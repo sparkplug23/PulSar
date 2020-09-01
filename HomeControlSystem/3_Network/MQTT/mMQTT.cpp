@@ -172,7 +172,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 120; 
+  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -328,7 +328,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 120;
+  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -336,7 +336,6 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Debug_Minimal;
 
 } //end "MQTTHandler_Init"
-
 
 // Send packet with payload using va_list
 void mMQTT::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)

@@ -14,6 +14,10 @@
 //#define CALL_MEMBER_FUNCTION_WITH_ARG(object,ptrToMember,X,Y)  ((object).*(ptrToMember)(X,Y))
 
 
+#define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
+#define DEFAULT_MQTT_SENSOR_MINIMAL_RATE_SECS 10
+#define DEFAULT_MQTT_DRIVER_MINIMAL_RATE_SECS 10
+
 // global enum for types of mqtt handlers, this can be asked for as a system command
 // Note: "MQTT_HANDLER_LENGTH_ID" is used in module/classes as the start position/index for specialised handlers
 enum MQTT_HANDLER_IDS{
