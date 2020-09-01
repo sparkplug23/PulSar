@@ -900,7 +900,7 @@ int8_t mMQTT::Tasker(uint8_t function){
       #ifdef ENABLE_ADVANCED_DEBUGGING
         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_UPTIME "MQTT %s"),pCONT->mt->uptime.hhmmss_ctr);
       #endif
-      
+      //
       // Send system telemetry from "mTelemetry.h"
       MQQTHandler_System_Sender();
 
