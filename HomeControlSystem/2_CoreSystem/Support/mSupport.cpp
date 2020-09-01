@@ -1,0 +1,5432 @@
+/*
+  support.ino - support for Sonoff-Tasmota
+
+  Copyright (C) 2019  Theo Arends
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+//#ifdef ESP8266
+
+#include "2_CoreSystem/Support/mSupport.h"
+
+
+
+// char* getIdentifier(uint8_t x,  char* buffer, uint8_t* id){ memcpy(buffer, "%d\0", 3); *id = IDENTIFIER_NUMBER_ID; return buffer; }
+// char* getIdentifier(uint16_t x, char* buffer, uint8_t* id){ memcpy(buffer, "%d\0", 3); *id = IDENTIFIER_NUMBER_ID;  return buffer; }
+// char* getIdentifier(uint32_t x, char* buffer, uint8_t* id){ memcpy(buffer, "%d\0", 3); *id = IDENTIFIER_NUMBER_ID;  return buffer; }
+// char* getIdentifier(float x, char* buffer, uint8_t* id)   { memcpy(buffer, "%f\0", 3); *id = IDENTIFIER_FLOAT_ID;  return buffer; }
+// char* getIdentifier(char* x,    char* buffer, uint8_t* id){ memcpy(buffer, "\"%s\"\0", sizeof("\"%s\"\0")-1); *id = IDENTIFIER_STRING_ID;  return buffer; }
+// char* getIdentifier(const char* x, char* buffer, uint8_t* id){ memcpy(buffer, "\"%s\"\0", sizeof("\"%s\"\0")-1); *id = IDENTIFIER_STRING_ID;  return buffer; }
+    
+
+
+uint8_t getIdentifierID(uint8_t x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(uint8_t* x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(uint16_t x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(uint16_t* x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(uint32_t x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(uint32_t* x){ return IDENTIFIER_NUMBER_ID; }
+uint8_t getIdentifierID(float x){ return IDENTIFIER_FLOAT_ID; }
+uint8_t getIdentifierID(float* x){ return IDENTIFIER_FLOAT_ID; }
+uint8_t getIdentifierID(char* x){ return IDENTIFIER_STRING_ID; }
+uint8_t getIdentifierID(const char* x){ return IDENTIFIER_STRING_ID; }
+    
+
+    
+
+
+
+
+char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
+{
+  if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
+    strcpy(s, "null");
+    return s;
+  } else {
+    return dtostrf(number, 1, prec, s);
+  }
+}
+
+
+int8_t mSupport::Tasker(uint8_t function){
+  
+  uint32_t start_millis = millis();
+    start_millis = millis();
+  switch(function){
+    case FUNC_INIT:
+      fSendTemplatesOnce = true;
+    break;
+    case FUNC_LOOP: 
+
+      #ifdef USE_RSS_SAMPLING
+        RSSSampler();
+      #endif
+      
+  //WDT_Reset();
+  MDNS.update();
+
+      // OsWatchTicker();
+
+      // testtime2.run = true;
+      
+      // if(mTime::TimeReached(&testtime2,1000)){ // 10 secs then 60 secs
+      //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "testtime2 %s"),pCONT->mt->uptime.hhmmss_ctr);    
+      // }
+
+      // if(TimeReached(&tSaved_SlowAllTemplatesOnSerial,1000*60*60)||fSendTemplatesOnce){
+      //   #ifdef SEND_TEMPLATES_OVER_MQTT
+      //     SlowAllTemplatesOnSerial();
+      //   #endif
+      //   fSendTemplatesOnce = false;
+      // }
+      
+    break;
+    // case FUNC_EVERY_FIVE_SECOND:{
+
+    //   int8_t device_id;
+    //   int8_t class_id;
+    //   AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_EVERY_FIVE_SECOND"));
+
+    //   int16_t device_id_found = SearchForTextIndexedID("Socket",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+
+    //   AddLog_P(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
+    // }break;
+    case FUNC_EVERY_SECOND:{
+
+      PerformEverySecond();
+
+      
+      if(TimeReached(&state_100msecond,100)){ 
+        #ifdef ENABLE_ADVANCED_DEBUGGING
+          AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every100mSeconds"));
+        #endif
+        start_millis = millis();
+        Every100mSeconds();
+        // AddLog_P(LOG_LEVEL_TEST,PSTR("Execution time 1 = %d"),millis()-start_millis);
+      }
+      if(TimeReached(&state_250msecond,250)){ 
+        #ifdef ENABLE_ADVANCED_DEBUGGING
+          AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every250mSeconds"));
+        #endif
+        Every250mSeconds();
+      }
+      
+    }break;
+    case FUNC_EVERY_FIVE_MINUTE:
+      //CmndCrash();
+    break;
+    case FUNC_MQTT_COMMAND: 
+      parse_JSONCommand();
+    break;
+  }
+
+  uint32_t end_millis = millis();
+
+
+  
+    // AddLog_P(LOG_LEVEL_TEST,PSTR("Execution time 2 = %d"),millis()-start_millis);
+
+}
+
+
+const char* mSupport::GetVersionBranchTypeNameByID(uint8_t id){
+  return 0;
+  // switch(id){
+  //   case FIRMWARE_VERSION_TYPE_RELEASE_ID :           return PSTR("Release") ;
+  //   case FIRMWARE_VERSION_TYPE_RELEASE_CANDIDATE_ID : return PSTR("Release Candidate") ;     
+  //   case FIRMWARE_VERSION_TYPE_BETA_ID :           return PSTR("Beta") ;
+  //   case FIRMWARE_VERSION_TYPE_DEVELOPING_ID :        return PSTR("Development") ;
+  // }
+}
+
+char mSupport::GetVersionBranchTypeCharNameByID(uint8_t id){
+  switch(id){
+    case FIRMWARE_VERSION_TYPE_RELEASE_ID : return 'R' ;
+    case FIRMWARE_VERSION_TYPE_RELEASE_CANDIDATE_ID : return 'C' ;     
+    case FIRMWARE_VERSION_TYPE_BETA_ID : return 'B' ;
+    case FIRMWARE_VERSION_TYPE_DEVELOPING_ID : return 'D' ;
+  }
+}
+
+void mSupport::init_FirmwareVersion(){
+
+  // Parse version for printing
+  snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%d.%d.%d"), PROJECT_VERSION >> 24 & 0xff, PROJECT_VERSION >> 16 & 0xff, PROJECT_VERSION >> 8 & 0xff);  // Release version 6.3.0
+  if (PROJECT_VERSION & 0xff) {  // Development or patched version 6.3.0.10
+    snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%s.%d"), pCONT_set->my_version, PROJECT_VERSION & 0xff);
+  }
+
+  AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
+//Serial.printf("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
+
+  // Version Current
+  pCONT_set->firmware_version.current.part_branch = (PROJECT_VERSION >> 30) & 0x03;
+  pCONT_set->firmware_version.current.part_major =  (PROJECT_VERSION >> 24) & 0x3F;
+  pCONT_set->firmware_version.current.part_minor =  (PROJECT_VERSION >> 16) & 0xff;
+  pCONT_set->firmware_version.current.part_system = (PROJECT_VERSION >> 8 ) & 0xff;
+  pCONT_set->firmware_version.current.part_module = (PROJECT_VERSION      ) & 0xff;
+  pCONT_set->firmware_version.current.number =       PROJECT_VERSION;
+
+  // Display Version Output
+
+  // Serial.printf("firmware_version.current = %X\n\r",PROJECT_VERSION);
+    
+  // char firmware_current[40];
+  memset(pCONT_set->firmware_version.current.name_ctr,0,sizeof(pCONT_set->firmware_version.current.name_ctr));
+  sprintf(pCONT_set->firmware_version.current.name_ctr,PSTR("%c%d.%d.%d.%d"),
+      pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->firmware_version.current.part_branch),
+      pCONT_set->firmware_version.current.part_major,
+      pCONT_set->firmware_version.current.part_minor,
+      pCONT_set->firmware_version.current.part_system,
+      pCONT_set->firmware_version.current.part_module
+  );
+
+  
+  // char message_version1[100];
+  // sprintf(message_version1,PSTR("%s %c%d.%d.%d.%d%s"),
+  //   PROJECT_NAME_CTR,
+  //   pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->firmware_version.current.part_branch),
+  //   pCONT_set->firmware_version.current.part_major,
+  //   pCONT_set->firmware_version.current.part_minor,
+  //   pCONT_set->firmware_version.current.part_system,
+  //   pCONT_set->firmware_version.current.part_module,
+  //   pCONT_set->firmware_version.fNewVersionAvailable ? " Update Available" : ""  
+  // );
+
+
+  //Serial.printf("firmware_version.current = %s\n\r",firmware_current);
+  // AddLog_P(LOG_LEVEL_INFO,PSTR("firmware_version.current = %s"),firmware_current);
+
+  char code_image[20];
+  snprintf_P(pCONT_set->my_image, sizeof(pCONT_set->my_image), PSTR("(%s)"), 
+    GetTextIndexed_P(code_image, sizeof(code_image), CODE_IMAGE, kCodeImage));
+  AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
+
+  Serial.flush();
+
+}
+
+
+char* mSupport::GetVersionColour(char* buffer){
+
+  if(pCONT_set->firmware_version.fCurrentVersionNotSupported){ //most important
+    sprintf_P(buffer,"%s","#ff0000");
+  }else
+  if(pCONT_set->firmware_version.fNewVersionAvailable){
+    sprintf_P(buffer,"%s","#ffef00");
+  }else{
+    sprintf_P(buffer,"%s","#00ff00");
+  }
+  return buffer;
+
+}
+
+float mSupport::mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+// checks for 0 before dividing
+int32_t mSupport::safeDivideInt(int32_t num, int32_t den)
+{
+  return (num!=0)?num/den:0;
+}
+
+// uint8_t mSupport::WITHINLIMITS(int minv, float var, int maxv){
+//   if(isnan(var)){
+//     return false;
+//   }
+//   return ((var>=minv)&&(var<=maxv)) ? 1 : 0;
+// }
+
+float mSupport::roundfloat(float in, uint8_t dec){
+  //float f = round(in*(10*dec))/(10*dec);
+  float f = round(in*(10*dec));
+  f /= (10*dec);///100;
+  return f;
+}
+
+
+// uint8_t mSupport::WITHINLIMITS(int minv, float var, int maxv){
+//   //if((var>=minv)&&(var<=maxv)&&(!isnan(var))){
+
+//   //Serial.println(isnan(var));
+//   if(isnan(var)){
+//     return false;
+//   }
+
+//   if((var>=minv)&&(var<=maxv)){
+//       return true;
+//   }else{
+//       return false;
+//   }
+
+//   //return  ? 1 : 0;  //ternary operator (condition) ? (if_true) : (if_false)
+// }
+
+
+
+
+int mSupport::mSearchCtrIndexOf(const char* toSearch, const char* toFind){
+
+  char *p = strstr(toSearch,toFind);
+
+  if(p != NULL){
+    return abs(toSearch - p); // get the position
+  }else{
+    return -1; //if null, it doesnt exist
+  }
+
+}
+
+// const char* mSupport::FloatToCStr(float f){
+//   char str[10];
+//   memset(str,0,sizeof(str));
+//   dtostrf( f, 3, 4, str );
+  
+//   //sprintf(str,"%f",f);
+//   return str;
+// }
+
+
+  // #ifdef ESP8266
+  //   switch(ESP.getResetInfoPtr()->reason){
+  //     // Good boot
+  //     case REASON_DEFAULT_RST:
+  //     case REASON_SOFT_RESTART:
+  //     case REASON_DEEP_SLEEP_AWAKE:
+  //       ota_startup_period_ms = 1000;
+  //     break;
+  //     // Bad boot
+  //     case REASON_EXCEPTION_RST:
+  //     case REASON_WDT_RST:
+  //     case REASON_SOFT_WDT_RST:
+  //     case REASON_EXT_SYS_RST: // not bad, but reset button will allow ota update
+  //       ota_startup_period_ms = 10000;
+  //     break;
+  //   }
+  // #endif
+
+//return -1 if not found
+
+int16_t mSupport::FindNearestValueIndexUInt8(uint8_t* tosearch, uint8_t tosearch_len, uint8_t tofind){
+
+  //quick check
+  for(int i=0;i<tosearch_len;i++){
+    if(tosearch[i]==tofind){
+      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      return i; //return index
+    }else{
+      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+    }
+  }
+
+  //find nearest
+  int16_t smallest_value=1000;//start with largest
+  int16_t smallest_index = -1;
+  int16_t value;
+  for(int i=0;i<tosearch_len;i++){
+
+    value = abs(tosearch[i]-tofind);
+    //check smallest
+    if(value<smallest_value){
+      smallest_index = i;
+      smallest_value = value;
+    }
+  }
+
+  return smallest_index;
+
+}
+
+int32_t mSupport::FindNearestValueIndexUInt16(uint16_t* tosearch, uint16_t tosearch_len, uint16_t tofind){
+
+  //quick check
+  for(int i=0;i<tosearch_len;i++){
+    if(tosearch[i]==tofind){
+      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      return i; //return index
+    }else{
+      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+    }
+  }
+
+  //find nearest
+  int16_t smallest_value=1000;//start with largest
+  int16_t smallest_index = -1;
+  int16_t value;
+  for(int i=0;i<tosearch_len;i++){
+
+    value = abs(tosearch[i]-tofind);
+    //check smallest
+    if(value<smallest_value){
+      smallest_index = i;
+      smallest_value = value;
+    }
+  }
+
+  return smallest_index;
+
+}
+
+
+
+// Time elapsed function that updates the time when true
+bool mSupport::TimeReached(uint32_t* tSaved, uint32_t ElapsedTime){
+  if(abs(millis()-*tSaved)>=ElapsedTime){ *tSaved=millis();
+    return true;
+  }
+  return false;
+}
+
+// Time elapsed function that updates the time when true  SAME AS REACHED, POSSIBLY BETTER NAME
+bool mSupport::TimeElapsed(uint32_t* tSaved, uint32_t ElapsedTime){
+  if(abs(millis()-*tSaved)>=ElapsedTime){ *tSaved=millis();
+    return true;
+  }
+  return false;
+}
+
+
+
+
+
+
+// bool mSupport::TimeReached(TIMEREACHED_SAVED* tSaved, uint32_t ElapsedTime){
+//   // if(
+//   //   (abs(millis()-*tSaved.millis_saved)>=ElapsedTime)||
+//   //   (*tSaved.RunNow == true)    
+//   //   ){ 
+//   //     *tSaved.millis_saved=millis();
+//   //     *tSaved.RunNow = false;
+//   //   return true;
+//   // }
+//   return false;
+// }
+
+// Time elapsed function that updates the time when true
+bool mSupport::TimeReachedNonReset(uint32_t* tSaved, uint32_t ElapsedTime){
+  if(abs(millis()-*tSaved)>=ElapsedTime){
+    return true;
+  }
+  return false;
+}
+
+// Time elapsed function that updates the time when true
+// WARNING: doesnt allow for wrap around
+bool mSupport::MillisReached(uint32_t* tTarget){
+  if(millis()>*tTarget){
+    return true;
+  }
+  return false;
+}
+
+
+
+int mSupport::mSearchNCtrIndexOf(const char* toSearch, int length, const char* toFind){
+
+  //Serial.print("mSearchStringForIndoxOf=toSearch>");Serial.println(toSearch);
+  //Serial.print("toFind>");Serial.println(toFind);
+  //Serial.println("Remaining strstr(toSearch,toFind)>");  Serial.println(strncmp(toSearch,toFind,length));
+
+  //char *p = strncmp(toSearch,toFind,length+1);
+
+  char *p = strstr(toSearch,toFind);
+
+  if(p != NULL){
+    return abs(toSearch - p); // get the position
+  }else{
+    return -1; //if null, it doesnt exist
+  }
+
+}
+
+
+int16_t mSupport::findClosetArrayIndex_float(float* array, uint8_t array_len, float desired){
+
+
+
+
+
+  return -1;
+}
+
+/*
+char* mHeating::append_str(char *here, const char *s) {
+  int tmp = 0;
+    while((*here++ = *s++)){tmp++;};
+    Serial.println(tmp);
+    Serial.println(here[0]);
+    return here;//-1;
+}
+
+char* mHeating::append_ul(char *here, unsigned long u) {
+    char buf[20];       // we "just know" this is big enough
+
+    return append_str(here, ultoa(u, buf, 10));
+}
+
+*/
+
+
+
+int mSupport::memsearch(const char* dataset, int datasetLength, const char* target, int targetLen){
+  //Serial.print(datasetLength);Serial.print("-");Serial.println(targetLen);
+    for(int i = 0; i < datasetLength; i++){
+        if(dataset[i] == target[0]){
+            int found = 1;
+            for(int j = 0; j < targetLen; j++){
+              int k = i + j; //Serial.print(dataset[j]);Serial.println(target[k]);
+              if(k >= datasetLength || target[j] != dataset[k]){
+                      found = 0;
+                      //Serial.println("FOUND 0");
+                      break;
+              }
+            }
+            if(found){
+            //Serial.println("RETURN I");
+            return i;
+          }
+        }
+    }//Serial.println("RETURN -1");
+    return -1;
+}
+
+
+void mSupport::PrintDebugger(char *in, unsigned char length){
+  for(int i = 0;i<length;i++){
+    Serial.print(F("i> "));Serial.print(i);Serial.print(F(" v> "));Serial.println(in[i]);
+  }
+}
+
+int mSupport::NumDigits(int x)
+{
+    x = abs(x);
+    return (x < 10 ? 1 :
+        (x < 100 ? 2 :
+        (x < 1000 ? 3 :
+        (x < 10000 ? 4 :
+        (x < 100000 ? 5 :
+        (x < 1000000 ? 6 :
+        (x < 10000000 ? 7 :
+        (x < 100000000 ? 8 :
+        (x < 1000000000 ? 9 :
+        10)))))))));
+}
+
+uint16_t mSupport::NumCtr2Num(char* numctr, uint8_t numberlength){
+
+  uint16_t numout=0;
+
+  for(int digit=0;digit<numberlength;digit++){
+    numout += (numctr[digit]-48)*pow(10,numberlength-digit-1);
+  }
+
+  return numout;
+}
+
+
+char *mSupport::strtolower(char *str)
+{
+    unsigned char *mystr = (unsigned char *)str;
+
+    while (*mystr) {
+        *mystr = tolower(*mystr);
+        mystr++;
+    }
+    return str;
+}
+
+/*
+uint8_t mSensorsDHT::WITHINLIMITS(int minv, float var, int maxv){
+  //if((var>=minv)&&(var<=maxv)&&(!isnan(var))){
+
+  //Serial.println(isnan(var));
+  if(isnan(var)){
+    return false;
+  }
+
+  if((var>=minv)&&(var<=maxv)){
+      return true;
+  }else{
+      return false;
+  }
+
+  //return  ? 1 : 0;  //ternary operator (condition) ? (if_true) : (if_false)
+}
+*/
+
+// Currently mqtt buffer, later shared buffer from this class
+void mSupport::MQTTCommand_Add(const char* topic, const char* payload){; // Write command into mpkt struct and set as waiting
+
+  // Clear mqtt packet with expectation to execute
+  memset(&data_buffer2.payload,0,sizeof(data_buffer2.payload));
+
+  data_buffer2.topic.len = strlen(topic);
+  data_buffer2.payload.len = strlen(payload);
+
+  memcpy(&data_buffer2.topic.ctr,topic,data_buffer2.topic.len);
+  memcpy(&data_buffer2.payload.ctr,payload,data_buffer2.payload.len);
+        
+}
+
+void mSupport::SlowAllTemplatesOnSerial(){
+
+// User template
+  DynamicJsonDocument doc(300);
+  JsonObject root = doc.to<JsonObject>();
+
+  char buffer[50];
+
+  root["name"] = pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer));
+  root["module_id"] = pCONT_set->Settings.module;
+
+  myio cmodule;
+  pCONT_pins->ModuleGpios(&cmodule,pCONT_set->Settings.module);
+
+  JsonArray gpio_arr = root.createNestedArray("GPIO");
+    for(uint8_t i=0;i<sizeof(cmodule);i++){ 
+      gpio_arr.add(cmodule.io[i]); 
+    }
+  
+  memset(&data_buffer2,0,sizeof(data_buffer2));
+  serializeJson(doc,data_buffer2.payload.ctr);
+
+    char topic2[100];
+    sprintf(topic2,PSTR("status/templates/my_module"));
+    
+    pCONT_mqtt->ppublish(topic2,data_buffer2.payload.ctr,false);
+
+  AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"), data_buffer2.payload.ctr);
+
+
+  for (uint8_t mod = 0; mod < sizeof(kModuleNiceList); mod++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+      
+    DynamicJsonDocument doc2(700);
+    JsonObject root2 = doc2.to<JsonObject>();
+    uint8_t midx = pgm_read_byte(kModuleNiceList + mod);
+
+    myio cmodule;
+    pCONT_pins->ModuleGpios(&cmodule,midx);
+  
+    JsonArray gpio_arr2 = root2.createNestedArray("GPIO");
+    for(int ii=0;ii<sizeof(cmodule);ii++){ 
+      gpio_arr2.add(cmodule.io[ii]); 
+    }
+    root2["name"] = pCONT_pins->AnyModuleName(midx, buffer, sizeof(buffer));
+    root2["mod"] = mod;
+    root2["midx"] = midx;
+
+      char stemp[20];
+
+    // JsonArray gpio_named_arr = root2.createNestedArray("GPIO_named");
+    // for(int ii=0;ii<sizeof(cmodule);ii++){ 
+    //   char stemp2[20];
+    //   pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), cmodule.io[ii], kSensorNames);
+    //   memcpy(stemp2,stemp,sizeof(stemp));
+    //   gpio_named_arr.add(stemp2);
+    // }
+  
+    memset(&data_buffer2,0,sizeof(data_buffer2));
+    serializeJson(doc2,data_buffer2.payload.ctr);
+
+    char topic[100];
+    sprintf(topic,PSTR("status/templates/%02d"),mod);
+    
+    pCONT->mqt->ppublish(topic,data_buffer2.payload.ctr,false);
+    
+    //delay(100);
+
+    AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"),data_buffer2.payload.ctr);
+
+  }
+
+
+
+
+
+
+
+
+
+  // Response_P(PSTR("{\"" D_JSON_NAME "\":\"%s\",\"" D_JSON_GPIO "\":["), pCONT_set->Settings.user_template.name);
+  // for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template2.hardware.gp); i++) {
+  //   ResponseAppend_P(PSTR("%s%d"), (i>0)?",":"", pCONT_set->Settings.user_template2.hardware.gp.io[i]);
+  // }
+  // ResponseAppend_P(PSTR("],\"" D_JSON_FLAG "\":%d,\"" D_JSON_BASE "\":%d}"), pCONT_set->Settings.user_template.flag, pCONT_set->Settings.user_template_base +1);
+}
+
+
+
+uint16_t mSupport::WriteBuffer_P(char* buffer, const char* formatP, ...)     // Content send snprintf_P char data
+{
+  va_list arg;
+  va_start(arg, formatP);
+  int length = vsnprintf_P(buffer, DATA_BUFFER_PAYLOAD_MAX_LENGTH, formatP, arg);
+  va_end(arg);
+  return length;
+}
+
+void mSupport::WriteBuffer_P(char* buffer, uint16_t* length, const char* formatP, ...)     // Content send snprintf_P char data
+{
+  va_list arg;
+  va_start(arg, formatP);
+  *length += vsnprintf_P(&buffer[*length], DATA_BUFFER_PAYLOAD_MAX_LENGTH, formatP, arg);
+  va_end(arg);
+  return;
+}
+
+
+// Assumes primary buffer
+uint16_t mSupport::WriteBuffer_P(const char* formatP, ...)     // Content send snprintf_P char data
+{
+  va_list arg;
+  va_start(arg, formatP);
+  char* buffer = data_buffer2.payload.ctr;
+  uint16_t length = strlen(buffer);
+  uint16_t bytes_written = vsnprintf_P(&buffer[length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-length, formatP, arg);
+  va_end(arg);
+  return bytes_written;
+}
+
+
+
+
+
+
+// temporarily have response appends too 
+
+int mSupport::Response_P(const char* format, ...)     // Content send snprintf_P char data
+{
+  //BufferWriter
+  memset(&data_buffer2,0,sizeof(data_buffer2));
+
+  // This uses char strings. Be aware of sending %% if % is needed
+  va_list args;
+  va_start(args, format);
+  int len = vsnprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), format, args);
+  va_end(args);
+  return len;
+}
+
+int mSupport::ResponseAppend_P(const char* format, ...)  // Content send snprintf_P char data
+{
+  // This uses char strings. Be aware of sending %% if % is needed
+  va_list args;
+  va_start(args, format);
+  int mlen = strlen(data_buffer2.payload.ctr);
+  int len = vsnprintf_P(data_buffer2.payload.ctr + mlen, sizeof(data_buffer2.payload.ctr) - mlen, format, args);
+  va_end(args);
+  return len + mlen;
+}
+
+
+
+
+
+// void mSupport::OsWatchTicker(void)
+// {
+// //   unsigned long t = millis();
+// //   unsigned long last_run = abs(t - oswatch_last_loop_time);
+
+// // // #ifdef DEBUG_THEO
+// // //   AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_OSWATCH " FreeRam %d, rssi %d, last_run %d"), ESP.getFreeHeap(), WifiGetRssiAsQuality(WiFi.RSSI()), last_run);
+// // // #endif  // DEBUG_THEO
+// //   if (last_run >= (OSWATCH_RESET_TIME * 1000)) {
+
+// #ifdef ENABLE_ADVANCED_DEBUGGING
+//     if(1){
+//       #else
+//     if(TimeReached(&tSaved_OSWatchLoop,OSWATCH_RESET_TIME * 1000)){
+//       #endif
+    
+//         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
+// // //    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_OSWATCH " " D_BLOCKED_LOOP ". " D_RESTARTING));  // Save iram space
+// //     RtcSettings.oswatch_blocked_loop = 1;
+// //     RtcSettingsSave();
+// // //    ESP.restart();  // normal reboot
+// //     ESP.reset();  // hard reset
+//   }
+// }
+
+// void mSupport::OsWatchInit(void)
+// {
+//   // oswatch_blocked_loop = RtcSettings.oswatch_blocked_loop;
+//   // RtcSettings.oswatch_blocked_loop = 0;
+//   // oswatch_last_loop_time = millis();
+//   // tickerOSWatch.attach_ms(((OSWATCH_RESET_TIME / 3) * 1000), OsWatchTicker);
+// }
+
+// void mSupport::OsWatchLoop(void)
+// {
+//  // oswatch_last_loop_time = millis();
+// //  while(1) delay(1000);  // this will trigger the os watch
+// }
+
+
+uint32_t mSupport::ResetReason(void)
+{
+  /*
+    user_interface.h
+    REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+    REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+    REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+    REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+    REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+    REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+    REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+  */
+  return resetInfo.reason;
+}
+
+void mSupport::SetPulseTimer(uint32_t index, uint32_t time)
+{
+  //pCONT_set->pulse_timer[index] = (time > 111) ? millis() + (1000 * (time - 100)) : (time > 0) ? millis() + (100 * time) : 0L;
+}
+
+uint32_t mSupport::GetPulseTimer(uint32_t index)
+{
+  // long time = TimePassedSince(pCONT_set->pulse_timer[index]);
+  // if (time < 0) {
+  //   time *= -1;
+  //   return (time > 11100) ? (time / 1000) + 100 : (time > 0) ? time / 100 : 0;
+  // }
+  return 0;
+}
+
+String mSupport::GetResetReason(void)
+{
+  #ifdef ESP8266
+  char buff[32];
+  if (oswatch_blocked_loop) {
+    strncpy_P(buff, PSTR(D_JSON_BLOCKED_LOOP), sizeof(buff));
+    return String(buff);
+  } else {
+    return ESP.getResetReason();
+  }
+  #else
+    return PSTR("Unsupported");
+  #endif
+}
+
+const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
+{
+  #ifdef ESP8266
+  if (oswatch_blocked_loop) {
+    strncpy_P(buffer, PSTR(D_JSON_BLOCKED_LOOP), buflen);
+  } else {
+    sprintf(buffer, "%s", ESP.getResetReason().c_str());
+  }
+  #else
+    sprintf(buffer, "%s", "Unsupported");
+  #endif
+  return buffer;
+}
+
+bool mSupport::OsWatchBlockedLoop(void)
+{
+  //return oswatch_blocked_loop;
+}
+
+/*********************************************************************************************\
+ * Miscellaneous
+\*********************************************************************************************/
+
+//#ifdef ARDUINO_ESP8266_RELEASE_2_3_0
+// Functions not available in 2.3.0
+
+// http://clc-wiki.net/wiki/C_standard_library:string.h:memchr
+void* memchr(const void* ptr, int value, size_t num)
+{
+  unsigned char *p = (unsigned char*)ptr;
+  while (num--) {
+    if (*p != (unsigned char)value) {
+      p++;
+    } else {
+      return p;
+    }
+  }
+  return 0;
+}
+
+// http://clc-wiki.net/wiki/C_standard_library:string.h:strcspn
+// Get span until any character in string
+size_t strcspn(const char *str1, const char *str2)
+{
+  size_t ret = 0;
+  while (*str1) {
+    if (strchr(str2, *str1)) {  // Slow
+      return ret;
+    } else {
+      str1++;
+      ret++;
+    }
+  }
+  return ret;
+}
+
+// https://opensource.apple.com/source/Libc/Libc-583/stdlib/FreeBSD/strtoull.c
+// Convert a string to an unsigned long long integer
+#ifndef __LONG_LONG_MAX__
+#define __LONG_LONG_MAX__ 9223372036854775807LL
+#endif
+#ifndef ULLONG_MAX
+#define ULLONG_MAX (__LONG_LONG_MAX__ * 2ULL + 1)
+#endif
+
+// unsigned long long strtoull(const char *__restrict nptr, char **__restrict endptr, int base)
+// {
+//   const char *s = nptr;
+//   char c;
+//   do { c = *s++; } while (isspace((unsigned char)c));                         // Trim leading spaces
+
+//   int neg = 0;
+//   if (c == '-') {                                                             // Set minus flag and/or skip sign
+//     neg = 1;
+//     c = *s++;
+//   } else {
+//     if (c == '+') {
+//       c = *s++;
+//     }
+//   }
+
+//   if ((base == 0 || base == 16) && (c == '0') && (*s == 'x' || *s == 'X')) {  // Set Hexadecimal
+//     c = s[1];
+//     s += 2;
+//     base = 16;
+//   }
+//   if (base == 0) { base = (c == '0') ? 8 : 10; }                              // Set Octal or Decimal
+
+//   unsigned long long acc = 0;
+//   int any = 0;
+//   if (base > 1 && base < 37) {
+//     unsigned long long cutoff = ULLONG_MAX / base;
+//     int cutlim = ULLONG_MAX % base;
+//     for ( ; ; c = *s++) {
+//       if (c >= '0' && c <= '9')
+//         c -= '0';
+//       else if (c >= 'A' && c <= 'Z')
+//         c -= 'A' - 10;
+//       else if (c >= 'a' && c <= 'z')
+//         c -= 'a' - 10;
+//       else
+//         break;
+
+//       if (c >= base)
+//         break;
+
+//       if (any < 0 || acc > cutoff || (acc == cutoff && c > cutlim))
+//         any = -1;
+//       else {
+//         any = 1;
+//         acc *= base;
+//         acc += c;
+//       }
+//     }
+//     if (any < 0) {
+//       acc = ULLONG_MAX;                                                       // Range error
+//     }
+//     else if (any && neg) {
+//       acc = -acc;
+//     }
+//   }
+
+//   if (endptr != nullptr) { *endptr = (char *)(any ? s - 1 : nptr); }
+
+//   return acc;
+// }
+// //#endif  // ARDUINO_ESP8266_RELEASE_2_3_0
+
+//Get span until single character in string
+size_t mSupport::strchrspn(const char *str1, int character)
+{
+  size_t ret = 0;
+  char *start = (char*)str1;
+  char *end = strchr(str1, character);
+  if (end) ret = end - start;
+  return ret;
+}
+
+// Function to return a substring defined by a delimiter at an index
+char* mSupport::subStr(char* dest, char* str, const char *delim, int index)
+{
+  // char *act;
+  // char *sub = nullptr;
+  // char *ptr;
+  // int i;
+
+  // // Since strtok consumes the first arg, make a copy
+  // strncpy(dest, str, strlen(str)+1);
+  // for (i = 1, act = dest; i <= index; i++, act = nullptr) {
+  //   sub = strtok_r(act, delim, &ptr);
+  //   if (sub == nullptr) break;
+  // }
+  // sub = Trim(sub);
+  // return sub;
+}
+
+double mSupport::CharToDouble(const char *str)
+{
+  // // simple ascii to double, because atof or strtod are too large
+  // char strbuf[24];
+
+  // strlcpy(strbuf, str, sizeof(strbuf));
+  // char *pt = strbuf;
+  // while ((*pt != '\0') && isblank(*pt)) { pt++; }  // Trim leading spaces
+
+  // signed char sign = 1;
+  // if (*pt == '-') { sign = -1; }
+  // if (*pt == '-' || *pt=='+') { pt++; }            // Skip any sign
+
+  // double left = 0;
+  // if (*pt != '.') {
+  //   left = atoi(pt);                               // Get left part
+  //   while (isdigit(*pt)) { pt++; }                 // Skip number
+  // }
+
+  // double right = 0;
+  // if (*pt == '.') {
+  //   pt++;
+  //   right = atoi(pt);                              // Decimal part
+  //   while (isdigit(*pt)) {
+  //     pt++;
+  //     right /= 10.0;
+  //   }
+  // }
+
+  // double result = left + right;
+  // if (sign < 0) {
+  //   return -result;                                // Add negative sign
+  // }
+  // return result;
+}
+
+int mSupport::TextToInt(char *str)
+{
+  // char *p;
+  // uint8_t radix = 10;
+  // if ('#' == str[0]) {
+  //   radix = 16;
+  //   str++;
+  // }
+  // return strtol(str, &p, radix);
+}
+
+// char* mSupport::ulltoa(unsigned long long value, char *str, int radix)
+// {
+// //   char digits[64];
+// //   char *dst = str;
+// //   int i = 0;
+// //   int n = 0;
+
+// // //  if (radix < 2 || radix > 36) { radix = 10; }
+
+// //   do {
+// //     n = value % radix;
+// //     digits[i++] = (n < 10) ? (char)n+'0' : (char)n-10+'A';
+// //     value /= radix;
+// //   } while (value != 0);
+
+// //   while (i > 0) { *dst++ = digits[--i]; }
+
+// //   *dst = 0;
+
+// //   return str;
+// }
+
+
+// In 1dB increments
+int8_t mSupport::GetRSSdBm(){
+  return WiFi.RSSI();
+}
+
+uint8_t mSupport::GetRSSPercentage(){
+  return constrain(map(GetRSSdBm(),-40,-100,100,0),0,100);
+}
+
+
+char* mSupport::Unescape(char* buffer, uint16_t* size)
+{
+//   uint8_t* read = (uint8_t*)buffer;
+//   uint8_t* write = (uint8_t*)buffer;
+//   int16_t start_size = *size;
+//   int16_t end_size = *size;
+//   uint8_t che = 0;
+
+// //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t*)buffer, *size);
+
+//   while (start_size > 0) {
+//     uint8_t ch = *read++;
+//     start_size--;
+//     if (ch != '\\') {
+//       *write++ = ch;
+//     } else {
+//       if (start_size > 0) {
+//         uint8_t chi = *read++;
+//         start_size--;
+//         end_size--;
+//         switch (chi) {
+//           case '\\': che = '\\'; break;  // 5C Backslash
+//           case 'a': che = '\a'; break;   // 07 Bell (Alert)
+//           case 'b': che = '\b'; break;   // 08 Backspace
+//           case 'e': che = '\e'; break;   // 1B Escape
+//           case 'f': che = '\f'; break;   // 0C Formfeed
+//           case 'n': che = '\n'; break;   // 0A Linefeed (Newline)
+//           case 'r': che = '\r'; break;   // 0D Carriage return
+//           case 's': che = ' ';  break;   // 20 Space
+//           case 't': che = '\t'; break;   // 09 Horizontal tab
+//           case 'v': che = '\v'; break;   // 0B Vertical tab
+//           case 'x': {
+//             uint8_t* start = read;
+//             che = (uint8_t)strtol((const char*)read, (char**)&read, 16);
+//             start_size -= (uint16_t)(read - start);
+//             end_size -= (uint16_t)(read - start);
+//             break;
+//           }
+//           case '"': che = '\"'; break;   // 22 Quotation mark
+// //          case '?': che = '\?'; break;   // 3F Question mark
+//           default : {
+//             che = chi;
+//             *write++ = ch;
+//             end_size++;
+//           }
+//         }
+//         *write++ = che;
+//       }
+//     }
+//   }
+//   *size = end_size;
+
+// //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t*)buffer, *size);
+
+//   return buffer;
+}
+
+char* mSupport::RemoveSpace(char* p)
+{
+//   char* write = p;
+//   char* read = p;
+//   char ch = '.';
+
+//   while (ch != '\0') {
+//     ch = *read++;
+//     if (!isspace(ch)) {
+//       *write++ = ch;
+//     }
+//   }
+// //  *write = '\0';  // Removed 20190223 as it buffer overflows on no isspace found - no need either
+//   return p;
+}
+
+char* mSupport::LowerCase(char* dest, const char* source)
+{
+  // char* write = dest;
+  // const char* read = source;
+  // char ch = '.';
+
+  // while (ch != '\0') {
+  //   ch = *read++;
+  //   *write++ = tolower(ch);
+  // }
+  // return dest;
+}
+
+char* mSupport::UpperCase(char* dest, const char* source)
+{
+  // char* write = dest;
+  // const char* read = source;
+  // char ch = '.';
+
+  // while (ch != '\0') {
+  //   ch = *read++;
+  //   *write++ = toupper(ch);
+  // }
+  // return dest;
+}
+
+char* mSupport::UpperCase_P(char* dest, const char* source)
+{
+  // char* write = dest;
+  // const char* read = source;
+  // char ch = '.';
+
+  // while (ch != '\0') {
+  //   ch = pgm_read_byte(read++);
+  //   *write++ = toupper(ch);
+  // }
+  // return dest;
+}
+
+char* mSupport::Trim(char* p)
+{
+  // while ((*p != '\0') && isblank(*p)) { p++; }  // Trim leading spaces
+  // char* q = p + strlen(p) -1;
+  // while ((q >= p) && isblank(*q)) { q--; }   // Trim trailing spaces
+  // q++;
+  // *q = '\0';
+  // return p;
+}
+
+char* mSupport::NoAlNumToUnderscore(char* dest, const char* source)
+{
+  // char* write = dest;
+  // const char* read = source;
+  // char ch = '.';
+
+  // while (ch != '\0') {
+  //   ch = *read++;
+  //   *write++ = (isalnum(ch) || ('\0' == ch)) ? ch : '_';
+  // }
+  // return dest;
+}
+
+void mSupport::SetShortcut(char* str, uint8_t action)
+{
+  // if ('\0' != str[0]) {     // There must be at least one character in the buffer
+  //   str[0] = '0' + action;  // SC_CLEAR, SC_DEFAULT, SC_USER
+  //   str[1] = '\0';
+  // }
+}
+
+uint8_t mSupport::Shortcut(const char* str)
+{
+  // uint8_t result = 10;
+
+  // if ('\0' == str[1]) {    // Only allow single character input for shortcut
+  //   if (('"' == str[0]) || ('0' == str[0])) {
+  //     result = SC_CLEAR;
+  //   } else {
+  //     result = atoi(str);  // 1 = SC_DEFAULT, 2 = SC_USER
+  //     if (0 == result) {
+  //       result = 10;
+  //     }
+  //   }
+  // }
+  // return result;
+}
+
+bool mSupport::ValidIpAddress(const char* str)
+{
+  const char* p = str;
+
+  while (*p && ((*p == '.') || ((*p >= '0') && (*p <= '9')))) { p++; }
+  return (*p == '\0');
+}
+
+bool mSupport::ParseIp(uint32_t* addr, const char* str)
+{
+  uint8_t *part = (uint8_t*)addr;
+  uint8_t i;
+
+  *addr = 0;
+  for (i = 0; i < 4; i++) {
+    part[i] = strtoul(str, nullptr, 10);        // Convert byte
+    str = strchr(str, '.');
+    if (str == nullptr || *str == '\0') {
+      break;  // No more separators, exit
+    }
+    str++;                                   // Point to next character after separator
+  }
+  return (3 == i);
+}
+
+void mSupport::MakeValidMqtt(uint8_t option, char* str)
+{
+// // option 0 = replace by underscore
+// // option 1 = delete character
+//   uint16_t i = 0;
+//   while (str[i] > 0) {
+// //        if ((str[i] == '/') || (str[i] == '+') || (str[i] == '#') || (str[i] == ' ')) {
+//     if ((str[i] == '+') || (str[i] == '#') || (str[i] == ' ')) {
+//       if (option) {
+//         uint16_t j = i;
+//         while (str[j] > 0) {
+//           str[j] = str[j +1];
+//           j++;
+//         }
+//         i--;
+//       } else {
+//         str[i] = '_';
+//       }
+//     }
+//     i++;
+//   }
+}
+
+// Function to parse & check if version_str is newer than our currently installed version.
+bool mSupport::NewerVersion(char* version_str)
+{
+  uint32_t version = 0;
+  uint8_t i = 0;
+  char *str_ptr;
+  char* version_dup = strdup(version_str);  // Duplicate the version_str as strtok_r will modify it.
+
+  if (!version_dup) {
+    return false;  // Bail if we can't duplicate. Assume bad.
+  }
+  // Loop through the version string, splitting on '.' seperators.
+  for (char *str = strtok_r(version_dup, ".", &str_ptr); str && i < sizeof(PROJECT_VERSION); str = strtok_r(nullptr, ".", &str_ptr), i++) {
+    int field = atoi(str);
+    // The fields in a version string can only range from 0-255.
+    if ((field < 0) || (field > 255)) {
+      free(version_dup);
+      return false;
+    }
+    // Shuffle the accumulated bytes across, and add the new byte.
+    version = (version << 8) + field;
+    // Check alpha delimiter after 1.2.3 only
+    if ((2 == i) && isalpha(str[strlen(str)-1])) {
+      field = str[strlen(str)-1] & 0x1f;
+      version = (version << 8) + field;
+      i++;
+    }
+  }
+  free(version_dup);  // We no longer need this.
+  // A version string should have 2-4 fields. e.g. 1.2, 1.2.3, or 1.2.3a (= 1.2.3.1).
+  // If not, then don't consider it a valid version string.
+  if ((i < 2) || (i > sizeof(PROJECT_VERSION))) {
+    return false;
+  }
+  // Keep shifting the parsed version until we hit the maximum number of tokens.
+  // PROJECT_VERSION stores the major number of the version in the most significant byte of the uint32_t.
+  while (i < sizeof(PROJECT_VERSION)) {
+    version <<= 8;
+    i++;
+  }
+  // Now we should have a fully constructed version number in uint32_t form.
+  return (version > PROJECT_VERSION);
+}
+
+char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option)
+{
+  // char sidx[8];
+
+  // strncpy_P(dest, S_RSLT_POWER, size);                // POWER
+  // if ((devices_present + option) > 1) {
+  //   snprintf_P(sidx, sizeof(sidx), PSTR("%d"), idx);  // x
+  //   strncat(dest, sidx, size - strlen(dest) -1);      // POWERx
+  // }
+  // return dest;
+}
+
+char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size)
+{
+  // return GetPowerDevice(dest, idx, size, 0);
+}
+
+float mSupport::ConvertTemp(float c)
+{
+  // float result = c;
+
+  // if (!isnan(c) && Settings.flag_system_phaseout.temperature_conversion) {
+  //   result = c * 1.8 + 32;  // Fahrenheit
+  // }
+  // return result;
+}
+
+char mSupport::TempUnit(void)
+{
+  return (pCONT_set->Settings.flag_system_phaseout.temperature_conversion) ? 'F' : 'C';
+}
+
+float mSupport::ConvertPressure(float p)
+{
+  // float result = p;
+
+  // if (!isnan(p) && Settings.flag_system_phaseout.pressure_conversion) {
+  //   result = p * 0.75006375541921;  // mmHg
+  // }
+  // return result;
+}
+
+String mSupport::PressureUnit(void)
+{
+  // return (Settings.flag_system_phaseout.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
+}
+
+void mSupport::SetGlobalValues(float temperature, float humidity)
+{
+  // global_update = uptime;
+  // global_temperature = temperature;
+  // global_humidity = humidity;
+}
+
+void mSupport::ResetGlobalValues(void)
+{
+  // if ((uptime - global_update) > GLOBAL_VALUES_VALID) {  // Reset after 5 minutes
+  //   global_update = 0;
+  //   global_temperature = 0;
+  //   global_humidity = 0;
+  // }
+}
+
+
+uint32_t mSupport::SqrtInt(uint32_t num)
+{
+  // if (num <= 1) {
+  //   return num;
+  // }
+
+  // uint32_t x = num / 2;
+  // uint32_t y;
+  // do {
+  //   y = (x + num / x) / 2;
+  //   if (y >= x) {
+  //     return x;
+  //   }
+  //   x = y;
+  // } while (true);
+}
+
+uint32_t mSupport::RoundSqrtInt(uint32_t num)
+{
+  // uint32_t s = SqrtInt(4 * num);
+  // if (s & 1) {
+  //   s++;
+  // }
+  // return s / 2;
+}
+
+char* mSupport::GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack)
+{
+  // Returns empty string if not found
+  // Returns text of found
+  char* write = destination;
+  const char* read = haystack;
+
+  index++;
+  while (index--) {
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+      ch = pgm_read_byte(read++);  //Makes sure byte is the right size
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    if (0 == ch) {
+      if (index) {
+        write = destination;
+      }
+      break;
+    }
+  }
+  *write = '\0';
+  return destination;
+}
+
+char* mSupport::GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack)
+{
+  // Returns empty string if not found
+  // Returns text of found
+  char* write = destination;
+  const char* read = haystack;
+
+  index++;
+  while (index--) {
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+
+      // (addr) (*(const uint8_t *)(addr))
+
+      ch = pgm_read_byte(read++);  //pads
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    if (0 == ch) {
+      if (index) {
+        write = destination;
+      }
+      break;
+    }
+  }
+  *write = '\0';
+  return destination;
+}
+
+
+int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id)
+{
+  const char* read = haystack;
+  int16_t position = -1;
+
+  // Search for substring
+  char *p_start_of_found = strstr(haystack,name_tofind);
+
+  // returns 
+  if(p_start_of_found == NULL){
+      // AddLog_P(LOG_LEVEL_INFO,PSTR("p_start_of_found == NULL \n\r%s \n\r%s \n\r%s"),name_tofind,haystack);
+    return -1;
+    // position = abs(haystack - p_start_of_found); // get the position
+  }
+  // else{
+  //   position = -1; //if null, it doesnt exist
+  // }
+
+  uint8_t delimeter_count = 0;
+  uint16_t haystack_index = 0;
+  uint16_t haystack_length = strlen(haystack);
+  // char ch = '.';
+  //search for delimeters between found index and start ie indexed list places
+  while((read != p_start_of_found) && (haystack_index++ < haystack_length)){
+    // Count delimeters
+    if(*read == '|'){
+      delimeter_count++;
+      AddLog_P(LOG_LEVEL_INFO,PSTR("%s\n\r found %s %d"),haystack,read,delimeter_count);
+
+      //use this and check class ID, then use it to return device_id
+
+
+    }
+    read++; //move pointer along
+  }
+
+//strcasecmp
+// if(delimeter_count>0){
+
+      // AddLog_P(LOG_LEVEL_INFO,PSTR("class %d  device %d"),Settings.device_name_buffer.class_id[delimeter_count],Settings.device_name_buffer.device_id[delimeter_count]);
+// }
+
+  return delimeter_count;
+}
+
+
+
+
+int mSupport::GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack)
+{
+  // Returns -1 of not found
+  // Returns index and command if found
+  int result = -1;
+  const char* read = haystack;
+  char* write = destination;
+
+  while (true) {
+    result++;
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+      ch = pgm_read_byte(read++);
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    *write = '\0';
+    if (!strcasecmp(needle, destination)) {
+      break;
+    }
+    if (0 == ch) {
+      result = -1;
+      break;
+    }
+  }
+  return result;
+}
+
+int8_t mSupport::GetStateNumber(const char *state_text)
+{
+  char command[50];
+  int8_t state_number = STATE_NUMBER_INVALID_ID;
+
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionOff) >= 0) {
+    state_number = STATE_NUMBER_OFF_ID;
+  }
+  else if (GetCommandCode(command, sizeof(command), state_text, kOptionOn) >= 0) {
+    state_number = STATE_NUMBER_ON_ID;
+  }
+  else if (GetCommandCode(command, sizeof(command), state_text, kOptionToggle) >= 0) {
+    state_number = STATE_NUMBER_TOGGLE_ID;
+  }
+  else if (GetCommandCode(command, sizeof(command), state_text, kOptionBlink) >= 0) {
+    state_number = STATE_NUMBER_BLINK_ID;
+  }
+  else if (GetCommandCode(command, sizeof(command), state_text, kOptionBlinkOff) >= 0) {
+    state_number = STATE_NUMBER_BLINK_OFF_ID;
+  }
+
+  AddLog_P(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
+
+  return state_number;
+
+}
+
+void mSupport::SetSerialBaudrate(int baudrate)
+{
+  // pCONT_set->Settings.baudrate = baudrate / 1200;
+  // if (Serial.baudRate() != baudrate) {
+  //   //if (seriallog_level) {
+  //     AddLog_P2(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SET_BAUDRATE_TO " %d"), baudrate);
+  //   //}
+  //   delay(100);
+  //   Serial.flush();
+  //   //Serial.begin(baudrate, serial_config);
+  //   delay(10);
+  //   Serial.println();
+  // }
+}
+
+void mSupport::ClaimSerial(void)
+{
+  // serial_local = true;
+  // AddLog_P(LOG_LEVEL_INFO, PSTR("SNS: Hardware Serial"));
+  // SetSeriallog(LOG_LEVEL_NONE);
+  // baudrate = Serial.baudRate();
+  // Settings.baudrate = baudrate / 1200;
+}
+
+void mSupport::SerialSendRaw(char *codes)
+{
+  char *p;
+  char stemp[3];
+  uint8_t code;
+
+  int size = strlen(codes);
+
+  while (size > 0) {
+    strlcpy(stemp, codes, sizeof(stemp));
+    code = strtol(stemp, &p, 16);
+    Serial.write(code);
+    size -= 2;
+    codes += 2;
+  }
+}
+
+uint32_t mSupport::GetHash(const char *buffer, size_t size)
+{
+  uint32_t hash = 0;
+  for (uint16_t i = 0; i <= size; i++) {
+    hash += (uint8_t)*buffer++ * (i +1);
+  }
+  return hash;
+}
+
+void mSupport::ShowSource(int source)
+{
+  if ((source > 0) && (source < SRC_MAX)) {
+    char stemp1[20];
+    AddLog_P(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
+  }
+}
+
+// void mSupport::WebHexCode(uint8_t i, const char* code)
+// {
+//   char scolor[10];
+
+//   strlcpy(scolor, code, sizeof(scolor));
+//   char* p = scolor;
+//   if ('#' == p[0]) { p++; }  // Skip
+
+//   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
+//     p[6] = p[3];  // \0
+//     p[5] = p[2];  // 3
+//     p[4] = p[2];  // 3
+//     p[3] = p[1];  // 2
+//     p[2] = p[1];  // 2
+//     p[1] = p[0];  // 1
+//   }
+
+//   uint32_t color = strtol(p, nullptr, 16);
+// /*
+//   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
+//     uint32_t w = ((color & 0xF00) << 8) | ((color & 0x0F0) << 4) | (color & 0x00F);  // 00010203
+//     color = w | (w << 4);                                                            // 00112233
+//   }
+// */
+
+//   pCONT_set->Settings.web_color[i][0] = (color >> 16) & 0xFF;  // Red
+//   pCONT_set->Settings.web_color[i][1] = (color >> 8) & 0xFF;   // Green
+//   pCONT_set->Settings.web_color[i][2] = color & 0xFF;          // Blue
+// }
+
+// uint32_t mSupport::WebColor(uint8_t i)
+// {
+//   uint32_t tcolor = (pCONT_set->Settings.web_color[i][0] << 16) | (pCONT_set->Settings.web_color[i][1] << 8) | pCONT_set->Settings.web_color[i][2];
+//   return tcolor;
+// }
+
+// uint32_t mSupport::WebColor(uint8_t r,uint8_t g,uint8_t b){
+//   uint32_t tcolor = (r << 16) | (g << 8) | b;
+//   return tcolor;
+// }
+
+
+/*********************************************************************************************\
+ * Sleep aware time scheduler functions borrowed from ESPEasy
+\*********************************************************************************************/
+
+// long mSupport::TimeDifference(unsigned long prev, unsigned long next)
+// {
+//   // Return the time difference as a signed value, taking into account the timers may overflow.
+//   // Returned timediff is between -24.9 days and +24.9 days.
+//   // Returned value is positive when "next" is after "prev"
+//   long signed_diff = 0;
+//   // To cast a value to a signed long, the difference may not exceed half 0xffffffffUL (= 4294967294)
+//   const unsigned long half_max_unsigned_long = 2147483647u;  // = 2^31 -1
+//   if (next >= prev) {
+//     const unsigned long diff = next - prev;
+//     if (diff <= half_max_unsigned_long) {                    // Normal situation, just return the difference.
+//       signed_diff = static_cast<long>(diff);                 // Difference is a positive value.
+//     } else {
+//       // prev has overflow, return a negative difference value
+//       signed_diff = static_cast<long>((0xffffffffUL - next) + prev + 1u);
+//       signed_diff = -1 * signed_diff;
+//     }
+//   } else {
+//     // next < prev
+//     const unsigned long diff = prev - next;
+//     if (diff <= half_max_unsigned_long) {                    // Normal situation, return a negative difference value
+//       signed_diff = static_cast<long>(diff);
+//       signed_diff = -1 * signed_diff;
+//     } else {
+//       // next has overflow, return a positive difference value
+//       signed_diff = static_cast<long>((0xffffffffUL - prev) + next + 1u);
+//     }
+//   }
+//   return signed_diff;
+// }
+
+// long mSupport::TimePassedSince(unsigned long timestamp)
+// {
+//   // Compute the number of milliSeconds passed since timestamp given.
+//   // Note: value can be negative if the timestamp has not yet been reached.
+//   return TimeDifference(timestamp, millis());
+// }
+
+// bool mSupport::TimeReachedTimer(unsigned long timer)
+// {
+//   // Check if a certain timeout has been reached.
+//   const long passed = TimePassedSince(timer);
+//   return (passed >= 0);
+// }
+
+// void mSupport::SetNextTimeInterval(unsigned long& timer, const unsigned long step)
+// {
+//   timer += step;
+//   const long passed = TimePassedSince(timer);
+//   if (passed < 0) { return; }   // Event has not yet happened, which is fine.
+//   if (static_cast<unsigned long>(passed) > step) {
+//     // No need to keep running behind, start again.
+//     timer = millis() + step;
+//     return;
+//   }
+//   // Try to get in sync again.
+//   timer = millis() + (step - passed);
+// }
+
+
+
+
+
+// ? unknown
+char* mSupport::Format(char* output, const char* input, int size)
+{
+  char *token;
+  uint8_t digits = 0;
+
+  if (strstr(input, "%") != nullptr) {
+    strlcpy(output, input, size);
+    token = strtok(output, "%");
+    if (strstr(input, "%") == input) {
+      output[0] = '\0';
+    } else {
+      token = strtok(nullptr, "");
+    }
+    if (token != nullptr) {
+      digits = atoi(token);
+      if (digits) {
+        char tmp[size];
+        if (strchr(token, 'd')) {
+          snprintf_P(tmp, size, PSTR("%s%c0%dd"), output, '%', digits);
+          #ifdef ESP8266
+          snprintf_P(output, size, tmp, ESP.getChipId() & 0x1fff);            // %04d - short chip ID in dec, like in hostname
+          #endif
+        } else {
+          snprintf_P(tmp, size, PSTR("%s%c0%dX"), output, '%', digits);
+          #ifdef ESP8266
+          snprintf_P(output, size, tmp, ESP.getChipId());                   // %06X - full chip ID in hex
+          #endif
+        }
+      } else {
+        if (strchr(token, 'd')) {
+          #ifdef ESP8266
+          snprintf_P(output, size, PSTR("%s%d"), output, ESP.getChipId());  // %d - full chip ID in dec
+          #endif
+          digits = 8;
+        }
+      }
+    }
+  }
+  if (!digits) { strlcpy(output, input, size); }
+  return output;
+}
+
+char* mSupport::GetOtaUrl(char *otaurl, size_t otaurl_size)
+{
+  // if (strstr(pCONT_set->Settings.ota_url, "%04d") != nullptr) {     // OTA url contains placeholder for chip ID
+  
+  //         #ifdef ESP8266
+  //   snprintf(otaurl, otaurl_size, pCONT_set->Settings.ota_url, ESP.getChipId() & 0x1fff);
+  //   #endif
+  // }
+  // else if (strstr(pCONT_set->Settings.ota_url, "%d") != nullptr) {  // OTA url contains placeholder for chip ID
+  
+  //         #ifdef ESP8266
+  //   snprintf_P(otaurl, otaurl_size, pCONT_set->Settings.ota_url, ESP.getChipId());
+  //   #endif
+  // }
+  // else {
+  //   strlcpy(otaurl, pCONT_set->Settings.ota_url, otaurl_size);
+  // }
+  return 0;//otaurl;
+}
+
+// /********************************************************************************************
+
+void mSupport::PerformEverySecond(void)
+{
+  // pCONT_set->uptime++;
+
+
+  // pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+  // pCONT_sup->activity.loop_counter=0;
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
+
+
+  if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
+    pCONT_set->RtcReboot.fast_reboot_count = 0;
+    pCONT_set->RtcRebootSave();
+    
+    pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
+  }
+
+  // if ((4 == uptime) && (SONOFF_IFAN02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
+  //   SetDevicePower(1, SRC_RETRY);      // Sync with default power on state microcontroller being Light ON and Fan OFF
+  //   SetDevicePower(power, SRC_RETRY);  // Set required power on state
+  // }
+
+  // if (pCONT_set->seriallog_timer) {
+  //   seriallog_timer--;
+  //   if (!seriallog_timer) {
+  //     if (seriallog_level) {
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //     }
+  //     seriallog_level = 0;
+  //   }
+  // }
+
+  // if (syslog_timer) {  // Restore syslog level
+  //   syslog_timer--;
+  //   if (!syslog_timer) {
+  //     syslog_level = Settings.syslog_level;
+  //     if (Settings.syslog_level) {
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //     }
+  //   }
+  // }
+
+  ResetGlobalValues();
+
+//   if (pCONT_set->Settings.tele_period) {
+//     pCONT_set->tele_period++;
+//     if (pCONT_set->tele_period == pCONT_set->Settings.tele_period -1) {
+//       //XsnsCall(FUNC_PREP_BEFORE_TELEPERIOD);
+//     }
+//     if (pCONT_set->tele_period >= pCONT_set->Settings.tele_period) {
+//       pCONT_set->tele_period = 0;
+//       //MqttPublishTeleState();
+//       // pCONT_set->data_buffer2.payload.ctr[0] = '\0';
+// //       if (MqttShowSensor()) {
+// //         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_SENSOR), Settings.flag_system_phaseout.mqtt_sensor_retain);
+// // #ifdef USE_RULES
+// //     //    RulesTeleperiod();  // Allow rule based HA messages
+// // #endif  // USE_RULES
+// //       }
+//     }
+//   }
+
+  //XdrvCall(FUNC_EVERY_SECOND);
+  //XsnsCall(FUNC_EVERY_SECOND);
+
+  // if ((2 == pCONT_set->RtcTime.minute) && pCONT_set->latest_uptime_flag) {
+  //   pCONT_set->latest_uptime_flag = false;
+  //   //Response_P(PSTR("{\"" D_JSON_TIME "\":\"%s\",\"" D_JSON_UPTIME "\":\"%s\"}"), GetDateAndTime(DT_LOCAL).c_str(), GetUptime().c_str());
+  //   //MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_UPTIME));
+  // }
+  // if ((3 == pCONT_set->RtcTime.minute) && !pCONT_set->latest_uptime_flag) pCONT_set->latest_uptime_flag = true;
+}
+
+// /*********************************************************************************************\
+//  * State loops
+// \*********************************************************************************************/
+// /*-------------------------------------------------------------------------------------------*\
+//  * Every 0.1 second
+// \*-------------------------------------------------------------------------------------------*
+
+
+void mSupport::Every100mSeconds(void)
+{
+  // As the max amount of sleep = 250 mSec this loop will shift in time...
+  power_t power_now;
+
+  // if (latching_relay_pulse) {
+  //   latching_relay_pulse--;
+  //   //if (!latching_relay_pulse) SetLatchingRelay(0, 0);
+  // }
+
+  // for (uint8_t i = 0; i < MAX_PULSETIMERS; i++) {
+  //   if (pulse_timer[i] != 0L) {           // Timer active?
+  //     if (TimeReached(pulse_timer[i])) {  // Timer finished?
+  //       pulse_timer[i] = 0L;              // Turn off this timer
+  //       //ExecuteCommandPower(i +1, (POWER_ALL_OFF_PULSETIME_ON == Settings.poweronstate) ? POWER_ON : POWER_OFF, SRC_PULSETIMER);
+  //     }
+  //   }
+  // }
+
+  // if (blink_mask) {
+  //   if (TimeReached(blink_timer)) {
+  //     SetNextTimeInterval(blink_timer, 100 * Settings.blinktime);
+  //     blink_counter--;
+  //     if (!blink_counter) {
+  //       StopAllPowerBlink();
+  //     } else {
+  //       blink_power ^= 1;
+  //       power_now = (power & (POWER_MASK ^ blink_mask)) | ((blink_power) ? blink_mask : 0);
+  //       SetDevicePower(power_now, SRC_IGNORE);
+  //     }
+  //   }
+  // }
+
+  // Backlog
+  // if (TimeReached(backlog_delay)) {
+  //   if ((backlog_pointer != backlog_index) && !backlog_mutex) {
+  //     backlog_mutex = true;
+  //     ExecuteCommand((char*)backlog[backlog_pointer].c_str(), SRC_BACKLOG);
+  //     backlog_mutex = false;
+  //     backlog_pointer++;
+  //     if (backlog_pointer >= MAX_BACKLOG) { backlog_pointer = 0; }
+  //   }
+  // }
+}
+
+// /*-------------------------------------------------------------------------------------------*\
+//  * Every 0.25 second
+// \*-------------------------------------------------------------------------------------------*/
+// /*
+void mSupport::Every250mSeconds(void)
+{
+// As the max amount of sleep = 250 mSec this loop should always be taken...
+
+  DEBUG_LINE;
+  uint8_t blinkinterval = 1;
+
+  pCONT_set->state_250mS++;
+  pCONT_set->state_250mS &= 0x3;
+
+  // global_state.network_down = (global_state.wifi_down && global_state.eth_down);
+
+  if (!pCONT_set->Settings.flag_system_phaseout.global_state) {                      // Problem blinkyblinky enabled
+    if (pCONT_set->global_state.data) {                              // Any problem
+      if (pCONT_set->global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
+      if (pCONT_set->global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
+      pCONT_set->blinks = 201;                                       // Allow only a single blink in case the problem is solved
+    }
+  }
+
+  DEBUG_LINE;
+  if (pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag) {
+
+    // Work out the led state based on time
+    if (pCONT_set->restart_flag || pCONT_set->ota_state_flag) {                 // Overrule blinks and keep led lit
+      pCONT_set->blinkstate = true;                                  // Stay lit
+    } else {
+      pCONT_set->blinkspeed--; // based of multiples of 200ms
+      if (!pCONT_set->blinkspeed) {
+        pCONT_set->blinkspeed = blinkinterval;                       // Set interval to 0.2 (default), 1 or 2 seconds
+        pCONT_set->blinkstate ^= 1;                                  // Blink
+      }
+    }
+
+  DEBUG_LINE;
+    // Update Link LED
+    if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->blinks > 200) || (pCONT_set->blinkstate))) {
+     SetLedLink(pCONT_set->blinkstate);                            // Set led on or off
+    }
+
+    // If blink has completed
+    if (!pCONT_set->blinkstate) {
+      pCONT_set->blinks--;
+      if (200 == pCONT_set->blinks) pCONT_set->blinks = 0;                      // Disable blink
+    }
+
+  }
+
+
+  if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
+    bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
+    // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
+    //(MODULE_SONOFF_T11 == pCONT_set->my_module_type) || 
+    //(MODULE_SONOFF_T12 == pCONT_set->my_module_type) || 
+    //(MODULE_SONOFF_T13 == pCONT_set->my_module_type)) {
+    //   tstate = (!pCONT_set->power) ? 1 : 0;                          // As requested invert signal for Touch devices to find them in the dark
+    // }
+   SetLedPower(tstate);
+  }
+
+  DEBUG_LINE;
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
+
+
+/*-------------------------------------------------------------------------------------------*\
+ * Every second at 0.25 second interval
+\*-------------------------------------------------------------------------------------------*/
+
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "%s"), "Every second at 0.25 second interval");
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "Switch %d"), pCONT_set->state_250mS);
+
+  switch (pCONT_set->state_250mS) {
+  case 0:                                                 // Every x.0 second
+
+    if (pCONT_set->ota_state_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
+      pCONT_set->ota_state_flag--;
+      if (2 == pCONT_set->ota_state_flag) {
+        // pCONT_set->ota_url = pCONT_set->Settings.ota_url;
+        pCONT_set->RtcSettings.ota_loader = 0;  // Try requested image first
+        pCONT_set->ota_retry_counter = OTA_ATTEMPTS;
+        
+        #ifdef ESP8266
+          ESPhttpUpdate.rebootOnUpdate(false);
+        #endif
+        pCONT_set->SettingsSave(1);  // Free flash for OTA update
+      }
+      if (pCONT_set->ota_state_flag <= 0) {
+
+#ifdef USE_WEBSERVER
+        if (pCONT_set->Settings.webserver) //StopWebserver();
+#endif  // USE_WEBSERVER
+// #ifdef USE_ARILUX_RF
+//         AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
+// #endif  // USE_ARILUX_RF
+        pCONT_set->ota_state_flag = 92;
+        pCONT_set->ota_result = 0;
+        pCONT_set->ota_retry_counter--;
+
+
+        // if (pCONT_set->ota_retry_counter) {
+          // strlcpy(pCONT_set->data_buffer2.payload.ctr, 
+//           // GetOtaUrl(pCONT_set->log_data, sizeof(pCONT_set->log_data)), sizeof(pCONT_set->data_buffer2.payload.ctr));
+// strlcpy(mqtt_data, GetOtaUrl(log_data, sizeof(log_data)), sizeof(mqtt_data));
+// #ifndef FIRMWARE_MINIMAL
+//           if (RtcSettings.ota_loader) {
+//             // OTA File too large so try OTA minimal version
+//             // Replace tasmota                                         with tasmota-minimal
+//             // Replace tasmota-DE                                      with tasmota-minimal
+//             // Replace tasmota.bin                                     with tasmota-minimal.bin
+//             // Replace tasmota.xyz                                     with tasmota-minimal.xyz
+//             // Replace tasmota.bin.gz                                  with tasmota-minimal.bin.gz
+//             // Replace tasmota.xyz.gz                                  with tasmota-minimal.xyz.gz
+//             // Replace tasmota.ino.bin                                 with tasmota-minimal.ino.bin
+//             // Replace tasmota.ino.bin.gz                              with tasmota-minimal.ino.bin.gz
+//             // Replace http://domus1:80/api/arduino/tasmota.bin        with http://domus1:80/api/arduino/tasmota-minimal.bin
+//             // Replace http://domus1:80/api/arduino/tasmota.bin.gz     with http://domus1:80/api/arduino/tasmota-minimal.bin.gz
+//             // Replace http://domus1:80/api/arduino/tasmota-DE.bin.gz  with http://domus1:80/api/arduino/tasmota-minimal.bin.gz
+//             // Replace http://domus1:80/api/ard-uino/tasmota-DE.bin.gz with http://domus1:80/api/ard-uino/tasmota-minimal.bin.gz
+//             // Replace http://192.168.2.17:80/api/arduino/tasmota.bin  with http://192.168.2.17:80/api/arduino/tasmota-minimal.bin
+//             // Replace http://192.168.2.17/api/arduino/tasmota.bin.gz  with http://192.168.2.17/api/arduino/tasmota-minimal.bin.gz
+
+//             char *bch = strrchr(mqtt_data, '/');                       // Only consider filename after last backslash prevent change of urls having "-" in it
+//             if (bch == nullptr) { bch = mqtt_data; }                   // No path found so use filename only
+// /*
+//             char *ech = strrchr(bch, '.');                             // Find file type in filename (none, .bin or .gz)
+//             if ((ech != nullptr) && (0 == strncasecmp_P(ech, PSTR(".GZ"), 3))) {
+//               char *fch = ech;
+//               *fch = '\0';
+//               ech = strrchr(bch, '.');                                 // Find file type .bin.gz
+//               *fch = '.';
+//             }
+// */
+//             char *ech = strchr(bch, '.');                              // Find file type in filename (none, .ino.bin, .ino.bin.gz, .bin, .bin.gz or .gz)
+//             if (ech == nullptr) { ech = mqtt_data + strlen(mqtt_data); }  // Point to '/0' at end of mqtt_data becoming an empty string
+
+// //AddLog_P2(LOG_LEVEL_DEBUG, PSTR("OTA: File type [%s]"), ech);
+
+//             char ota_url_type[strlen(ech) +1];
+//             strncpy(ota_url_type, ech, sizeof(ota_url_type));          // Either empty, .ino.bin, .ino.bin.gz, .bin, .bin.gz or .gz
+
+//             char *pch = strrchr(bch, '-');                             // Find last dash (-) and ignore remainder - handles tasmota-DE
+//             if (pch == nullptr) { pch = ech; }                         // No dash so ignore filetype
+//             *pch = '\0';                                               // mqtt_data = http://domus1:80/api/arduino/tasmota
+//             snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("%s-" D_JSON_MINIMAL "%s"), mqtt_data, ota_url_type);  // Minimal filename must be filename-minimal
+//           }
+// #endif  // FIRMWARE_MINIMAL
+
+
+//           // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPLOAD "%s"), pCONT_set->data_buffer2.payload.ctr);
+//           #ifdef ESP8266
+// #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
+//           ota_result = (HTTP_UPDATE_FAILED != ESPhttpUpdate.update(data_buffer2.payload.ctr));
+// #else
+//           // If using core stage or 2.5.0+ the syntax has changed
+//           WiFiClient OTAclient;
+//           pCONT_set->ota_result = (HTTP_UPDATE_FAILED != ESPhttpUpdate.update(OTAclient, pCONT_set->data_buffer2.payload.ctr));
+// #endif
+// #endif
+//           if (!pCONT_set->ota_result) {
+// #ifndef FIRMWARE_MINIMAL
+
+//           #ifdef ESP8266
+//             int ota_error = ESPhttpUpdate.getLastError();
+//             #endif
+// //            AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPLOAD "Ota error %d"), ota_error);
+//             // if ((HTTP_UE_TOO_LESS_SPACE == ota_error) || (HTTP_UE_BIN_FOR_WRONG_FLASH == ota_error)) {
+//             //   pCONT_set->RtcSettings.ota_loader = 1;  // Try minimal image next
+//             // }
+// #endif  // FIRMWARE_MINIMAL
+//             pCONT_set->ota_state_flag = 2;    // Upgrade failed - retry
+//           }
+//         }
+      }
+      if (90 == pCONT_set->ota_state_flag) {  // Allow MQTT to reconnect
+        pCONT_set->ota_state_flag = 0;
+        if (pCONT_set->ota_result) {
+//          SetFlashModeDout();      // Force DOUT for both ESP8266 and ESP8285
+          Response_mP(PSTR(D_JSON_SUCCESSFUL ". " D_JSON_RESTARTING));
+        } else {
+          
+          #ifdef ESP8266
+          Response_mP(PSTR(D_JSON_FAILED " %s"), ESPhttpUpdate.getLastErrorString().c_str());
+          #endif
+        }
+        pCONT_set->restart_flag = 2;          // Restart anyway to keep memory clean webserver
+        //MqttPublishPrefixTopic_P(STAT, PSTR(D_JSON_UPGRADE));
+      }
+    }
+    break;
+  case 1:                                                 // Every x.25 second
+  
+    /*if (save_data_counter && (backlog_pointer == backlog_index)) {
+      save_data_counter--;
+      if (save_data_counter <= 0) { Serial.print("if (save_data_counter <= 0)="); Serial.println(save_data_counter);
+        if (Settings.flag_system_phaseout.save_state) {
+          power_t mask = POWER_MASK;
+          for (uint8_t i = 0; i < MAX_PULSETIMERS; i++) {
+            if ((Settings.pulse_timer[i] > 0) && (Settings.pulse_timer[i] < 30)) {  // 3 seconds
+              mask &= ~(1 << i);
+            }
+          }
+          if (!((Settings.power &mask) == (power &mask))) {
+            Settings.power = power;
+          }
+        } else {
+          Settings.power = 0;
+        }
+        Serial.println("SettingsSave(0); from sonoff.ino");
+        SettingsSave(0);
+        save_data_counter = Settings.save_data; Serial.println("save_data_counter = Settings.save_data; 2");
+      }
+    }*/
+
+
+    if (pCONT_set->restart_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
+      if ((214 == pCONT_set->restart_flag) || (215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
+        char storage_wifi[sizeof(pCONT_set->Settings.sta_ssid) +
+                          sizeof(pCONT_set->Settings.sta_pwd)];
+        char storage_mqtt[sizeof(pCONT_set->Settings.mqtt_host) +
+                          sizeof(pCONT_set->Settings.mqtt_port) +
+                          sizeof(pCONT_set->Settings.mqtt_client) +
+                          sizeof(pCONT_set->Settings.mqtt_user) +
+                          sizeof(pCONT_set->Settings.mqtt_pwd) +
+                          sizeof(pCONT_set->Settings.mqtt_topic)];
+        memcpy(storage_wifi, pCONT_set->Settings.sta_ssid, sizeof(storage_wifi));     // Backup current SSIDs and Passwords
+
+        // // Backup current SSIDs and Passwords
+        // char storage_ssid1[strlen(SettingsText(SET_STASSID1)) +1];
+        // strncpy(storage_ssid1, SettingsText(SET_STASSID1), sizeof(storage_ssid1));
+        // char storage_ssid2[strlen(SettingsText(SET_STASSID2)) +1];
+        // strncpy(storage_ssid2, SettingsText(SET_STASSID2), sizeof(storage_ssid2));
+        // char storage_pass1[strlen(SettingsText(SET_STAPWD1)) +1];
+        // strncpy(storage_pass1, SettingsText(SET_STAPWD1), sizeof(storage_pass1));
+        // char storage_pass2[strlen(SettingsText(SET_STAPWD2)) +1];
+        // strncpy(storage_pass2, SettingsText(SET_STAPWD2), sizeof(storage_pass2));
+
+        // char storage_mqtthost[strlen(SettingsText(SET_MQTT_HOST)) +1];
+        // strncpy(storage_mqtthost, SettingsText(SET_MQTT_HOST), sizeof(storage_mqtthost));
+        // char storage_mqttuser[strlen(SettingsText(SET_MQTT_USER)) +1];
+        // strncpy(storage_mqttuser, SettingsText(SET_MQTT_USER), sizeof(storage_mqttuser));
+        // char storage_mqttpwd[strlen(SettingsText(SET_MQTT_PWD)) +1];
+        // strncpy(storage_mqttpwd, SettingsText(SET_MQTT_PWD), sizeof(storage_mqttpwd));
+        // char storage_mqtttopic[strlen(SettingsText(SET_MQTT_TOPIC)) +1];
+        // strncpy(storage_mqtttopic, SettingsText(SET_MQTT_TOPIC), sizeof(storage_mqtttopic));
+        // uint16_t mqtt_port = Settings.mqtt_port;
+
+        if (216 == pCONT_set->restart_flag) {
+          memcpy(storage_mqtt, pCONT_set->Settings.mqtt_host, sizeof(storage_mqtt));  // Backup mqtt host, port, client, username and password
+        }
+        if ((215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
+          pCONT_set->SettingsErase(0);  // Erase all flash from program end to end of physical flash
+        }
+        pCONT_set->SettingsDefault();
+        memcpy(pCONT_set->Settings.sta_ssid, storage_wifi, sizeof(storage_wifi));     // Restore current SSIDs and Passwords
+        if (216 == pCONT_set->restart_flag) {
+          memcpy(pCONT_set->Settings.mqtt_host, storage_mqtt, sizeof(storage_mqtt));  // Restore the mqtt host, port, client, username and password
+          strlcpy(pCONT_set->Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(pCONT_set->Settings.mqtt_client));  // Set client to default
+        }
+        pCONT_set->restart_flag = 2;
+      }
+      else if (213 == pCONT_set->restart_flag) {
+        pCONT_set->SettingsSdkErase();  // Erase flash SDK parameters
+        pCONT_set->restart_flag = 2;
+      }
+      else if (212 == pCONT_set->restart_flag) {
+        pCONT_set->SettingsErase(0);    // Erase all flash from program end to end of physical flash
+        pCONT_set->restart_flag = 211;
+      }
+      if (211 == pCONT_set->restart_flag) {
+        pCONT_set->SettingsDefault();
+        pCONT_set->restart_flag = 2;
+      }
+      pCONT_set->SettingsSaveAll();
+      pCONT_set->restart_flag--;
+      if (pCONT_set->restart_flag <= 0) {
+        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
+        pCONT_wif->EspRestart();
+      }
+    }
+    break;
+  case 2:                                                 // Every x.5 second
+    //if (pCONT_set->Settings.flag4.network_wifi) {
+      pCONT_wif->WifiCheck(pCONT_set->wifi_state_flag);
+      pCONT_set->wifi_state_flag = WIFI_RESTART;
+    // }
+    //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
+    break;
+  case 3:                                                 // Every x.75 second
+    //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
+
+/*
+if (!global_state.network_down) {
+#ifdef FIRMWARE_MINIMAL
+      if (1 == RtcSettings.ota_loader) {
+        RtcSettings.ota_loader = 0;
+        ota_state_flag = 3;
+      }
+#endif  // FIRMWARE_MINIMAL
+
+#ifdef USE_DISCOVERY
+      StartMdns();
+#endif  // USE_DISCOVERY
+
+#ifdef USE_WEBSERVER
+      if (Settings.webserver) {
+
+#ifdef ESP8266
+        StartWebserver(Settings.webserver, WiFi.localIP());
+#else  // ESP32
+#ifdef USE_ETHERNET
+        StartWebserver(Settings.webserver, (EthernetLocalIP()) ? EthernetLocalIP() : WiFi.localIP());
+#else
+        StartWebserver(Settings.webserver, WiFi.localIP());
+#endif
+#endif
+
+#ifdef USE_DISCOVERY
+#ifdef WEBSERVER_ADVERTISE
+        MdnsAddServiceHttp();
+#endif  // WEBSERVER_ADVERTISE
+#endif  // USE_DISCOVERY
+      } else {
+        StopWebserver();
+      }
+#ifdef USE_EMULATION
+    if (Settings.flag2.emulation) { UdpConnect(); }
+#endif  // USE_EMULATION
+#endif  // USE_WEBSERVER
+
+#ifdef USE_DEVICE_GROUPS
+      DeviceGroupsStart();
+#endif  // USE_DEVICE_GROUPS
+
+#ifdef USE_KNX
+      if (!knx_started && Settings.flag.knx_enabled) {  // CMND_KNX_ENABLED
+        KNXStart();
+        knx_started = true;
+      }
+#endif  // USE_KNX
+
+      MqttCheck();
+    } else {
+#ifdef USE_EMULATION
+      UdpDisconnect();
+#endif  // USE_EMULATION
+
+#ifdef USE_DEVICE_GROUPS
+      DeviceGroupsStop();
+#endif  // USE_DEVICE_GROUPS
+
+#ifdef USE_KNX
+      knx_started = false;
+#endif  // USE_KNX
+    }
+*/
+
+
+
+
+    break;
+  }
+}
+
+
+
+// #ifdef ESP8266
+// void SerialInput(void)
+// {
+//   while (Serial.available()) {
+// //    yield();
+//     delay(0);
+// //     serial_in_byte = Serial.read();
+
+// // /*-------------------------------------------------------------------------------------------*\
+// //  * Sonoff dual and ch4 19200 baud serial interface
+// // \*-------------------------------------------------------------------------------------------*/
+// //     if ((SONOFF_DUAL == my_module_type) || (CH4 == my_module_type)) {
+// //      // serial_in_byte = ButtonSerial(serial_in_byte);
+// //     }
+
+// // /*-------------------------------------------------------------------------------------------*/
+
+// //     // if (XdrvCall(FUNC_SERIAL)) {
+// //     //   serial_in_byte_counter = 0;
+// //     //   Serial.flush();
+// //     //   return;
+// //     // }
+
+// // /*-------------------------------------------------------------------------------------------*/
+
+// //     if (serial_in_byte > 127 && !Settings.flag_system_phaseout.mqtt_serial_raw) {                // Discard binary data above 127 if no raw reception allowed
+// //       serial_in_byte_counter = 0;
+// //       Serial.flush();
+// //       return;
+// //     }
+// //     if (!Settings.flag_system_phaseout.mqtt_serial) {                                            // SerialSend active
+// //       if (isprint(serial_in_byte)) {                                             // Any char between 32 and 127
+// //         if (serial_in_byte_counter < INPUT_BUFFER_SIZE -1) {                     // Add char to string if it still fits
+// //           serial_in_buffer[serial_in_byte_counter++] = serial_in_byte;
+// //         } else {
+// //           serial_in_byte_counter = 0;
+// //         }
+// //       }
+// //     } else {
+// //       if (serial_in_byte || Settings.flag_system_phaseout.mqtt_serial_raw) {                     // Any char between 1 and 127 or any char (0 - 255)
+// //         if ((serial_in_byte_counter < INPUT_BUFFER_SIZE -1) &&                   // Add char to string if it still fits and ...
+// //             ((isprint(serial_in_byte) && (128 == Settings.serial_delimiter)) ||  // Any char between 32 and 127
+// //             ((serial_in_byte != Settings.serial_delimiter) && (128 != Settings.serial_delimiter)) ||  // Any char between 1 and 127 and not being delimiter
+// //               Settings.flag_system_phaseout.mqtt_serial_raw)) {                                  // Any char between 0 and 255
+// //           serial_in_buffer[serial_in_byte_counter++] = serial_in_byte;
+// //           serial_polling_window = millis();
+// //         } else {
+// //           serial_polling_window = 0;                                             // Reception done - send mqtt
+// //           break;
+// //         }
+// //       }
+// //     }
+
+// // /*-------------------------------------------------------------------------------------------*\
+// //  * Sonoff SC 19200 baud serial interface
+// // \*-------------------------------------------------------------------------------------------*/
+// //     if (SONOFF_SC == my_module_type) {
+// //       if (serial_in_byte == '\x1B') {                                            // Sonoff SC status from ATMEGA328P
+// //         serial_in_buffer[serial_in_byte_counter] = 0;                            // Serial data completed
+// //         //SonoffScSerialInput(serial_in_buffer);
+// //         serial_in_byte_counter = 0;
+// //         Serial.flush();
+// //         return;
+// //       }
+// //     }
+
+// /*-------------------------------------------------------------------------------------------*
+
+//     // else if (!Settings.flag_system_phaseout.mqtt_serial && (serial_in_byte == '\n')) {
+//     //   serial_in_buffer[serial_in_byte_counter] = 0;                              // Serial data completed
+//     //   seriallog_level = (Settings.seriallog_level < LOG_LEVEL_INFO) ? (uint8_t)LOG_LEVEL_INFO : Settings.seriallog_level;
+//     //   AddLog_P2(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "%s"), serial_in_buffer);
+//     //   ExecuteCommand(serial_in_buffer, SRC_SERIAL);
+//     //   serial_in_byte_counter = 0;
+//     //   serial_polling_window = 0;
+//     //   Serial.flush();
+//     //   return;
+//     // }
+//   }
+
+// //   if (Settings.flag_system_phaseout.mqtt_serial && serial_in_byte_counter && (millis() > (serial_polling_window + SERIAL_POLLING))) {
+// //     serial_in_buffer[serial_in_byte_counter] = 0;                                // Serial data completed
+// //     if (!Settings.flag_system_phaseout.mqtt_serial_raw) {
+// //       Response_P(PSTR("{\"" D_JSON_SERIALRECEIVED "\":\"%s\"}"), serial_in_buffer);
+// //     } else {
+// //       Response_P(PSTR("{\"" D_JSON_SERIALRECEIVED "\":\""));
+// //       for (int i = 0; i < serial_in_byte_counter; i++) {
+// //         ResponseAppend_P(PSTR("%02x"), serial_in_buffer[i]);
+// //       }
+// //       ResponseAppend_P(PSTR("\"}"));
+// //     }
+// //     MqttPublishPrefixTopic_P(RESULT_OR_TELE, PSTR(D_JSON_SERIALRECEIVED));
+// // //      XdrvRulesProcess();
+// //     serial_in_byte_counter = 0;
+// //   }
+// }
+
+// /********************************************************************************************
+
+
+extern "C" {
+extern struct rst_info resetInfo;
+}
+
+
+
+
+
+
+
+/*********************************************************************************************\
+ * Basic I2C routines
+\*********************************************************************************************/
+
+// #ifdef USE_I2C
+// const uint8_t I2C_RETRY_COUNTER = 3;
+
+// uint32_t i2c_buffer = 0;
+
+// bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
+// {
+//   uint8_t x = I2C_RETRY_COUNTER;
+
+//   i2c_buffer = 0;
+//   do {
+//     Wire.beginTransmission(addr);                       // start transmission to device
+//     Wire.write(reg);                                    // sends register address to read from
+//     if (0 == Wire.endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
+//       Wire.requestFrom((int)addr, (int)size);           // send data n-bytes read
+//       if (Wire.available() == size) {
+//         for (uint8_t i = 0; i < size; i++) {
+//           i2c_buffer = i2c_buffer << 8 | Wire.read();   // receive DATA
+//         }
+//       }
+//     }
+//     x--;
+//   } while (Wire.endTransmission(true) != 0 && x != 0);  // end transmission
+//   return (x);
+// }
+
+// bool I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
+// {
+//   bool status = I2cValidRead(addr, reg, 1);
+//   *data = (uint8_t)i2c_buffer;
+//   return status;
+// }
+
+// bool I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg)
+// {
+//   bool status = I2cValidRead(addr, reg, 2);
+//   *data = (uint16_t)i2c_buffer;
+//   return status;
+// }
+
+// bool I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg)
+// {
+//   bool status = I2cValidRead(addr, reg, 2);
+//   *data = (int16_t)i2c_buffer;
+//   return status;
+// }
+
+// bool I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg)
+// {
+//   uint16_t ldata;
+//   bool status = I2cValidRead16(&ldata, addr, reg);
+//   *data = (ldata >> 8) | (ldata << 8);
+//   return status;
+// }
+
+// bool I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg)
+// {
+//   uint16_t ldata;
+//   bool status = I2cValidRead16LE(&ldata, addr, reg);
+//   *data = (int16_t)ldata;
+//   return status;
+// }
+
+// bool I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg)
+// {
+//   bool status = I2cValidRead(addr, reg, 3);
+//   *data = i2c_buffer;
+//   return status;
+// }
+
+// uint8_t I2cRead8(uint8_t addr, uint8_t reg)
+// {
+//   I2cValidRead(addr, reg, 1);
+//   return (uint8_t)i2c_buffer;
+// }
+
+// uint16_t I2cRead16(uint8_t addr, uint8_t reg)
+// {
+//   I2cValidRead(addr, reg, 2);
+//   return (uint16_t)i2c_buffer;
+// }
+
+// int16_t I2cReadS16(uint8_t addr, uint8_t reg)
+// {
+//   I2cValidRead(addr, reg, 2);
+//   return (int16_t)i2c_buffer;
+// }
+
+// uint16_t I2cRead16LE(uint8_t addr, uint8_t reg)
+// {
+//   I2cValidRead(addr, reg, 2);
+//   uint16_t temp = (uint16_t)i2c_buffer;
+//   return (temp >> 8) | (temp << 8);
+// }
+
+// int16_t I2cReadS16_LE(uint8_t addr, uint8_t reg)
+// {
+//   return (int16_t)I2cRead16LE(addr, reg);
+// }
+
+// int32_t I2cRead24(uint8_t addr, uint8_t reg)
+// {
+//   I2cValidRead(addr, reg, 3);
+//   return i2c_buffer;
+// }
+
+
+double mSupport::FastPrecisePow(double a, double b)
+{
+  // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
+  // calculate approximation with fraction of the exponent
+  int e = abs((int)b);
+  union {
+    double d;
+    int x[2];
+  } u = { a };
+  u.x[1] = (int)((b - e) * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+  // exponentiation by squaring with the exponent's integer part
+  // double r = u.d makes everything much slower, not sure why
+  double r = 1.0;
+  while (e) {
+    if (e & 1) {
+      r *= a;
+    }
+    a *= a;
+    e >>= 1;
+  }
+  return r * u.d;
+}
+
+float mSupport::FastPrecisePowf(const float x, const float y)
+{
+//  return (float)(pow((double)x, (double)y));
+  return (float)FastPrecisePow(x, y);
+}
+
+
+// bool I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size)
+// {
+//   uint8_t x = I2C_RETRY_COUNTER;
+
+//   do {
+//     Wire.beginTransmission((uint8_t)addr);              // start transmission to device
+//     Wire.write(reg);                                    // sends register address to write to
+//     uint8_t bytes = size;
+//     while (bytes--) {
+//       Wire.write((val >> (8 * bytes)) & 0xFF);          // write data
+//     }
+//     x--;
+//   } while (Wire.endTransmission(true) != 0 && x != 0);  // end transmission
+//   return (x);
+// }
+
+// bool I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val)
+// {
+//    return I2cWrite(addr, reg, val, 1);
+// }
+
+// bool I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val)
+// {
+//    return I2cWrite(addr, reg, val, 2);
+// }
+
+// int8_t I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+// {
+//   Wire.beginTransmission((uint8_t)addr);
+//   Wire.write((uint8_t)reg);
+//   Wire.endTransmission();
+//   if (len != Wire.requestFrom((uint8_t)addr, (uint8_t)len)) {
+//     return 1;
+//   }
+//   while (len--) {
+//     *reg_data = (uint8_t)Wire.read();
+//     reg_data++;
+//   }
+//   return 0;
+// }
+
+// int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+// {
+//   Wire.beginTransmission((uint8_t)addr);
+//   Wire.write((uint8_t)reg);
+//   while (len--) {
+//     Wire.write(*reg_data);
+//     reg_data++;
+//   }
+//   Wire.endTransmission();
+//   return 0;
+// }
+
+// void I2cScan(char *devs, unsigned int devs_len)
+// {
+//   // Return error codes defined in twi.h and core_esp8266_si2c.c
+//   // I2C_OK                      0
+//   // I2C_SCL_HELD_LOW            1 = SCL held low by another device, no procedure available to recover
+//   // I2C_SCL_HELD_LOW_AFTER_READ 2 = I2C bus error. SCL held low beyond slave clock stretch time
+//   // I2C_SDA_HELD_LOW            3 = I2C bus error. SDA line held low by slave/another_master after n bits
+//   // I2C_SDA_HELD_LOW_AFTER_INIT 4 = line busy. SDA again held low by another device. 2nd master?
+
+//   uint8_t error = 0;
+//   uint8_t address = 0;
+//   uint8_t any = 0;
+
+//   snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_DEVICES_FOUND_AT));
+//   for (address = 1; address <= 127; address++) {
+//     Wire.beginTransmission(address);
+//     error = Wire.endTransmission();
+//     if (0 == error) {
+//       any = 1;
+//       snprintf_P(devs, devs_len, PSTR("%s 0x%02x"), devs, address);
+//     }
+//     else if (error != 2) {  // Seems to happen anyway using this scan
+//       any = 2;
+//       snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
+//       break;
+//     }
+//   }
+//   if (any) {
+//     strncat(devs, "\"}", devs_len - strlen(devs) -1);
+//   }
+//   else {
+//     snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
+//   }
+// }
+
+// bool I2cDevice(uint8_t addr)
+// {
+//   for (uint8_t address = 1; address <= 127; address++) {
+//     Wire.beginTransmission(address);
+//     if (!Wire.endTransmission() && (address == addr)) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+// #endif  // USE_I2C
+
+
+
+
+
+//SYSTEM will be single level, basic commands in json format
+int8_t mSupport::parse_JSONCommand(){
+
+  // Check if instruction is for me
+  if(mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/system")>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_SYSTEM));
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+  }else{
+    return 0; // not meant for here
+  }
+
+  int8_t isserviced = 0;
+
+  StaticJsonDocument<300> doc;
+  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  JsonObject obj = doc.as<JsonObject>();
+
+  if(obj.containsKey("resetcounter")){
+    uint8_t val = obj["resetcounter"];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
+    pCONT->mt->ResetRebootCounter();
+    isserviced++;
+  }else
+  if(obj.containsKey("loglevel")){
+    const char* name = obj["loglevel"];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
+    pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
+    // Add save log here
+    isserviced++;
+  }
+  else{
+     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
+  }
+
+  //USeful tasmota stuff
+  // else if (CMND_STATUS == command_code) {
+  //     if ((payload < 0) || (payload > MAX_STATUS)) payload = 99;
+  //     PublishStatus(payload);
+  //     fallback_topic_flag = false;
+  //     return;
+  //   }
+  //   else if (CMND_STATE == command_code) {
+  //     data_buffer2.payload.ctr[0] = '\0';
+  //     MqttShowState();
+  //     if (Settings.flag_network_phaseout.hass_tele_on_power) {
+  //       MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
+  //     }
+  //   }
+  //   else if (CMND_SLEEP == command_code) {
+  //     if ((payload >= 0) && (payload < 251)) {
+  //       Settings.sleep = payload;
+  //       sleep = payload;
+  //       WiFiSetSleepMode();
+  //     }
+  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "");
+  //   }
+
+  // else if (CMND_RESTART == command_code) {
+  //     switch (payload) {
+  //     case 1:
+  //       restart_flag = 2;
+  //       snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_SVALUE, command, D_JSON_RESTARTING);
+  //       break;
+  //     case 99:
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+  //       EspRestart();
+  //       break;
+  //     default:
+  //       snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_SVALUE, command, D_JSON_ONE_TO_RESTART);
+  //     }
+  //   }
+
+  //  else if ((CMND_POWERONSTATE == command_code) && (Settings.module != MOTOR)) {
+  //     /* 0 = Keep relays off after power on
+  //      * 1 = Turn relays on after power on, if PulseTime set wait for PulseTime seconds, and turn relays off
+  //      * 2 = Toggle relays after power on
+  //      * 3 = Set relays to last saved state after power on
+  //      * 4 = Turn relays on and disable any relay control (used for Sonoff Pow to always measure power)
+  //      * 5 = Keep relays off after power on, if PulseTime set wait for PulseTime seconds, and turn relays on
+  //      */
+  //     if ((payload >= POWER_ALL_OFF) && (payload <= POWER_ALL_OFF_PULSETIME_ON)) {
+  //       Settings.poweronstate = payload;
+  //       if (POWER_ALL_ALWAYS_ON == Settings.poweronstate) {
+  //         for (uint8_t i = 1; i <= devices_present; i++) {
+  //           ExecuteCommandPower(i, POWER_ON, SRC_IGNORE);
+  //         }
+  //       }
+  //     }
+  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_NVALUE, command, Settings.poweronstate);
+  //   }
+  
+  // else if (CMND_SYSLOG == command_code) {
+  //     if ((payload >= LOG_LEVEL_NONE) && (payload <= LOG_LEVEL_ALL)) {
+  //       Settings.syslog_level = payload;
+  //       syslog_level = payload;
+  //       syslog_timer = 0;
+  //     }
+  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, command, Settings.syslog_level, syslog_level);
+  //   }
+  //   else if (CMND_LOGHOST == command_code) {
+  //     if ((data_len > 0) && (data_len < sizeof(Settings.syslog_host))) {
+  //       strlcpy(Settings.syslog_host, (SC_DEFAULT == Shortcut(dataBuf)) ? SYS_LOG_HOST : dataBuf, sizeof(Settings.syslog_host));
+  //     }
+  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_SVALUE, command, Settings.syslog_host);
+  //   }
+
+
+// void mSupport::parse_SyncRefresh(){
+//   //DISABLED UNTIL NEW SYNC METHOD/FLAG SYSTEM IS ESTABLISHED
+//       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_ERROR_UNSUPPORTED));
+//   // if((mSupport::memsearch(data_buffer2.payload.ctr, data_buffer2.payload.len,"refresh",sizeof("refresh")-1))>=0){ pCONT->mso->MessagePrint("MATCHED refresh");
+//   //   //fSendAllData = true;
+//   // }
+// } // END function
+
+
+
+
+  //else if(root["reset_wifi_counter"]){ pCONT->mso->MessagePrintln("root[reset_wifi_counter]");
+  //   // wifi_reconnects_counter = 0;
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["reboot"].as<const char*>()){ pCONT->mso->MessagePrintln("root[reboot]");
+  // //make non json
+  // data_buffer2.payload.isserviced++;
+  // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   if(strstr(root["command"],"resetcounter")){
+  //     pCONT->mt->ResetRebootCounter();
+  //   }else if(strstr(root["command"],"reset_wificounter")){
+  //     //pCONT->mt->ResetRebootCounter();
+  //   }
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   //RssScannerRate = root["rss_scanner"];
+  //   data_buffer2.payload.isserviced++;
+  // }
+  
+  // else{
+  //   pCONT->mso->MessagePrintln("NO MATCH");
+  // }
+
+  
+
+  // if(root["resetcounter"]){ pCONT->mso->MessagePrintln("root[resetcounter]");
+  //   pCONT->mt->ResetRebootCounter();
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["healthsecnormal"]){ pCONT->mso->MessagePrintln("root[healthsecnormal]");
+  //   healthsecnormal = root["healthsecnormal"];
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["reset_wifi_counter"]){ pCONT->mso->MessagePrintln("root[reset_wifi_counter]");
+  //   // wifi_reconnects_counter = 0;
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["reboot"].as<const char*>()){ pCONT->mso->MessagePrintln("root[reboot]");
+  // //make non json
+  // data_buffer2.payload.isserviced++;
+  // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   if(strstr(root["command"],"resetcounter")){
+  //     pCONT->mt->ResetRebootCounter();
+  //   }else if(strstr(root["command"],"reset_wificounter")){
+  //     //pCONT->mt->ResetRebootCounter();
+  //   }
+  //   data_buffer2.payload.isserviced++;
+  // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   //RssScannerRate = root["rss_scanner"];
+
+  //   data_buffer2.payload.isserviced++;
+  // }else{
+  //   pCONT->mso->MessagePrintln("NO MATCH");
+  // }
+
+  //fHardwareInfoSent = false; // resend since its updated
+
+  return isserviced;
+
+}
+
+
+
+// void mMQTTTask::RSSSampler(void){
+// // #define RSS_SAMPLES_MAX;
+// // struct RSS_SAMPLER{
+// //   struct SENDER{
+// //     uint16_t rate_ms;
+// //   }sender;
+// //   struct SAMPLES{
+// //     uint16_t rate_ms;
+// //     uint16_t val[RSS_SAMPLES_MAX];
+// //     uint8_t count;
+// //   }samples;
+// // }rss_readings;
+
+// if(rss_readings.sender.rate_ms){ //if its greater than 0
+
+
+//   // Sample rate (save into an array)
+//   if((abs(millis()-rss_readings.samples.tSaved)>(rss_readings.samples.rate_ms))){ rss_readings.samples.tSaved=millis();
+
+//     if(rss_readings.samples.count<RSS_SAMPLES_MAX){
+//       rss_readings.samples.val[rss_readings.samples.count++] = WiFi.RSSI();
+//     }else{
+//       rss_readings.sender.fForceSend = true;
+//     }
+//       //rss_readings.samples.count = 0;}
+//   }
+
+//   // Send rate (send array with one now measurement)
+//   if((abs(millis()-rss_readings.sender.tSaved)>(rss_readings.sender.rate_ms))||(rss_readings.sender.fForceSend)){rss_readings.sender.tSaved=millis();rss_readings.sender.fForceSend=false;
+
+//     memset(&data_buffer2,0,sizeof(data_buffer2));
+    
+//   StaticJsonDocument<500> doc;
+//     JsonObject rootobj = doc.to<JsonObject>();
+
+//     /*{   now:1234,
+//           samples:
+//             count:12
+//             rate:12
+//             array:[1,2,3]
+//           sender:
+//             rate:12
+//     */
+//       rootobj["now"] = WiFi.RSSI();
+//       JsonObject samplesobj = rootobj.createNestedObject("samples");
+//         samplesobj["count"] = rss_readings.samples.count;
+//         samplesobj["max"] = RSS_SAMPLES_MAX;
+//         samplesobj["rate_ms"] = rss_readings.samples.rate_ms;
+//         JsonArray rssarr = samplesobj.createNestedArray("array");
+//           uint8_t array_len = (rss_readings.samples.count<RSS_SAMPLES_MAX)?rss_readings.samples.count:RSS_SAMPLES_MAX;
+//           for(int i=0;i<array_len;i++){
+//             rssarr.add(rss_readings.samples.val[i]);
+//           }
+
+//       JsonObject senderobj = rootobj.createNestedObject("sender");
+//         senderobj["rate_ms"] = rss_readings.sender.rate_ms;
+
+//       data_buffer2.payload.len = measureJson(rootobj)+1;
+//       serializeJson(doc,data_buffer2.payload.ctr);
+
+//       Serial.println(data_buffer2.payload.ctr);
+
+//       pCONT->mqt->ppublish("status/hardware/rss",data_buffer2.payload.ctr,false);
+
+//       rss_readings.samples.count = 0;
+
+//     }
+//   }
+// }
+
+
+uint16_t mSupport::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
+                                       uint16_t ito_min, uint16_t ito_max) {
+  // guard-rails
+  if (ifrom_min >= ifrom_max) {
+    if (ito_min > ito_max) {
+      return ito_max;
+    } else {
+      return ito_min;  // invalid input, return arbitrary value
+    }
+  }
+  // convert to uint31, it's more verbose but code is more compact
+  uint32_t num = inum;
+  uint32_t from_min = ifrom_min;
+  uint32_t from_max = ifrom_max;
+  uint32_t to_min = ito_min;
+  uint32_t to_max = ito_max;
+
+  // check source range
+  num = (num > from_max ? from_max : (num < from_min ? from_min : num));
+
+  // check to_* order
+  if (to_min > to_max) {
+    // reverse order
+    num = (from_max - num) + from_min;
+    to_min = ito_max;
+    to_max = ito_min;
+  }
+
+  uint32_t numerator = (num - from_min) * (to_max - to_min);
+  uint32_t result;
+  if (numerator >= 0x80000000L) {
+    // don't do rounding as it would create an overflow
+    result = numerator / (from_max - from_min) + to_min;
+  } else {
+    result = (((numerator * 2) / (from_max - from_min)) + 1) / 2 + to_min;
+  }
+  return (uint32_t) (result > to_max ? to_max : (result < to_min ? to_min : result));
+}
+
+
+
+
+
+
+
+
+
+
+
+/*************
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * support_rotary.ino
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ /
+
+
+
+// /*
+//   support_rotary.ino - rotary switch support for Sonoff-Tasmota
+
+//   Copyright (C) 2019  Theo Arends
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// */
+
+
+// #ifdef ESP8266
+// /*********************************************************************************************\
+//  * Rotary support
+// \*********************************************************************************************/
+
+// unsigned long rotary_debounce = 0;          // Rotary debounce timer
+// uint8_t rotaries_found = 0;
+// uint8_t rotary_state = 0;
+// uint8_t rotary_position = 128;
+// uint8_t rotary_last_position = 128;
+// uint8_t interrupts_in_use = 0;
+// uint8_t rotary_changed = 0;
+
+// //#define ROTARY_V1
+// #ifdef ROTARY_V1
+
+// /********************************************************************************************/
+
+// void update_position(void)
+// {
+//   uint8_t s;
+
+//   /*
+//    * https://github.com/PaulStoffregen/Encoder/blob/master/Encoder.h
+//    */
+
+//   s = rotary_state & 3;
+//   if (digitalRead(pin[GPIO_ROT1A])) s |= 4;
+//   if (digitalRead(pin[GPIO_ROT1B])) s |= 8;
+//   switch (s) {
+//     case 0: case 5: case 10: case 15:
+//       break;
+//     case 1: case 7: case 8: case 14:
+//       rotary_position++; break;
+//     case 2: case 4: case 11: case 13:
+//       rotary_position--; break;
+//     case 3: case 12:
+//       rotary_position = rotary_position + 2; break;
+//     default:
+//       rotary_position = rotary_position - 2; break;
+//   }
+//   rotary_state = (s >> 2);
+// }
+
+// void update_rotary(void)
+// {
+//   if (MI_DESK_LAMP == my_module_type){
+//     // if (light_power) {
+//     //   update_position();
+//     // }
+//   }
+// }
+
+// void RotaryInit(void)
+// {
+//   rotaries_found = 0;
+//   if ((pin[GPIO_ROT1A] < 99) && (pin[GPIO_ROT1B] < 99)) {
+//     rotaries_found++;
+//     pinMode(pin[GPIO_ROT1A], INPUT_PULLUP);
+//     pinMode(pin[GPIO_ROT1B], INPUT_PULLUP);
+
+//     // GPIO6-GPIO11 are typically used to interface with the flash memory IC on
+//     // most esp8266 modules, so we should avoid adding interrupts to these pins.
+
+//     if ((pin[GPIO_ROT1A] < 6) || (pin[GPIO_ROT1A] > 11)) {
+//       attachInterrupt(digitalPinToInterrupt(pin[GPIO_ROT1A]), update_rotary, CHANGE);
+//       interrupts_in_use++;
+//     }
+//     if ((pin[GPIO_ROT1B] < 6) || (pin[GPIO_ROT1B] > 11)) {
+//       attachInterrupt(digitalPinToInterrupt(pin[GPIO_ROT1B]), update_rotary, CHANGE);
+//       interrupts_in_use++;
+//     }
+//   }
+// }
+
+// /*********************************************************************************************\
+//  * Rotary handler
+// \*********************************************************************************************/
+
+// void RotaryHandler(void)
+// {
+//   if (interrupts_in_use < 2) {
+//     noInterrupts();
+//     update_rotary();
+//   } else {
+//     noInterrupts();
+//   }
+//   if (rotary_last_position != rotary_position) {
+//     if (MI_DESK_LAMP == my_module_type) { // Mi Desk lamp
+//       if (holdbutton[0]) {
+//         rotary_changed = 1;
+//         // button1 is pressed: set color temperature
+//         int16_t t = LightGetColorTemp();
+//         t = t + (rotary_position - rotary_last_position);
+//         if (t < 153) {
+//           t = 153;
+//         }
+//         if (t > 500) {
+//           t = 500;
+//         }
+//         AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_JSON_COLORTEMPERATURE " %d"), rotary_position - rotary_last_position);
+//         LightSetColorTemp((uint16_t)t);
+//       } else {
+//         int8_t d = Settings.light_dimmer;
+//         d = d + (rotary_position - rotary_last_position);
+//         if (d < 1) {
+//           d = 1;
+//         }
+//         if (d > 100) {
+//           d = 100;
+//         }
+//         AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_JSON_DIMMER " %d"), rotary_position - rotary_last_position);
+
+//         LightSetDimmer((uint8_t)d);
+//         Settings.light_dimmer = d;
+//       }
+//     }
+//     rotary_last_position = 128;
+//     rotary_position = 128;
+//   }
+//   interrupts();
+// }
+
+// void RotaryLoop(void)
+// {
+//   if (rotaries_found) {
+//     if (TimeReached(rotary_debounce)) {
+//       SetNextTimeInterval(rotary_debounce, Settings.button_debounce); // Using button_debounce setting for this as well
+//       RotaryHandler();
+//     }
+//   }
+// }
+
+// #endif  // ROTARY_V1
+// #endif
+
+
+/**
+ * 
+ * 
+
+
+
+
+
+
+
+
+
+ support_rtc.ino
+
+
+ ***/
+
+
+// //Tasmota legacy code
+
+
+// /*
+//   support_rtc.ino - Real Time Clock support for Sonoff-Tasmota
+
+//   Copyright (C) 2019  Theo Arends
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// */
+
+// #ifdef ESP8266
+
+
+
+/*********
+ * 
+ * 
+
+
+
+
+
+
+ support_features.ino
+
+
+
+
+ ****/
+
+// /*
+//   support_features.ino - feature support for Sonoff-Tasmota
+
+//   Copyright (C) 2019  Theo Arends
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// */
+// #ifdef ESP8266
+
+// /*********************************************************************************************\
+//  * Fill feature list
+// \*********************************************************************************************/
+
+// void GetFeatures(void)
+// {
+//   feature_drv1 = 0x00000000;   // xdrv_01_mqtt.ino, xdrv_01_light.ino, xdrv_04_snfbridge.ino
+
+// //  feature_drv1 |= 0x00000001;
+// //  feature_drv1 |= 0x00000002;
+
+// #ifdef USE_I2C
+//   feature_drv1 |= 0x00000004;  // sonoff.ino
+// #endif
+// #ifdef USE_SPI
+//   feature_drv1 |= 0x00000008;  // sonoff.ino
+// #endif
+// #ifdef USE_DISCOVERY
+//   feature_drv1 |= 0x00000010;  // sonoff.ino
+// #endif
+// #ifdef USE_ARDUINO_OTA
+//   feature_drv1 |= 0x00000020;  // sonoff.ino
+// #endif
+// #ifdef USE_MQTT_TLS
+//   feature_drv1 |= 0x00000040;  // sonoff.ino
+// #endif
+// #ifdef USE_WEBSERVER
+//   feature_drv1 |= 0x00000080;  // xdrv_02_webserver.ino
+// #endif
+// #ifdef WEBSERVER_ADVERTISE
+//   feature_drv1 |= 0x00000100;  // xdrv_02_webserver.ino
+// #endif
+// #ifdef USE_EMULATION
+//   feature_drv1 |= 0x00000200;  // xplg_wemohue.ino
+// #endif
+// #if (MQTT_LIBRARY_TYPE == MQTT_PUBSUBCLIENT)
+//   feature_drv1 |= 0x00000400;  // xdrv_01_mqtt.ino
+// #endif
+// #if (MQTT_LIBRARY_TYPE == MQTT_TASMOTAMQTT)
+// //  feature_drv1 |= 0x00000800;  // xdrv_01_mqtt.ino
+// #endif
+// #if (MQTT_LIBRARY_TYPE == MQTT_ESPMQTTARDUINO)      // Obsolete since 6.2.1.11
+// //  feature_drv1 |= 0x00001000;  // xdrv_01_mqtt.ino
+// #endif
+// #ifdef MQTT_HOST_DISCOVERY
+//   feature_drv1 |= 0x00002000;  // xdrv_01_mqtt.ino
+// #endif
+// #ifdef USE_ARILUX_RF
+//   feature_drv1 |= 0x00004000;  // xdrv_04_light.ino
+// #endif
+// #ifdef USE_WS2812
+//   feature_drv1 |= 0x00008000;  // xdrv_04_light.ino
+// #endif
+// #ifdef USE_WS2812_DMA
+//   feature_drv1 |= 0x00010000;  // xdrv_04_light.ino
+// #endif
+// #ifdef USE_IR_REMOTE
+//   feature_drv1 |= 0x00020000;  // xdrv_05_irremote.ino
+// #endif
+// #ifdef USE_IR_HVAC
+//   feature_drv1 |= 0x00040000;  // xdrv_05_irremote.ino
+// #endif
+// #ifdef USE_IR_RECEIVE
+//   feature_drv1 |= 0x00080000;  // xdrv_05_irremote.ino
+// #endif
+// #ifdef USE_DOMOTICZ
+//   feature_drv1 |= 0x00100000;  // xdrv_07_domoticz.ino
+// #endif
+// #ifdef USE_DISPLAY
+//   feature_drv1 |= 0x00200000;  // xdrv_13_display.ino
+// #endif
+// #ifdef USE_HOME_ASSISTANT
+//   feature_drv1 |= 0x00400000;  // xdrv_12_home_assistant.ino
+// #endif
+// #ifdef USE_SERIAL_BRIDGE
+//   feature_drv1 |= 0x00800000;  // xdrv_08_serial_bridge.ino
+// #endif
+// #ifdef USE_TIMERS
+//   feature_drv1 |= 0x01000000;  // xdrv_09_timers.ino
+// #endif
+// #ifdef USE_SUNRISE
+//   feature_drv1 |= 0x02000000;  // xdrv_09_timers.ino
+// #endif
+// #ifdef USE_TIMERS_WEB
+//   feature_drv1 |= 0x04000000;  // xdrv_09_timers.ino
+// #endif
+// #ifdef USE_RULES
+//   feature_drv1 |= 0x08000000;  // xdrv_10_rules.ino
+// #endif
+// #ifdef USE_KNX
+//   feature_drv1 |= 0x10000000;  // xdrv_11_knx.ino
+// #endif
+// #ifdef USE_WPS
+//   feature_drv1 |= 0x20000000;  // support.ino
+// #endif
+// #ifdef USE_SMARTCONFIG
+//   feature_drv1 |= 0x40000000;  // support.ino
+// #endif
+// #if (MQTT_LIBRARY_TYPE == MQTT_ARDUINOMQTT)
+// //  feature_drv1 |= 0x80000000;  // xdrv_01_mqtt.ino
+// #endif
+
+// /*********************************************************************************************/
+
+//   feature_drv2 = 0x00000000;
+
+// #ifdef USE_CONFIG_OVERRIDE
+//   feature_drv2 |= 0x00000001;  // user_config(_override).h
+// #endif
+// #ifdef FIRMWARE_MINIMAL
+//   feature_drv2 |= 0x00000002;  // user_config(_override).h
+// #endif
+// #ifdef FIRMWARE_SENSORS
+//   feature_drv2 |= 0x00000004;  // user_config(_override).h
+// #endif
+// #ifdef FIRMWARE_CLASSIC
+//   feature_drv2 |= 0x00000008;  // user_config(_override).h
+// #endif
+// #ifdef FIRMWARE_KNX_NO_EMULATION
+//   feature_drv2 |= 0x00000010;  // user_config(_override).h
+// #endif
+// #ifdef USE_DISPLAY_MODES1TO5
+//   feature_drv2 |= 0x00000020;  // xdrv_13_display.ino
+// #endif
+// #ifdef USE_DISPLAY_GRAPH
+//   feature_drv2 |= 0x00000040;  // xdrv_13_display.ino
+// #endif
+// #ifdef USE_DISPLAY_LCD
+//   feature_drv2 |= 0x00000080;  // xdsp_01_lcd.ino
+// #endif
+// #ifdef USE_DISPLAY_SSD1306
+//   feature_drv2 |= 0x00000100;  // xdsp_02_ssd1306.ino
+// #endif
+// #ifdef USE_DISPLAY_MATRIX
+//   feature_drv2 |= 0x00000200;  // xdsp_03_matrix.ino
+// #endif
+// #ifdef USE_DISPLAY_ILI9341
+//   feature_drv2 |= 0x00000400;  // xdsp_04_ili9341.ino
+// #endif
+// #ifdef USE_DISPLAY_EPAPER_29
+//   feature_drv2 |= 0x00000800;  // xdsp_05_epaper.ino
+// #endif
+// #ifdef USE_DISPLAY_SH1106
+//   feature_drv2 |= 0x00001000;  // xdsp_06_sh1106.ino
+// #endif
+// #ifdef USE_MP3_PLAYER
+//   feature_drv2 |= 0x00002000;  // xdrv_14_mp3.ino
+// #endif
+// #ifdef USE_PCA9685
+//   feature_drv2 |= 0x00004000;  // xdrv_15_pca9685.ino
+// #endif
+// #ifdef USE_TUYA_DIMMER
+//   feature_drv2 |= 0x00008000;  // xdrv_16_tuyadimmer.ino
+// #endif
+// #ifdef USE_RC_SWITCH
+//   feature_drv2 |= 0x00010000;  // xdrv_17_rcswitch.ino
+// #endif
+// #ifdef USE_ARMTRONIX_DIMMERS
+//   feature_drv2 |= 0x00020000;  // xdrv_18_armtronixdimmer.ino
+// #endif
+// #ifdef USE_SM16716
+//   feature_drv2 |= 0x00040000;  // xdrv_04_light.ino
+// #endif
+
+// //  feature_drv2 |= 0x00080000;
+// //  feature_drv2 |= 0x00100000;
+// //  feature_drv2 |= 0x00200000;
+// //  feature_drv2 |= 0x00400000;
+
+// #ifdef NO_EXTRA_4K_HEAP
+//   feature_drv2 |= 0x00800000;  // mFirmwareDefaults.h
+// #endif
+// #ifdef VTABLES_IN_IRAM
+//   feature_drv2 |= 0x01000000;  // platformio.ini
+// #endif
+// #ifdef VTABLES_IN_DRAM
+//   feature_drv2 |= 0x02000000;  // platformio.ini
+// #endif
+// #ifdef VTABLES_IN_FLASH
+//   feature_drv2 |= 0x04000000;  // platformio.ini
+// #endif
+// #ifdef PIO_FRAMEWORK_ARDUINO_LWIP_HIGHER_BANDWIDTH
+//   feature_drv2 |= 0x08000000;  // platformio.ini
+// #endif
+// #ifdef PIO_FRAMEWORK_ARDUINO_LWIP2_LOW_MEMORY
+//   feature_drv2 |= 0x10000000;  // platformio.ini
+// #endif
+// #ifdef PIO_FRAMEWORK_ARDUINO_LWIP2_HIGHER_BANDWIDTH
+//   feature_drv2 |= 0x20000000;  // platformio.ini
+// #endif
+// #ifdef DEBUG_THEO
+//   feature_drv2 |= 0x40000000;  // xdrv_99_debug.ino
+// #endif
+// #ifdef USE_DEBUG_DRIVER
+//   feature_drv2 |= 0x80000000;  // xdrv_99_debug.ino
+// #endif
+
+// /*********************************************************************************************/
+
+//   feature_sns1 = 0x00000000;   // xsns_01_counter.ino, xsns_04_snfsc.ino
+
+// //  feature_sns1 |= 0x00000001;
+
+// #ifdef USE_ADC_VCC
+//   feature_sns1 |= 0x00000002;  // support.ino (ADC)
+// #endif
+// #ifdef USE_ENERGY_SENSOR
+//   feature_sns1 |= 0x00000004;  // xdrv_03_energy.ino
+// #endif
+// #ifdef USE_PZEM004T
+//   feature_sns1 |= 0x00000008;  // xnrg_03_pzem004t.ino
+// #endif
+// #ifdef USE_DS18B20
+//   feature_sns1 |= 0x00000010;  // xsns_05_ds18b20.ino
+// #endif
+// #ifdef USE_DS18x20_LEGACY
+//   feature_sns1 |= 0x00000020;  // xsns_05_ds18x20_legacy.ino
+// #endif
+// #ifdef USE_DS18x20
+//   feature_sns1 |= 0x00000040;  // xsns_05_ds18x20.ino
+// #endif
+// #ifdef USE_DHT
+//   feature_sns1 |= 0x00000080;  // xsns_06_dht.ino
+// #endif
+// #ifdef USE_SHT
+//   feature_sns1 |= 0x00000100;  // xsns_07_sht1x.ino
+// #endif
+// #ifdef USE_HTU
+//   feature_sns1 |= 0x00000200;  // xsns_08_htu21.ino
+// #endif
+// #ifdef USE_BMP
+//   feature_sns1 |= 0x00000400;  // xsns_09_bmp.ino
+// #endif
+// #ifdef USE_BME680
+//   feature_sns1 |= 0x00000800;  // xsns_09_bmp.ino - BME680
+// #endif
+// #ifdef USE_BH1750
+//   feature_sns1 |= 0x00001000;  // xsns_10_bh1750.ino
+// #endif
+// #ifdef USE_VEML6070
+//   feature_sns1 |= 0x00002000;  // xsns_11_veml6070.ino
+// #endif
+// #ifdef USE_ADS1115_I2CDEV
+//   feature_sns1 |= 0x00004000;  // xsns_12_ads1115_i2cdev.ino
+// #endif
+// #ifdef USE_ADS1115
+//   feature_sns1 |= 0x00008000;  // xsns_12_ads1115.ino
+// #endif
+// #ifdef USE_INA219
+//   feature_sns1 |= 0x00010000;  // xsns_13_ina219.ino
+// #endif
+// #ifdef USE_SHT3X
+//   feature_sns1 |= 0x00020000;  // xsns_14_sht3x.ino
+// #endif
+// #ifdef USE_MHZ19
+//   feature_sns1 |= 0x00040000;  // xsns_15_mhz19.ino
+// #endif
+// #ifdef USE_TSL2561
+//   feature_sns1 |= 0x00080000;  // xsns_16_tsl2561.ino
+// #endif
+// #ifdef USE_SENSEAIR
+//   feature_sns1 |= 0x00100000;  // xsns_17_senseair.ino
+// #endif
+// #ifdef USE_PMS5003
+//   feature_sns1 |= 0x00200000;  // xsns_18_pms5003.ino
+// #endif
+// #ifdef USE_MGS
+//   feature_sns1 |= 0x00400000;  // xsns_19_mgs.ino
+// #endif
+// #ifdef USE_NOVA_SDS
+//   feature_sns1 |= 0x00800000;  // xsns_20_novasds.ino
+// #endif
+// #ifdef USE_SGP30
+//   feature_sns1 |= 0x01000000;  // xsns_21_sgp30.ino
+// #endif
+// #ifdef USE_SR04
+//   feature_sns1 |= 0x02000000;  // xsns_22_sr04.ino
+// #endif
+// #ifdef USE_SDM120
+//   feature_sns1 |= 0x04000000;  // xsns_23_sdm120.ino
+// #endif
+// #ifdef USE_SI1145
+//   feature_sns1 |= 0x08000000;  // xsns_24_si1145.ino
+// #endif
+// #ifdef USE_SDM630
+//   feature_sns1 |= 0x10000000;  // xsns_25_sdm630.ino
+// #endif
+// #ifdef USE_LM75AD
+//   feature_sns1 |= 0x20000000;  // xsns_26_lm75ad.ino
+// #endif
+// #ifdef USE_APDS9960
+//   feature_sns1 |= 0x40000000;  // xsns_27_apds9960.ino
+// #endif
+// #ifdef USE_TM1638
+//   feature_sns1 |= 0x80000000;  // xsns_28_tm1638.ino
+// #endif
+
+// /*********************************************************************************************/
+
+//   feature_sns2 = 0x00000000;
+
+// #ifdef USE_MCP230xx
+//   feature_sns2 |= 0x00000001;  // xsns_29_mcp230xx.ino
+// #endif
+// #ifdef USE_MPR121
+//   feature_sns2 |= 0x00000002;  // xsns_30_mpr121.ino
+// #endif
+// #ifdef USE_CCS811
+//   feature_sns2 |= 0x00000004;  // xsns_31_ccs811.ino
+// #endif
+// #ifdef USE_MPU6050
+//   feature_sns2 |= 0x00000008;  // xsns_32_mpu6050.ino
+// #endif
+// #ifdef USE_MCP230xx_OUTPUT
+//   feature_sns2 |= 0x00000010;  // xsns_29_mcp230xx.ino
+// #endif
+// #ifdef USE_MCP230xx_DISPLAYOUTPUT
+//   feature_sns2 |= 0x00000020;  // xsns_29_mcp230xx.ino
+// #endif
+// #ifdef USE_HLW8012
+//   feature_sns2 |= 0x00000040;  // xnrg_01_hlw8012.ino
+// #endif
+// #ifdef USE_CSE7766
+//   feature_sns2 |= 0x00000080;  // xnrg_02_cse7766.ino
+// #endif
+// #ifdef USE_MCP39F501
+//   feature_sns2 |= 0x00000100;  // xnrg_04_mcp39f501.ino
+// #endif
+// #ifdef USE_PZEM_AC
+//   feature_sns2 |= 0x00000200;  // xnrg_05_pzem_ac.ino
+// #endif
+// #ifdef USE_DS3231
+//   feature_sns2 |= 0x00000400;  // xsns_33_ds3231.ino
+// #endif
+// #ifdef USE_HX711
+//   feature_sns2 |= 0x00000800;  // xsns_34_hx711.ino
+// #endif
+// #ifdef USE_PZEM_DC
+//   feature_sns2 |= 0x00001000;  // xnrg_06_pzem_dc.ino
+// #endif
+// #ifdef USE_TX20_WIND_SENSOR
+//   feature_sns2 |= 0x00002000;  // xsns_35_tx20.ino
+// #endif
+// #ifdef USE_MGC3130
+//   feature_sns2 |= 0x00004000;  // xsns_36_mgc3130.ino
+// #endif
+// #ifdef USE_RF_SENSOR
+//   feature_sns2 |= 0x00008000;  // xsns_37_rfsensor.ino
+// #endif
+// #ifdef USE_THEO_V2
+//   feature_sns2 |= 0x00010000;  // xsns_37_rfsensor.ino
+// #endif
+// #ifdef USE_ALECTO_V2
+//   feature_sns2 |= 0x00020000;  // xsns_37_rfsensor.ino
+// #endif
+// #ifdef USE_AZ7798
+//   feature_sns2 |= 0x00040000;  // xsns_38_az7798.ino
+// #endif
+// #ifdef USE_MAX31855
+//   feature_sns2 |= 0x00080000;  // xsns_39_max31855.ino
+// #endif
+// #ifdef USE_PN532_HSU
+//   feature_sns2 |= 0x00100000;  // xsns_40_pn532.ino
+// #endif
+// #ifdef USE_MAX44009
+//   feature_sns2 |= 0x00200000;  // xsns_41_max44009.ino
+// #endif
+// #ifdef USE_SCD30
+//   feature_sns2 |= 0x00400000;  // xsns_42_scd30.ino
+// #endif
+// #ifdef USE_HRE
+//   feature_sns2 |= 0x00800000;  // xsns_43_hre.ino
+// #endif
+// //  feature_sns2 |= 0x01000000;
+// //  feature_sns2 |= 0x02000000;
+// //  feature_sns2 |= 0x04000000;
+// //  feature_sns2 |= 0x08000000;
+// //  feature_sns2 |= 0x10000000;
+// //  feature_sns2 |= 0x20000000;
+// //  feature_sns2 |= 0x40000000;
+// //  feature_sns2 |= 0x80000000;
+
+// }
+// #endif
+
+
+
+
+
+/******
+ * 
+ * 
+ * 
+ * 
+ * 
+ * parsing.ino
+ * 
+ * 
+ * 
+ */
+
+/*
+  Parsing.cpp - HTTP request parsing.
+
+  Copyright (c) 2015 Ivan Grokhotkov. All rights reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  Modified 8 May 2015 by Hristo Gochkov (proper post and file upload handling)
+*/
+
+#ifdef ESP8266
+
+// Use patched Parsing.cpp to fix ALEXA parsing issue in v2.4.2
+#include <core_version.h>
+#if defined(ARDUINO_ESP8266_RELEASE_2_4_2)
+#warning **** Tasmota is using v2.4.2 patched Parsing.cpp as planned ****
+
+#include <Arduino.h>
+#include "WiFiServer.h"
+#include "WiFiClient.h"
+#include "ESP8266WebServer.h"
+#include "detail/mimetable.h"
+
+//#define DEBUG_ESP_HTTP_SERVER
+#ifdef DEBUG_ESP_PORT
+#define DEBUG_OUTPUT DEBUG_ESP_PORT
+#else
+#define DEBUG_OUTPUT Serial
+#endif
+
+static const char Content_Type[] PROGMEM = "Content-Type";
+static const char filename[] PROGMEM = "filename";
+
+static char* readBytesWithTimeout(WiFiClient& client, size_t maxLength, size_t& dataLength, int timeout_ms)
+{
+  char *buf = nullptr;
+  dataLength = 0;
+  while (dataLength < maxLength) {
+    int tries = timeout_ms;
+    size_t newLength;
+    while (!(newLength = client.available()) && tries--) delay(1);
+    if (!newLength) {
+      break;
+    }
+    if (!buf) {
+      buf = (char *) malloc(newLength + 1);
+      if (!buf) {
+        return nullptr;
+      }
+    }
+    else {
+      char* newBuf = (char *) realloc(buf, dataLength + newLength + 1);
+      if (!newBuf) {
+        free(buf);
+        return nullptr;
+      }
+      buf = newBuf;
+    }
+    client.readBytes(buf + dataLength, newLength);
+    dataLength += newLength;
+    buf[dataLength] = '\0';
+  }
+  return buf;
+}
+
+bool ESP8266WebServer::_parseRequest(WiFiClient& client) {
+  // Read the first line of HTTP request
+  String req = client.readStringUntil('\r');
+  client.readStringUntil('\n');
+  //reset header value
+  for (int i = 0; i < _headerKeysCount; ++i) {
+    _currentHeaders[i].value =String();
+   }
+
+  // First line of HTTP request looks like "GET /path HTTP/1.1"
+  // Retrieve the "/path" part by finding the spaces
+  int addr_start = req.indexOf(' ');
+  int addr_end = req.indexOf(' ', addr_start + 1);
+  if (addr_start == -1 || addr_end == -1) {
+#ifdef DEBUG_ESP_HTTP_SERVER
+    DEBUG_OUTPUT.print("Invalid request: ");
+    DEBUG_OUTPUT.println(req);
+#endif
+    return false;
+  }
+
+  String methodStr = req.substring(0, addr_start);
+  String url = req.substring(addr_start + 1, addr_end);
+  String versionEnd = req.substring(addr_end + 8);
+  _currentVersion = atoi(versionEnd.c_str());
+  String searchStr = "";
+  int hasSearch = url.indexOf('?');
+  if (hasSearch != -1){
+    searchStr = url.substring(hasSearch + 1);
+    url = url.substring(0, hasSearch);
+  }
+  _currentUri = url;
+  _chunked = false;
+
+  HTTPMethod method = HTTP_GET;
+  if (methodStr == F("POST")) {
+    method = HTTP_POST;
+  } else if (methodStr == F("DELETE")) {
+    method = HTTP_DELETE;
+  } else if (methodStr == F("OPTIONS")) {
+    method = HTTP_OPTIONS;
+  } else if (methodStr == F("PUT")) {
+    method = HTTP_PUT;
+  } else if (methodStr == F("PATCH")) {
+    method = HTTP_PATCH;
+  }
+  _currentMethod = method;
+
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("method: ");
+  DEBUG_OUTPUT.print(methodStr);
+  DEBUG_OUTPUT.print(" url: ");
+  DEBUG_OUTPUT.print(url);
+  DEBUG_OUTPUT.print(" search: ");
+  DEBUG_OUTPUT.println(searchStr);
+#endif
+
+  //attach handler
+  RequestHandler* handler;
+  for (handler = _firstHandler; handler; handler = handler->next()) {
+    if (handler->canHandle(_currentMethod, _currentUri))
+      break;
+  }
+  _currentHandler = handler;
+
+  String formData;
+  // below is needed only when POST type request
+  if (method == HTTP_POST || method == HTTP_PUT || method == HTTP_PATCH || method == HTTP_DELETE){
+    String boundaryStr;
+    String headerName;
+    String headerValue;
+    bool isForm = false;
+    bool isEncoded = false;
+    uint32_t contentLength = 0;
+    //parse headers
+    while(1){
+      req = client.readStringUntil('\r');
+      client.readStringUntil('\n');
+      if (req == "") break;//no moar headers
+      int headerDiv = req.indexOf(':');
+      if (headerDiv == -1){
+        break;
+      }
+      headerName = req.substring(0, headerDiv);
+      headerValue = req.substring(headerDiv + 1);
+      headerValue.trim();
+       _collectHeader(headerName.c_str(),headerValue.c_str());
+
+      #ifdef DEBUG_ESP_HTTP_SERVER
+      DEBUG_OUTPUT.print("headerName: ");
+      DEBUG_OUTPUT.println(headerName);
+      DEBUG_OUTPUT.print("headerValue: ");
+      DEBUG_OUTPUT.println(headerValue);
+      #endif
+
+      if (headerName.equalsIgnoreCase(FPSTR(Content_Type))){
+        using namespace mime;
+        if (headerValue.startsWith(FPSTR(mimeTable[txt].mimeType))){
+          isForm = false;
+        } else if (headerValue.startsWith(F("application/x-www-form-urlencoded"))){
+          isForm = false;
+          isEncoded = true;
+        } else if (headerValue.startsWith(F("multipart/"))){
+          boundaryStr = headerValue.substring(headerValue.indexOf('=') + 1);
+          boundaryStr.replace("\"","");
+          isForm = true;
+        }
+      } else if (headerName.equalsIgnoreCase(F("Content-Length"))){
+        contentLength = headerValue.toInt();
+      } else if (headerName.equalsIgnoreCase(F("Host"))){
+        _hostHeader = headerValue;
+      }
+    }
+
+    if (!isForm){
+      size_t plainLength;
+      char* plainBuf = readBytesWithTimeout(client, contentLength, plainLength, HTTP_MAX_POST_WAIT);
+      if (plainLength < contentLength) {
+      	free(plainBuf);
+      	return false;
+      }
+      if (contentLength > 0) {
+        if(isEncoded){
+          //url encoded form
+          if (searchStr != "") searchStr += '&';
+          searchStr += plainBuf;
+        }
+        _parseArguments(searchStr);
+        if(!isEncoded||(0==_currentArgCount)){ // @20180124OF01: Workarround for Alexa Bug
+          //plain post json or other data
+          RequestArgument& arg = _currentArgs[_currentArgCount++];
+          arg.key = F("plain");
+          arg.value = String(plainBuf);
+        }
+
+  #ifdef DEBUG_ESP_HTTP_SERVER
+        DEBUG_OUTPUT.print("Plain: ");
+        DEBUG_OUTPUT.println(plainBuf);
+  #endif
+        free(plainBuf);
+      } else {
+        // No content - but we can still have arguments in the URL.
+        _parseArguments(searchStr);
+      }
+    }
+
+    if (isForm){
+      _parseArguments(searchStr);
+      if (!_parseForm(client, boundaryStr, contentLength)) {
+        return false;
+      }
+    }
+  } else {
+    String headerName;
+    String headerValue;
+    //parse headers
+    while(1){
+      req = client.readStringUntil('\r');
+      client.readStringUntil('\n');
+      if (req == "") break;//no moar headers
+      int headerDiv = req.indexOf(':');
+      if (headerDiv == -1){
+        break;
+      }
+      headerName = req.substring(0, headerDiv);
+      headerValue = req.substring(headerDiv + 2);
+      _collectHeader(headerName.c_str(),headerValue.c_str());
+
+	  #ifdef DEBUG_ESP_HTTP_SERVER
+	  DEBUG_OUTPUT.print("headerName: ");
+	  DEBUG_OUTPUT.println(headerName);
+	  DEBUG_OUTPUT.print("headerValue: ");
+	  DEBUG_OUTPUT.println(headerValue);
+	  #endif
+
+	  if (headerName.equalsIgnoreCase("Host")){
+        _hostHeader = headerValue;
+      }
+    }
+    _parseArguments(searchStr);
+  }
+  client.flush();
+
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("Request: ");
+  DEBUG_OUTPUT.println(url);
+  DEBUG_OUTPUT.print(" Arguments: ");
+  DEBUG_OUTPUT.println(searchStr);
+#endif
+
+  return true;
+}
+
+bool ESP8266WebServer::_collectHeader(const char* headerName, const char* headerValue) {
+  for (int i = 0; i < _headerKeysCount; i++) {
+    if (_currentHeaders[i].key.equalsIgnoreCase(headerName)) {
+            _currentHeaders[i].value=headerValue;
+            return true;
+        }
+  }
+  return false;
+}
+
+void ESP8266WebServer::_parseArguments(String data) {
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("args: ");
+  DEBUG_OUTPUT.println(data);
+#endif
+  if (_currentArgs)
+    delete[] _currentArgs;
+  _currentArgs = 0;
+  if (data.length() == 0) {
+    _currentArgCount = 0;
+    _currentArgs = new RequestArgument[1];
+    return;
+  }
+  _currentArgCount = 1;
+
+  for (int i = 0; i < (int)data.length(); ) {
+    i = data.indexOf('&', i);
+    if (i == -1)
+      break;
+    ++i;
+    ++_currentArgCount;
+  }
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("args count: ");
+  DEBUG_OUTPUT.println(_currentArgCount);
+#endif
+
+  _currentArgs = new RequestArgument[_currentArgCount+1];
+  int pos = 0;
+  int iarg;
+  for (iarg = 0; iarg < _currentArgCount;) {
+    int equal_sign_index = data.indexOf('=', pos);
+    int next_arg_index = data.indexOf('&', pos);
+#ifdef DEBUG_ESP_HTTP_SERVER
+    DEBUG_OUTPUT.print("pos ");
+    DEBUG_OUTPUT.print(pos);
+    DEBUG_OUTPUT.print("=@ ");
+    DEBUG_OUTPUT.print(equal_sign_index);
+    DEBUG_OUTPUT.print(" &@ ");
+    DEBUG_OUTPUT.println(next_arg_index);
+#endif
+    if ((equal_sign_index == -1) || ((equal_sign_index > next_arg_index) && (next_arg_index != -1))) {
+#ifdef DEBUG_ESP_HTTP_SERVER
+      DEBUG_OUTPUT.print("arg missing value: ");
+      DEBUG_OUTPUT.println(iarg);
+#endif
+      if (next_arg_index == -1)
+        break;
+      pos = next_arg_index + 1;
+      continue;
+    }
+    RequestArgument& arg = _currentArgs[iarg];
+    arg.key = urlDecode(data.substring(pos, equal_sign_index));
+    arg.value = urlDecode(data.substring(equal_sign_index + 1, next_arg_index));
+#ifdef DEBUG_ESP_HTTP_SERVER
+    DEBUG_OUTPUT.print("arg ");
+    DEBUG_OUTPUT.print(iarg);
+    DEBUG_OUTPUT.print(" key: ");
+    DEBUG_OUTPUT.print(arg.key);
+    DEBUG_OUTPUT.print(" value: ");
+    DEBUG_OUTPUT.println(arg.value);
+#endif
+    ++iarg;
+    if (next_arg_index == -1)
+      break;
+    pos = next_arg_index + 1;
+  }
+  _currentArgCount = iarg;
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("args count: ");
+  DEBUG_OUTPUT.println(_currentArgCount);
+#endif
+
+}
+
+void ESP8266WebServer::_uploadWriteByte(uint8_t b){
+  if (_currentUpload->currentSize == HTTP_UPLOAD_BUFLEN){
+    if(_currentHandler && _currentHandler->canUpload(_currentUri))
+      _currentHandler->upload(*this, _currentUri, *_currentUpload);
+    _currentUpload->totalSize += _currentUpload->currentSize;
+    _currentUpload->currentSize = 0;
+  }
+  _currentUpload->buf[_currentUpload->currentSize++] = b;
+}
+
+uint8_t ESP8266WebServer::_uploadReadByte(WiFiClient& client){
+  int res = client.read();
+  if(res == -1){
+    while(!client.available() && client.connected())
+      yield();
+    res = client.read();
+  }
+  return (uint8_t)res;
+}
+
+bool ESP8266WebServer::_parseForm(WiFiClient& client, String boundary, uint32_t len){
+  (void) len;
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("Parse Form: Boundary: ");
+  DEBUG_OUTPUT.print(boundary);
+  DEBUG_OUTPUT.print(" Length: ");
+  DEBUG_OUTPUT.println(len);
+#endif
+  String line;
+  int retry = 0;
+  do {
+    line = client.readStringUntil('\r');
+    ++retry;
+  } while (line.length() == 0 && retry < 3);
+
+  client.readStringUntil('\n');
+  //start reading the form
+  if (line == ("--"+boundary)){
+    RequestArgument* postArgs = new RequestArgument[32];
+    int postArgsLen = 0;
+    while(1){
+      String argName;
+      String argValue;
+      String argType;
+      String argFilename;
+      bool argIsFile = false;
+
+      line = client.readStringUntil('\r');
+      client.readStringUntil('\n');
+      if (line.length() > 19 && line.substring(0, 19).equalsIgnoreCase(F("Content-Disposition"))){
+        int nameStart = line.indexOf('=');
+        if (nameStart != -1){
+          argName = line.substring(nameStart+2);
+          nameStart = argName.indexOf('=');
+          if (nameStart == -1){
+            argName = argName.substring(0, argName.length() - 1);
+          } else {
+            argFilename = argName.substring(nameStart+2, argName.length() - 1);
+            argName = argName.substring(0, argName.indexOf('"'));
+            argIsFile = true;
+#ifdef DEBUG_ESP_HTTP_SERVER
+            DEBUG_OUTPUT.print("PostArg FileName: ");
+            DEBUG_OUTPUT.println(argFilename);
+#endif
+            //use GET to set the filename if uploading using blob
+            if (argFilename == F("blob") && hasParam(FPSTR(filename)))
+              argFilename = arg(FPSTR(filename));
+          }
+#ifdef DEBUG_ESP_HTTP_SERVER
+          DEBUG_OUTPUT.print("PostArg Name: ");
+          DEBUG_OUTPUT.println(argName);
+#endif
+          using namespace mime;
+          argType = FPSTR(mimeTable[txt].mimeType);
+          line = client.readStringUntil('\r');
+          client.readStringUntil('\n');
+          if (line.length() > 12 && line.substring(0, 12).equalsIgnoreCase(FPSTR(Content_Type))){
+            argType = line.substring(line.indexOf(':')+2);
+            //skip next line
+            client.readStringUntil('\r');
+            client.readStringUntil('\n');
+          }
+#ifdef DEBUG_ESP_HTTP_SERVER
+          DEBUG_OUTPUT.print("PostArg Type: ");
+          DEBUG_OUTPUT.println(argType);
+#endif
+          if (!argIsFile){
+            while(1){
+              line = client.readStringUntil('\r');
+              client.readStringUntil('\n');
+              if (line.startsWith("--"+boundary)) break;
+              if (argValue.length() > 0) argValue += "\n";
+              argValue += line;
+            }
+#ifdef DEBUG_ESP_HTTP_SERVER
+            DEBUG_OUTPUT.print("PostArg Value: ");
+            DEBUG_OUTPUT.println(argValue);
+            DEBUG_OUTPUT.println();
+#endif
+
+            RequestArgument& arg = postArgs[postArgsLen++];
+            arg.key = argName;
+            arg.value = argValue;
+
+            if (line == ("--"+boundary+"--")){
+#ifdef DEBUG_ESP_HTTP_SERVER
+              DEBUG_OUTPUT.println("Done Parsing POST");
+#endif
+              break;
+            }
+          } else {
+            _currentUpload.reset(new HTTPUpload());
+            _currentUpload->status = UPLOAD_FILE_START;
+            _currentUpload->name = argName;
+            _currentUpload->filename = argFilename;
+            _currentUpload->type = argType;
+            _currentUpload->totalSize = 0;
+            _currentUpload->currentSize = 0;
+#ifdef DEBUG_ESP_HTTP_SERVER
+            DEBUG_OUTPUT.print("Start File: ");
+            DEBUG_OUTPUT.print(_currentUpload->filename);
+            DEBUG_OUTPUT.print(" Type: ");
+            DEBUG_OUTPUT.println(_currentUpload->type);
+#endif
+            if(_currentHandler && _currentHandler->canUpload(_currentUri))
+              _currentHandler->upload(*this, _currentUri, *_currentUpload);
+            _currentUpload->status = UPLOAD_FILE_WRITE;
+            uint8_t argByte = _uploadReadByte(client);
+readfile:
+            while(argByte != 0x0D){
+              if (!client.connected()) return _parseFormUploadAborted();
+              _uploadWriteByte(argByte);
+              argByte = _uploadReadByte(client);
+            }
+
+            argByte = _uploadReadByte(client);
+            if (!client.connected()) return _parseFormUploadAborted();
+            if (argByte == 0x0A){
+              argByte = _uploadReadByte(client);
+              if (!client.connected()) return _parseFormUploadAborted();
+              if ((char)argByte != '-'){
+                //continue reading the file
+                _uploadWriteByte(0x0D);
+                _uploadWriteByte(0x0A);
+                goto readfile;
+              } else {
+                argByte = _uploadReadByte(client);
+                if (!client.connected()) return _parseFormUploadAborted();
+                if ((char)argByte != '-'){
+                  //continue reading the file
+                  _uploadWriteByte(0x0D);
+                  _uploadWriteByte(0x0A);
+                  _uploadWriteByte((uint8_t)('-'));
+                  goto readfile;
+                }
+              }
+
+              uint8_t endBuf[boundary.length()];
+              client.readBytes(endBuf, boundary.length());
+
+              if (strstr((const char*)endBuf, boundary.c_str()) != nullptr){
+                if(_currentHandler && _currentHandler->canUpload(_currentUri))
+                  _currentHandler->upload(*this, _currentUri, *_currentUpload);
+                _currentUpload->totalSize += _currentUpload->currentSize;
+                _currentUpload->status = UPLOAD_FILE_END;
+                if(_currentHandler && _currentHandler->canUpload(_currentUri))
+                  _currentHandler->upload(*this, _currentUri, *_currentUpload);
+#ifdef DEBUG_ESP_HTTP_SERVER
+                DEBUG_OUTPUT.print("End File: ");
+                DEBUG_OUTPUT.print(_currentUpload->filename);
+                DEBUG_OUTPUT.print(" Type: ");
+                DEBUG_OUTPUT.print(_currentUpload->type);
+                DEBUG_OUTPUT.print(" Size: ");
+                DEBUG_OUTPUT.println(_currentUpload->totalSize);
+#endif
+                line = client.readStringUntil(0x0D);
+                client.readStringUntil(0x0A);
+                if (line == "--"){
+#ifdef DEBUG_ESP_HTTP_SERVER
+                  DEBUG_OUTPUT.println("Done Parsing POST");
+#endif
+                  break;
+                }
+                continue;
+              } else {
+                _uploadWriteByte(0x0D);
+                _uploadWriteByte(0x0A);
+                _uploadWriteByte((uint8_t)('-'));
+                _uploadWriteByte((uint8_t)('-'));
+                uint32_t i = 0;
+                while(i < boundary.length()){
+                  _uploadWriteByte(endBuf[i++]);
+                }
+                argByte = _uploadReadByte(client);
+                goto readfile;
+              }
+            } else {
+              _uploadWriteByte(0x0D);
+              goto readfile;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    int iarg;
+    int totalArgs = ((32 - postArgsLen) < _currentArgCount)?(32 - postArgsLen):_currentArgCount;
+    for (iarg = 0; iarg < totalArgs; iarg++){
+      RequestArgument& arg = postArgs[postArgsLen++];
+      arg.key = _currentArgs[iarg].key;
+      arg.value = _currentArgs[iarg].value;
+    }
+    if (_currentArgs) delete[] _currentArgs;
+    _currentArgs = new RequestArgument[postArgsLen];
+    for (iarg = 0; iarg < postArgsLen; iarg++){
+      RequestArgument& arg = _currentArgs[iarg];
+      arg.key = postArgs[iarg].key;
+      arg.value = postArgs[iarg].value;
+    }
+    _currentArgCount = iarg;
+    if (postArgs)
+      delete[] postArgs;
+    return true;
+  }
+#ifdef DEBUG_ESP_HTTP_SERVER
+  DEBUG_OUTPUT.print("Error: line: ");
+  DEBUG_OUTPUT.println(line);
+#endif
+  return false;
+}
+
+String ESP8266WebServer::urlDecode(const String& text)
+{
+	String decoded = "";
+	char temp[] = "0x00";
+	unsigned int len = text.length();
+	unsigned int i = 0;
+	while (i < len)
+	{
+		char decodedChar;
+		char encodedChar = text.charAt(i++);
+		if ((encodedChar == '%') && (i + 1 < len))
+		{
+			temp[2] = text.charAt(i++);
+			temp[3] = text.charAt(i++);
+
+			decodedChar = strtol(temp, NULL, 16);
+		}
+		else {
+			if (encodedChar == '+')
+			{
+				decodedChar = ' ';
+			}
+			else {
+				decodedChar = encodedChar;  // normal ascii char
+			}
+		}
+		decoded += decodedChar;
+	}
+	return decoded;
+}
+
+bool ESP8266WebServer::_parseFormUploadAborted(){
+  _currentUpload->status = UPLOAD_FILE_ABORTED;
+  if(_currentHandler && _currentHandler->canUpload(_currentUri))
+    _currentHandler->upload(*this, _currentUri, *_currentUpload);
+  return false;
+}
+
+#endif  // ARDUINO_ESP8266_RELEASE
+
+
+#endif
+
+
+
+// char* GetTopic_P(char *stopic, uint8_t prefix, char *topic, const char* subtopic)
+// {
+//   /* prefix 0 = Cmnd
+//      prefix 1 = Stat
+//      prefix 2 = Tele
+//      prefix 4 = Cmnd fallback
+//      prefix 5 = Stat fallback
+//      prefix 6 = Tele fallback
+//   *
+//   char romram[CMDSZ];
+//   String fulltopic;
+
+//   snprintf_P(romram, sizeof(romram), subtopic);
+//   // if (fallback_topic_flag || (prefix > 3)) {
+//   //   prefix &= 3;
+//   //   fulltopic = FPSTR(kPrefixes[prefix]);
+//   //   fulltopic += F("/");
+//   //   fulltopic += mqtt_client;
+//   //   fulltopic += F("_fb");                    // cmnd/<mqttclient>_fb
+//   // } else {
+//   //   fulltopic = Settings.mqtt_fulltopic;
+//   //   if ((0 == prefix) && (-1 == fulltopic.indexOf(FPSTR(MQTT_TOKEN_PREFIX)))) {
+//   //     fulltopic += F("/");
+//   //     fulltopic += FPSTR(MQTT_TOKEN_PREFIX);  // Need prefix for commands to handle mqtt topic loops
+//   //   }
+//   //   for (uint8_t i = 0; i < 3; i++) {
+//   //     if ('\0' == Settings.mqtt_prefix[i][0]) {
+//   //       snprintf_P(Settings.mqtt_prefix[i], sizeof(Settings.mqtt_prefix[i]), kPrefixes[i]);
+//   //     }
+//   //   }
+//   //   fulltopic.replace(FPSTR(MQTT_TOKEN_PREFIX), Settings.mqtt_prefix[prefix]);
+//   //   fulltopic.replace(FPSTR(MQTT_TOKEN_TOPIC), topic);
+//   //   fulltopic.replace(F("%hostname%-12345"), my_hostname);
+//   //   String token_id = WiFi.macAddress();
+//   //   token_id.replace(":", "");
+//   //   fulltopic.replace(F("%id%"), token_id);
+//   // }
+//   // fulltopic.replace(F("#"), "");
+//   // fulltopic.replace(F("//"), "/");
+//   // if (!fulltopic.endsWith("/")) fulltopic += "/";
+//   // snprintf_P(stopic, TOPSZ, PSTR("%s%s"), fulltopic.c_str(), romram);
+//   // return stopic;
+// }
+
+// char* GetFallbackTopic_P(char *stopic, uint8_t prefix, const char* subtopic)
+// {
+//   return GetTopic_P(stopic, prefix +4, nullptr, subtopic);
+// }
+
+
+// My hardware_status?
+char* mSupport::GetStateText(uint8_t state)
+{
+  if (state > 3) { state = 1; }
+  return 0;//pCONT_set->Settings.state_text[state];
+}
+
+// /********************************************************************************************
+
+
+
+
+
+
+
+
+void mSupport::UpdateLedPowerAll()
+{
+	for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
+		SetLedPowerIdx(i, bitRead(pCONT_set->led_power, i));
+	}
+}
+
+void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
+{
+  if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
+    if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
+      led = 1;
+    }
+  }
+  if (pCONT_pins->PinUsed(GPIO_LED1_ID, led)) {
+    uint32_t mask = 1 << led;
+    if (state) {
+      state = 1;
+      pCONT_set->led_power |= mask;
+    } else {
+      pCONT_set->led_power &= (0xFF ^ mask);
+    }
+    uint16_t pwm = 0;
+    if (bitRead(pCONT_set->Settings.ledpwm_mask, led)) {
+// #ifdef USE_LIGHT
+//       pwm = changeUIntScale(ledGamma10(state ? Settings.ledpwm_on : Settings.ledpwm_off), 0, 1023, 0, Settings.pwm_range); // gamma corrected
+// #else //USE_LIGHT
+      pwm = changeUIntScale((uint16_t)(state ? pCONT_set->Settings.ledpwm_on : pCONT_set->Settings.ledpwm_off), 0, 255, 0, pCONT_set->Settings.pwm_range); // linear
+// #endif //USE_LIGHT
+      analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->led_inverted, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
+    } else {
+      pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
+    }
+  }
+#ifdef USE_BUZZER
+  if (led == 0) {
+    BuzzerSetStateToLed(state);
+  }
+#endif // USE_BUZZER
+}
+
+void mSupport::SetLedPower(uint32_t state)
+{
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
+  if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
+    SetLedPowerIdx(0, state);
+  } else {
+    power_t mask = 1;
+    for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {  // Map leds to power
+      bool tstate = (pCONT_set->power & mask);
+      SetLedPowerIdx(i, tstate);
+      mask <<= 1;
+    }
+  }
+}
+
+void mSupport::SetLedPowerAll(uint32_t state)
+{
+  for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
+    SetLedPowerIdx(i, state);
+  }
+}
+
+void mSupport::SetLedLink(uint32_t state)
+{
+  AddLog_P(LOG_LEVEL_TEST,PSTR("SetLedLink(%d)"),state);
+
+  uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
+  uint32_t led_inv = pCONT_set->ledlnk_inverted;
+  if (99 == led_pin) {                    // Legacy - LED1 is status
+    SetLedPowerIdx(0, state);
+  }
+  else if (led_pin < 99) {
+    if (state) { state = 1; }
+    digitalWrite(led_pin, (led_inv) ? !state : state);
+  }
+#ifdef USE_BUZZER
+  BuzzerSetStateToLed(state);
+#endif // USE_BUZZER
+}
+
+
+
+
+int mSupport::ResponseJsonEnd(void)
+{
+  return ResponseAppend_P(PSTR("}"));
+}
+
+int mSupport::ResponseJsonEndEnd(void)
+{
+  return ResponseAppend_P(PSTR("}}"));
+}
+
+
+
+// void MqttShowPWMState(void)
+// {
+//   // ResponseAppend_P(PSTR("\"" D_JSON_PWM "\":{"));
+//   // bool first = true;
+//   // for (uint8_t i = 0; i < MAX_PWMS; i++) {
+//   //   if (pin[GPIO_PWM1 + i] < 99) {
+//   //     ResponseAppend_P(PSTR("%s\"" D_JSON_PWM "%d\":%d"), first ? "" : ",", i+1, Settings.pwm_value[i]);
+//   //     first = false;
+//   //   }
+//   // }
+//   // ResponseAppend_P(PSTR("}"));
+// }
+
+// void MqttShowState(void)
+// {
+//   char stemp1[33];
+
+//  // ResponseAppend_P(PSTR("{\"" D_JSON_TIME "\":\"%s\",\"" D_JSON_UPTIME "\":\"%s\""), GetDateAndTime(DT_LOCAL).c_str(), GetUptime().c_str());
+
+// // #ifdef USE_ADC_VCC
+// //   dtostrfd((double)ESP.getVcc()/1000, 3, stemp1);
+// //   ResponseAppend_P(PSTR(",\"" D_JSON_VCC "\":%s"), stemp1);
+// // #endif
+
+//   // ResponseAppend_P(PSTR(",\"SleepMode\":\"%s\",\"Sleep\":%u,\"LoadAvg\":%u"),
+//   //   GetTextIndexed_P(stemp1, sizeof(stemp1), Settings.flag_network_phaseout.sleep_normal, kSleepMode), sleep, loop_load_avg);
+
+//   // for (uint8_t i = 0; i < devices_present; i++) {
+//   //   // if (i == light_device -1) {
+//   //   //   //LightState(1);
+//   //   // } else {
+//   //    // ResponseAppend_P(PSTR(",\"%s\":\"%s\""), GetPowerDevice(stemp1, i +1, sizeof(stemp1), Settings.flag_system_phaseout.device_index_enable), GetStateText(bitRead(power, i)));
+//   //     // if (SONOFF_IFAN02 == my_module_type) {
+//   //     //   ResponseAppend_P(PSTR(",\"" D_JSON_FANSPEED "\":%d"), GetFanspeed());
+//   //     //   break;
+//   //     // }
+//   //   //}
+//   // }
+
+//   // if (pwm_present) {
+//   //   ResponseAppend_P(PSTR(","));
+//   //   MqttShowPWMState();
+//   // }
+
+//   // ResponseAppend_P(PSTR(",\"" D_JSON_WIFI "\":{\"" D_JSON_AP "\":%d,\"" D_JSON_SSID "\":\"%s\",\"" D_JSON_BSSID "\":\"%s\",\"" D_JSON_CHANNEL "\":%d,\"" D_JSON_RSSI "\":%d,\"" D_JSON_LINK_COUNT "\":%d,\"" D_JSON_DOWNTIME "\":\"%s\"}}"),
+//   //   Settings.sta_active +1, Settings.sta_ssid[Settings.sta_active], WiFi.BSSIDstr().c_str(), WiFi.channel(), WifiGetRssiAsQuality(WiFi.RSSI()), WifiLinkCount(), WifiDowntime().c_str());
+// }
+
+// void MqttPublishTeleState(void)
+// {
+//   // data_buffer2.payload.ctr[0] = '\0';
+//   // MqttShowState();
+//   // MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
+// }
+
+// // bool MqttShowSensor(void)
+// // {
+// //   ResponseAppend_P(PSTR("{\"" D_JSON_TIME "\":\"%s\""), GetDateAndTime(DT_LOCAL).c_str());
+// //   int json_data_start = strlen(data_buffer2.payload.ctr);
+// //   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
+// // #ifdef USE_TM1638
+// //     if ((pin[GPIO_SWT1 +i] < 99) || ((pin[GPIO_TM16CLK] < 99) && (pin[GPIO_TM16DIO] < 99) && (pin[GPIO_TM16STB] < 99))) {
+// // #else
+// //     if (pin[GPIO_SWT1 +i] < 99) {
+// // #endif  // USE_TM1638
+// //       bool swm = ((FOLLOW_INV == Settings.switchmode[i]) || (PUSHBUTTON_INV == Settings.switchmode[i]) || (PUSHBUTTONHOLD_INV == Settings.switchmode[i]));
+// //       ResponseAppend_P(PSTR(",\"" D_JSON_SWITCH "%d\":\"%s\""), i +1, GetStateText(swm ^ SwitchLastState(i)));
+// //     }
+// //   }
+// //   //XsnsCall(FUNC_JSON_APPEND);
+// //   bool json_data_available = (strlen(data_buffer2.payload.ctr) - json_data_start);
+// //   if (strstr_P(data_buffer2.payload.ctr, PSTR(D_JSON_PRESSURE)) != nullptr) {
+// //     ResponseAppend_P(PSTR(",\"" D_JSON_PRESSURE_UNIT "\":\"%s\""), PressureUnit().c_str());
+// //   }
+// //   if (strstr_P(data_buffer2.payload.ctr, PSTR(D_JSON_TEMPERATURE)) != nullptr) {
+// //     ResponseAppend_P(PSTR(",\"" D_JSON_TEMPERATURE_UNIT "\":\"%c\""), TempUnit());
+// //   }
+// //   ResponseAppend_P(PSTR("}"));
+
+// //   if (json_data_available) { XdrvCall(FUNC_SHOW_SENSOR); }
+// //   return json_data_available;
+// // }
+
+
+
+// /*
+//   xdrv_99_debug.ino - debug support for Sonoff-Tasmota
+
+//   Copyright (C) 2019  Theo Arends
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// */
+
+// #ifdef ESP8266
+// //#define USE_DEBUG_DRIVER
+
+// #ifdef DEBUG_THEO
+// #ifndef USE_DEBUG_DRIVER
+// #define USE_DEBUG_DRIVER
+// #endif  // USE_DEBUG_DRIVER
+// #endif  // DEBUG_THEO
+
+// //#define USE_DEBUG_SETTING_NAMES
+
+// #ifdef USE_DEBUG_DRIVER
+// /*********************************************************************************************\
+//  * Virtual debugging support - Part1
+//  *
+//  * Needs file zzzz_debug.ino due to DEFINE processing
+// \*********************************************************************************************/
+
+// #define XDRV_99             99
+
+// #ifndef CPU_LOAD_CHECK
+// #define CPU_LOAD_CHECK      1                 // Seconds between each CPU_LOAD log
+// #endif
+
+// /*********************************************************************************************\
+//  * Debug commands
+// \*********************************************************************************************/
+
+// #define D_JSON_CFGDUMP   "CfgDump"
+// #define D_JSON_CFGPOKE   "CfgPoke"
+// #define D_JSON_CFGPEEK   "CfgPeek"
+// #define D_JSON_CFGSHOW   "CfgShow"
+// #define D_JSON_CFGXOR    "CfgXor"
+// #define D_JSON_CPUCHECK  "CpuChk"
+// #define D_JSON_EXCEPTION "Exception"
+// #define D_JSON_FREEMEM   "FreeMem"
+// #define D_JSON_RTCDUMP   "RtcDump"
+// #define D_JSON_HELP      "Help"
+// #define D_JSON_SETSENSOR "SetSensor"
+// #define D_JSON_FLASHMODE "FlashMode"
+
+// enum DebugCommands {
+//   CMND_CFGDUMP, CMND_CFGPEEK, CMND_CFGPOKE, CMND_CFGSHOW, CMND_CFGXOR,
+//   CMND_CPUCHECK, CMND_EXCEPTION, CMND_FREEMEM, CMND_RTCDUMP, CMND_SETSENSOR, CMND_FLASHMODE, CMND_HELP };
+// const char kDebugCommands[] PROGMEM =
+//   D_JSON_CFGDUMP "|" D_JSON_CFGPEEK "|" D_JSON_CFGPOKE "|" D_JSON_CFGSHOW "|" D_JSON_CFGXOR "|"
+//   D_JSON_CPUCHECK "|" D_JSON_EXCEPTION "|" D_JSON_FREEMEM "|" D_JSON_RTCDUMP "|" D_JSON_SETSENSOR "|" D_JSON_FLASHMODE "|" D_JSON_HELP;
+
+// uint32_t CPU_loops = 0;
+// uint32_t CPU_last_millis = 0;
+// uint32_t CPU_last_loop_time = 0;
+// uint8_t CPU_load_check = 0;
+// uint8_t CPU_show_freemem = 0;
+
+// /*******************************************************************************************/
+
+// #ifdef DEBUG_THEO
+// void ExceptionTest(uint8_t type)
+// {
+// /*
+// Exception (28):
+// epc1=0x4000bf64 epc2=0x00000000 epc3=0x00000000 excvaddr=0x00000007 depc=0x00000000
+
+// ctx: cont
+// sp: 3fff1f30 end: 3fff2840 offset: 01a0
+
+// >>>stack>>>
+// 3fff20d0:  202c3573 756f7247 2c302070 646e4920
+// 3fff20e0:  40236a6e 7954202c 45206570 00454358
+// 3fff20f0:  00000010 00000007 00000000 3fff2180
+// 3fff2100:  3fff2190 40107bfc 3fff3e4c 3fff22c0
+// 3fff2110:  40261934 000000f0 3fff22c0 401004d8
+// 3fff2120:  40238fcf 00000050 3fff2100 4021fc10
+// 3fff2130:  3fff32bc 4021680c 3ffeade1 4021ff7d
+// 3fff2140:  3fff2190 3fff2180 0000000c 7fffffff
+// 3fff2150:  00000019 00000000 00000000 3fff21c0
+// 3fff2160:  3fff23f3 3ffe8e08 00000000 4021ffb4
+// 3fff2170:  3fff2190 3fff2180 0000000c 40201118
+// 3fff2180:  3fff21c0 0000003c 3ffef840 00000007
+// 3fff2190:  00000000 00000000 00000000 40201128
+// 3fff21a0:  3fff23f3 000000f1 3fff23ec 4020fafb
+// 3fff21b0:  3fff23f3 3fff21c0 3fff21d0 3fff23f6
+// 3fff21c0:  00000000 3fff23fb 4022321b 00000000
+
+// Exception 28: LoadProhibited: A load referenced a page mapped with an attribute that does not permit loads
+// Decoding 14 results
+// 0x40236a6e: ets_vsnprintf at ?? line ?
+// 0x40107bfc: vsnprintf at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/libc_replacements.c line 387
+// 0x40261934: bignum_exptmod at ?? line ?
+// 0x401004d8: malloc at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266\umm_malloc/umm_malloc.c line 1664
+// 0x40238fcf: wifi_station_get_connect_status at ?? line ?
+// 0x4021fc10: operator new[](unsigned int) at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/abi.cpp line 57
+// 0x4021680c: ESP8266WiFiSTAClass::status() at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\libraries\ESP8266WiFi\src/ESP8266WiFiSTA.cpp line 569
+// 0x4021ff7d: vsnprintf_P(char*, unsigned int, char const*, __va_list_tag) at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/pgmspace.cpp line 146
+// 0x4021ffb4: snprintf_P(char*, unsigned int, char const*, ...) at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/pgmspace.cpp line 146
+// 0x40201118: atol at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/core_esp8266_noniso.c line 45
+// 0x40201128: atoi at C:\Data2\Arduino\arduino-1.8.1-esp-2.3.0\portable\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/core_esp8266_noniso.c line 45
+// 0x4020fafb: MqttDataHandler(char*, unsigned char*, unsigned int) at R:\Arduino\Work-ESP8266\Theo\sonoff\sonoff-4\sonoff/sonoff.ino line 679 (discriminator 1)
+// 0x4022321b: pp_attach at ?? line ?
+
+// 00:00:08 MQTT: tele/sonoff/INFO3 = {"Started":"Fatal exception:28 flag:2 (EXCEPTION) epc1:0x4000bf64 epc2:0x00000000 epc3:0x00000000 excvaddr:0x00000007 depc:0x00000000"}
+// */
+//   if (1 == type) {
+//     char svalue[10];
+//     snprintf_P(svalue, sizeof(svalue), PSTR("%s"), 7);  // Exception 28 as number in string (7 in excvaddr)
+//   }
+// /*
+// 14:50:52 osWatch: FreeRam 25896, rssi 68, last_run 0
+// 14:51:02 osWatch: FreeRam 25896, rssi 58, last_run 0
+// 14:51:03 CMND: exception 2
+// 14:51:12 osWatch: FreeRam 25360, rssi 60, last_run 8771
+// 14:51:22 osWatch: FreeRam 25360, rssi 62, last_run 18771
+// 14:51:32 osWatch: FreeRam 25360, rssi 62, last_run 28771
+// 14:51:42 osWatch: FreeRam 25360, rssi 62, last_run 38771
+// 14:51:42 osWatch: Warning, loop blocked. Restart now
+// */
+//   if (2 == type) {
+//     while(1) delay(1000);  // this will trigger the os watch
+//   }
+// }
+
+// #endif  // DEBUG_THEO
+
+// /*******************************************************************************************/
+
+// void CpuLoadLoop(void)
+// {
+//   CPU_last_loop_time = millis();
+//   if (CPU_load_check && CPU_last_millis) {
+//     CPU_loops ++;
+//     if ((CPU_last_millis + (CPU_load_check *1000)) <= CPU_last_loop_time) {
+// #if defined(F_CPU) && (F_CPU == 160000000L)
+//       int CPU_load = 100 - ( (CPU_loops*(1 + 30*sleep)) / (CPU_load_check *800) );
+//       CPU_loops = CPU_loops / CPU_load_check;
+//       AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, CPU %d%%(160MHz), Loops/sec %d"), ESP.getFreeHeap(), CPU_load, CPU_loops);
+// #else
+//       int CPU_load = 100 - ( (CPU_loops*(1 + 30*sleep)) / (CPU_load_check *400) );
+//       CPU_loops = CPU_loops / CPU_load_check;
+//       AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, CPU %d%%(80MHz), Loops/sec %d"), ESP.getFreeHeap(), CPU_load, CPU_loops);
+// #endif
+//       CPU_last_millis = CPU_last_loop_time;
+//       CPU_loops = 0;
+//     }
+//   }
+// }
+
+// /*******************************************************************************************/
+
+// #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1)
+// // All version before core 2.4.2
+// // https://github.com/esp8266/Arduino/issues/2557
+
+// extern "C" {
+// #include <cont.h>
+//   extern cont_t g_cont;
+// }
+
+// void DebugFreeMem(void)
+// {
+//   register uint32_t *sp asm("a1");
+
+//  AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d, UnmodifiedStack %d"), ESP.getFreeHeap(), 4 * (sp - g_cont.stack), cont_get_free_stack(&g_cont));//, XdrvMailbox.data);
+//   // AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d (%s)"), ESP.getFreeHeap(), 4 * (sp - g_cont.stack), XdrvMailbox.data);
+// }
+
+// #else
+// // All version from core 2.4.2
+// // https://github.com/esp8266/Arduino/pull/5018
+// // https://github.com/esp8266/Arduino/pull/4553
+
+extern "C" {
+#include <cont.h>
+  extern cont_t* g_pcont;
+}
+
+void mSupport::DebugFreeMem(void)
+{
+  //https://www.esp8266.com/viewtopic.php?p=69937
+  //https://i.stack.imgur.com/waoHN.gif
+  register uint32_t *sp asm("a1");
+
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d"), 
+      ESP.getFreeHeap(), 4 * (sp - g_pcont->stack));
+}
+
+// #endif  // ARDUINO_ESP8266_RELEASE_2_x_x
+
+
+
+// void mSupport::WDT_Begin(){}
+//   // Configure WDT
+//   #ifdef ESP32
+//     timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
+//     timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
+//     timerAlarmWrite(timerwdt, wdtTimeout * 1000, false); //set time in us
+//     timerAlarmEnable(timerwdt);                          //enable interrupt
+//     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+//   #endif
+//   #ifdef ESP32 // Get disabling
+//     timerAlarmDisable(timerwdt);                          //enable interrupt
+//     mwif.WifiConnectForced();
+//     timerWrite(timerwdt, 0); //reset timer (feed watchdog)
+//     timerAlarmEnable(timerwdt);                          //enable interrupt
+//   #endif
+// }
+
+// WDT_Reset()
+//   #ifdef ESP32
+//     timerWrite(timerwdt, 0);  //reset timer (feed watchdog)   ///move into settings with different functions for eahc hardware
+//   #endif // ESP32
+//   #ifdef ESP8266
+//     ESP.wdtFeed();            //reset timer (feed watchdog)
+//   #endif // ESP8266
+
+// /*******************************************************************************************/
+
+// void DebugRtcDump(char* parms)
+// {
+//   #define CFG_COLS 16
+
+//   uint16_t idx;
+//   uint16_t maxrow;
+//   uint16_t row;
+//   uint16_t col;
+//   char *p;
+
+//   // |<--SDK data (256 bytes)-->|<--User data (512 bytes)-->|
+//   // 000 - 0FF: SDK
+//   //  000 - 01B: SDK rst_info
+//   // 100 - 2FF: User
+//   //  280 - 283: Tasmota RtcReboot   (Offset 100 (x 4bytes) - sizeof(RTCRBT) (x 4bytes))
+//   //  290 - 2EB: Tasmota RtcSettings (Offset 100 (x 4bytes))
+
+//   uint8_t buffer[768];
+// //  ESP.rtcUserMemoryRead(0, (uint32_t*)&buffer, sizeof(buffer));
+//   system_rtc_mem_read(0, (uint32_t*)&buffer, sizeof(buffer));
+
+//   maxrow = ((sizeof(buffer)+CFG_COLS)/CFG_COLS);
+
+//   uint16_t srow = strtol(parms, &p, 16) / CFG_COLS;
+//   uint16_t mrow = strtol(p, &p, 10);
+
+// //  AddLog_P2(LOG_LEVEL_DEBUG, PSTR("Cnfg: Parms %s, Start row %d, rows %d"), parms, srow, mrow);
+
+//   if (0 == mrow) {  // Default only 8 lines
+//     mrow = 8;
+//   }
+//   if (srow > maxrow) {
+//     srow = maxrow - mrow;
+//   }
+//   if (mrow < (maxrow - srow)) {
+//     maxrow = srow + mrow;
+//   }
+
+//   for (row = srow; row < maxrow; row++) {
+//     idx = row * CFG_COLS;
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%03X:"), idx);
+//     for (col = 0; col < CFG_COLS; col++) {
+//       if (!(col%4)) {
+//         snprintf_P(log_data, sizeof(log_data), PSTR("%s "), log_data);
+//       }
+//       snprintf_P(log_data, sizeof(log_data), PSTR("%s %02X"), log_data, buffer[idx + col]);
+//     }
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s |"), log_data);
+//     for (col = 0; col < CFG_COLS; col++) {
+// //      if (!(col%4)) {
+// //        snprintf_P(log_data, sizeof(log_data), PSTR("%s "), log_data);
+// //      }
+//       snprintf_P(log_data, sizeof(log_data), PSTR("%s%c"), log_data, ((buffer[idx + col] > 0x20) && (buffer[idx + col] < 0x7F)) ? (char)buffer[idx + col] : ' ');
+//     }
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s|"), log_data);
+//     AddLogAddLog(LOG_LEVEL_INFO);
+//   }
+// }
+
+// /*******************************************************************************************/
+
+// void DebugCfgDump(char* parms)
+// {
+//   #define CFG_COLS 16
+
+//   uint16_t idx;
+//   uint16_t maxrow;
+//   uint16_t row;
+//   uint16_t col;
+//   char *p;
+
+//   uint8_t *buffer = (uint8_t *) &Settings;
+//   maxrow = ((sizeof(SYSCFG)+CFG_COLS)/CFG_COLS);
+
+//   uint16_t srow = strtol(parms, &p, 16) / CFG_COLS;
+//   uint16_t mrow = strtol(p, &p, 10);
+
+// //  AddLog_P2(LOG_LEVEL_DEBUG, PSTR("Cnfg: Parms %s, Start row %d, rows %d"), parms, srow, mrow);
+
+//   if (0 == mrow) {  // Default only 8 lines
+//     mrow = 8;
+//   }
+//   if (srow > maxrow) {
+//     srow = maxrow - mrow;
+//   }
+//   if (mrow < (maxrow - srow)) {
+//     maxrow = srow + mrow;
+//   }
+
+//   for (row = srow; row < maxrow; row++) {
+//     idx = row * CFG_COLS;
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%03X:"), idx);
+//     for (col = 0; col < CFG_COLS; col++) {
+//       if (!(col%4)) {
+//         snprintf_P(log_data, sizeof(log_data), PSTR("%s "), log_data);
+//       }
+//       snprintf_P(log_data, sizeof(log_data), PSTR("%s %02X"), log_data, buffer[idx + col]);
+//     }
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s |"), log_data);
+//     for (col = 0; col < CFG_COLS; col++) {
+// //      if (!(col%4)) {
+// //        snprintf_P(log_data, sizeof(log_data), PSTR("%s "), log_data);
+// //      }
+//       snprintf_P(log_data, sizeof(log_data), PSTR("%s%c"), log_data, ((buffer[idx + col] > 0x20) && (buffer[idx + col] < 0x7F)) ? (char)buffer[idx + col] : ' ');
+//     }
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s|"), log_data);
+//     AddLogAddLog(LOG_LEVEL_INFO);
+//     delay(1);
+//   }
+// }
+
+// void DebugCfgPeek(char* parms)
+// {
+//   char *p;
+
+//   uint16_t address = strtol(parms, &p, 16);
+//   if (address > sizeof(SYSCFG)) address = sizeof(SYSCFG) -4;
+//   address = (address >> 2) << 2;
+
+//   uint8_t *buffer = (uint8_t *) &Settings;
+//   uint8_t data8 = buffer[address];
+//   uint16_t data16 = (buffer[address +1] << 8) + buffer[address];
+//   uint32_t data32 = (buffer[address +3] << 24) + (buffer[address +2] << 16) + data16;
+
+//   snprintf_P(log_data, sizeof(log_data), PSTR("%03X:"), address);
+//   for (uint8_t i = 0; i < 4; i++) {
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s %02X"), log_data, buffer[address +i]);
+//   }
+//   snprintf_P(log_data, sizeof(log_data), PSTR("%s |"), log_data);
+//   for (uint8_t i = 0; i < 4; i++) {
+//     snprintf_P(log_data, sizeof(log_data), PSTR("%s%c"), log_data, ((buffer[address +i] > 0x20) && (buffer[address +i] < 0x7F)) ? (char)buffer[address +i] : ' ');
+//   }
+//   snprintf_P(log_data, sizeof(log_data), PSTR("%s| 0x%02X (%d), 0x%04X (%d), 0x%0LX (%lu)"), log_data, data8, data8, data16, data16, data32, data32);
+//   AddLogAddLog(LOG_LEVEL_INFO);
+// }
+
+// void DebugCfgPoke(char* parms)
+// {
+//   char *p;
+
+//   uint16_t address = strtol(parms, &p, 16);
+//   if (address > sizeof(SYSCFG)) address = sizeof(SYSCFG) -4;
+//   address = (address >> 2) << 2;
+
+//   uint32_t data = strtol(p, &p, 16);
+
+//   uint8_t *buffer = (uint8_t *) &Settings;
+//   uint32_t data32 = (buffer[address +3] << 24) + (buffer[address +2] << 16) + (buffer[address +1] << 8) + buffer[address];
+
+//   uint8_t *nbuffer = (uint8_t *) &data;
+//   for (uint8_t i = 0; i < 4; i++) { buffer[address +i] = nbuffer[+i]; }
+
+//   uint32_t ndata32 = (buffer[address +3] << 24) + (buffer[address +2] << 16) + (buffer[address +1] << 8) + buffer[address];
+
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: 0x%0LX (%lu) poked to 0x%0LX (%lu)"), address, data32, data32, ndata32, ndata32);
+// }
+
+// #ifdef USE_DEBUG_SETTING_NAMES
+// void DebugCfgShow(uint8_t more)
+// {
+//   uint8_t *SetAddr;
+//   SetAddr = (uint8_t *)&Settings;
+
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: Hostname (%d)         [%s]"), (uint8_t *)&Settings.hostname - SetAddr, sizeof(Settings.hostname)-1, Settings.hostname);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: SSids (%d)            [%s], [%s]"), (uint8_t *)&Settings.sta_ssid - SetAddr, sizeof(Settings.sta_ssid[0])-1, Settings.sta_ssid[0], Settings.sta_ssid[1]);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: Friendlynames (%d)    [%s], [%s], [%s], [%s]"), (uint8_t *)&Settings.system_name.friendly - SetAddr, sizeof(Settings.system_name.friendly[0])-1, Settings.system_name.friendly[0], Settings.system_name.friendly[1], Settings.system_name.friendly[2], Settings.system_name.friendly[3]);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: OTA Url (%d)          [%s]"), (uint8_t *)&Settings.ota_url - SetAddr, sizeof(Settings.ota_url)-1, Settings.ota_url);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: StateText (%d)        [%s], [%s], [%s], [%s]"), (uint8_t *)&Settings.state_text - SetAddr, sizeof(Settings.state_text[0])-1, Settings.state_text[0], Settings.state_text[1], Settings.state_text[2], Settings.state_text[3]);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: Syslog Host (%d)      [%s]"), (uint8_t *)&Settings.syslog_host - SetAddr, sizeof(Settings.syslog_host)-1, Settings.syslog_host);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: NTP Servers (%d)      [%s], [%s], [%s]"), (uint8_t *)&Settings.ntp_server - SetAddr, sizeof(Settings.ntp_server[0])-1, Settings.ntp_server[0], Settings.ntp_server[1], Settings.ntp_server[2]);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT Host (%d)        [%s]"), (uint8_t *)&Settings.mqtt_host - SetAddr, sizeof(Settings.mqtt_host)-1, Settings.mqtt_host);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT Client (%d)      [%s]"), (uint8_t *)&Settings.mqtt_client - SetAddr, sizeof(Settings.mqtt_client)-1, Settings.mqtt_client);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT User (%d)        [%s]"), (uint8_t *)&Settings.mqtt_user - SetAddr, sizeof(Settings.mqtt_user)-1, Settings.mqtt_user);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT FullTopic (%d)   [%s]"), (uint8_t *)&Settings.mqtt_fulltopic - SetAddr, sizeof(Settings.mqtt_fulltopic)-1, Settings.mqtt_fulltopic);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT Topic (%d)       [%s]"), (uint8_t *)&Settings.mqtt_topic - SetAddr, sizeof(Settings.mqtt_topic)-1, Settings.mqtt_topic);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT GroupTopic (%d)  [%s]"), (uint8_t *)&Settings.mqtt_grptopic - SetAddr, sizeof(Settings.mqtt_grptopic)-1, Settings.mqtt_grptopic);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT ButtonTopic (%d) [%s]"), (uint8_t *)&Settings.button_topic - SetAddr, sizeof(Settings.button_topic)-1, Settings.button_topic);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT SwitchTopic (%d) [%s]"), (uint8_t *)&Settings.switch_topic - SetAddr, sizeof(Settings.switch_topic)-1, Settings.switch_topic);
+//   AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT Prefixes (%d)    [%s], [%s], [%s]"), (uint8_t *)&Settings.mqtt_prefix - SetAddr, sizeof(Settings.mqtt_prefix[0])-1, Settings.mqtt_prefix[0], Settings.mqtt_prefix[1], Settings.mqtt_prefix[2]);
+//   if (17 == more) {
+//     AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: AP Passwords (%d)     [%s], [%s]"), (uint8_t *)&Settings.sta_pwd - SetAddr, sizeof(Settings.sta_pwd[0])-1, Settings.sta_pwd[0], Settings.sta_pwd[1]);
+//     AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: MQTT Password (%d)    [%s]"), (uint8_t *)&Settings.mqtt_pwd - SetAddr, sizeof(Settings.mqtt_pwd)-1, Settings.mqtt_pwd);
+//     AddLog_P2(LOG_LEVEL_INFO, PSTR("%03X: Web Password (%d)     [%s]"), (uint8_t *)&Settings.web_password - SetAddr, sizeof(Settings.web_password)-1, Settings.web_password);
+//   }
+// }
+// #endif  // USE_DEBUG_SETTING_NAMES
+
+// void SetFlashMode(uint8_t mode)
+// {
+//   uint8_t *_buffer;
+//   uint32_t address;
+
+//   address = 0;
+//   _buffer = new uint8_t[FLASH_SECTOR_SIZE];
+
+//   if (ESP.flashRead(address, (uint32_t*)_buffer, FLASH_SECTOR_SIZE)) {
+//     if (_buffer[2] != mode) {  // DOUT
+//       _buffer[2] = mode;
+//       if (ESP.flashEraseSector(address / FLASH_SECTOR_SIZE)) ESP.flashWrite(address, (uint32_t*)_buffer, FLASH_SECTOR_SIZE);
+//     }
+//   }
+//   delete[] _buffer;
+// }
+
+// /*******************************************************************************************/
+
+// bool DebugCommand(void)
+// {
+//   char command[CMDSZ];
+//   bool serviced = true;
+
+//   int command_code = GetCommandCode(command, sizeof(command), XdrvMailbox.topic, kDebugCommands);
+//   if (-1 == command_code) {
+//     serviced = false;  // Unknown command
+//   }
+//   else if (CMND_HELP == command_code) {
+//     AddLog_P(LOG_LEVEL_INFO, kDebugCommands);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+//   else if (CMND_RTCDUMP == command_code) {
+//     DebugRtcDump(XdrvMailbox.data);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+//   else if (CMND_CFGDUMP == command_code) {
+//     DebugCfgDump(XdrvMailbox.data);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+//   else if (CMND_CFGPEEK == command_code) {
+//     DebugCfgPeek(XdrvMailbox.data);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+//   else if (CMND_CFGPOKE == command_code) {
+//     DebugCfgPoke(XdrvMailbox.data);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+// #ifdef USE_DEBUG_SETTING_NAMES
+//   else if (CMND_CFGSHOW == command_code) {
+//     DebugCfgShow(XdrvMailbox.payload);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+// #endif  // USE_DEBUG_SETTING_NAMES
+// #ifdef USE_WEBSERVER
+//   else if (CMND_CFGXOR == command_code) {
+//     if (XdrvMailbox.data_len > 0) {
+//       config_xor_on_set = XdrvMailbox.payload;
+//     }
+//     Response_P(S_JSON_COMMAND_NVALUE, command, config_xor_on_set);
+//   }
+// #endif  // USE_WEBSERVER
+// #ifdef DEBUG_THEO
+//   else if (CMND_EXCEPTION == command_code) {
+//     if (XdrvMailbox.data_len > 0) ExceptionTest(XdrvMailbox.payload);
+//     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
+//   }
+// #endif  // DEBUG_THEO
+//   else if (CMND_CPUCHECK == command_code) {
+//     if (XdrvMailbox.data_len > 0) {
+//       CPU_load_check = XdrvMailbox.payload;
+//       CPU_last_millis = CPU_last_loop_time;
+//     }
+//     Response_P(S_JSON_COMMAND_NVALUE, command, CPU_load_check);
+//   }
+//   else if (CMND_FREEMEM == command_code) {
+//     if (XdrvMailbox.data_len > 0) {
+//       CPU_show_freemem = XdrvMailbox.payload;
+//     }
+//     Response_P(S_JSON_COMMAND_NVALUE, command, CPU_show_freemem);
+//   }
+//   else if ((CMND_SETSENSOR == command_code) && (XdrvMailbox.index < MAX_XSNS_DRIVERS)) {
+//     if ((XdrvMailbox.payload >= 0) && XsnsPresent(XdrvMailbox.index)) {
+//       bitWrite(Settings.sensors[XdrvMailbox.index / 32], XdrvMailbox.index % 32, XdrvMailbox.payload &1);
+//       if (1 == XdrvMailbox.payload) { restart_flag = 2; }  // To safely re-enable a sensor currently most sensor need to follow complete restart init cycle
+//     }
+//     Response_P(S_JSON_COMMAND_XVALUE, command, XsnsGetSensors().c_str());
+//   }
+//   else if (CMND_FLASHMODE == command_code) {
+//     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 3)) {
+//       SetFlashMode(XdrvMailbox.payload);
+//     }
+//     Response_P(S_JSON_COMMAND_NVALUE, command, ESP.getFlashChipMode());
+//   }
+//   else serviced = false;  // Unknown command
+
+//   return serviced;
+// }
+
+// /*********************************************************************************************\
+//  * Interface
+// \*********************************************************************************************/
+
+// bool Xdrv99(uint8_t function)
+// {
+//   bool result = false;
+
+//   switch (function) {
+//     case FUNC_LOOP:
+//       CpuLoadLoop();
+//       break;
+//     case FUNC_PRE_INIT:
+//       CPU_last_millis = millis();
+//       break;
+//     case FUNC_COMMAND:
+//       result = DebugCommand();
+//       break;
+//     case FUNC_FREE_MEM:
+//       if (CPU_show_freemem) { DebugFreeMem(); }
+//       break;
+//   }
+//   return result;
+// }
+
+// #endif  // USE_DEBUG_DRIVER
+// #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /*
+//   xdrv_interface.ino - Driver interface support for Sonoff-Tasmota
+
+//   Copyright (C) 2019  Theo Arends inspired by ESPEasy
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// */
+
+// #ifdef ESP8266
+// #ifdef XFUNC_PTR_IN_ROM
+// bool (* const xdrv_func_ptr[])(uint8_t) PROGMEM = {   // Driver Function Pointers
+// #else
+// bool (* const xdrv_func_ptr[])(uint8_t) = {   // Driver Function Pointers
+// #endif
+
+// #ifdef XDRV_01
+//   &Xdrv01,
+// #endif
+
+// #ifdef XDRV_02
+//   &Xdrv02,
+// #endif
+
+// #ifdef XDRV_03
+//   &Xdrv03,
+// #endif
+
+// #ifdef XDRV_04
+//   &Xdrv04,
+// #endif
+
+// #ifdef XDRV_05
+//   &Xdrv05,
+// #endif
+
+// #ifdef XDRV_06
+//   &Xdrv06,
+// #endif
+
+// #ifdef XDRV_07
+//   &Xdrv07,
+// #endif
+
+// #ifdef XDRV_08
+//   &Xdrv08,
+// #endif
+
+// #ifdef XDRV_09
+//   &Xdrv09,
+// #endif
+
+// #ifdef XDRV_10
+//   &Xdrv10,
+// #endif
+
+// #ifdef XDRV_11
+//   &Xdrv11,
+// #endif
+
+// #ifdef XDRV_12
+//   &Xdrv12,
+// #endif
+
+// #ifdef XDRV_13
+//   &Xdrv13,
+// #endif
+
+// #ifdef XDRV_14
+//   &Xdrv14,
+// #endif
+
+// #ifdef XDRV_15
+//   &Xdrv15,
+// #endif
+
+// #ifdef XDRV_16
+//   &Xdrv16,
+// #endif
+
+// #ifdef XDRV_17
+//   &Xdrv17,
+// #endif
+
+// #ifdef XDRV_18
+//   &Xdrv18,
+// #endif
+
+// #ifdef XDRV_19
+//   &Xdrv19,
+// #endif
+
+// #ifdef XDRV_20
+//   &Xdrv20,
+// #endif
+
+// #ifdef XDRV_21
+//   &Xdrv21,
+// #endif
+
+// #ifdef XDRV_22
+//   &Xdrv22,
+// #endif
+
+// #ifdef XDRV_23
+//   &Xdrv23,
+// #endif
+
+// #ifdef XDRV_24
+//   &Xdrv24,
+// #endif
+
+// #ifdef XDRV_25
+//   &Xdrv25,
+// #endif
+
+// #ifdef XDRV_26
+//   &Xdrv26,
+// #endif
+
+// #ifdef XDRV_27
+//   &Xdrv27,
+// #endif
+
+// #ifdef XDRV_28
+//   &Xdrv28,
+// #endif
+
+// #ifdef XDRV_29
+//   &Xdrv29,
+// #endif
+
+// #ifdef XDRV_30
+//   &Xdrv30,
+// #endif
+
+// #ifdef XDRV_31
+//   &Xdrv31,
+// #endif
+
+// #ifdef XDRV_32
+//   &Xdrv32,
+// #endif
+
+// // Optional user defined drivers in range 91 - 99
+
+// #ifdef XDRV_91
+//   &Xdrv91,
+// #endif
+
+// #ifdef XDRV_92
+//   &Xdrv92,
+// #endif
+
+// #ifdef XDRV_93
+//   &Xdrv93,
+// #endif
+
+// #ifdef XDRV_94
+//   &Xdrv94,
+// #endif
+
+// #ifdef XDRV_95
+//   &Xdrv95,
+// #endif
+
+// #ifdef XDRV_96
+//   &Xdrv96,
+// #endif
+
+// #ifdef XDRV_97
+//   &Xdrv97,
+// #endif
+
+// #ifdef XDRV_98
+//   &Xdrv98,
+// #endif
+
+// #ifdef XDRV_99
+//   &Xdrv99
+// #endif
+// };
+
+// const uint8_t xdrv_present = sizeof(xdrv_func_ptr) / sizeof(xdrv_func_ptr[0]);  // Number of drivers found
+
+// bool XdrvMqttData(char *topicBuf, uint16_t stopicBuf, char *dataBuf, uint16_t sdataBuf)
+// {
+//   XdrvMailbox.index = stopicBuf;
+//   XdrvMailbox.data_len = sdataBuf;
+//   XdrvMailbox.topic = topicBuf;
+//   XdrvMailbox.data = dataBuf;
+
+//   return XdrvCall(FUNC_MQTT_COMMAND);
+// }
+
+// bool XdrvRulesProcess(void)
+// {
+//   return XdrvCall(FUNC_RULES_PROCESS);
+// }
+
+// #ifdef USE_DEBUG_DRIVER
+// void ShowFreeMem(const char *where)
+// {
+//   char stemp[30];
+//   snprintf_P(stemp, sizeof(stemp), where);
+//   XdrvMailbox.data = stemp;
+//   XdrvCall(FUNC_FREE_MEM);
+// }
+// #endif
+
+// /*********************************************************************************************\
+//  * Function call to all xdrv
+// \*********************************************************************************************/
+
+// bool XdrvCall(uint8_t Function)
+// { 
+//   bool result = false;
+
+//   for (uint8_t x = 0; x < xdrv_present; x++) {
+//     // WifiAddDelayWhenDisconnected();
+//     result = xdrv_func_ptr[x](Function);
+
+//     if (result && ((FUNC_COMMAND == Function) ||
+//                    (FUNC_COMMAND_DRIVER == Function) ||
+//                    (FUNC_MQTT_COMMAND == Function) ||
+//                    (FUNC_RULES_PROCESS == Function) ||
+//                    (FUNC_BUTTON_PRESSED == Function) ||
+//                    (FUNC_SERIAL == Function) ||
+//                    (FUNC_MODULE_INIT == Function) ||
+//                    (FUNC_SET_CHANNELS == Function) ||
+//                    (FUNC_SET_DEVICE_POWER == Function)
+//                   )) {
+//       break;
+//     }
+//   }
+
+//   return result;
+// }
+// #endif
+
+
+//#ifdef ENABLE_CRASH_RECORDING
+
+/**
+ * Save crash information in RTC memory
+ * This function is called automatically if ESP8266 suffers an exception
+ * It should be kept quick / consise to be able to execute before hardware wdt may kick in
+ */
+extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack, uint32_t stack_end )
+{
+  uint32_t addr_written = 0;      // how many addresses have we already written in RTC
+  uint32_t value;                 // 4 bytes buffer to write to RTC
+
+  for (uint32_t i = stack; i < stack_end; i += 4) {
+    value = *((uint32_t*) i);     // load value from stack
+    if ((value >= 0x40000000) && (value < 0x40300000)) {  // keep only addresses in code area
+      ESP.rtcUserMemoryWrite(crash_rtc_offset + addr_written, (uint32_t*)&value, sizeof(value));
+      addr_written++;
+      if (addr_written >= crash_dump_max_len) { break; }  // we store only 31 addresses
+    }
+  }
+  value = crash_magic + addr_written;
+  ESP.rtcUserMemoryWrite(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+}
+
+// Generate a crash to test the crash recorder
+void mSupport::CmndCrash(void)
+{
+  volatile uint32_t dummy;
+  dummy = *((uint32_t*) 0x00000000);
+}
+
+// Do an infinite loop to trigger WDT watchdog
+void mSupport::CmndWDT(void)
+{
+  volatile uint32_t dummy = 0;
+  while (1) {
+    dummy++;
+  }
+}
+
+// This will trigger the os watch after OSWATCH_RESET_TIME (=120) seconds
+void mSupport::CmndBlockedLoop(void)
+{
+  while (1) {
+    delay(1000);
+  }
+}
+
+// Clear the RTC dump counter when we do a normal reboot, this avoids garbage data to stay in RTC
+void mSupport::CrashDumpClear(void)
+{
+  uint32_t value = 0;
+  ESP.rtcUserMemoryWrite(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+}
+
+/*********************************************************************************************\
+ * CmndCrashDump - dump the crash history - called by `Status 12`
+\*********************************************************************************************/
+
+bool mSupport::CrashFlag(void)
+{
+  return ((ResetReason() == REASON_EXCEPTION_RST) || (ResetReason() == REASON_SOFT_WDT_RST) || oswatch_blocked_loop);
+}
+
+void mSupport::CrashDump_AddJson(void)
+// void CrashDump(void)
+{
+  // // ResponseAppend_P(PSTR("{\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
+  // //   resetInfo.exccause,        // Exception Cause
+  // //   GetResetReason().c_str(),  // Reset Reason
+  // //   resetInfo.epc1,            // Exception Progam Counter
+  // //   resetInfo.epc2,            // Exception Progam Counter - High-Priority Interrupt 1
+  // //   resetInfo.epc3,            // Exception Progam Counter - High-Priority Interrupt 2
+  // //   resetInfo.excvaddr,        // Exception Virtual Address Register - Virtual address that caused last fetch, load, or store exception
+  // //   resetInfo.depc);           // Double Exception Program Counter
+
+  // pCONT_sup->WriteBuffer_P(PSTR("%s:%d"),"test",1);
+
+  // // uint32_t value;
+  // // ESP.rtcUserMemoryRead(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+  // // if (crash_magic == (value & 0xFFFFFF00)) {
+  // //   ResponseAppend_P(PSTR(",\"CallChain\":["));
+  // //   uint32_t count = value & 0x3F;
+  // //   for (uint32_t i = 0; i < count; i++) {
+  // //     ESP.rtcUserMemoryRead(crash_rtc_offset +i, (uint32_t*)&value, sizeof(value));
+  // //     if (i > 0) { ResponseAppend_P(PSTR(",")); }
+  // //     ResponseAppend_P(PSTR("\"%08x\""), value);
+  // //   }
+  // //   ResponseAppend_P(PSTR("]"));
+  // // }
+
+  // // ResponseJsonEnd();
+
+    char buffer[30];
+
+pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
+    resetInfo.exccause,        // Exception Cause
+    pCONT_sup->GetResetReason(buffer, sizeof(buffer)),  // Reset Reason
+    resetInfo.epc1,            // Exception Progam Counter
+    resetInfo.epc2,            // Exception Progam Counter - High-Priority Interrupt 1
+    resetInfo.epc3,            // Exception Progam Counter - High-Priority Interrupt 2
+    resetInfo.excvaddr,        // Exception Virtual Address Register - Virtual address that caused last fetch, load, or store exception
+    resetInfo.depc             // Double Exception Program Counter
+  );
+
+  uint32_t value;
+  ESP.rtcUserMemoryRead(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+  if (crash_magic == (value & 0xFFFFFF00)) {
+    pCONT_sup->WriteBuffer_P(PSTR(",\"CallChain\":["));
+    uint32_t count = value & 0x3F;
+    for (uint32_t i = 0; i < count; i++) {
+      ESP.rtcUserMemoryRead(crash_rtc_offset +i, (uint32_t*)&value, sizeof(value));
+      if (i > 0) { pCONT_sup->WriteBuffer_P(PSTR(",")); }
+      pCONT_sup->WriteBuffer_P(PSTR("\"%08x\""), value);
+    }
+    pCONT_sup->WriteBuffer_P(PSTR("]"));
+  }
+
+  
+}
+
+// #endif

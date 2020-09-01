@@ -1,0 +1,726 @@
+
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>DEVICENAME</title>
+    <style>
+        /* The snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+  visibility: hidden; /* Hidden by default. Visible on click */
+  min-width: 250px; /* Set a default minimum width */
+  margin-left: -125px; /* Divide value of min-width by 2 */
+  background-color: #333; /* Black background color */
+  color: #fff; /* White text color */
+  text-align: center; /* Centered text */
+  border-radius: 2px; /* Rounded borders */
+  padding: 16px; /* Padding */
+  position: fixed; /* Sit on top of the screen */
+  z-index: 1; /* Add a z-index if needed */
+  left: 50%; /* Center the snackbar */
+  bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+  visibility: visible; /* Show the snackbar */
+  /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+  However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+        div,fieldset,input,select{
+            padding:5px;
+            font-size:1em;
+        }
+        fieldset{
+            background:#000000;
+        }
+        p{
+            margin:0.5em 0;
+        }
+        input{
+            width:100%;
+            box-sizing:border-box;
+            -webkit-box-sizing:border-box;
+            -moz-box-sizing:border-box;
+            background:#000000;
+            color:#ffffff;
+        }
+        input[type=checkbox],input[type=radio]{
+            width:1em;
+            margin-right:6px;
+            vertical-align:-1px;
+        }
+        select{
+            width:100%;
+            background:#000000;
+            color:#ffffff;
+        }
+        textarea{
+            resize:none;
+            width:98%;
+            height:318px;
+            padding:5px;
+            overflow:auto;
+            background:#000000;
+            color:#ffffff;
+        }
+        body{
+            text-align:center;
+            font-family:verdana;
+            background:#000000;
+        }
+        td{
+            padding:0px;
+        }
+        button{
+            border:0;
+            border-radius:0.3rem;
+            background:#4d8d90;
+            color:#000000;
+            line-height:2.4rem;
+            font-size:1.2rem;
+            width:100%;
+            -webkit-transition-duration:0.4s;
+            transition-duration:0.4s;
+            cursor:pointer;
+        }
+        button:hover{
+            background:#31595b;
+        }
+        .bred{
+            background:#d43535;
+        }
+        .bred:hover{
+            background:#931f1f;
+        }
+        .bgrn{
+            background:#47c266;
+        }
+        .bgrn:hover{
+            background:#5aaf6f;
+        }
+        .bora{
+            background:#ec7d1f;
+        }
+        .bora:hover{
+            background:#7a4111;
+        }
+        .bform1{
+            width:33%;
+            line-height:1.7rem
+        }
+        a{
+            text-decoration:none;
+        }
+        .p{
+            float:left;
+            text-align:left;
+         }
+        .q{
+            float:right;
+            text-align:right;
+        }
+        .tb_con {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 0px;
+        }
+        .tb_gp {
+            width: 100%;
+            background: #222;
+            display: flex;
+            justify-content: space-between;
+            height: auto;
+        }
+        .tb_it {
+            color: #fff;
+            padding: 5px 10px;
+            position: relative;
+            font-size:1em
+        }
+        /* <!-- for lights --> */
+        .palette{
+            background:black;
+            height:30px;
+        }
+        .palette_title{
+            background:black;
+            height:30px;
+        }
+        .palette{
+            padding:0px;
+            display:inline-block;
+        }
+        .rgb_pal{
+            width:100%;
+            height:20px;
+        }
+        textarea{
+            resize:none;
+            width:98%;
+            height:318px;
+            padding:5px;
+            overflow:auto;
+            background:#1f1f1f;
+            color:#65c115;
+        }
+    </style>
+    <script>
+
+
+function ShowMessageToast(message) {
+  // Get the snackbar DIV
+  var x = document.getElementById("snackbar");
+
+  // Add the "show" class to DIV
+  x.className = "show";
+  x.innerHTML = message;
+
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
+
+
+        
+        // var json_url_list_object = {"/page_draw.json":-100,"/module_draw.json":-200,"/update_urls.json":-500}
+        // var json_url_list_object = {"http://192.168.1.180/draw.json":-1,"http://192.168.1.180/update_urls.json":100}
+
+        
+        var json_url_list_object = {"/base_page_fill.json":-100,"/web_top_bar.json":1000};
+
+        function TimeElapsed(t,e){
+            var n=new Date();
+            if(n-t>e){
+                return 1;
+            }
+            return 0;
+        }    
+        var t=new Date();
+        // var t_debug = new Date();
+        var tSaved_debug = new Date();
+        var tSaved=[];
+        var tf=0;
+        var fl=[];
+        var ps_count=0;
+        var tURLfetch;
+        //init_t();
+        function init_t(){
+            // for (var i=0;i<dfurls.length;i++){
+            //     tSaved[i] = t;fl[i]=1;
+            // }
+            console.log('json_url_list_object',Object.keys(json_url_list_object).length)
+
+            for (var i=0;i<Object.keys(json_url_list_object).length;i++){
+                tSaved[i] = t;fl[i]=1;
+            }
+        }
+        function init_urls_for_page(){
+
+            // var page_url_full = "http://192.168.1.1/";//window.location.href;
+            var page_url_full = window.location.href.replace(/\?/g,"").replace(/PAGE/g,"").replace(/\./g,"");
+
+            var page2 = page_url_full.split("http://");
+            console.log('page2',page2);
+            var page3 = page2[1].split("/");
+            console.log('page3',page3);            
+            var hostname = page3[0];
+            console.log('hostname',hostname);
+            var pagename = page3[1].split("/");
+            console.log('pagename',pagename);
+
+            var page_url_start = page_url_full.split("/");
+            console.log('page_url_start',page_url_start);
+            var page_url_start2 = page_url_start[2];
+            console.log('page_url_start2',page_url_start2);
+
+
+            if(pagename == ""){
+                console.log('pagename was root and NULL',pagename);                
+                json_url_list_object["/page_draw.json"] = -1;
+                // json_url_list_object["/module_draw.json"] = -100;
+                json_url_list_object["/update_urls.json"] = -200;
+            }else{
+                
+                json_url_list_object["/" + pagename + "/page_draw.json"] = -1;
+                // json_url_list_object["/" + pagename + "/module_draw.json"] = -100;
+                json_url_list_object["/" + pagename + "/update_urls.json"] = -200;
+            }
+
+
+            // "/rgb_colour_palette_editor + "/page_draw.json":-1,
+            // "/rgb_colour_palette_editor/update_urls.json":-200,
+
+
+
+            //append test
+            console.log('json_url_list_object2',json_url_list_object);
+
+
+        
+
+            
+
+
+        }
+        function execute_updated_urls(){
+            init_t();
+            URLfetch();       
+
+
+            //document.getElementsByClassName("container_6")[0].innerHTML = window.location.href;
+
+        }
+        //URLfetch();
+        function URLfetch(){
+            Object.keys(json_url_list_object).forEach(function(u,i){
+                
+                //console.log('forEach(function(u,i)',u,i)
+                var f=1,t=tSaved[i],r=json_url_list_object[u];
+
+                // if(TimeElapsed(tSaved_debug,1000)){ 
+                //   //  console.log('TimeElapsed(tSaved_debug,1000');
+                //         tSaved_debug=new Date();
+                // // console.log('json_url_list_object',json_url_list_object)
+                // // console.log('json_url_list_object',Object.keys(json_url_list_object).length)
+
+                        
+                // }
+
+                // console.log('forEach(function(u,i)=r,json_url_list_object',u,i,r,json_url_list_object[u])
+                
+                
+                if(r==0){ //console.log('r==0');
+                    f=0;
+                }
+                if((r>0)&&(fl[i]==1)){ //if failed, retry with backoff
+                    r=1000; //console.log('r=1000;');
+                }
+                if(r<0){ console.log('r<0');
+                    r*=-1;
+                }
+                
+                if(f){
+                    if(TimeElapsed(t,r)){ //console.log('TimeElapsed t,r',t,r);
+                        if(ps_count<4){
+                            ps_count++;
+                            var suc=fetchUwT(u);
+                            if((suc==1)||(tf==1)){
+                                fl[i]=0;
+                            }else{}
+                            if((json_url_list_object[u]<0)){ //console.log('json_url_list_object[u]<0');
+                                json_url_list_object[u]=0;
+                            }else{console.log('new Date()');
+                                tSaved[i]=new Date();
+                            }
+                        }
+                    }
+                }
+            });
+            clearTimeout(tURLfetch);
+            tURLfetch = setTimeout(URLfetch,1);
+        }
+        var controller = new AbortController();
+        var signal = controller.signal;
+        function fetchUwT(u){
+            new Promise((resolve,reject)=>{
+                let timer = setTimeout(()=>{
+                    reject(new Error('TO'));
+                    controller.abort();
+                    controller = new AbortController();
+                    signal = controller.signal;
+                    ps_count--;
+                    tf=0;
+                },3000);
+            fetch(u,{method:'get',signal:signal,}).then((r)=>{
+                console.log('u',u);
+                if(u.includes('.json')){
+                    //console.log('return r.json()',r.json());
+                    return r.json();
+                }else{
+                    //console.log('return r.text()',r.text());
+                    return r.text();
+                }
+            },err=>reject(err)).then((d)=>{
+                ps_count--;
+                console.log('d',d);
+                if(u.includes('.json')){
+                    console.log('Parse_JsonData',d);
+                    Parse_JsonData(d);
+                }else if(u.includes('.js')){
+                    Parse_AddScript(d);
+                }else if(u.includes('.css')){
+                    Parse_AddStyle(d);
+                }else{
+                    console.log('u UNKNOWN',u);
+                }
+                tf=1;
+            }).catch(function(err){tf=0;}).finally(
+                function(){
+                    clearTimeout(timer);
+                });
+            });
+            return tf;
+        }
+        
+        function ihr(x){
+            console.log('f ihr',x);
+            var result = x.replace(/{o1}/g,"<option value='")
+                    .replace(/{o2}/g,"</option>")
+                    .replace(/{f1}/g,"<font color='")
+                    .replace(/{f2}/g,"</font>")
+                    .replace(/{sc}/g,"'style='color:#")
+                    .replace(/{sw}/g,"<td style='width:")
+                    .replace(/{bc}/g,"><button class=")
+                    .replace(/{bc2}/g,"</button></td>")
+                    .replace(/{t}/g,"<table style='width:100%'>")
+                    .replace(/{t2}/g,"</table>")
+                    .replace(/{oc}/g,"'onclick='")
+                    .replace(/{dc}/g,"<div class=")
+                    .replace(/}1/g,"</td></tr><tr><th>")
+                    .replace(/}2/g,"</th><td>");
+            console.log('f ihr result',result);
+
+            return result;
+        }
+        
+        function Parse_JsonData(json){
+            try{
+
+                console.log('json',json);
+                var json_object_length = Object.keys(json).length;//json.length();
+                console.log('json_object_length',json_object_length);
+            
+                for(c in json){
+
+// for (var k = 0; k < json_object_length; k++) {
+// console.log('json.names()',json.names());
+// var c = json.names().getString(k);
+
+                //var c = json
+
+                console.log('c in json',c);
+                // console.log('json_object_length',json_object_length);
+                // console.log('json[c].length',json[c].length);
+                for(i=0;i<json[c].length;i++){
+                    console.log('i in json',i);
+                    var id=0; 
+                    // assumed as 0 when I dont want to pass an id
+                    if(json[c][i].hasOwnProperty('id')){
+                        id=json[c][i].id;
+                     }
+                     if(json[c][i].hasOwnProperty('ih')){
+                         document.getElementsByClassName(c)[id].innerHTML=json[c][i].ih;
+                     }
+                     if(json[c][i].hasOwnProperty('evl')){
+                         document.getElementById(c).value=json[c][i].evl;
+                     }
+                     if(json[c][i].hasOwnProperty('ihr')){
+                         
+                console.log('json[c][i].hasOwnProperty(ihr) in json',json[c][i].ihr);
+                         document.getElementsByClassName(c)[id].innerHTML=ihr(json[c][i].ihr);
+                         
+                console.log('document search',document.getElementsByClassName(c)[id].innerHTML);
+
+
+                    }
+                     if(json[c][i].hasOwnProperty('eihr')){
+                         document.getElementById(c).innerHTML=ihr(json[c][i].eihr);
+                     }
+                     if(json[c][i].hasOwnProperty('evl')){
+                         document.getElementById(c).value=json[c][i].evl;
+                         console.log('value',document.getElementById(c).value);
+                     }
+                     if(json[c][i].hasOwnProperty('bc')){
+                         document.getElementsByClassName(c)[id].style.backgroundColor=json[c][i].bc;
+                     }
+                     if(json[c][i].hasOwnProperty('fc')){
+                         document.getElementsByClassName(c)[id].style.color=json[c][i].fc;
+                     }
+                     if(json[c][i].hasOwnProperty('bclg')){
+                         var s='linear-gradient(90deg,';
+                         var l=json[c][i].bclg.length;
+                         for(j=0;j<l;j++){
+                             s+='#'+json[c][i].bclg[j];
+                             if(j<l-1){s+=','}
+                         }
+                         s+=')';
+                         document.getElementsByClassName(c)[id].style.background=s;
+                     }
+                     if(json[c][i].hasOwnProperty('bcbl')){
+                         var s='linear-gradient(90deg,';
+                         var l=json[c][i].bcbl.length;
+                         var ld,pos;
+                         for(j=0;j<l;j++){
+                             ld=json[c][i].bcbl[j];
+                             pos=(j+1)*100/l;
+                             s+='#'+ld+' 0,#'+ld+' '+pos+'%';
+                             if(j<l-1){
+                                 s+=','
+                             }
+                         }
+                         s+=')';
+                         document.getElementsByClassName(c)[id].style.background=s;
+                     }
+                     if(json[c][i].hasOwnProperty('function')){
+
+                        console.log('c==function, json[c][i]',json[c][i]);
+                        if(json[c][i].hasOwnProperty('Parse_AddScript')){
+                            console.log('Parse_AddScript');
+                            Parse_AddScript(json[c][i].Parse_AddScript);
+                        }
+                        if(json[c][i].hasOwnProperty('Parse_Urls')){
+                            console.log('Parse_Urls',json[c][i].Parse_Urls);
+                            Parse_Urls(json.function.Parse_Urls);
+                        }
+                        if(json[c][i].hasOwnProperty('Append_Parse_Urls')){
+                            console.log('Append_Parse_Urls',json[c][i].Append_Parse_Urls);
+                            Append_Parse_Urls(json.function.Append_Parse_Urls);
+                        }
+                        if(json[c][i].hasOwnProperty('SetTitle')){
+                            console.log('Parse_Urls',json[c][i].Parse_Urls);
+                            Parse_Urls(json.function.Parse_Urls);
+                            var newTitle = json.function.SetTitle;
+                            if (document.title != newTitle) {
+                                document.title = newTitle;
+                            }
+                            //$('meta[name="description"]').attr("content", newDescription);
+                        }
+                        
+                     }
+                }
+                 if(c=='function'){
+                     console.log('PHASE OUT c==function, json[c]',json[c]);
+                     if(json[c].hasOwnProperty('Parse_AddScript')){
+                         console.log('Parse_AddScript',json[c].Parse_AddScript);
+                         Parse_AddScript(json[c].Parse_AddScript);
+                     }
+                     if(json[c].hasOwnProperty('Parse_Urls')){
+                         console.log('Parse_Urls',json[c].Parse_Urls);
+                         Parse_Urls(json.function.Parse_Urls);
+                     }
+                     if(json[c].hasOwnProperty('Append_Parse_Urls')){
+                         console.log('Append_Parse_Urls',json[c].Append_Parse_Urls);
+                         Append_Parse_Urls(json.function.Append_Parse_Urls);
+                     }
+                     if(json[c].hasOwnProperty('SetTitle')){
+                          console.log('Parse_Urls',json[c].Parse_Urls);
+                          Parse_Urls(json.function.Parse_Urls);
+                         var newTitle = json.function.SetTitle;
+                         if (document.title != newTitle) {
+                             document.title = newTitle;
+                         }
+                         //$('meta[name="description"]').attr("content", newDescription);
+                     }
+                }
+            }
+
+
+            }catch(err) {
+                
+                ShowMessageToast(err.message);
+                // document.getElementsByClassName("container_1")[0].innerHTML = err.message;
+            }
+        }
+        function Parse_AddStyle(d){
+            var s=document.createElement('style');
+            s.innerHTML = d;
+            document.head.appendChild(s);
+        }
+        function Parse_AddScript(d){ //start of parse json
+            var s=document.createElement('script'); //s = script
+            s.innerHTML = d;
+            console.log(s);
+            document.head.appendChild(s);
+        }
+        function Parse_Urls(d){
+            console.log('Parse_Urls2',d);
+            var keys = Object.keys(d);
+            console.log( keys[ 0 ] );
+            var url_list_json_object = d;            
+            // console.log('get val 2', d[keys[0]] );
+
+            console.log('BEFORE',json_url_list_object);
+            for(url in d){
+                json_url_list_object[url] = d[url];
+            }
+            console.log('AFTER',json_url_list_object);
+
+            execute_updated_urls();
+        }
+        function Edit_Url_Speed(d){ //update via root_any? 
+            //Use top_bar to refresh page settings like refresh time
+            console.log('Parse_Urls2',d);
+            // var keys = Object.keys(d);
+            // console.log( keys[ 0 ] );
+            var url_list_json_object = d;            
+            // console.log('get val 2', d[keys[0]] );
+
+            console.log('BEFORE',json_url_list_object);
+            for(url in d){
+                json_url_list_object[url] = d[url];
+            }
+            console.log('AFTER',json_url_list_object);
+
+            execute_updated_urls();
+        }
+        function Append_Parse_Urls(d){
+
+            console.log('Append_Parse_Urls',d);
+            // var keys = Object.keys(d);
+            // console.log( keys[ 0 ] );
+            // var url_list_json_object = d;            
+            // console.log('get val 2', d[keys[0]] );
+            json_url_list_object = json_url_list_object + d;
+
+
+
+        }
+
+
+    </script>
+    <script>
+        var os1;
+        function send_select(u,f){
+            var x=new XMLHttpRequest();
+            x.onreadystatechange=function(){
+                if(this.readyState==4&&this.status==200){
+                    f(this);
+                }
+            };
+            x.open('GET',u,true);
+            x.send();
+        }
+        function x0(a){
+            os1=a.responseText;
+            console.log('os1',os1);
+        }
+        function send_value(id){
+            var p=document.getElementById(id).value;
+            la('&'+id+'='+p);
+        }
+        var x=null,lt,to,tp,pc='';
+        function eb(s){
+            return document.getElementById(s);
+        }
+        function wl(f){
+            window.addEventListener('load',f);
+        }
+        function qs(s){
+            return document.querySelector(s);
+        }
+        function start(p){
+            la(p);
+            init_urls_for_page();
+            execute_updated_urls();
+        }
+        function la(p){
+            var a=' ';
+            if(la.arguments.length==1){
+                a=p;
+                console.log('p',p);
+                clearTimeout(lt);
+            }
+            if(x!=null){
+                x.abort();
+            }
+            x=new XMLHttpRequest();
+            x.onreadystatechange=function(){
+                if(x.readyState==4&&x.status==200){
+                    var s=x.responseText.replace(/{t}/g,"<table style='width:100%'>")
+                                        .replace(/{s}/g,"<tr><th>")
+                                        .replace(/{m}/g,"</th><td>")
+                                        .replace(/{e}/g,"</td></tr>")
+                                        .replace(/{t2}/g,"</table>")
+                                        .replace(/{c}/g,"%'><div style='text-align:center;font-weight:");
+                    eb('l1').innerHTML=s;
+                }
+            };
+            x.open('GET','./?m=1'+a,true);
+            x.send();
+            lt=setTimeout(la,5000);
+        }
+        function lb(p){
+            la('&d='+p);
+        }
+        function lc(p){
+            la('&t='+p);
+        }
+        function lc2(v,i,p){
+            if(eb('s')){
+                if(v=='h'||v=='d'){
+                    var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
+                }
+            }
+            la('&'+v+i+'='+p);
+        }
+        function lc3(v,p){
+            if(eb('s')){
+                if(v=='h'||v=='d'){
+                    var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
+                }
+            }
+            la('&'+v+'='+p);
+        }
+        window.onload=start(0);
+    </script>
+</head>
+<body>
+    <div class="tb_con">
+        <div class="tb_gp">
+            <span class="tb_it">TIME</span>
+            <span class="tb_it">BUILD</span>
+            <span class="tb_it">NETWORK</span>
+        </div>
+    </div>
+    <div style="text-align:left;display:inline-block;color:#ffffff;min-width:340px;padding-top:30px">
+        <div style="text-align:center;">
+            <noscript>JavaScript Needed<br/></noscript>
+            <h2>
+                <div class="page_title">TITLE</div>
+            </h2>
+        </div>
+        <div id="l1" name="l1">
+            <table style="width:100%"></table>
+        </div>
+        <div class="container_1"></div>
+        <div class="container_2"></div>
+        <div class="container_3"></div>
+        <div class="container_4"></div>
+        <div class="container_5"></div>
+        <div class="container_6"></div>
+        <div class="container_7"></div>
+        <div id="snackbar">Some text some message..</div>
+        <div style="text-align:right;font-size:11px;">
+            <hr>
+            <a href="https://github.com/sparkplug23/HomeAutomationControlSystem" target="_blank" style="color:#ffffff;">Home Automation Control System (HACS) <span class="row_version_data">VERSION</span></a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,263 @@
+#ifndef _MSTREAMOUT_H
+#define _MSTREAMOUT_H 0.5
+
+#include <Arduino.h>
+#ifdef ESP32
+  #include <WiFi.h> //esp32
+#endif
+#ifdef ESP8266
+  #include <ESP8266WiFi.h>
+#endif
+
+#include <Arduino.h>
+#include <stdint.h>
+
+#ifdef USE_SOFTWARE_SERIAL_DEBUG
+  #include <SoftwareSerial.h>
+  #define SERIAL_DEBUG Serial
+#else
+  #define SERIAL_DEBUG Serial
+#endif
+
+
+// Can only be used when hardware serial is enabled
+#if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_LINE    SERIAL_DEBUG.printf("DEBUG: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_LINE   //nothing, no code
+#endif
+
+//For single test use, no ifdefs
+// #ifdef USE_DEBUG_LINE
+#if !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_LINE_HERE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+
+#else
+  #define DEBUG_LINE_HERE   //nothing, no code
+#endif
+
+
+
+#ifdef USE_DEBUG_LINE_LED
+  #define DEBUG_LINE_LED    pinMode(D4,OUTPUT);\
+                            digitalWrite(D4,LOW);\
+                            delay(500);\
+                            digitalWrite(D4,HIGH);\
+                            delay(500);\
+                            digitalWrite(D4,LOW);\
+                            delay(500);\
+                            digitalWrite(D4,HIGH);\
+                            delay(500);\
+                            digitalWrite(D4,LOW);\
+                            delay(500);\
+                            digitalWrite(D4,HIGH);\
+                            delay(500);\
+                            digitalWrite(D4,LOW);\
+                            delay(500);\
+                            digitalWrite(D4,HIGH);
+#else
+  #define DEBUG_LINE_LED   //nothing, no code
+#endif
+
+#include "2_CoreSystem/Time/mTime.h"
+class mTime;
+extern "C" {
+#include <cont.h>
+  extern cont_t* g_pcont;
+}
+#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+
+
+#include "2_CoreSystem/Languages/mLanguageDefault.h"
+#include "2_CoreSystem/Settings/mSettings.h"
+
+
+  #define D_LOG_LEVEL_NONE_SHORT_CTR            "NON"
+  #define D_LOG_LEVEL_ERROR_SHORT_CTR           "ERR"
+  #define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
+  #define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
+  #define D_LOG_LEVEL_INFO_SHORT_CTR            "INF"
+  #define D_LOG_LEVEL_DEBUG_SHORT_CTR           "DBG"
+  #define D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR      "DBM"
+  #define D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR  "DBL"
+  #define D_LOG_LEVEL_ALL_SHORT_CTR             "ALL"
+
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_NONE_SHORT_CTR)            D_LOG_LEVEL_NONE_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_ERROR_SHORT_CTR)           D_LOG_LEVEL_ERROR_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_SHORT_CTR)            D_LOG_LEVEL_INFO_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_SHORT_CTR)           D_LOG_LEVEL_DEBUG_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)      D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_ALL_SHORT_CTR)             D_LOG_LEVEL_ALL_SHORT_CTR;
+
+  #define D_LOG_LEVEL_NONE_LONG_CTR            "NON"
+  #define D_LOG_LEVEL_ERROR_LONG_CTR           "ERR"
+  #define D_LOG_LEVEL_WARN_LONG_CTR            "WRN"
+  #define D_LOG_LEVEL_TEST_LONG_CTR            "TST"
+  #define D_LOG_LEVEL_INFO_LONG_CTR            "INF"
+  #define D_LOG_LEVEL_DEBUG_LONG_CTR           "DBG"
+  #define D_LOG_LEVEL_DEBUG_MORE_LONG_CTR      "DBM"
+  #define D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR  "DBL"
+  #define D_LOG_LEVEL_ALL_LONG_CTR             "ALL"
+
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_NONE_LONG_CTR)            D_LOG_LEVEL_NONE_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_ERROR_LONG_CTR)           D_LOG_LEVEL_ERROR_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_WARN_LONG_CTR)            D_LOG_LEVEL_WARN_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_TEST_LONG_CTR)            D_LOG_LEVEL_TEST_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_LONG_CTR)            D_LOG_LEVEL_INFO_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LONG_CTR)           D_LOG_LEVEL_DEBUG_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)      D_LOG_LEVEL_DEBUG_MORE_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_ALL_LONG_CTR)             D_LOG_LEVEL_ALL_LONG_CTR;
+
+//https://eli.thegreenplace.net/2014/variadic-templates-in-c/
+
+void AddLog_P(uint8_t loglevel, PGM_P formatP, ...);
+void AddLog_P(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
+// void AddLog_P(PGM_P formatP, ...);
+void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...);
+int Response_mP(const char* format, ...);
+int ResponseAppend_mP(const char* format, ...);
+void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
+
+
+
+template<typename T>
+void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, T arr_len)
+{
+#ifndef DISABLE_SERIAL_LOGGING
+  SERIAL_DEBUG.printf("%s = ",name_ctr);
+
+  for(T index=0;index<arr_len;index++){
+    SERIAL_DEBUG.printf("%d,", arr[index]);
+  }
+  SERIAL_DEBUG.printf("\n\r");
+  #endif
+
+}
+
+template<typename T>
+void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, T arr_len)
+{
+  T ch;
+  #ifndef DISABLE_SERIAL_LOGGING
+  SERIAL_DEBUG.printf("%S = ",name_ctr);
+  for(T index=0;index<arr_len;index++){
+    ch = pgm_read_byte(arr + index);
+    SERIAL_DEBUG.printf("%d,", ch);
+  }
+  SERIAL_DEBUG.printf("\n\r");
+  #endif
+}
+
+
+template<typename T>
+void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const char* name_ctr, T* arr, T arr_len)//}, uint8_t fWithIndex = 0, uint8_t fVertical = 0)
+{
+  if(abs(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
+    AddLog_Array(loglevel,name_ctr,arr,arr_len);
+  }
+}
+
+
+
+// #define TEST_SINGLETON
+
+#ifdef TEST_SINGLETON
+// mLogging* mLogging::mso3 = nullptr;
+#endif
+
+class mLogging{
+public:
+    mLogging(){}; // Class constructor
+    // mLogging(HardwareSerial* hs);
+    void init(void);
+    int8_t Tasker(uint8_t function);
+
+    // template<typename T>
+    // void Debug_Printf(T format, )
+
+    enum DEBUG_OUTPUT_IDS{
+      DEBUG_OUTPUT_HARDWARE_ID=0,
+      DEBUG_OUTPUT_SOFTWARE_ID
+    };
+
+     
+    #ifdef USE_SOFTWARE_SERIAL_DEBUG
+      uint8_t fDebugOutputMode = DEBUG_OUTPUT_SOFTWARE_ID;
+    #else
+      uint8_t fDebugOutputMode = DEBUG_OUTPUT_HARDWARE_ID;
+    #endif
+
+     
+    #ifdef DISABLE_SERIAL_LOGGING
+      uint8_t fDebugSerialMode = 1;
+    #else
+      uint8_t fDebugSerialMode = 0;
+    #endif
+    //mode to include
+    // OFF, ON, TIMED_10_MINUTES_FROM_BOOT, TIMED_MINUTES_FROM_USER_REQUEST
+
+
+    #ifdef TEST_SINGLETON
+    uint8_t test_counter = 0;
+    static mLogging* mso3;
+
+    static mLogging *getInstance() {
+      if (!mso3)
+      mso3 = new mLogging;
+      return mso3;
+    }
+
+    #endif
+
+    
+    // HardwareSerial* hs;
+
+    enum LoggingLevels {
+      LOG_LEVEL_NONE, 
+      LOG_LEVEL_ERROR, 
+      LOG_LEVEL_WARN, 
+      LOG_LEVEL_TEST, // New level with elevated privilege - during code development use only
+      LOG_LEVEL_INFO, 
+      LOG_LEVEL_DEBUG, 
+      LOG_LEVEL_DEBUG_MORE, 
+      LOG_LEVEL_DEBUG_LOWLEVEL, 
+      LOG_LEVEL_ALL
+    };
+ 
+    void GetLog(uint8_t idx, char** entry_pp, size_t* len_p);
+    void SetSeriallog(uint8_t loglevel);
+    void Syslog(void);
+    void AddLogAddLog(uint8_t loglevel);
+    void AddLog_P(uint8_t loglevel, const char *formatP);
+    void AddLog_P(uint8_t loglevel, const char *formatP, const char *formatP2);
+    void AddLog_P2(uint8_t loglevel, PGM_P formatP, ...);
+    void AddLogBuffer(uint8_t loglevel, uint8_t *buffer, int count);
+    void AddLogSerial(uint8_t loglevel);
+    void AddLogMissed(char *sensor, uint8_t misses);
+
+    int8_t SetLogLevelIDbyName(const char* name);
+    const char* GetLogLevelNameShort(char* buffer);   
+    const char* GetLogLevelNamebyID(uint8_t id, char* buffer); 
+    const char* GetLogLevelNameShortbyID(uint8_t id, char* buffer);
+
+    void StartTelnetServer();
+
+    #define TELNET_PORT 23
+
+    WiFiServer* server = nullptr;
+    WiFiClient* clientptr;
+    WiFiClient client;
+    
+};
+
+#endif // header guard
