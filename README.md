@@ -3,20 +3,10 @@ UNDERDEVELOPMENT -- Not ready for public use until v1.0 is reached
 
 # Home Automation Control System (HACS)
 
-Firmware for _ESP8266_ and _ESP32* based devices_ with **web UI, OTA updates, Nextion displays and sensor support** for integration with smart home systems. Written for VSCode IDE with PlatformIO.
+Firmware for _ESP8266_ and _ESP32* based devices_ with **web UI, OTA updates, Nextion displays and sensor support** for integration with smart home systems. Written with VSCode IDE and PlatformIO.
 Project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases.
 
 Currently supports enabling functions on devices:
-- Nextion displays (ESP32 only)
-- WS28xx RGB(W)
-- BME280 climate sensors
-- DHT11/22 climate sensors
-- Relay controls (up to 4)
-- SAW radios (488 Mhz transceivers such as those found in low cost plugs and garage openers)
-- Ultrasonic distance measuring (with optional temperature compensation)
-- Motion sensing (PIR)
-- Door sensing (magnetic reed sensor)
-- Door bell (button + chime)
 
 Specific hardware support/functions for (details below):
 - Heating controller (2 zones radiators + 2 zone water heating)
@@ -25,15 +15,6 @@ Specific hardware support/functions for (details below):
 - Security lights (motion + lighting control)
 
 If you like **Home Automation Control System**, give it a star, or fork it, and contribute!
-
-## Contribute
-You can contribute to HACS by:
-- providing Pull Requests (Features, Proof of Concepts, Language files or Fixes)
-- testing new released features and report issues
-- donating to acquire hardware for testing and implementing or out of gratitude
-- contributing missing documentation for features and devices
-
-[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://paypal.me/sparkplug2324)
 
 ## Credits
 
@@ -44,7 +25,6 @@ Libraries used with HACS are:
 - [ESP8266 core for Arduino](https://github.com/esp8266/Arduino)
 - [ArduinoJson](https://arduinojson.org/)
 - [BME280]()
-- [Bosch BME680](https://github.com/BoschSensortec/BME680_driver)
 - [IRremoteEsp8266](https://github.com/markszabo/IRremoteESP8266)
 - [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)
 - [OneWire](https://github.com/PaulStoffregen/OneWire)
