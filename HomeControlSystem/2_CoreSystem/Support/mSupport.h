@@ -211,6 +211,11 @@ class mSupport{
 
     Ticker tickerOSWatch;
 
+char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);
+
+
+void AppendDList(char* buffer, const char* to_add);
+
     uint32_t tSaved_SlowAllTemplatesOnSerial;
     void SlowAllTemplatesOnSerial();
 

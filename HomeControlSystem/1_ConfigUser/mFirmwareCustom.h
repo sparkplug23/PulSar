@@ -35,6 +35,8 @@
 // #define DEVICE_RGBBEDLIGHT
 // #define DEVICE_DESKLIGHT
 // #define DEVICE_RGBCOOKER // new lighting H801
+//  #define DEVICE_RGBUTILITY // new lighting H801
+// #define DEVICE_RGBFRIDGE
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 
@@ -46,8 +48,6 @@
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_BEDROOMBLINDS
-//#define DEVICE_RGBFRIDGE
-//  #define DEVICE_RGBUTILITY
 // #define DEVICE_DOORBELLWALLCHIME
 // #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_OILFURNACE
@@ -58,6 +58,8 @@
 // #define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 // #define DEVICE_BLACKDOORBELL
+// #define DEVICE_BEDROOM_CEILINGFAN
+
 
 /**
  *  ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- 
@@ -69,10 +71,12 @@
 **/
 // #define DEVICE_ATTIC_NODE
 // #define DEVICE_KITCHENSENSOR
+// #define DEVICE_UTILITYSENSOR
 
 /**
  *  SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- 
 **/
+// #define DEVICE_DESKFAN
 // #define DEVICE_SONOFFTESTER
 // #define DEVICE_DRESSERLIGHT
 // #define DEVICE_CANDLEWARMER
@@ -81,7 +85,6 @@
 // #define DEVICE_SILVERLAMP1
 // #define DEVICE_SILVERLAMP2
 // #define DEVICE_HALLWAYMIRROR
-// #define DEVICE_DESKFAN
 
 /**
  *  SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- 
@@ -297,7 +300,7 @@
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_PWM
+  // #define USE_MODULE_LIGHTS_PWM
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   #define USE_MODULE_TEMPLATE
@@ -939,46 +942,19 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
-      "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
       "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
       "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
       "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
       "\"9\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
+  // Controller Device - Sets device names by hard coded
   
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"" D_JSON_DEVICENAME "\":{"
-  //       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-  //         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-  //         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
-  //         "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
-  //         "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
-  //       "],"
-  //       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-  //         "\"" D_DB18_NAME_DOWNSTAIRS_PIPE "\","
-  //         "\"" D_DB18_NAME_UPSTAIRS_PIPE "\","
-  //         "\"" D_DB18_NAME_BOILER_PIPE "\","
-  //         "\"" D_DB18_NAME_IMMERSION_HEATER "\","
-  //         "\"" D_DB18_NAME_TANK_TOP "\","
-  //         "\"" D_DB18_NAME_TANK_MIDDLE "\","
-  //         "\"" D_DB18_NAME_TANK_BOTTOM "\","
-  //         "\"" D_DB18_NAME_TANK_OUT "\""
-  //       "],"
-  //       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-  //         "\"" D_DHT_NAME_UPSTAIRS "\","
-  //         "\"" D_DHT_NAME_DOWNSTAIRS "\""
-  //       "]"
-  //   "}"
-  // "}";
-
 #endif
 #ifdef DEVICE_DOORBELLWALLCHIME
   #define DEVICENAME_CTR          "doorbellwallchime"
@@ -1096,6 +1072,10 @@
         "]"
     "}"
   "}";
+
+
+
+
 #endif
 
 
@@ -1254,8 +1234,8 @@
   #define USE_SENSOR_DOOR_LOCK
   #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  #define USE_MODULE_CUSTOM_CEILING_FAN
-  #define USE_MODULE_DRIVERS_IRTRANSCEIVER
+  // #define USE_MODULE_CUSTOM_CEILING_FAN
+  // #define USE_MODULE_DRIVERS_IRTRANSCEIVER
 
   #define USE_MODULE_SENSORS_DS18B20
 
@@ -1269,10 +1249,10 @@
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 1
   #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1627,40 +1607,7 @@
 #endif
 
 
-#ifdef DEVICE_RGBFRIDGE
-  #define DEVICENAME_CTR          "rgbfridge"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Fridge"
-  
-  #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
-   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
 
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
-    "{"
-      "\"NAME\":\"" DEVICENAME_CTR "\","
-      "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-      "\"GPIOC\":{"
-        "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-      "},"
-      "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-    "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
-    "{"
-      "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-      "\"" D_JSON_STRIP_SIZE     "\":50,"
-      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_GRB "\","
-      "\"" D_JSON_MODE           "\":\"" D_JSON_SCENE "\","
-      "\"" D_JSON_SCENE_COLOUR   "\":{\"" D_JSON_HSB "\":[30,80,100]" "},"
-      "\"" D_JSON_BRIGHTNESS     "\":60"
-    "}";
-
-#endif
 // #ifdef DEVICE_RGBCOOKER
 //   #define DEVICENAME_CTR          "rgbcooker"
 //   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker"
@@ -1787,15 +1734,85 @@
 #endif
 #ifdef DEVICE_RGBUTILITY
   #define DEVICENAME_CTR          "rgbutility"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Utility"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Utility H801"
 
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define DISABLE_TEMPORARY_RGBANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_PWM
   
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"FLAG\":0,"
+    "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
+    "\"" D_JSON_CCT_TEMP       "\":500,"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+#endif
+#ifdef DEVICE_RGBFRIDGE
+  #define DEVICENAME_CTR          "rgbfridge"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Fridge H801"
+
+  #define FORCE_TEMPLATE_LOADING
+  //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+   
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define DISABLE_TEMPORARY_RGBANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_PWM
+  
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"FLAG\":0,"
+    "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
+    "\"" D_JSON_CCT_TEMP       "\":500,"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+#endif
+#ifdef DEVICE_UTILITYSENSOR
+  #define DEVICENAME_CTR          "utilitysensor"
+  #define DEVICENAME_FRIENDLY_CTR "Utility Sensor (prev. RGB Utility)"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 3 //maintain other settings (bootcount)
+     
   #define USE_MODULE_SENSORS_MOTION
   #define MOTIONALERT_PAYLOAD1_CTR "utility"
 
@@ -1819,22 +1836,9 @@
       #ifdef USE_MODULE_SENSORS_DOOR
       DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_DETECT_CTR)
       #endif
-      DEFINE_END_SVALUE("RX",D_GPIO_FUNCTION_RGB_DATA_CTR)
+      DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LEDLNK_CTR)
     "},"
     DEFINE_END_SVALUE("BASE",D_MODULE_NAME_USERMODULE_CTR)
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "50"          ","
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[30,80,100]" 
-        "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "50"
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Utility"
@@ -2138,6 +2142,59 @@
     "\"" D_JSON_DEVICENAME "\":{"
         "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+        "]"
+    "}"
+  "}";
+
+  // white wire in garage, add red led inside switch as optional led connected to gpio2
+
+#endif
+
+#ifdef DEVICE_BEDROOM_CEILINGFAN
+  #define DEVICENAME_CTR          "bedroom_ceilingfan"
+  #define DEVICENAME_FRIENDLY_CTR "Bedroom Ceiling Fan"
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+  
+  // #define ENABLE_BUG_TRACING
+
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+
+  #define USE_MODULE_SENSORS_BUTTONS
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 4
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"BASE\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Relay0"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Relay1"
+  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Relay2"
+  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Relay3"
+
+  // Drivers, Sensors and lights?
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    //device_names:{"module_name":["relay1","relay2"]}
+
+// fan controller will name these directly
+
+    "\"" D_JSON_DEVICENAME "\":{"
+        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
         "]"
     "}"
   "}";

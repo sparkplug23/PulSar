@@ -571,6 +571,7 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_ANALOG_POSITION_CTR) D_GPIO_FUNCTION_ANALOG_POSI
 #define USE_MODULE_TEMPLATE_MAGICHOME
 #define USE_MODULE_TEMPLATE_SHELLY1
 #define USE_MODULE_TEMPLATE_SHELLY2P5
+#define USE_MODULE_TEMPLATE_SONOFF_IFAN03
 
 // Supported hardware modules. Leave completed list
 enum SupportedModules_StaticCompleteList {
@@ -580,6 +581,7 @@ enum SupportedModules_StaticCompleteList {
   MODULE_MAGICHOME_ID,
   MODULE_SHELLY1_ID,
   MODULE_SHELLY2P5_ID,
+  MODULE_SONOFF_IFAN03_ID,
 
   // MODULE_SONOFF_RF_ID,
   // MODULE_SONOFF_SV_ID,
@@ -671,6 +673,10 @@ enum SupportedModules_StaticCompleteList {
   #define            D_MODULE_NAME_SHELLY2P5_CTR       "Shelly 2"
   DEFINE_PGM_CTR(PM_MODULE_NAME_SHELLY2P5_CTR)     D_MODULE_NAME_SHELLY2P5_CTR;
 #endif
+#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
+  DEFINE_PGM_CTR(PM_MODULE_NAME_SONOFF_IFAN03_CTR)     D_MODULE_NAME_SONOFF_IFAN03_CTR;
+#endif
 
 
 /********************************************************************************************/
@@ -741,6 +747,9 @@ const uint8_t kModuleNiceList[] PROGMEM = {
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY2P5
     MODULE_SHELLY2P5_ID,
+  #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    MODULE_SONOFF_IFAN03_ID,        // Sonoff Relay Devices
   #endif
 //   MODULE_SONOFF_RF_ID,
 //   MODULE_SONOFF_SV_ID,
@@ -825,6 +834,7 @@ DEFINE_PGM_CTR(kModules_Name_list)
   D_MODULE_NAME_MAGICHOME_CTR     "|"
   D_MODULE_NAME_SHELLY1_CTR       "|"
   D_MODULE_NAME_SHELLY2P5_CTR     "|"
+  D_MODULE_NAME_SONOFF_IFAN03_CTR "|"
 };
 
 
@@ -934,50 +944,6 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY2P5  
-  // {  D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
-  //    0,
-  //    0,//GPIO_MCP39F5_TX_ID,  // GPIO01 MCP39F501 Serial input
-  //    0,
-  //    0,//GPIO_MCP39F5_RX_ID,  // GPIO03 MCP39F501 Serial output
-  //    GPIO_REL1_ID,        // GPIO04
-  //    GPIO_REL2_ID,        // GPIO05
-  //                      // GPIO06 (SD_CLK   Flash)
-  //                      // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-  //                      // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-  //    0,                // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
-  //    0,                // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
-  //                      // GPIO11 (SD_CMD   Flash)
-  //    GPIO_SWT1_ID,        // GPIO12
-  //    0,
-  //    GPIO_SWT2_ID,        // GPIO14
-  //    0,//GPIO_MCP39F5_RST_ID, // GPIO15 MCP39F501 Reset
-  //    0,
-  //    0
-  // },
-
-// switch 2 conttrolled light 1
-
-  // {  D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
-  //    GPIO_LED1_ID,
-  //    0,//GPIO_MCP39F5_TX_ID,  // GPIO01 MCP39F501 Serial input
-  //    0,//GPIO_KEY1_ID,
-  //    0,//GPIO_MCP39F5_RX_ID,  // GPIO03 MCP39F501 Serial output
-  //    GPIO_REL1_ID,        // GPIO04
-  //    GPIO_SWT2_NP_ID,        // GPIO05
-  //                      // GPIO06 (SD_CLK   Flash)
-  //                      // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-  //                      // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-  //    0,                // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
-  //    0,                // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
-  //                      // GPIO11 (SD_CMD   Flash)
-  //    0,//GPIO_I2C_SDA_ID,        // GPIO12
-  //    GPIO_SWT1_NP_ID,
-  //    0,//GPIO_I2C_SCL_ID,        // GPIO14
-  //    GPIO_REL2_ID,//GPIO_MCP39F5_RST_ID, // GPIO15 MCP39F501 Reset
-  //    0,
-  //    0//GPIO_SWT1_ID
-  // },
-
   {  D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
      0,
      0,//GPIO_MCP39F5_TX_ID,  // GPIO01 MCP39F501 Serial input
@@ -997,6 +963,27 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
      GPIO_REL2_ID,//GPIO_MCP39F5_RST_ID, // GPIO15 MCP39F501 Reset
      0,
      0//GPIO_SWT1_ID
+  },
+  #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  { D_MODULE_NAME_SONOFF_IFAN03_CTR,    // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
+    GPIO_KEY1_ID,          // GPIO00 WIFI_KEY0 Button 1
+    GPIO_SERIAL_TX_ID,           // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
+    0,                         // GPIO02 ESP_LOG
+    GPIO_SERIAL_RX_ID,           // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
+    0,                         // GPIO04 DEBUG_RX
+    0,                         // GPIO05 DEBUG_TX
+                               // GPIO06 (SD_CLK   Flash)
+                               // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+                               // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+    GPIO_REL1_INV_ID,      // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+    255,//GPIO_BUZZER_INV_ID,    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
+                               // GPIO11 (SD_CMD   Flash)
+    GPIO_REL3_ID,       // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+    GPIO_LED1_INV_ID,      // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+    GPIO_REL2_ID,       // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+    GPIO_REL4_ID,       // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+    0, 0
   },
   #endif
 

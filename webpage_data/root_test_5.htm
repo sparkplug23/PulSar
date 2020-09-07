@@ -1,4 +1,5 @@
 
+    
 
 <!DOCTYPE html>
 <html lang="en" class="">
@@ -262,7 +263,17 @@ function ShowMessageToast(message) {
         function init_urls_for_page(){
 
             // var page_url_full = "http://192.168.1.1/";//window.location.href;
-            var page_url_full = window.location.href.replace(/\?/g,"").replace(/PAGE/g,"").replace(/\./g,"");
+            var page_url_full2 = window.location.href;
+            var page_url_full;
+            // Remove any ? parts
+            if(page_url_full2.includes("?")){
+                var url_minus_values = page_url_full2.split("?");
+                page_url_full = url_minus_values[0];
+            }else{
+                page_url_full = page_url_full2;
+            }
+            
+            page_url_full = page_url_full.replace(/\?/g,"").replace(/PAGE/g,"").replace(/\./g,"");
 
             var page2 = page_url_full.split("http://");
             console.log('page2',page2);
@@ -431,9 +442,9 @@ function ShowMessageToast(message) {
         function Parse_JsonData(json){
             try{
 
-                console.log('json',json);
+                //console.log('json',json);
                 var json_object_length = Object.keys(json).length;//json.length();
-                console.log('json_object_length',json_object_length);
+                //console.log('json_object_length',json_object_length);
             
                 for(c in json){
 
@@ -443,11 +454,11 @@ function ShowMessageToast(message) {
 
                 //var c = json
 
-                console.log('c in json',c);
+                //console.log('c in json',c);
                 // console.log('json_object_length',json_object_length);
                 // console.log('json[c].length',json[c].length);
                 for(i=0;i<json[c].length;i++){
-                    console.log('i in json',i);
+                    //console.log('i in json',i);
                     var id=0; 
                     // assumed as 0 when I dont want to pass an id
                     if(json[c][i].hasOwnProperty('id')){
@@ -461,10 +472,10 @@ function ShowMessageToast(message) {
                      }
                      if(json[c][i].hasOwnProperty('ihr')){
                          
-                console.log('json[c][i].hasOwnProperty(ihr) in json',json[c][i].ihr);
+                //console.log('json[c][i].hasOwnProperty(ihr) in json',json[c][i].ihr);
                          document.getElementsByClassName(c)[id].innerHTML=ihr(json[c][i].ihr);
                          
-                console.log('document search',document.getElementsByClassName(c)[id].innerHTML);
+                // console.log('document search',document.getElementsByClassName(c)[id].innerHTML);
 
 
                     }
@@ -636,16 +647,42 @@ function ShowMessageToast(message) {
     </script>
     <script>
         var os1;
-        function send_select(u,f){
-            var x=new XMLHttpRequest();
-            x.onreadystatechange=function(){
-                if(this.readyState==4&&this.status==200){
-                    f(this);
+        function send_select(url,mess){
+            // var x=new XMLHttpRequest();
+            // x.onreadystatechange=function(){
+            //     if(this.readyState==4&&this.status==200){
+            //         //f(this);
+            //         console.log('this.responseText',this.responseText);
+            //     }
+            // };
+            // x.open('GET',u,true);
+            // x.send(mess);
+
+            var xhr = new XMLHttpRequest();
+            // var url = "/rgb_controls/save_animation_controls";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    console.log('response',json);//json.email + ", " + json.password);
                 }
             };
-            x.open('GET',u,true);
-            x.send();
+            var data = JSON.stringify({"email": "hey@mail.com", "password": "101010"});
+            xhr.send(data);
+
+
         }
+// //   "function ld(u,f){"
+// //     "var x=new XMLHttpRequest();"
+// //     "x.onreadystatechange=function(){"
+// //       "if(this.readyState==4&&this.status==200){"
+// //         "f(this);"
+// //       "}"
+// //     "};"
+// //     "x.open('GET',u,true);"
+// //     "x.send();"
+// //   "}";
         function x0(a){
             os1=a.responseText;
             console.log('os1',os1);
@@ -673,33 +710,78 @@ function ShowMessageToast(message) {
             
         }
 
+        var xhr = new XMLHttpRequest();
+        xhr.open("PUT", '/server', true);
+
+        //Send the proper header information along with the request
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function() { // Call a function when the state changes.
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                // Request finished. Do processing here.
+            }
+        }
+        xhr.send("foo=bar&lorem=ipsum");
 
         const serialize_form = form => JSON.stringify(
-  Array.from(new FormData(form).entries())
-       .reduce((m, [ key, value ]) => Object.assign(m, { [key]: value }), {})
-);
+            Array.from(new FormData(form).entries())
+                .reduce((m, [ key, value ]) => Object.assign(m, { [key]: value }), {})
+        );
 
-function start_form_listener(){
+        function start_form_listener(){
 
-    // Gets a reference to the form element
-    var form = document.getElementById("register_form");
+            // Gets a reference to the form element
+            var form = document.getElementById("json_command_form");
 
-    console.log('form',form);
-    if(form){
-        // Adds a listener for the "submit" event.
-        form.addEventListener('submit', function(e) {
-        e.preventDefault();
-            const json = serialize_form(this);
-        console.log('json',json);
-        console.log('HERE2');
-        });
-    }
-}
+            console.log('form',form);
+            if(form){
+                // Adds a listener for the "submit" event.
+                form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const json = serialize_form(this);
+                console.log('json',json);
+                // console.log('HERE2');
+                // console.log('e',e);
+                // console.log('action',form);
 
-window.onload=function(){
-    
-    start_form_listener();
-}
+                var data = JSON.stringify(json);
+                console.log('data',data);
+
+                send_select(form.action,data);
+
+
+                // // construct an HTTP request
+                // var xhr = new XMLHttpRequest();
+                
+                // // xhr.onreadystatechange=function(){
+                // // if(xhr.readyState==4&&xhr.status==200){
+                // //     var s=xhr.responseText.replace(/{t}/g,"<table style='width:100%'>")
+                // //                         .replace(/{s}/g,"<tr><th>")
+                // //                         .replace(/{m}/g,"</th><td>")
+                // //                         .replace(/{e}/g,"</td></tr>")
+                // //                         .replace(/{t2}/g,"</table>")
+                // //                         .replace(/{c}/g,"%'><div style='text-align:center;font-weight:");
+                // //     // eb('l1').innerHTML=s;
+                // //     document.getElementsByClassName("container_5")[0].innerHTML=s;
+                // // }
+
+                xhr.open(form.method, form.action, true);
+                xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+                console.log('form.method',form.method);
+                console.log('action',form.action);
+                console.log('xhr',xhr);
+                // send the collected data as JSON
+                xhr.send(json);//JSON.stringify(data));
+
+                });
+            }
+        }
+
+        // window.onload=function(){
+            
+        //     start_form_listener();
+        // }
 
 
         function la(p){
@@ -779,26 +861,6 @@ window.onload=function(){
         <div class="container_6"></div>
         <div class="container_7"></div>
 
-        <table style="width:100%">
-            <tr><th>row1</th><td>row1</td><td>row1</td><td>row1</td><td>row1</td></tr>
-            <tr><td>row1</td><td>row1</td><td>row1</td><td>row1</td><td>row1</td></tr>
-            <tr><td>row1</td><td>row1</td><td>row1</td><td>row1</td><td>row1</td></tr>
-            <tr><td>row1</td><td>row1</td><td>row1</td><td>row1</td><td>row1</td></tr>
-        </table>
-
-
-        <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
-        <form id="register_form"  action="https://url.com/users/register" method="post">
-          <input type="text" placeholder="Name" name="name" title="Up to 20 alphabetical characters">
-          <input type="email" placeholder="Email" name="email" title="Must be a valid email address">
-          <input type="password" placeholder="Password" name="password" title="Must be 8 or more characters long and contain at least one number and one uppercase letter">
-          <input type="text" placeholder="Homeadress" name="homeadress">
-          <input type="text" placeholder="Postnumber" name="postnumber">
-          <input type="text" placeholder="City" name="city">
-          <br>
-          <button value="Submit" type="submit">Register</button>
-        </form>
-
         <div id="snackbar">Some text some message..</div>
         <div style="text-align:right;font-size:11px;">
             <hr>
@@ -809,5 +871,3 @@ window.onload=function(){
 </html>
 
     
-
-

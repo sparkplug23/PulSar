@@ -1390,8 +1390,13 @@
 #define D_JSON_ORDER "order"
 #define D_JSON_PACKETS "Packets"
 #define D_JSON_PIXELSGROUPED "pixels_grouped"
-#define D_JSON_PIXELS_UPDATE_NUMBER "pixels_to_update_as_number"
-#define D_JSON_PIXELS_UPDATE_PERCENTAGE "pixels_to_update_as_percentage"
+
+// #define D_JSON_PIXELS_UPDATE_NUMBER "pixels_to_update_as_number"
+// #define D_JSON_PIXELS_UPDATE_PERCENTAGE "pixels_to_update_as_percentage"
+
+#define D_JSON_PIXELS_UPDATE_NUMBER "PixelUpdateNum"
+#define D_JSON_PIXELS_UPDATE_PERCENTAGE "PixelUpdatePerc"
+
 #define D_JSON_PIXELNUM "pixelnum"
 #define D_JSON_PULSER "pulser"
 #define D_JSON_FADE "fade"

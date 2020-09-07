@@ -1066,6 +1066,7 @@ const char HTTP_FORM_WIFI[] PROGMEM =
 //   "<input id='b1' name='b1' type='checkbox'%s><b>" D_MQTT_ENABLE "</b><br/>"
 //   "<br/>";
 
+//delee these
 const char HTTP_FORM_END[] PROGMEM =
   "<br/>"
   "<button name='save' type='submit' class='button bgrn'>" D_SAVE "</button>"
@@ -1082,6 +1083,27 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_NO_SAVE)
   "<br/>"
   "</form></fieldset>";
+
+
+// DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)
+//   "<br/>"
+//   "<button name='save' type='submit' class='button bgrn'>" D_SAVE "</button>"
+//   "</form></fieldset>";
+
+
+// field name, 
+DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_START_VARIABLE_JSON)
+  "<fieldset><legend><b>&nbsp;%s&nbsp;</b></legend>"
+  "<form id='%s' method='post' action='%s'>"
+  "<p></p>";
+DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON)
+  "<br/>"
+  "<button name='save' type='submit' class='button %s'>%s</button>"
+  "</form></fieldset>";
+
+
+#include "AsyncJson.h"
+#include "ArduinoJson.h"
 
 // const char HTTP_FORM_RST[] PROGMEM =
 //   "<div id='f1' name='f1' style='display:block;'>"
@@ -1245,12 +1267,19 @@ enum HttpOptions {HTTP_OFF, HTTP_USER, HTTP_ADMIN, HTTP_MANAGER, HTTP_MANAGER_RE
 
 
 
-class mWebServer{
+class mWebServer : public AsyncWebHandler{
   public:
     mWebServer(){};
     
     int8_t Tasker(uint8_t function);
     void init(void);
+
+    
+  void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
+    size_t index, size_t total) override;
+
+
+
     
     void WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles);
 

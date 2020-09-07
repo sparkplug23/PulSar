@@ -14,6 +14,7 @@
 //#define CALL_MEMBER_FUNCTION_WITH_ARG(object,ptrToMember,X,Y)  ((object).*(ptrToMember)(X,Y))
 
 
+#define DEFAULT_MQTT_SYSTEM_BOOT_RATE_SECS 1
 #define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
 #define DEFAULT_MQTT_SENSOR_MINIMAL_RATE_SECS 10
 #define DEFAULT_MQTT_DRIVER_MINIMAL_RATE_SECS 10
@@ -116,7 +117,6 @@ class mSupport;
 
 #define WEB_HANDLE_MQTT "mq"
 
-extern bool flag_uptime_reached_reduce_frequency;
 
 class mMQTT{
 
@@ -124,6 +124,8 @@ class mMQTT{
     mMQTT(){};
     void init(void);
     int8_t Tasker(uint8_t function);
+
+    bool flag_uptime_reached_reduce_frequency = false;
 
     // char lwt_message_ondisconnect_ctr[50];
 
@@ -191,10 +193,14 @@ class mMQTT{
         if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ handler_ptr->tSavedLastSent=millis();
           handler_ptr->fSendNow = true;
           handler_ptr->flags.SendNow = true;
-          // if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
-          //   handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change
-          //   handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs; //only reduce if new rate is longer
-          // }
+          //handler_ptr->flags.FrequencyRedunctionLevel = 1;
+          if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
+            // handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change
+            
+            //Serial.println("flag_uptime_reached_reduce_frequency");
+            
+            handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs; //only reduce if new rate is longer
+          }
         }
       }
       if(handler_ptr->fSendNow || handler_ptr->flags.SendNow){ handler_ptr->fSendNow = false;    handler_ptr->flags.SendNow = false;

@@ -49,6 +49,10 @@
 //   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 // } data_buffer2;
 
+
+
+
+
 struct DATA_BUFFER2 data_buffer2;
 
 // /*********************struct DATA_BUFFER2 data_buffer2;***********************************************************************/
@@ -1464,8 +1468,6 @@ void mSettings::SystemSettings_DefaultBody_TelePeriods(){
   Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
   Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
   Settings.sensors.configperiod_secs = SEC_IN_HOUR;
-
-
 
 }
 

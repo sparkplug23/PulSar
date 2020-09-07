@@ -26,7 +26,7 @@
 #define WEB_HANDLE_HEATING_TIMER "heat_timer"
 
 //disable  for debugging
-// #define ENABLE_RELAY_CONTROLS
+#define ENABLE_RELAY_CONTROLS
 
 #define WEB_HANDLE_BUTTON_NAME_TEMP_SET "btte"
 #define WEB_HANDLE_BUTTON_NAME_TIMER_SET "btti"

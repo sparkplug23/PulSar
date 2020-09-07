@@ -66,9 +66,6 @@ typedef enum {
 #endif
 
 
-
-
-
 //if this value is returned when asked for data, packet will not be sent and you will be asked for data again
 #define RESPONSE_TRY_AGAIN 0xFFFFFFFF
 
@@ -243,6 +240,7 @@ class AsyncWebServerRequest {
 
 
     // void send(int code, const char* contentType=nullptr, char* content_ptr = nullptr);
+    void send_code(int code);
     void send(int code, uint8_t contentType_id = 0, char* content_ptr = nullptr);
     void send(FS &fs, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
     void send(File content, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);

@@ -186,6 +186,8 @@ uint8_t AsyncStaticWebHandler::_countBits(const uint8_t value) const
 
 void AsyncStaticWebHandler::handleRequest(AsyncWebServerRequest *request)
 {
+
+  Serial.println("AsyncStaticWebHandler::handleRequest(AsyncWebServerRequest *request)"); Serial.flush();
   // Get the filename from request->_tempObject and free it
   String filename = String((char*)request->_tempObject);
   free(request->_tempObject);
@@ -213,9 +215,9 @@ void AsyncStaticWebHandler::handleRequest(AsyncWebServerRequest *request)
         response->addHeader("Cache-Control", _cache_control.c_str());
         response->addHeader("ETag", etag.c_str());
       }
-      request->send(response);
+      //request->send(response);
     }
   } else {
-    request->send(404);
+    //request->send(404);
   }
 }

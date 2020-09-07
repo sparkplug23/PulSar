@@ -49,6 +49,30 @@ void mWebServer::ExecuteWebCommand(char* svalue, int source)
   ExecuteCommand(svalue, SRC_IGNORE);
 }
 
+
+void mWebServer::handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
+    size_t index, size_t total) {
+  // ESP_LOGD(TAG, "handleBody [len=%u, index=%u, total=%u]", len, index, total);
+
+  Serial.println("mWebServer::handleBody");
+
+  // If whole data is not available, do not botter making sense of it.
+  if (!data || len != total) {
+    return;
+  }
+
+  // `POST /sys/master`
+  if (request->method() == HTTP_POST && request->url() == "/setmaster") {
+    // if (this->set_master_(data, len)) {
+    //   request->send(200, APPLICATION_JSON, bool_response(true).c_str());
+    // } else  {
+      request->send(500);
+    // }
+    return;
+  }
+}
+
+
 void mWebServer::StartWebserver(int type, IPAddress ipweb)
 {
   // Ensure valid refresh values
@@ -63,7 +87,7 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
         pWebServer = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
       #endif
             
-      // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); // ALLOW CROSS SITE JAVASCRIPT ACCESS (CORS) BY DEFAULT
+      DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); // ALLOW CROSS SITE JAVASCRIPT ACCESS (CORS) BY DEFAULT
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST");
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");      
 
@@ -151,6 +175,90 @@ void mWebServer::WebPage_Root_AddHandlers(){
   pCONT_web->pWebServer->on(WEB_HANDLE_JSON_ROOT_STATUS_ANY, HTTP_GET, [this](AsyncWebServerRequest *request){
     WebSend_JSON_RootStatus_Table(request);
   });
+
+
+  pCONT_web->pWebServer->on("/michael", HTTP_POST, [this](AsyncWebServerRequest *request){
+
+
+    int params = request->params();
+    for(int i=0;i<params;i++){
+      AsyncWebParameter* p = request->getParam(i);
+      if(p->isFile()){
+        Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+      } else if(p->isPost()){
+        Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      } else {
+        Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      }
+    }
+
+    request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
+
+    //  if (request->method() == HTTP_POST && request->url() == "/michael") {
+    //    Serial.println("HTTP_POST && request->url()");
+    //   // Shoudl be already handled by handleBody(..) at this point.
+    //   return;
+    // }
+    // Web_Base_Page_Draw(request);
+  });
+
+// pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+//     Serial.println("Running");
+//     if (request->url() == "/setmaster") {
+//       Serial.println();
+//       // DynamicJsonDocument jsonBuffer;
+//       Serial.printf("data=%s\n\r",data);
+//       // JsonObject root = jsonBuffer..parseObject((const char*)data);
+//       // if (root.success()) {
+//       //   if (root.containsKey("command")) {
+//       //     Serial.println(root["command"].asString()); // Hello
+//       //   }
+//       // }
+//       request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
+//     }
+//   });
+
+      // pCONT_web->pWebServer->on("/michael", HTTP_POST, 
+      // [](AsyncWebServerRequest *request)
+      // {
+      //   Serial.println("1");
+      // },
+      // [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final)
+      // {
+      //   Serial.println("2");
+      // },
+      // [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+      // {
+      //   Serial.println("3");
+      //   Serial.println(String("data=") + (char*)data);
+      // });
+      
+  pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+    if(!index)
+      Serial.printf("BodyStart: %u\n", total);
+    Serial.printf("%s", (const char*)data);
+    if(index + len == total)
+      Serial.printf("BodyEnd: %u\n", total);
+  });
+
+
+// pCONT_web->pWebServer->on("/generate", HTTP_POST, [](AsyncWebServerRequest *request){
+//     //nothing and dont remove it
+//   }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+//     // DynamicJsonBuffer jsonBuffer;
+//     // JsonObject& root = jsonBuffer.parseObject((const char*)data);
+//     // if (root.success()) {
+//     //   if (root.containsKey("cmd")) {
+//     //     Serial.println(root["cmd"].asString());
+//     //   }
+//     //   if (root.containsKey("cmd1")) {
+//     //     Serial.println(root["cmd1"].asString());
+//     //   }
+//     //   request->send(200, "text/plain", "");
+//     // } else {
+//       request->send(404, CONTENT_TYPE_TEXT_HTML_ID, "gernate");
+//     // }
+//   });
 
 
   /**

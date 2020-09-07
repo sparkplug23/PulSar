@@ -74,7 +74,13 @@ AsyncWebServerRequest::AsyncWebServerRequest(AsyncWebServer* s, AsyncClient* c)
   c->onAck([](void *r, AsyncClient* c, size_t len, uint32_t time){ AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; req->_onAck(len, time); }, this);
   c->onDisconnect([](void *r, AsyncClient* c){ AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; req->_onDisconnect(); delete c; }, this);
   c->onTimeout([](void *r, AsyncClient* c, uint32_t time){ AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; req->_onTimeout(time); }, this);
-  c->onData([](void *r, AsyncClient* c, void *buf, size_t len){ AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; req->_onData(buf, len); }, this);
+  c->onData(
+    [](void *r, AsyncClient* c, void *buf, size_t len){
+      AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; 
+      req->_onData(buf, len); 
+    },
+    this
+  );
   c->onPoll([](void *r, AsyncClient* c){ AsyncWebServerRequest *req = (AsyncWebServerRequest*)r; req->_onPoll(); }, this);
 }
 
@@ -106,9 +112,15 @@ AsyncWebServerRequest::~AsyncWebServerRequest(){
 
 void AsyncWebServerRequest::_onData(void *buf, size_t len){
   size_t i = 0;
+
+  Serial.println("AsyncWebServerRequest::_onData");
+
   while (true) {
 
+
   if(_parseState < PARSE_REQ_BODY){
+    
+  // Serial.println("AsyncWebServerRequest::_onData || _parseState < PARSE_REQ_BODY");
     // Find new line in buf
     char *str = (char*)buf;
     for (i = 0; i < len; i++) {
@@ -135,11 +147,15 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
       }
     }
   } else if(_parseState == PARSE_REQ_BODY){
+    
+    Serial.println("AsyncWebServerRequest::_onData || _parseState == PARSE_REQ_BODY");
+
     // A handler should be already attached at this point in _parseLine function.
     // If handler does nothing (_onRequest is NULL), we don't need to really parse the body.
     const bool needParse = _handler && !_handler->isRequestHandlerTrivial();
     if(_isMultipart){
       if(needParse){
+        
         size_t i;
         for(i=0; i<len; i++){
           _parseMultipartPostByte(((uint8_t*)buf)[i], i == len - 1);
@@ -148,9 +164,17 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
       } else
           _parsedLength += len;
     } else {
+      
+      Serial.println("AsyncWebServerRequest::_onData ||else   !_isMultipart");
+
       if(_parsedLength == 0){
+        
+      Serial.println("_parsedLength == 0");
+
         if(_contentType.startsWith("application/x-www-form-urlencoded")){
-          _isPlainPost = true;
+          
+      Serial.println("pplication/x-www-form-url");
+      _isPlainPost = true;
         } else if(_contentType == "text/plain" && __is_param_char(((char*)buf)[0])){
           size_t i = 0;
           while (i<len && __is_param_char(((char*)buf)[i++]));
@@ -160,20 +184,37 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
         }
       }
       if(!_isPlainPost) {
+        
+      Serial.println("!_isPlainPost");
+
         //check if authenticated before calling the body
-        if(_handler) _handler->handleBody(this, (uint8_t*)buf, len, _parsedLength, _contentLength);
+        if(_handler) {
+          Serial.println("AsyncWebServerRequest::if(_handler) {");
+          _handler->handleBody(this, (uint8_t*)buf, len, _parsedLength, _contentLength);
+        }else{
+          Serial.println("NOTAsyncWebServerRequest::if(_handler) {");
+        }
+        
+        Serial.printf("AsyncWebServerRequest::_onData ||else %s\n\r",buf);
+        
         _parsedLength += len;
       } else if(needParse) {
+      Serial.println("needParse");
+
         size_t i;
         for(i=0; i<len; i++){
           _parsedLength++;
           _parsePlainPostChar(((uint8_t*)buf)[i]);
         }
+        
+
       } else {
         _parsedLength += len;
       }
     }
     if(_parsedLength == _contentLength){
+      Serial.println("_parseState = PARSE_REQ_END");
+
       _parseState = PARSE_REQ_END;
       //check if authenticated before calling handleRequest and request auth instead
       if(_handler) _handler->handleRequest(this);
@@ -907,6 +948,18 @@ void AsyncWebServerRequest::send_serial(int code, uint8_t contentType, char* con
 }
 
 
+//temp fix for stable sending of function below overloading
+void AsyncWebServerRequest::send_code(int code){
+
+  // char contentType[20]; sprintf(contentType, "%s", "contentType");
+  // char content_ptr[20]; sprintf(content_ptr, "%s", "content_ptr");
+  // uint16_t content_len = strlen(content_ptr);
+
+  // send(beginResponse(code, contentType, content_ptr, content_len));
+
+
+}
+
 void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_ptr){
 
   // #ifdef DEBUG_WEBSERVER_LIB
@@ -915,10 +968,19 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
   // Need to add a minimum Ram size left here before trying to assemble a large response, or else, reply with not enough memory etc
 
-  uint16_t content_len = strlen(content_ptr);
+  uint16_t content_len = 0;
+  if(content_ptr!=nullptr){
+    content_len = strlen(content_ptr);
+  }else{
+    content_len = 0;
+  } 
+  
+  
 
+  // Serial.println(F("send2(beginResponse2(code, contentType, content)); DONE")); Serial.flush();
   send(beginResponse(code, contentType, content_ptr, content_len));
   
+  // Serial.println(F("send2END(beginResponse2(code, contentType, content)); DONE"));Serial.flush();
   #ifdef DEBUG_ASYNC
   Serial.println(F("send2(beginResponse2(code, contentType, content)); DONE"));
   #endif

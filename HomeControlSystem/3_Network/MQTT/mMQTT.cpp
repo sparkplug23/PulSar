@@ -5,7 +5,7 @@ const char S_CONFIGURE_MQTT[] PROGMEM = D_CONFIGURE_MQTT;
 const char HTTP_BTN_MENU_MQTT[] PROGMEM =
   "<p><form action='" WEB_HANDLE_MQTT "' method='get'><button>" D_CONFIGURE_MQTT "</button></form></p>";
 
-bool flag_uptime_reached_reduce_frequency = false;
+// bool flag_uptime_reached_reduce_frequency = false;
 
 
 // const char HTTP_FORM_MQTT1[] PROGMEM =
@@ -173,7 +173,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
   mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_health;
@@ -900,7 +900,7 @@ int8_t mMQTT::Tasker(uint8_t function){
       #ifdef ENABLE_ADVANCED_DEBUGGING
         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_UPTIME "MQTT %s"),pCONT->mt->uptime.hhmmss_ctr);
       #endif
-      //
+      
       // Send system telemetry from "mTelemetry.h"
       MQQTHandler_System_Sender();
 
@@ -908,16 +908,29 @@ int8_t mMQTT::Tasker(uint8_t function){
       pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
 
     break;
+    case FUNC_EVERY_SECOND:
+
+// Serial.println("flag_uptime_reached_reduce_frequency");
+            
+//             handler_ptr->tRateSecs = 10;
+
+
+// AddLog_P(LOG_LEVEL_INFO,PSTR("tRateSecs = %d %d %d"),mqtthandler_health.tRateSecs,mqtthandler_health.flags.FrequencyRedunctionLevel,flag_uptime_reached_reduce_frequency);
+
+    break;
     case FUNC_EVERY_MINUTE:
       //DiscoverServer();
       //pCONT->Tasker_Interface(FUNC_MQTT_CHECK_REDUNCTION_LEVEL);
+    break;
+    case FUNC_UPTIME_1_MINUTES:
+
     break;
     case FUNC_UPTIME_10_MINUTES:
       // mqtthandler_debug_minimal.tRateSecs = 120;
       // //#ifndef DEVICE_MYBEDROOM
       // mqtthandler_health.tRateSecs = 120;
       // //#endif
-      flag_uptime_reached_reduce_frequency = true;
+flag_uptime_reached_reduce_frequency = true;
     break;
     // case FUNC_MQTT_CHECK_REDUNCTION_LEVEL:
 

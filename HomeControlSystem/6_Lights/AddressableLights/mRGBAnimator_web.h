@@ -140,6 +140,14 @@ DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM)
 
 
 
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_WITH_RESULT_CTR)  
+  "{o1}%d' result='%s'>%s{o2}";   
+
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUMBER_CTR)  
+  "{o1}%d'>%s{o2}";   
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)  
+  "{o1}%s'>%s{o2}";   
+
 
 
 
@@ -380,6 +388,7 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_LIST_START)
   "<fieldset><legend><b>&nbsp;" "Animation Controls" "&nbsp;</b></legend>"
   "<form method='get' action='rgb_controls'>"
   "<p></p>";
+
 
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_LIST_START2)
   "<fieldset><legend><b>&nbsp;" "Animation Controls" "&nbsp;</b></legend>"

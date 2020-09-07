@@ -15,6 +15,8 @@
 
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
+#include "AsyncJson.h"
+#include "ArduinoJson.h"
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef NeoRgbFeature selectedNeoFeatureType;
@@ -102,6 +104,9 @@ DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)                      "
 DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG";
 
 
+void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+
+
 class mRGBAnimator{
   private:
     // RgbTypeColor needs to be a pointer type so I can pass as single byte 3/4/5 colour types
@@ -112,6 +117,8 @@ class mRGBAnimator{
     mRGBAnimator(){};
     void pre_init(void);
     void init(void);
+
+    
 
     enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
       PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default

@@ -45,6 +45,9 @@ uint8_t getIdentifierID(const char* x){ return IDENTIFIER_STRING_ID; }
 
     
 
+void mSupport::AppendDList(char* buffer, const char* to_add){
+  sprintf(buffer+strlen(buffer), "%s|", to_add);
+}
 
 
 
@@ -1460,6 +1463,42 @@ char* mSupport::GetTextIndexed(char* destination, size_t destination_size, uint1
   *write = '\0';
   return destination;
 }
+
+
+char* mSupport::GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack)
+{
+  // Returns empty string if not found
+  // Returns text of found
+  char* write = destination;
+  const char* read = haystack;
+
+  index++;
+  uint16_t index_hay = 0;
+  while (index--) {
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+
+      // (addr) (*(const uint8_t *)(addr))
+
+      ch = read[index_hay++];  //pads
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    if (0 == ch) {
+      if (index) {
+        write = destination;
+      }
+      break;
+    }
+  }
+  *write = '\0';
+  return destination;
+}
+
 
 
 int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id)

@@ -896,7 +896,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
@@ -906,7 +906,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
@@ -916,7 +916,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;

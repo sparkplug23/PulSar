@@ -73,7 +73,7 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
     void setMethod(WebRequestMethodComposite method){ _method = method; }
     void onRequest(ArRequestHandlerFunction fn){ _onRequest = fn; }
     void onUpload(ArUploadHandlerFunction fn){ _onUpload = fn; }
-    void onBody(ArBodyHandlerFunction fn){ _onBody = fn; }
+    void onBody(ArBodyHandlerFunction fn){ _onBody = fn; Serial.println("onBody(ArBodyHandlerFunction fn)");}
 
     virtual bool canHandle(AsyncWebServerRequest *request) override final{
 
@@ -101,8 +101,21 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
         _onUpload(request, filename, index, data, len, final);
     }
     virtual void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override final {
-      if(_onBody)
+      //Serial.println("virtual void handleBody(AsyncWebServerRequest");Serial.flush();
+      if(_onBody){
+              
+        Serial.println("_onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
         _onBody(request, data, len, index, total);
+
+      }else{
+        
+        Serial.println("NOT _onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
+      }
+
+      if(_onBody==NULL){
+      Serial.println("_onBody==NULL");Serial.flush();
+      }
+      
     }
     virtual bool isRequestHandlerTrivial() override final {return _onRequest ? false : true;}
 };

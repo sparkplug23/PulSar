@@ -353,7 +353,7 @@ void loop(void)
   
   
   pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-  AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC2 = %d"), pCONT_sup->activity.loop_counter);
+  // AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC2 = %d"), pCONT_sup->activity.loop_counter);
   pCONT_sup->activity.loop_counter=0;
 
      }
@@ -365,6 +365,9 @@ void loop(void)
   ********************************************************************************************************/
     
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
+
+
+  //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
 
   // Change this to my own way
   // DO THIS NEXT
