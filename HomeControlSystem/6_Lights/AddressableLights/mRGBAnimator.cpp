@@ -3053,14 +3053,17 @@ const char* mRGBAnimator::GetAnimationModeName(char* buffer){
 const char* mRGBAnimator::GetAnimationModeNameByID(uint8_t id, char* buffer){
   switch(id){
     default:
+    case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
+  case ANIMATION_MODE_TURN_ON_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_ON_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_ON_NAME_CTR)); break;
+  case ANIMATION_MODE_TURN_OFF_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_OFF_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR)); break;
+  
     case ANIMATION_MODE_AMBILIGHT_ID:     memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID: memcpy_P(buffer, PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR,sizeof(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)); break;
     #endif
     case ANIMATION_MODE_FLASHER_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_FLASHER_NAME_CTR, sizeof(PM_ANIMATION_MODE_FLASHER_NAME_CTR)); break;
     case ANIMATION_MODE_SCENE_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_SCENE_NAME_CTR , sizeof(PM_ANIMATION_MODE_SCENE_NAME_CTR)); break;
-    case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
-  }
+    }
   return buffer;
 } 
 int8_t mRGBAnimator::GetAnimationModeIDbyName(const char* c){
@@ -3171,13 +3174,14 @@ const char* mRGBAnimator::GetTransitionMethodName(char* buffer){
   return GetTransitionMethodNameByID(animation.transition.method_id,buffer);
 }
 const char* mRGBAnimator::GetTransitionMethodNameByID(uint8_t id, char* buffer){
-  switch(id){ default: 
-    case TRANSITION_METHOD_BLEND_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_BLEND_NAME_CTR,sizeof(PM_TRANSITION_METHOD_BLEND_NAME_CTR)); // smooth shift between them
-  //   case TRANSITION_METHOD_INSTANT_ID: return D_TRANSITION_METHOD_INSTANT_NAME_CTR; // instant shift
-  //   case TRANSITION_METHOD_TWINKLE_ID: return D_TRANSITION_METHOD_TWINKLE_NAME_CTR; // blend shift with random twinkles on random number of leds
-  //   case TRANSITION_METHOD_GLIMMER_ID: return D_TRANSITION_METHOD_GLIMMER_NAME_CTR; // blend shift with random twinkles on random number of leds
+  switch(id){ default:   
+    case TRANSITION_METHOD_NONE_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_NONE_NAME_CTR,sizeof(PM_TRANSITION_METHOD_NONE_NAME_CTR)); break; // smooth shift between them
+    case TRANSITION_METHOD_BLEND_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_BLEND_NAME_CTR,sizeof(PM_TRANSITION_METHOD_BLEND_NAME_CTR)); break; 
+    case TRANSITION_METHOD_INSTANT_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_INSTANT_NAME_CTR,sizeof(PM_TRANSITION_METHOD_INSTANT_NAME_CTR)); break;  // smooth shift between them
+    case TRANSITION_METHOD_TWINKLE_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_TWINKLE_NAME_CTR,sizeof(PM_TRANSITION_METHOD_TWINKLE_NAME_CTR));  break; // smooth shift between them
+    case TRANSITION_METHOD_GLIMMER_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_GLIMMER_NAME_CTR,sizeof(PM_TRANSITION_METHOD_GLIMMER_NAME_CTR));  break; // smooth shift between them
   }
-  return WARNING_NOTHANDLED_CTR;
+  return buffer;
 }
 int8_t mRGBAnimator::GetTransitionMethodIDbyName(const char* c){
   if(c=='\0'){
@@ -3398,13 +3402,13 @@ const char* mRGBAnimator::GetTransitionOrderName(char* buffer){
 }
 const char* mRGBAnimator::GetTransitionOrderNameByID(uint8_t id, char* buffer){
   switch(id){  default:    
+    case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
     case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
     case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
-    // case TRANSITION_ORDER_FIXED_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
-    // case TRANSITION_ORDER_NONE_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break; // blend shift with random twinkles on random number of leds
-  }
+    case TRANSITION_ORDER_FIXED_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
+    }
   return buffer;
 }
 int8_t mRGBAnimator::GetTransitionOrderIDbyName(const char* c){

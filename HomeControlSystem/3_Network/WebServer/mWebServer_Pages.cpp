@@ -54,20 +54,15 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
 
   JsonBuilderI->Start();
   JsonBuilderI->Array_Start("tb_it");// Class name
-  
-    for(int row=0;row<3;row++){
+    for(int row=0;row<2;row++){
     JsonBuilderI->Level_Start();
       switch(row){
         case 0:
           JsonBuilderI->Add("id",row);
           JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
-          JsonBuilderI->Add("bc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_DAY?PSTR("#ff0000"):PSTR("#000000"));    
+          JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
-        case 1:             
-          JsonBuilderI->Add("id",row);
-          JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-        break;
-        case 2:{        
+        case 1:{        
           int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
           char colour_ctr[7];
           if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
@@ -82,7 +77,14 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
     } // end for
 
   JsonBuilderI->Array_End();
+  
+  JsonBuilderI->Array_Start("debug_line");// Class name
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+    JsonBuilderI->Level_End();
+  JsonBuilderI->Array_End();
   JsonBuilderI->End();
+
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
 
@@ -200,15 +202,15 @@ void mWebServer::WebAppend_Root_Draw_ModuleButtons(){
 
 void mWebServer::WebAppend_Root_Draw_PageButtons(){
   
-  JsonBuilderI->Array_Start("container_5");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"");
-        WebAppend_Button_Spaced(BUTTON_CONSOLE);
-        WebAppend_Button(BUTTON_SYSTEM_SETTINGS);
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  // JsonBuilderI->Array_Start("container_5");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->AddKey("ihr");           // function
+  //       JsonBuilderI->AppendBuffer("\"");
+  //       WebAppend_Button_Spaced(BUTTON_CONSOLE);
+  //       WebAppend_Button(BUTTON_SYSTEM_SETTINGS);
+  //     JsonBuilderI->AppendBuffer("\"");
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
 
 }
 
@@ -2049,13 +2051,13 @@ void mWebServer::WebAppend_Button(uint8_t title_index)
   char title[32];
   if (title_index <= BUTTON_RESET_CONFIGURATION) {
     char confirm[64];
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='button bred'>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='button_hacs bred'>%s</button></form></p>"),
       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
       pCONT_sup->GetTextIndexed_P(confirm, sizeof(confirm), title_index, kButtonConfirm),
       (!title_index) ? "rst" : "non",
       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
   } else {
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='button_hac'>%s</button></form></p>"),
       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
   }
@@ -2077,7 +2079,7 @@ void mWebServer::WebAppend_Button(const char* button_title_ctr, const char* acti
     BufferWriterI->Append_P(PSTR(
       "<p>"
         "<form action='%s' method='get' onsubmit='return confirm(\"%s\");'>"
-          "<button name='%s' class='button bred'>%s</button>"
+          "<button name='%s' class='button_hac bred'>%s</button>"
         "</form>"
       "</p>"),
       action_ctr,
@@ -2086,7 +2088,7 @@ void mWebServer::WebAppend_Button(const char* button_title_ctr, const char* acti
       button_title_ctr
     );
   } else {
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='button_hac'>%s</button></form></p>"),
       action_ctr,
       button_title_ctr
     );

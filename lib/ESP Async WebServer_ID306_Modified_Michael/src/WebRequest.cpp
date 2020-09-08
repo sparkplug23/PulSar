@@ -113,7 +113,7 @@ AsyncWebServerRequest::~AsyncWebServerRequest(){
 void AsyncWebServerRequest::_onData(void *buf, size_t len){
   size_t i = 0;
 
-  Serial.println("AsyncWebServerRequest::_onData");
+  // Serial.println("AsyncWebServerRequest::_onData");
 
   while (true) {
 
@@ -148,7 +148,7 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
     }
   } else if(_parseState == PARSE_REQ_BODY){
     
-    Serial.println("AsyncWebServerRequest::_onData || _parseState == PARSE_REQ_BODY");
+    // Serial.println("AsyncWebServerRequest::_onData || _parseState == PARSE_REQ_BODY");
 
     // A handler should be already attached at this point in _parseLine function.
     // If handler does nothing (_onRequest is NULL), we don't need to really parse the body.
@@ -165,15 +165,15 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
           _parsedLength += len;
     } else {
       
-      Serial.println("AsyncWebServerRequest::_onData ||else   !_isMultipart");
+      // Serial.println("AsyncWebServerRequest::_onData ||else   !_isMultipart");
 
       if(_parsedLength == 0){
         
-      Serial.println("_parsedLength == 0");
+      // Serial.println("_parsedLength == 0");
 
         if(_contentType.startsWith("application/x-www-form-urlencoded")){
           
-      Serial.println("pplication/x-www-form-url");
+      // Serial.println("pplication/x-www-form-url");
       _isPlainPost = true;
         } else if(_contentType == "text/plain" && __is_param_char(((char*)buf)[0])){
           size_t i = 0;
@@ -185,21 +185,21 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
       }
       if(!_isPlainPost) {
         
-      Serial.println("!_isPlainPost");
+      // Serial.println("!_isPlainPost");
 
         //check if authenticated before calling the body
         if(_handler) {
-          Serial.println("AsyncWebServerRequest::if(_handler) {");
+          // Serial.println("AsyncWebServerRequest::if(_handler) {");
           _handler->handleBody(this, (uint8_t*)buf, len, _parsedLength, _contentLength);
         }else{
-          Serial.println("NOTAsyncWebServerRequest::if(_handler) {");
+          // Serial.println("NOTAsy/ncWebServerRequest::if(_handler) {");
         }
         
-        Serial.printf("AsyncWebServerRequest::_onData ||else %s\n\r",buf);
+        // Serial.printf("AsyncWebServerRequest::_onData ||else %s\n\r",buf);
         
         _parsedLength += len;
       } else if(needParse) {
-      Serial.println("needParse");
+      // Serial.println("needParse");
 
         size_t i;
         for(i=0; i<len; i++){
@@ -213,7 +213,7 @@ void AsyncWebServerRequest::_onData(void *buf, size_t len){
       }
     }
     if(_parsedLength == _contentLength){
-      Serial.println("_parseState = PARSE_REQ_END");
+      // Serial.println("_parseState = PARSE_REQ_END");
 
       _parseState = PARSE_REQ_END;
       //check if authenticated before calling handleRequest and request auth instead

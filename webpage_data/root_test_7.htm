@@ -1,7 +1,5 @@
 
 
-    
-
 <!DOCTYPE html>
 <html lang="en" class="">
 <head>
@@ -733,7 +731,6 @@ function ShowMessageToast(message) {
 
         function start_form_listener(){
 
-
             // Gets a reference to the form element
             var form = document.getElementById("json_command_form");
 
@@ -757,8 +754,18 @@ function ShowMessageToast(message) {
                         console.log('multilevel',new_key[0]);
                         console.log('multilevel',new_key[1]);
                         var subobject = {};
-                        subobject[new_key[1]] = value;                       
-                        object[new_key[0]] = subobject;
+                        //check if it exists, then append
+                        if(object[new_key[0]]){
+                            console.log('multilevel key existed');
+                            var old_object = object[new_key[0]];
+                            old_object[new_key[1]] = value; // add to it
+
+                            // subobject[new_key[1]] = value;                       
+                            object[new_key[0]] = old_object;
+                        }else{
+                            subobject[new_key[1]] = value;                       
+                            object[new_key[0]] = subobject;
+                        }
                     }else{                        
                         console.log('singlelevel');
                         object[key] = value;
@@ -811,12 +818,11 @@ function ShowMessageToast(message) {
             }
         }
 
-        window.onload=function(){
+        // window.onload=function(){
             
-            start_form_listener();
-        }
+        //     start_form_listener();
+        // }
 
-        // start_form_listener();
 
         function la(p){
             var a=' ';
@@ -894,8 +900,6 @@ function ShowMessageToast(message) {
         <div class="container_5"></div>
         <div class="container_6"></div>
         <div class="container_7"></div>
-
-        <div class="container_1"><fieldset><legend><b>&nbsp;Animation Controls&nbsp;</b></legend><form id="json_command_form" method="post" action="http://192.168.1.170/rgb_controls/save_animation_controls"><p></p><table style="width:100%"><tbody><tr><td style="width:200px"><b>Pixels updated (%)</b></td><td style="width:216px"><select id="g0" name="Pixel,UpdatePerc"><option value="0">0 (0 %)</option><option value="1">3 (5 %)</option><option value="2">5 (10 %)</option><option value="3">8 (15 %)</option><option value="4">10 (20 %)</option><option value="5">15 (30 %)</option><option value="6">20 (40 %)</option><option value="7">25 (50 %)</option><option value="8">30 (60 %)</option><option value="9">35 (70 %)</option><option value="10">40 (80 %)</option><option value="11">45 (90 %)</option><option value="12">50 (100 %)</option></select></td></tr><tr><td style="width:200px"><b>Pixel Order</b></td><td style="width:216px"><select id="g1" name="PixelOrder"><option value="Random">Random</option><option value="Random">Random</option><option value="Centre Out">Centre Out</option><option value="InOrder">InOrder</option><option value="Rotate">Rotate</option><option value="Random">Random</option></select></td></tr><tr><td style="width:200px"><b>Change Rate (secs)</b></td><td style="width:216px"><select id="g2" name="PixelRateSecs"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">4</option><option value="4">6</option><option value="5">10</option><option value="6">15</option><option value="7">20</option><option value="8">30</option><option value="9">60</option></select></td></tr><tr><td style="width:200px"><b>Change Period (secs)</b></td><td style="width:216px"><select id="g3" name="PixelPeriodSecs"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">4</option><option value="4">6</option><option value="5">10</option><option value="6">15</option><option value="7">20</option><option value="8">30</option><option value="9">60</option></select></td></tr><tr><td style="width:200px"><b>Transition Method</b></td><td style="width:216px"><select id="g4" name="PixelTransMethod"><option value="0">NOT_HANDLED</option><option value="1">NOT_HANDLED</option><option value="2">NOT_HANDLED</option><option value="3">NOT_HANDLED</option><option value="4">NOT_HANDLED</option></select></td></tr><tr><td style="width:200px"><b>Mode</b></td><td style="width:216px"><select id="g5" name="PixelMode"><option value="0">None</option><option value="1">Ambilight</option><option value="2">Ambilight</option><option value="3">Ambilight</option><option value="4">Scene</option><option value="5">Flasher</option></select></td></tr></tbody></table><br><button name="save" type="submit" class="button bgrn">Save JSON</button></form></fieldset></div>
 
         <div id="snackbar">Some text some message..</div>
         <div style="text-align:right;font-size:11px;">

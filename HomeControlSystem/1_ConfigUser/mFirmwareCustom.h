@@ -39,6 +39,7 @@
 // #define DEVICE_RGBFRIDGE
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
+// #define DEVICE_RGBDESK
 
 /**
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
@@ -110,11 +111,9 @@
   #define USE_MODULE_SENSORS_PZEM004T_MODBUS
 
   // #define ENABLE_BUG_TRACING
-
   
   #define USE_SOFTWARE_SERIAL_DEBUG
   #define DISABLE_SERIAL_LOGGING //temp measure
-
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -122,25 +121,14 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
-      // "\"D1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      // "\"D2\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
       "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
-
       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
       "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  // #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains0"
-  // #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Cooker1"
-  // #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "WashingMachine2"
-  // #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "TumbleDryer3"
-  // #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "Garage4"
-  // #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "Shower5"
-  // #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "Sockets6"
-  // #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "Kitchen7"
   #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains"
   #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Cooker"
   #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "Tumble Dryer"
@@ -211,6 +199,43 @@
 #ifdef DEVICE_RGBDELL
   #define DEVICENAME_CTR            "rgbdell"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell"
+
+  #define FORCE_TEMPLATE_LOADING
+  //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+   
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 133
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
+    "\"" D_JSON_STRIP_SIZE     "\":"    "133"          ","
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
+    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_SCENE_COLOUR   "\":{"
+          "\"" D_JSON_HSB    "\":[15,95,70]" 
+        "},"
+    "\"" D_JSON_BRIGHTNESS     "\":"    "70"
+  "}";  
+#endif
+
+#ifdef DEVICE_RGBDESK
+  #define DEVICENAME_CTR            "rgbdesk"
+  #define DEVICENAME_FRIENDLY_CTR   "RGB Under Desk"
 
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)

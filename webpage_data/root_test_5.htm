@@ -870,4 +870,53 @@ function ShowMessageToast(message) {
 </body>
 </html>
 
-    
+https://stackoverflow.com/questions/41431322/how-to-convert-formdatahtml5-object-to-json
+142
+
+You could also use forEach on the FormData object directly:
+
+var object = {};
+formData.forEach(function(value, key){
+    object[key] = value;
+});
+var json = JSON.stringify(object);
+UPDATE:
+And for those who prefer the same solution with ES6 arrow functions:
+
+var object = {};
+formData.forEach((value, key) => {object[key] = value});
+var json = JSON.stringify(object);
+UPDATE 2:
+And for those who want support for multi select lists or other form elements with multiple values (since there are so many comments below the answer regarding this issue I will add a possible solution):
+
+var object = {};
+formData.forEach((value, key) => {
+    // Reflect.has in favor of: object.hasOwnProperty(key)
+    if(!Reflect.has(object, key)){
+        object[key] = value;
+        return;
+    }
+    if(!Array.isArray(object[key])){
+        object[key] = [object[key]];    
+    }
+    object[key].push(value);
+});
+var json = JSON.stringify(object);
+Here a Fiddle demonstrating the use of this method with a simple multi select list.
+
+UPDATE 3:
+As a side note for those ending up here, in case the purpose of converting the form data to json is to send it through a XML HTTP request to a server you can send the FormData object directly without converting it. As simple as this:
+
+var request = new XMLHttpRequest();
+request.open("POST", "http://example.com/submitform.php");
+request.send(formData);
+See also Using FormData Objects on MDN for reference:
+
+UPDATE 4:
+As mentioned in one of the comments below my answer the JSON stringify method won't work out of the box for all types of objects. For more information on what types are supported I would like to refer to the Description section in the MDN documentation of JSON.stringify.
+
+In the description is also mentioned that:
+
+If the value has a toJSON() method, it's responsible to define what data will be serialized.
+
+This means that you can supply your own toJSON serialization method with logic for serializing your custom objects. Like that you can quickly and easily build serialization support for more complex object trees.

@@ -104,7 +104,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
   BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                             100/2, 
-                            "mainbut", //class type of button
+                            "mainbut" " " "button_hac", //class type of button
                             "rgb_toggle", 
                             DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                             PSTR("Light Power "),
@@ -113,7 +113,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
 
   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                             100/2, 
-                            "mainbut", //class type of button
+                            "mainbut" " " "button_hac", //class type of button
                             "animation_toggle", 
                             DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                             PSTR("Animation  "),
@@ -145,7 +145,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
     sprintf(mode_select_ctr,PSTR("animod%02d"),option_mode_id);
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                                   100/option_mode_id_count, 
-                                  "animod",
+                                  "animod" " " "button_hac",
                                   mode_select_ctr, 
                                   DEVICE_CONTROL_BUTTON_ON_ID, 
                                   GetAnimationModeNameByID(option_mode_id, buffer), ""
@@ -1621,10 +1621,10 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
   //   // Web_Base_Page_Draw(request);
   // });
 
-  pCONT_web->pWebServer->onRequestBody(
-      [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
-      {
-        Serial.println("onRequestBody");
+  pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls", HTTP_POST, [](AsyncWebServerRequest *request){
+    //nothing and dont remove it
+  }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+    Serial.println("onRequestBody " D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls" );
           if ((request->url() == D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls") && //"/rest/api/v2/test") &&
               (request->method() == HTTP_POST))
           {
@@ -1636,8 +1636,15 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
                   JsonObject obj = jsonDoc.as<JsonObject>();
                   // Serial.printf("%s\n\r", obj["test"].as<String>().c_str());
 
+                  pCONT_ladd->parsesub_CheckAll(jsonDoc.as<JsonObjectConst>());
+
                   for (JsonPair keyValue : obj) {
-                    AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
+                    // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
+                    if(keyValue.value().as<char*>()){
+                      Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<char*>());
+                    }else{
+                      Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<int>());
+                    }
                     // Serial.println(keyValue.value().as<char*>());
                   }
 
@@ -1645,8 +1652,41 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
               
               request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{ \"status\": 0 }");
           }
-      }
-  );   
+  });
+
+  // pCONT_web->pWebServer->onRequestBody(
+  //     [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+  //     {
+  //       Serial.println("onRequestBody");
+  //         if ((request->url() == D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls") && //"/rest/api/v2/test") &&
+  //             (request->method() == HTTP_POST))
+  //         {
+  //             const size_t        JSON_DOC_SIZE   = 512U;
+  //             DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
+              
+  //             if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+  //             {
+  //                 JsonObject obj = jsonDoc.as<JsonObject>();
+  //                 // Serial.printf("%s\n\r", obj["test"].as<String>().c_str());
+
+  //                 pCONT_ladd->parsesub_CheckAll(jsonDoc.as<JsonObjectConst>());
+
+  //                 for (JsonPair keyValue : obj) {
+  //                   // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
+  //                   if(keyValue.value().as<char*>()){
+  //                     Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<char*>());
+  //                   }else{
+  //                     Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<int>());
+  //                   }
+  //                   // Serial.println(keyValue.value().as<char*>());
+  //                 }
+
+  //             }
+              
+  //             request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{ \"status\": 0 }");
+  //         }
+  //     }
+  // );   
   
   // onRequestBody(
   //       [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
@@ -1815,12 +1855,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
 
   // create command list
   char dlist[200]; memset(dlist,0,sizeof(dlist));
-  pCONT_sup->AppendDList(dlist, D_JSON_PIXELS_UPDATE_PERCENTAGE);
-  pCONT_sup->AppendDList(dlist, "PixelOrder");
-  pCONT_sup->AppendDList(dlist, "PixelRateSecs");
-  pCONT_sup->AppendDList(dlist, "PixelPeriodSecs");
-  pCONT_sup->AppendDList(dlist, "PixelTransMethod");
-  pCONT_sup->AppendDList(dlist, "PixelMode");
+  pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_PIXELS_UPDATE_PERCENTAGE);
+  pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_ORDER);
+  pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_RATE);
+  pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_TIME);
+  pCONT_sup->AppendDList(dlist, D_JSON_TRANSITION "," D_JSON_METHOD);
+  pCONT_sup->AppendDList(dlist, D_JSON_MODE);
 
   JsonBuilderI->Array_Start("container_1");//animation_options_container");// Class name
     JsonBuilderI->Level_Start();
@@ -1828,7 +1868,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
         JsonBuilderI->AppendBuffer("\"");
 
         JsonBuilderI->AppendBuffer(PM_HTTP_FORM_SELECTOR_START_VARIABLE_JSON, ("Animation Controls"), "json_command_form", D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls");
-          char dlist_result[25];
+          char dlist_result[40];
           char title_ctr[70];
           uint8_t element_list_num = 6;
           uint8_t row_id_selected[element_list_num];
@@ -1847,7 +1887,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
           }
           JsonBuilderI->AppendBuffer(PSTR("{t2}"));
 
-        JsonBuilderI->AppendBuffer(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON, "bgrn", ("Save JSON"));
+        JsonBuilderI->AppendBuffer(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON, "bgrn", ("Save"));
 
       JsonBuilderI->AppendBuffer("\"");
     JsonBuilderI->Level_End();
@@ -2294,31 +2334,17 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
             GetPixelsToUpdateAsNumberFromPercentage(pixels_to_update_as_percentage_map[row_id]),
             pixels_to_update_as_percentage_map[row_id]
           );
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
-            row_id, buffer
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_CTR,
+            GetPixelsToUpdateAsNumberFromPercentage(pixels_to_update_as_percentage_map[row_id]), 
+            buffer
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
+      JsonBuilderI->Add("evl",GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
-  
 
-  // JsonBuilderI->Array_Start("g1");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->AddKey("eihr");           // function
-  //       JsonBuilderI->AppendBuffer("\"");
-  //       for (uint8_t row_id = 0; row_id < TRANSITION_ORDER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-  //         JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
-  //           row_id, 
-  //           GetTransitionOrderNameByID(row_id, buffer)
-  //         );
-  //       }
-  //       JsonBuilderI->AppendBuffer("\"");
-  //     JsonBuilderI->Add("evl",2);
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
-  
+
   JsonBuilderI->Array_Start("g1");// Class name
     JsonBuilderI->Level_Start();
       JsonBuilderI->AddKey("eihr");           // function
@@ -2330,7 +2356,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",2);
+      JsonBuilderI->Add("evl",GetTransitionOrderName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
   
@@ -2340,13 +2366,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");      
         for (uint8_t row_id = 0; row_id < sizeof(rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM, 
-            row_id, 
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_NUM, 
+            rate_map_secs[row_id], 
             rate_map_secs[row_id]
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",3);
+      JsonBuilderI->Add("evl",(uint16_t)round(animation.transition.rate_ms.val/1000));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2356,13 +2382,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < sizeof(time_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM, 
-            row_id, 
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_NUM, 
+            time_map_secs[row_id], 
             time_map_secs[row_id]
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",4);
+      JsonBuilderI->Add("evl",(uint16_t)round(animation.transition.time_ms.val/1000));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
   
@@ -2372,13 +2398,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < TRANSITION_METHOD_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
-            row_id, 
-            GetTransitionMethodNameByID(row_id, buffer)
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
+            GetTransitionMethodNameByID(row_id, buffer),
+            GetTransitionMethodNameByID(row_id, buffer2)
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
+      JsonBuilderI->Add("evl",GetTransitionMethodName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2388,13 +2414,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < ANIMATION_MODE_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
-            row_id, 
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
+            GetAnimationModeNameByID(row_id, buffer), 
             GetAnimationModeNameByID(row_id, buffer)
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
+      JsonBuilderI->Add("evl",GetAnimationModeName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2404,47 +2430,47 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
-            row_id, 
-            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer)
+          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
+            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer),
+            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer2)
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
+      JsonBuilderI->Add("evl",pCONT_iLight->GetPaletteFriendlyName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
 
   #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
-  JsonBuilderI->Array_Start("g7");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("eihr");           // function
-        JsonBuilderI->AppendBuffer("\""); 
-        for (uint8_t row_id = 0; row_id < FLASHER_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
-            row_id, 
-            pCONT_iLight->GetPaletteFriendlyNameByID(row_id)
-          );
-        }
-        JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  // JsonBuilderI->Array_Start("g7");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->AddKey("eihr");           // function
+  //       JsonBuilderI->AppendBuffer("\""); 
+  //       for (uint8_t row_id = 0; row_id < FLASHER_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+  //         JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
+  //           row_id, 
+  //           pCONT_iLight->GetPaletteFriendlyNameByID(row_id)
+  //         );
+  //       }
+  //       JsonBuilderI->AppendBuffer("\"");
+  //     JsonBuilderI->Add("evl",1);
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
 
-  JsonBuilderI->Array_Start("g8");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("eihr");           // function
-        JsonBuilderI->AppendBuffer("\""); 
-        for (uint8_t row_id = 0; row_id < 6; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
-          JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
-            row_id, 
-            "running_id"
-          );
-        }
-        JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",1);
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  // JsonBuilderI->Array_Start("g8");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->AddKey("eihr");           // function
+  //       JsonBuilderI->AppendBuffer("\""); 
+  //       for (uint8_t row_id = 0; row_id < 6; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+  //         JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
+  //           row_id, 
+  //           "running_id"
+  //         );
+  //       }
+  //       JsonBuilderI->AppendBuffer("\"");
+  //     JsonBuilderI->Add("evl",1);
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
   #endif
 
 }
