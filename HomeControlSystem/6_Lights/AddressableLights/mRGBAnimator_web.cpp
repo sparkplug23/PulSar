@@ -627,8 +627,13 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_ASYNC "FreeRam %d"),freemem_start-ESP.getFreeHeap());
   
-  request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);//PAGE_rgb_colour_palette_editor);
+  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);//PAGE_rgb_colour_palette_editor);
 
+  AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
+
+  response->addHeader("Content-Encoding","gzip");
+  
+  request->send(response);
 
 //   if (pCONT_web->pWebServer->hasParam("loadpixels")) {
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"loadpixels\")"));
@@ -1050,8 +1055,13 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
     //   return;
     // }
   
-  request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
 
+  AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
+
+  response->addHeader("Content-Encoding","gzip");
+  
+  request->send(response);
 }
 
 
@@ -1815,7 +1825,6 @@ void mRGBAnimator::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *reques
     JsonBuilderI->Level_Start("function");
       JsonBuilderI->Level_Start("Parse_Urls");        
         JsonBuilderI->Add("/fetch/animation_control_list_options.json",-1);
-        // JsonBuilderI->Add("/fetch/web_top_bar.json",1000); 
       JsonBuilderI->Level_End();
     JsonBuilderI->Level_End();
   JsonBuilderI->End();
@@ -1928,7 +1937,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_PageButtons(){
         JsonBuilderI->AppendBuffer("\"");
         pCONT_web->WebAppend_Button_Spaced(PM_BUTTON_NAME_RGB_PALETTE_EDITOR_CTR, D_WEB_HANDLE_PALETTE_EDITOR_PAGE_CTR);
         pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_ANIMATION_MIXER_EDITOR_CTR, PM_WEB_HANDLE_RGB_ANIMATION_MIXER_EDITOR_CTR);
-        pCONT_web->WebAppend_Button_Spaced(BUTTON_MAIN);
+        // pCONT_web->WebAppend_Button_Spaced(BUTTON_MAIN);
       JsonBuilderI->AppendBuffer("\"");
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();

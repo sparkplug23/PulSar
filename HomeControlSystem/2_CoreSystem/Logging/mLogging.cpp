@@ -171,6 +171,7 @@ void AddLog_P(uint8_t loglevel, PGM_P formatP, ...)
         it++;                                  // Skip web_log_index
         it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
         it++;                                  // Skip delimiting "\1"
+        // circle uffer
         memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
       }
       // creates line formatted with \1 meaning EOL
@@ -456,6 +457,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
 
   if (idx) {
     char* it = pCONT_set->web_log;
+    // get line
     do {
       uint8_t cur_idx = *it;
       it++;

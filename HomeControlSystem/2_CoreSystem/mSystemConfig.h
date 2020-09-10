@@ -14,9 +14,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0
-#define FIRMWARE_VERSION_MINOR    77
-#define FIRMWARE_VERSION_CORE     19
-#define FIRMWARE_VERSION_MODULE   39
+#define FIRMWARE_VERSION_MINOR    78
+#define FIRMWARE_VERSION_CORE     4
+#define FIRMWARE_VERSION_MODULE   0
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))
@@ -66,19 +66,12 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define DEBUG_WEBSERVER_MEMORY
 
 
-// During testing to easily show different versions
-// #define COLOR_BUTTON                "#1fbdec"    // [WebColor11] Button color - Blueish
-// #define COLOR_BUTTON_HOVER          "#136780"
-
 // Muted blue/green
 #define COLOR_BUTTON_HIGHLIGHT      "#1be7f1"
 #define COLOR_BUTTON                "#4d8d90"    // [WebColor11] Button color - Blueish
 #define COLOR_BUTTON_HOVER          "#31595b"
-#define D_COLOUR_PAGE_TITLE         "#60e88b"
-
-// Version 56 colour
-// #define D_COL_TEXT_MODULE_TITLE_CTR "#ff8800" //orange
-#define D_COL_TEXT_MODULE_TITLE_CTR "#03fcf0"//cyan
+#define D_COLOUR_PAGE_TITLE         "#4bb7e6"
+#define D_COL_TEXT_MODULE_TITLE_CTR "#4bb7e6"
 
 #define ENABLE_USER_CONFIG_OVERRIDE
 

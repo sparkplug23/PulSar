@@ -203,7 +203,7 @@ bool AsyncWebServerResponse::_started() const { return _state > RESPONSE_SETUP; 
 bool AsyncWebServerResponse::_finished() const { return _state > RESPONSE_WAIT_ACK; }
 bool AsyncWebServerResponse::_failed() const { return _state == RESPONSE_FAILED; }
 bool AsyncWebServerResponse::_sourceValid() const { return false; }
-void AsyncWebServerResponse::_respond(AsyncWebServerRequest *request){ _state = RESPONSE_END; request->client()->close(); }
+void AsyncWebServerResponse::_respond(AsyncWebServerRequest *request){ Serial.println("AsyncWebServerResponse::_respond"); _state = RESPONSE_END; request->client()->close(); }
 size_t AsyncWebServerResponse::_ack(AsyncWebServerRequest *request, size_t len, uint32_t time){ return 0; }
 
 /*
@@ -298,9 +298,9 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
  * Called by callback, used to actually transmit response back to client
  * */
 void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
-  #ifdef DEBUG_ASYNC
+  // #ifdef DEBUG_ASYNC
   Serial.println("AsyncBasicResponse::_respond(request) = Primary send mechanism"); Serial.flush();
-  #endif
+  // #endif
   _state = RESPONSE_HEADERS;
 
   uint16_t header_max_length = 250;
@@ -433,16 +433,23 @@ AsyncAbstractResponse::AsyncAbstractResponse(AwsTemplateProcessor callback): _ca
 }
 
 void AsyncAbstractResponse::_respond(AsyncWebServerRequest *request){
+  
+      Serial.println("AsyncAbstractResponse::_respond"); Serial.flush();
   addHeader(PSTR("Connection"),PSTR("close"));
   uint16_t header_max_length = 250;
   char header_ctr[header_max_length];//write header into output string //maximum header size for stability
   size_t header_len = _assembleHead(header_ctr, request->version(), header_max_length);
+  
+      Serial.printf("AsyncAbstractResponse::_respond header_ctr=%s\n\r",header_ctr); Serial.flush();
   _head = String(header_ctr);//_assembleHead(request->version());
   _state = RESPONSE_HEADERS;
   _ack(request, 0, 0);
 }
 
 size_t AsyncAbstractResponse::_ack(AsyncWebServerRequest *request, size_t len, uint32_t time){
+
+  
+      Serial.printf("AsyncAbstractResponse::_ack\n\r"); Serial.flush();
   if(!_sourceValid()){
     _state = RESPONSE_FAILED;
     request->client()->close();
@@ -527,6 +534,7 @@ size_t AsyncAbstractResponse::_ack(AsyncWebServerRequest *request, size_t len, u
         _sentLength += outLen - headLen;
     }
 
+      Serial.printf("AsyncAbstractResponse::_ack free(buf)=%s\n\r",buf); Serial.flush();
     free(buf);
 
     if((_chunked && readLen == 0) || (!_sendContentLength && outLen == 0) || (!_chunked && _sentLength == _contentLength)){

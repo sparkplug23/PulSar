@@ -17,7 +17,8 @@ typedef struct  FREEMEM_HANDLER{
 #include <Arduino.h>
 #include "2_CoreSystem/Logging/mLogging.h"
 
-#include "3_Network/WebServer/WebPages_Progmem.h"
+// #include "3_Network/WebServer/WebPages_Progmem.h"
+#include "html_ui.h"
 
 #include <ArduinoJson.h>
 #include "2_CoreSystem/InterfaceController/mInterfaceController.h"
@@ -475,6 +476,7 @@ const char HTTP_STYLE_TITLE_CONTAINER_HEAD[] PROGMEM =
 
 #define WEB_HANDLER_STYLE_WEB_BASIC_ROOT "/style/web_basic_root.css"
 #define WEB_HANLDE_JSON_WEB_TOP_BAR "/web_top_bar.json"
+#define WEB_HANLDE_JSON_WEB_STATUS_POPOUT_DATA "/status_popout_data.json"
 
 #define WEB_HANDLE_JSON_ROOT_STATUS_ANY "/root_status_any.json"
 
@@ -1199,23 +1201,6 @@ DEFINE_PGM_CTR(PM_STYLE_TOPBAR)
 };
 
 
-//send tab_top
-// const char DIVDRAW_NOTIFICATION_TOP_BAR[] PROGMEM = 
-// //"<div class='tb_con'>"
-//   // "<div class='tb_gp'>"
-//   //   "<span class='tb_it'></span>"
-//   //   "<span class='tb_it'></span>"
-//   //   "<span class='tb_it'></span>"
-//   //   "<span class='tb_it'></span>"
-//   //   "<span class='tb_it'></span>"
-//   // "</div>"
-// //"</div>"
-// ;
-
-// typedef struct buffermess{
-//   char* ctr;
-//   uint16_t len;
-// }buffer_t;
 
 enum ButtonTitle {
   BUTTON_RESTART, BUTTON_RESET_CONFIGURATION,
@@ -1324,6 +1309,10 @@ void WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_r
 
     void WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request);    
      
+     
+void Console_JSON_Data(AsyncWebServerRequest *request);
+
+
 void WebAppend_Root_Draw_PageTitleFields();
     void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Draw_ModuleTable();
@@ -1501,6 +1490,10 @@ void FreeMem_Usage_After(freemem_usage_t* memory_location);
     
     void WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request);
     void WebSend_JSON_WebServer_TopBar2(AsyncWebServerRequest *request);
+    
+
+void WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *request);
+    
     void HandleSystemSettings(AsyncWebServerRequest *request);
 
     void HandleUpgradeFirmwareStart(AsyncWebServerRequest *request);

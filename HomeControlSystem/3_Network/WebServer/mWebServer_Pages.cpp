@@ -52,13 +52,15 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
     
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
 
+char buffer[30];
+
   JsonBuilderI->Start();
-  JsonBuilderI->Array_Start("tb_it");// Class name
-    for(int row=0;row<2;row++){
+  JsonBuilderI->Array_Start("info_row");// Class name
+    for(int row=0;row<4;row++){
     JsonBuilderI->Level_Start();
+          JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add("id",row);
           JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
@@ -68,21 +70,29 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
           if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add("id",row);
           JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);    
         }break;
+        case 2:
+          JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+          JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+
+        break;
+        case 3:
+            JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+    
+        break;
       } //end switch 
     JsonBuilderI->Level_End();
     } // end for
 
   JsonBuilderI->Array_End();
   
-  JsonBuilderI->Array_Start("debug_line");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  // JsonBuilderI->Array_Start("debug_line");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
   JsonBuilderI->End();
 
 
@@ -91,6 +101,59 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
 } // end function
 
 
+
+
+void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *request){
+    
+  if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
+
+char buffer[30];
+
+  JsonBuilderI->Start();
+  JsonBuilderI->Array_Start("info_row");// Class name
+    for(int row=0;row<4;row++){
+    JsonBuilderI->Level_Start();
+          JsonBuilderI->Add("id",row);
+      switch(row){
+        case 0:
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
+          JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+        break;
+        case 1:{        
+          int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
+          char colour_ctr[7];
+          if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
+          else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
+          else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
+          JsonBuilderI->Add("fc", colour_ctr);    
+        }break;
+        case 2:
+          JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+          JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+
+        break;
+        case 3:
+            JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+    
+        break;
+      } //end switch 
+    JsonBuilderI->Level_End();
+    } // end for
+
+  JsonBuilderI->Array_End();
+  
+  // JsonBuilderI->Array_Start("debug_line");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
+  JsonBuilderI->End();
+
+
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+
+} // end function
 
 
 
@@ -147,8 +210,22 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
     AddLog_P(LOG_LEVEL_TEST,PSTR("HandleRootStatusRefresh(request) FOUND SO STOP"));
     return;
   }
-  request->addInterestingHeader("root");
-  request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+  // request->addInterestingHeader("root");
+
+  
+  // request->addHeader("Content-Encoding","gzip");
+
+
+  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+
+  
+  AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
+
+  response->addHeader("Content-Encoding","gzip");
+  
+  request->send(response);
+
+
   
 }
 
@@ -310,13 +387,13 @@ void mWebServer::WebAppend_Root_Draw_PageTitleFields(){
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
-  char buffer[10];
-  JsonBuilderI->Array_Start("row_version_data");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
-      JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  // char buffer[10];
+  // JsonBuilderI->Array_Start("row_version_data");// Class name
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+  //     JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->Array_End();
 
   // JsonBuilderI->Level_Start("function");
   //     JsonBuilderI->Add("SetTitle",pCONT_set->Settings.system_name.friendly);
@@ -388,8 +465,13 @@ void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
     return;
   }
 
-  request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
   
+  AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
+
+  response->addHeader("Content-Encoding","gzip");
+  
+  request->send(response);
 }
 
 
@@ -404,7 +486,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
       JsonBuilderI->AddKey("ihr");           // function
         JsonBuilderI->AppendBuffer("\"");
         JsonBuilderI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
-        JsonBuilderI->AppendBuffer(PSTR("<textarea readonly='' id='t1' cols='340' wrap='off' name='t1'></textarea>"
+        JsonBuilderI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
           "<br><br>"
           "<form method='get' onsubmit='return l(1);'>"
               "<input id='c1'  style='background:#1d1d1d' placeholder='Enter Module Name eg pixels' autofocus='' name='c1'>"
@@ -452,54 +534,59 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
       JsonBuilderI->AddKey("Parse_AddScript");
         JsonBuilderI->AppendBuffer("\"");
         JsonBuilderI->AppendBuffer(PSTR(
-          "var x2=null,lt2='';"
-            "var sn2=0,id2=0;"
-            "function l(p){"
-              "var c,o='',t;"
-              "clearTimeout(lt2);"
-              "t=document.getElementById('t1');"
-              "if(p==1){"
-                "c=document.getElementById('c1');"
-                "o='&c1='+encodeURIComponent(c.value);"
-                "c.value='';"
-                "t.scrollTop=sn2;"
-              "}"
-              "if(t.scrollTop>=sn2){"
-                "if(x2!=null){ x2.abort(); }"
-                "x2=new XMLHttpRequest();"
-                "x2.onreadystatechange=function(){"
-                "if(x2.readyState==4&&x2.status==200){"
-                  "var z,d;"
-                  "d=x2.responseText.split(/}1/);"
-                  "id2=d.shift();"
-                  "if(d.shift()==0){"
-                  "t.value='';"
-                "}"
-                "z=d.shift();"
-                "if(z.length>0){"
-                  "t.value+=z;"
-                "}"
-                "t.scrollTop=99999;"
-                "sn2=t.scrollTop;"
-              "}"
-            "};"
-            "x2.open('GET','" D_WEB_HANDLE_CONSOLE_PAGE "?c2='+id2+o,true);"
-            "x2.send();"
-          "}"
-          "lt2=setTimeout(l,200);"
-          "return false;"
-        "}"
-        "l(0);"
-        "function jd(){"
-          "var t=0,i=document.querySelectorAll('input,button,textarea,select');"
-          "while(i.length>=t){"
-            "if(i[t]){"
-              "i[t]['name']=(i[t].hasAttribute('id')&&(!i[t].hasAttribute('name')))?i[t]['id']:i[t]['name'];"
-            "}"
-            "t++;"
-          "}"
-        "}"
-        "jd();")
+          "set_console_as_page();"
+          "enable_get_console_data();"
+        //   "var x2=null,lt2='';"
+        //   "var sn2=0,id2=0;" //sn2 starts at top of page, web_log_index starts at 0
+        //   "function l(p){"
+        //     "var c,o='',t;"
+        //     "clearTimeout(lt2);"
+        //     "t=document.getElementById('t1');"
+        //     "if(p==1){"
+        //       "c=document.getElementById('c1');"
+        //       "o='&c1='+encodeURIComponent(c.value);"
+        //       "c.value='';"
+        //       "t.scrollTop=sn2;"
+        //     "}"
+        //     //scrolltop == 0 is top of textbox, larger number = bottom
+        //     "if(t.scrollTop>=sn2){" //if scrolled up at all, don't update
+        //       "if(x2!=null){ x2.abort(); }"
+        //       "x2=new XMLHttpRequest();"
+        //       "x2.onreadystatechange=function(){"
+        //         "if(x2.readyState==4&&x2.status==200){"
+        //           "var z,d;"
+        //           //[web_log_index][reset_web_log_flag][text]
+        //           "d=x2.responseText.split(/}1/);"
+        //           "id2=d.shift();"   //web_log_index //removes first to last element
+        //           "if(d.shift()==0){" //reset_web_log_flag == 0
+        //             "t.value='';" //clear value back to start
+        //           "}"
+        //           "z=d.shift();" //get the text
+        //           "if(z.length>0){" //if new text
+        //             "t.value+=z;"  //append text
+        //           "}"
+        //           "t.scrollTop=99999;" //force to the very bottom
+        //           "sn2=t.scrollTop;"   //get scroll of the bottom line now 
+        //         "}"
+        //       "};"
+        //       "x2.open('GET','" D_WEB_HANDLE_CONSOLE_PAGE "?c2='+id2+o,true);" //current weblog_index + any new commands
+        //       "x2.send();"
+        //     "}"
+        //   "lt2=setTimeout(l,200);"
+        //   "return false;"
+        // "}"
+        // "l(0);"
+        // "function jd(){"
+        //   "var t=0,i=document.querySelectorAll('input,button,textarea,select');"
+        //   "while(i.length>=t){"
+        //     "if(i[t]){"
+        //       "i[t]['name']=(i[t].hasAttribute('id')&&(!i[t].hasAttribute('name')))?i[t]['id']:i[t]['name'];"
+        //     "}"
+        //     "t++;"
+        //   "}"
+        // "}"
+        // "jd();"
+        )
       );
       JsonBuilderI->AppendBuffer("\"");
     JsonBuilderI->Level_End();
@@ -528,40 +615,87 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
   BufferWriterI->Start();
 
-  BufferWriterI->Append_P(PSTR("%d}1%d}1"), pCONT_set->web_log_index, reset_web_log_flag);
+  BufferWriterI->Append_P(
+    PSTR(
+      "%d" //web_log_index
+      "}1"
+      "%d" //reset_web_log_flag
+      "}1")
+    , pCONT_set->web_log_index, reset_web_log_flag);
 
   if (!reset_web_log_flag) {
-    counter = 0;
+    counter = 0;                  //reset counter from webpage 
     reset_web_log_flag = true;
   }
-  if (counter != pCONT_set->web_log_index) {
-    if (!counter) {
-      counter = pCONT_set->web_log_index;
-      cflg = false;
+  if (counter != pCONT_set->web_log_index) {   //if webpage counter does not match internal counter
+    if (!counter) {    //and counter is not FIRST position
+      counter = pCONT_set->web_log_index;  //use internal counter
+      cflg = false;     //no NEW line
     }
+
+    // get the webindex, and get all internal indexes until internal catches up with web
     do {
       char* tmp;
       size_t len;
       pCONT->mso->GetLog(counter, &tmp, &len);
-      if (len) {
-        if (len > sizeof(data_buffer2.payload.ctr) -2) { 
-          len = sizeof(data_buffer2.payload.ctr); 
-        }
+      if (len) { //if there is new log data
+      // and is not larger than buffer
+        if (len > sizeof(data_buffer2.payload.ctr) -2) { len = sizeof(data_buffer2.payload.ctr); }
         char stemp[len +1]; //leak!
         strlcpy(stemp, tmp, len);
+        // add new line if not first, then text
         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
         cflg = true;
       }
-      counter++;
+      counter++; //internal counter
       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
       if(counter>100) break;
     } while (counter != pCONT_set->web_log_index);
+
+
+
+
   }
 
   BufferWriterI->Append_P(PSTR("}1"));
   
   request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
  
+}
+
+void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
+
+
+  if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
+  
+  JsonBuilderI->Start();
+    
+  JsonBuilderI->Array_Start("function");// Class name
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->AddKey("Append_Console");
+
+        char buffer[500];
+        // sprintf(buffer, "{'link':1,'text':'hello','reset':0}");
+        sprintf(buffer, "{\\\"link\\\":1}");
+
+// I need to think how ANYTHING can pass through serial, json might not work
+
+
+        // sprintf(buffer, "{}");
+        JsonBuilderI->AppendBuffer("\"");
+        JsonBuilderI->AppendBuffer(buffer);
+        JsonBuilderI->AppendBuffer("\"");
+
+    JsonBuilderI->Level_End();
+  JsonBuilderI->Array_End();
+        
+  JsonBuilderI->End();
+
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+
+
+
+
 }
 
 

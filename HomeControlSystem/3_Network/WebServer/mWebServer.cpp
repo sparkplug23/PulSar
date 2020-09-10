@@ -89,7 +89,7 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
             
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); // ALLOW CROSS SITE JAVASCRIPT ACCESS (CORS) BY DEFAULT
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST");
-      DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");      
+      DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");    
 
       pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER); // MOVE to be delayed start
       // To prevent rush event of mqtt telemetry and webui building, add a small delay to all shared buffer to be used
@@ -171,6 +171,9 @@ void mWebServer::WebPage_Root_AddHandlers(){
   });   
   pWebServer->on(WEB_HANLDE_JSON_WEB_TOP_BAR, HTTP_GET, [this](AsyncWebServerRequest *request){ 
     WebSend_JSON_WebServer_TopBar(request);    
+  });  
+  pWebServer->on(WEB_HANLDE_JSON_WEB_STATUS_POPOUT_DATA, HTTP_GET, [this](AsyncWebServerRequest *request){ 
+    WebSend_JSON_WebServer_StatusPopoutData(request);    
   });
   pCONT_web->pWebServer->on(WEB_HANDLE_JSON_ROOT_STATUS_ANY, HTTP_GET, [this](AsyncWebServerRequest *request){
     WebSend_JSON_RootStatus_Table(request);
@@ -201,6 +204,15 @@ void mWebServer::WebPage_Root_AddHandlers(){
     // }
     // Web_Base_Page_Draw(request);
   });
+
+  pCONT_web->pWebServer->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+    Console_JSON_Data(request);
+  });  
+
+
+
+
+
 
 // pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
 //     Serial.println("Running");

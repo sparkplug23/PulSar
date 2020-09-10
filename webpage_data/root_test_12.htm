@@ -669,10 +669,7 @@
             text-align: left;
             margin-top: var(--bmt);            
         }
-        /* #briwrap2 {
-            display: block;
-            word-wrap: break-word;       
-        } */
+        
         .btnwrap{
             float:right;
         }
@@ -1006,7 +1003,7 @@
 <body onload="onLoad()">
 
 <!-- <div id="cv" class="overlay">Loading WLED UI...</div> -->
-<noscript><div class="overlay" style="opacity:1;">Sorry, WLED UI needs JavaScript!</div></noscript>
+<noscript><div class="overlay" style="opacity:1;">JavaScript Needed!</div></noscript>
 <div id="bg"></div>
 
 <div class="wrapper" id="top">
@@ -1263,7 +1260,7 @@ function onLoad() {
 	setTimeout(function(){requestJson(null, false)}, 25);
 	d.addEventListener("visibilitychange", handleVisibilityChange, false);
 	size();
-	d.getElementById("cv").style.opacity=0;
+	// d.getElementById("cv").style.opacity=0;
 	if (localStorage.getItem('pcm') == "true") togglePcMode(true);
 }
 
