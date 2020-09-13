@@ -34,6 +34,8 @@ class mWiFi{
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;
     uint32_t tSavedWiFiReconnect;
+    
+    bool WifiCheckIpConnected();
 
     #ifndef WIFI_RSSI_THRESHOLD
       #define WIFI_RSSI_THRESHOLD     10         // Difference in dB between current network and scanned network

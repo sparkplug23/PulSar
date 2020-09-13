@@ -28,10 +28,10 @@
 **/
 // #define DEVICE_RGBROOF 
 // #define DEVICE_RGBDELL
-//#define DEVICE_RGBCRYSTAL1
+// #define DEVICE_RGBCRYSTAL1
 //#define DEVICE_RGBSHELF
-//#define DEVICE_RGBMICRO1 //glass box
-#define DEVICE_RGBMICRO2 //projector
+// #define DEVICE_RGBMICRO1 //glass box
+// #define DEVICE_RGBMICRO2 //projector
 // #define DEVICE_RGBBEDLIGHT
 // #define DEVICE_DESKLIGHT
 // #define DEVICE_RGBCOOKER // new lighting H801
@@ -59,7 +59,7 @@
 // #define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 // #define DEVICE_BLACKDOORBELL
-// #define DEVICE_BEDROOM_CEILINGFAN
+#define DEVICE_BEDROOM_CEILINGFAN
 
 
 /**
@@ -81,7 +81,7 @@
 // #define DEVICE_SONOFFTESTER
 // #define DEVICE_DRESSERLIGHT
 // #define DEVICE_CANDLEWARMER
-//#define DEVICE_EXTRACTORFAN
+// #define DEVICE_EXTRACTORFAN
 // #define DEVICE_EXTENTION1
 // #define DEVICE_SILVERLAMP1
 // #define DEVICE_SILVERLAMP2
@@ -680,6 +680,7 @@
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -699,9 +700,9 @@
       "\"" D_JSON_STRIP_SIZE     "\":50," //really 150
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":4,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-      "\"" D_JSON_COLOUR_PALETTE "\":\"USER_19\"," //purple/pink/red (at sunset orange?)
+      "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\"," //purple/pink/red (at sunset orange?)
       "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
-      "\"" D_JSON_BRIGHTNESS     "\":50"
+      "\"" D_JSON_BRIGHTNESS     "\":100"
     "}";
 
 #endif
@@ -788,7 +789,7 @@
   // #define USE_SENSOR_DOOR_LOCK
   // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  // #define USE_MODULE_CUSTOM_CEILING_FAN
+  // #define USE_SONOFF_IFAN
   // #define USE_MODULE_DRIVERS_IRTRANSCEIVER
 
   // #define USE_MODULE_SENSORS_DS18B20
@@ -945,13 +946,12 @@
   #define DEVICENAME_FRIENDLY_CTR "Heating"
 
   #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   //#define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
   #define FORCE_DEVICENAME_CLEAR_ON_BOOT
-
   #define ENABLE_HEATING_DEBUG_TIMES
 
   #define USE_BUILD_TYPE_CUSTOM
@@ -959,7 +959,10 @@
   
   #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_DS18B20
+
   #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 4
+  #define USE_MODULE_DRIVERS_INTERFACE
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -978,7 +981,8 @@
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-  // Controller Device - Sets device names by hard coded
+
+  // Controller Device "mHeating.cpp/h"- Sets device names directly
   
 #endif
 #ifdef DEVICE_DOORBELLWALLCHIME
@@ -1259,7 +1263,7 @@
   #define USE_SENSOR_DOOR_LOCK
   #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  // #define USE_MODULE_CUSTOM_CEILING_FAN
+  // #define USE_SONOFF_IFAN
   // #define USE_MODULE_DRIVERS_IRTRANSCEIVER
 
   #define USE_MODULE_SENSORS_DS18B20
@@ -2010,84 +2014,6 @@
     pCONT_set->devices_present = 1_ID;
 #endif
 
-#ifdef DEVICE_SONOFFBASIC_TESTER
-  #define DEVICENAME_CTR          "sonoffbasic_tester"
-  #define DEVICENAME_FRIENDLY_CTR "Sonoff Basic Tester"
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "relay"
-  #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
-#endif
-
-#ifdef DEVICE_SONOFFTESTER
-  #define DEVICENAME_CTR          "dresserlight_tester"
-  #define DEVICENAME_FRIENDLY_CTR "Sonoff Dresser Socket"
-  
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-  
-  // #define ENABLE_BUG_TRACING
-
-  #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
-
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"NAME\":\"" DEVICENAME_CTR "\","
-    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"GPIOC\":{"
-    //   #ifdef USE_MODULE_SENSORS_BME
-    //   "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-    //   "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    //   #endif
-    //   #ifdef USE_MODULE_SENSORS_DS18B20
-    //   "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-    //   "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-    //   #endif
-    //   #ifdef USE_MODULE_DRIVERS_RELAY
-    //   "\"D4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-    //   // "\"D0\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-    //   #endif
-    //   #ifdef USE_MODULE_SENSORS_BUTTONS
-    //   "\"D0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-    //   #endif
-    //   "\"D5\":\"" D_GPIO_FUNCTION_FAN_IRSEND_CTR    "\","
-    //   #ifdef USE_MODULE_SENSORS_MOTION
-    //   "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_CTR     "\","
-    //   #endif
-    //   "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    //   // add status led to here
-    // "},"
-    "\"BASE\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
-
-  // Drivers, Sensors and lights?
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    //device_names:{"module_name":["relay1","relay2"]}
-    "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-        "]"
-    "}"
-  "}";
-
-  // white wire in garage, add red led inside switch as optional led connected to gpio2
-
-
-
-#endif
 #ifdef DEVICE_CANDLEWARMER
 #define DEVICENAME_CTR          "candlewarmer"
   #define DEVICENAME_FRIENDLY_CTR "Candle Warmer"
@@ -2133,10 +2059,10 @@
 
 #ifdef DEVICE_DRESSERLIGHT
   #define DEVICENAME_CTR          "dresserlight"
-  #define DEVICENAME_FRIENDLY_CTR "Sonoff Dresser Socket"
+  #define DEVICENAME_FRIENDLY_CTR "Dresser Light"
   
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
+  #define SETTINGS_HOLDER 1
   
   // #define ENABLE_BUG_TRACING
 
@@ -2187,7 +2113,7 @@
   #define USE_MODULE_SENSORS_BUTTONS
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
 
-  #define USE_MODULE_SENSORS_BUTTONS
+  #define USE_SONOFF_IFAN
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 4
@@ -2201,30 +2127,7 @@
     "\"BASE\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Relay0"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Relay1"
-  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Relay2"
-  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Relay3"
-
-  // Drivers, Sensors and lights?
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    //device_names:{"module_name":["relay1","relay2"]}
-
-// fan controller will name these directly
-
-    "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
-        "]"
-    "}"
-  "}";
-
-  // white wire in garage, add red led inside switch as optional led connected to gpio2
+  // Need to create default names for all class in GetDeviceName
 
 #endif
 
@@ -2236,12 +2139,8 @@
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
-  // #define ENABLE_BUG_TRACING
-
   #define USE_MODULE_SENSORS_BUTTONS
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
-
-  #define USE_MODULE_SENSORS_BUTTONS
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 1
@@ -2256,18 +2155,16 @@
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
-
-  // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
-    //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
         "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
         "]"
     "}"
   "}";
+
 #endif
 #ifdef DEVICE_EXTENTION1
   #define DEVICENAME_CTR          "extention1"

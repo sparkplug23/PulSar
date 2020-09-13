@@ -69,8 +69,8 @@ uint8_t mInterfaceController::Instance_Init(){
 
 
   // Drivers
-  #ifdef USE_MODULE_CUSTOM_CEILING_FAN
-    if(mcf == nullptr){ mcf = new mCeilingFan(); }
+  #ifdef USE_SONOFF_IFAN
+    if(mifan == nullptr){ mifan = new mSonoffIFan(); }
   #endif
 
 
@@ -247,8 +247,8 @@ DEBUG_LINE;
   #ifdef D_MODULE_CUSTOM_HEATING_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_HEATING_ID;
   #endif
-  #ifdef D_MODULE_CUSTOM_CEILINGFAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_CEILINGFAN_ID;
+  #ifdef D_MODULE_DRIVER_IFAN_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVER_IFAN_ID;
   #endif
   #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
@@ -360,8 +360,8 @@ uint8_t mInterfaceController::CheckPointersPass(){
   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined(USE_MODULE_DRIVERS_RF433MHZ)
     if(msm==nullptr){ return false; }
   #endif
-  #ifdef USE_MODULE_CUSTOM_CEILING_FAN
-    if(mcf==nullptr){ return false; }
+  #ifdef USE_SONOFF_IFAN
+    if(mifan==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mod==nullptr){ return false; }
@@ -548,8 +548,8 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
         case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
       #endif
-      #ifdef D_MODULE_CUSTOM_CEILINGFAN_ID
-        case D_MODULE_CUSTOM_CEILINGFAN_ID:      result = mcf->Tasker(function); break;
+      #ifdef D_MODULE_DRIVER_IFAN_ID
+        case D_MODULE_DRIVER_IFAN_ID:      result = mifan->Tasker(function); break;
       #endif
       #ifdef D_MSAW_MODULE_ID
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
@@ -755,24 +755,16 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MODULE_CUSTOM_EXERCISEBIKE_ID:     result = meb->Tasker(function); break;
       #endif
       #ifdef D_MODULE_CUSTOM_HEATING_ID
-        case D_MODULE_CUSTOM_HEATING_ID:          result = mh-> Tasker(function); break;
+        case D_MODULE_CUSTOM_HEATING_ID:          result = mh-> Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_DRIVERS_RELAY_ID
-        case D_MODULE_DRIVERS_RELAY_ID:    
-        
-        result = mry->Tasker(function,param1);
-
-        //  f<int>();
-        //  mry->f2<int>();
-        
-        // result = mry->Tasker(function);
-         break;
+        case D_MODULE_DRIVERS_RELAY_ID:           result = mry->Tasker(function,param1);      break;
       #endif
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
         case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
       #endif
-      #ifdef D_MODULE_CUSTOM_CEILINGFAN_ID
-        case D_MODULE_CUSTOM_CEILINGFAN_ID:      result = mcf->Tasker(function); break;
+      #ifdef D_MODULE_DRIVER_IFAN_ID
+        case D_MODULE_DRIVER_IFAN_ID:      result = mifan->Tasker(function, param1); break;
       #endif
       #ifdef D_MSAW_MODULE_ID
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
@@ -1140,8 +1132,8 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
         return D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR; 
       break;
     #endif
-    #ifdef D_MODULE_CUSTOM_CEILINGFAN_ID
-      case D_MODULE_CUSTOM_CEILINGFAN_ID:         return PM_MODULE_CUSTOM_CEILINGFAN_FRIENDLY_CTR;  break;
+    #ifdef D_MODULE_DRIVER_IFAN_ID
+      case D_MODULE_DRIVER_IFAN_ID:         return PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR;  break;
     #endif
     #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
       case D_MODULE_CUSTOM_OILFURNACE_ID:        return PM_MODULE_CUSTOM_OILFURNACE_FRIENDLY_CTR; 

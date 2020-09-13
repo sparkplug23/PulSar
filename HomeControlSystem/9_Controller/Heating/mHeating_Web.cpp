@@ -143,7 +143,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
           sprintf(buffer, "#4d8d90");
           // sprintf(buffer, "%d==%d %d",program_timers[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
         }
-        AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_timers[row].time_minutes_on_start,row,_kButtonTitle[row]);
+        // AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_timers[row].time_minutes_on_start,row,_kButtonTitle[row]);
         JsonBuilderI->Add("bc",buffer);//program_timers[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
       JsonBuilderI->Level_End();
     }
@@ -238,7 +238,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
             sprintf(buffer, "#4d8d90");
             // sprintf(buffer, "%d==%d %d",program_temps[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
           }
-           AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_temps[row].temp.desired,row,_kButtonTitle[row]);
+           //AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_temps[row].temp.desired,row,_kButtonTitle[row]);
         }else{
           
             sprintf(buffer, "#4d8d90");
@@ -304,7 +304,7 @@ char buffer[30];
       sprintf(button_handle_ctr,"%s%d\0",WEB_HANDLE_BUTTON_NAME_TIMER_SET,device_id);
       BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                                     100/4, 
-                                    WEB_HANDLE_BUTTON_NAME_TIMER_SET,
+                                    "button_hac " WEB_HANDLE_BUTTON_NAME_TIMER_SET,
                                     button_handle_ctr, 
                                     program_timers[device_id].mapped_defaults[button_id],                                       
                                     pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
@@ -312,27 +312,24 @@ char buffer[30];
     }
     BufferWriterI->Append_P("</tr>");
 
-    // BufferWriterI->Append_P("</tr>{t2}");
-
     // TEMPS
-    BufferWriterI->Append_P("<tr>");
-    for(uint8_t button_id=0;button_id<4;button_id++){
-      char stemp[20];
-      sprintf(button_handle_ctr,"%s%d\0",WEB_HANDLE_BUTTON_NAME_TEMP_SET, device_id);
-      BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
-                                    100/4, 
-                                    WEB_HANDLE_BUTTON_NAME_TEMP_SET,
-                                    button_handle_ctr, 
-                                    program_temps[device_id].temp.mapped_defaults[button_id],                                       
-                                    pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_temps_title),""
-                                  );
+    if((device_id==DEVICE_WB_ID)||(device_id==DEVICE_IH_ID)){
+      BufferWriterI->Append_P("<tr>");
+      for(uint8_t button_id=0;button_id<4;button_id++){
+        char stemp[20];
+        sprintf(button_handle_ctr,"%s%d\0",WEB_HANDLE_BUTTON_NAME_TEMP_SET, device_id);
+        BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
+                                      100/4, 
+                                      "button_hac " WEB_HANDLE_BUTTON_NAME_TEMP_SET,
+                                      button_handle_ctr, 
+                                      program_temps[device_id].temp.mapped_defaults[button_id],                                       
+                                      pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_temps_title),""
+                                    );
+      }
+      BufferWriterI->Append_P("</tr>{t2}");
     }
-    BufferWriterI->Append_P("</tr>{t2}");
   }
-  
-  // BufferWriterI->Append_P("\"");  
-  // BufferWriterI->Append_P("}]");  
-  // BufferWriterI->Append_P(PSTR(","));  
+
 }
 
 

@@ -468,6 +468,16 @@ void mWiFi::WifiSetState(uint8_t state)
   pCONT_set->global_state.wifi_down = state ^1;
 }
 
+bool mWiFi::WifiCheckIpConnected(){
+  if ((WL_CONNECTED == WiFi.status()) && 
+      (static_cast<uint32_t>(WiFi.localIP()) != 0) &&
+      (WiFi.localIP().toString()!="(IP unset)")
+  ) { 
+    return true;  
+  }
+  return false;
+}
+
 void mWiFi::WifiCheckIp(void)
 {
   //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
@@ -510,7 +520,7 @@ void mWiFi::WifiCheckIp(void)
 
   } else { //not connected
     
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WiFi.status() %s, IP %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str());
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
     WifiSetState(0);
     uint8_t wifi_config_tool = pCONT_set->Settings.sta_config;
     wifi_status = WiFi.status();
@@ -564,7 +574,7 @@ void mWiFi::WifiCheckIp(void)
             wifi_retry = 0;
             AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "WIFI_CONFIG_NO_SSID"));
           } else {
-            AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION));
+            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION));
           }
         }
 
@@ -575,7 +585,7 @@ void mWiFi::WifiCheckIp(void)
 
 
     if (wifi_retry) {
-      //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry %d"),wifi_retry);
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry %d"),wifi_retry);
       if (pCONT_set->Settings.flag_network_phaseout.use_wifi_scan) {
         if (wifi_retry_init == wifi_retry) {
           wifi_scan_state = 1;    // Select scanned SSID
@@ -602,6 +612,8 @@ void mWiFi::WifiCheckIp(void)
     }
   }
 }
+
+
 
 void mWiFi::WifiCheck(uint8_t param)
 {
@@ -672,7 +684,10 @@ void mWiFi::WifiCheck(uint8_t param)
       }
 
       // Still connected
-      if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0)){//} && !wifi_config_type) {
+      if ((WL_CONNECTED == WiFi.status()) && 
+          (static_cast<uint32_t>(WiFi.localIP()) != 0) 
+          // && !(WiFi.localIP()!="")
+          ){//} && !wifi_config_type) {
 
         // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"Connected, Restarted, Begin services");
 

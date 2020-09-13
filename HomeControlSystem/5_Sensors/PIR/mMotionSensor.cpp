@@ -253,7 +253,7 @@ int8_t mMotionSensor::Tasker(uint8_t function){
       // parse_JSONCommand();
     break;
     case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
-      // parsesub_JSONCommand();
+      // parsesub_TopicCheck_JSONCommand();
     break;
     /************
      * WEBPAGE SECTION * 
@@ -353,7 +353,7 @@ void mMotionSensor::parse_JSONCommand(JsonObjectConst obj){ //parse_Command() an
   // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
   // JsonObject obj = doc.as<JsonObject>();
 
-  //parsesub_JSONCommand(&obj);
+  //parsesub_TopicCheck_JSONCommand(&obj);
 
 }
 
@@ -388,7 +388,7 @@ const char* mMotionSensor::GetDeviceNameWithStateLongbyIDCtr(uint8_t device_id, 
   return buffer;
 }
 
-// void mMotionSensor::parsesub_JSONCommand(JsonObject& _obj){
+// void mMotionSensor::parsesub_TopicCheck_JSONCommand(JsonObject& _obj){
 
 //   //If its null (nothing passed), try global parameter
 //   if(_obj == nullptr){

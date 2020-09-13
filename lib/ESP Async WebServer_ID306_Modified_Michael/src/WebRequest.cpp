@@ -789,45 +789,45 @@ void AsyncWebServerRequest::addInterestingHeader(const String& name){
  * * */
 void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
   
-  // #ifdef DEBUG_ASYNC
+  #ifdef DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::sendONE=S for ");
-  // #endif
+  #endif
   _response = response;
   if(_response == NULL){    
-    // #ifdef DEBUG_ASYNC
+    #ifdef DEBUG_ASYNC
     Serial.println("_response == NULL");
-    // #endif
+    #endif
     _client->close(true);
     _onDisconnect();
     return;
   }
   if(!_response->_sourceValid()){
-    // #ifdef DEBUG_ASYNC
+    #ifdef DEBUG_ASYNC
     Serial.println("!_response->_sourceValid()");
-    // #endif
+    #endif
     delete response;
     _response = NULL;
     send(500);
   }
   else {
-    // #ifdef DEBUG_ASYNC
+    #ifdef DEBUG_ASYNC
       Serial.println("else _response->_respond(this)"); Serial.flush();
-    // #endif
-    // _client->setRxTimeout(0);
-    _client->setRxTimeout(5); //test, 5 seconds?
-    // #ifdef DEBUG_ASYNC
+    #endif
+    _client->setRxTimeout(0);
+    // _client->setRxTimeout(5); //test, 5 seconds?
+    #ifdef DEBUG_ASYNC
       Serial.println("DONE setRxTimeout"); Serial.flush();
-    // #endif
+    #endif
     // _response->addHeader("michael","test");
     _response->_respond(this);
-    // #ifdef DEBUG_ASYNC
+    #ifdef DEBUG_ASYNC
       Serial.println("DONE _response->_respond(this)"); Serial.flush();
-    // #endif
+    #endif
     
   }
-  // #ifdef DEBUG_ASYNC
+  #ifdef DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=E");
-  // #endif
+  #endif
 }
 
 

@@ -185,7 +185,7 @@ void Template_Load();
 
 int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-int8_t parsesub_JSONCommand(JsonObjectConst obj);
+int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     
 int8_t parsesub_CheckAll(JsonObjectConst obj);
 int8_t parsesub_Settings(JsonObjectConst obj);

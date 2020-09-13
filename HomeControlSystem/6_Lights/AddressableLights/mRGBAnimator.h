@@ -611,7 +611,7 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
     void WebAppend_Root_Status_Table();
     
-    int8_t parsesub_JSONCommand(JsonObjectConst obj);
+    int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     int8_t parsesub_ModeManual(JsonObjectConst obj);
     int8_t parsesub_ModeAnimation(JsonObjectConst obj);
     int8_t parsesub_ModeScene(JsonObjectConst obj);

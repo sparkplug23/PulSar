@@ -330,7 +330,7 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/light")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "mInterfaceLight"));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -339,7 +339,7 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 }
 
 
-int8_t mInterfaceLight::parsesub_JSONCommand(JsonObjectConst obj){
+int8_t mInterfaceLight::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   int8_t isserviced = 0;
   

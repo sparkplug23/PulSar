@@ -253,6 +253,36 @@ void mWebServer::WebPage_Root_AddHandlers(){
       Serial.printf("BodyEnd: %u\n", total);
   });
 
+  
+  pCONT_web->pWebServer->on("/json_command.json", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+    Serial.println("onRequestBody " "/json_command.json" );
+    if ((request->url() == "/json_command.json") && (request->method() == HTTP_POST))
+    {
+        const size_t        JSON_DOC_SIZE   = 512U;
+        DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
+        
+        if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+        {
+            pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, jsonDoc.as<JsonObjectConst>());
+
+            // Debug printing
+            JsonObject obj = jsonDoc.as<JsonObject>();
+            for (JsonPair keyValue : obj) {
+              // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
+              if(keyValue.value().as<char*>()){
+                Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<char*>());
+              }else{
+                Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<int>());
+              }
+            }
+
+        }
+        
+        request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
+    }
+  });
+
+
 
 // pCONT_web->pWebServer->on("/generate", HTTP_POST, [](AsyncWebServerRequest *request){
 //     //nothing and dont remove it

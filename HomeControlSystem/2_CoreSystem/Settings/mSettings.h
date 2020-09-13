@@ -1,23 +1,3 @@
-/*
-  settings.h - setting variables for Sonoff-Tasmota
-
-  Copyright (C) 2019  Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-//#ifdef ESP8266
-
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
@@ -1255,8 +1235,8 @@ struct AnimationSettings{
 
 
 // Buffer that stores names of sensors as delimeter list
-#define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  40
-#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 300
+#define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  20
+#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400
 struct DeviceNameBuffer{ // size(230)
   // delimeter name list
   char name_buffer[DEVICENAMEBUFFER_NAME_BUFFER_LENGTH];
@@ -1784,7 +1764,7 @@ struct FIRMWARE_VERSION{
 }firmware_version;
 
 int8_t parse_JSONCommand();
-void   parsesub_JSONCommand(JsonObjectConst _obj);
+void   parsesub_TopicCheck_JSONCommand(JsonObjectConst _obj);
 int8_t parsesub_SystemCommand(JsonObjectConst _obj);
 int8_t parsesub_FirmwareInformation(JsonObjectConst _obj);
 

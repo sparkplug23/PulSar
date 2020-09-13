@@ -62,6 +62,14 @@ int8_t mTime::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       //SubTasker_MQTTSender();
     break;
+    case FUNC_MQTT_CONNECTED:{
+      char message[40];
+      memset(message,0,sizeof(message));
+      sprintf(message,"{\"connected\":{\"time\":\"%s\"}}",pCONT->mt->uptime.hhmmss_ctr);
+      AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
+      pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
+    }
+    break;
   }
 
 }//end

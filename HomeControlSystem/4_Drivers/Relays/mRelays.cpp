@@ -12,6 +12,12 @@
 6) Enable mode to start with, on, off, as saved
 7) Schedule automatic tod on/off, include duty cycle (with variable for scele, seconds, minutes, hours)
 
+
+add table (optional flag to turn this on/off)
+Relay Name:    ontime, offtime, timeon, last controlled by
+
+
+
 */
 
 void mRelays::init(void){
@@ -66,7 +72,7 @@ void mRelays::init(void){
 
 //   switch(function){
 //     case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
-//       //parsesub_JSONCommand(param1);
+//       //parsesub_TopicCheck_JSONCommand(param1);
 //     break;
 //     case FUNC_INIT:
 //       init();
@@ -150,7 +156,7 @@ int8_t mRelays::Tasker(uint8_t function){
 int8_t mRelays::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);
@@ -176,7 +182,7 @@ Serial.println("WebAppend_Root_Add_Buttons");
     sprintf(relay_handle_ctr,"reltog%02d",relay_id);
     JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
                                   100/relays_connected, 
-                                  "reltog",
+                                  "button_hac ""reltog",
                                   relay_handle_ctr, 
                                   DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                                   GetRelayNamebyIDCtr(relay_id, buffer, sizeof(buffer)), ""
@@ -351,7 +357,7 @@ void mRelays::WebCommand_Parse(void)
 //   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
 //   JsonObjectConst obj = doc.as<JsonObject>();
 
-//   parsesub_JSONCommand(obj);
+//   parsesub_TopicCheck_JSONCommand(obj);
 
 // }
 
@@ -362,7 +368,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/relays")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -370,7 +376,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-void mRelays::parsesub_JSONCommand(JsonObjectConst obj){
+void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   uint8_t name_num=-1,state=-1;    
 
@@ -696,7 +702,7 @@ void mRelays::SetPowerOnState(void)
 
 void mRelays::ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source){
   AddLog_P(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
-ExecuteCommandPowerZeroIndex(device+1, state, source);
+  ExecuteCommandPower(device+1, state, source);
 }
 
 void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)

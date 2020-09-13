@@ -85,7 +85,7 @@
 //   "<fieldset><legend><b>&nbsp;" D_COLOUR_PICKER "&nbsp;</b>"
 //   "</legend><form method='get' action='" WEB_HANDLE_RGB_COLOUR_PALETTE_EDITOR "'>";
 // const char HTTP_FORM_RGB_LOAD_PIXELS[] PROGMEM =
-//   "<button name='loadpixels' type='submit' class='button bora'>" "Load Palette" "</button>";
+//   "<button name='loadpixels' type='submit' class='button_hac bora'>" "Load Palette" "</button>";
 
 // #define D_RGB_COLOUR_SELECTOR "Colour Palette Selector"
 

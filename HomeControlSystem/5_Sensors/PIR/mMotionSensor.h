@@ -32,7 +32,7 @@ class mMotionSensor{
     void EveryLoop();
 
     void parse_JSONCommand(JsonObjectConst obj);
-    // void parsesub_JSONCommand(JsonObject& _obj);
+    // void parsesub_TopicCheck_JSONCommand(JsonObject& _obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
 

@@ -398,12 +398,12 @@ void mSensorsDB18::printAddress(DeviceAddress deviceAddress, int8_t index){
 
 void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
 
-  char buffer[50];
+  char buffer[100];
 
   for(int ii=0;ii<db18_sensors_active;ii++){ //add number in name? List needed? also hold user defined name?
     JsonBuilderI->Append_P(PSTR("<tr>"));
 
-    char name_buffer_tmp[25];
+    // char name_buffer_tmp[25];
     // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
     
@@ -411,6 +411,7 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
 
 
       JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+      AddLog_P(LOG_LEVEL_INFO,PSTR("buffer=%s"),buffer);
       JsonBuilderI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_db18","?");   
     JsonBuilderI->Append_P(PSTR("</tr>"));
   }
@@ -514,11 +515,11 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:{
-      char buffer[40];
-      uint8_t ii = 5;
-      AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
-      ii = 6;
-      AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
+      // char buffer[100];
+      // uint8_t ii = 5;
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
+      // ii = 6;
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
 
 
 

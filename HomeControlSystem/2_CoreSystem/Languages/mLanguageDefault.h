@@ -271,7 +271,7 @@
   #define D_MODULE_CUSTOM_RADIATORFAN_CTR              "mRadiatorFan"
   #define D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_CEILING_FAN
+//#ifdef USE_SONOFF_IFAN
   #define D_MODULE_CUSTOM_CEILINGFAN_CTR               "mCeilingFan"
   #define D_MODULE_CUSTOM_CEILINGFAN_FRIENDLY_CTR      "ceilingfan"
 //#endif
@@ -364,7 +364,7 @@
 #define D_LENGTH "Length"
 #define D_LIMIT "Limit"
 #define D_DIMMER "Dimmer"
-#define D_FAN "Fan"
+#define D_JSON_FANSPEED "Fan"
 #define D_LWT "LWT"
 #define D_MEASURE "Measure"
 #define D_MESSAGE "Message"
@@ -1222,6 +1222,7 @@
 #define D_JSON_INFRARED "Infrared"
 #define D_JSON_UNKNOWN "Unknown"
 #define D_JSON_LIGHT "Light"
+#define D_JSON_LIGHTPOWER "LightPower"
 #define D_JSON_LINKCOUNT "LinkCount"
 #define D_JSON_LEVEL "Level"
 #define D_JSON_LOCAL_TIME "Local"
@@ -1329,6 +1330,10 @@
 // My own JSON named are for root[JSON] and are all lower case
 #define D_JSON_ALTITUDE "altitude"
 #define D_JSON_AGE "age"
+
+
+#define D_JSON_ANY "Any"
+
 #define D_JSON_BRT "brt"
 #define D_JSON_CCT_PERCENTAGE "cct_per"
 #define D_JSON_CCT_TEMP "cct_temp"
@@ -1442,6 +1447,8 @@
 #define D_JSON_TRANSITION "transition"
 #define D_JSON_TYPE "type"
 #define D_JSON_RELAY "relay"
+
+
 
 #define D_JSON_RGB "RGB"
 #define D_JSON_RBG "RBG"

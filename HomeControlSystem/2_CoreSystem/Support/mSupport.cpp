@@ -50,6 +50,21 @@ void mSupport::AppendDList(char* buffer, const char* to_add){
 }
 
 
+bool mSupport::JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged){
+
+  // If we have exceeded minimal json level, true
+  if(json_level_testing >= json_level_set){
+    return true;
+  }
+  // If ischanged is set, check ifchanged
+  if(ischanged){
+    if(json_level_testing >= JSON_LEVEL_IFCHANGED){
+      return true;
+    }
+  }
+  return false;
+
+}
 
 char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
 {
@@ -1400,6 +1415,20 @@ uint32_t mSupport::RoundSqrtInt(uint32_t num)
   // }
   // return s / 2;
 }
+
+
+// sprintf that returns the pointer to buffer instead of length for inline use
+char* mSupport::p_snprintf(char* buffer, uint16_t buflen, const char* formatP, ...)
+{
+  va_list arg;
+  va_start(arg, formatP);
+  vsnprintf_P(buffer, buflen, formatP, arg);
+  va_end(arg);
+  return buffer;
+}
+
+
+// }
 
 char* mSupport::GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack)
 {

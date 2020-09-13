@@ -3695,7 +3695,7 @@ int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pixels")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -3703,7 +3703,7 @@ int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-int8_t mRGBAnimator::parsesub_JSONCommand(JsonObjectConst obj){
+int8_t mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   // // Check if instruction is for me
   // if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pixels")>=0){

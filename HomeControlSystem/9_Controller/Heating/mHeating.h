@@ -93,6 +93,8 @@ DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_TO_CTR)           D_HEATING_SENS
 #define D_HEATING_SENSOR_NAME_LONG_TB "Tank Bottom"
 #define D_HEATING_SENSOR_NAME_LONG_TO "Tank Out"
 
+// #define TEST_DEVICE_NAME
+
 
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_LONG_DS_CTR)           D_HEATING_SENSOR_NAME_LONG_DS;
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_LONG_US_CTR)           D_HEATING_SENSOR_NAME_LONG_US;
@@ -212,7 +214,7 @@ void WebAppend_Root_Draw_PageTable();
 
 
 struct HEATING_STATUS{
-  char message_ctr[100];
+  char message_ctr[50];
   char message_len = 0;
 }heating_status[4];
 
@@ -240,28 +242,36 @@ uint8_t    time_map_temps_immersion[4];//                 = {0, 30, 40, 50};
 uint8_t    time_map_temps_boiler[4];//                    = {0, 30, 40, 50};
 
 
+    struct SETTINGS{
+      uint8_t  fEnableModule = true;
+    }settings;
+
+
 
     
 void HandleTimerConfiguration(void);
 void HandleProgramTimerConfiguration();
 
     // *************** HEATINGPROFILES ****************************************************************************************************
-    #define HEATINGPROFILE_RESOLUTION 100
-    struct HEATINGPROFILES{
-      float temperature_max;
-      float temperature_min;
-      float temperature_step;
-      float temperature[HEATINGPROFILE_RESOLUTION];
-      uint32_t duration_secs[HEATINGPROFILE_RESOLUTION];
-    }heating_profiles[4];
-    void init_HeatingProfiles(); // read from memory
-    void Save_HeatingProfiles();
-    void Load_HeatingProfiles();
-    uint32_t tSavedHeatingProfiles;
-    void MQQTSendHeatingProfile_Raw_IfChanged(void);
-    void ConstructJSON_HeatingProfile_Raw(uint8_t device_id);
-    uint32_t GetHeatingProfilesTimeSeconds(uint8_t device_id, float temp_now, float temp_target);
-    uint32_t GetHeatingProfilesTimeMinutes(uint8_t device_id, float temp_now, float temp_target);
+    // This use existing heating and performance to estimate time until the desired temperature is reached
+    #ifdef USE_HEATING_PROFILE_ESTIMATION
+      #define HEATINGPROFILE_RESOLUTION 60
+      struct HEATINGPROFILES{
+        float temperature_max;
+        float temperature_min;
+        float temperature_step;
+        float temperature[HEATINGPROFILE_RESOLUTION];
+        uint32_t duration_secs[HEATINGPROFILE_RESOLUTION];
+      }heating_profiles[4];
+      void init_HeatingProfiles(); // read from memory
+      void Save_HeatingProfiles();
+      void Load_HeatingProfiles();
+      uint32_t tSavedHeatingProfiles;
+      void MQQTSendHeatingProfile_Raw_IfChanged(void);
+      void ConstructJSON_HeatingProfile_Raw(uint8_t device_id);
+      uint32_t GetHeatingProfilesTimeSeconds(uint8_t device_id, float temp_now, float temp_target);
+      uint32_t GetHeatingProfilesTimeMinutes(uint8_t device_id, float temp_now, float temp_target);
+    #endif
 
     // *************** TIMERS ****************************************************************************************************
     #define HEATING_DEVICE_TIMERS_MAX 4
@@ -405,8 +415,6 @@ void AddToHardwareMessage();
     
 
     uint8_t fForceUpdatePanel= true;
-    //int8_t Tasker();
-    // const char* GetRGBUpDownModeCtr(void);
     uint32_t tSaved,tSaved2;
 
     struct colour{
@@ -421,9 +429,9 @@ void AddToHardwareMessage();
     struct STOREDINFO stored_all;
     struct STOREDINFO stored_new;
 
-    struct PIXEL{
-      colour c;
-    }pixel[LED_PANEL_PIXELS];
+    // struct PIXEL{
+    //   colour c;
+    // }pixel[LED_PANEL_PIXELS];
 
     // *************** RELAYS ****************************************************************************************************
 
@@ -470,6 +478,19 @@ void WebAppend_Root_Draw_Table();
     void SendVoiceSettings(void);
 
     int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonObjectConst obj);
+
+    
+    int8_t parsesub_CheckAll(JsonObjectConst obj);
+    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+    
+    int8_t parsesub_ModeManual(JsonObjectConst obj);
+    int8_t parsesub_ProgramTimers(JsonObjectConst obj);
+    int8_t parsesub_ProgramTemps(JsonObjectConst obj);
+
+
+
     void SubTasker_HeatingTimers(void);
     void SubTasker_HeatingTemps(void);
     void SubTasker_ScheduledEvents(void);

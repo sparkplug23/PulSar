@@ -573,6 +573,8 @@ void mMQTT::publish_status_module(const char* module_name, const char* topic_pos
 // My function for adding prefix by device name
 boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained){
 
+  // return 0;
+
         // AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
     if (!pubsub->connected()) {
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
@@ -586,7 +588,7 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
 // Serial.println(WiFi.localIP());
 // Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
 
-    if ((WL_CONNECTED != WiFi.status()) || (static_cast<uint32_t>(WiFi.localIP()) == 0)) {
+    if (!pCONT_wif->WifiCheckIpConnected()) {
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
         return false;
     }else{
@@ -611,24 +613,33 @@ DEBUG_LINE;
 //return 0;//
 
     char convctr[100]; memset(convctr,0,sizeof(convctr));
-    snprintf(convctr,sizeof(convctr),PSTR("%s/%s"),settings.prefixtopic,topic);
+    // Serial.println(settings.prefixtopic); Serial.flush();
+    // Serial.println(topic); Serial.flush();
+    snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),settings.prefixtopic,topic);
     
+    // Serial.println(convctr); Serial.flush();
 DEBUG_LINE;
 //TRACE();
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
+    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
+    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
 
 DEBUG_LINE;
-//TRACE();
-    #ifdef SERIAL_DEBUG_LOW_LEVEL
-    if(strstr(payload,"{}")){
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
-    }
-    #endif
+// //TRACE();
+//     #ifdef SERIAL_DEBUG_LOW_LEVEL
+//     if(strstr(payload,"{}")){
+//         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
+//     }
+//     #endif
 
 DEBUG_LINE;
-//TRACE();
+if(pubsub!=nullptr){
+
+DEBUG_LINE;
   return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
+}
+DEBUG_LINE;
+return 0;
+//TRACE();
 }
 
 
@@ -945,13 +956,6 @@ flag_uptime_reached_reduce_frequency = true;
 // #endif  // USE_WEBSERVER
 
 
-    case FUNC_MQTT_CONNECTED:{
-      char message[40];
-      memset(message,0,sizeof(message));
-      sprintf(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"),pCONT->mt->uptime.hhmmss_ctr);
-      ppublish(PSTR("status/system/mqtt/event"),message,false); //reconnect message
-    }
-    break;
   }
 
 }//enabled off

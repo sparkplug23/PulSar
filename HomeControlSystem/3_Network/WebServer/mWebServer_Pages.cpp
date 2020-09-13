@@ -496,7 +496,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         JsonBuilderI->AppendBuffer(PSTR(
           "<form method='get' onsubmit='return l(1);'>"
           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
-            "<button  class='button bform1' type='submit'>Execute command</button>"
+            "<button  class='button_hac bform1' type='submit'>Execute command</button>"
           "</form>"
         ));            
       JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
@@ -512,7 +512,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         JsonBuilderI->AppendBuffer(PSTR(
         "<form method='get' onsubmit='return l(1);'>"
         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
-        "<button class='button bform1' type='submit'>Execute Command</button>"
+        "<button class='button_hac bform1' type='submit'>Execute Command</button>"
         "</form>"  ));
       JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
 
@@ -2185,7 +2185,7 @@ void mWebServer::WebAppend_Button(uint8_t title_index)
   char title[32];
   if (title_index <= BUTTON_RESET_CONFIGURATION) {
     char confirm[64];
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='button_hacs bred'>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='button_hac bred'>%s</button></form></p>"),
       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
       pCONT_sup->GetTextIndexed_P(confirm, sizeof(confirm), title_index, kButtonConfirm),
       (!title_index) ? "rst" : "non",
@@ -2239,7 +2239,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
   //   BufferWriterI->Append_P(PSTR(
   //     "<p>"
   //       "<form action='%s' method='get' onsubmit='return confirm(\"%s\");'>"
-  //         "<button name='%s' class='button bred'>%s</button>"
+  //         "<button name='%s' class='button_hac bred'>%s</button>"
   //       "</form>"
   //     "</p>"),
   //     action_ctr,
@@ -2252,7 +2252,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
       
       // "<p><form action='%s' method='get'><button>%s</button></form></p>"
 
-    "<button name='%s' type='submit' class='button %s'>%s</button>"),
+    "<button name='%s' type='submit' class='button_hac %s'>%s</button>"),
 
       action_ctr,
       button_css_extra_style_ctr,

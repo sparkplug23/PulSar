@@ -214,6 +214,8 @@ class mSupport{
 char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);
 
 
+bool JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged = false);
+
 void AppendDList(char* buffer, const char* to_add);
 
     uint32_t tSaved_SlowAllTemplatesOnSerial;
@@ -244,6 +246,7 @@ void AppendDList(char* buffer, const char* to_add);
     bool knx_started = false;
     #endif  // USE_KNX
 
+    char* p_snprintf(char* buffer, uint16_t buflen, const char* formatP, ...);
     
 
     uint8_t fSendTemplatesOnce = true;

@@ -109,7 +109,9 @@ void mHeating::init(void){
   failsafes.tSaved = millis();
 
   #ifdef USE_HEATING_TEMPS
+  #ifdef USE_HEATING_PROFILE_ESTIMATION
     init_HeatingProfiles();
+  #endif
   #endif
 
   // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_US,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_US);
@@ -128,10 +130,18 @@ void mHeating::init(void){
 
 void mHeating::init_relay_driver_parameters(){
   
+  #ifdef TEST_DEVICE_NAME
+  pCONT_set->AddDeviceName("One", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_US);
+  pCONT_set->AddDeviceName("Two", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_DS);
+  pCONT_set->AddDeviceName("Three", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_IH);
+  pCONT_set->AddDeviceName("Four", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_WB);
+
+  #else
   pCONT_set->AddDeviceName(D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_US);
   pCONT_set->AddDeviceName(D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_DS);
   pCONT_set->AddDeviceName(D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_IH);
   pCONT_set->AddDeviceName(D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_WB);
+  #endif
 
 }
 
@@ -167,6 +177,17 @@ void mHeating::init_db18_sensor_parameters(){
       }
     }// end search for sensor
 
+  #ifdef TEST_DEVICE_NAME
+  pCONT_set->AddDeviceName("One", D_MODULE_SENSORS_DB18S20_ID,   0);
+  pCONT_set->AddDeviceName("Two", D_MODULE_SENSORS_DB18S20_ID,   1);
+  pCONT_set->AddDeviceName("Three", D_MODULE_SENSORS_DB18S20_ID,  2);
+  pCONT_set->AddDeviceName("Four", D_MODULE_SENSORS_DB18S20_ID,   3);
+  pCONT_set->AddDeviceName("Five", D_MODULE_SENSORS_DB18S20_ID,   4);
+  pCONT_set->AddDeviceName("Six", D_MODULE_SENSORS_DB18S20_ID,   5);
+  pCONT_set->AddDeviceName("Seven", D_MODULE_SENSORS_DB18S20_ID,   6);
+  pCONT_set->AddDeviceName("Eight", D_MODULE_SENSORS_DB18S20_ID,   7);
+
+  #else
     switch(sensor_found_id){
       case ID_DB18_DS: pCONT_set->AddDeviceName(D_DB18_NAME_DOWNSTAIRS_PIPE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
       case ID_DB18_US: pCONT_set->AddDeviceName(D_DB18_NAME_UPSTAIRS_PIPE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
@@ -177,6 +198,9 @@ void mHeating::init_db18_sensor_parameters(){
       case ID_DB18_TT: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_TOP,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
       case ID_DB18_TM: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_MIDDLE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
     }
+    #endif
+
+    
 
   }
 
@@ -195,9 +219,14 @@ void mHeating::init_db18_sensor_parameters(){
 void mHeating::init_dht22_sensor_parameters(){
 
 
+  #ifdef TEST_DEVICE_NAME
+  pCONT_set->AddDeviceName("One", D_MODULE_SENSORS_DHT_ID,   0);
+  pCONT_set->AddDeviceName("Two", D_MODULE_SENSORS_DHT_ID,   1);
+
+  #else
   pCONT_set->AddDeviceName(D_DHT_NAME_DOWNSTAIRS, D_MODULE_SENSORS_DHT_ID,     ID_DHT_DS);
   pCONT_set->AddDeviceName(D_DHT_NAME_UPSTAIRS, D_MODULE_SENSORS_DHT_ID,     ID_DHT_US);
-
+#endif
   // // Measure and report every second
   // pCONT_msdb18->settings.rate_measure_ms = 1000;
   // // pCONT_msdb18->mqtthandler_sensor_ifchanged.tRateSecs = 5;
@@ -733,6 +762,8 @@ int i=0;
   }//END for
 }// END function
 
+#ifdef USE_HEATING_PROFILE_ESTIMATION
+    
 // 6.25-25
 // 6.55 -49.3
 // 24.3 in 30 minutes
@@ -970,7 +1001,8 @@ void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 }
 #endif
 
-
+#endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
+    
 
 
 
@@ -1050,103 +1082,8 @@ float mHeating::GetClimateTempsRawByID(uint8_t sensor_id){
 
 
 
-/*********************************************************************** MQQT senders *********************************************************************************************/
-
-
-void mHeating::SendMQTTAlertOnChangeofState(uint8_t device_id, uint8_t state){//device,new state
-
-  char msg[70]; memset(msg,0,sizeof(msg));
-
-  // sprintf(msg, "%s heating has been turned %s",GetDeviceNameLongbyIDCtr(device_id),(state==1?"on\0":"off\0"));
-
-//probably only want this when off, but send both and let OH decide
-
-  //pCONT->mso->MessagePrintln(msg);
-  //pCONT->mqt->pubsub->publish("heating/alert",msg);
-  //pCONT->mso->MessagePrintln("heating/alert sent");
-
-}
-
 
 #ifdef USE_MQTT
-
-// // NEW METHOD -- first senders then on internals
-// void mHeating::SubTasker_MQTTSender(){
-
-//   // In future, with new sending method, try offset times when sending
-
-//   // force updates in ifchanged
-//   if((abs(millis()-tSavedForceUpdate)>=1*60000)||(fForceMQTTUpdate)){tSavedForceUpdate=millis();
-//     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING "tSavedForceUpdate"));    
-//     //for(int device_id=0;device_id<4;device_id++){ program_temps[device_id].mqtt.fForceUpdate = 1; }
-//   }
-
-//   // Ifchanged
-//   if((abs(millis()-tSavedSendClimate)>=5000)||(fForceMQTTUpdate)){tSavedSendClimate=millis();
-//     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING "tSavedSendClimate"));    
-//     MQQTSendClimateTempsIfChanged();
-//     MQQTSendPipesTempsIfChanged();
-//     MQQTSendPipesTempsByColoursIfChanged();
-//     MQQTSendHeatingRelaysIfChanged();
-//   }
-
-//   //must send at slow rate so I know if anything is running, also update if needed (ifchanged)
-//   if((abs(millis()-tSavedSendActive)>=(rateSavedSendActive*1000))||(isanychanged_timers)||(fForceMQTTUpdate)){tSavedSendActive=millis();  isanychanged_timers=0;
-//     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING "tSavedSendActive"));   
-//     MQQTSendProgramsActive();
-//     MQQTSendProgramTempsIfChanged(); //ERROR
-//     MQQTSendProgramTimersIfChanged();
-//     SendMQTTWaterTempsByColours();
-//     if(rateSavedSendActive<10){rateSavedSendActive++;}else{rateSavedSendActive=10;}
-//   }
-
-//   if((abs(millis()-tSavedSendRateOfChange10s)>=30000)||(fForceMQTTUpdate)){tSavedSendRateOfChange10s=millis();
-//     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING "tSavedSendRateOfChange10s"));    
-//     //MQQTSendPipesTempsROC10s();
-//   }
-
-//   // REDUCED - unused reports while improving other functions
-//   // Seperate topics for only reporting changes over time
-//   if((abs(millis()-tSavedSendRateOfChange)>=60000)||(fForceMQTTUpdate)){tSavedSendRateOfChange=millis();
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING "tSavedSendRateOfChange"));    
-//     // MQQTSendPipesTempsROC1m();
-//     // MQQTSendClimateTempsROC1m();
-//     MQQTSendProgramTempsForced();
-//     MQQTSendPipesTempsLatest1m();
-//     MQQTSendClimateTempsLatest1m();
-//     MQQTSendProgramTimersForced();
-//     if(mSavedROC10m++>10){mSavedROC10m=0;
-//       // MQQTSendPipesTempsROC10m();
-//       // MQQTSendClimateTempsROC10m();
-//       // MQQTSendPipesTempsLatest10m();
-//       // MQQTSendClimateTempsLatest10m();
-//     }
-//   }
-
-
-//   // // Sending RGB colour patterns of panels
-//   // if((abs(millis()-tSavedSlow)>=60000)||(fSendAllData)||(fForceMQTTUpdate)){tSavedSlow=millis();
-//   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING "tSavedSlow"));    
-//   //  //MQQTSendRGBUpstairsStatus();
-//   //  //SendVoiceSettings();
-//   // }
-
-
-//   for(int device_id=0;device_id<4;device_id++){
-//     if(activeprograms[device_id].timers.state){
-//       rateSavedSendActive = 1; //if active show faster
-//     }
-//     if(activeprograms[device_id].temps.state){
-//       rateSavedSendActive = 1; //if active show faster
-//     }
-//   }
-
-//   fForceMQTTUpdate = false;
-//   fSendAllData = false;
-//   fSendSingleFunctionData = false;
-
-// }
-
 
 // schedule.run_time:hh:mm
 // schedule.run_days:M-W-FSS
@@ -1154,145 +1091,6 @@ void mHeating::SendMQTTAlertOnChangeofState(uint8_t device_id, uint8_t state){//
 // temp.set
 // temp.max_time
 // new time values that make sense
-
-/*******************************************************************************************************************************************************
-************************************************************************************************************************************************
-********* Parse ALL Controls ***************************************************************************************************************************************
-************************************************************************************************************************************************
-************************************************************************************************************************************************/
-
-
-int8_t mHeating::parse_JSONCommand(void){
-
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/heating")>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return 0; // not meant for here
-  }
-
-  int8_t isserviced = 0;
-  
-  StaticJsonDocument<200> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-
-  if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_HEATING D_ERROR_JSON_DESERIALIZATION));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-    return 0;
-  }
-  JsonObject obj = doc.as<JsonObject>();
-
-  int8_t device_id,schedule_id;
-  uint8_t timeon,tempset;
-
-  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
-  }else{
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-    return 0; // Unknown device, can't execute
-  }
-
-  if(!obj[D_JSON_TIME_ON].isNull()){ 
-    program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
-    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
-    // fForceHeatingTimerUpdate = true;
-    functionhandler_programs_timers.flags.run_now = true;
-    isanychanged_timers = true;
-    isserviced++;
-  }
-
-  if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
-    program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
-    fForceHeatingTempUpdate = true;
-    isserviced++;
-  }
-
-#ifdef USE_HEATING_TEMPS
-  // TEMP RELATED
-  if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
-    program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-    fForceHeatingTempUpdate = true;
-    isserviced++;
-  }
-
-  // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
-  //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-  //   fForceHeatingTempsUpdate = true;
-  //   isserviced++;
-
-  //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
-  //     program_temps[device_id].time_running.on = 0;
-  //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
-  //     program_temps[device_id].time_running.on = -1;
-  //     program_temps[device_id].time_maintaining.on = -1;
-  //     SetHeater(device_id,0);
-  //   }
-  // }
-  // if(!obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
-  //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
-  //   program_temps[device_id].schedule.ontime = ontime;
-
-  //   //pCONT->mso->MessagePrint("ontime>>\t "); 
-  //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
-  //   //pCONT->mso->MessagePrintln(" ");
-  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
-  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
-  //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
-
-  //   // Check if new hour is tomorrow
-  //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->mtime.hour){
-  //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
-  //   // }
-
-  //   // add off time based on max limit possible
-  //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
-  //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
-
-  //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
-  //   //pCONT->mso->MessagePrintln(" ");
-  //   //pCONT->mso->MessagePrint("mtime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->mtime);
-
-  //    // splash result (add new ctr for this message)
-  //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
-  //    program_temps[device_id].schedule.fHasRun = 0;
-  //    program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
-  //    program_temps[device_id].status.mode_next = program_temps[device_id].status.mode;
-  //    program_temps[device_id].status.mode = TEMP_MODE_SPLASH_RUN_TIME;
-
-  //    program_temps[device_id].status.tSplashTime = millis();
-  //    program_temps[device_id].status.msSplashtime = 5000; // 2 seconds
-
-  //   fForceHeatingTempsUpdate = true;
-  //   fForceMQTTUpdate = true;
-
-
-  //   isserviced++;
-  // }
-  #endif
-
-  fForceMQTTUpdate = true;
-    mqtthandler_program_timers_ifchanged.fSendNow = true;
-
-//    temp mesaure, send everything
-MQTTHandler_Set_fSendNow();
-
-
-  return isserviced;
-
-} // END function
-
 
 /*********************************************************************** JSON Payload Constructors *********************************************************************************************/
 
@@ -1414,182 +1212,67 @@ return 0;
 
 // relays{ds,us},timers{ds,us},temps{ds,us} in simple 1 or 0
 uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
-
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-
-  memset(&pCONT_tel->hardwarestatus,0,sizeof(pCONT_tel->hardwarestatus)); //reset
-  SubContructCtr_HardwareStatus_Long();
-
-  pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr,&data_buffer2.payload.len,
-    PSTR(
-      "{"
-        "\"" D_JSON_RELAY "\":{"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_DS    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_US    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_WB    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_IH    "\":%d,"
-          "\"" "any"                             "\":%d"
-        "},"
-        "\"" D_JSON_TIMER "\":{"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_DS    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_US    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_WB    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_IH    "\":%d"
-        "},"
-        "\"" D_JSON_TEMP "\":{"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_DS    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_US    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_WB    "\":%d,"
-          "\"" D_HEATING_SENSOR_NAME_SHORT_IH    "\":%d"
-        "},"
-        "\"" D_JSON_STATUS "\":{"
-          "\"" D_JSON_MESSAGE                    "\":%s,"
-          "\"" D_JSON_LENGTH                     "\":%d,"
-          "\"" D_JSON_IMPORTANCE                 "\":%d"
-        "}"
-      "}"
-    ), 
-    GetHeatingRelay(DEVICE_DS_ID),
-    GetHeatingRelay(DEVICE_US_ID),
-    GetHeatingRelay(DEVICE_WB_ID),
-    GetHeatingRelay(DEVICE_IH_ID),
-    GetAnyHeatingRelay(),
-    activeprograms[DEVICE_DS_ID].timers.state,
-    activeprograms[DEVICE_US_ID].timers.state,
-    activeprograms[DEVICE_WB_ID].timers.state,
-    activeprograms[DEVICE_IH_ID].timers.state,
-    activeprograms[DEVICE_DS_ID].temps.state,
-    activeprograms[DEVICE_US_ID].temps.state,
-    activeprograms[DEVICE_WB_ID].temps.state,
-    activeprograms[DEVICE_IH_ID].temps.state,
-    pCONT_tel->hardwarestatus.ctr,        //"Relay On, RGB On";
-    pCONT_tel->hardwarestatus.len,        //"Relay On, RGB On";
-    pCONT_tel->hardwarestatus.importance  // colour represents risk/importance of knowing message level
-  );
-     
-  return data_buffer2.payload.len>3?1:0;
-
+  JsonBuilderI->Start();
+    JsonBuilderI->Level_Start_P(D_JSON_RELAY);   
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_US, GetHeatingRelay(DEVICE_US_ID));
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_DS, GetHeatingRelay(DEVICE_DS_ID));
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_IH, GetHeatingRelay(DEVICE_IH_ID));
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_WB, GetHeatingRelay(DEVICE_WB_ID));
+      JsonBuilderI->Add(D_JSON_ANY,                     GetAnyHeatingRelay());      
+    JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start_P(D_JSON_TIMER);  
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_US, activeprograms[DEVICE_US_ID].timers.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_DS, activeprograms[DEVICE_DS_ID].timers.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].timers.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].timers.state); 
+    JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start_P(D_JSON_TEMP);  
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_US, activeprograms[DEVICE_US_ID].temps.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_DS, activeprograms[DEVICE_DS_ID].temps.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].temps.state); 
+      JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].temps.state); 
+    JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start_P(D_JSON_STATUS);  
+      JsonBuilderI->Add(D_JSON_MESSAGE, pCONT_tel->hardwarestatus.ctr); 
+      JsonBuilderI->Add(D_JSON_LENGTH, pCONT_tel->hardwarestatus.len); 
+      JsonBuilderI->Add(D_JSON_IMPORTANCE, pCONT_tel->hardwarestatus.importance); 
+    JsonBuilderI->Level_End();
+  return JsonBuilderI->End();
 }
-
 
 
 uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
-
-  StaticJsonDocument<700> doc;
-  JsonObject obj = doc.to<JsonObject>();
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-
-  char buffer[40];
-
+  char buffer[50];
+  JsonBuilderI->Start();
   for(int device_id=0;device_id<4;device_id++){
-    //data_buffer2.payload.json_pairs++;
-    JsonObject relaysobj = obj.createNestedObject(GetSensorNameByID(device_id, buffer));
-
-    char time_ctr[40]; memset(time_ctr,'\0',sizeof(time_ctr));
-    sprintf(time_ctr, "%02d:%02d:%02d",heating_device_relays[device_id].ontime.hour,heating_device_relays[device_id].ontime.minute,heating_device_relays[device_id].ontime.second);
-    relaysobj[D_JSON_ONTIME] = time_ctr;//pCONT->mt->getFormattedTime();
-
-    memset(time_ctr,'\0',sizeof(time_ctr));
-    sprintf(time_ctr, "%02d:%02d:%02d",heating_device_relays[device_id].offtime.hour,heating_device_relays[device_id].offtime.minute,heating_device_relays[device_id].offtime.second);
-    relaysobj[D_JSON_OFFTIME] = time_ctr;//pCONT->mt->getFormattedTime();
-
-    relaysobj[D_JSON_TIME_ON] = heating_device_relays[device_id].time_minutes_on;
-    relaysobj[D_JSON_ISCHANGED] = heating_device_relays[device_id].ischanged;
-    // relaysobj[D_JSON_ONOFF] = pCONT_mry->GetDeviceIDbyName(device_id, buffer)
+    JsonBuilderI->Level_Start_P(GetSensorNameByID(device_id, buffer));   
+      JsonBuilderI->Add_FP(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  heating_device_relays[device_id].ontime.hour,  heating_device_relays[device_id].ontime.minute,  heating_device_relays[device_id].ontime.second);
+      JsonBuilderI->Add_FP(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), heating_device_relays[device_id].offtime.hour, heating_device_relays[device_id].offtime.minute, heating_device_relays[device_id].offtime.second);
+      JsonBuilderI->Add(D_JSON_TIME_ON,   heating_device_relays[device_id].time_minutes_on);
+      JsonBuilderI->Add(D_JSON_ISCHANGED, heating_device_relays[device_id].ischanged);
+    JsonBuilderI->Level_End();
   }
-
- 
-
-  data_buffer2.payload.len = measureJson(obj)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
-  return data_buffer2.payload.len>3?1:0;
-
-  // return 0;
-
+  return JsonBuilderI->End();
 }
 
 
-// Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-// uint8_t mHeating::ConstructJSON_PipeTemps(uint8_t json_level){
-
-//   StaticJsonDocument<700> doc;
-//   JsonObject obj = doc.to<JsonObject>();
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
-
-//   uint8_t fSendAll = false;  
-//   if(json_level > JSON_LEVEL_IFCHANGED){
-//     fSendAll = true;
-//   }
-
-//   for(uint8_t id=0;id<8;id++){
-
-//     switch(id){
-//       case ID_DB18_DS: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.downstairs_pipe; break;
-//       case ID_DB18_US: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.upstairs_pipe; break;
-//       case ID_DB18_WB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.boiler_pipe; break;
-//       case ID_DB18_IH: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.immersion_heater; break;
-//       case ID_DB18_TB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_bottom; break;
-//       case ID_DB18_TM: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_middle; break;
-//       case ID_DB18_TT: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_top; break;
-//       case ID_DB18_TO: default: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_out; break;
-//     }
-    
-//     if(pCONT->mhs->watertemps.ptr->raw.ischanged||fSendAll){
-//       JsonObject json1 = obj.createNestedObject(GetSensorNameByID(id));
-//         json1[D_JSON_TEMP] = mSupport::roundfloat(pCONT->mhs->watertemps.ptr->raw.val,1);
-//         json1[D_JSON_ISVALID] = (int)pCONT->mhs->watertemps.ptr->raw.isvalid;
-//         json1[D_JSON_SECS] = (int)abs(pCONT->mt->uptime.seconds_nonreset-pCONT->mhs->watertemps.ptr->raw.captureupsecs);
-//     }
-//   }
-
-//   data_buffer2.payload.len = measureJson(obj)+1;
-//   serializeJson(doc,data_buffer2.payload.ctr);
-//   return data_buffer2.payload.len>3?1:0;
-
-// }
 
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
 uint8_t mHeating::ConstructJSON_PipeTemps(uint8_t json_level){
 
-  uint8_t fSendAll = false;  
-  if(json_level > JSON_LEVEL_IFCHANGED){
-    fSendAll = true;
-  }
+  char buffer[50];
   
-  char name_tmp[25];
-  char float_tmp[25];
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-  
-  for(int i=0;i<pCONT_msdb18->db18_sensors_active;i++){
-
-    if(pCONT_msdb18->sensor[i].reading.ischanged||fSendAll){
-      if(!data_buffer2.payload.len){
-        pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr,&data_buffer2.payload.len,PSTR("{"));
-      }
-      pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr,&data_buffer2.payload.len,
-        PSTR(
-          "\"%s\":{"
-            "\"" D_JSON_TEMP    "\":%s,"
-            "\"" D_JSON_ISVALID "\":%d,"
-            "\"" D_JSON_SECS    "\":%d"
-          "},"
-        ), 
-        // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), i, pCONT_msdb18->name_buffer),
-        pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, i, name_tmp, sizeof(name_tmp)),
-
-        dtostrf(pCONT_msdb18->sensor[i].reading.val,5,pCONT_set->Settings.sensors.flags.decimal_precision,float_tmp), 
-        pCONT_msdb18->sensor[i].reading.isvalid,
-        (int)abs(pCONT->mt->uptime.seconds_nonreset-pCONT_msdb18->sensor[i].reading.captureupsecs)
-      );
-    }//is changed
-    
-  }
-
-  if(data_buffer2.payload.len){
-    pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr,&(--data_buffer2.payload.len),PSTR("}"));
-  }
-
-  return data_buffer2.payload.len>3?1:0;
+  JsonBuilderI->Start();
+    for(int i=0;i<pCONT_msdb18->db18_sensors_active;i++){ 
+      if(pCONT_sup->JsonLevelFlagCheck(JSON_LEVEL_IFCHANGED, json_level, pCONT_msdb18->sensor[i].reading.ischanged)){
+        JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, i, buffer, sizeof(buffer)));
+          JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_msdb18->sensor[i].reading.val);
+          JsonBuilderI->Add(D_JSON_ISVALID, pCONT_msdb18->sensor[i].reading.isvalid);
+          JsonBuilderI->Add(D_JSON_SECS, (int)abs(pCONT->mt->uptime.seconds_nonreset-pCONT_msdb18->sensor[i].reading.captureupsecs));
+        JsonBuilderI->Level_End();
+      } 
+    }
+  return JsonBuilderI->End();
 
 }
 
@@ -2066,9 +1749,9 @@ int mHeating::mapHeatingTempToBrightness(int temp){
 // FLASHER to be send seperate when programs change state
 uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
 
-  StaticJsonDocument<800> doc;
-  JsonObject obj = doc.to<JsonObject>();
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  // StaticJsonDocument<800> doc;
+  // JsonObject obj = doc.to<JsonObject>();
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
 
   // uint8_t ischanged = false;
 
@@ -2121,7 +1804,7 @@ uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer2.payload.ctr);
   // // }
 
-  return data_buffer2.payload.len>3?1:0;
+  return 0;// data_buffer2.payload.len>3?1:0;
 
 }
 
@@ -2365,34 +2048,60 @@ const char* mHeating::GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* bu
 
 int8_t mHeating::Tasker(uint8_t function){
 
+  /************
+   * INIT SECTION * 
+  *******************/
+  if(function == FUNC_PRE_INIT){
+    pre_init();
+  }else
+  if(function == FUNC_INIT){
+    init();
+  }
 
-//  return 0;
+  // Only continue in to tasker if module was configured properly
+  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
-    case FUNC_PRE_INIT:
-      pre_init();
+    /************
+     * SETTINGS SECTION * 
+    *******************/
+    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+      // Settings_Load();
     break;
-    case FUNC_INIT:
-      init();
+    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+      // Settings_Save();
     break;
-    case FUNC_LOOP: 
-
+    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
+      // Settings_Default();
     break;
-    case FUNC_EVERY_SECOND:{
-    
-  //   char name_tmp[30];
-    
-
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("Relay %d name \"%s\""),2,pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, 2, name_tmp, sizeof(name_tmp)));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("Relay %d name \"%s\""),3,pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, 3, name_tmp, sizeof(name_tmp)));
-      
-
-
-    }break;
+    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+      // Settings_Default();
+      // pCONT_set->SettingsSave(2);
+    break;
+    /************
+     * PERIODIC SECTION * 
+    *******************/
     case FUNC_EVERY_MINUTE:     
 
     break;
+    /************
+     * FUNCTION HANDLER SECTION * 
+    *******************/
+    case FUNC_FUNCTION_LAMBDA_INIT:
+      FunctionHandler_Init();
+    break;
+    case FUNC_FUNCTION_LAMBDA_LOOP:       //calls from here, into support requiring no object
+      FunctionHandler_Loop();
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_COMMAND:
 
+    break;  
+    /************
+     * MQTT SECTION * 
+    *******************/
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
@@ -2402,33 +2111,12 @@ int8_t mHeating::Tasker(uint8_t function){
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
       //MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
     break;
-    case FUNC_JSON_COMMAND:
-      parse_JSONCommand();
-    break;  
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_CONNECTED:
-      //mqttConnected();
+      MQTTHandler_Set_fSendNow();
     break;
-    case FUNC_MQTT_DISCONNECTED:
-      //mqttDisconnected();
-    break;
-
-    case FUNC_FUNCTION_LAMBDA_INIT:
-      FunctionHandler_Init();
-    break;
-    case FUNC_FUNCTION_LAMBDA_LOOP:       //calls from here, into support requiring no object
-      FunctionHandler_Loop();
-    break;
-
-
-
-    case FUNC_JSON_HARDWARE_APPEND:
-      // AddToHardwareMessage();
-    break;
-
-    
   }
   
   /************
@@ -2437,6 +2125,314 @@ int8_t mHeating::Tasker(uint8_t function){
   return Tasker_Web(function);
 
 } // END Tasker
+int8_t mHeating::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      parsesub_CheckAll(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
+
+
+int8_t mHeating::parsesub_CheckAll(JsonObjectConst obj){
+  parsesub_ModeManual(obj);
+  parsesub_ProgramTimers(obj);
+  parsesub_ProgramTemps(obj);
+}
+
+int8_t mHeating::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+  // Check if instruction is for me
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/heating")>=0){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      parsesub_TopicCheck_JSONCommand(obj);
+      return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+int8_t mHeating::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+  
+  int8_t isserviced = false;
+  
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+    #endif
+    isserviced += parsesub_ModeManual(obj);
+  }else
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
+    #endif
+    isserviced += parsesub_ProgramTimers(obj);
+  }else
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
+    #endif
+    isserviced += parsesub_ProgramTemps(obj);
+  }
+
+}
+
+
+int8_t mHeating::parsesub_ModeManual(JsonObjectConst obj){
+
+  int8_t device_id,schedule_id,isserviced;
+  uint8_t timeon,tempset;
+
+  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return 0; // Unknown device, can't execute
+  }
+
+  if(!obj[D_JSON_TIME_ON].isNull()){ 
+    program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
+    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
+    // fForceHeatingTimerUpdate = true;
+    functionhandler_programs_timers.flags.run_now = true;
+    isanychanged_timers = true;
+    isserviced++;
+  }
+
+  if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
+    program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
+    fForceHeatingTempUpdate = true;
+    isserviced++;
+  }
+
+#ifdef USE_HEATING_TEMPS
+  // TEMP RELATED
+  if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
+    program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
+    fForceHeatingTempUpdate = true;
+    isserviced++;
+  }
+
+  // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
+  //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   fForceHeatingTempsUpdate = true;
+  //   isserviced++;
+
+  //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
+  //     program_temps[device_id].time_running.on = 0;
+  //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
+  //     program_temps[device_id].time_running.on = -1;
+  //     program_temps[device_id].time_maintaining.on = -1;
+  //     SetHeater(device_id,0);
+  //   }
+  // }
+  // if(!obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
+  //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
+  //   program_temps[device_id].schedule.ontime = ontime;
+
+  //   //pCONT->mso->MessagePrint("ontime>>\t "); 
+  //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
+  //   //pCONT->mso->MessagePrintln(" ");
+  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
+  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
+  //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
+
+  //   // Check if new hour is tomorrow
+  //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->mtime.hour){
+  //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
+  //   // }
+
+  //   // add off time based on max limit possible
+  //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
+  //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
+
+  //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
+  //   //pCONT->mso->MessagePrintln(" ");
+  //   //pCONT->mso->MessagePrint("mtime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->mtime);
+
+  //    // splash result (add new ctr for this message)
+  //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
+  //    program_temps[device_id].schedule.fHasRun = 0;
+  //    program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
+  //    program_temps[device_id].status.mode_next = program_temps[device_id].status.mode;
+  //    program_temps[device_id].status.mode = TEMP_MODE_SPLASH_RUN_TIME;
+
+  //    program_temps[device_id].status.tSplashTime = millis();
+  //    program_temps[device_id].status.msSplashtime = 5000; // 2 seconds
+
+  //   fForceHeatingTempsUpdate = true;
+  //   fForceMQTTUpdate = true;
+
+
+  //   isserviced++;
+  // }
+  #endif
+
+  fForceMQTTUpdate = true;
+  mqtthandler_program_timers_ifchanged.fSendNow = true;
+
+  //    temp mesaure, send everything
+  MQTTHandler_Set_fSendNow();
+
+  return isserviced;
+
+}
+
+
+
+int8_t mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
+
+  int8_t device_id,schedule_id,isserviced;
+  uint8_t timeon,tempset;
+
+  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return 0; // Unknown device, can't execute
+  }
+
+  if(!obj[D_JSON_TIME_ON].isNull()){ 
+    program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
+    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
+    // fForceHeatingTimerUpdate = true;
+    functionhandler_programs_timers.flags.run_now = true;
+    isanychanged_timers = true;
+    isserviced++;
+  }
+
+  if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
+    program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
+    fForceHeatingTempUpdate = true;
+    isserviced++;
+  }
+
+  fForceMQTTUpdate = true;
+  mqtthandler_program_timers_ifchanged.fSendNow = true;
+
+  //    temp mesaure, send everything
+  MQTTHandler_Set_fSendNow();
+
+  return isserviced;
+
+}
+
+
+int8_t mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
+
+  int8_t device_id,schedule_id,isserviced;
+  uint8_t timeon,tempset;
+
+  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return 0; // Unknown device, can't execute
+  }
+
+#ifdef USE_HEATING_TEMPS
+  // TEMP RELATED
+  if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
+    program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
+    fForceHeatingTempUpdate = true;
+    isserviced++;
+  }
+
+  // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
+  //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   fForceHeatingTempsUpdate = true;
+  //   isserviced++;
+
+  //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
+  //     program_temps[device_id].time_running.on = 0;
+  //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
+  //     program_temps[device_id].time_running.on = -1;
+  //     program_temps[device_id].time_maintaining.on = -1;
+  //     SetHeater(device_id,0);
+  //   }
+  // }
+  // if(!obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
+  //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
+  //   program_temps[device_id].schedule.ontime = ontime;
+
+  //   //pCONT->mso->MessagePrint("ontime>>\t "); 
+  //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
+  //   //pCONT->mso->MessagePrintln(" ");
+  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
+  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
+  //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
+
+  //   // Check if new hour is tomorrow
+  //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->mtime.hour){
+  //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
+  //   // }
+
+  //   // add off time based on max limit possible
+  //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
+  //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
+
+  //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
+  //   //pCONT->mso->MessagePrintln(" ");
+  //   //pCONT->mso->MessagePrint("mtime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->mtime);
+
+  //    // splash result (add new ctr for this message)
+  //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
+  //    program_temps[device_id].schedule.fHasRun = 0;
+  //    program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
+  //    program_temps[device_id].status.mode_next = program_temps[device_id].status.mode;
+  //    program_temps[device_id].status.mode = TEMP_MODE_SPLASH_RUN_TIME;
+
+  //    program_temps[device_id].status.tSplashTime = millis();
+  //    program_temps[device_id].status.msSplashtime = 5000; // 2 seconds
+
+  //   fForceHeatingTempsUpdate = true;
+  //   fForceMQTTUpdate = true;
+
+
+  //   isserviced++;
+  // }
+  #endif
+
+  fForceMQTTUpdate = true;
+  mqtthandler_program_timers_ifchanged.fSendNow = true;
+
+  //    temp mesaure, send everything
+  MQTTHandler_Set_fSendNow();
+
+  return isserviced;
+
+}
+
+
+
+
 
 
 void mHeating::FunctionHandler_Init(){
@@ -2458,7 +2454,8 @@ void mHeating::FunctionHandler_Init(){
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_MINS_ID; 
   functionhandler_ptr->time_val = 1;
   functionhandler_ptr->function = &mHeating::FunctionHandler_FailSafe;
-  
+
+  #ifdef USE_HEATING_PROFILE_ESTIMATION  
   functionhandler_ptr = &functionhandler_heating_profiles;
   functionhandler_ptr->saved_millis = millis();
   functionhandler_ptr->flags.periodic_enabled = true;
@@ -2467,7 +2464,8 @@ void mHeating::FunctionHandler_Init(){
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   functionhandler_ptr->time_val = 1;
   functionhandler_ptr->function = &mHeating::FunctionHandler_Heating_Profiles;
-  
+  #endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
+      
   functionhandler_ptr = &functionhandler_relay_status;
   functionhandler_ptr->saved_millis = millis();
   functionhandler_ptr->flags.periodic_enabled = true;
@@ -2507,7 +2505,9 @@ void mHeating::FunctionHandler_Loop(){
   struct functionhandler<mHeating>* functionhandler_list_ptr[] = {
     &functionhandler_failsafe,
     &functionhandler_status_message,
+    #ifdef USE_HEATING_PROFILE_ESTIMATION
     &functionhandler_heating_profiles,
+    #endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
     &functionhandler_relay_status,
     &functionhandler_programs_timers,
     &functionhandler_programs_temps
@@ -2746,8 +2746,6 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes_colours;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructSON_PipeTempsByColours;
 
-
-
   // Measure and report every second
   pCONT_msdb18->settings.rate_measure_ms = 1000;
   // pCONT_msdb18->mqtthandler_sensor_ifchanged.tRateSecs = 5;
@@ -2802,8 +2800,6 @@ void mHeating::MQTTHandler_Set_TelePeriod(){
 
 } //end "MQTTHandler_Set_TelePeriod"
 
-
-
 void mHeating::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t flag_handle_all = false, handler_not_found = false;
@@ -2848,65 +2844,6 @@ void mHeating::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 ////////////////////// END OF MQTT /////////////////////////
-
-
-
-
-
-// Serialise and append from offset position
-void mHeating::AddToHardwareMessage(){
-
-  // StaticJsonDocument<250> doc;
-  // JsonObject root = doc.to<JsonObject>();
-
-  // JsonObject classobj = root.createNestedObject("mHeating");
-  //   classobj["version"] = MHEATING_H;
-
-  //   JsonObject pinsobj = classobj.createNestedObject("pins");
-
-  //     JsonObject relaysobj = pinsobj.createNestedObject("relays");
-  //       relaysobj["DS"] = "D1";
-  //       relaysobj["US"] = "D2";
-  //       relaysobj["WB"] = "D5";
-  //       relaysobj["IH"] = "D6";
-
-  //     JsonObject db18obj = pinsobj.createNestedObject("DB18");
-  //       db18obj["DS"] = "9|SD2";
-  //       db18obj["US"] = "10|SD3";
-
-  //     JsonObject dhtobj = pinsobj.createNestedObject("DHT");
-  //       dhtobj["DS"] = "D7";
-  //       dhtobj["US"] = "D0";
-
-  // uint16_t index_start = data_buffer2.payload.len;
-  // uint16_t index_end = 0;
-  // char     output[250];  memset(output,0,sizeof(output));
-
-  // serializeJson(doc,output); // {"classname":...."pins":{..}}
-
-  // if(index_start==HARDWARE_STATUS_OFFSET_INDEX){
-  //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DEBUG "HT First call"));
-  //   memcpy(&data_buffer2.payload.ctr[index_start],output,sizeof(char)*measureJson(root));
-  // }else{
-  //   // {"classname":...."pins":{..}} -> {"classname":...."pins":{..},x} so } becomes ,
-  //   data_buffer2.payload.ctr[index_start-1] = ',';
-  //   // skip first {
-  //   memcpy(&data_buffer2.payload.ctr[index_start],&output[1],sizeof(char)*measureJson(root)-1);
-  // }
-
-  // index_end = strlen(&data_buffer2.payload.ctr[index_start]);
-
-  // // save index
-  // data_buffer2.payload.len = index_start+index_end;
-
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DEBUG "mHeating" " HRW " "[%d|%d|%d] \"%s\""),
-  //   index_start, //start index
-  //   index_end, //end index
-  //   data_buffer2.payload.len,
-  //   &data_buffer2.payload.ctr[index_start]); //appended
-
-}
-
 
 
 #endif

@@ -213,10 +213,18 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_RELAY_CTR)           D_MODULE_DRIVERS_RELAY_CTR;
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)  D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
 #endif
+#ifdef USE_SONOFF_IFAN
+  #include "4_Drivers/Sonoff_iFan/mSonoffIFan.h"
+  class mSonoffIFan;
+  #define D_MODULE_DRIVER_IFAN_ID                             46
+  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_CTR)               "mSonoffIFan";
+  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR)      "ifan";
+  #define pCONT_ifan                                           pCONT->mifan
+#endif
 #ifdef USE_MODULE_DRIVERS_RF433MHZ
   // #include "SAWRadios/mSAWMain.h"
   // class mSAWMain;
-  // #define D_MSAW_MODULE_ID 46
+  // #define D_MSAW_MODULE_ID 47
   // DEFINE_PROGMEM_CTR(MSAW_MODULE_CTR)              "mSAWMain";
   // DEFINE_PROGMEM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR)              "rcswitch";
   // #include "SAWRadios/mSAWProtocol.h"
@@ -387,14 +395,6 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   #define D_MODULE_CUSTOM_RADIATORFAN_ID 175
   DEFINE_PROGMEM_CTR(MODULE_CUSTOM_RADIATORFAN_CTR)              "mRadiatorFan";
   DEFINE_PROGMEM_CTR(MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR)              "radiatorfan";
-#endif
-#ifdef USE_MODULE_CUSTOM_CEILING_FAN
-  #include "4_Drivers/CeilingFan/mCeilingFan.h"
-  class mCeilingFan;
-  #define D_MODULE_CUSTOM_CEILINGFAN_ID                             176
-  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_CEILINGFAN_CTR)               "mCeilingFan";
-  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_CEILINGFAN_FRIENDLY_CTR)      "ceilingfan";
-  #define pCONT_mcf                                           pCONT->mcf
 #endif
 #ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
   // #ifdef ESP32
@@ -626,8 +626,8 @@ class mInterfaceController{
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
     mRadiatorFan* mrf = nullptr;
   #endif
-  #ifdef USE_MODULE_CUSTOM_CEILING_FAN
-    mCeilingFan* mcf = nullptr;
+  #ifdef USE_SONOFF_IFAN
+    mSonoffIFan* mifan = nullptr;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     mIRtransceiver* mir = nullptr;

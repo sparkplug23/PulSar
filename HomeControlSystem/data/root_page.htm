@@ -145,6 +145,7 @@
             right: 0;
             background: var(--c-tb);
             z-index: 1;
+            /* height:65px; */
         }
     </style>
     <style>
@@ -310,7 +311,7 @@
             /* height: calc(100% - var(--tp) - var(--bh)); */
             margin-top: var(--tp);
             transform: translate(calc(var(--tx, 0px) + var(--i, 0)/var(--n)*-100%));
-            overscroll-behavior: none;
+            overscroll-behavior:none;
             min-width:340px;
             min-height: 100px;
             text-align:left;
@@ -900,6 +901,8 @@
             </div>
              -->
 
+             <!-- <button id='test1' class="button_hac fanbut" value='0'>Off</button> -->
+
             <div id="l1" name="l1">
                 <!-- phase out -->
                 <table style="width:100%"></table>
@@ -1424,6 +1427,8 @@ function move(e) {
 }
 
 function size() { 
+    console.log('BLOCKING size function');
+    return;
 	w = window.innerWidth;
 	var h = d.getElementById('top').clientHeight;
 	sCol('--th', h + "px");
@@ -1432,6 +1437,7 @@ function size() {
 	sCol('--tp', h + "px");
 	togglePcMode();
 }
+
 
 function togglePcMode(fromB = false)
 {
@@ -1449,12 +1455,12 @@ function togglePcMode(fromB = false)
 	// d.getElementById('buttonPcm').className = (pcMode) ? "active":"";
 	// d.getElementById('bot').style.height = (pcMode && !cfg.comp.pcmbot) ? "0":"auto";
 	// sCol('--bh', d.getElementById('bot').clientHeight + "px");
-	if (pcMode)
-	{
+	// if (pcMode)
+	// {
 		_C.style.width = '100%';
-	} else {
-		_C.style.width = '400%';
-	}
+	// } else {
+	// 	_C.style.width = '400%';
+	// }
 	lastw = w;
 }
 
@@ -1468,15 +1474,78 @@ _C.style.setProperty('--n', N);
 
 window.addEventListener('resize', size, false);
 
-_C.addEventListener('mousedown', lock, false);
-_C.addEventListener('touchstart', lock, false);
+// Buttons inside main container to have listener
+_C.addEventListener('click', function() {
+    
+    var id = event.target.id;
+    console.log('button id',id);
 
-_C.addEventListener('mousemove', drag, false);
-_C.addEventListener('touchmove', drag, false);
+    console.log('button classname',event.target.className);
 
-_C.addEventListener('mouseout', move, false);
-_C.addEventListener('mouseup', move, false);
-_C.addEventListener('touchend', move, false);
+
+    var key = id;
+    var value = event.target.value;
+
+
+    var object = {};
+                // const formData = new FormData(form);
+                // formData.forEach(function(value, key){
+                    //multi level
+
+                    
+
+
+                    // //function start
+                    if(key.includes(",")){
+                        console.log('multilevel');
+                        var new_key = key.split(',');
+                        var subobject = {};
+                        //check if it exists, then append
+                        if(object[new_key[0]]){
+                            console.log('multilevel key existed');
+                            var old_object = object[new_key[0]];
+                            old_object[new_key[1]] = value;                    
+                            object[new_key[0]] = old_object;
+                        }else{
+                            subobject[new_key[1]] = value;                       
+                            object[new_key[0]] = subobject;
+                        }
+                    }else{                        
+                        console.log('singlelevel');
+                        object[key] = value;
+                    }
+                    //function end
+
+                    
+                // });
+                var json2 = JSON.stringify(object);
+                console.log('button json', json2);
+
+                var url_command = '/json_command.json'
+                var method = 'POST';
+
+                var xhr = new XMLHttpRequest();
+                xhr.open(method, url_command, true);
+                xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+                xhr.send(json2);
+
+
+
+
+    
+}, false);
+
+// _C.addEventListener('mousedown', lock, false);
+
+// _C.addEventListener('mousedown', lock, false);
+// _C.addEventListener('touchstart', lock, false);
+
+// _C.addEventListener('mousemove', drag, false);
+// _C.addEventListener('touchmove', drag, false);
+
+// _C.addEventListener('mouseout', move, false);
+// _C.addEventListener('mouseup', move, false);
+// _C.addEventListener('touchend', move, false);
 
 
     var json_url_list_object = {"/base_page_fill.json":-100,"/status_popout_data.json":1000};
@@ -1627,6 +1696,8 @@ _C.addEventListener('touchend', move, false);
             .replace(/{t}/g,"<table style='width:100%'>")
             .replace(/{t2}/g,"</table>")
             .replace(/{oc}/g,"'onclick='")
+            .replace(/{id}/g,"id='")
+            .replace(/{va}/g,"value='")
             .replace(/{dc}/g,"<div class='")
             .replace(/}1/g,"</td></tr><tr><th>")
             .replace(/}2/g,"</th><td>");
@@ -1833,6 +1904,9 @@ _C.addEventListener('touchend', move, false);
                 const formData = new FormData(form);
                 formData.forEach(function(value, key){
                     //multi level
+
+
+                    //function start
                     if(key.includes(",")){
                         console.log('multilevel');
                         var new_key = key.split(',');
@@ -1851,6 +1925,9 @@ _C.addEventListener('touchend', move, false);
                         console.log('singlelevel');
                         object[key] = value;
                     }
+                    //function end
+
+
                 });
                 var json2 = JSON.stringify(object);
                 xhr.open(form.method, form.action, true);

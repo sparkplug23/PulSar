@@ -77,6 +77,7 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
 
   char* buffer = Settings.device_name_buffer.name_buffer;
   uint16_t buffer_length = strlen(buffer);
+  AddLog_P(LOG_LEVEL_INFO,PSTR("mSettings::AddDeviceName len=%d"),buffer_length);
   buffer_length = buffer_length > DEVICENAMEBUFFER_NAME_BUFFER_LENGTH ? DEVICENAMEBUFFER_NAME_BUFFER_LENGTH : buffer_length;
   
   #ifdef USE_LOG
@@ -132,35 +133,23 @@ const char* mSettings::GetDeviceName(int16_t class_id, int8_t device_id, char* b
   for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++){
     if((Settings.device_name_buffer.class_id[i]==class_id)&&(Settings.device_name_buffer.device_id[i]==device_id)){
       found_index = i;
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSettings::GetDeviceName found_index %d"),i);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("mSettings::GetDeviceName found_index %d"),i);
       break;
     }
   }
 
   if(found_index == -1){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
     return buffer;
   }
 
   char* name_buffer = Settings.device_name_buffer.name_buffer;
-  int8_t index = GetIndexOfNthCharPosition(name_buffer,'|',found_index);
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("name_buffer=%s %d"),Settings.device_name_buffer.name_buffer,index);
-  
-  // JsonBuilderI->Start();
-  // JsonBuilderI->Array_AddArray("name_buffer",name_buffer,sizeof(name_buffer));
-  // JsonBuilderI->End();
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("JsonBuilder=%s"),BufferWriterI->GetPtr());
-    
-  // First space has no delimeter
-  if(index != 0){
-    index++; //+1
-  }
-
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(DEBUG_INSERT_PAGE_BREAK "mSettings::GetDeviceName len=%d"),strlen(buffer));
   // gets first index from the array, where we start at the position the desired name is the next name
-  pCONT_sup->GetTextIndexed(buffer, buffer_size, 0, &name_buffer[index]);
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("GetDeviceName=%s"),buffer);
-  AddLog_P(LOG_LEVEL_INFO,PSTR("GetDeviceName &name_buffer[index]=%s"),&name_buffer[index]);
+  pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceName=%s"),buffer);
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceName &name_buffer[index]=%s"),&name_buffer[index]);
 
   if(buffer == nullptr){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
@@ -297,7 +286,7 @@ void mSettings::Function_Template_Load(){
   // pObj = &obj;
 
   // Serial.println("ERROR: NOT HANDLED");
-  // parsesub_JSONCommand(obj);
+  // parsesub_TopicCheck_JSONCommand(obj);
 
   // clear old buffer
   pCONT_set->ClearAllDeviceName();
@@ -387,7 +376,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);
@@ -418,7 +407,7 @@ int8_t mSettings::parse_JSONCommand(){
   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
   JsonObject obj = doc.as<JsonObject>();
 
-  parsesub_JSONCommand(doc.as<JsonObject>());
+  parsesub_TopicCheck_JSONCommand(doc.as<JsonObject>());
     
   //new topic names must include pixels
 
@@ -461,14 +450,14 @@ int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/settings")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_JSONCommand(obj);
+      parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
-void mSettings::parsesub_JSONCommand(JsonObjectConst obj){
+void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   if(!obj[F(D_JSON_DEVICENAME)].isNull()){
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_RELAYS D_PARSING_MATCHED "%s"), F(D_JSON_DEVICENAME)); 

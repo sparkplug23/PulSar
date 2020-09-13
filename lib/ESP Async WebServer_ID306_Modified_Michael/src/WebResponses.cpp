@@ -298,9 +298,9 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
  * Called by callback, used to actually transmit response back to client
  * */
 void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
-  // #ifdef DEBUG_ASYNC
+  #ifdef DEBUG_ASYNC
   Serial.println("AsyncBasicResponse::_respond(request) = Primary send mechanism"); Serial.flush();
-  // #endif
+  #endif
   _state = RESPONSE_HEADERS;
 
   uint16_t header_max_length = 250;

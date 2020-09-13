@@ -44,7 +44,7 @@ class mRelays{
 
 
 
-    void parsesub_JSONCommand(JsonObjectConst obj);
+    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
     #define RELAYS_MAX_COUNT 4
 
