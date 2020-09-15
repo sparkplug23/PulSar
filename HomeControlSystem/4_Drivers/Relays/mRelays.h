@@ -97,7 +97,7 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     void RestorePower(bool publish_power, uint32_t source);   
     void SetAllPower(uint32_t state, uint32_t source);
     void ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source);
-    void ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source);
+    // void ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source);
 
     void SetPowerOnState(void);
     // power_t power = 0;                          // Current copy of Settings.power

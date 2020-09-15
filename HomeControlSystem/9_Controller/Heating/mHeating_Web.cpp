@@ -304,7 +304,7 @@ char buffer[30];
       sprintf(button_handle_ctr,"%s%d\0",WEB_HANDLE_BUTTON_NAME_TIMER_SET,device_id);
       BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                                     100/4, 
-                                    "button_hac " WEB_HANDLE_BUTTON_NAME_TIMER_SET,
+                                    "buttonh " WEB_HANDLE_BUTTON_NAME_TIMER_SET,
                                     button_handle_ctr, 
                                     program_timers[device_id].mapped_defaults[button_id],                                       
                                     pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_timers_title),""
@@ -320,7 +320,7 @@ char buffer[30];
         sprintf(button_handle_ctr,"%s%d\0",WEB_HANDLE_BUTTON_NAME_TEMP_SET, device_id);
         BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                                       100/4, 
-                                      "button_hac " WEB_HANDLE_BUTTON_NAME_TEMP_SET,
+                                      "buttonh " WEB_HANDLE_BUTTON_NAME_TEMP_SET,
                                       button_handle_ctr, 
                                       program_temps[device_id].temp.mapped_defaults[button_id],                                       
                                       pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), button_id, button_temps_title),""

@@ -5441,37 +5441,10 @@ bool mSupport::CrashFlag(void)
 }
 
 void mSupport::CrashDump_AddJson(void)
-// void CrashDump(void)
 {
-  // // ResponseAppend_P(PSTR("{\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
-  // //   resetInfo.exccause,        // Exception Cause
-  // //   GetResetReason().c_str(),  // Reset Reason
-  // //   resetInfo.epc1,            // Exception Progam Counter
-  // //   resetInfo.epc2,            // Exception Progam Counter - High-Priority Interrupt 1
-  // //   resetInfo.epc3,            // Exception Progam Counter - High-Priority Interrupt 2
-  // //   resetInfo.excvaddr,        // Exception Virtual Address Register - Virtual address that caused last fetch, load, or store exception
-  // //   resetInfo.depc);           // Double Exception Program Counter
-
-  // pCONT_sup->WriteBuffer_P(PSTR("%s:%d"),"test",1);
-
-  // // uint32_t value;
-  // // ESP.rtcUserMemoryRead(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
-  // // if (crash_magic == (value & 0xFFFFFF00)) {
-  // //   ResponseAppend_P(PSTR(",\"CallChain\":["));
-  // //   uint32_t count = value & 0x3F;
-  // //   for (uint32_t i = 0; i < count; i++) {
-  // //     ESP.rtcUserMemoryRead(crash_rtc_offset +i, (uint32_t*)&value, sizeof(value));
-  // //     if (i > 0) { ResponseAppend_P(PSTR(",")); }
-  // //     ResponseAppend_P(PSTR("\"%08x\""), value);
-  // //   }
-  // //   ResponseAppend_P(PSTR("]"));
-  // // }
-
-  // // ResponseJsonEnd();
-
     char buffer[30];
 
-pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
+  pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
     resetInfo.exccause,        // Exception Cause
     pCONT_sup->GetResetReason(buffer, sizeof(buffer)),  // Reset Reason
     resetInfo.epc1,            // Exception Progam Counter
@@ -5493,7 +5466,6 @@ pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08
     }
     pCONT_sup->WriteBuffer_P(PSTR("]"));
   }
-
   
 }
 

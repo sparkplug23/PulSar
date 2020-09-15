@@ -131,7 +131,7 @@ int8_t Tasker_Web(uint8_t function);
 //     "for(i=0;i<%d;i++){"
 //       "b='';"
 //       "if(0==i){b=\" id='dP'\";}"
-//       "s+=\"<button type='button_hac' class='tl' onclick='ot(\"+i+\",this)'\"+b+\">\"+(i+1)+\"</button>\""
+//       "s+=\"<button type='buttonh' class='tl' onclick='ot(\"+i+\",this)'\"+b+\">\"+(i+1)+\"</button>\""
 //     "}"
 //     "eb('bt').innerHTML=s;"                                       // Create tabs
 //     "if(%d>0){"                                                   // Create Output and Action drop down boxes

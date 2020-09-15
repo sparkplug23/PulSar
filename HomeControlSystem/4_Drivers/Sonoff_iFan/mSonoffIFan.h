@@ -30,12 +30,9 @@ class mSonoffIFan {
   public:
     mSonoffIFan(){};
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    int8_t Tasker_Web(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
-    uint8_t test_speed = 0;
-    uint32_t tSaved_test = millis();
-
+int8_t Tasker_Web(uint8_t function);
 
 // const char kSonoffIfanCommands[] PROGMEM = "|"  // No prefix
 //   D_CMND_FANSPEED;
@@ -52,7 +49,7 @@ bool ifan_restart_flag = true;
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 int8_t parsesub_Commands(JsonObjectConst obj);
 
-
+void init();
 
 uint8_t GetLightState(void);
 void SetLightState(uint8_t state);
@@ -65,7 +62,6 @@ void SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence);
 void SonoffIfanReceived(void);
 bool SonoffIfanSerialInput(void);
 void CmndFanspeed(void);
-bool SonoffIfanInit(void);
 void SonoffIfanUpdate(void);
 
 
@@ -88,6 +84,30 @@ void WebCommand_Parse(void);
 
 void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Status_Table();
+
+
+    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+
+  
+  //#ifdef USE_CORE_MQTT 
+
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_TelePeriod();
+    
+    struct handler<mSonoffIFan>* mqtthandler_ptr;
+    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+
+    const char* postfix_topic_settings = "settings\0";
+    struct handler<mSonoffIFan> mqtthandler_settings_teleperiod;
+    
+    const char* postfix_topic_sensors = "power\0";
+    struct handler<mSonoffIFan> mqtthandler_sensor_ifchanged;
+    struct handler<mSonoffIFan> mqtthandler_sensor_teleperiod;
+    
+    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+
 
 };
 

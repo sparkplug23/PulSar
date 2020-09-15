@@ -1299,10 +1299,6 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_USERMODULE_CTR)==0){      return USER_MODULE; }
 
-
-
-
-
   return -1;
 
 }

@@ -247,8 +247,8 @@ DEBUG_LINE;
   #ifdef D_MODULE_CUSTOM_HEATING_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_HEATING_ID;
   #endif
-  #ifdef D_MODULE_DRIVER_IFAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVER_IFAN_ID;
+  #ifdef D_MODULE_DRIVERS_IFAN_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_IFAN_ID;
   #endif
   #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
@@ -548,8 +548,8 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
         case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
       #endif
-      #ifdef D_MODULE_DRIVER_IFAN_ID
-        case D_MODULE_DRIVER_IFAN_ID:      result = mifan->Tasker(function); break;
+      #ifdef D_MODULE_DRIVERS_IFAN_ID
+        case D_MODULE_DRIVERS_IFAN_ID:      result = mifan->Tasker(function); break;
       #endif
       #ifdef D_MSAW_MODULE_ID
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
@@ -763,8 +763,8 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
         case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
       #endif
-      #ifdef D_MODULE_DRIVER_IFAN_ID
-        case D_MODULE_DRIVER_IFAN_ID:      result = mifan->Tasker(function, param1); break;
+      #ifdef D_MODULE_DRIVERS_IFAN_ID
+        case D_MODULE_DRIVERS_IFAN_ID:      result = mifan->Tasker(function, param1); break;
       #endif
       #ifdef D_MSAW_MODULE_ID
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
@@ -953,8 +953,6 @@ const char* mInterfaceController::GetTaskName(uint8_t task, char* buffer){
     case FUNC_WEB_PAGEINFORMATION_SEND_MODULE:        return PM_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR;
     case FUNC_WEB_COMMAND:                            return PM_FUNC_WEB_COMMAND_CTR;
     case FUNC_CHECK_POINTERS:                         return PM_FUNC_CHECK_POINTERS_CTR;
-    case FUNC_WEB_SHOW_PARAMETERS:                    return PM_FUNC_WEB_SHOW_PARAMETERS_CTR;
-    case FUNC_WEB_SHOW_PARAMETERS2:                   return PM_FUNC_WEB_SHOW_PARAMETERS2_CTR;
     case FUNC_WEB_SYSTEM_INFO:                        return PM_FUNC_WEB_SYSTEM_INFO_CTR;
     case FUNC_DEBUG_CONFIGURE:                        return PM_FUNC_DEBUG_CONFIGURE_CTR;
   }
@@ -999,6 +997,9 @@ PGM_P mInterfaceController::GetClassName(uint8_t task){
     // Drivers
     #ifdef D_MODULE_DRIVERS_RELAY_ID
       case D_MODULE_DRIVERS_RELAY_ID:        return PM_MODULE_DRIVERS_RELAY_CTR;
+    #endif
+    #ifdef D_MODULE_DRIVERS_IFAN_ID
+      case D_MODULE_DRIVERS_IFAN_ID:        return PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR;
     #endif
     default: return 0;
   }
@@ -1077,6 +1078,7 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_SENSORS_SWITCHES_ID
       case D_MODULE_SENSORS_SWITCHES_ID:
+      Serial.println("D_MODULE_SENSORS_SWITCHES_ID");
         return D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR; 
       break;
     #endif
@@ -1132,8 +1134,8 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
         return D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR; 
       break;
     #endif
-    #ifdef D_MODULE_DRIVER_IFAN_ID
-      case D_MODULE_DRIVER_IFAN_ID:         return PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR;  break;
+    #ifdef D_MODULE_DRIVERS_IFAN_ID
+      case D_MODULE_DRIVERS_IFAN_ID:         return PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR;  
     #endif
     #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
       case D_MODULE_CUSTOM_OILFURNACE_ID:        return PM_MODULE_CUSTOM_OILFURNACE_FRIENDLY_CTR; 

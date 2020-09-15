@@ -131,8 +131,6 @@
 #define D_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR          "WEB_PAGEINFORMATION_SEND_MODULE"
 #define D_FUNC_WEB_COMMAND_CTR                              "WEB_COMMAND"
 #define D_FUNC_CHECK_POINTERS_CTR                           "CHECK_POINTERS"
-#define D_FUNC_WEB_SHOW_PARAMETERS_CTR                      "WEB_SHOW_PARAMETERS"
-#define D_FUNC_WEB_SHOW_PARAMETERS2_CTR                     "WEB_SHOW_PARAMETERS2"
 #define D_FUNC_WEB_SYSTEM_INFO_CTR                          "WEB_SYSTEM_INFO"
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
@@ -1346,6 +1344,7 @@
 #define D_JSON_CLIMATE "climate"
 #define D_JSON_CLASSID "ClassID"
 #define D_JSON_CURRENT "Current"
+#define D_JSON_CRASHDUMP "CrashDump"
 #define D_JSON_COLOUR_PALETTE "colour_palette"
 #define D_JSON_DATA "data"
 #define D_JSON_DATETIME "DateTime"

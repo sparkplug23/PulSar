@@ -104,7 +104,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
   BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                             100/2, 
-                            "mainbut" " " "button_hac", //class type of button
+                            "mainbut" " " "buttonh", //class type of button
                             "rgb_toggle", 
                             DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                             PSTR("Light Power "),
@@ -113,7 +113,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
 
   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                             100/2, 
-                            "mainbut" " " "button_hac", //class type of button
+                            "mainbut" " " "buttonh", //class type of button
                             "animation_toggle", 
                             DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                             PSTR("Animation  "),
@@ -145,7 +145,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
     sprintf(mode_select_ctr,PSTR("animod%02d"),option_mode_id);
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
                                   100/option_mode_id_count, 
-                                  "animod" " " "button_hac",
+                                  "animod" " " "buttonh",
                                   mode_select_ctr, 
                                   DEVICE_CONTROL_BUTTON_ON_ID, 
                                   GetAnimationModeNameByID(option_mode_id, buffer), ""

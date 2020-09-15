@@ -199,9 +199,6 @@ void mHeating::init_db18_sensor_parameters(){
       case ID_DB18_TM: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_MIDDLE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
     }
     #endif
-
-    
-
   }
 
   // Measure and report every second
@@ -218,29 +215,16 @@ void mHeating::init_db18_sensor_parameters(){
 
 void mHeating::init_dht22_sensor_parameters(){
 
-
-  #ifdef TEST_DEVICE_NAME
-  pCONT_set->AddDeviceName("One", D_MODULE_SENSORS_DHT_ID,   0);
-  pCONT_set->AddDeviceName("Two", D_MODULE_SENSORS_DHT_ID,   1);
-
-  #else
   pCONT_set->AddDeviceName(D_DHT_NAME_DOWNSTAIRS, D_MODULE_SENSORS_DHT_ID,     ID_DHT_DS);
   pCONT_set->AddDeviceName(D_DHT_NAME_UPSTAIRS, D_MODULE_SENSORS_DHT_ID,     ID_DHT_US);
-#endif
-  // // Measure and report every second
-  // pCONT_msdb18->settings.rate_measure_ms = 1000;
-  // // pCONT_msdb18->mqtthandler_sensor_ifchanged.tRateSecs = 5;
 
-  
-  // //Reduce sensor lib from reporting to minimum
-  // pCONT_msdb18->mqtthandler_sensor_ifchanged.tRateSecs = SEC_IN_HOUR;
-  // pCONT_msdb18->mqtthandler_sensor_teleperiod.tRateSecs = SEC_IN_HOUR;
-  // pCONT_msdb18->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
+  // Measure and report every second
+  pCONT_msdb18->settings.rate_measure_ms = 1000;
 
-  // //Reduce sensor lib from reporting to minimum
-  // pCONT->msdht->mqtthandler_sensor_ifchanged.tRateSecs = SEC_IN_HOUR;
-  // pCONT->msdht->mqtthandler_sensor_teleperiod.tRateSecs = SEC_IN_HOUR;
-  // pCONT->msdht->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
+  //Reduce sensor lib from reporting to minimum
+  pCONT->msdht->mqtthandler_sensor_ifchanged.tRateSecs = SEC_IN_HOUR;
+  pCONT->msdht->mqtthandler_sensor_teleperiod.tRateSecs = SEC_IN_HOUR;
+  pCONT->msdht->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
 
 }
 
@@ -2513,8 +2497,8 @@ void mHeating::FunctionHandler_Loop(){
     &functionhandler_programs_temps
   };
 
-  for(uint8_t list_id=0;list_id<6;list_id++){
-    pCONT_sup->FunctionHandler_Command(*this,D_MODULE_CUSTOM_HEATING_ID,functionhandler_list_ptr[list_id]); 
+  for(uint8_t list_id=0;list_id<5;list_id++){
+    pCONT_sup->FunctionHandler_Call(*this,D_MODULE_CUSTOM_HEATING_ID,functionhandler_list_ptr[list_id]); 
   }   
   
 }

@@ -994,10 +994,10 @@
 
 // // const char HTTP_FORM_END[] PROGMEM =
 // //   "<br/>"
-// //   "<button name='save' type='submit' class='button_hac bgrn'>" D_SAVE "</button>"
+// //   "<button name='save' type='submit' class='buttonh bgrn'>" D_SAVE "</button>"
 // //   "</form></fieldset>";
 // const char HTTP_FORM_RGB_LOAD_PIXELS[] PROGMEM =
-//   "<button name='loadpixels' type='submit' class='button_hac bgrn'>" "Load Pixels" "</button>";
+//   "<button name='loadpixels' type='submit' class='buttonh bgrn'>" "Load Pixels" "</button>";
 
 
 // const char kRGBPickerTitles[] PROGMEM = "Colour 0" "|" "Colour 1" "|" "Colour 2";

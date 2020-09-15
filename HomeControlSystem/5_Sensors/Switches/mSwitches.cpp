@@ -12,14 +12,13 @@ Ticker* TickerSwitch = nullptr;
 
 void mSwitches::SwitchInit(void)
 {
-  AddLog_P(LOG_LEVEL_TEST,PSTR("mSwitches::SwitchInit\n\r\n\r\n\r\n\r\n\r\n\r"));
 
   switches_found = 0;
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
     lastwallswitch[i] = 1;  // Init global to virtual switch state;
     if (pCONT_set->pin[GPIO_SWT1_ID +i] < 99) {
       switches_found++;
-      AddLog_P(LOG_LEVEL_TEST,PSTR("switches_found=%d"),switches_found);
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("switches_found=%d"),switches_found);
       pinMode(pCONT_set->pin[GPIO_SWT1_ID +i], bitRead(switch_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_SWT1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
       lastwallswitch[i] = digitalRead(pCONT_set->pin[GPIO_SWT1_ID +i]);  // Set global now so doesn't change the saved power state on first switch check
     }
@@ -45,20 +44,17 @@ void mSwitches::SwitchProbe(void)
   uint8_t force_low = (pCONT_set->Settings.switch_debounce % 50) &2;                    // 52, 102, 152 etc
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
-    if (pCONT_set->pin[GPIO_SWT1_ID +i] < 99) {
+    if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)) {
       //pins->GetPin
-
-      // switch_virtual[i] = digitalRead(pCONT_set->pin[GPIO_SWT1_ID +i]);
-
 
       // Olimex user_switch2.c code to fix 50Hz induced pulses
       if (1 == digitalRead(pCONT_set->pin[GPIO_SWT1_ID +i])) {
 
-      //   if (force_high) {                               // Enabled with SwitchDebounce x1
-      //     if (1 == switch_virtual[i]) {
-      //       switch_state_buf[i] = state_filter;         // With noisy input keep current state 1 unless constant 0
-      //     }
-      //   }
+        if (force_high) {                               // Enabled with SwitchDebounce x1
+          if (1 == switch_virtual[i]) {
+            switch_state_buf[i] = state_filter;         // With noisy input keep current state 1 unless constant 0
+          }
+        }
 
         if (switch_state_buf[i] < state_filter) {
           switch_state_buf[i]++;
@@ -69,11 +65,11 @@ void mSwitches::SwitchProbe(void)
 
       } else {
 
-      //   if (force_low) {                                // Enabled with SwitchDebounce x2
-      //     if (0 == switch_virtual[i]) {
-      //       switch_state_buf[i] = 0;                    // With noisy input keep current state 0 unless constant 1
-      //     }
-      //   }
+        if (force_low) {                                // Enabled with SwitchDebounce x2
+          if (0 == switch_virtual[i]) {
+            switch_state_buf[i] = 0;                    // With noisy input keep current state 0 unless constant 1
+          }
+        }
 
         if (switch_state_buf[i] > 0) {
           switch_state_buf[i]--;
@@ -185,11 +181,15 @@ void mSwitches::SwitchHandler(uint8_t mode)
           break;
         }
 
+        mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
         if (switchflag < 3) {
           // if (!SendKey(1, i +1, switchflag)) {  // Execute command via MQTT
           AddLog_P(LOG_LEVEL_TEST,PSTR("ExecuteCommandPower")); 
+          #ifdef USE_MODULE_DRIVERS_RELAY
           pCONT_mry->ExecuteCommandPower(i +1, switchflag, SRC_SWITCH);  // Execute command internally (if i < devices_present)
           // }
+          #endif
         }
 
         lastwallswitch[i] = button;
@@ -237,7 +237,86 @@ int8_t mSwitches::Tasker(uint8_t function){
     case FUNC_JSON_COMMAND: 
     
     break;
+    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+      WebAppend_Root_Draw_Table();
+    break; 
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break; 
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init(); 
+    break;
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif //USE_MQTT
+
+    
+
+
   }
+
+}
+
+void mSwitches::WebAppend_Root_Draw_Table(){
+
+  const char kTitle_TableTitles_Root[] = 
+    "Switch 0" "|" 
+    "Switch 1" "|" 
+    "Switch 2" "|" 
+    "Switch 3" "|" 
+    "Switch 4" "|" 
+    "Switch 5" "|" 
+    "Switch 6" "|" 
+    "Switch 7" "|" 
+    "Switch 8" "|" ;
+
+  pCONT_web->WebAppend_Root_Draw_Table_dList(switches_found,"switch_table", kTitle_TableTitles_Root);
+
+}
+
+//append to internal buffer if any root messages table
+void mSwitches::WebAppend_Root_Status_Table(){
+
+  char buffer[50];
+  
+  JsonBuilderI->Array_Start("switch_table");// Class name
+  for(int row=0;row<switches_found;row++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",row);
+      JsonBuilderI->Add_FP("ih","\"%s\"", IsSwitchActive(row)?"Pressed":"NOT Pressed");
+      if(IsSwitchActive(row)){
+        JsonBuilderI->Add("fc","#00ff00");
+      }else{
+        JsonBuilderI->Add("fc","#ff0000");
+      }
+    
+    JsonBuilderI->Level_End();
+  }
+  JsonBuilderI->Array_End();
+  
+}
+
+
+bool mSwitches::IsSwitchActive(uint8_t id){
+// Needs to know what type the button is, low, high, no pullup etc
+  if(lastwallswitch[id] == HIGH){
+    return true;
+  }
+  return false;
 
 }
 
@@ -265,6 +344,32 @@ uint8_t mSwitches::SwitchGetVirtual(uint8_t index)
 }
 
 
+
+/*********************************************************************************************************************************************
+******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
+**********************************************************************************************************************************************
+********************************************************************************************************************************************/
+
+uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, switches_found);
+  return JsonBuilderI->End();
+
+}
+
+uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
+
+  JsonBuilderI->Start();
+
+  JsonBuilderI->Array_AddArray("lastwallswitch", lastwallswitch, sizeof(lastwallswitch));
+  
+  return JsonBuilderI->End();
+
+}
+
+
+
 /*********************************************************************************************************************************************
 ******** MQTT Stuff **************************************************************************************************************************************
 **********************************************************************************************************************************************
@@ -277,7 +382,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
@@ -287,7 +392,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
@@ -297,7 +402,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
@@ -317,8 +422,8 @@ void mSwitches::MQTTHandler_Set_fSendNow(){
 
 void mSwitches::MQTTHandler_Set_TelePeriod(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
 } //end "MQTTHandler_Set_TelePeriod"
 

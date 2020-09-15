@@ -182,7 +182,7 @@ Serial.println("WebAppend_Root_Add_Buttons");
     sprintf(relay_handle_ctr,"reltog%02d",relay_id);
     JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
                                   100/relays_connected, 
-                                  "button_hac ""reltog",
+                                  "buttonh ""reltog",
                                   relay_handle_ctr, 
                                   DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
                                   GetRelayNamebyIDCtr(relay_id, buffer, sizeof(buffer)), ""
@@ -323,7 +323,7 @@ void mRelays::WebCommand_Parse(void)
       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
       // SetRefreshLEDs();
 
-      ExecuteCommandPowerZeroIndex(relay_id,POWER_TOGGLE,SRC_MQTT);
+      ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
     }
 
   }
@@ -442,7 +442,7 @@ void mRelays::SetRelay(uint8_t num, uint8_t state){
   }else{ relay_status[num].offtime = pCONT->mt->mtime; }
 
 
-  ExecuteCommandPowerZeroIndex(num,state,SRC_MQTT);
+  ExecuteCommandPower(num,state,SRC_MQTT);
 
 }
 
@@ -526,7 +526,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
 
   if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {  // All on and stay on
-    pCONT_set->power = (1 << pCONT_set->devices_present) -1;
+    pCONT_set->power = (1 << pCONT_set->devices_present);// -1;
     rpower = pCONT_set->power;
   }
 
@@ -580,14 +580,14 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
         pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
 
-        #ifdef ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS // leave mums, work on another
-          uint8_t led_pin = 13;
-          pinMode(led_pin,OUTPUT);
-          digitalWrite(led_pin,!state);
-          led_pin = 2;
-          pinMode(led_pin,OUTPUT);
-          digitalWrite(led_pin,!state);
-        #endif
+        // #ifdef ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS // leave mums, work on another
+        //   uint8_t led_pin = 13;
+        //   pinMode(led_pin,OUTPUT);
+        //   digitalWrite(led_pin,!state);
+        //   led_pin = 2;
+        //   pinMode(led_pin,OUTPUT);
+        //   digitalWrite(led_pin,!state);
+        // #endif
 
       }else{
         AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "ELSE i=%d,state=%d"),i,state);
@@ -625,7 +625,7 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
     publish_power = false;
   }
   if ((state >= POWER_OFF) && (state <= POWER_TOGGLE)) {
-    power_t all_on = (1 << pCONT_set->devices_present) -1;
+    power_t all_on = (1 << pCONT_set->devices_present);// -1;
     switch (state) {
     case POWER_OFF:
       pCONT_set->power = 0;
@@ -660,24 +660,24 @@ void mRelays::SetPowerOnState(void)
         SetDevicePower(pCONT_set->power, SRC_RESTART);
         break;
       case POWER_ALL_ON:  // All on
-        pCONT_set->power = (1 << pCONT_set->devices_present) -1;
+        pCONT_set->power = (1 << pCONT_set->devices_present);// -1;
         SetDevicePower(pCONT_set->power, SRC_RESTART);
         break;
       case POWER_ALL_SAVED_TOGGLE:
-        pCONT_set->power = (pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1)) ^ POWER_MASK;
+        pCONT_set->power = (pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) )) ^ POWER_MASK;
         if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
-        pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1);
+        pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
         if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->power, SRC_RESTART);
         }
         break;
       }
     // } else {
-    //   power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1);
+    //   power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
     //   if (pCONT_set->Settings.flag_system_phaseout.save_state) {    // SetOption0 - Save power state and use after restart
     //     SetDevicePower(pCONT_set->power, SRC_RESTART);
     //   }
@@ -700,16 +700,16 @@ void mRelays::SetPowerOnState(void)
 
 
 
-void mRelays::ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source){
-  AddLog_P(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
-  ExecuteCommandPower(device+1, state, source);
-}
+// void mRelays::ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source){
+//   AddLog_P(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
+//   ExecuteCommandPower(device+1, state, source);
+// }
 
 void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)
 {
 
 //device++; // I am using 0 index, tasmota used 1
-AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device++\" index shift"));
+// AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device++\" index shift"));
 
 // device  = Relay number 1 and up
 // state 0 = POWER_OFF = Relay Off
@@ -742,16 +742,21 @@ AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device+
     publish_power = false;
   }
 
-  if ((device < 1) || (device > pCONT_set->devices_present)) {
-    device = 1;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "device>1\tfall back to single relay"));
+  if (
+    // (device < 1) || 
+  (device > pCONT_set->devices_present)) {
+    device = 0;
+    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
   }
   active_device = device;
 
   // if (device <= MAX_PULSETIMERS) {
-  //   SetPulseTimer(device -1, 0);
+  //   SetPulseTimer(device, 0);
   // }
-  power_t mask = 1 << (device -1);        // Device to control
+  // power_t mask = 1 << (device);        // Device to control
+
+  // Indexing is now from 0!!
+  power_t mask = 1 << device;        // Device to control
   if (state <= POWER_TOGGLE) {
     // if ((blink_mask & mask)) {
     //   blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
@@ -792,13 +797,13 @@ AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device+
     SetDevicePower(pCONT_set->power, source);
 
     // if (device <= MAX_PULSETIMERS) {  // Restart PulseTime if powered On
-    //   SetPulseTimer(device -1, (((POWER_ALL_OFF_PULSETIME_ON == Settings.poweronstate) ? ~power : power) & mask) ? Settings.pulse_timer[device -1] : 0);
+    //   SetPulseTimer(device , (((POWER_ALL_OFF_PULSETIME_ON == Settings.poweronstate) ? ~power : power) & mask) ? Settings.pulse_timer[device -1] : 0);
     // }
   }
   // else if (POWER_BLINK == state) {
   //   if (!(blink_mask & mask)) {
   //     blink_powersave = (blink_powersave & (POWER_MASK ^ mask)) | (power & mask);  // Save state
-  //     blink_power = (power >> (device -1))&1;  // Prep to Toggle
+  //     blink_power = (power >> (device ))&1;  // Prep to Toggle
   //   }
   //   blink_timer = millis() + 100;
   //   blink_counter = ((!Settings.blinkcount) ? 64000 : (Settings.blinkcount *2)) +1;
@@ -811,7 +816,7 @@ AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device+
   //   blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
   //   MqttPublishPowerBlinkState(device);
   //   if (flag) {
-  //     ExecuteCommandPower(device, (blink_powersave >> (device -1))&1, SRC_IGNORE);  // Restore state
+  //     ExecuteCommandPower(device, (blink_powersave >> (device ))&1, SRC_IGNORE);  // Restore state
   //   }
   //   return;
   // }
@@ -829,7 +834,7 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
-  root["tbd"] = 0;
+  // root["tbd"] = 0;
   root["relays_connected"] = relays_connected;
 
   data_buffer2.payload.len = measureJson(root)+1;

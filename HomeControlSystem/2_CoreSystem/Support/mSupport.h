@@ -173,7 +173,7 @@ class mSupport{
      * be sent. If a payload should sent, the formatted publish function is called.
      * */
     template<typename T>
-    void FunctionHandler_Command(T& class_ptr, uint8_t class_id, functionhandler<T>* handler_ptr)
+    void FunctionHandler_Call(T& class_ptr, uint8_t class_id, functionhandler<T>* handler_ptr)
     {
       if(handler_ptr == nullptr){
         return;

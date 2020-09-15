@@ -115,6 +115,9 @@ const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR[] PROGMEM =
 
 DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_HANDLE_IHR)   "{sw}%d%%'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
 
+DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR)   
+"<td{sw1}%d%%'{cs}%s'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
+
 
 const char HTTP_TABLE100[] PROGMEM =
   "<table style='width:100%%'>";
@@ -1073,7 +1076,7 @@ const char HTTP_FORM_WIFI[] PROGMEM =
 //delee these
 const char HTTP_FORM_END[] PROGMEM =
   "<br/>"
-  "<button name='save' type='submit' class='button_hac bgrn'>" D_SAVE "</button>"
+  "<button name='save' type='submit' class='buttonh bgrn'>" D_SAVE "</button>"
   "</form></fieldset>";
 const char HTTP_FORM_END_NOSAVE[] PROGMEM =
   "<br/>"
@@ -1082,7 +1085,7 @@ const char HTTP_FORM_END_NOSAVE[] PROGMEM =
 
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)
   "<br/>"
-  "<button name='save' type='submit' class='button_hac bgrn'>" D_SAVE "</button>"
+  "<button name='save' type='submit' class='buttonh bgrn'>" D_SAVE "</button>"
   "</form></fieldset>";
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_NO_SAVE)
   "<br/>"
@@ -1091,7 +1094,7 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_NO_SAVE)
 
 // DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)
 //   "<br/>"
-//   "<button name='save' type='submit' class='button_hac bgrn'>" D_SAVE "</button>"
+//   "<button name='save' type='submit' class='buttonh bgrn'>" D_SAVE "</button>"
 //   "</form></fieldset>";
 
 
@@ -1102,7 +1105,7 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_START_VARIABLE_JSON)
   "<p></p>";
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON)
   "<br/>"
-  "<button name='save' type='submit' class='button_hac %s'>%s</button>"
+  "<button name='save' type='submit' class='buttonh %s'>%s</button>"
   "</form></fieldset>";
 
 

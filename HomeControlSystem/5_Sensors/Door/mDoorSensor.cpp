@@ -246,7 +246,8 @@ void mDoorSensor::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
-  mqtthandler_ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mDoorSensor:
+  :ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();

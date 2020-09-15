@@ -42,7 +42,7 @@
         td{
             padding:0px;
         }
-        .button_hac{
+        .buttonh{
             border:0;
             border-radius:0.3rem;
             background:#4d8d90;
@@ -54,7 +54,7 @@
             transition-duration:0.4s;
             cursor:pointer;
         }
-        .button_hac:hover{
+        .buttonh:hover{
             background:#31595b;
         }
         .bred{
@@ -901,7 +901,9 @@
             </div>
              -->
 
-             <!-- <button id='test1' class="button_hac fanbut" value='0'>Off</button> -->
+    
+
+             <!-- <button id='test1' class="buttonh fanbut" value='0'>Off</button> -->
 
             <div id="l1" name="l1">
                 <!-- phase out -->
@@ -1691,6 +1693,8 @@ _C.addEventListener('click', function() {
             .replace(/{f2}/g,"</font>")
             .replace(/{sc}/g,"'style='color:#")
             .replace(/{sw}/g,"<td style='width:")
+            .replace(/{sw1}/g," style='width:")
+            .replace(/{cs}/g," colspan='")
             .replace(/{bc}/g,"><button class=")
             .replace(/{bc2}/g,"</button></td>")
             .replace(/{t}/g,"<table style='width:100%'>")

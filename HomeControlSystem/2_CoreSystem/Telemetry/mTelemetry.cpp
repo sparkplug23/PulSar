@@ -334,16 +334,20 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ //
                     );
   JsonBuilder_Level_Start(D_JSON_COUNTER);
     JsonBuilder_Add("All", (uint8_t)0);
-    JsonBuilder_Add("WDT", (uint8_t)0);
+    // JsonBuilder_Add("WDT", (uint8_t)0);
   JsonBuilder_Level_End();
 
-  if (pCONT_sup->CrashFlag()) {
+  // if (pCONT_sup->CrashFlag()) {
+    
+  JsonBuilder_Level_Start(D_JSON_CRASHDUMP);
     pCONT_sup->WriteBuffer_P(PSTR(","));
     pCONT_sup->CrashDump_AddJson();
-  } else {
-    char buffer[30];
-    JsonBuilder_Add("Reason", pCONT_sup->GetResetReason(buffer, sizeof(buffer)));
-  }
+  JsonBuilder_Level_End();
+
+  // } else {
+  //   char buffer[30];
+  //   JsonBuilder_Add("Reason", pCONT_sup->GetResetReason(buffer, sizeof(buffer)));
+  // }
 
   return JsonBuilder_End();
 

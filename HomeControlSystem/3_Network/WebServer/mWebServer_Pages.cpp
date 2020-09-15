@@ -120,13 +120,14 @@ char buffer[30];
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
-          int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
-          char colour_ctr[7];
-          if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
-          else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
-          else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
-          JsonBuilderI->Add("fc", colour_ctr);    
+          // int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
+          // char colour_ctr[7];
+          // if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
+          // else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
+          // else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
+          // JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
+          // JsonBuilderI->Add("fc", colour_ctr);   
+          JsonBuilderI->Add("fc", 'red');    
         }break;
         case 2:
           JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
@@ -207,7 +208,7 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
   // }
   
   if (HandleRootStatusRefresh(request)) {
-    AddLog_P(LOG_LEVEL_TEST,PSTR("HandleRootStatusRefresh(request) FOUND SO STOP"));
+    // AddLog_P(LOG_LEVEL_TEST,PSTR("HandleRootStatusRefresh(request) FOUND SO STOP"));
     return;
   }
   // request->addInterestingHeader("root");
@@ -315,7 +316,7 @@ bool mWebServer::HandleRootStatusRefresh(AsyncWebServerRequest *request)
   // }
 
   if (!request->hasParam("m")) {     // Status refresh requested
-    AddLog_P(LOG_LEVEL_TEST,PSTR("!request->hasParam(\"m\")"));
+    // AddLog_P(LOG_LEVEL_TEST,PSTR("!request->hasParam(\"m\")"));
     return false; 
   }else{
     AddLog_P(LOG_LEVEL_TEST,PSTR("request->hasParam(\"m\")"));
@@ -366,7 +367,9 @@ bool mWebServer::HandleRootStatusRefresh(AsyncWebServerRequest *request)
 
   JsonBuilderI->Start();
     JsonBuilderI->AppendBuffer(PSTR("t}")); //temp fix
-    pCONT->Tasker_Interface(FUNC_WEB_SHOW_PARAMETERS);
+    // all but phased out 
+    // REMOVE html part
+    // pCONT->Tasker_Interface(FUNC_WEB_SHOW_PARAMETERS);
     JsonBuilderI->AppendBuffer(PSTR("{t2")); //temp fix
   JsonBuilderI->End();
 
@@ -496,7 +499,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         JsonBuilderI->AppendBuffer(PSTR(
           "<form method='get' onsubmit='return l(1);'>"
           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
-            "<button  class='button_hac bform1' type='submit'>Execute command</button>"
+            "<button  class='buttonh bform1' type='submit'>Execute command</button>"
           "</form>"
         ));            
       JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
@@ -512,7 +515,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         JsonBuilderI->AppendBuffer(PSTR(
         "<form method='get' onsubmit='return l(1);'>"
         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
-        "<button class='button_hac bform1' type='submit'>Execute Command</button>"
+        "<button class='buttonh bform1' type='submit'>Execute Command</button>"
         "</form>"  ));
       JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
 
@@ -2185,13 +2188,13 @@ void mWebServer::WebAppend_Button(uint8_t title_index)
   char title[32];
   if (title_index <= BUTTON_RESET_CONFIGURATION) {
     char confirm[64];
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='button_hac bred'>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get' onsubmit='return confirm(\"%s\");'><button name='%s' class='buttonh bred'>%s</button></form></p>"),
       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
       pCONT_sup->GetTextIndexed_P(confirm, sizeof(confirm), title_index, kButtonConfirm),
       (!title_index) ? "rst" : "non",
       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
   } else {
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='button_hac'>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='buttonh'>%s</button></form></p>"),
       pCONT_sup->GetTextIndexed_P(action, sizeof(action), title_index, kButtonAction),
       pCONT_sup->GetTextIndexed_P(title, sizeof(title), title_index, kButtonTitle));
   }
@@ -2213,7 +2216,7 @@ void mWebServer::WebAppend_Button(const char* button_title_ctr, const char* acti
     BufferWriterI->Append_P(PSTR(
       "<p>"
         "<form action='%s' method='get' onsubmit='return confirm(\"%s\");'>"
-          "<button name='%s' class='button_hac bred'>%s</button>"
+          "<button name='%s' class='buttonh bred'>%s</button>"
         "</form>"
       "</p>"),
       action_ctr,
@@ -2222,7 +2225,7 @@ void mWebServer::WebAppend_Button(const char* button_title_ctr, const char* acti
       button_title_ctr
     );
   } else {
-    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='button_hac'>%s</button></form></p>"),
+    BufferWriterI->Append_P(PSTR("<p><form action='%s' method='get'><button class='buttonh'>%s</button></form></p>"),
       action_ctr,
       button_title_ctr
     );
@@ -2239,7 +2242,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
   //   BufferWriterI->Append_P(PSTR(
   //     "<p>"
   //       "<form action='%s' method='get' onsubmit='return confirm(\"%s\");'>"
-  //         "<button name='%s' class='button_hac bred'>%s</button>"
+  //         "<button name='%s' class='buttonh bred'>%s</button>"
   //       "</form>"
   //     "</p>"),
   //     action_ctr,
@@ -2252,7 +2255,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
       
       // "<p><form action='%s' method='get'><button>%s</button></form></p>"
 
-    "<button name='%s' type='submit' class='button_hac %s'>%s</button>"),
+    "<button name='%s' type='submit' class='buttonh %s'>%s</button>"),
 
       action_ctr,
       button_css_extra_style_ctr,

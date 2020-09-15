@@ -96,6 +96,12 @@ class mSwitches{
     void init(void);
 
 
+
+bool IsSwitchActive(uint8_t id);
+
+void WebAppend_Root_Draw_Table();
+void WebAppend_Root_Status_Table();
+
   uint32_t tSavedSwitchProbe = millis();
     uint32_t switch_debounce = 0;          // Switch debounce timer
     uint16_t switch_no_pullup = 0;              // Switch pull-up bitmask flags

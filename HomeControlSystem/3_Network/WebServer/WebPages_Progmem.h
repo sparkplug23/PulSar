@@ -54,7 +54,7 @@
 //         td{
 //             padding:0px;
 //         }
-//         .button_hac{
+//         .buttonh{
 //             border:0;
 //             border-radius:0.3rem;
 //             background:#4d8d90;
@@ -66,7 +66,7 @@
 //             transition-duration:0.4s;
 //             cursor:pointer;
 //         }
-//         .button_hac:hover{
+//         .buttonh:hover{
 //             background:#31595b;
 //         }
 //         .bred{

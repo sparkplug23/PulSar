@@ -150,6 +150,7 @@ void ArduinoOtaLoop(void)
   MDNS.update();
   ArduinoOTA.handle();
   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
+  // Note async stuff can still occur, so I need to disable them
   while (arduino_ota_triggered) { ArduinoOTA.handle(); }
 }
 
