@@ -585,32 +585,32 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
     // case FUNC_WEB_COMMAND:
     //   WebCommand_Parse();      
     // break;
-    case FUNC_WEB_SHOW_PARAMETERS:{
+    // case FUNC_WEB_SHOW_PARAMETERS:{
 
-      // /****
-      //  *  Show LED power 
-      //  * ****/
-      // uint8_t fsize = 32;
-      // char onoff_ctr[30];
+    //   // /****
+    //   //  *  Show LED power 
+    //   //  * ****/
+    //   // uint8_t fsize = 32;
+    //   // char onoff_ctr[30];
       
-      // char float_ctr[10];
-      // memset(float_ctr,0,sizeof(float_ctr));
-      // dtostrf(GetDistanceCMReading()/100,3,2,float_ctr);
+    //   // char float_ctr[10];
+    //   // memset(float_ctr,0,sizeof(float_ctr));
+    //   // dtostrf(GetDistanceCMReading()/100,3,2,float_ctr);
 
-      // sprintf(onoff_ctr,"%s (m)",float_ctr);
+    //   // sprintf(onoff_ctr,"%s (m)",float_ctr);
         
-      // pCONT_web->WSBufferAppend_PI2(HTTP_SNS_GENERIC, 
-      //   "Ultrasonic Distance",
-      //   onoff_ctr
-      // );
+    //   // pCONT_web->WSBufferAppend_PI2(HTTP_SNS_GENERIC, 
+    //   //   "Ultrasonic Distance",
+    //   //   onoff_ctr
+    //   // );
 
-      // pCONT_web->WSBufferAppend_PI2(HTTP_SNS_GENERIC, 
-      //   "Ultrasonic Threshold Last Changed",
-      //   presence_detect.detected_rtc_ctr
-      // );
+    //   // pCONT_web->WSBufferAppend_PI2(HTTP_SNS_GENERIC, 
+    //   //   "Ultrasonic Threshold Last Changed",
+    //   //   presence_detect.detected_rtc_ctr
+    //   // );
 
-    }
-    break;
+    // }
+    // break;
     // case FUNC_WEB_SHOW_PARAMETERS:{
     //   //WebPage_Root_SendStatus();      
     // }break;

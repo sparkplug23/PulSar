@@ -32,25 +32,21 @@ class mMotionSensor{
     void EveryLoop();
 
     void parse_JSONCommand(JsonObjectConst obj);
-    // void parsesub_TopicCheck_JSONCommand(JsonObject& _obj);
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-
+    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
     #ifndef PIR_DETECTOR_NAME_CTR
       #define PIR_DETECTOR_NAME_CTR   "HC-SR501"  //move into options list with enums
     #endif
     
-    #define MAXIMUM_SENSORS 2
-    int8_t pin[2] = {-1, -1};
-    uint8_t pin_isinverted[2] = {0, 0};
+    #define MAXIMUM_SENSORS 3
+    int8_t pin[MAXIMUM_SENSORS] = {-1, -1, -1};
+    uint8_t pin_isinverted[MAXIMUM_SENSORS] = {0, 0, 0};
     uint8_t sensors_active = 0;
     uint8_t fEnableSensor = false;
     pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
 
-    
     const char* GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
     const char* GetDeviceNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);
-
     
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
@@ -72,9 +68,9 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mMotionSensor>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mMotionSensor> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mMotionSensor> mqtthandler_sensor_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

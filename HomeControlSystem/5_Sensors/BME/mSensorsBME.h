@@ -87,9 +87,9 @@ class mSensorsBME{
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSensorsBME>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mSensorsBME> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mSensorsBME> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsBME> mqtthandler_sensor_teleperiod;
 

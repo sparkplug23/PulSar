@@ -66,7 +66,7 @@ extern struct DATA_BUFFER2 data_buffer2;
 
 
 
-const char EMPTY_MESSAGE_CTR[] PROGMEM = "Unused\0";
+const char EMPTY_MESSAGE_CTR[] PROGMEM = "Unused";
 
 // default buffer sizes assumed by klists, negates the need to pass it to function
 #define D_DEFAULT_DEVICE_BUFFER_LENGTH 50 

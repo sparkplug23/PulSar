@@ -112,7 +112,7 @@ class mPulseCounter{
     
 uint8_t Change_Detected(uint8_t sensor_id);
 
-    const char* sensor_unset_ctr = "unset\0";
+    const char* sensor_unset_ctr = "unset";
 
     void WebPage_Root_AddHandlers();
     void WebPage_Root_SendStatus();
@@ -130,9 +130,9 @@ uint8_t Change_Detected(uint8_t sensor_id);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mPulseCounter>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mPulseCounter> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mPulseCounter> mqtthandler_sensor_ifchanged;
     struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;
 

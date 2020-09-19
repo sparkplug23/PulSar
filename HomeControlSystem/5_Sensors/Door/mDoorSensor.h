@@ -73,9 +73,9 @@ class mDoorSensor{
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mDoorSensor>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mDoorSensor> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mDoorSensor> mqtthandler_sensor_ifchanged;
     struct handler<mDoorSensor> mqtthandler_sensor_teleperiod;
 

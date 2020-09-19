@@ -78,9 +78,9 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
     struct handler<mExerciseBike>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mExerciseBike> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mExerciseBike> mqtthandler_sensor_ifchanged;
     struct handler<mExerciseBike> mqtthandler_sensor_teleperiod;
     
@@ -91,7 +91,7 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_lightstate = "state\0";
+    const char* postfix_topic_lightstate = "state";
     struct handler<mExerciseBike> mqtthandler_lightstate_ifchanged;
     struct handler<mExerciseBike> mqtthandler_lightstate_teleperiod;
   //#endif

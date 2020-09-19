@@ -213,10 +213,10 @@ void Settings_Save();
     struct handler<mEnergy>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mEnergy> mqtthandler_settings_teleperiod;
     
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mEnergy> mqtthandler_sensor_ifchanged;
     struct handler<mEnergy> mqtthandler_sensor_teleperiod;
     
@@ -227,7 +227,7 @@ void Settings_Save();
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_energystats = "energystats\0";
+    const char* postfix_topic_energystats = "energystats";
     struct handler<mEnergy> mqtthandler_energystats_ifchanged;
     struct handler<mEnergy> mqtthandler_energystats_teleperiod;
   //#endif

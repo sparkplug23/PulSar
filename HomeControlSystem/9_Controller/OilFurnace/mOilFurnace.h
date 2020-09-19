@@ -386,7 +386,7 @@ int8_t parse_JSONCommand();
     struct handler<mOilFurnace>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mOilFurnace> mqtthandler_settings_teleperiod;
     
     // Extra module only handlers
@@ -398,10 +398,10 @@ int8_t parse_JSONCommand();
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_litres = "litres\0";
+    const char* postfix_topic_litres = "litres";
     struct handler<mOilFurnace> mqtthandler_litres_ifchanged;
     struct handler<mOilFurnace> mqtthandler_litres_teleperiod;
-    const char* postfix_topic_furnace = "furnace\0";
+    const char* postfix_topic_furnace = "furnace";
     struct handler<mOilFurnace> mqtthandler_furnace_ifchanged;
     struct handler<mOilFurnace> mqtthandler_furnace_teleperiod;
   //#endif

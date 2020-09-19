@@ -1430,7 +1430,7 @@ struct FREEMEM_USAGE{
 #ifdef DEBUG_WEBSERVER_MEMORY
 
   
-  const char*     freemem_usage_name_json_shared = "json_shared\0";
+  const char*     freemem_usage_name_json_shared = "json_shared";
   freemem_usage_t freemem_usage_json_shared;
 
 

@@ -53,9 +53,9 @@ class mAnalog{
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mAnalog>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mAnalog> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mAnalog> mqtthandler_sensor_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

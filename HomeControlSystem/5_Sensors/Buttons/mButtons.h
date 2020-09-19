@@ -94,9 +94,9 @@ bool IsButtonActive(uint8_t id);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mButtons>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mButtons> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mButtons> mqtthandler_sensor_ifchanged;
     struct handler<mButtons> mqtthandler_sensor_teleperiod;
 

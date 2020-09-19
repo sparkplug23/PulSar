@@ -30,7 +30,7 @@
 //#define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
 // #define DEVICE_RGBMICRO2 //projector
-#define DEVICE_RGBBEDLIGHT
+// #define DEVICE_RGBBEDLIGHT
 // #define DEVICE_DESKLIGHT
 // #define DEVICE_RGBCOOKER // new lighting H801
 //  #define DEVICE_RGBUTILITY // new lighting H801
@@ -48,7 +48,6 @@
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_BEDROOMBLINDS
 // #define DEVICE_DOORBELLWALLCHIME
-// #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
 // #define DEVICE_HEATING
@@ -63,7 +62,7 @@
 /**
  *  ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- 
 **/
-// #define DEVICE_CONSUMERUNIT 
+#define DEVICE_CONSUMERUNIT 
 
 /**
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
@@ -71,6 +70,7 @@
 // #define DEVICE_ATTIC_NODE
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_UTILITYSENSOR
+// #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_TESTSENSOR
 
 /**
@@ -111,6 +111,9 @@
   #define USE_BUILD_TYPE_ENERGY
   #define USE_MODULE_SENSORS_PZEM004T_MODBUS
 
+  #define USE_MODULE_SENSORS_BME
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "Downstairs Toilet"
+
   // #define ENABLE_BUG_TRACING
   
   #define USE_SOFTWARE_SERIAL_DEBUG
@@ -122,6 +125,10 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
       "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
@@ -153,6 +160,9 @@
             "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
             "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
             "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
+        "],"
+        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\""
         "]"
     "}"
   "}";
@@ -1411,18 +1421,18 @@
   #define DEVICENAME_FRIENDLY_CTR "Living Room Sensor"
     
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
-     
+  #define SETTINGS_HOLDER 1
+  
   #define USE_MODULE_SENSORS_MOTION
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "LivingRoom"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "DriveFront"
 
   #define D_DEVICE_SENSOR_CLIMATE "LivingRoom"
 
-  #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "DriveFront"
 
-  #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_ULTRASONICS
+  #define USE_MODULE_SENSORS_BME
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1430,16 +1440,18 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR    "\","
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_ULTRASONICS
-      "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D5\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_CTR     "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_PIR_3_INV_CTR     "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
@@ -1453,7 +1465,7 @@
         "\"" D_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "\""
         "],"
-        "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_SENSOR_CLIMATE "\""
         "],"
         "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
@@ -2526,7 +2538,7 @@
 
 
 #ifdef DEVICE_GARAGELIGHT
-  #define DEVICENAME_CTR          "garagelightnew"
+  #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights"
   
   #define FORCE_TEMPLATE_LOADING
@@ -2536,7 +2548,7 @@
 
   // motion comes from switch inputs, which I need to write. Actually, all "motion" should use switch inputs!
   #define USE_MODULE_SENSORS_MOTION
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Middle Driveway"
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
   
   #define USE_MODULE_CUSTOM_SECURITY_LIGHT
@@ -2558,8 +2570,8 @@
       "\"5\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"15\":\"" D_GPIO_FUNCTION_REL1_CTR  "\"," //swapped relays
-      "\"4\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\"," 
+      "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
     "},"
@@ -2588,6 +2600,12 @@
   "}";
 #endif
 
+/**
+ * 
+ * Hoping you both have the perfect day and a long happy marriage filled with joy and laughter. 
+ * 
+ * 
+ * */
 
 
 #ifdef DEVICE_SILVERLAMP1

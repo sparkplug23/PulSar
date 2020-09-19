@@ -132,9 +132,9 @@ static void SwitchProbe(void);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSwitches>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mSwitches> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mSwitches> mqtthandler_sensor_ifchanged;
     struct handler<mSwitches> mqtthandler_sensor_teleperiod;
 

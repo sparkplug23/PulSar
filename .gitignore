@@ -13,7 +13,7 @@ firmware.map
 ;FutureIdeas.txt
 UserConfigSecret.h
 RevisionHistory.txt
-FutureIdeas.txt
+##FutureIdeas.txt
 
 ## Visual Studio Code specific ######
 .vscode

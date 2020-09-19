@@ -281,36 +281,36 @@ class mMQTT{
 
     // move into progmem!
 
-    const char* postfix_topic_health = "health\0";
+    const char* postfix_topic_health = "health";
     handler<mMQTT> mqtthandler_health;
-    const char* postfix_topic_settings = "settings\0";    
+    const char* postfix_topic_settings = "settings";    
     handler<mMQTT> mqtthandler_settings; //ie modes, on, off, states
-    const char* postfix_topic_log = "log\0";        
+    const char* postfix_topic_log = "log";        
     handler<mMQTT> mqtthandler_log;
-    const char* postfix_topic_firmware = "firmware\0";        
+    const char* postfix_topic_firmware = "firmware";        
     handler<mMQTT> mqtthandler_firmware;
-    const char* postfix_topic_memory = "memory\0";    
+    const char* postfix_topic_memory = "memory";    
     handler<mMQTT> mqtthandler_memory;
-    const char* postfix_topic_network = "network\0";    
+    const char* postfix_topic_network = "network";    
     handler<mMQTT> mqtthandler_network;
-    const char* postfix_topic_mqtt = "mqtt\0";    
+    const char* postfix_topic_mqtt = "mqtt";    
     handler<mMQTT> mqtthandler_mqtt;
-    const char* postfix_topic_time = "time\0";    
+    const char* postfix_topic_time = "time";    
     handler<mMQTT> mqtthandler_time;
-    const char* postfix_topic_devices = "devices\0";    
+    const char* postfix_topic_devices = "devices";    
     handler<mMQTT> mqtthandler_devices; // appended all ACTIVE sensors from all sensor modules
-    const char* postfix_topic_reboot = "reboot\0";    
+    const char* postfix_topic_reboot = "reboot";    
     handler<mMQTT> mqtthandler_reboot;
-    const char* postfix_topic_reboot_event = "reboot/event\0";    
+    const char* postfix_topic_reboot_event = "reboot/event";    
     handler<mMQTT> mqtthandler_reboot_event;
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      const char* postfix_topic_debug_pins = "debug/pins\0";    
+      const char* postfix_topic_debug_pins = "debug/pins";    
       handler<mMQTT> mqtthandler_debug_pins;
-      const char* postfix_topic_debug_template = "debug/template\0";    
+      const char* postfix_topic_debug_template = "debug/template";    
       handler<mMQTT> mqtthandler_debug_template;
-      const char* postfix_topic_debug_moduleinterface = "debug/moduleinterface\0";    
+      const char* postfix_topic_debug_moduleinterface = "debug/moduleinterface";    
       handler<mMQTT> mqtthandler_debug_moduleinterface;
-      const char* postfix_topic_debug_minimal = "debug/minimal\0";    
+      const char* postfix_topic_debug_minimal = "debug/minimal";    
       handler<mMQTT> mqtthandler_debug_minimal;
     #endif
 

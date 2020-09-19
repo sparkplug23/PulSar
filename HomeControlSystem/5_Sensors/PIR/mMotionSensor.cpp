@@ -5,68 +5,42 @@
 void mMotionSensor::Pre_Init(void){
 
   sensors_active = 0;
-
-  // Using ++ means always the lowest index will be the active sensor, ie, PIR2 can be 0 when PIR1 is not defined
-  if (pCONT_set->pin[GPIO_PIR_1_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_1_ID];
-    pin_isinverted[sensors_active] = 0;
-    pinMode(pin[sensors_active],INPUT);
-    sensors_active++;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_set->pin[GPIO_PIR_1_ID]);
-  }
-  if (pCONT_set->pin[GPIO_PIR_2_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_2_ID];
-    pin_isinverted[sensors_active] = 0;
-    pinMode(pin[sensors_active],INPUT);
-    sensors_active++;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_set->pin[GPIO_PIR_2_ID]);
-  }
-  if (pCONT_set->pin[GPIO_PIR_1_INV_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_1_INV_ID];
-    pin_isinverted[sensors_active] = 1;
-    pinMode(pin[sensors_active],INPUT_PULLUP);
-    sensors_active++;
-    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1_INV] %d"),pCONT_set->pin[GPIO_PIR_1_ID]);
-  }
-  if (pCONT_set->pin[GPIO_PIR_2_INV_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_2_INV_ID];
-    pin_isinverted[sensors_active] = 1;
-    pinMode(pin[sensors_active],INPUT_PULLUP);
-    sensors_active++;
-    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2_INV] %d"),pCONT_set->pin[GPIO_PIR_2_ID]);
-  }
-  if (pCONT_set->pin[GPIO_PIR_1_NP_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_1_NP_ID];
-    pin_isinverted[sensors_active] = 1;
-    pinMode(pin[sensors_active],INPUT);
-    sensors_active++;
-    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1_INV] %d"),pCONT_set->pin[GPIO_PIR_1_ID]);
-  }
-  if (pCONT_set->pin[GPIO_PIR_2_NP_ID] < 99) {  // not set when 255
-    pin[sensors_active] = pCONT_set->pin[GPIO_PIR_2_NP_ID];
-    pin_isinverted[sensors_active] = 1;
-    pinMode(pin[sensors_active],INPUT);
-    sensors_active++;
-    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2_INV] %d"),pCONT_set->pin[GPIO_PIR_2_ID]);
-  }
-
   fEnableSensor = false;
-  if(sensors_active>2){
-    return;
-  }
 
-  for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
-    if(pin[sensor_id]>=0){
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "Pin Set %d"),pin[sensor_id]);
-      // if(pin_isinverted[sensors_active]){   //inverted = active HIGH
-      //   pinMode(pin[sensor_id],INPUT);
-      // }else{      
-      //   pinMode(pin[sensor_id],INPUT_PULLUP); //free floating NOT inverted = active LOW
-      // }
-      fEnableSensor = true; // true if any are active
-    }else{
-      AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin[sensor_id]);
+  uint16_t pin_id = 0;
+  for(uint8_t ii=0;ii<9;ii++){
+    
+    pin_id = GPIO_PIR_1_ID+ii;
+    // Make sure to not exceed limits
+    if(sensors_active>MAXIMUM_SENSORS){ break; }
+
+    if(pCONT_pins->PinUsed(pin_id)){
+      // Save GPIO
+      pin[sensors_active] = pCONT_pins->GetPin(pin_id);
+      // config
+      switch (pin_id){
+        case GPIO_PIR_1_INV_ID:
+        case GPIO_PIR_2_INV_ID:
+        case GPIO_PIR_3_INV_ID:
+          pin_isinverted[sensors_active] = true;
+          pinMode(pin[sensors_active], INPUT_PULLUP);
+        break;
+        case GPIO_PIR_1_NP_ID:
+        case GPIO_PIR_2_NP_ID:
+        case GPIO_PIR_3_NP_ID:
+          pin_isinverted[sensors_active] = false;
+          pinMode(pin[sensors_active], INPUT);   
+        break;   
+        default:
+          pin_isinverted[sensors_active] = false;
+          pinMode(pin[sensors_active], INPUT);
+        break;
+      }
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[%d] gpio=%d"), sensors_active, pin[sensors_active]);
+      sensors_active++;
+      fEnableSensor = true;
     }
+    
   }
 
 }
@@ -75,30 +49,13 @@ void mMotionSensor::Pre_Init(void){
 void mMotionSensor::Init(){
 
   memset(&pir_detect[0].detected_rtc_ctr,0,sizeof(pir_detect[0].detected_rtc_ctr));
-  //memset(&pir_detect[0].friendly_name_ctr,0,sizeof(pir_detect[0].friendly_name_ctr));
   memset(&pir_detect[1].detected_rtc_ctr,0,sizeof(pir_detect[1].detected_rtc_ctr));
-  //memset(&pir_detect[1].friendly_name_ctr,0,sizeof(pir_detect[1].friendly_name_ctr));
+  memset(&pir_detect[2].detected_rtc_ctr,0,sizeof(pir_detect[1].detected_rtc_ctr));
   
   for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
     sprintf(pir_detect[sensor_id].detected_rtc_ctr,"--:--:--\0");
     pir_detect[sensor_id].state = PIR_Detected(sensor_id);
   }
-
-  // #ifdef MOTIONALERT_PAYLOAD1_CTR
-  //   sprintf(pir_detect[0].friendly_name_ctr,MOTIONALERT_PAYLOAD1_CTR);
-  // #else
-  //   // sprintf(pir_detect[0].friendly_name_ctr,PSTR("undefined"));
-  // #endif
-          
-  // #ifdef MOTIONALERT_PAYLOAD2_CTR
-  //   sprintf(pir_detect[1].friendly_name_ctr,MOTIONALERT_PAYLOAD2_CTR);
-  // #else
-  //   // sprintf(pir_detect[1].friendly_name_ctr,PSTR("undefined"));
-  // #endif
-
-
-
-
 
 }
 

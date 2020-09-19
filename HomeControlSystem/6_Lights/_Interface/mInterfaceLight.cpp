@@ -2511,7 +2511,7 @@ const char* mInterfaceLight::GetPaletteFriendlyNameByID(uint8_t id, char* name, 
   }
   //progmem
   else{
-    return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;//"NULL\0";
+    return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;//"NULL";
   }
 }
 
@@ -2528,7 +2528,7 @@ const char* mInterfaceLight::GetPaletteName(char* buffer){
 } 
 const char* mInterfaceLight::GetPaletteNameByID(uint8_t id, char* buffer){  
   PALETTELIST::PALETTE *ptr = GetPalettePointerByID(id);
-  return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;//"NULL\0";
+  return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;//"NULL";
   
   return WARNING_NOTHANDLED_CTR;
   // return "Unknown";
@@ -2646,7 +2646,7 @@ void mInterfaceLight::setdefault_PresetColourPalettes_UserFill(uint8_t id){//} c
 
   // fill memory location to defaults
   uint8_t get_pixels_used = GetDefaultColourPaletteUserIDsCount(id);
-  // char* test = "test\0"; //GetDefaultColourPaletteUserIDs_P(id)
+  // char* test = "test"; //GetDefaultColourPaletteUserIDs_P(id)
 
   auto id_ptr = GetDefaultColourPaletteUserIDs_P(id);
   // Serial.printf("get_pixels_used=%d\n\r",get_pixels_used); Serial.flush();

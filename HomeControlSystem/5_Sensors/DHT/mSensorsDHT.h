@@ -124,7 +124,7 @@ class mSensorsDHT{
       // const char* name_ptr = nullptr;
     }sensor[MAX_SENSORS];
 
-    const char* sensor_unset_ctr = "unset\0";
+    const char* sensor_unset_ctr = "unset";
 
     void WebPage_Root_AddHandlers();
     void WebPage_Root_SendStatus();
@@ -142,9 +142,9 @@ class mSensorsDHT{
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSensorsDHT>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mSensorsDHT> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors\0";
+    const char* postfix_topic_sensors = "sensors";
     struct handler<mSensorsDHT> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsDHT> mqtthandler_sensor_teleperiod;
 

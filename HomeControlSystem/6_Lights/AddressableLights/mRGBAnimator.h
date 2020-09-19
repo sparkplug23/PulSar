@@ -1184,7 +1184,7 @@ void WebAppend_Root_RGBPalette();
     struct handler<mRGBAnimator>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings\0";
+    const char* postfix_topic_settings = "settings";
     struct handler<mRGBAnimator> mqtthandler_settings_teleperiod;
 
     // Extra module only handlers
@@ -1202,30 +1202,30 @@ void WebAppend_Root_RGBPalette();
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_animation = "animation\0";
+    const char* postfix_topic_animation = "animation";
     struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;
     
-    const char* postfix_topic_ambilight = "ambilight\0";
+    const char* postfix_topic_ambilight = "ambilight";
     struct handler<mRGBAnimator> mqtthandler_ambilight_teleperiod;
     
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    const char* postfix_topic_notifications = "notifications\0";
+    const char* postfix_topic_notifications = "notifications";
     struct handler<mRGBAnimator> mqtthandler_notifications_teleperiod;
   #endif
 
-    const char* postfix_topic_scene = "scene\0";
+    const char* postfix_topic_scene = "scene";
     struct handler<mRGBAnimator> mqtthandler_scene_teleperiod;
 
-    const char* postfix_topic_state = "state\0";
+    const char* postfix_topic_state = "state";
     struct handler<mRGBAnimator> mqtthandler_state_teleperiod;
 
-    const char* postfix_topic_timed = "timed\0";
+    const char* postfix_topic_timed = "timed";
     struct handler<mRGBAnimator> mqtthandler_timed_teleperiod;
 
-    const char* postfix_topic_flasher = "flasher/animator\0";
+    const char* postfix_topic_flasher = "flasher/animator";
     struct handler<mRGBAnimator> mqtthandler_flasher_teleperiod;
 
-    const char* postfix_topic_mixer = "flasher/mixer\0";
+    const char* postfix_topic_mixer = "flasher/mixer";
     struct handler<mRGBAnimator> mqtthandler_mixer_teleperiod;
 
   #endif
