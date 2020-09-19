@@ -114,9 +114,9 @@ int8_t mRelays::Tasker(uint8_t function){
     case FUNC_JSON_COMMAND:
       // function_result = CheckAndExecute_JSONCommand();
     break;
-    case FUNC_SET_POWER:
-      // LightSetPower();
-    break;    
+    // case FUNC_SET_POWER:
+    //   // LightSetPower();
+    // break;    
     /************
      * MQTT SECTION * 
     *******************/
@@ -378,6 +378,8 @@ int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
+  AddLog_P(LOG_LEVEL_INFO,PSTR("mRelays::parsesub_TopicCheck_JSONCommand"));
+
   uint8_t name_num=-1,state=-1;    
 
   if(!obj[F(D_JSON_NAME)].isNull()){
@@ -387,6 +389,8 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     if(obj["name"].is<int>()){
       name_num  = obj["name"];
     }
+  }else{
+    name_num = 0; // assume relay 0
   }
 
   if(!obj[F(D_JSON_ONOFF)].isNull()){
@@ -398,9 +402,28 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     }    
   }
 
-  if((name_num>-1)&&(state>-1)){
+  if(state>-1){
     SetRelay(name_num,state);
   }
+
+
+  
+  // if(!obj[D_JSON_POWER].isNull()){
+  //   if(const char* value = obj[D_JSON_POWER]){
+  //     state = pCONT_sup->GetStateNumber(value);
+  //   }else 
+  //   if(obj[D_JSON_POWER].is<int>()){
+  //     state  = obj[D_JSON_POWER];
+  //     if(state==2){
+  //       state ^= GetRelay(name_num); //invert
+  //     }
+  //   }    
+  // }
+
+  // if(state>-1){
+  //   SetRelay(name_num,state);
+  // }
+
 
   //create parsing function
   // id = ParseJsonObjectValue(function, key, )
@@ -520,9 +543,13 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 
 void mRelays::SetDevicePower(power_t rpower, uint32_t source)
 {
+
+  DEBUG_LINE;
+
   pCONT_sup->ShowSource(source);
   pCONT_set->last_source = source;
-
+DEBUG_LINE;
+  
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
 
   if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {  // All on and stay on
@@ -548,16 +575,17 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   //     }
   //   }
   // }
-
+DEBUG_LINE;
+  
   if (rpower) {                           // Any power set
     last_power = rpower;
   }
 
-  pCONT_set->XdrvMailbox.index = rpower;
-  pCONT->Tasker_Interface(FUNC_SET_POWER);               // Signal power state
-
-  pCONT_set->XdrvMailbox.index = rpower;
-  pCONT_set->XdrvMailbox.payload = source;
+  // PHASE OUT and replace with something else
+  // pCONT_set->XdrvMailbox.index = rpower;
+  // pCONT->Tasker_Interface(FUNC_SET_POWER);               // Signal power state
+  // pCONT_set->XdrvMailbox.index = rpower;
+  // pCONT_set->XdrvMailbox.payload = source;
 
   // if (pCONT->Tasker_Interface(FUNC_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
   //   // Serviced
@@ -574,6 +602,38 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   //   SetLatchingRelay(rpower, 1);
   // }
   // else {
+
+
+    #ifdef USE_VIRTUAL_REMOTE_URL_RELAY
+
+      char remote_url[100];
+      // URL
+      // sprintf(remote_url, "http://%s/json_command.json", VIRTUAL_DEVICE_MDNS_NAME);
+      //MQTT
+      sprintf(remote_url, "%s/set/relays", VIRTUAL_DEVICE_MDNS_NAME);
+
+      power_t state = rpower &1;
+      uint8_t state_level = bitRead(rel_inverted, 0) ? !state : state;
+
+      // State  is controlled remotely, so we can only toggle, until I use HTTP_GET to remain in sync
+      char remote_command[100];
+      sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
+
+      AddLog_P(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
+
+      pCONT_mqtt->ppublish(remote_url,remote_command,false);
+
+      // AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html);
+      // response->addHeader("Server","ESP Async Web Server");
+      // request->send(response);
+
+      return; // not local control
+
+    #endif
+
+
+
+
     for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {

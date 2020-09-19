@@ -76,7 +76,6 @@ class mTelemetry{
 
     uint8_t ConstructJSON_Health(uint8_t json_level);
     uint8_t ConstructJSON_Settings(uint8_t json_level);
-    // uint8_t ConstructJSON_Parameters(uint8_t json_level);
     uint8_t ConstructJSON_Firmware(uint8_t json_level);
     uint8_t ConstructJSON_Log(uint8_t json_level);
     uint8_t ConstructJSON_Memory(uint8_t json_level);
@@ -92,23 +91,25 @@ class mTelemetry{
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
     #endif
 
-void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Log_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Memory_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Network_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_MQTT_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Time_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Devices_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Reboot_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Debug_Minimal_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
-void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Log_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Memory_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Network_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_MQTT_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Time_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Devices_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Reboot_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Debug_Minimal_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
+    void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
     
     #define HARDWARE_STATUS_MAX_LENGTH 200
     struct STATUSHARDWARE{
+//make function that appends pretty simple message
+
       char ctr[HARDWARE_STATUS_MAX_LENGTH];
       uint8_t len = 0;
       uint8_t importance = 0; //0 low, 1 med, 2 high

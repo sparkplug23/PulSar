@@ -683,7 +683,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
   int8_t tmp_id = 0;
   int8_t isserviced = 0;
 
-  #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
+  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
 
   char buffer[50];
 
@@ -861,7 +861,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     #endif
   }
 
-  #endif
+  // #endif
   
 // Flash colour needs to NOT be a scene, but part of a manual direct mode
 // if(strstr(scenectr,"FLASHCOLOUR")){pCONT->mso->MessagePrintln("FLASHCOLOUR");
@@ -3815,7 +3815,7 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
    // Create local dereferenced variable
   // JsonObject obj = (*_obj); 
 
-  #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
+  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
   if(!obj["external_power_onoff"].isNull()){ 
     const char* onoff = obj[D_JSON_ONOFF];
     if(strstr(onoff,"ON")){ 
@@ -3919,7 +3919,7 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
     #endif
   }
 
-#endif
+// #endif
 
   DEBUG_LINE;
 
@@ -3940,7 +3940,7 @@ int8_t mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
 
 DEBUG_LINE;
 
-  #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
+  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
 DEBUG_LINE;
   if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
 DEBUG_LINE;
@@ -4180,7 +4180,7 @@ DEBUG_LINE;
   animation_override.time_ms = 1000; // implement in 1 second 
 
 
-#endif
+// #endif
 
 DEBUG_LINE;
 

@@ -316,7 +316,12 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
     JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, sizeof(pCONT_set->Settings.device_name_buffer.device_id)/2);
     JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  sizeof(pCONT_set->Settings.device_name_buffer.class_id)/2);
-    JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);  
+    JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
+
+    #ifdef USE_FUNCTION_TEMPLATE
+    //JsonBuilderI->Add("Function Template",   FUNCTION_TEMPLATE);
+    #endif
+
   return JsonBuilderI->End();
 
 }

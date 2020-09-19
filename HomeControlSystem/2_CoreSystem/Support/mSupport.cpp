@@ -92,7 +92,7 @@ int8_t mSupport::Tasker(uint8_t function){
       #endif
       
   //WDT_Reset();
-  MDNS.update();
+  // MDNS.update();
 
       // OsWatchTicker();
 
@@ -120,6 +120,10 @@ int8_t mSupport::Tasker(uint8_t function){
 
     //   AddLog_P(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
     // }break;
+    case FUNC_EVERY_250_MSECOND:
+
+
+    break;
     case FUNC_EVERY_SECOND:{
 
       PerformEverySecond();
@@ -153,6 +157,7 @@ int8_t mSupport::Tasker(uint8_t function){
 
 
   
+// DEBUG_LINE_HERE;
     // AddLog_P(LOG_LEVEL_TEST,PSTR("Execution time 2 = %d"),millis()-start_millis);
 
 }
@@ -1996,20 +2001,10 @@ void mSupport::Every100mSeconds(void)
   // }
 }
 
-// /*-------------------------------------------------------------------------------------------*\
-//  * Every 0.25 second
-// \*-------------------------------------------------------------------------------------------*/
-// /*
-void mSupport::Every250mSeconds(void)
-{
-// As the max amount of sleep = 250 mSec this loop should always be taken...
-
+void mSupport::UpdateStatusBlink(){
+  
   DEBUG_LINE;
   uint8_t blinkinterval = 1;
-
-  pCONT_set->state_250mS++;
-  pCONT_set->state_250mS &= 0x3;
-
   // global_state.network_down = (global_state.wifi_down && global_state.eth_down);
 
   if (!pCONT_set->Settings.flag_system_phaseout.global_state) {                      // Problem blinkyblinky enabled
@@ -2020,6 +2015,7 @@ void mSupport::Every250mSeconds(void)
     }
   }
 
+//DEBUG_LINE_HERE;
   DEBUG_LINE;
   if (pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag) {
 
@@ -2034,6 +2030,7 @@ void mSupport::Every250mSeconds(void)
       }
     }
 
+//DEBUG_LINE_HERE;
   DEBUG_LINE;
     // Update Link LED
     if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->blinks > 200) || (pCONT_set->blinkstate))) {
@@ -2049,6 +2046,7 @@ void mSupport::Every250mSeconds(void)
   }
 
 
+//DEBUG_LINE_HERE;
   if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
     bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
     // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
@@ -2063,14 +2061,40 @@ void mSupport::Every250mSeconds(void)
   DEBUG_LINE;
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
 
+}
+
+
+// /*-------------------------------------------------------------------------------------------*\
+//  * Every 0.25 second
+// \*-------------------------------------------------------------------------------------------*/
+// /*
+// Keep this by name, but move contents into its own function
+void mSupport::Every250mSeconds(void)
+{
+  
+//DEBUG_LINE_HERE;
+// As the max amount of sleep = 250 mSec this loop should always be taken...
+
+
+  pCONT_set->state_250mS++;
+  // pCONT_set->state_250mS &= 0x3;
+
+  if(pCONT_set->state_250mS>2){
+    pCONT_set->state_250mS = 0;
+  }
+
 
 /*-------------------------------------------------------------------------------------------*\
  * Every second at 0.25 second interval
 \*-------------------------------------------------------------------------------------------*/
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "%s"), "Every second at 0.25 second interval");
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "Switch %d"), pCONT_set->state_250mS);
+//DEBUG_LINE_HERE;
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "%s"), "Every second at 0.25 second interval");
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "Switch %d"), pCONT_set->state_250mS);
 
+  // Serial.flush();
+
+//DEBUG_LINE_HERE;
   switch (pCONT_set->state_250mS) {
   case 0:                                                 // Every x.0 second
 
@@ -2084,12 +2108,18 @@ void mSupport::Every250mSeconds(void)
         #ifdef ESP8266
           ESPhttpUpdate.rebootOnUpdate(false);
         #endif
+// DEBUG_LINE_HERE;
         pCONT_set->SettingsSave(1);  // Free flash for OTA update
+        
+// DEBUG_LINE_HERE;
       }
+      
+// DEBUG_LINE_HERE;
       if (pCONT_set->ota_state_flag <= 0) {
 
+// DEBUG_LINE_HERE;
 #ifdef USE_WEBSERVER
-        if (pCONT_set->Settings.webserver) //StopWebserver();
+        // if (pCONT_set->Settings.webserver) //StopWebserver();
 #endif  // USE_WEBSERVER
 // #ifdef USE_ARILUX_RF
 //         AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
@@ -2176,13 +2206,13 @@ void mSupport::Every250mSeconds(void)
       if (90 == pCONT_set->ota_state_flag) {  // Allow MQTT to reconnect
         pCONT_set->ota_state_flag = 0;
         if (pCONT_set->ota_result) {
-//          SetFlashModeDout();      // Force DOUT for both ESP8266 and ESP8285
-          Response_mP(PSTR(D_JSON_SUCCESSFUL ". " D_JSON_RESTARTING));
+         pCONT_set->SetFlashModeDout();      // Force DOUT for both ESP8266 and ESP8285
+          // Response_mP(PSTR(D_JSON_SUCCESSFUL ". " D_JSON_RESTARTING));
         } else {
           
-          #ifdef ESP8266
-          Response_mP(PSTR(D_JSON_FAILED " %s"), ESPhttpUpdate.getLastErrorString().c_str());
-          #endif
+          // #ifdef ESP8266
+          // Response_mP(PSTR(D_JSON_FAILED " %s"), ESPhttpUpdate.getLastErrorString().c_str());
+          // #endif
         }
         pCONT_set->restart_flag = 2;          // Restart anyway to keep memory clean webserver
         //MqttPublishPrefixTopic_P(STAT, PSTR(D_JSON_UPGRADE));
@@ -2213,7 +2243,8 @@ void mSupport::Every250mSeconds(void)
       }
     }*/
 
-
+//#ifdef DISABLE_SETTINGS_SAVING_BUG
+// DEBUG_LINE_HERE;
     if (pCONT_set->restart_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
       if ((214 == pCONT_set->restart_flag) || (215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
         char storage_wifi[sizeof(pCONT_set->Settings.sta_ssid) +
@@ -2279,6 +2310,7 @@ void mSupport::Every250mSeconds(void)
         pCONT_wif->EspRestart();
       }
     }
+    // #endif
     break;
   case 2:                                                 // Every x.5 second
     //if (pCONT_set->Settings.flag4.network_wifi) {
@@ -2287,82 +2319,85 @@ void mSupport::Every250mSeconds(void)
     // }
     //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
     break;
-  case 3:                                                 // Every x.75 second
-    //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
+//   case 3:                                                 // Every x.75 second
+//     //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
 
-/*
-if (!global_state.network_down) {
-#ifdef FIRMWARE_MINIMAL
-      if (1 == RtcSettings.ota_loader) {
-        RtcSettings.ota_loader = 0;
-        ota_state_flag = 3;
-      }
-#endif  // FIRMWARE_MINIMAL
+// /*
+// if (!global_state.network_down) {
+// #ifdef FIRMWARE_MINIMAL
+//       if (1 == RtcSettings.ota_loader) {
+//         RtcSettings.ota_loader = 0;
+//         ota_state_flag = 3;
+//       }
+// #endif  // FIRMWARE_MINIMAL
 
-#ifdef USE_DISCOVERY
-      StartMdns();
-#endif  // USE_DISCOVERY
+// #ifdef USE_DISCOVERY
+//       StartMdns();
+// #endif  // USE_DISCOVERY
 
-#ifdef USE_WEBSERVER
-      if (Settings.webserver) {
+// #ifdef USE_WEBSERVER
+//       if (Settings.webserver) {
 
-#ifdef ESP8266
-        StartWebserver(Settings.webserver, WiFi.localIP());
-#else  // ESP32
-#ifdef USE_ETHERNET
-        StartWebserver(Settings.webserver, (EthernetLocalIP()) ? EthernetLocalIP() : WiFi.localIP());
-#else
-        StartWebserver(Settings.webserver, WiFi.localIP());
-#endif
-#endif
+// #ifdef ESP8266
+//         StartWebserver(Settings.webserver, WiFi.localIP());
+// #else  // ESP32
+// #ifdef USE_ETHERNET
+//         StartWebserver(Settings.webserver, (EthernetLocalIP()) ? EthernetLocalIP() : WiFi.localIP());
+// #else
+//         StartWebserver(Settings.webserver, WiFi.localIP());
+// #endif
+// #endif
 
-#ifdef USE_DISCOVERY
-#ifdef WEBSERVER_ADVERTISE
-        MdnsAddServiceHttp();
-#endif  // WEBSERVER_ADVERTISE
-#endif  // USE_DISCOVERY
-      } else {
-        StopWebserver();
-      }
-#ifdef USE_EMULATION
-    if (Settings.flag2.emulation) { UdpConnect(); }
-#endif  // USE_EMULATION
-#endif  // USE_WEBSERVER
+// #ifdef USE_DISCOVERY
+// #ifdef WEBSERVER_ADVERTISE
+//         MdnsAddServiceHttp();
+// #endif  // WEBSERVER_ADVERTISE
+// #endif  // USE_DISCOVERY
+//       } else {
+//         StopWebserver();
+//       }
+// #ifdef USE_EMULATION
+//     if (Settings.flag2.emulation) { UdpConnect(); }
+// #endif  // USE_EMULATION
+// #endif  // USE_WEBSERVER
 
-#ifdef USE_DEVICE_GROUPS
-      DeviceGroupsStart();
-#endif  // USE_DEVICE_GROUPS
+// #ifdef USE_DEVICE_GROUPS
+//       DeviceGroupsStart();
+// #endif  // USE_DEVICE_GROUPS
 
-#ifdef USE_KNX
-      if (!knx_started && Settings.flag.knx_enabled) {  // CMND_KNX_ENABLED
-        KNXStart();
-        knx_started = true;
-      }
-#endif  // USE_KNX
+// #ifdef USE_KNX
+//       if (!knx_started && Settings.flag.knx_enabled) {  // CMND_KNX_ENABLED
+//         KNXStart();
+//         knx_started = true;
+//       }
+// #endif  // USE_KNX
 
-      MqttCheck();
-    } else {
-#ifdef USE_EMULATION
-      UdpDisconnect();
-#endif  // USE_EMULATION
+//       MqttCheck();
+//     } else {
+// #ifdef USE_EMULATION
+//       UdpDisconnect();
+// #endif  // USE_EMULATION
 
-#ifdef USE_DEVICE_GROUPS
-      DeviceGroupsStop();
-#endif  // USE_DEVICE_GROUPS
+// #ifdef USE_DEVICE_GROUPS
+//       DeviceGroupsStop();
+// #endif  // USE_DEVICE_GROUPS
 
-#ifdef USE_KNX
-      knx_started = false;
-#endif  // USE_KNX
-    }
-*/
+// #ifdef USE_KNX
+//       knx_started = false;
+// #endif  // USE_KNX
+//     }
+// */
+
+// DEBUG_LINE_HERE;
 
 
 
 
-    break;
-  }
+//     break;
+  }// END switch
+
+// DEBUG_LINE_HERE;
 }
-
 
 
 // #ifdef ESP8266

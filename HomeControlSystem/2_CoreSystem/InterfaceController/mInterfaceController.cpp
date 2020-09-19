@@ -436,13 +436,19 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
 
     DEBUG_LINE;
     switch_index = target_tasker ? target_tasker : module_settings.list[i];
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-        switch_index, 
-        GetTaskName(function, buffer_taskname),
-        GetModuleFriendlyName(switch_index));
-    #endif
-    DEBUG_LINE;
+    // #ifdef ENABLE_ADVANCED_DEBUGGING
+    //   AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+    //     switch_index, 
+    //     GetTaskName(function, buffer_taskname),
+    //     GetModuleFriendlyName(switch_index));
+    // #endif
+    
+    // char buffer_taskname[40];
+    //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+    //     switch_index, 
+    //     GetTaskName(function, buffer_taskname),
+    //     GetModuleFriendlyName(switch_index));
+    // DEBUG_LINE;
 
     // Remember start millis
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)
@@ -660,8 +666,9 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
 
     DEBUG_LINE;
     switch_index = target_tasker ? target_tasker : module_settings.list[i];
-    // #ifdef ENABLE_ADVANCED_DEBUGGING
-    //   AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+    // // #ifdef ENABLE_ADVANCED_DEBUGGING
+    // char buffer_taskname[40];
+    //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
     //     switch_index, 
     //     GetTaskName(function, buffer_taskname),
     //     GetModuleFriendlyName(switch_index));

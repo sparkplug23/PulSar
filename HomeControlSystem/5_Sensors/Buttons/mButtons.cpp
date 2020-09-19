@@ -39,12 +39,22 @@ void mButtons::ButtonInvertFlag(uint8 button_bit)
 
 void mButtons::ButtonInit(void)
 {
+  
+      AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "mButtons::ButtonInit"));
+
   buttons_found = 0;
   for (uint8_t i = 0; i < MAX_KEYS; i++) {
     if (pCONT_set->pin[GPIO_KEY1_ID +i] < 99) {
       buttons_found++;
+      AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
       pinMode(pCONT_set->pin[GPIO_KEY1_ID +i], 
         bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+        
+      AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
+      bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
+      );
+
+
     }
   }
 }
@@ -88,7 +98,7 @@ void mButtons::ButtonHandler(void)
 
  uint8_t maxdev = (pCONT_set->devices_present > MAX_KEYS) ? MAX_KEYS : pCONT_set->devices_present;
  for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
-  for (uint8_t button_index = 0; button_index < MAX_KEYS; button_index++) {
+  // for (uint8_t button_index = 0; button_index < MAX_KEYS; button_index++) {
     button = NOT_PRESSED;
     button_present = 0;
 
@@ -104,7 +114,7 @@ void mButtons::ButtonHandler(void)
     //     dual_button_code = 0;
     //   }
     // } else {
-      if (pCONT_pins->PinUsed(GPIO_KEY1_ID,button_index)) {
+      if (pCONT_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
         button_present = 1;
         button = (digitalRead(pCONT_set->pin[GPIO_KEY1_ID + button_index]) != bitRead(key_inverted, button_index));
       }
@@ -138,12 +148,23 @@ void mButtons::ButtonHandler(void)
 //       else {
         if ((PRESSED == button) && (NOT_PRESSED == lastbutton[button_index])) {
           // if (pCONT_set->Settings.flag_system_phaseout.button_single) {                   // Allow only single button press for immediate action
-            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index +1);
-            //if (!SendKey(0, button_index +1, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
+            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
+            //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
+            
+              // Type method
+              // AddLog_P(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
+              // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
+              // AddLog_P(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
+
+
               #ifdef USE_MODULE_DRIVERS_RELAY
-              pCONT->mry->ExecuteCommandPower(button_index +1, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
-              //temp fix
-              delay(200); //stop quick relay toggling
+                pCONT_mry->ExecuteCommandPower(button_index, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
+        
+                // #ifdef ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS
+                //   AddLog_P(LOG_LEVEL_ERROR,PSTR("ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS=%d"),1000);
+                //   delay(1000);
+                // #endif
+
               #endif
 
             //}
@@ -155,6 +176,7 @@ void mButtons::ButtonHandler(void)
           // blinks = 201;
         }
 
+//held buttons
         if (NOT_PRESSED == button) {
           holdbutton[button_index] = 0;
         } else {
@@ -169,7 +191,7 @@ void mButtons::ButtonHandler(void)
             if (pCONT_set->Settings.flag_system_phaseout.button_restrict) {               // Button restriction
               if (holdbutton[button_index] == loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button hold
                 multipress[button_index] = 0;
-                // SendKey(0, button_index +1, 3);                // Execute Hold command via MQTT if ButtonTopic is set
+                // SendKey(0, button_index, 3);                // Execute Hold command via MQTT if ButtonTopic is set
               }
             } else {
               if (holdbutton[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
@@ -221,7 +243,7 @@ void mButtons::ButtonHandler(void)
           }
         }
       } // if (button_present)
-    }
+    // }
     lastbutton[button_index] = button;
   }
 }
@@ -229,9 +251,13 @@ void mButtons::ButtonHandler(void)
 void mButtons::ButtonLoop(void)
 {
   if (buttons_found) {
+    // Listen quickly
     if(mSupport::TimeReached(&tsaved_button_debounce, pCONT_set->Settings.button_debounce)){
       ButtonHandler();
     }
+    // Change slowly
+
+
   }
 }
 
@@ -245,10 +271,106 @@ int8_t mButtons::Tasker(uint8_t function){
     case FUNC_LOOP: 
       ButtonLoop();
     break;
-    case FUNC_JSON_COMMAND: 
-    
+
+
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init(); 
     break;
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif //USE_MQTT
+
+    /************
+     * WEB SECTION * 
+    *******************/
+
+    
+    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+      WebAppend_Root_Draw_Table();
+    break; 
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break; 
+
+
   }
+
+}
+
+
+
+
+void mButtons::WebAppend_Root_Draw_Table(){
+
+  pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(buttons_found,"button_table", "Button");
+
+}
+
+//append to internal buffer if any root messages table
+void mButtons::WebAppend_Root_Status_Table(){
+
+  JsonBuilderI->Array_Start("button_table");// Class name
+  for(int row=0;row<buttons_found;row++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",row);
+      JsonBuilderI->Add_FP("ih","\"%s\"", IsButtonActive(row)?"Pressed":"NOT Pressed");
+      if(IsButtonActive(row)){
+        JsonBuilderI->Add("fc","#00ff00");
+      }else{
+        JsonBuilderI->Add("fc","#ff0000");
+      }
+    
+    JsonBuilderI->Level_End();
+  }
+  JsonBuilderI->Array_End();
+  
+}
+
+
+bool mButtons::IsButtonActive(uint8_t id){
+// Needs to know what type the button is, low, high, no pullup etc
+  if(lastbutton[id] == LOW){
+    return true;
+  }
+  return false;
+
+}
+
+
+
+
+/*********************************************************************************************************************************************
+******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
+**********************************************************************************************************************************************
+********************************************************************************************************************************************/
+
+uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, buttons_found);
+  return JsonBuilderI->End();
+
+}
+
+uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
+  return JsonBuilderI->End();
 
 }
 

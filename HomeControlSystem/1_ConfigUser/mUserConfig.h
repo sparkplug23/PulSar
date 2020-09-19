@@ -235,7 +235,8 @@
 #define APP_BLINKCOUNT         10                // [BlinkCount] Number of blinks (0 = 32000)
 #define APP_SLEEP              10                // [Sleep] Sleep time to lower energy consumption (0 = Off, 1 - 250 mSec)
 
-#define KEY_DEBOUNCE_TIME      100                // [ButtonDebounce] Number of mSeconds button press debounce time
+#define KEY_CHECK_TIME         1000
+#define KEY_DEBOUNCE_TIME      50                // [ButtonDebounce] Number of mSeconds button press debounce time
 #define KEY_HOLD_TIME          40                // [SetOption32] Number of 0.1 seconds to hold Button or external Pushbutton before sending HOLD message
 #define SWITCH_DEBOUNCE_TIME   50                // [SwitchDebounce] Number of mSeconds switch press debounce time
 #define SWITCH_MODE            TOGGLE            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE (the wall switch state)

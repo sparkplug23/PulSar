@@ -126,17 +126,20 @@ int8_t mSettings::RemoveDeviceName(const char* name_ctr, int16_t class_id, int8_
   // Not needed until I want to remove values
 }
 
-const char* mSettings::GetDeviceName(int16_t class_id, int8_t device_id, char* buffer, uint16_t buffer_size){
+const char* mSettings::GetDeviceName(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size){
 
   int8_t found_index = -1;
   // Check if class & id match
   for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++){
-    if((Settings.device_name_buffer.class_id[i]==class_id)&&(Settings.device_name_buffer.device_id[i]==device_id)){
+    if((Settings.device_name_buffer.class_id[i]==module_id)&&(Settings.device_name_buffer.device_id[i]==device_id)){
       found_index = i;
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("mSettings::GetDeviceName found_index %d"),i);
       break;
     }
   }
+//future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
+
+
 
   if(found_index == -1){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
@@ -272,7 +275,7 @@ void mSettings::Function_Template_Load(){
   // Read into local
   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR("\n\r\n\r\n\r\n\r\n\r\n\rFUNCTION_TEMPLATE READ = \"%s\""), buffer);
+  AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "FUNCTION_TEMPLATE READ = \"%s\""), buffer);
 
   DynamicJsonDocument doc(1500);
   DeserializationError error = deserializeJson(doc, buffer);
@@ -316,23 +319,23 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     break;
     case FUNC_LOOP:
 
-      if(mSupport::TimeReached(&tSavedSavingTest,10000)){
-        // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-        // SettingsSave(1);
-        // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
-        // SettingsLoad();
-        //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1before"));
-        // pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT);
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1after"));
+      // if(mSupport::TimeReached(&tSavedSavingTest,10000)){
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+      //   // SettingsSave(1);
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
+      //   // SettingsLoad();
+      //   //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1before"));
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT);
+      //   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1after"));
 
-        // AddLog_P(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
-      }
+      // }
 
     break;
     case FUNC_EVERY_SECOND:
 // SystemSettings_DefaultBody_Network();
       //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
+        AddLog_P(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
     break;
     case FUNC_EVERY_FIVE_SECOND:{
 
@@ -356,8 +359,11 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
     case FUNC_EVERY_MINUTE:
     // Change to saving using counter later, Settings.save_data
-      pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+      // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+      
+// #ifdef DISABLE_SETTINGS_SAVING_BUG
       pCONT_set->SettingsSave(1);
+    // #endif
     break;
     case FUNC_ON_SUCCESSFUL_BOOT:
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
@@ -471,10 +477,10 @@ void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
       module_id = pCONT->module_settings.list[module_list_id];
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       
       if(!obj[F(D_JSON_DEVICENAME)][module_friendlyname_buffer].isNull()){
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
         //Get devices already present
 
 //NEED FIXED -- Doesnt 
@@ -484,8 +490,8 @@ void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
         for(JsonVariantConst v : array) {
           const char* device_name_ctr = v.as<const char*>();
           pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
-          AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
-          AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
         }
       }
 
@@ -932,6 +938,12 @@ uint32_t mSettings::GetSettingsAddress(void)
 
 void mSettings::SettingsSave(uint8_t rotate)
 { 
+
+  
+
+// return ;
+// #endif
+
   // Serial.print("SettingsSave> ");Serial.println(rotate);
   /* Save configuration in eeprom or one of 7 slots below
  *
@@ -941,8 +953,10 @@ void mSettings::SettingsSave(uint8_t rotate)
  * stop_flash_rotate 0 = Allow flash slot rotation (SetOption12 0)
  * stop_flash_rotate 1 = Allow only eeprom flash slot use (SetOption12 1)
  */
-#ifndef FIRMWARE_MINIMAL
+DEBUG_LINE_HERE;
+// #ifndef FIRMWARE_MINIMAL
   if ((GetSettingsCrc() != settings_crc) || rotate) {
+DEBUG_LINE_HERE;
     if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
       stop_flash_rotate = 1;
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
@@ -965,37 +979,59 @@ void mSettings::SettingsSave(uint8_t rotate)
     Settings.cfg_size = sizeof(SYSCFG);
     Settings.cfg_crc = GetSettingsCrc();
 
-#ifdef USE_EEPROM
-    if (SPIFFS_END == settings_location) {
-      uint8_t* flash_buffer;
-      flash_buffer = new uint8_t[SPI_FLASH_SEC_SIZE];
-      if (eeprom_data && eeprom_size) {
-        size_t flash_offset = SPI_FLASH_SEC_SIZE - eeprom_size;
-        memcpy(flash_buffer + flash_offset, eeprom_data, eeprom_size);  // Write dirty EEPROM data
-      } else {
-        ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);   // Read EEPROM area
-      }
-      memcpy(flash_buffer, &Settings, sizeof(Settings));
-      ESP.flashEraseSector(settings_location);
-      ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);
-      delete[] flash_buffer;
-    } else {
-      ESP.flashEraseSector(settings_location);
-      ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-    }
-#else
+DEBUG_LINE_HERE;
+// #ifdef USE_EEPROM
+//     if (SPIFFS_END == settings_location) {
+//       uint8_t* flash_buffer;
+//       flash_buffer = new uint8_t[SPI_FLASH_SEC_SIZE];
+//       if (eeprom_data && eeprom_size) {
+//         size_t flash_offset = SPI_FLASH_SEC_SIZE - eeprom_size;
+//         memcpy(flash_buffer + flash_offset, eeprom_data, eeprom_size);  // Write dirty EEPROM data
+//       } else {
+//         ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);   // Read EEPROM area
+//       }
+//       memcpy(flash_buffer, &Settings, sizeof(Settings));
+//       ESP.flashEraseSector(settings_location);
+//       ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);
+//       delete[] flash_buffer;
+//     } else {
+//       ESP.flashEraseSector(settings_location);
+//       ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
+//     }
+// #else
 
-
-    settings_location = SETTINGS_LOCATION;
+// ESP.wdtFeed();
+// ESP.wdtDisable();
+DEBUG_LINE_HERE;
+    // settings_location = SETTINGS_LOCATION;
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
 
+AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
 
-    ESP.flashEraseSector(settings_location);
-    ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-#endif  // USE_EEPROM
+// Serial.flush();
+// delay(1000);
+
+DEBUG_LINE_HERE;
+
+#ifdef ENABLE_FLASH_ERASE_SECTOR_CURRENTLY_BUG
+  if (ESP.flashEraseSector(settings_location)) {
+    ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
+  }
+#endif
+
+AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
+// ESP.wdtFeed();
+// delay(1000);
+
+    // ESP.flashEraseSector(settings_location);
+// DEBUG_LINE_HERE;
+//     ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
+DEBUG_LINE_HERE;
+// #endif  // USE_EEPROM
 
     if (!stop_flash_rotate && rotate) {
       for (uint8_t i = 1; i < CFG_ROTATES; i++) {
+DEBUG_LINE_HERE;
         ESP.flashEraseSector(settings_location -i);  // Delete previous configurations by resetting to 0xFF
         delay(1);
       }
@@ -1005,7 +1041,8 @@ void mSettings::SettingsSave(uint8_t rotate)
 
     settings_crc = Settings.cfg_crc;
   }
-#endif  // FIRMWARE_MINIMAL
+// #endif  // FIRMWARE_MINIMAL
+DEBUG_LINE_HERE;
   RtcSettingsSave();
 
 }
@@ -1071,12 +1108,36 @@ void mSettings::SettingsLoad(void)
 
     delay(1);
   }
+
+/*
+#else  // CFG_RESILIENT
+  // Activated with version 8.4.0.2 - Fails to read any config before version 6.6.0.11
+  settings_location = 0;
+  uint32_t save_flag = 0;
+  uint32_t flash_location = SETTINGS_LOCATION;
+  for (uint32_t i = 0; i < CFG_ROTATES; i++) {              // Read all config pages in search of valid and latest
+    ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
+    if ((Settings.cfg_crc32 != 0xFFFFFFFF) && (Settings.cfg_crc32 != 0x00000000) && (Settings.cfg_crc32 == GetSettingsCrc32())) {
+      if (Settings.save_flag > save_flag) {                 // Find latest page based on incrementing save_flag
+        save_flag = Settings.save_flag;
+        settings_location = flash_location;
+        if (Settings.flag.stop_flash_rotate && (0 == i)) {  // Stop if only eeprom area should be used and it is valid
+          break;
+        }
+      }
+    }
+    flash_location--;
+    delay(1);
+  }
+  */
+  
   if (settings_location > 0) {
     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu" D_BOOT_COUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
-  }else{    
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s>%d"), "settings_location",settings_location);
   }
+  // else{    
+  //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s>%d"), "settings_location",settings_location);
+  // }
 
   #ifndef FIRMWARE_MINIMAL
   if (!settings_location || (Settings.cfg_holder != (uint16_t)SETTINGS_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in .h
@@ -1086,18 +1147,7 @@ void mSettings::SettingsLoad(void)
 
     // Clear system defaults
     SettingsDefault();
-    //
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
-    pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
-    boot_status.module_template_used = true;
-    DEBUG_LINE;
-    // Clear module defaults
-    pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
-    DEBUG_LINE;
-    pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
-    DEBUG_LINE;
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
-    SettingsSave(2);
+
   }
   settings_crc = GetSettingsCrc();
   #endif  // FIRMWARE_MINIMAL
@@ -1317,6 +1367,18 @@ void mSettings::SettingsDefault(void)
    SystemSettings_DefaultHeader();
   //  Serial.println("SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
+
+    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
+    pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
+    boot_status.module_template_used = true;
+    DEBUG_LINE;
+    // Clear module defaults
+    pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
+    DEBUG_LINE;
+    pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
+    DEBUG_LINE;
+    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
+    
 }
 
 void mSettings::SystemSettings_DefaultHeader(void)

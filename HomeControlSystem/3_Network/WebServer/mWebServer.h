@@ -1412,6 +1412,10 @@ void WebAppend_Root_FillOptions_Controls();
 void WebAppend_Root_FillOptions_Controls_Selected();
 void WebAppend_Root_Draw_Controls();
 
+
+void WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles);
+
+
 void Web_Root_UpdateURLs(AsyncWebServerRequest *request);
 
     

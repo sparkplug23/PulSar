@@ -277,9 +277,9 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
     case FUNC_COMMAND:
 
     break;
-    case FUNC_SET_POWER:
-      // LightSetPower();
-    break;
+    // case FUNC_SET_POWER:
+    //   // LightSetPower();
+    // break;
     /************
      * MQTT SECTION * 
     *******************/

@@ -362,6 +362,7 @@ uint16_t WriteBuffer_P(const char* formatP, ...);
 
 
 
+void UpdateStatusBlink();
 
     timereached_t testtime2;
 

@@ -312,7 +312,6 @@ uint8_t mSensorsBME::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  JsonBuilderI->Level_End();
   return JsonBuilderI->End();
 
 }
@@ -321,9 +320,12 @@ uint8_t mSensorsBME::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
 
+  char buffer[50];
+
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(D_JSON_SENSOR "%02d", sensor_id+1);   
+      // JsonBuilderI->Level_Start_P(D_JSON_SENSOR "%02d", sensor_id+1);   
+      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);

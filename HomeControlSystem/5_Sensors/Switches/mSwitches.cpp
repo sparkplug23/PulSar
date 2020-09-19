@@ -187,9 +187,12 @@ void mSwitches::SwitchHandler(uint8_t mode)
           // if (!SendKey(1, i +1, switchflag)) {  // Execute command via MQTT
           AddLog_P(LOG_LEVEL_TEST,PSTR("ExecuteCommandPower")); 
           #ifdef USE_MODULE_DRIVERS_RELAY
-          pCONT_mry->ExecuteCommandPower(i +1, switchflag, SRC_SWITCH);  // Execute command internally (if i < devices_present)
+          pCONT_mry->ExecuteCommandPower(i, switchflag, SRC_SWITCH);  // Execute command internally (if i < devices_present)
           // }
           #endif
+
+
+    
         }
 
         lastwallswitch[i] = button;

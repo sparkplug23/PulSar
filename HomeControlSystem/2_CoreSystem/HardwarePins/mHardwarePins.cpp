@@ -949,9 +949,10 @@ void mHardwarePins::GpioInit(void)
     if ((def_gp.io[i] > GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) {
       pCONT_set->my_module.io[i] = def_gp.io[i];
       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
-    }else{
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "ELSE my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
     }
+    // else{
+    //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "ELSE my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
+    // }
 
   }
   pCONT_set->my_module_flag = ModuleFlag();
@@ -981,7 +982,7 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
     mpin = ValidPin(i, pCONT_set->my_module.io[i]);
 
-    AddLog_P(LOG_LEVEL_INFO, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
 
     if (mpin) {
 
@@ -989,7 +990,7 @@ void mHardwarePins::GpioInit(void)
       if ((mpin >= GPIO_SWT1_NP_ID) && (mpin < (GPIO_SWT1_NP_ID + MAX_SWITCHES))) {
         pCONT->mswh->SwitchPullupFlag(mpin - GPIO_SWT1_NP_ID);
         mpin -= (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-        AddLog_P(LOG_LEVEL_INFO, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
       }else
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
@@ -1425,6 +1426,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
 
 
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
+
+
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IA_CTR)==0){  return GPIO_HBRIDGE_L9110_IA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR)==0){  return GPIO_HBRIDGE_L9110_IB_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_OA_CTR)==0){  return GPIO_HBRIDGE_L9110_OA_ID; }
@@ -1711,6 +1715,11 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
     case GPIO_PIR_1_NP_ID: return PM_GPIO_FUNCTION_PIR_1_NP_CTR;
     case GPIO_PIR_1_INV_ID: return PM_GPIO_FUNCTION_PIR_1_INV_CTR;
 
+
+    
+    case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
+    
+    case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
 
     case GPIO_LEDLNK_INV_ID: return PM_GPIO_FUNCTION_LEDLNK_INV_CTR;
 

@@ -912,6 +912,7 @@
 #define D_GPIO_FUNCTION_NEXTION_RX_CTR     "Nextion Rx"
 #define D_GPIO_FUNCTION_NEXTION_TX_CTR     "Nextion Tx"
 
+#define D_GPIO_FUNCTION_KEY1_CTR        "Key1"
 #define D_GPIO_FUNCTION_KEY1_INV_CTR        "Key1 Inv"
 
 #define D_SENSOR_SDM120_TX_CTR     "SDMx20 Tx"

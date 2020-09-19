@@ -213,7 +213,7 @@ void setup(void)
   #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
   #endif
-  Serial.println(F("Rebooting..."));
+  Serial.println(F("Rebooting..." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
   Serial.println(F("DELAYED BOOT for 5 seconds...")); Serial.flush(); delay(5000);
@@ -272,17 +272,20 @@ void setup(void)
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
-  #ifdef ENABLE_LOG
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
-  #endif
+    #ifdef ENABLE_LOG
+    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
+    #endif
+  AddLog_P(LOG_LEVEL_INFO, "Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD)");
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   #endif
 
   // Init the GPIOs
   pCONT_pins->GpioInit();
   // Start pins in modules
+  AddLog_P(LOG_LEVEL_INFO, "Tasker_Interface(FUNC_PRE_INIT)");
   pCONT->Tasker_Interface(FUNC_PRE_INIT);
   // Init devices
+  AddLog_P(LOG_LEVEL_INFO, "Tasker_Interface(FUNC_INIT)");
   pCONT->Tasker_Interface(FUNC_INIT);
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
@@ -297,15 +300,19 @@ void setup(void)
   // init mqtt handlers
   pCONT->Tasker_Interface(FUNC_MQTT_INIT); // phase out of handlers to only be init/start
 
-  #ifdef FORCE_TEMPLATE_LOADING // after settings load..? needs to be after too, think this through
+
+// Are these needed here? this is double calling
+  #ifdef FORCE_TEMPLATE_LOADING_SECOND_PHASE_OUT // after settings load..? needs to be after too, think this through
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
-  #ifdef ENABLE_LOG
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
-  #endif
+    #ifdef ENABLE_LOG
+    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
+    #endif
+    
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);
   #endif
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);
+  
 
   pCONT_wif->WifiConnect();
 

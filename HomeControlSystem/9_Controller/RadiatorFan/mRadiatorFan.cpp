@@ -164,11 +164,11 @@ void mRadiatorFan::parse_JSONCommand(){
 
 void mRadiatorFan::AddToJsonObject_AddHardware(JsonObject root){
 
-  JsonObject obj = root.createNestedObject("fan");
-    obj["type"] = "FAN-SPST-relay";
-    obj["function"] = "on|off";
-    obj["unpoweredstate"] = "POWER_OFF-NO";
-    obj["pin"] = 0;
+  // JsonObject obj = root.createNestedObject("fan");
+  //   obj["type"] = "FAN-SPST-relay";
+  //   obj["function"] = "on|off";
+  //   obj["unpoweredstate"] = "POWER_OFF-NO";
+  //   obj["pin"] = 0;
 
 }
 
@@ -200,10 +200,10 @@ void mRadiatorFan::Append_Hardware_Status_Message(){
 
 //enum FAN_MODE{MANUAL=1,AUTO_LOCAL,AUTO_REMOTE};
 const char* mRadiatorFan::FanModeCtr(void){
-  return (fan_mode == MANUAL ? "MANUAL\0" :
-      (fan_mode == AUTO_TEMP ?  "AUTO_TEMP\0" :
-      (fan_mode == AUTO_REMOTE ?  "AUTO_REMOTE\0" :
-      "unk\0")));
+  // return (fan_mode == MANUAL ? "MANUAL\0" :
+  //     (fan_mode == AUTO_TEMP ?  "AUTO_TEMP\0" :
+  //     (fan_mode == AUTO_REMOTE ?  "AUTO_REMOTE\0" :
+  //     "unk\0")));
 }
 
 
@@ -237,7 +237,7 @@ uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_method){
 
   data_buffer2.payload.len = measureJson(root)+1;
   serializeJson(doc,data_buffer2.payload.ctr);
-return 1;
+return 0;
 }
 
 uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
@@ -254,7 +254,7 @@ uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
   data_buffer2.payload.len = measureJson(root)+1;
   serializeJson(doc,data_buffer2.payload.ctr);
 
-  return 1;
+  return 0;
 
 }
 

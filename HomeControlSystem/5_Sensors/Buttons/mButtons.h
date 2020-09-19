@@ -78,6 +78,11 @@ void ButtonLoop(void);
 
 
 
+void WebAppend_Root_Draw_Table();
+void WebAppend_Root_Status_Table();
+bool IsButtonActive(uint8_t id);
+
+
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   

@@ -119,6 +119,18 @@ void mWebServer::WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* 
   BufferWriterI->Append_P(PSTR("{t2}"));
 }
 
+void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles){
+  
+  BufferWriterI->Append_P(PSTR("{t}"));
+  for(int ii=0;ii<row_count;ii++){
+    BufferWriterI->Append_P(PSTR("<tr>"));
+      BufferWriterI->Append_P(PSTR("<td>%s %d</td>"), dList_titles);
+      BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
+    BufferWriterI->Append_P(PSTR("</tr>"));
+  }    
+  BufferWriterI->Append_P(PSTR("{t2}"));
+}
+
 //pass row title using array/arrlen, include prefix format
 //leave contents blank
 

@@ -97,26 +97,26 @@ int8_t mDoorSensor::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       SubTasker_MQTTSender();
     break;
-    case FUNC_WEB_SHOW_PARAMETERS:{
+    // case FUNC_WEB_SHOW_PARAMETERS:{
       
-      // uint8_t fsize = 16;
-      // char sensor_ctr[50];
+    //   // uint8_t fsize = 16;
+    //   // char sensor_ctr[50];
 
-      // memset(sensor_ctr,0,sizeof(sensor_ctr));
-      // sprintf(sensor_ctr,"Reed %s Door Position",door_detect.friendly_name_ctr);
-      // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
-      //   sensor_ctr,
-      //   door_detect.state?"Opened":"Closed"
-      // );
+    //   // memset(sensor_ctr,0,sizeof(sensor_ctr));
+    //   // sprintf(sensor_ctr,"Reed %s Door Position",door_detect.friendly_name_ctr);
+    //   // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
+    //   //   sensor_ctr,
+    //   //   door_detect.state?"Opened":"Closed"
+    //   // );
 
-      // memset(sensor_ctr,0,sizeof(sensor_ctr));
-      // sprintf(sensor_ctr,"Reed %s Door Last Opened",door_detect.friendly_name_ctr);
-      // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
-      //   sensor_ctr,
-      //   door_detect.detected_rtc_ctr
-      // );
+    //   // memset(sensor_ctr,0,sizeof(sensor_ctr));
+    //   // sprintf(sensor_ctr,"Reed %s Door Last Opened",door_detect.friendly_name_ctr);
+    //   // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
+    //   //   sensor_ctr,
+    //   //   door_detect.detected_rtc_ctr
+    //   // );
       
-    }break;
+    // }break;
   }
 
 } // END function
@@ -229,6 +229,38 @@ void mDoorSensor::MQQTSendDoorUpdate(void){
 }
 
 
+uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_method){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, 0);
+  return JsonBuilderI->End();
+
+}
+
+uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
+
+  JsonBuilderI->Start();
+
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, 0);
+  // for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
+  //   if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
+  //     JsonBuilderI->Level_Start_P(D_JSON_SENSOR "%02d", sensor_id+1);   
+  //       JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
+  //       JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
+  //       JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
+  //       JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
+  //       JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+  //         JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+  //         JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
+  //       JsonBuilderI->Level_End();  
+  //     JsonBuilderI->Level_End();
+  //   }
+  // }
+  
+  return JsonBuilderI->End();
+
+}
+
 
 /*********************************************************************************************************************************************
 ******** MQTT Stuff **************************************************************************************************************************************
@@ -246,8 +278,7 @@ void mDoorSensor::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
-  mqtthandler_ptr->ConstructJSON_function = &mDoorSensor:
-  :ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();

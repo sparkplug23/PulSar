@@ -586,7 +586,17 @@ extern "C" {
 #include "spi_flash.h"
 }
 #include "eboot_command.h"
-extern "C" uint32_t _SPIFFS_end;
+// extern "C" uint32_t _SPIFFS_end;
+#endif
+
+
+#ifdef ESP8266
+
+  #if AUTOFLASHSIZE
+
+  #else
+    extern "C" uint32_t _FS_end;
+  #endif  // AUTOFLASHSIZE
 #endif
 
 
@@ -651,32 +661,58 @@ void Function_Template_Load();
 // }
 // #include "eboot_command.h"
 
-#if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2) || defined(ARDUINO_ESP8266_RELEASE_2_5_0) || defined(ARDUINO_ESP8266_RELEASE_2_5_1) || defined(ARDUINO_ESP8266_RELEASE_2_5_2)
+// #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2) || defined(ARDUINO_ESP8266_RELEASE_2_5_0) || defined(ARDUINO_ESP8266_RELEASE_2_5_1) || defined(ARDUINO_ESP8266_RELEASE_2_5_2)
 
-  extern "C" uint32_t _SPIFFS_end;
-  // From libraries/EEPROM/EEPROM.cpp EEPROMClass
-  const uint32_t SPIFFS_END = ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+//   extern "C" uint32_t _SPIFFS_end;
+//   // From libraries/EEPROM/EEPROM.cpp EEPROMClass
+//   const uint32_t SPIFFS_END = ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
 
-#else  // Core > 2.5.2 and STAGE
+// #else  // Core > 2.5.2 and STAGE
+
+//   #if AUTOFLASHSIZE
+
+//     #include "flash_hal.h"
+
+//     // From libraries/EEPROM/EEPROM.cpp EEPROMClass
+//     const uint32_t SPIFFS_END = (_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+
+//   #else
+
+//     // From libraries/EEPROM/EEPROM.cpp EEPROMClass
+//     const uint32_t SPIFFS_END = ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+
+//   #endif  // AUTOFLASHSIZE
+
+// #endif  // All cores < pre-2.6.0
+
+// Version 4.2 config = eeprom area
+// const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses EEPROM area
+
+
+#ifdef ESP8266
 
   #if AUTOFLASHSIZE
 
     #include "flash_hal.h"
 
     // From libraries/EEPROM/EEPROM.cpp EEPROMClass
-    const uint32_t SPIFFS_END = (_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+    const uint32_t SPIFFS_END = (FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
 
   #else
 
+    // extern "C" uint32_t _FS_end;
     // From libraries/EEPROM/EEPROM.cpp EEPROMClass
-    const uint32_t SPIFFS_END = ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+    const uint32_t SPIFFS_END = ((uint32_t)&_FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
 
   #endif  // AUTOFLASHSIZE
 
-#endif  // All cores < pre-2.6.0
-
 // Version 4.2 config = eeprom area
 const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses EEPROM area
+
+#endif  // ESP8266
+
+
+
 // Version 5.2 allow for more flash space
 const uint8_t CFG_ROTATES = 8;          // Number of flash sectors used (handles uploads)
 
@@ -1181,6 +1217,9 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 } SysBitfield_Sensors;
 
 
+
+// a flag status group showing how succesful the boot was
+// 3 state template, used, succuss, fail, none
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint16_t data;                           // Allow bit manipulation using SetOption
   struct {                                 // SetOption0 .. SetOption31
@@ -1190,6 +1229,8 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint8_t mdns_started_succesfully: 1;
   };
 } SysBitfield_BootStatus;
+
+
 
 SysBitfield_BootStatus boot_status;
 
@@ -1769,15 +1810,6 @@ int8_t parse_JSONCommand();
 void   parsesub_TopicCheck_JSONCommand(JsonObjectConst _obj);
 int8_t parsesub_SystemCommand(JsonObjectConst _obj);
 int8_t parsesub_FirmwareInformation(JsonObjectConst _obj);
-
-// JsonObjectConst& pObj;// = nullptr; //global accessable
-
-uint32_t tSavedSavingTest= millis();
-
-
-// //String backlog[MAX_BACKLOG];                // Command backlog
-// uint16_t wifi_reconnects_counter = 0;
-
 
 };
 
