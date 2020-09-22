@@ -185,7 +185,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
         case 0:
         
           pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("%s&deg;%c"),value_ctr,pCONT_sup->TempUnit());
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s&deg;%c\""),value_ctr,pCONT_sup->TempUnit());
 
           if(sensor[sensor_counter].temperature<=25){
             sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
@@ -195,33 +195,33 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
           }else{
             sprintf(colour_ctr,"%s","#ffffff");
           }      
-          JsonBuilderI->Add_FP("fc",colour_ctr);
+          JsonBuilderI->Add("fc",colour_ctr);
 
         break;
         case 1:    
 
           pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("%s%%"),value_ctr);
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s%%\""),value_ctr);
        
           if(sensor[sensor_counter].humidity>70){
             sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
           }else{
             sprintf(colour_ctr,"%s","#ffffff");
           }
-          JsonBuilderI->Add_FP("fc",colour_ctr);
+          JsonBuilderI->Add("fc",colour_ctr);
 
         break;
         case 2:     
           
           pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("%s hPa"),value_ctr);
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s hPa\""),value_ctr);
           
           if(sensor[sensor_counter].pressure>1000){
             sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
           }else{
             sprintf(colour_ctr,"%s","#ffffff");
           }
-          JsonBuilderI->Add_FP("fc",colour_ctr);
+          JsonBuilderI->Add("fc",colour_ctr);
 
         break;
       }
@@ -375,7 +375,7 @@ void mSensorsBME::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;

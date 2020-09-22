@@ -104,6 +104,9 @@ uint8_t mInterfaceController::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_RELAY
     if(mry == nullptr){ mry = new mRelays(); }
   #endif
+  #ifdef USE_MODULE_DRIVERS_PWM
+    if(mpwm == nullptr){ mpwm = new mPWM(); }
+  #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
     if(mrl == nullptr){ mrl = new mGarageLights(); }
   #endif
@@ -214,6 +217,9 @@ DEBUG_LINE;
   // Drivers
   #ifdef D_MODULE_DRIVERS_RELAY_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_RELAY_ID;
+  #endif
+  #ifdef D_MODULE_DRIVERS_PWM_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_PWM_ID;
   #endif
   #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_HBRIDGE_ID;
@@ -353,6 +359,9 @@ uint8_t mInterfaceController::CheckPointersPass(){
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
     if(mry==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_DRIVERS_PWM
+    if(mpwm==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
     if(mrl==nullptr){ return false; }
@@ -549,6 +558,13 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
         //  mry->f2<int>();
         
         // result = mry->Tasker(function);
+         break;
+      #endif
+      #ifdef D_MODULE_DRIVERS_PWM_ID
+        case D_MODULE_DRIVERS_PWM_ID:    
+        
+        result = mpwm->Tasker(function);
+
          break;
       #endif
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
@@ -766,6 +782,9 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
       #endif
       #ifdef D_MODULE_DRIVERS_RELAY_ID
         case D_MODULE_DRIVERS_RELAY_ID:           result = mry->Tasker(function,param1);      break;
+      #endif
+      #ifdef D_MODULE_DRIVERS_PWM_ID
+        case D_MODULE_DRIVERS_PWM_ID:           result = mpwm->Tasker(function,param1);      break;
       #endif
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
         case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
@@ -1005,6 +1024,9 @@ PGM_P mInterfaceController::GetClassName(uint8_t task){
     #ifdef D_MODULE_DRIVERS_RELAY_ID
       case D_MODULE_DRIVERS_RELAY_ID:        return PM_MODULE_DRIVERS_RELAY_CTR;
     #endif
+    #ifdef D_MODULE_DRIVERS_PWM_ID
+      case D_MODULE_DRIVERS_PWM_ID:        return PM_MODULE_DRIVERS_PWM_CTR;
+    #endif
     #ifdef D_MODULE_DRIVERS_IFAN_ID
       case D_MODULE_DRIVERS_IFAN_ID:        return PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR;
     #endif
@@ -1062,6 +1084,9 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
     #ifdef D_MODULE_DRIVERS_RELAY_ID
       case D_MODULE_DRIVERS_RELAY_ID:         return PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR; 
     #endif
+    #ifdef D_MODULE_DRIVERS_PWM_ID
+      case D_MODULE_DRIVERS_PWM_ID:         return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; 
+    #endif
     #ifdef D_MSAW_MODULE_ID
       case D_MSAW_MODULE_ID:
         return D_MSAW_MODULE_FRIENDLY_CTR; 
@@ -1095,7 +1120,7 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
       break;
     #endif
     #ifdef D_MODULE_SENSORS_DOORBELL_ID
-      case D_MODULE_SENSORS_DOORBELL_ID:        return MODULE_SENSORS_DOORBELL_FRIENDLY_CTR; 
+      case D_MODULE_SENSORS_DOORBELL_ID:        return PM_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR; 
     #endif
     #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
       case D_MODULE_SENSORS_PZEM004T_MODBUS_ID:     return PM_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR; 

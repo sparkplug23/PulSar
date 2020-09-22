@@ -182,6 +182,10 @@
   #define D_MODULE_DRIVERS_RELAY_CTR           "relays"
   #define D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR  "relays"
 //#endif
+//#ifdef USE_MODULE_DRIVERS_PWM
+  #define D_MODULE_DRIVERS_PWM_CTR           "pwm"
+  #define D_MODULE_DRIVERS_PWM_FRIENDLY_CTR  "pwm"
+//#endif
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PROGMEM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PROGMEM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
@@ -819,6 +823,7 @@
 #define D_GPIO_FUNCTION_REL2_INV_CTR      "Relay 2 Inv"
 #define D_GPIO_FUNCTION_REL3_INV_CTR      "Relay 3 Inv"
 #define D_GPIO_FUNCTION_REL4_INV_CTR      "Relay 4 Inv"
+#define D_GPIO_FUNCTION_FAN_PWM1_CTR      "Fan PWM1"
 #define D_GPIO_FUNCTION_I2C_SCL_CTR       "I2C SCL"
 #define D_GPIO_FUNCTION_I2C_SDA_CTR       "I2C SDA"
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"

@@ -213,10 +213,18 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_RELAY_CTR)           D_MODULE_DRIVERS_RELAY_CTR;
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)  D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
 #endif
+#ifdef USE_MODULE_DRIVERS_PWM
+  #include "4_Drivers/PWM/mPWM.h"
+  class mPWM;
+  #define            D_MODULE_DRIVERS_PWM_ID       46
+  #define            pCONT_mpwm                        pCONT->mpwm
+  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_PWM_CTR)           D_MODULE_DRIVERS_PWM_CTR;
+  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR)  D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
+#endif
 #ifdef USE_SONOFF_IFAN
   #include "4_Drivers/Sonoff_iFan/mSonoffIFan.h"
   class mSonoffIFan;
-  #define D_MODULE_DRIVERS_IFAN_ID                             46
+  #define D_MODULE_DRIVERS_IFAN_ID                             47
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_CTR)               "mSonoffIFan";
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR)      "ifan";
   #define pCONT_ifan                                           pCONT->mifan
@@ -224,7 +232,7 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
 #ifdef USE_MODULE_DRIVERS_RF433MHZ
   // #include "SAWRadios/mSAWMain.h"
   // class mSAWMain;
-  // #define D_MSAW_MODULE_ID 47
+  // #define D_MSAW_MODULE_ID 48
   // DEFINE_PROGMEM_CTR(MSAW_MODULE_CTR)              "mSAWMain";
   // DEFINE_PROGMEM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR)              "rcswitch";
   // #include "SAWRadios/mSAWProtocol.h"
@@ -608,6 +616,9 @@ class mInterfaceController{
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
     mRelays* mry = nullptr;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+    mPWM* mpwm = nullptr;
   #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
     mGarageLights* mrl = nullptr;

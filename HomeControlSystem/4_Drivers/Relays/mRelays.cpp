@@ -20,6 +20,18 @@ Relay Name:    ontime, offtime, timeon, last controlled by
 
 */
 
+
+
+
+
+//
+  // I should add a relay "type" ie, external power, internal power, light
+
+
+
+
+
+
 void mRelays::init(void){
 
   relays_connected = pCONT_set->devices_present; //phase out
@@ -389,9 +401,10 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     if(obj["name"].is<int>()){
       name_num  = obj["name"];
     }
-  }else{
-    name_num = 0; // assume relay 0
   }
+  // else{
+  //   name_num = 0; // assume relay 0
+  // }
 
   if(!obj[F(D_JSON_ONOFF)].isNull()){
     if(const char* value = obj["onoff"]){
@@ -402,7 +415,7 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     }    
   }
 
-  if(state>-1){
+  if((state>-1)&&(name_num>-1)){
     SetRelay(name_num,state);
   }
 

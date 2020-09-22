@@ -5,10 +5,11 @@
 void mMotionSensor::Pre_Init(void){
 
   sensors_active = 0;
+
   fEnableSensor = false;
 
   uint16_t pin_id = 0;
-  for(uint8_t ii=0;ii<9;ii++){
+  for(uint8_t ii=0;ii<(GPIO_PIR_3_INV_ID-GPIO_PIR_1_ID+1);ii++){
     
     pin_id = GPIO_PIR_1_ID+ii;
     // Make sure to not exceed limits
@@ -36,7 +37,7 @@ void mMotionSensor::Pre_Init(void){
           pinMode(pin[sensors_active], INPUT);
         break;
       }
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[%d] gpio=%d"), sensors_active, pin[sensors_active]);
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[%d] %d"), sensors_active, pin[sensors_active]);
       sensors_active++;
       fEnableSensor = true;
     }

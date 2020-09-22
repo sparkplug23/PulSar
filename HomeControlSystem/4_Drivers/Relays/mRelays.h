@@ -119,9 +119,18 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
     uint8_t fForceMQTTUpdate = true; //each local subtasker has its own fForce
 
+
+
+//
+  // I should add a relay "type" ie, external power, internal power, light
+
+
     struct RELAY_STATUS{
+
+      //also flags bit
       uint8_t onoff = false;
       uint8_t ischanged = false;
+      // uint8_t flags.relay_type
       struct datetime ontime;
       struct datetime offtime;
     }relay_status[RELAYS_CONNECTED];

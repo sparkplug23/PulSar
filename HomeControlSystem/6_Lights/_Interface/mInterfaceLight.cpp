@@ -2409,8 +2409,24 @@ int8_t mInterfaceLight::GetPaletteIDbyName(const char* c){
 DEBUG_LINE;
   for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH_ID;ii++){
     ptr = GetPalettePointerByID(ii);
-    if(ptr->friendly_name_ctr == nullptr){ return 0;}
+
+
+
+// AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->id %d"),ptr->id);
+// AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
+
+//needs to use the shared buffer in settings dlist
+
+
+    if(ptr->friendly_name_ctr == nullptr){ 
+AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr == nullptr"));
+      // return 0;
+      break; //break for loop and ignore this .. NEEDS fixed
+      
+      
+    }
     if(strstr(c,ptr->friendly_name_ctr)){
+// AddLog_P(LOG_LEVEL_ERROR, PSTR("strstr(c,ptr->friendly_name_ctr"));
       return ii;
     }
   }

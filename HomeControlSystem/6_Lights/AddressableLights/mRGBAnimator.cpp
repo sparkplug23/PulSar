@@ -186,6 +186,8 @@ void mRGBAnimator::init(void){
   #endif //USE_WS28XX_HARDWARE_WS2801
 
   uint16_t animator_strip_size_tmp = animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
+
+
   animations_control = new NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
 
   animation.transition.pixels_to_update_as_percentage.val = 100;
@@ -3932,6 +3934,8 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 int8_t mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
 
 
+AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "parsesub_ModeAnimation"));
+
   char buffer[40];
 
   uint8_t isserviced = 0;
@@ -3948,6 +3952,7 @@ DEBUG_LINE;
 DEBUG_LINE;
     if((tmp_id=pCONT_iLight->GetPaletteIDbyName(colour))>=0){
       animation.palette_id = tmp_id;
+AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GetPaletteIDbyName=%d"),tmp_id);
 DEBUG_LINE;
       #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
       if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
@@ -4460,7 +4465,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 //       int array_length = colourarray.size();
 
 //       const char* pixelcolour;
-//       for(JsonVariant v : colourarray) {
+//       for(JsonVariantConst v : colourarray) {
 //         pixelcolour = v.as<const char*>();
 
 //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
@@ -4532,7 +4537,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 //       int array_length = colourarray.size();
 
 //       const char* pixelcolour;
-//       for(JsonVariant v : colourarray) {
+//       for(JsonVariantConst v : colourarray) {
 //         pixelcolour = v.as<const char*>();
 
 //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
@@ -4616,7 +4621,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 //       int array_length = colourarray.size();
 
 //       const char* pixelcolour;
-//       for(JsonVariant v : colourarray) {
+//       for(JsonVariantConst v : colourarray) {
 //         pixelcolour = v.as<const char*>();
 
 //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
@@ -5126,8 +5131,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
   if(!obj[D_JSON_PIXELNUM].isNull()){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
     if(obj[D_JSON_PIXELNUM].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_PIXELNUM];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_PIXELNUM];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.pixelnum.val[parsed.pixelnum.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,val);          
@@ -5164,8 +5169,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     uint32_t colour32bit;  
     // Arrays
     if(obj[D_JSON_RGB].is<JsonArray>()){ 
-      JsonArray array = obj[D_JSON_RGB];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_RGB];
+      for(JsonVariantConst v : array) {
         const char* val = v.as<const char*>();
         if(val[0]=='#'){ colour32bit = (long) strtol( &val[1], NULL, 16); }else{ colour32bit = (long) strtol( &val[0], NULL, 16); }
         parsed.hsb.val[parsed.hue.found_idx++] = HsbColor(RgbColor((colour32bit>>16),(colour32bit>>8&0xFF),(colour32bit&0xFF)));
@@ -5200,8 +5205,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_HUE));  
     // Arrays
     if(obj[D_JSON_HUE].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_HUE];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_HUE];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.hue.val[parsed.hue.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " JsonArray " " [i%d:v%d]"),parsed.hue.found_idx-1,val);    
@@ -5238,8 +5243,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_SAT));  
     // Arrays
     if(obj[D_JSON_SAT].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_SAT];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_SAT];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.sat.val[parsed.sat.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT " JsonArray " " [i%d:v%d]"),parsed.sat.found_idx-1,val);    
@@ -5277,8 +5282,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_BRT));  
     // Arrays
     if(obj[D_JSON_BRT].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_BRT];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_BRT];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.brt.val[parsed.brt.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT " JsonArray " " [i%d:v%d]"),parsed.brt.found_idx-1,val);    
@@ -5315,8 +5320,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_WHITE));  
     // Arrays
     if(obj[D_JSON_WHITE].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_WHITE];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_WHITE];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         // Serial.println(parsed.white.found_idx);
         parsed.white.val[parsed.white.found_idx++] = val;//map(val,0,100,0,255); //only 0-100 accepted
@@ -5356,8 +5361,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_FLASHER));  
     // Arrays
     if(obj[D_JSON_FLASHER].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_FLASHER];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_FLASHER];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.flasher.val[parsed.flasher.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER " JsonArray " " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
@@ -5386,8 +5391,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_PULSER));  
     // Arrays
     if(obj[D_JSON_PULSER].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_PULSER];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_PULSER];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.pulser.val[parsed.pulser.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PULSER " JsonArray " " [i%d:v%d]"),parsed.pulser.found_idx-1,val);    
@@ -5414,8 +5419,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_FADE));  
     // Arrays
     if(obj[D_JSON_FADE].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_FADE];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_FADE];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.fade.val[parsed.fade.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FADE " JsonArray " " [i%d:v%d]"),parsed.fade.found_idx-1,val);    
@@ -5442,8 +5447,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_SECS));  
     // Arrays
     if(obj[D_JSON_TIME_SECS].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_TIME_SECS];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_TIME_SECS];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val*1000; //secs2ms
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
@@ -5464,8 +5469,8 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_MS));  
     // Arrays
     if(obj[D_JSON_TIME_MS].is<JsonArray>()){   
-      JsonArray array = obj[D_JSON_TIME_MS];
-      for(JsonVariant v : array) {
+      JsonArrayConst array = obj[D_JSON_TIME_MS];
+      for(JsonVariantConst v : array) {
         int val = v.as<int>();
         parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    

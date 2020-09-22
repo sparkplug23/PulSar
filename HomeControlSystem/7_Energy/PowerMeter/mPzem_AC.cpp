@@ -124,6 +124,7 @@ void mPzem_AC::ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer){
   mod->frequency     = (float)((buffer[17] << 8) + buffer[18]) / 10.0;                                              // 50.0 Hz
   mod->power_factor  = (float)((buffer[19] << 8) + buffer[20]) / 100.0;  
   mod->energy        = (float)((buffer[15] << 24) + (buffer[16] << 16) + (buffer[13] << 8) + buffer[14]);    
+
 }
 
 

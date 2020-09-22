@@ -104,6 +104,23 @@ int8_t mGarageLights::Tasker(uint8_t function){
 
 void mGarageLights::SubTask_Light(){
 
+/*
+new switch case method/mode
+
+enum AUTOMATIC_LIGHT_MODE{ //should this be in lights instead? probably most if not all of this class can be merged with light, simply having the output as relays
+and the lights "automatic" inside the interface
+
+manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and_day_dust_by_time
+
+
+}
+
+
+
+
+*/
+
+
   // Automatic
   if(pir_detect_copy.ischanged){ pir_detect_copy.ischanged=false;
 
@@ -140,7 +157,11 @@ void mGarageLights::SubTask_Light(){
 //  schedule list of ontimes?
 
   // Seconds_on
+
+  // for now, use openhab remote control for schedules
   
+
+  // no longer named structs, needs to be veriable, timed goes by relay
   if(mSupport::TimeReached(&tSavedSeconds,1000)){
     if(light_control_driveway.seconds_on>0){ 
       light_control_driveway.seconds_on--;
@@ -154,17 +175,17 @@ void mGarageLights::SubTask_Light(){
       SetLight(LIGHT_DRIVEWAY_ID,OFF);
     }
 
-    // if(light_control_garden.seconds_on>0){
-    //   light_control_garden.seconds_on--;
-    //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
-    //   SetLight(LIGHT_GARDEN_ID,ON);
-    //   fForceMQTTUpdate = true;
-    // }else if(light_control_garden.seconds_on==0){
-    //   light_control_garden.seconds_on = -1; //stop
-    //   fForceMQTTUpdate = true;
-    //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
-    //   SetLight(LIGHT_GARDEN_ID,OFF);
-    // }
+    if(light_control_garden.seconds_on>0){
+      light_control_garden.seconds_on--;
+      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+      SetLight(LIGHT_GARDEN_ID,ON);
+      // fForceMQTTUpdate = true;
+    }else if(light_control_garden.seconds_on==0){
+      light_control_garden.seconds_on = -1; //stop
+      // fForceMQTTUpdate = true;
+      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+      SetLight(LIGHT_GARDEN_ID,OFF);
+    }
   }
 
 }
@@ -340,47 +361,49 @@ uint8_t mGarageLights::ConstructJSON_LightStates(uint8_t json_level){
 
   memset(&data_buffer2,0,sizeof(data_buffer2));
 
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  JsonObject root = doc.to<JsonObject>();
+  // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  // JsonObject root = doc.to<JsonObject>();
 
-  for(int device_id=0;device_id<RELAYS_CONNECTED;device_id++){
+  // for(int device_id=0;device_id<RELAYS_CONNECTED;device_id++){
 
-    switch(device_id){
-      case LIGHT_DRIVEWAY_ID: light_control_ptr = &light_control_driveway; break;
-      case LIGHT_GARDEN_ID: light_control_ptr = &light_control_garden; break;
-    }
+  //   switch(device_id){
+  //     case LIGHT_DRIVEWAY_ID: light_control_ptr = &light_control_driveway; break;
+  //     case LIGHT_GARDEN_ID: light_control_ptr = &light_control_garden; break;
+  //   }
 
-    if(light_control_ptr->ischanged){ light_control_ptr->ischanged=false;
+  //   if(light_control_ptr->ischanged){ light_control_ptr->ischanged=false;
 
-      char buffer[50];
+  //     char buffer[50];
 
-      JsonObject relayobj = root.createNestedObject(pCONT->mry->GetRelayNamebyIDCtr(device_id, buffer, sizeof(buffer)));
+  //     JsonObject relayobj = root.createNestedObject(pCONT->mry->GetRelayNamebyIDCtr(device_id, buffer, sizeof(buffer)));
 
-      relayobj["onoff"] = pCONT->mry->GetRelay(device_id);
-      relayobj["seconds_on"] = light_control_ptr->seconds_on;
+  //     relayobj["onoff"] = pCONT->mry->GetRelay(device_id);
+  //     relayobj["seconds_on"] = light_control_ptr->seconds_on;
 
-      char time_ctr[40]; memset(time_ctr,'\0',sizeof(time_ctr));
-      sprintf(time_ctr, "%02d:%02d:%02d",pCONT->mry->relay_status[device_id].ontime.hour,pCONT->mry->relay_status[device_id].ontime.minute,pCONT->mry->relay_status[device_id].ontime.second);
-      relayobj["ontime"] = time_ctr;
-      char time_ctr2[40]; memset(time_ctr2,'\0',sizeof(time_ctr2));
-      sprintf(time_ctr2, "%02d:%02d:%02d",pCONT->mry->relay_status[device_id].offtime.hour,pCONT->mry->relay_status[device_id].offtime.minute,pCONT->mry->relay_status[device_id].offtime.second);
-      relayobj["offtime"] = time_ctr2;
+  //     char time_ctr[40]; memset(time_ctr,'\0',sizeof(time_ctr));
+  //     sprintf(time_ctr, "%02d:%02d:%02d",pCONT->mry->relay_status[device_id].ontime.hour,pCONT->mry->relay_status[device_id].ontime.minute,pCONT->mry->relay_status[device_id].ontime.second);
+  //     relayobj["ontime"] = time_ctr;
+  //     char time_ctr2[40]; memset(time_ctr2,'\0',sizeof(time_ctr2));
+  //     sprintf(time_ctr2, "%02d:%02d:%02d",pCONT->mry->relay_status[device_id].offtime.hour,pCONT->mry->relay_status[device_id].offtime.minute,pCONT->mry->relay_status[device_id].offtime.second);
+  //     relayobj["offtime"] = time_ctr2;
 
-      char time_ctr3[40]; memset(time_ctr3,'\0',sizeof(time_ctr3));
-      sprintf(time_ctr3, "%02d:%02d:%02d",light_control_ptr->enabled_starttime.hour,light_control_ptr->enabled_starttime.minute,light_control_ptr->enabled_starttime.second);
-      relayobj["enabled_starttime"] = time_ctr3;
-      char time_ctr4[40]; memset(time_ctr4,'\0',sizeof(time_ctr4));
-      sprintf(time_ctr4, "%02d:%02d:%02d",light_control_ptr->enabled_endtime.hour,light_control_ptr->enabled_endtime.minute,light_control_ptr->enabled_endtime.second);
-      relayobj["enabled_endtime"] = time_ctr4;
+  //     char time_ctr3[40]; memset(time_ctr3,'\0',sizeof(time_ctr3));
+  //     sprintf(time_ctr3, "%02d:%02d:%02d",light_control_ptr->enabled_starttime.hour,light_control_ptr->enabled_starttime.minute,light_control_ptr->enabled_starttime.second);
+  //     relayobj["enabled_starttime"] = time_ctr3;
+  //     char time_ctr4[40]; memset(time_ctr4,'\0',sizeof(time_ctr4));
+  //     sprintf(time_ctr4, "%02d:%02d:%02d",light_control_ptr->enabled_endtime.hour,light_control_ptr->enabled_endtime.minute,light_control_ptr->enabled_endtime.second);
+  //     relayobj["enabled_endtime"] = time_ctr4;
 
-    }
-  }
+  //   }
+  // }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  if(data_buffer2.payload.len>3){
-    serializeJson(doc,data_buffer2.payload.ctr);
-    return 1;
-  }
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // if(data_buffer2.payload.len>3){
+  //   serializeJson(doc,data_buffer2.payload.ctr);
+  //   return 1;
+  // }
+
+  return 0;
 
 }
 

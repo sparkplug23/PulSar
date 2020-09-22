@@ -120,14 +120,14 @@ char buffer[30];
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
-          // int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
-          // char colour_ctr[7];
-          // if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
-          // else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
-          // else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          // JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
-          // JsonBuilderI->Add("fc", colour_ctr);   
-          JsonBuilderI->Add("fc", 'red');    
+          int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
+          char colour_ctr[7];
+          if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
+          else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
+          else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
+          JsonBuilderI->Add("fc", colour_ctr);   
+          // JsonBuilderI->Add("fc", "red");    
         }break;
         case 2:
           JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
