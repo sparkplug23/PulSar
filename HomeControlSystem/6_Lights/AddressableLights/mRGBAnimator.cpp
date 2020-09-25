@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 
+
+//addressible needs another class for just the output of neopixels
+
 /*******************************************************************************************************************
 ********************************************************************************************************************
 ************TASKER**************************************************************************************************
@@ -548,7 +551,12 @@ void mRGBAnimator::SubTask_Scenes(){
       // GetColour_HSB();//
       RgbTypeColor rgbcolour = HsbColor(scene.colour.H,scene.colour.S,animation.brightness);
       #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-        rgbcolour.W = scene.colourW;
+      // scene.colourW = 100;
+      Serial.printf("scene.scene.colourW_f=%d" DEBUG_INSERT_PAGE_BREAK,scene.colourW);
+
+      // Serial.println(scene.colourW_f);
+
+        rgbcolour.W = scene.colourW;//(float)(scene.colourW/255);
       #endif
       FadeToNewColour(rgbcolour,animation.transition.time_ms.val);
 
@@ -753,9 +761,11 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_WHITE,whitepixel);
     #endif
     scene.colourW = whitepixel;
+
+    // scene.colourW = whitepixel;
     isserviced++;
   }else{
-    scene.colourW = 0; // default to off if not demanded
+    scene.colourW  = 0; // default to off if not demanded
   }
   #endif
 

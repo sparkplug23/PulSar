@@ -39,12 +39,193 @@ int8_t mBlinds::Tasker(uint8_t function){ //Serial.println("mBlinds::Tasker");
       // }
 
     break;
-    case FUNC_JSON_COMMAND:
-      parse_JSONCommand();
-    break;
+    // case FUNC_JSON_COMMAND:
+    //   parse_JSONCommand();
+    // break;
   }
 
 }
+
+
+int8_t mBlinds::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      parsesub_TopicCheck_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
+
+int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+  // Check if instruction is for me
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/blinds")>=0){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR));
+      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      parsesub_TopicCheck_JSONCommand(obj);
+      return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+
+  // for(int j=0;j<data_buffer2.payload.len;j++){
+  //   pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
+  // }
+
+  // pCONT->mso->println();
+  // pCONT->mso->print("\tiTOPIC[len:");
+  // pCONT->mso->print(data_buffer2.topic.len);
+  // pCONT->mso->print("]> ");
+  // pCONT->mso->print(data_buffer2.topic.ctr);
+  // pCONT->mso->println();
+  // pCONT->mso->print("\tiPAYLOAD[len:");
+  // pCONT->mso->print(data_buffer2.payload.len);
+  // pCONT->mso->print("]> ");
+  // pCONT->mso->print(data_buffer2.payload.ctr);  
+  // pCONT->mso->println();
+
+  // pCONT->mso->println();
+  // pCONT->mso->print("\tpTOPIC[len:");
+  // pCONT->mso->print("]> ");
+  // //pCONT->mso->print(topic);
+  // pCONT->mso->println();
+  // pCONT->mso->print("\tpPAYLOAD[len:");
+  // pCONT->mso->print("]> ");
+  // pCONT->mso->print(payload);  
+  // pCONT->mso->println();
+
+//  pCONT->mqt->ppublish("payload/mrelays",data_buffer2.payload.ctr,false);
+
+  uint8_t name_num=-1,state=-1;
+
+  if(obj.containsKey("manual")){ //pCONT->mso->println("obj[\"manual\"] int");
+    const char* command = obj["manual"];
+    
+    if(strstr(command,"up")){  //pCONT->mso->println("MATCHED>> up");
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"UP");
+      pCONT->mdhb->MoveMotorPulse(1,300);// 1=up,300ms
+    }else if(strstr(command,"down")){  //pCONT->mso->println("MATCHED>> down");
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"DOWN");
+      pCONT->mdhb->MoveMotorPulse(0,300);// 1=up,300ms
+    }
+    // else if(strstr(command,"vals")){ pCONT->mso->print("MATCHED>> vals");  
+
+    //   // int motorspeed = obj["speed"];
+    //   // int motordirection = obj["direction"];
+    //   // int motorduration = obj["duration"];
+
+    //   // pCONT->mso->print("speed = ");   pCONT->mso->println(motorspeed);  
+    //   // pCONT->mso->print("direction = ");   pCONT->mso->println(motordirection);  
+    //   // pCONT->mso->print("duration = ");   pCONT->mso->println(motorduration);  
+
+    //   // if(motordirection){
+    //   //   SetMotorUp(motorspeed);
+    //   // }else{
+    //   //   SetMotorDown(motorspeed);
+    //   // }
+
+    //   // delay(motorduration);
+
+    //   // SetStop();
+
+    // }
+
+  }
+  // else 
+  // if(obj.containsKey("percentage")){ pCONT->mso->println("MATCHED>> obj[\"percentage\"]");
+    
+  //   pCONT->mso->print("percentageBEFORE");
+  //   int percentage = obj["percentage"];
+  //   pCONT->mso->print("percentage=");
+  //   pCONT->mso->println(percentage);
+    
+  //   SetBlindPosition(percentage);    
+    
+  // }
+  else{
+    // pCONT->mso->println("NOT obj[\"name\"] int");
+  }
+
+
+  //MQQTSendFanStatus();
+
+  /*
+  Serial.println();
+  Serial.println("mBlinds::parse_JSONCommand()");
+
+  StaticJsonDocument<MQTT_MAX_PARSING_PACKET_SIZE> doc;
+  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  JsonObject obj = doc.as<JsonObject>();
+
+  Serial.print("data_buffer2.payload.len");
+  Serial.println(mpt->payload.len);
+
+  for(int j=0;j<data_buffer2.payload.len;j++){
+    pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
+  }
+
+  pCONT->mqt->ppublish("results/topic",data_buffer2.topic.ctr,false);
+  pCONT->mqt->ppublish("results/payload",data_buffer2.payload.ctr,false);
+
+  uint8_t name_num=-1,state=-1;
+
+
+  Serial.print("]> ");
+  Serial.print(data_buffer2.payload.ctr);
+
+
+// Serial.print("topic>> "); Serial.println(pCONT->mqt->mqqt_mqt->mpkt.topic.ctr);
+// Serial.print("Payload>> "); Serial.println(data_buffer2.payload.ctr);
+
+
+  //if(obj.containsKey("test1")){ 
+if(strstr(data_buffer2.payload.ctr,"test1")){
+Serial.println("obj[\"test1\"] int");
+   // name_num  = obj["name"];
+
+   
+  }else{
+    Serial.println("NOT obj[\"test1\"] int");
+  }
+
+if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
+//  if(obj.containsKey("test2")){ 
+  Serial.println("obj[\"test2\"] int");
+    //name_num  = obj["name"];
+
+    digitalWrite(MOTOR_B_PWM,LOW);
+    digitalWrite(MOTOR_B_DIR,HIGH);
+
+    delay(1000);
+
+    SetStop();
+  }else{
+    Serial.println("NOT obj[\"test1\"] int");
+  }
+
+
+*/
+  // uint8_t onoff = root["onoff"];
+
+  // switch(onoff){
+  //   case 1: FAN_ON(); break;
+  //   case 0: default: FAN_OFF(); break;
+  // }
+
+  //if onoff set, remember change mode, or set via mode
+
+  // fan.ischanged=true;
+  //pCONT->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");pCONT->mso->MessagePrintln(onoff);
+
+
+}
+
 
 
 // void mBlinds::init_ADC(void){
@@ -409,179 +590,30 @@ int8_t mBlinds::Tasker(uint8_t function){ //Serial.println("mBlinds::Tasker");
 
 
 
-int8_t mBlinds::parse_JSONCommand(){//mpkt_t* mpt, char* topic, char* payload){
+// int8_t mBlinds::parse_JSONCommand(){//mpkt_t* mpt, char* topic, char* payload){
 
-  Serial.println("MBLINDS TEST");
+//   Serial.println("MBLINDS TEST");
   
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/blinds")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return 0; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/blinds")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   }else{
+//     return 0; // not meant for here
+//   }
 
-  int8_t device_id,user_id,schedule_id;
-  uint8_t timeon,tempset;
+//   int8_t device_id,user_id,schedule_id;
+//   uint8_t timeon,tempset;
 
-  // char* payload = data_buffer2.payload.ctr;
+//   // char* payload = data_buffer2.payload.ctr;
 
-  DynamicJsonDocument doc(100);
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  JsonObject obj = doc.as<JsonObject>();
+//   DynamicJsonDocument doc(100);
+//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   JsonObject obj = doc.as<JsonObject>();
 
-  // for(int j=0;j<data_buffer2.payload.len;j++){
-  //   pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
-  // }
+//   return 0;
 
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tiTOPIC[len:");
-  // pCONT->mso->print(data_buffer2.topic.len);
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer2.topic.ctr);
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tiPAYLOAD[len:");
-  // pCONT->mso->print(data_buffer2.payload.len);
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer2.payload.ctr);  
-  // pCONT->mso->println();
-
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tpTOPIC[len:");
-  // pCONT->mso->print("]> ");
-  // //pCONT->mso->print(topic);
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tpPAYLOAD[len:");
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(payload);  
-  // pCONT->mso->println();
-
-//  pCONT->mqt->ppublish("payload/mrelays",data_buffer2.payload.ctr,false);
-
-  uint8_t name_num=-1,state=-1;
-
-  if(obj.containsKey("manual")){ //pCONT->mso->println("obj[\"manual\"] int");
-    const char* command = obj["manual"];
-    
-    if(strstr(command,"up")){  //pCONT->mso->println("MATCHED>> up");
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"UP");
-      pCONT->mdhb->MoveMotorPulse(1,300);// 1=up,300ms
-    }else if(strstr(command,"down")){  //pCONT->mso->println("MATCHED>> down");
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"DOWN");
-      pCONT->mdhb->MoveMotorPulse(0,300);// 1=up,300ms
-    }
-    // else if(strstr(command,"vals")){ pCONT->mso->print("MATCHED>> vals");  
-
-    //   // int motorspeed = obj["speed"];
-    //   // int motordirection = obj["direction"];
-    //   // int motorduration = obj["duration"];
-
-    //   // pCONT->mso->print("speed = ");   pCONT->mso->println(motorspeed);  
-    //   // pCONT->mso->print("direction = ");   pCONT->mso->println(motordirection);  
-    //   // pCONT->mso->print("duration = ");   pCONT->mso->println(motorduration);  
-
-    //   // if(motordirection){
-    //   //   SetMotorUp(motorspeed);
-    //   // }else{
-    //   //   SetMotorDown(motorspeed);
-    //   // }
-
-    //   // delay(motorduration);
-
-    //   // SetStop();
-
-    // }
-
-  }
-  // else 
-  // if(obj.containsKey("percentage")){ pCONT->mso->println("MATCHED>> obj[\"percentage\"]");
-    
-  //   pCONT->mso->print("percentageBEFORE");
-  //   int percentage = obj["percentage"];
-  //   pCONT->mso->print("percentage=");
-  //   pCONT->mso->println(percentage);
-    
-  //   SetBlindPosition(percentage);    
-    
-  // }
-  else{
-    // pCONT->mso->println("NOT obj[\"name\"] int");
-  }
-
-
-  //MQQTSendFanStatus();
-
-  /*
-  Serial.println();
-  Serial.println("mBlinds::parse_JSONCommand()");
-
-  StaticJsonDocument<MQTT_MAX_PARSING_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  JsonObject obj = doc.as<JsonObject>();
-
-  Serial.print("data_buffer2.payload.len");
-  Serial.println(mpt->payload.len);
-
-  for(int j=0;j<data_buffer2.payload.len;j++){
-    pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
-  }
-
-  pCONT->mqt->ppublish("results/topic",data_buffer2.topic.ctr,false);
-  pCONT->mqt->ppublish("results/payload",data_buffer2.payload.ctr,false);
-
-  uint8_t name_num=-1,state=-1;
-
-
-  Serial.print("]> ");
-  Serial.print(data_buffer2.payload.ctr);
-
-
-// Serial.print("topic>> "); Serial.println(pCONT->mqt->mqqt_mqt->mpkt.topic.ctr);
-// Serial.print("Payload>> "); Serial.println(data_buffer2.payload.ctr);
-
-
-  //if(obj.containsKey("test1")){ 
-if(strstr(data_buffer2.payload.ctr,"test1")){
-Serial.println("obj[\"test1\"] int");
-   // name_num  = obj["name"];
-
-   
-  }else{
-    Serial.println("NOT obj[\"test1\"] int");
-  }
-
-if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
-//  if(obj.containsKey("test2")){ 
-  Serial.println("obj[\"test2\"] int");
-    //name_num  = obj["name"];
-
-    digitalWrite(MOTOR_B_PWM,LOW);
-    digitalWrite(MOTOR_B_DIR,HIGH);
-
-    delay(1000);
-
-    SetStop();
-  }else{
-    Serial.println("NOT obj[\"test1\"] int");
-  }
-
-
-*/
-  // uint8_t onoff = root["onoff"];
-
-  // switch(onoff){
-  //   case 1: FAN_ON(); break;
-  //   case 0: default: FAN_OFF(); break;
-  // }
-
-  //if onoff set, remember change mode, or set via mode
-
-  // fan.ischanged=true;
-  //pCONT->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");pCONT->mso->MessagePrintln(onoff);
-
-  return 0;
-
-}
+// }
 
 
 // void mBlinds::AddToJsonObject_AddHardware(JsonObject root){

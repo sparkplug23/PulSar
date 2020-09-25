@@ -111,8 +111,7 @@ uint8_t mInterfaceController::Instance_Init(){
     if(mrl == nullptr){ mrl = new mGarageLights(); }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-    mNextionPanel mod;
-    if(mois == nullptr){ mois = new mMoistureSensor(); }
+    if(mnext == nullptr){ mnext = new mNextionPanel(); }
   #endif
   #ifdef USE_MODULE_DRIVERS_ENERGY
     if(mdenergy == nullptr){ mdenergy = new mEnergy(); }
@@ -366,6 +365,9 @@ uint8_t mInterfaceController::CheckPointersPass(){
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
     if(mrl==nullptr){ return false; }
   #endif
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+    if(mnext==nullptr){ return false; }
+  #endif
   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined(USE_MODULE_DRIVERS_RF433MHZ)
     if(msm==nullptr){ return false; }
   #endif
@@ -577,7 +579,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
       #endif
       #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mod->Tasker(function); break;
+        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mnext->Tasker(function); break;
       #endif
       #ifdef D_MODULE_SENSORS_BUTTONS_ID
         case D_MODULE_SENSORS_BUTTONS_ID:         result =  mbtn->Tasker(function); break;
@@ -745,7 +747,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MODULE_SENSORS_DOOR_ID:       result = mds->Tasker(function); break;
       #endif
       #ifdef D_MODULE_SENSORS_DOORBELL_ID
-        case D_MODULE_SENSORS_DOORBELL_ID:   result = mdb->Tasker(function); break;
+        case D_MODULE_SENSORS_DOORBELL_ID:   result = mdb->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_SENSORS_MOTION_ID
         case D_MODULE_SENSORS_MOTION_ID:     result = mms->Tasker(function, param1); break;
@@ -769,7 +771,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;
       #endif
       #ifdef USE_MODULE_CUSTOM_BLINDS
-        case D_MODULE_CUSTOM_BLINDS_ID:           result = mbbl->Tasker(function); break;
+        case D_MODULE_CUSTOM_BLINDS_ID:           result = mbbl->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
         case D_MODULE_CUSTOM_OILFURNACE_ID:       result = mof->Tasker(function); break;
@@ -787,7 +789,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MODULE_DRIVERS_PWM_ID:           result = mpwm->Tasker(function,param1);      break;
       #endif
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
+        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_DRIVERS_IFAN_ID
         case D_MODULE_DRIVERS_IFAN_ID:      result = mifan->Tasker(function, param1); break;
@@ -796,7 +798,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
       #endif
       #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mod->Tasker(function); break;
+        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mnext->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_SENSORS_BUTTONS_ID
         case D_MODULE_SENSORS_BUTTONS_ID:         result =  mbtn->Tasker(function); break;
@@ -1141,6 +1143,9 @@ PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_SENSORS_MOTION_ID
       case D_MODULE_SENSORS_MOTION_ID:        return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; 
+    #endif
+    #ifdef D_MODULE_SENSORS_DOOR_ID
+      case D_MODULE_SENSORS_DOOR_ID:        return PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR; 
     #endif
     #ifdef D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID
       case D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID:

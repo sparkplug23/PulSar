@@ -124,13 +124,14 @@ void mSensorsBME::init(void){
   }
 
   sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
+  settings.measure_rate_ms = 1000;
   
 }
 
 void mSensorsBME::EveryLoop(){
     
   for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){
-    if(mTime::TimeReachedNonReset(&sensor[sensor_id].tSavedMeasureClimate,1000)){  
+    if(mTime::TimeReachedNonReset(&sensor[sensor_id].tSavedMeasureClimate,settings.measure_rate_ms)){  
       // Retry init if failed
       if(!settings.fSensorCount){
         init(); //search again
@@ -263,7 +264,8 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
           (fabsf(sensor[sensor_id].temperature-sensor[sensor_id].bme->readTemperature())>0.1)||
           (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())&&(abs(millis()-sensor[sensor_id].ischangedtLast)>60000)  
         ){
-          sensor[sensor_id].ischanged_over_threshold = true; // check if updated
+          sensor[sensor_id].ischanged_over_threshold = true;
+          mqtthandler_sensor_ifchanged.fSendNow = true;
           sensor[sensor_id].ischangedtLast = millis();
         }else{
           sensor[sensor_id].ischanged_over_threshold = false;
@@ -375,7 +377,7 @@ void mSensorsBME::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;

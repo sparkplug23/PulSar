@@ -41,6 +41,9 @@ void mDoorSensor::init(void){
   
   sprintf(door_detect.detected_rtc_ctr,"--:--:--\0");
 
+  //record init state
+  door_detect.state = IsDoorOpen();
+
   #ifdef DOORALERT_PAYLOAD_CTR
     sprintf(door_detect.friendly_name_ctr,DOORALERT_PAYLOAD_CTR);
   #else
@@ -94,6 +97,9 @@ int8_t mDoorSensor::Tasker(uint8_t function){
       #endif
 
     break;
+    case FUNC_EVERY_SECOND:
+      AddLog_P(LOG_LEVEL_INFO,PSTR("Door open sensor %s"),IsDoorOpen_Ctr());
+    break;
     case FUNC_MQTT_SENDER:
       SubTasker_MQTTSender();
     break;
@@ -117,9 +123,86 @@ int8_t mDoorSensor::Tasker(uint8_t function){
     //   // );
       
     // }break;
+
+
+
+    
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifdef USE_WEBSERVER
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Status_Table_Draw();
+      break;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table_Data();
+      break;
+    #endif //USE_WEBSERVER
+
+
+
   }
 
 } // END function
+
+
+void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
+
+  char value_ctr[8];
+  uint8_t sensor_counter = 0;
+    
+  BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PSTR("<td>Door Position</td>"));
+    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_door", IsDoorOpen_Ctr());   
+  BufferWriterI->Append_P(PSTR("</tr>"));
+  
+}
+
+
+//append to internal buffer if any root messages table
+void mDoorSensor::WebAppend_Root_Status_Table_Data(){
+  
+  uint8_t sensor_counter = 0;
+  char value_ctr[8];
+  char colour_ctr[10];
+
+  JsonBuilderI->Array_Start("tab_door");// Class name
+  
+  for(int sensor_id=0;sensor_id<1;sensor_id++){
+    
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",sensor_id);
+
+    char colour_ctr[8];
+    uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
+    // Motion in progress
+    if(door_detect.isactive){
+      sprintf(colour_ctr,PSTR("#00ff00"));
+    }else
+    // If movement event has just finished
+    if(millis_elapsed<(1000*60)){
+      // Show colour as fading back to white over X seconds SINCE EVENT OVER
+      uint8_t colour_G = constrain(
+                            map(millis_elapsed,0,(1000*60),0,255)
+                            ,0,255 //increases with time
+                          );
+      pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr);
+    }
+    // no event show, just white
+    else{
+      sprintf(colour_ctr,"#ffffff");
+    }
+
+    
+      JsonBuilderI->Add("ih",door_detect.detected_rtc_ctr);
+      JsonBuilderI->Add("fc",colour_ctr);
+    
+    JsonBuilderI->Level_End();
+  }
+
+  JsonBuilderI->Array_End();
+
+}
 
 
 //#ifdef USE_MQTT
@@ -148,7 +231,9 @@ void mDoorSensor::MQTTSendDoorSensorIfChanged(){
     StaticJsonDocument<300> doc;
     JsonObject root = doc.to<JsonObject>();
 
-    root["location"] = DOORALERT_PAYLOAD_CTR;
+    char buffer[50];
+
+    root["location"] = pCONT_set->GetDeviceName(D_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer));
     root["time"] = pCONT->mt->mtime.hhmmss_ctr;
 
     data_buffer2.payload.len = measureJson(root)+1;

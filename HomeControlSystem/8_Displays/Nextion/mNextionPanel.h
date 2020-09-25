@@ -62,6 +62,16 @@ class mNextionPanel{
     mNextionPanel();
     void pre_init();
 
+    
+
+int8_t Tasker(uint8_t function, JsonObjectConst obj);
+int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+
+
+int8_t parsesub_Commands(JsonObjectConst obj);
+
+
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
 // Reminder: the buffer size optimizations here, in particular the isrBufSize that only accommodates
@@ -169,11 +179,8 @@ uint32_t tTest = millis();
 
 
 
-    void Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function);
     void init(void);
-
-    mInterfaceController *mcl = NULL;
-    void init_object(mInterfaceController* mcl);
 
     uint8_t parse_JSONCommand();
 

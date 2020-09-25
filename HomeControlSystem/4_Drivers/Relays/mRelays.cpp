@@ -402,9 +402,9 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
       name_num  = obj["name"];
     }
   }
-  // else{
-  //   name_num = 0; // assume relay 0
-  // }
+  else{
+    name_num = 0; // assume relay 0
+  }
 
   if(!obj[F(D_JSON_ONOFF)].isNull()){
     if(const char* value = obj["onoff"]){
@@ -525,6 +525,21 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
 
   int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
   AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+
+  // show options
+  if(device_id_found == -1){
+    // for(int ii=0;ii<pCONT_set->GetDeviceNameCount(D_MODULE_DRIVERS_RELAY_ID);ii++){
+    //   AddLog_P(LOG_LEVEL_INFO, PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
+
+    // }
+    AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\nsearching=%s"),c);
+AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
+
+
+
+  }
+
+
 
   return device_id_found;
 

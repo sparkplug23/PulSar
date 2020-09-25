@@ -101,6 +101,76 @@ int8_t mGarageLights::Tasker(uint8_t function){
 
 } // END function
 
+int8_t mGarageLights::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      parsesub_TopicCheck_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
+
+int8_t mGarageLights::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+  // Check if instruction is for me
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/garagelights")>=0){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR));
+      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      parsesub_TopicCheck_JSONCommand(obj);
+      return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+void mGarageLights::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+
+  int8_t device_id = -1;
+  int8_t isserviced=-1;
+
+  if((device_id = pCONT->mry->GetRelayIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
+    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return ; // Unknown device, can't execute
+  }
+
+  switch(device_id){
+    case LIGHT_DRIVEWAY_ID: light_control_ptr = &light_control_driveway; break;
+    case LIGHT_GARDEN_ID: light_control_ptr = &light_control_garden; break;
+  }
+
+  if(obj.containsKey(D_JSON_TIME_ON)){
+    light_control_ptr->seconds_on = obj[D_JSON_TIME_ON];
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,light_control_ptr->seconds_on);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON,light_control_ptr->seconds_on);
+    isserviced++;
+  }
+
+  if(obj.containsKey(D_JSON_ONOFF)){
+    const char* onoff = obj[D_JSON_ONOFF];
+    if(strstr(onoff,"ON")){ 
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+      SetLight(device_id,ON);
+      isserviced++;
+    }else if(strstr(onoff,"OFF")){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
+      SetLight(device_id,OFF);
+      isserviced++;
+    }else{
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
+    }
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ONOFF,onoff);
+    Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ONOFF,onoff);
+    isserviced++;
+  }
+
+}
 
 void mGarageLights::SubTask_Light(){
 
@@ -198,10 +268,11 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 void mGarageLights::SetLight(uint8_t light_id, uint8_t state){
 
   int8_t relay_id;
-
+// THIS IS BAD< PHASE OU TTO WORK WITH OTEHER LIGHTS
+//this should all be in interface light
   switch(light_id){
-    case LIGHT_DRIVEWAY_ID: relay_id = pCONT->mry->GetRelayIDbyName("driveway"); light_control_driveway.ischanged = true; break;
-    case LIGHT_GARDEN_ID:   relay_id = pCONT->mry->GetRelayIDbyName("garden"); light_control_garden.ischanged = true; break;
+    case LIGHT_DRIVEWAY_ID: relay_id = pCONT->mry->GetRelayIDbyName("Driveway Light"); light_control_driveway.ischanged = true; break;
+    case LIGHT_GARDEN_ID:   relay_id = pCONT->mry->GetRelayIDbyName("Garden Light"); light_control_garden.ischanged = true; break;
   }
 
   if(state==TIMED_ON){
@@ -224,79 +295,6 @@ void mGarageLights::SetLight(uint8_t light_id, uint8_t state){
 /*********************************************************************************************
 * MQTT ******************************************************************
 *************************************************************************************************/
-
-
-// manual light controls
-// set seconds/minutes on
-// set time to stay on from
-int8_t mGarageLights::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
-  
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/garagelights")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "/garagelights"));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return 0; // not meant for here
-  }
-
-
-  uint8_t isserviced = 0;
-  int8_t device_id;
-
-  // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mGarageLights::parse_JSONCommand()");
-
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE "Command: " "\"%s\""),data_buffer2.payload.ctr);
-
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_ERROR_JSON_DESERIALIZATION));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-    return 0;
-  }
-  JsonObject obj = doc.as<JsonObject>();
-  
-  if((device_id = pCONT->mry->GetRelayIDbyName(obj[D_JSON_DEVICE]))>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
-  }else{
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-    return 0; // Unknown device, can't execute
-  }
-
-  switch(device_id){
-    case LIGHT_DRIVEWAY_ID: light_control_ptr = &light_control_driveway; break;
-    case LIGHT_GARDEN_ID: light_control_ptr = &light_control_garden; break;
-  }
-
-  if(obj.containsKey(D_JSON_TIME_ON)){
-    light_control_ptr->seconds_on = obj[D_JSON_TIME_ON];
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,light_control_ptr->seconds_on);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON,light_control_ptr->seconds_on);
-    isserviced++;
-  }
-
-  if(obj.containsKey(D_JSON_ONOFF)){
-    const char* onoff = obj[D_JSON_ONOFF];
-    if(strstr(onoff,"ON")){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-      SetLight(device_id,ON);
-      isserviced++;
-    }else if(strstr(onoff,"OFF")){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-      SetLight(device_id,OFF);
-      isserviced++;
-    }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
-    }
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ONOFF,onoff);
-    Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ONOFF,onoff);
-    isserviced++;
-  }
-
-}
-
 
 
 // NEW METHOD -- first senders then on internals

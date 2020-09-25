@@ -73,6 +73,11 @@ class mDoorBell{
 
     }settings;
 
+    
+int8_t Tasker(uint8_t function, JsonObjectConst obj);
+int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+
     int8_t parse_JSONCommand();
 
     int8_t parsesub_Settings();

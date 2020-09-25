@@ -335,7 +335,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 // SystemSettings_DefaultBody_Network();
       //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
-        AddLog_P(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
+       // AddLog_P(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
     break;
     case FUNC_EVERY_FIVE_SECOND:{
 

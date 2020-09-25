@@ -139,100 +139,100 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 
 
 
-int8_t mDoorBell::parse_JSONCommand(void){
+// int8_t mDoorBell::parse_JSONCommand(void){
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/doorbell")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return 0; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/doorbell")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   }else{
+//     return 0; // not meant for here
+//   }
 
-  int8_t isserviced = 0;
+//   int8_t isserviced = 0;
     
-  //new topic names must include pixels
+//   //new topic names must include pixels
   
-  if(strstr(data_buffer2.topic.ctr,"/settings")){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "settings"));    
-    isserviced += parsesub_Settings();
-  }else 
-  if(strstr(data_buffer2.topic.ctr,"/command")){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "command"));    
-    isserviced += parsesub_Command();
-  }else 
-  {
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
-  }
+//   if(strstr(data_buffer2.topic.ctr,"/settings")){
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "settings"));    
+//     isserviced += parsesub_Settings();
+//   }else 
+//   if(strstr(data_buffer2.topic.ctr,"/command")){
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "command"));    
+//     isserviced += parsesub_Command();
+//   }else 
+//   {
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
+//   }
 
-  return isserviced;
+//   return isserviced;
 
-}
+// }
 
-int8_t mDoorBell::parsesub_Command(){
+// int8_t mDoorBell::parsesub_Command(){
 
-  #ifdef JSONDOCUMENT_STATIC
-    StaticJsonDocument<800> doc;
-  #else
-    DynamicJsonDocument doc(600);
-  #endif
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-    return 0;
-  }
-  JsonObject obj = doc.as<JsonObject>();
+//   #ifdef JSONDOCUMENT_STATIC
+//     StaticJsonDocument<800> doc;
+//   #else
+//     DynamicJsonDocument doc(600);
+//   #endif
+//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   if(error){
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+//     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+//     return 0;
+//   }
+//   JsonObject obj = doc.as<JsonObject>();
 
-  int8_t tmp_id = 0;
-  int8_t isserviced = 0;
+//   int8_t tmp_id = 0;
+//   int8_t isserviced = 0;
 
-  // Ring Door bell manually
-  if(!obj["doorbell"].isNull()){ 
-    // const char* scenectr = obj[D_JSON_NAME];
-    // if((tmp_id=GetSceneIDbyName(scenectr))>=0){
-    //   scene.name_id = tmp_id;
-    //   animation.mode = ANIMATION_MODE_SCENE_ID;
-    //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName());
-    //   Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName());
-    //   isserviced++;
-    // }else{
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
-    // }
-  }
+//   // Ring Door bell manually
+//   if(!obj["doorbell"].isNull()){ 
+//     // const char* scenectr = obj[D_JSON_NAME];
+//     // if((tmp_id=GetSceneIDbyName(scenectr))>=0){
+//     //   scene.name_id = tmp_id;
+//     //   animation.mode = ANIMATION_MODE_SCENE_ID;
+//     //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName());
+//     //   Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName());
+//     //   isserviced++;
+//     // }else{
+//     //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+//     // }
+//   }
   
-  return isserviced;
+//   return isserviced;
 
-} // END FUNCTION
+// } // END FUNCTION
 
 
-int8_t mDoorBell::parsesub_Settings(){
+// int8_t mDoorBell::parsesub_Settings(){
 
-  // #ifdef JSONDOCUMENT_STATIC
-  //   StaticJsonDocument<800> doc;
-  // #else
-  //   DynamicJsonDocument doc(600);
-  // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-  //   return 0;
-  // }
-  // JsonObject obj = doc.as<JsonObject>();
+//   // #ifdef JSONDOCUMENT_STATIC
+//   //   StaticJsonDocument<800> doc;
+//   // #else
+//   //   DynamicJsonDocument doc(600);
+//   // #endif
+//   // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   // if(error){
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+//   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+//   //   return 0;
+//   // }
+//   // JsonObject obj = doc.as<JsonObject>();
 
-  int8_t tmp_id = 0;
-  int8_t isserviced = 0;
+//   int8_t tmp_id = 0;
+//   int8_t isserviced = 0;
 
-  // if(!obj["doorbell_output_binding"].isNull()){ 
-  //   settings.fEnable_Switch_Relay_Binding = obj["doorbell_output_binding"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DOORBELL D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"doorbell_output_binding",settings.fEnable_Switch_Relay_Binding);
-  //   isserviced++;
-  // }
+//   // if(!obj["doorbell_output_binding"].isNull()){ 
+//   //   settings.fEnable_Switch_Relay_Binding = obj["doorbell_output_binding"];
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DOORBELL D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"doorbell_output_binding",settings.fEnable_Switch_Relay_Binding);
+//   //   isserviced++;
+//   // }
   
-  return isserviced;
+//   return isserviced;
 
-} // END FUNCTION
+// } // END FUNCTION
 
 
 
@@ -363,12 +363,9 @@ int8_t mDoorBell::Tasker(uint8_t function){
 
 
 
-    case FUNC_MQTT_SENDER:
-      SubTasker_MQTTSender();
-    break;
-    case FUNC_JSON_COMMAND:
-      parse_JSONCommand();
-    break;  
+    // case FUNC_JSON_COMMAND:
+    //   parse_JSONCommand();
+    // break;  
 
 
 
@@ -378,20 +375,49 @@ int8_t mDoorBell::Tasker(uint8_t function){
     break;
 
     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
-      char relay_handle_ctr[20]; 
-      BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-      // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
-        memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
-        sprintf(relay_handle_ctr,"doorbell_ring");//,relay_id);
-        BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
-                                      100, 
-                                      "doorbell_ring",
-                                      relay_handle_ctr, 
-                                      DEVICE_CONTROL_BUTTON_ON_ID, 
-                                      "Ring Doorbell", ""
-                                    );
-      // }
-      BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
+      // char relay_handle_ctr[20]; 
+      // BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
+      // // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
+      //   memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
+      //   sprintf(relay_handle_ctr,"doorbell_ring");//,relay_id);
+      //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
+      //                                 100, 
+      //                                 "buttonh " "doorbell_ring",
+      //                                 relay_handle_ctr, 
+      //                                 DEVICE_CONTROL_BUTTON_ON_ID, 
+      //                                 "Ring Doorbell", ""
+      //                               );
+      // // }
+      // BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
+ char relay_handle_ctr[10]; 
+  char buffer[30];
+  uint8_t relays_connected = 1;
+      
+  // JsonBuilderI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
+  // // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
+  //   memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
+  //   sprintf(relay_handle_ctr,"doorbell_ring");
+    
+  //       JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
+  //                                     100, 
+  //                                     "buttonh " "doorbell_ring",
+  //                                     relay_handle_ctr, 
+  //                                     DEVICE_CONTROL_BUTTON_ON_ID, 
+  //                                     "Ring Doorbell", ""
+  //                                   );
+  //     // }
+
+  //   // JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
+  //   //                               100/relays_connected, 
+  //   //                               "buttonh ""reltog",
+  //   //                               relay_handle_ctr, 
+  //   //                               DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
+  //   //                               "TEST", ""
+  //   //                             );
+  // // }
+  // JsonBuilderI->Append_P("%s",PSTR("</tr>{t2}"));
+
+
     }break;
 
     // case FUNC_WEB_ADD_MAIN_BUTTON:{
@@ -441,12 +467,77 @@ int8_t mDoorBell::Tasker(uint8_t function){
     break;
     #endif //USE_WEBSERVER
 
+    case FUNC_MQTT_SENDER:
+      SubTasker_MQTTSender();
+    break;
 
 
   }
 
 
 } // END function
+
+int8_t mDoorBell::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      parsesub_TopicCheck_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
+
+
+int8_t mDoorBell::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+  // Check if instruction is for me
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/doorbell")>=0){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
+      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      parsesub_TopicCheck_JSONCommand(obj);
+      return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+void mDoorBell::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+
+  AddLog_P(LOG_LEVEL_INFO,PSTR("mDoorBell::parsesub_TopicCheck_JSONCommand"));
+
+  uint8_t name_num=-1,state=-1;    
+
+
+  // Ring Door bell manually
+  if(!obj["doorbell"].isNull()){ 
+
+
+    RingDoorBellSet(1,2);
+
+
+
+//     // const char* scenectr = obj[D_JSON_NAME];
+//     // if((tmp_id=GetSceneIDbyName(scenectr))>=0){
+//     //   scene.name_id = tmp_id;
+//     //   animation.mode = ANIMATION_MODE_SCENE_ID;
+//     //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName());
+//     //   Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName());
+//     //   isserviced++;
+//     // }else{
+//     //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+//     // }
+  }
+
+
+
+}
+
+
+
+
+
 
 
 void mDoorBell::WebAppend_Root_Status_Table_Draw(){

@@ -32,6 +32,14 @@ class mGarageLights{
     //   struct datetime offtime;
     // }light_status[2];
 
+    
+int8_t Tasker(uint8_t function, JsonObjectConst obj);
+int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+
+
+
+
     enum LIGHT_ID{LIGHT_DRIVEWAY_ID=0,LIGHT_GARDEN_ID,LIGHT_ALL_ID};
     enum STATE_ID{OFF=0,ON=1,TIMED_ON=2};
     void SetLight(uint8_t light_id, uint8_t state);

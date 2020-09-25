@@ -48,6 +48,12 @@ class mBlinds{
     void SetBlindPosition(uint8_t percentage);
     void SendMQTT_Event(String key, String pair);
 
+    
+int8_t Tasker(uint8_t function, JsonObjectConst obj);
+int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+
+
     // Used as complete maximums
     #define MOTOR_ADC_MAX_BOUNDARY_LOWER 2500
     #define MOTOR_ADC_MAX_BOUNDARY_UPPER 3500

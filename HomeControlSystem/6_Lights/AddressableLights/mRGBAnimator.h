@@ -864,15 +864,20 @@ uint8_t pixels_to_update_as_percentage_map[PIXELS_UPDATE_PERCENTAGE_LENGTH_ID] =
     void SetAnimationBrightness(uint8_t brt);
 
 
+
+
     enum SCENE_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
     struct SCENES_CONFIG{
       uint8_t name_id;
 
-      uint8_t colour_255[6];
 
+
+// Scenes will be stored in LIGHT_INTERFACE as array
+      uint8_t colour_255[6];
 
       HsbColor colour;
       uint8_t colourW; // save white channel always, even when not needed for struct size compatability
+      // float colourW_f;
       
       
       

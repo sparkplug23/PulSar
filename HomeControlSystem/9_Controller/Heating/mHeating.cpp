@@ -100,11 +100,14 @@ void mHeating::init(void){
   dummy_t.minute = 30;
   dummy_t.second = 0;
 
+#ifdef USE_SCHEDULED_HEATING
+
   for(int device_id=0;device_id<4;device_id++){
     // program_temps[device_id].schedule.ontime = &dummy_t;
     // program_temps[device_id].schedule.offtime = &dummy_t;
     // program_temps[device_id].schedule.untilontime = &dummy_t;
   }
+  #endif
 
   failsafes.tSaved = millis();
 
@@ -1020,53 +1023,6 @@ void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 
 
 
-
-
-
-void mHeating::setfForceMQTTUpdate(uint8_t state){fForceMQTTUpdate = state;}
-uint8_t mHeating::getfForceMQTTUpdate(void){return fForceMQTTUpdate;}
-uint8_t mHeating::getclearfForceMQTTUpdate(void){if(fForceMQTTUpdate == true){fForceMQTTUpdate = false;return true;};return false;}
-
-float mHeating::GetWaterTempsRawByID(uint8_t device_id){
-
-  for(int search_id=0;search_id<8;search_id++){
-    if(pCONT_msdb18->sensor[search_id].id == device_id){
-      return pCONT_msdb18->sensor[search_id].reading.val;
-    }
-  }
-
-  // switch(device_id){
-  //   case ID_DB18_DS: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.downstairs_pipe; break;
-  //   case ID_DB18_US: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.upstairs_pipe; break;
-  //   case ID_DB18_WB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.boiler_pipe; break;
-  //   case ID_DB18_IH: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.immersion_heater; break;
-  //   case ID_DB18_TB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_bottom; break;
-  //   case ID_DB18_TM: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_middle; break;
-  //   case ID_DB18_TT: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_top; break;
-  //   case ID_DB18_TO: default: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_out; break;
-  // }
-
-  // return pCONT->mhs->watertemps.ptr->raw.val;
-
-}
-
-
-
-
-float mHeating::GetClimateTempsRawByID(uint8_t sensor_id){
-
-  switch(sensor_id){
-    case 0: return pCONT->msdht->sensor[DHT_DOWNSTAIRS_ID].instant.temperature;
-    case 1: return pCONT->msdht->sensor[DHT_UPSTAIRS_ID].instant.temperature;
-  }
-
-}
-
-
-
-
-
-
 #ifdef USE_MQTT
 
 // schedule.run_time:hh:mm
@@ -1229,7 +1185,8 @@ uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
   char buffer[50];
   JsonBuilderI->Start();
   for(int device_id=0;device_id<4;device_id++){
-    JsonBuilderI->Level_Start_P(GetSensorNameByID(device_id, buffer));   
+    JsonBuilderI->Level_Start_P(
+      pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
       JsonBuilderI->Add_FP(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  heating_device_relays[device_id].ontime.hour,  heating_device_relays[device_id].ontime.minute,  heating_device_relays[device_id].ontime.second);
       JsonBuilderI->Add_FP(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), heating_device_relays[device_id].offtime.hour, heating_device_relays[device_id].offtime.minute, heating_device_relays[device_id].offtime.second);
       JsonBuilderI->Add(D_JSON_TIME_ON,   heating_device_relays[device_id].time_minutes_on);
@@ -1548,29 +1505,6 @@ uint8_t mHeating::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-// for use with google cast voice, allowing different messages and its volume to be set by device on node red
-void mHeating::SendFormattedVoiceMessage(uint8_t device, uint8_t state){
-
-  // StaticJsonDocument<200> doc;
-  // JsonObject obj = doc.to<JsonObject>();
-
-  // obj[D_JSON_DEVICE] = GetDeviceNamebyIDCtr(device);
-
-  // if(program_timers[device].time_minutes_on>0){
-  //   obj[D_JSON_ONOFF] = D_ON;
-  //   obj[D_JSON_TIME_ON] = program_timers[device].time_minutes_on;
-  // }else if(program_timers[device].time_minutes_on<0){
-  //   obj[D_JSON_ONOFF] = D_OFF;
-  // }
-
-  // data_buffer2.payload.len = measureJson(obj)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
-
-  // pCONT->mqt->pubsub->publish("heating/voice/alert/encoded",data_buffer2.payload.ctr);
-  // pCONT->mso->MessagePrintln("heating/voice/alert/encoded sent");
-
-}
-
 
 #endif
 
@@ -1886,15 +1820,6 @@ const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer){
   }
   return buffer;
 }
-// const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer){
-  // if(buffer == nullptr){ return 0;}
-//   return 
-//     (device_id == DEVICE_DS ? D_HEATING_SENSOR_NAME_SHORT_DS_LOWER :
-//     (device_id == DEVICE_US ? D_HEATING_SENSOR_NAME_SHORT_US_LOWER :
-//     (device_id == DEVICE_WB ? D_HEATING_SENSOR_NAME_SHORT_WB_LOWER :
-//     (device_id == DEVICE_IH ? D_HEATING_SENSOR_NAME_SHORT_IH_LOWER :
-//     D_UNKNOWN))));
-// }
 const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer){
   if(buffer == nullptr){ return 0;}
   switch(device_id){ 
@@ -1925,69 +1850,8 @@ int8_t mHeating::GetDeviceIDbyName(const char* c){
   }
 }
 
-//PHASE INTO HEATINGSENSOR CLASS
 
-int8_t mHeating::GetWaterSensorIDbyShortName(const char* c){
-  if(c=='\0'){
-    return -1;
-  }
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_DS)||strstr(c,D_HEATING_SENSOR_NAME_LONG_DS)){
-    return ID_DB18_DS;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_US)||strstr(c,D_HEATING_SENSOR_NAME_LONG_US)){
-    return ID_DB18_US;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_WB)||strstr(c,D_HEATING_SENSOR_NAME_LONG_WB)){
-    return ID_DB18_WB;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_IH)||strstr(c,D_HEATING_SENSOR_NAME_LONG_IH)){
-    return ID_DB18_IH;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_TT)||strstr(c,D_HEATING_SENSOR_NAME_LONG_TT)){
-    return ID_DB18_TT;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_TM)||strstr(c,D_HEATING_SENSOR_NAME_LONG_TM)){
-    return ID_DB18_TM;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_TB)||strstr(c,D_HEATING_SENSOR_NAME_LONG_TB)){
-    return ID_DB18_TB;
-  }else 
-  if(strstr(c,D_HEATING_SENSOR_NAME_SHORT_TO)||strstr(c,D_HEATING_SENSOR_NAME_LONG_TO)){
-    return ID_DB18_TO;
-  }else{
-    return -1;
-  }
-}
-const char* mHeating::GetSensorNameLongbyID(uint8_t sensor_id, char* buffer){
-  if(buffer == nullptr){ return 0;}
-  switch(sensor_id){
-    case ID_DB18_DS: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_DS_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_DS_CTR)); break;
-    case ID_DB18_US: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_US_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_US_CTR)); break;
-    case ID_DB18_WB: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_WB_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_WB_CTR)); break;
-    case ID_DB18_IH: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_IH_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_IH_CTR)); break;
-    case ID_DB18_TT: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_TT_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_TT_CTR)); break;
-    case ID_DB18_TM: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_TM_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_TM_CTR)); break;
-    case ID_DB18_TB: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_TB_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_TB_CTR)); break;
-    case ID_DB18_TO: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_TO_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_TO_CTR)); break;
-  }
-  return buffer;
-}
-
-const char* mHeating::GetSensorNameByID(uint8_t sensor_id, char* buffer){
-  if(buffer == nullptr){ return 0;}
-    switch(sensor_id){
-    case ID_DB18_DS: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_DS_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_DS_CTR)); break;
-    case ID_DB18_US: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_US_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_US_CTR)); break;
-    case ID_DB18_WB: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_WB_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_WB_CTR)); break;
-    case ID_DB18_IH: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_IH_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_IH_CTR)); break;
-    case ID_DB18_TT: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_TT_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_TT_CTR)); break;
-    case ID_DB18_TM: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_TM_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_TM_CTR)); break;
-    case ID_DB18_TB: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_TB_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_TB_CTR)); break;
-    case ID_DB18_TO: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_TO_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_TO_CTR)); break;
-  }
-  return buffer;
-}
-
+#ifdef USE_SCHEDULED_HEATING
 int8_t mHeating::GetScheduleModeIDByCtr(const char* c){
   if(c=='\0'){ return -1; }
   // if(strstr(c,D_JSON_SCHEDULED_OFF)){ return SCHEDULED_OFF; }
@@ -2006,6 +1870,7 @@ const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer){
   }
   return buffer;
 }
+#endif //USE_SCHEDULED_HEATING
 
 const char* mHeating::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer){
   if(buffer == nullptr){ return 0;}
@@ -2090,10 +1955,10 @@ int8_t mHeating::Tasker(uint8_t function){
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_HANDLERS_RESET:
-      // Reset to the initial parameters
+      MQTTHandler_Init(); // Reset to the initial parameters
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      //MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter

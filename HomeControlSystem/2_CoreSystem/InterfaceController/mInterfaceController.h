@@ -174,7 +174,7 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   // #define pCONT_nex pCONT->mnext
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
-  #include "Displays/Nextion/mNextionPanel.h"
+  #include "8_Displays/Nextion/mNextionPanel.h"
   class mNextionPanel;
   #define D_MODULE_DISPLAYS_NEXTION_ID 31
   DEFINE_PROGMEM_CTR(PM_MODULE_DISPLAYS_NEXTION_CTR)              "mNextionPanel";
@@ -647,7 +647,7 @@ class mInterfaceController{
   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-   mNextionPanel* mod = nullptr;
+   mNextionPanel* mnext = nullptr;
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
     mMoistureSensor *mois = nullptr;

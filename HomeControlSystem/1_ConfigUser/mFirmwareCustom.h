@@ -29,7 +29,7 @@
 // #define DEVICE_RGBCRYSTAL1
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-// #define DEVICE_RGBMICRO2 //projector
+//#define DEVICE_RGBMICRO2 //projector
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT
@@ -49,12 +49,12 @@
 // #define DEVICE_OILFURNACE
 // #define DEVICE_GAZEBCON
 // #define DEVICE_HEATING
-// #define DEVICE_BEDROOMSENSOR
-//#define DEVICE_KITCHENPANEL
-// #define DEVICE_LANDINGPANEL
+#define DEVICE_KITCHENPANEL
+//#define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 // #define DEVICE_BLACKDOORBELL
 // #define DEVICE_BEDROOM_CEILINGFAN
+// #define DEVICE_FLOORFAN1
 // #define DEVICE_DESKFAN
 
 /**
@@ -66,6 +66,7 @@
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
 **/
 // #define DEVICE_ATTICSENSOR
+// #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_UTILITYSENSOR
 // #define DEVICE_LIVINGROOMSENSOR
@@ -77,13 +78,13 @@
 **/
 // #define DEVICE_SONOFFTESTER
 // #define DEVICE_DRESSERLIGHT
+// #define DEVICE_BEDSIDE_LAMP1
 // #define DEVICE_CANDLEWARMER
 // #define DEVICE_EXTRACTORFAN
 // #define DEVICE_EXTENTION1
 // #define DEVICE_SILVERLAMP1
 // #define DEVICE_SILVERLAMP2
 // #define DEVICE_HALLWAYMIRROR
-// #define DEVICE_BEDSIDE_LAMP1
 
 /**
  *  SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- 
@@ -952,9 +953,9 @@
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
     "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[180,100,10]" 
+          "\"" D_JSON_HSB    "\":[180,100,0]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "10"
+    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -1098,11 +1099,13 @@
   #define DEVICENAME_FRIENDLY_CTR   "Landing Control Panel"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+  #define SETTINGS_HOLDER 1
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  // #define USE_MODULE_SENSORS_BME
   
   #define USE_MODULE_SENSORS_MOTION
 
@@ -1112,9 +1115,13 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
-        #ifdef USE_MODULE_SENSORS_MOTION
-        "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-        #endif
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1135,22 +1142,20 @@
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
-
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Landing"
   
-  // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -1202,11 +1207,39 @@
 
 
 #ifdef DEVICE_KITCHENPANEL
-  #define DEVICENAME_CTR          "nextionkitchen"
+  #define DEVICENAME_CTR          "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Panel"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
   #define USE_MODULE_DISPLAYS_NEXTION
   #define NEXTION_DEFAULT_PAGE_NUMBER 6
+
+  #define USE_BUILD_TYPE_DISPLAY
+
+  // #define ENABLE_BUG_TRACING
+  
+  // #define USE_SOFTWARE_SERIAL_DEBUG
+  // #define DISABLE_SERIAL_LOGGING //temp measure
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"3\":\""  D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," 
+      "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
+      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
 #endif
+
+
 #ifdef DEVICE_BEDROOMSENSOR
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
@@ -1216,9 +1249,9 @@
   
   // #define ENABLE_BUG_TRACING
 
-  // #define USE_MODULE_SENSORS_DOOR
+  #define USE_MODULE_SENSORS_DOOR
   // #define USE_SENSOR_DOOR_LOCK
-  // #define DOORALERT_PAYLOAD_CTR "bedroom"
+  #define DOORALERT_PAYLOAD_CTR "bedroom"
 
   // #define USE_MODULE_SENSORS_DS18B20
 
@@ -1282,7 +1315,7 @@
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
     "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
-    "\"" D_JSON_BRIGHTNESS     "\":10"
+    "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
@@ -1349,7 +1382,7 @@
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
-      "\"RX\":\"" D_GPIO_FUNCTION_PIR_3_INV_CTR     "\""  //END
+      "\"D3\":\"" D_GPIO_FUNCTION_PIR_3_INV_CTR     "\""  //END
       #endif
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1397,8 +1430,8 @@
       #ifdef USE_MODULE_DRIVERS_HBRIDGE
       "\"D1\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_IA_CTR   "\","
       "\"D6\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_OA_CTR   "\","
-      "\"D5\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR   "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR   "\","
+      // "\"D5\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR   "\","
+      // "\"D7\":\"" D_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_ANALOG_MEASURE
       "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_POSITION_CTR "\","
@@ -1409,24 +1442,7 @@
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE)                                                  //parsed via lighting interface
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
-    "\"" D_JSON_STRIP_SIZE     "\":12,"
-    "\"" D_JSON_STRIP_REPEAT   "\":5,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
-    "\"" D_JSON_BRIGHTNESS     "\":10"
-  "}";
-  #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
-  #define STRIP_SIZE_MAX                      12   
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "LED1"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "LED2"
+  #define D_DEVICE_FRIENDLY_NAME_LONG "Blinds"
 
   // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
@@ -1434,17 +1450,9 @@
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-    //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-    //       "\"" "bedroom" "\""
-    //     "],"
-    //     "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
-    //       "\"" "bedroomDOOR" "\""
-    //     "]"
-    // "}"
+      "\"" D_MODULE_DRIVERS_HBRIDGE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_FRIENDLY_NAME_LONG "\""
+      "]"
   "}";
 
 
@@ -1748,7 +1756,6 @@
   // #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_MODULE_LIGHTS_PWM
   
-  
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1776,15 +1783,11 @@
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  #define SETTINGS_HOLDER 1
      
-  #define USE_MODULE_SENSORS_MOTION
-  #define MOTIONALERT_PAYLOAD1_CTR "utility"
-
-  // #define USE_MODULE_SENSORS_DOOR
-  // #define DOORALERT_PAYLOAD_CTR   "backdoor"
-
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1799,9 +1802,9 @@
       #ifdef USE_MODULE_SENSORS_MOTION
       DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_PIR_1_INV_CTR)
       #endif
-      // #ifdef USE_MODULE_SENSORS_DOOR
-      // DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_DETECT_CTR)
-      // #endif
+      #ifdef USE_MODULE_SENSORS_DOOR
+      DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_DETECT_CTR)
+      #endif
       DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LEDLNK_CTR)
     "},"
     DEFINE_END_SVALUE("BASE",D_MODULE_NAME_USERMODULE_CTR)
@@ -1816,15 +1819,15 @@
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 #endif
@@ -2061,9 +2064,41 @@
 
 #endif
 
+
 #ifdef DEVICE_BEDROOM_CEILINGFAN
   #define DEVICENAME_CTR          "bedroom_ceilingfan"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Ceiling Fan"
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+  
+  // #define ENABLE_BUG_TRACING
+
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+
+  #define USE_SONOFF_IFAN
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 4
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"BASE\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
+  "}";
+
+  // Need to create default names for all class in GetDeviceName
+
+#endif
+
+
+#ifdef DEVICE_FLOORFAN1
+  #define DEVICENAME_CTR          "floorfan1"
+  #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 1"
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
@@ -2541,8 +2576,8 @@
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway Light"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden Light"
   // #define SET_POWERONSTATE_AS_ON
 
   // Drivers, Sensors and lights?

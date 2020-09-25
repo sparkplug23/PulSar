@@ -35,7 +35,8 @@ class mDoorSensor{
       uint32_t tDetectTimeforDebounce;
       char friendly_name_ctr[15];
       char detected_rtc_ctr[9];
-
+      uint32_t tDetectTime;
+      uint32_t tEndedTime;
     }door_detect;
 
     #ifdef DOORLOCK_SWITCH_PIN
@@ -61,6 +62,11 @@ class mDoorSensor{
       uint32_t tSavedSendDoorSensor;
       uint8_t fUpdateSendDoorSensor;
     //#endif
+    
+
+void WebAppend_Root_Status_Table_Draw();
+void WebAppend_Root_Status_Table_Data();
+  
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

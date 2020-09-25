@@ -1432,6 +1432,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
 
 
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_RX_CTR)==0){  return GPIO_NEXTION_RX_ID; }
+
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
 
 
@@ -1707,7 +1710,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 //   GPIO_HRE_DATA
 // #endif
 // #ifdef USE_MODULE_SENSORS_DOOR
-//   GPIO_DOOR_OPEN_ID,
+    case GPIO_DOOR_OPEN_ID: return PM_GPIO_FUNCTION_DOOR_OPEN_CTR;
 // #endif
 // #ifdef USE_SENSOR_DOOR_LOCK
 //   GPIO_DOOR_LOCK_ID,

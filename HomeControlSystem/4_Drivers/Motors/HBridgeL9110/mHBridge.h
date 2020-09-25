@@ -48,11 +48,18 @@ class mHBridge{
     int8_t Tasker(uint8_t function);
     void init(void);
 
+
+//A-1A,A-1B
+//B-1A,B-1B
+
+
     void pre_init(void);
-    int8_t pin_IA = -1;
-    int8_t pin_IB = -1;
-    int8_t pin_OA = -1;
-    int8_t pin_OB = -1;
+    int8_t pin_A_IA = -1;
+    int8_t pin_A_IB = -1;
+    int8_t pin_B_IA = -1;
+    int8_t pin_B_IB = -1;
+    // int8_t pin_OA = -1;
+    // int8_t pin_OB = -1;
     int8_t pin_AnalogSense = -1;
     int8_t init_success = false;
 

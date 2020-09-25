@@ -224,6 +224,10 @@ changeBri(0); //default off
 } //light_init
 
 
+// Colours etc will be made or called using a func_update_light_Values
+// Another func will push those values to the output, which each hardware class will handle
+
+
 // // Used for timed on or off events
 int8_t mInterfaceLight::Tasker(uint8_t function){
   

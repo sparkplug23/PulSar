@@ -31,8 +31,8 @@ class mSensorsBME{
     struct SETTINGS{
       uint8_t fEnableSensor= false;
       uint8_t fSensorCount= 0; 
-      uint8_t fSensorFound = 0; // new flag for all devices "0=notworking" //Phase out
       uint8_t sModuleStatus =0;// MODULE_STATUS_NOTSET;
+      uint16_t measure_rate_ms = 1000;
     }settings;
     
     void AddToHardwareMessage();
