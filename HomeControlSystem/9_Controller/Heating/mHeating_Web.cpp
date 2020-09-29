@@ -70,7 +70,7 @@ void mHeating::WebAppend_Root_Draw_Table(){
       BufferWriterI->Append_P(PSTR("{t}"));
     for(int ii=0;ii<4;ii++){
       BufferWriterI->Append_P(PSTR("<tr>"));
-        BufferWriterI->Append_P(PSTR("<td>%s Status</td>"), GetDeviceNameLongbyIDCtr(ii,buffer));
+        BufferWriterI->Append_P(PSTR("<td>%s Status</td>"), GetDeviceNameLongbyIDCtr(ii,buffer, sizeof(buffer)));
         BufferWriterI->Append_P(PSTR("<td><span class='%s'>%s</span></td>"),"prog_status_tab","?");   
       BufferWriterI->Append_P(PSTR("</tr>"));
     }    
@@ -295,7 +295,7 @@ char buffer[30];
       break;
     }
    
-    BufferWriterI->Append_P("{t}<tr>%s Programs</tr>{t2}",GetDeviceNameLongbyIDCtr(device_id, buffer));
+    BufferWriterI->Append_P("{t}<tr>%s Programs</tr>{t2}",GetDeviceNameLongbyIDCtr(device_id, buffer, sizeof(buffer)));
 
     // Timers
     BufferWriterI->Append_P("{t}<tr>");

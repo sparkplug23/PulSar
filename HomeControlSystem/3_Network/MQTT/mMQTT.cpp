@@ -873,12 +873,19 @@ int8_t mMQTT::Tasker(uint8_t function){
           //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_MQTT "pubsub->loop()"));
           // New data
           if(data_buffer2.fWaiting){data_buffer2.fWaiting = false;
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer2.topic.len,  data_buffer2.topic.ctr);
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer2.payload.len,data_buffer2.payload.ctr);
+            // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer2.topic.len,  data_buffer2.topic.ctr);
+            // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer2.payload.len,data_buffer2.payload.ctr);
             
+            Serial.println("DeserializationError BEFORE"); Serial.flush();
 
             StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
             DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+
+            Serial.println("DeserializationError AFTER"); Serial.flush();
+
+            if(error){
+              AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError")); Serial.flush();
+            }
 
             // Check for json formatted messages
             if(!error){

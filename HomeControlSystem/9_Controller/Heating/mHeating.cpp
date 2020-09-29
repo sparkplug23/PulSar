@@ -380,7 +380,7 @@ void mHeating::FunctionHandler_Programs_Timers(void){
   uint8_t log_level = LOG_LEVEL_INFO;//LOG_LEVEL_DEBUG;
   for(int device_id=0;device_id<DEVICE_ID_TOTAL;device_id++){
     if(program_timers[device_id].time_minutes_on){log_level = LOG_LEVEL_INFO;}
-    AddLog_P(log_level, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "\"%s\" %d min"),GetDeviceNamebyIDCtr(device_id, buffer),program_timers[device_id].time_minutes_on);
+    AddLog_P(log_level, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "\"%s\" %d min"),GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),program_timers[device_id].time_minutes_on);
   }
   
   uint8_t state_tmp = 0;
@@ -445,7 +445,7 @@ void mHeating::FunctionHandler_Programs_Timers(void){
 
 void mHeating::FunctionHandler_Programs_Temps(void){
 
-/* DISABLE UNTIL REWRITE
+// DISABLE UNTIL REWRITE
   // Update times running 1/minute
   if(mSupport::TimeReached(&tSavedHeatingTemps2,60000)){
     SubTask_HeatingTemps_Ticker();
@@ -462,7 +462,7 @@ void mHeating::FunctionHandler_Programs_Temps(void){
     SubTask_HeatingTemps_StatusMessage();
   }
 
-*/
+
   // Use 1 ROC to deactive rapid heating decreases indicating using water
   /*if(CheckIfROCExceedsNegativeLimit(device_id)){
 
@@ -1067,7 +1067,7 @@ uint8_t mHeating::ConstructJSON_ProgramTimers(uint8_t json_level){
             "\"" D_JSON_TIME_ON    "\":%d"
           "}"
         ), 
-        GetDeviceNamebyIDCtr(ii,buffer),
+        GetDeviceNamebyIDCtr(ii,buffer, sizeof(buffer)),
         program_timers[ii].time_minutes_on==-1?0:program_timers[ii].time_minutes_on
       );
     } //END if
@@ -1085,66 +1085,56 @@ uint8_t mHeating::ConstructJSON_ProgramTimers(uint8_t json_level){
 //Update: when times changed (set forced), or 60s elapsed
 //new method, diving up Constructs if they are too big, return if all data was sent
 uint8_t mHeating::ConstructJSON_ProgramTemps(uint8_t json_level){ //MQQTSendTimers
+// return false;
+  char buffer[50];
+  JsonBuilderI->Start();
+  for(int device=0;device<4;device++){
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
-  // StaticJsonDocument<1800> doc;
-  // JsonObject rootobj = doc.to<JsonObject>();
+    // if((program_temps[device].mqtt.fForceUpdate)||(json_level==JSON_LEVEL_IFCHANGED)){program_temps[device].mqtt.fForceUpdate = false;
 
-  // char buffer[50];
+      JsonBuilderI->Level_Start_P(GetDeviceNamebyIDCtr(device, buffer, sizeof(buffer))); 
+        JsonBuilderI->Level_Start_P(D_JSON_TEMPERATURE);   
+          JsonBuilderI->Add(D_JSON_CURRENT, program_temps[device].temp.current);
+          JsonBuilderI->Add(D_JSON_DESIRED, program_temps[device].temp.desired);
+          JsonBuilderI->Add(D_JSON_ERROR, program_temps[device].temp.error);
+        JsonBuilderI->Level_End();
+        JsonBuilderI->Level_Start_P(D_JSON_STATUS);   
+          JsonBuilderI->Add(D_JSON_MODE, GetTempModeByDeviceIDCtr(device, buffer, sizeof(buffer)));
+          JsonBuilderI->Add(D_JSON_DATA, program_temps[device].status.data.ctr);
+        JsonBuilderI->Level_End();
 
-  // for(int device=0;device<4;device++){
+    //       JsonObject maintainingobj = deviceobj.createNestedObject(D_JSON_TIME_MAINTAINING);
+    //         maintainingobj[D_JSON_ONTIME] = program_temps[device].time_maintaining.on;
+    //         maintainingobj[D_JSON_LIMIT] = program_temps[device].time_maintaining.limit;
 
-  //   //if((program_temps[device].mqtt.fForceUpdate)||(fSendSingleFunctionData)){program_temps[device].mqtt.fForceUpdate = false;
+    //       JsonObject timerunningobj = deviceobj.createNestedObject(D_JSON_TIME_RUNNING);
+    //         timerunningobj[D_JSON_ONTIME] = program_temps[device].time_maintaining.on;
+    //         timerunningobj[D_JSON_LIMIT] = program_temps[device].time_maintaining.limit;
 
-  //     JsonObject deviceobj = rootobj.createNestedObject(GetDeviceNamebyIDCtr(device, buffer));
+    //       #ifdef USE_HEATING_TEMPS
+    //       // JsonObject time_to_heatobj = deviceobj.createNestedObject(D_JSON_TIME_TO_HEAT);
+    //       //   time_to_heatobj[D_JSON_SECONDS] = GetHeatingProfilesTimeSeconds(device,program_temps[device].temp.current,program_temps[device].temp.desired);
+    //       //   time_to_heatobj[D_JSON_MINUTES] = GetHeatingProfilesTimeMinutes(device,program_temps[device].temp.current,program_temps[device].temp.desired);
+    //     #endif
 
-  //       JsonObject tempobj = deviceobj.createNestedObject(D_JSON_TEMP);
-  //         tempobj[D_JSON_CURRENT] = mSupport::roundfloat(program_temps[device].temp.current,1);
-  //         tempobj[D_JSON_DESIRED] = mSupport::roundfloat(program_temps[device].temp.desired,1);
-  //         tempobj[D_JSON_ERROR] = mSupport::roundfloat(program_temps[device].temp.error,1);
+    //     JsonObject scheduleobj = deviceobj.createNestedObject(D_JSON_SCHEDULE);
+    //       scheduleobj[D_JSON_MODE] = GetScheduleNameCtrbyID(program_temps[device].schedule.mode_sch);
+    //       scheduleobj[D_JSON_ISRUNNING] = program_temps[device].schedule.fRunning;
 
-  //       JsonObject statusobj = deviceobj.createNestedObject(D_JSON_STATUS);
-  //         // statusobj[D_JSON_MODE] = GetTempModeByDeviceIDCtr(device);
-  //         statusobj[D_JSON_DATA] = program_temps[device].status.data.ctr;
+    //       // char time_ctr[20]; memset(time_ctr,'\0',sizeof(time_ctr));
+    //       // sprintf(time_ctr, "%02d:%02d:%02d",(int)program_temps[device].schedule.ontime.hour,(int)program_temps[device].schedule.ontime.minute,(int)program_temps[device].schedule.ontime.second);
+    //       // scheduleobj[D_JSON_ONTIME] = time_ctr;//pCONT->mt->getFormattedTime();
+          
+    //       // char time_ctr2[20];
+    //       // memset(time_ctr2,'\0',sizeof(time_ctr2));
+    //       // sprintf(time_ctr2, "%02d:%02d:%02d",(int)program_temps[device].schedule.offtime.hour,(int)program_temps[device].schedule.offtime.minute,(int)program_temps[device].schedule.offtime.second);
+    //       // scheduleobj[D_JSON_OFFTIME] = time_ctr2;//pCONT->mt->getFormattedTime();
 
-  //       JsonObject maintainingobj = deviceobj.createNestedObject(D_JSON_TIME_MAINTAINING);
-  //         maintainingobj[D_JSON_ONTIME] = program_temps[device].time_maintaining.on;
-  //         maintainingobj[D_JSON_LIMIT] = program_temps[device].time_maintaining.limit;
-
-  //       JsonObject timerunningobj = deviceobj.createNestedObject(D_JSON_TIME_RUNNING);
-  //         timerunningobj[D_JSON_ONTIME] = program_temps[device].time_maintaining.on;
-  //         timerunningobj[D_JSON_LIMIT] = program_temps[device].time_maintaining.limit;
-
-  //       #ifdef USE_HEATING_TEMPS
-  //       // JsonObject time_to_heatobj = deviceobj.createNestedObject(D_JSON_TIME_TO_HEAT);
-  //       //   time_to_heatobj[D_JSON_SECONDS] = GetHeatingProfilesTimeSeconds(device,program_temps[device].temp.current,program_temps[device].temp.desired);
-  //       //   time_to_heatobj[D_JSON_MINUTES] = GetHeatingProfilesTimeMinutes(device,program_temps[device].temp.current,program_temps[device].temp.desired);
-  //     #endif
-
-  //     JsonObject scheduleobj = deviceobj.createNestedObject(D_JSON_SCHEDULE);
-  //       scheduleobj[D_JSON_MODE] = GetScheduleNameCtrbyID(program_temps[device].schedule.mode_sch);
-  //       scheduleobj[D_JSON_ISRUNNING] = program_temps[device].schedule.fRunning;
-
-  //       // char time_ctr[20]; memset(time_ctr,'\0',sizeof(time_ctr));
-  //       // sprintf(time_ctr, "%02d:%02d:%02d",(int)program_temps[device].schedule.ontime.hour,(int)program_temps[device].schedule.ontime.minute,(int)program_temps[device].schedule.ontime.second);
-  //       // scheduleobj[D_JSON_ONTIME] = time_ctr;//pCONT->mt->getFormattedTime();
-        
-  //       // char time_ctr2[20];
-  //       // memset(time_ctr2,'\0',sizeof(time_ctr2));
-  //       // sprintf(time_ctr2, "%02d:%02d:%02d",(int)program_temps[device].schedule.offtime.hour,(int)program_temps[device].schedule.offtime.minute,(int)program_temps[device].schedule.offtime.second);
-  //       // scheduleobj[D_JSON_OFFTIME] = time_ctr2;//pCONT->mt->getFormattedTime();
-
-  //     //data_buffer2.payload.json_pairs++;
-  //   //}
-  // }
-  
-  
-
-  // data_buffer2.payload.len = measureJson(rootobj)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
-  // return data_buffer2.payload.len>3?1:0;
-
-return 0;
+    //     //data_buffer2.payload.json_pairs++;
+    JsonBuilderI->Level_End();
+    // }
+  }
+  return JsonBuilderI->End();
 
 }
 
@@ -1810,23 +1800,23 @@ const char* mHeating::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char
 }
 
 
-const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer){
+const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
   if(buffer == nullptr){ return 0;}
   switch(device_id){ 
-    case DEVICE_DS_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_DS_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_DS_CTR)); break;
-    case DEVICE_US_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_US_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_US_CTR)); break;
-    case DEVICE_WB_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_WB_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_WB_CTR)); break;
-    case DEVICE_IH_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_SHORT_IH_CTR, sizeof(PM_HEATING_SENSOR_NAME_SHORT_IH_CTR)); break;
+    case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_DS_CTR); break;
+    case DEVICE_US_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_US_CTR); break;
+    case DEVICE_WB_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_WB_CTR); break;
+    case DEVICE_IH_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_IH_CTR); break;
   }
   return buffer;
 }
-const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer){
+const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
   if(buffer == nullptr){ return 0;}
   switch(device_id){ 
-    case DEVICE_DS_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_DS_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_DS_CTR)); break;
-    case DEVICE_US_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_US_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_US_CTR)); break;
-    case DEVICE_WB_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_WB_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_WB_CTR)); break;
-    case DEVICE_IH_ID: memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_IH_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_IH_CTR)); break;
+    case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_DS_CTR); break;
+    case DEVICE_US_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_US_CTR); break;
+    case DEVICE_WB_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_WB_CTR); break;
+    case DEVICE_IH_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_IH_CTR); break;
   }
   return buffer;
 }
@@ -1872,11 +1862,13 @@ const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer){
 }
 #endif //USE_SCHEDULED_HEATING
 
-const char* mHeating::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer){
+const char* mHeating::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
   if(buffer == nullptr){ return 0;}
-  return 0;
-  // return 
-  //   (program_temps[device].status.mode == TEMP_MODE_OFF ? "TEMP_MODE_OFF\0" :
+  switch(program_temps[device].status.mode){
+    default:               snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH); break;
+    case TEMP_MODE_OFF_ID: snprintf_P(buffer, buflen, PM_TEMP_MODE_OFF_CTR); break;
+  }
+  return buffer;
   //   (program_temps[device].status.mode == TEMP_MODE_HEATING ? "TEMP_MODE_HEATING\0" :
   //   (program_temps[device].status.mode == TEMP_MODE_MAINTAINING ? "TEMP_MODE_MAINTAINING\0" :
   //   (program_temps[device].status.mode == TEMP_MODE_SCHEDULED ? "TEMP_MODE_SCHEDULED\0" :
@@ -2439,7 +2431,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
   mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_program_temps;

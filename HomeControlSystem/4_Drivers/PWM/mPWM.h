@@ -48,6 +48,7 @@ int8_t pin = -1;
 
 struct SETTINGS{
   uint8_t fEnableModule = false;
+  uint8_t fShowManualSlider = false;
 }settings;
 
 // uint8_t GetLightState(void);

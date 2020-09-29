@@ -1,8 +1,10 @@
-#include "mSonoffIFan.h"
+#include "mPWMFan.h"
 
 //  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
 
-#ifdef USE_SONOFF_IFAN
+#ifdef USE_MODULE_CUSTOM_PWM_FAN
+
+//Uses 433mhz radios, relays, buttons
 
 /*********************************************************************************************\
   Sonoff iFan02 and iFan03
@@ -10,47 +12,53 @@
 
 /*********************************************************************************************/
 
-// bool mSonoffIFan::IsModuleIfan(void)
+// bool mPWMFan::IsModuleIfan(void)
 // {
 //   return ((SONOFF_IFAN02 == my_module_type) || (SONOFF_IFAN03 == my_module_type));
 // }
 
-// uint8_t mSonoffIFan::MaxFanspeed(void)
+// uint8_t mPWMFan::MaxFanspeed(void)
 // {
 //   return MAX_FAN_SPEED;
 // }
 
-uint8_t mSonoffIFan::GetFanspeed(void)
+uint8_t mPWMFan::GetFanspeed(void)
 {
-  if (ifan_fanspeed_timer) {
-    return ifan_fanspeed_goal;                     // Do not show sequence fanspeed
-  } else {
-    /* Fanspeed is controlled by relay 2, 3 and 4 as in Sonoff 4CH.
-      000x = 0
-      001x = 1
-      011x = 2
-      101x = 3 (ifan02) or 100x = 3 (ifan03)
-    */
-    uint8_t fanspeed = (uint8_t)( pCONT_set->power &0xF) >> 1;
-    if (fanspeed) { fanspeed = (fanspeed >> 1) +1; }  // 0, 1, 2, 3
-    return fanspeed;
-  }
+  // if (ifan_fanspeed_timer) {
+  //   return ifan_fanspeed_goal;                     // Do not show sequence fanspeed
+  // } else {
+  //   /* Fanspeed is controlled by relay 2, 3 and 4 as in Sonoff 4CH.
+  //     000x = 0
+  //     001x = 1
+  //     011x = 2
+  //     101x = 3 (ifan02) or 100x = 3 (ifan03)
+  //   */
+  //   uint8_t fanspeed = (uint8_t)( pCONT_set->power &0xF) >> 1;
+  //   if (fanspeed) { fanspeed = (fanspeed >> 1) +1; }  // 0, 1, 2, 3
+  //   return fanspeed;
+  // }
+
+  // Map and round it?
+  return set_fan_speed;
+
 }
+
+
 
 
 // Probably to be handled using "light_interface?"
-uint8_t mSonoffIFan::GetLightState(void)
+uint8_t mPWMFan::GetLightState(void)
 {
-  return pCONT_mry->GetRelay(0);
+  // return pCONT_mry->GetRelay(0);
 }
-void mSonoffIFan::SetLightState(uint8_t state)
+void mPWMFan::SetLightState(uint8_t state)
 {
-  pCONT_mry->SetRelay(state);
+  // pCONT_mry->SetRelay(state);
 }
 
 /*********************************************************************************************/
 
-void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
+void mPWMFan::SetFanspeed(uint8_t fanspeed, bool sequence)
 {
   ifan_fanspeed_timer = 0;                         // Stop any sequence
   ifan_fanspeed_goal = fanspeed;
@@ -71,19 +79,19 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
   //       }
   //     }
   //   }
-    fans = kIFan03Speed[fanspeed];
+  //   fans = kIFan03Speed[fanspeed];
+  // // }
+  // for (uint32_t i = 2; i < 5; i++) {
+  //   uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
+  //   pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
+  //   fans >>= 1;
   // }
-  for (uint32_t i = 2; i < 5; i++) {
-    uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
-    pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
-    fans >>= 1;
-  }
 
 }
 
 /*********************************************************************************************/
 
-// void mSonoffIFan::SonoffIfanReceived(void)
+// void mPWMFan::SonoffIfanReceived(void)
 // {
 //   char svalue[32];
 
@@ -129,7 +137,7 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
 //   }
 // }
 
-// bool mSonoffIFan::SonoffIfanSerialInput(void)
+// bool mPWMFan::SonoffIfanSerialInput(void)
 // {
 //   if (SONOFF_IFAN03 == my_module_type) {
 //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -169,7 +177,7 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
  * Commands
 \*********************************************************************************************/
 
-void mSonoffIFan::CmndFanspeed(void)
+void mPWMFan::CmndFanspeed(void)
 {
   // if (XdrvMailbox.data_len > 0) {
   //   if ('-' == XdrvMailbox.data[0]) {
@@ -182,28 +190,31 @@ void mSonoffIFan::CmndFanspeed(void)
   //   }
   // }
   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < MAX_FAN_SPEED)) {
-  //   SonoffIFanSetFanspeed(XdrvMailbox.payload, true);
+  //   SetFanspeed(XdrvMailbox.payload, true);
   // }
   // ResponseCmndNumber(GetFanspeed());
 }
 
 /*********************************************************************************************/
 
-void mSonoffIFan::init(void)
+void mPWMFan::init(void)
 {
   // if (SONOFF_IFAN03 == my_module_type) {
   //   SetSerial(9600, TS_SERIAL_8N1);
   // }
   // return false;  // Continue init chain
+
+  analogWrite(pin, pwm_range_min);
+
 }
 
-void mSonoffIFan::SonoffIfanUpdate(void)
+void mPWMFan::SonoffIfanUpdate(void)
 {
   // if (SONOFF_IFAN03 == my_module_type) {
     if (ifan_fanspeed_timer) {
       ifan_fanspeed_timer--;
       if (!ifan_fanspeed_timer) {
-        SonoffIFanSetFanspeed(ifan_fanspeed_goal, false);
+        SetFanspeed(ifan_fanspeed_goal, false);
       }
     }
   // }
@@ -216,13 +227,23 @@ void mSonoffIFan::SonoffIfanUpdate(void)
 }
 
 
-int8_t mSonoffIFan::Tasker(uint8_t function){
+void mPWMFan::pre_init(){
+  
+  if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
+    pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
+    pinMode(pin, OUTPUT);
+    settings.fEnableModule = true;
+  }
+
+}
+
+int8_t mPWMFan::Tasker(uint8_t function){
 
   /************
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    // pre_init();
+    pre_init();
   }else
   if(function == FUNC_INIT){
     init();
@@ -275,7 +296,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
 } // END Tasker
 
 
-int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
+int8_t mPWMFan::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
       parsesub_Commands(obj);
@@ -285,48 +306,81 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
     break;
   }
 }
-int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mPWMFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/ifan")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_Commands(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+  // if(mSupport::CheckSetTopicIsModulebyID())
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pwmfan")>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parsesub_Commands(obj);
+    return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
-int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
+int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
 
   int8_t isserviced = 0;
 
-  if(obj.containsKey(D_JSON_LIGHTPOWER)){
-    int light = obj[D_JSON_LIGHTPOWER];
-    if(light == 2){
-      SetLightState(!GetLightState());
-    }else{
-      SetLightState(light);      
-    }
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
-    Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
-    isserviced++;  
-  }
+  // if(obj.containsKey(D_JSON_LIGHTPOWER)){
+  //   int light = obj[D_JSON_LIGHTPOWER];
+  //   if(light == 2){
+  //     SetLightState(!GetLightState());
+  //   }else{
+  //     SetLightState(light);      
+  //   }
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
+  //   isserviced++;  
+  // }
 
-
+  // FanSpeed = 0,1,2,3 ie off,low,med,high
   if(obj.containsKey(D_JSON_FANSPEED)){
     int speed = obj[D_JSON_FANSPEED];
     if(speed>3){
       Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
       speed=0; //default off
     }      
-    SonoffIFanSetFanspeed(speed, false);
-    AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+
+    int pwm_val = map(speed, 0, 3, pwm_range_min, pwm_range_max);
+
+    set_fan_speed  = speed;
+    set_fan_pwm = pwm_val;
+
+    analogWrite(pin,pwm_val);
+
+
+    // SetFanspeed(speed, false);
+    // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-    Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
+    // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
     isserviced++;
   }
+
+  //FanPWM = 0-1023
+  if(obj.containsKey(D_JSON_FANPWM)){
+    int pwm_val = obj[D_JSON_FANPWM];
+    // if(speed>3){
+    //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANPWM,D_PARSING_NOMATCH);
+    //   speed=0; //default off
+    // }      
+    
+    set_fan_speed  = map(pwm_val, pwm_range_min, pwm_range_max, 0, 3);;
+    set_fan_pwm = pwm_val;
+
+    analogWrite(pin,set_fan_pwm);
+
+    // SetFanspeed(speed, false);
+    AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
+    Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANPWM,set_fan_pwm);
+    isserviced++;
+  }
+
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
   
   return isserviced;
 
@@ -335,40 +389,53 @@ int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
 
 
 
-int8_t mSonoffIFan::Tasker_Web(uint8_t function){
+int8_t mPWMFan::Tasker_Web(uint8_t function){
+
+
 
   switch(function){
     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
 
       // create command list
       char dlist[100]; memset(dlist,0,sizeof(dlist));
-      pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
 
-      uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
+      
+      // Slider (put tester flag around this as optional)
+      
+      BufferWriterI->Append_P(PSTR("<div> Fan PWM </div>"));
+      BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+        WEB_HANDLE_PWM_SLIDER,               // c - Unique HTML id
+        PSTR("#ddd"), PSTR("#eee"),   // Black to White
+        4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+        0, 1023,  // Range 0/1 to 100%
+        set_fan_pwm,
+        WEB_HANDLE_PWM_SLIDER "tobechanged"
+      );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+
+
+      uint8_t button_values[4] = {0, 1, 2, 3}; //toggle, fanspeed0-3
           
-      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Ceiling Fan Controls"),"");
+      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Fan Speed"),"");
 
       char button_value_ctr[10];
       char button_key_ctr[50];
       char button_text_ctr[30];
 
       BufferWriterI->Append_P(PSTR("{t}<tr>"));
-        for(uint8_t button_id=0;button_id<5;button_id++){
+        for(uint8_t button_id=0;button_id<4;button_id++){
           BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
-                                    100/(button_id==0?1:4),
-                                    button_id==0?"4":"", 
+                                    100/4,
+                                    "", 
                                     "buttonh",
                                     pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
                                     pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
-                                    pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
+                                    pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls_pwm),
                                     ""
-                                );
-          // LightPower button gets its own row
-          if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
+                                  );
         }
       BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
@@ -379,7 +446,7 @@ int8_t mSonoffIFan::Tasker_Web(uint8_t function){
 
 
 
-uint8_t mSonoffIFan::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mPWMFan::ConstructJSON_Settings(uint8_t json_method){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -387,11 +454,12 @@ uint8_t mSonoffIFan::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mSonoffIFan::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mPWMFan::ConstructJSON_Sensor(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
+    // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
     JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
+    JsonBuilderI->Add_P(D_JSON_FANPWM, set_fan_pwm);  
   JsonBuilderI->End();
 
 }
@@ -404,7 +472,7 @@ uint8_t mSonoffIFan::ConstructJSON_Sensor(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mSonoffIFan::MQTTHandler_Init(){
+void mPWMFan::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -414,7 +482,7 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
-  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mPWMFan::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -424,7 +492,7 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
-  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mPWMFan::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -434,12 +502,12 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
-  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mPWMFan::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 
-void mSonoffIFan::MQTTHandler_Set_fSendNow(){
+void mPWMFan::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.fSendNow = true;
   mqtthandler_sensor_ifchanged.fSendNow = true;
@@ -448,7 +516,7 @@ void mSonoffIFan::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mSonoffIFan::MQTTHandler_Set_TelePeriod(){
+void mPWMFan::MQTTHandler_Set_TelePeriod(){
 
   // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -456,7 +524,7 @@ void mSonoffIFan::MQTTHandler_Set_TelePeriod(){
 } //end "MQTTHandler_Set_TelePeriod"
 
 
-void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mPWMFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t flag_handle_all = false, handler_found = false;
   if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
@@ -472,7 +540,7 @@ void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     } // switch
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_DRIVERS_IFAN_ID,mqtthandler_ptr); }
+    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_PWM_FAN_ID,mqtthandler_ptr); }
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

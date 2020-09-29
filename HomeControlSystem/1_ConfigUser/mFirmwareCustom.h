@@ -27,10 +27,11 @@
 // #define DEVICE_RGBROOF 
 // #define DEVICE_RGBDELL
 // #define DEVICE_RGBCRYSTAL1
+// #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-//#define DEVICE_RGBMICRO2 //projector
-//#define DEVICE_RGBMICRO3 //bedroom string esp01
+#define DEVICE_RGBMICRO2 //projector
+// #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT
 // #define DEVICE_RGBDESK
@@ -47,9 +48,9 @@
 // #define DEVICE_BEDROOMBLINDS
 // #define DEVICE_DOORBELLWALLCHIME
 // #define DEVICE_OILFURNACE
-// #define DEVICE_GAZEBCON
+//#define DEVICE_GAZEBCON
 // #define DEVICE_HEATING
-#define DEVICE_KITCHENPANEL
+// #define DEVICE_KITCHENPANEL
 //#define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 // #define DEVICE_BLACKDOORBELL
@@ -342,7 +343,7 @@
   #define DEVICENAME_FRIENDLY_CTR "Projector Micro Lights"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
+  #define SETTINGS_HOLDER 1
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -366,7 +367,7 @@
     "\"" D_JSON_STRIP_SIZE     "\":50,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
     "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
     // "\"" D_JSON_SCENE_COLOUR   "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
     "\"" D_JSON_BRIGHTNESS     "\":50"
@@ -436,13 +437,13 @@
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
       #ifdef USE_MODULE_LIGHTS_INTERFACE
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\","
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       #endif  
-      "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
-      "\"D4\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      // "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
+      // "\"D4\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -456,10 +457,10 @@
     "\"" D_JSON_STRIP_SIZE     "\":50,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":1,\"" D_JSON_RATE "\":2,\"" D_JSON_ORDER "\":\"Random\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
     "\"" D_JSON_MODE           "\":\"" D_JSON_SCENE "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{\"" D_JSON_HSB "\":[120,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
 #endif
 
@@ -650,6 +651,42 @@
     "}";
 
 #endif
+
+#ifdef DEVICE_RGBCRYSTAL2
+  #define DEVICENAME_CTR            "rgbcrystal2"
+  #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Round 2"
+  
+  #define FORCE_TEMPLATE_LOADING
+  //#define SETTINGS_HOLDER 10
+   
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"NAME\":\"" DEVICENAME_CTR "\","
+      "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"GPIOC\":{"
+        "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+      "},"
+      "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+    "{"
+      "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
+      "\"" D_JSON_STRIP_SIZE     "\":50," //really 150
+      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+      "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
+      "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_BRIGHTNESS     "\":14"
+    "}";
+
+#endif
 #ifdef DEVICE_RGBSHELF
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
@@ -734,7 +771,7 @@
   // #define USE_SENSOR_DOOR_LOCK
   // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  // #define USE_SONOFF_IFAN
+  // #define USE_MODULE_CUSTOM_SONOFF_IFAN
   // #define USE_MODULE_DRIVERS_IRTRANSCEIVER
 
   // #define USE_MODULE_SENSORS_DS18B20
@@ -879,7 +916,7 @@
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
-  //#define ENABLE_BUG_TRACING
+  // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
   #define FORCE_DEVICENAME_CLEAR_ON_BOOT
@@ -1214,7 +1251,7 @@
   #define SETTINGS_HOLDER 2
 
   #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 6
+  #define NEXTION_DEFAULT_PAGE_NUMBER 4 //heating page
 
   #define USE_BUILD_TYPE_DISPLAY
 
@@ -1878,7 +1915,7 @@
   #define DEVICENAME_CTR          "gazebcon"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
  
-  #define STRIP_REPEAT_OUTPUT_MAX                        500
+  #define STRIP_REPEAT_OUTPUT_MAX       500
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -1924,10 +1961,15 @@
   #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Water"
   #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Relay4"
 
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Gazebo"
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
@@ -1939,7 +1981,6 @@
       "]"
     "}"
   "}";
-
 
 #endif
 
@@ -2077,7 +2118,7 @@
   #define USE_MODULE_SENSORS_BUTTONS
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
 
-  #define USE_SONOFF_IFAN
+  #define USE_MODULE_CUSTOM_SONOFF_IFAN
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 4
@@ -2108,7 +2149,7 @@
   #define USE_MODULE_SENSORS_BUTTONS
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
 
-  #define USE_SONOFF_IFAN
+  #define USE_MODULE_CUSTOM_SONOFF_IFAN
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 4
@@ -2765,6 +2806,7 @@
   #define SETTINGS_HOLDER 1
   
   #define USE_MODULE_DRIVERS_PWM
+  #define USE_MODULE_CUSTOM_PWM_FAN
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 

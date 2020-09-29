@@ -57,7 +57,7 @@ class mDoorSensor{
 
     //#ifdef MQTT
       void SubTasker_MQTTSender();
-      void MQTTSendDoorSensorIfChanged();
+      // void MQTTSendDoorSensorIfChanged();
       void MQQTSendDoorUpdate();
       uint32_t tSavedSendDoorSensor;
       uint8_t fUpdateSendDoorSensor;

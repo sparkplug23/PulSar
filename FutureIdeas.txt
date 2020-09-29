@@ -452,3 +452,6 @@ Fix multiple repos "git push -f origin master"
 
 #Idea 104
     Make a class wrap that allows checks on a sensor value, setting limits and variable/static tolerances that can be checked for validity. 
+
+//Idea 105
+    Add into system settings page, and use the settings struct for each module and include tick boxes or number boxes to configure

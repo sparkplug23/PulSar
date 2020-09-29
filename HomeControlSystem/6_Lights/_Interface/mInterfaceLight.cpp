@@ -506,6 +506,41 @@ int8_t mInterfaceLight::parsesub_ModeManual(JsonObjectConst obj){
 
 
 
+float mInterfaceLight::HueN2F(uint16_t hue){
+  return hue/360.0f;
+}
+// S at100toFloat
+float mInterfaceLight::SatN2F(uint8_t sat){
+  return sat/100.0f;
+}
+// B rt100toFloat
+float mInterfaceLight::BrtN2F(uint8_t brt){
+  return brt/100.0f;
+}
+
+//remove 360/100 and make HueF2N and HueN2F
+// H ueFloatto360
+uint16_t mInterfaceLight::HueF2N(float hue){
+  return round(hue*360.0f);
+}
+// S atFloatto100
+uint8_t mInterfaceLight::SatF2N(float sat){
+  return round(sat*100.0f);
+}
+// B rtFloatto100
+uint8_t mInterfaceLight::BrtF2N(float brt){
+  return round(brt*100.0f);
+}
+
+
+
+// Generate random colour between two hsb colours
+HsbColor mInterfaceLight::GetRandomColour(HsbColor colour1, HsbColor colour2){
+  int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
+  int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
+  int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
+  return HsbColor(HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
+}
 
 
 

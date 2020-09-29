@@ -48,11 +48,11 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
     "#800", "#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800",  // Hue colors
     2,               // sl2 - Unique range HTML id - Used as source for Saturation end color
     1, 359,          // Range valid Hue
-    HueF2N(scene.colour.H),
+    pCONT_iLight->HueF2N(scene.colour.H),
     "scn_hue", 0
   );         // h0 - Value id
 
-  uint8_t dcolor = changeUIntScale(BrtF2N(scene.colour.B), 0, 100, 0, 255);
+  uint8_t dcolor = changeUIntScale(pCONT_iLight->BrtF2N(scene.colour.B), 0, 100, 0, 255);
   snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   //   uint8_t red, green, blue;
   //   LightHsToRgb(hue, 255, &red, &green, &blue);
@@ -64,7 +64,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
     scolor, buffer,   // Brightness to max current color
     3,               // sl3 - Unique range HTML id - Not used
     0, 100,          // Range 0 to 100%
-    changeUIntScale(SatF2N(scene.colour.S), 0, 255, 0, 100),
+    changeUIntScale(pCONT_iLight->SatF2N(scene.colour.S), 0, 255, 0, 100),
     "scn_sat", 0
   );         // n0 - Value id
 
@@ -90,7 +90,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
   );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
   #endif
 
-  BufferWriterI->Append_P(PSTR("<div> Brightness <span class='hsb_brt_ttl'>%d %%</span></div>"), BrtF2N(animation.brightness));
+  BufferWriterI->Append_P(PSTR("<div> Brightness <span class='hsb_brt_ttl'>%d %%</span></div>"), pCONT_iLight->BrtF2N(animation.brightness));
   BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
     "brt",               // c - Unique HTML id
     PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
@@ -279,7 +279,7 @@ return; }
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colourW = BrtN2F(arg_value);
+    scene.colourW = pCONT_iLight->BrtN2F(arg_value);
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "scene.colourW=%d"),arg_value);
 
@@ -298,7 +298,7 @@ return; }
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
     uint16_t hue = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colour.H = HueN2F(hue);
+    scene.colour.H = pCONT_iLight->HueN2F(hue);
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
     animation.mode_id = ANIMATION_MODE_SCENE_ID;
@@ -310,7 +310,7 @@ return; }
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colour.S = SatN2F(arg_value);
+    scene.colour.S = pCONT_iLight->SatN2F(arg_value);
     animation.mode_id = ANIMATION_MODE_SCENE_ID;
     scene.name_id = SCENES_COLOURSCENE_ID;
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
@@ -324,7 +324,7 @@ return; }
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    animation.brightness = BrtN2F(arg_value);
+    animation.brightness = pCONT_iLight->BrtN2F(arg_value);
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
     SetRefreshLEDs();

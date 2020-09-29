@@ -101,7 +101,7 @@ Command_SetPage(settings.page);
 
 
 
-int8_t mNextionPanel::Tasker(uint8_t task){
+int8_t mNextionPanel::Tasker(uint8_t function){
 
   /************
    * INIT SECTION * 
@@ -113,7 +113,7 @@ int8_t mNextionPanel::Tasker(uint8_t task){
     init();
   }
 
-  switch(task){
+  switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
@@ -177,6 +177,7 @@ int8_t mNextionPanel::Tasker(uint8_t task){
 
 
 int8_t mNextionPanel::Tasker(uint8_t function, JsonObjectConst obj){
+  AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
       parsesub_TopicCheck_JSONCommand(obj);
@@ -239,30 +240,25 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
 
 
-  // if(strstr(data_buffer2.topic.ctr,"/commands")){ // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
+  // if(strstr(data_buffer2.topic.ctr,"/commands")){ 
+  // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/commands",sizeof("/commands")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
     #endif
     isserviced += parsesub_Commands(obj);
   }else 
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/scene",sizeof("/scene")-1)>=0){
+   // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "scene"));    
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
     #endif
-    //isserviced += parsesub_ModeScene(obj);
+    isserviced += parsesub_SetMulti(obj);
   }else{
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
   }  
   
   
-  // else
-  // // Group commands (many)
-  // if(strstr(data_buffer2.topic.ctr,"/set_multi")){  // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED " set_multi"));     
-  //   nextionParseJson(data_buffer2.payload.ctr);
-  // }else
-  // // Set element 
   // if(strstr(data_buffer2.topic.ctr,"/set_single")){
     
   //   StaticJsonDocument<300> doc;
@@ -322,6 +318,8 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 }
 
 
+
+
 int8_t mNextionPanel::parsesub_Commands(JsonObjectConst obj){
 
   char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
@@ -375,301 +373,20 @@ int8_t mNextionPanel::parsesub_Commands(JsonObjectConst obj){
 }
 
 
-void mNextionPanel::HandleUpgradeFirmwareStart(void)
-{
-  // Upload via URL
 
+int8_t mNextionPanel::parsesub_SetMulti(JsonObjectConst obj){
 
-  // //if (!HttpCheckPriviledgedAccess()) { return; }
+  AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
 
-  // char command[sizeof(mcl->mset->Settings.ota_url) + 10];  // OtaUrl
-
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
-  // mcl->mwif->WifiConfigCounter();
-
-  // char otaurl[sizeof(mcl->mset->Settings.ota_url)];
-  // WebGetArg(request,"o", otaurl, sizeof(otaurl));
-  // if (strlen(otaurl)) {
-  //   snprintf_P(command, sizeof(command), PSTR(D_JSON_OTAURL " %s"), otaurl);
-  //   ExecuteWebCommand(command, SRC_WEBGUI);
-  // }
-
-  // WSStartAppend_P(PM_INFORMATION);
-  // WSBufferAppend_P(HTTP_SCRIPT_RELOAD_OTA);
-  // WSContentSendStyle();
-  // WSBufferAppend_P(PSTR("<div style='text-align:center;'><b>" D_UPGRADE_STARTED " ...</b></div>"));
-  // WSBufferAppend_P(HTTP_MSG_RSTRT);
-  // WSContentSpaceButton(BUTTON_MAIN);
-  // WSContentStop();
-
-  // snprintf_P(command, sizeof(command), PSTR(D_JSON_UPGRADE " 1"));
-  // ExecuteWebCommand(command, SRC_WEBGUI);
-
+  if(!obj["commands"].isNull()){
+    JsonArrayConst array = obj["commands"];
+    for(JsonVariantConst val : array) {
+      nextionSendCmd(val.as<const char*>());
+    }
+  }
+  
 }
 
-void mNextionPanel::HandleUploadDone(void)
-{
-//   if (!HttpCheckPriviledgedAccess()) { return; }
-
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPLOAD_DONE));
-
-  char error[100];
-
-  // mcl->mwif->WifiConfigCounter();
-  // mcl->mset->restart_flag = 0;
-  //MqttRetryCounter(0);
-
-//   mcl->mwif->WSStartAppend_P(PM_INFORMATION);
-//   if (!upload_error) {
-//     mcl->mwif->WSBufferAppend_P(HTTP_SCRIPT_RELOAD_OTA);  // Refesh main web ui after OTA upgrade
-//   }
-//   mcl->mwif->WSContentSendStyle();
-//   mcl->mwif->WSBufferAppend_P(PSTR("<div style='text-align:center;'><b>" D_UPLOAD " <font color='#"));
-//   if (upload_error) {
-// //    WSBufferAppend_P(PSTR(COLOR_TEXT_WARNING "'>" D_FAILED "</font></b><br/><br/>"));
-//     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_FAILED "</font></b><br/><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_WARNING));
-// #ifdef USE_RF_FLASH
-//     if (upload_error < 14) {
-// #else
-//     if (upload_error < 10) {
-// #endif
-//       mcl->msup->GetTextIndexed_P(error, sizeof(error), upload_error -1, kUploadErrors);
-//     } else {
-//       snprintf_P(error, sizeof(error), PSTR(D_UPLOAD_ERROR_CODE " %d"), upload_error);
-//     }
-//     mcl->mwif->WSBufferAppend_P(error);
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
-//     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system_phaseout.stop_flash_rotate;
-//   } else {
-//     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_SUCCESS));
-//     mcl->mwif->WSBufferAppend_P(HTTP_MSG_RSTRT);
-//     mcl->mwif->ShowWebSource(SRC_WEBGUI);
-//     mcl->mset->restart_flag = 2;  // Always restart to re-enable disabled features during update
-//   }
-//   //SettingsBufferFree();
-//   mcl->mwif->WSBufferAppend_P(PSTR("</div><br/>"));
-//   mcl->mwif->WSContentSpaceButton(BUTTON_MAIN);
-//   mcl->mwif->WSContentStop();
-
-}
-
-void mNextionPanel::HandleUploadLoop(void)
-{
-
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), "HandleUploadLoop");
-
-//   // Based on ESP8266HTTPUpdateServer.cpp uses ESP8266WebServer Parsing.cpp and Cores Updater.cpp (Update)
-//   bool _serialoutput = (LOG_LEVEL_DEBUG <= mcl->mset->seriallog_level);
-
-//   if (HTTP_USER == webserver_state) { return; }
-//   if (upload_error) {
-    
-//     #ifdef ESP8266
-//       if (UPL_TASMOTA == upload_file_type) { Update.end(); }
-//     #endif
-//     return;
-//   }
-
-//   HTTPUpload& upload = pWebServer->upload();
-
-//   if (UPLOAD_FILE_START == upload.status) {
-//     mcl->mset->restart_flag = 60;
-//     if (0 == upload.filename.c_str()[0]) {
-//       upload_error = 1;  // No file selected
-//       return;
-//     }
-//     //SettingsSave(1);  // Free flash for upload
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
-//     if (UPL_SETTINGS == upload_file_type) {
-//       if (!mcl->mset->SettingsBufferAlloc()) {
-//         upload_error = 2;  // Not enough space
-//         return;
-//       }
-//     } else {
-//      // MqttRetryCounter(60);
-// #ifdef USE_EMULATION
-//       //UdpDisconnect();
-// #endif  // USE_EMULATION
-// #ifdef USE_ARILUX_RF
-//       //AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
-// #endif  // USE_ARILUX_RF
-//       //if (mcl->mset->Settings.flag_system_phaseout.mqtt_enabled) MqttDisconnect();
-//       uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-      
-//           #ifdef ESP8266
-//       if (!Update.begin(maxSketchSpace)) {         //start with max available size
-
-// //        if (_serialoutput) Update.printError(Serial);
-// //        if (Update.getError() == UPDATE_ERROR_BOOTSTRAP) {
-// //          if (_serialoutput) Serial.println("Device still in UART update mode, perform powercycle");
-// //        }
-
-//         upload_error = 2;  // Not enough space
-//         return;
-//       }
-//       #endif
-//     }
-//     upload_progress_dot_count = 0;
-//   } else if (!upload_error && (UPLOAD_FILE_WRITE == upload.status)) {
-//     if (0 == upload.totalSize) {
-//       if (UPL_SETTINGS == upload_file_type) {
-//         config_block_count = 0;
-//       }
-//       else {
-// // #ifdef USE_RF_FLASH
-// //         if ((SONOFF_BRIDGE == mcl->mset->my_module_type) && (upload.buf[0] == ':')) {  // Check if this is a RF bridge FW file
-// //           Update.end();              // End esp8266 update session
-// //           upload_file_type = UPL_EFM8BB1;
-// //
-// //           upload_error = SnfBrUpdateInit();
-// //           if (upload_error != 0) { return; }
-// //         } else
-// // #endif  // USE_RF_FLASH
-//         {
-//           if (upload.buf[0] != 0xE9) {
-//             upload_error = 3;  // Magic byte is not 0xE9
-//             return;
-//           }
-//           uint32_t bin_flash_size = ESP.magicFlashChipSize((upload.buf[3] & 0xf0) >> 4);
-//           #ifdef ESP8266
-//           if(bin_flash_size > ESP.getFlashChipRealSize()) {
-//             upload_error = 4;  // Program flash size is larger than real flash size
-//             return;
-//           }
-//           #endif
-// //          upload.buf[2] = 3;  // Force DOUT - ESP8285
-//         }
-//       }
-//     }
-//     if (UPL_SETTINGS == upload_file_type) {
-//       if (!upload_error) {
-//         if (upload.currentSize > (sizeof(mcl->mset->Settings) - (config_block_count * HTTP_UPLOAD_BUFLEN))) {
-//           upload_error = 9;  // File too large
-//           return;
-//         }
-//         memcpy(mcl->mset->settings_buffer + (config_block_count * HTTP_UPLOAD_BUFLEN), upload.buf, upload.currentSize);
-//         config_block_count++;
-//       }
-//     }
-// // #ifdef USE_RF_FLASH
-// //     else if (UPL_EFM8BB1 == upload_file_type) {
-// //       if (efm8bb1_update != nullptr) {    // We have carry over data since last write, i. e. a start but not an end
-// //         ssize_t result = rf_glue_remnant_with_new_data_and_write(efm8bb1_update, upload.buf, upload.currentSize);
-// //         free(efm8bb1_update);
-// //         efm8bb1_update = nullptr;
-// //         if (result != 0) {
-// //           upload_error = abs(result);  // 2 = Not enough space, 8 = File invalid
-// //           return;
-// //         }
-// //       }
-// //       ssize_t result = rf_search_and_write(upload.buf, upload.currentSize);
-// //       if (result < 0) {
-// //         upload_error = abs(result);
-// //         return;
-// //       } else if (result > 0) {
-// //         if ((size_t)result > upload.currentSize) {
-// //           // Offset is larger than the buffer supplied, this should not happen
-// //           upload_error = 9;  // File too large - Failed to decode RF firmware
-// //           return;
-// //         }
-// //         // A remnant has been detected, allocate data for it plus a null termination byte
-// //         size_t remnant_sz = upload.currentSize - result;
-// //         efm8bb1_update = (uint8_t *) malloc(remnant_sz + 1);
-// //         if (efm8bb1_update == nullptr) {
-// //           upload_error = 2;  // Not enough space - Unable to allocate memory to store new RF firmware
-// //           return;
-// //         }
-// //         memcpy(efm8bb1_update, upload.buf + result, remnant_sz);
-// //         // Add null termination at the end of of remnant buffer
-// //         efm8bb1_update[remnant_sz] = '\0';
-// //       }
-// //     }
-// // #endif  // USE_RF_FLASH
-//     else {  // firmware
-    
-//           #ifdef ESP8266
-//       if (!upload_error && (Update.write(upload.buf, upload.currentSize) != upload.currentSize)) {
-//         upload_error = 5;  // Upload buffer miscompare
-//         return;
-//       }
-//       #endif
-//       if (_serialoutput) {
-//         Serial.printf(".");
-//         upload_progress_dot_count++;
-//         if (!(upload_progress_dot_count % 80)) { Serial.println(); }
-//       }
-//     }
-//   } else if(!upload_error && (UPLOAD_FILE_END == upload.status)) {
-//     if (_serialoutput && (upload_progress_dot_count % 80)) {
-//       Serial.println();
-//     }
-//     if (UPL_SETTINGS == upload_file_type) {
-//       if (config_xor_on_set) {
-//         for (uint16_t i = 2; i < sizeof(mcl->mset->Settings); i++) {
-//           mcl->mset->settings_buffer[i] ^= (config_xor_on_set +i);
-//         }
-//       }
-//       bool valid_settings = false;
-//       unsigned long buffer_version = mcl->mset->settings_buffer[11] << 24 | mcl->mset->settings_buffer[10] << 16 | mcl->mset->settings_buffer[9] << 8 | mcl->mset->settings_buffer[8];
-//       if (buffer_version > 0x06000000) {
-//         uint16_t buffer_size = mcl->mset->settings_buffer[3] << 8 | mcl->mset->settings_buffer[2];
-//         uint16_t buffer_crc = mcl->mset->settings_buffer[15] << 8 | mcl->mset->settings_buffer[14];
-//         uint16_t crc = 0;
-//         for (uint16_t i = 0; i < buffer_size; i++) {
-//           if ((i < 14) || (i > 15)) { crc += mcl->mset->settings_buffer[i]*(i+1); }  // Skip crc
-//         }
-//         valid_settings = (buffer_crc == crc);
-//       } else {
-//         valid_settings = (mcl->mset->settings_buffer[0] == CONFIG_FILE_SIGN);
-//       }
-//       if (valid_settings) {
-//         //SystemSettings_DefaultBody();
-//         memcpy((char*)&mcl->mset->Settings +16, mcl->mset->settings_buffer +16, sizeof(mcl->mset->Settings) -16);
-//         mcl->mset->Settings.version = buffer_version;  // Restore version and auto upgrade after restart
-//         //SettingsBufferFree();
-//       } else {
-//         upload_error = 8;  // File invalid
-//         return;
-//       }
-//     }
-// #ifdef USE_RF_FLASH
-//     else if (UPL_EFM8BB1 == upload_file_type) {
-//       // RF FW flash done
-//       upload_file_type = UPL_TASMOTA;
-//     }
-// #endif  // USE_RF_FLASH
-//     else {
-//           #ifdef ESP8266
-//       if (!Update.end(true)) { // true to set the size to the current progress
-//         if (_serialoutput) { Update.printError(Serial); }
-//         upload_error = 6;  // Upload failed. Enable logging 3
-//         return;
-//       }
-//       #endif
-//     }
-//     if (!upload_error) {
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_SUCCESSFUL " %u bytes. " D_RESTARTING), upload.totalSize);
-//     }
-//   } else if (UPLOAD_FILE_ABORTED == upload.status) {
-//     mcl->mset->restart_flag = 0;
-//     //MqttRetryCounter(0);
-//     upload_error = 7;  // Upload aborted
-//           #ifdef ESP8266
-//     if (UPL_TASMOTA == upload_file_type) { Update.end(); }
-//     #endif
-//   }
-//   delay(0);
-}
-
-/*-------------------------------------------------------------------------------------------*/
-
-void mNextionPanel::HandlePreflightRequest(void)
-{
-  // mcl->mwif->pWebServer->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
-  // mcl->mwif->pWebServer->sendHeader(F("Access-Control-Allow-Methods"), F("GET, POST"));
-  // mcl->mwif->pWebServer->sendHeader(F("Access-Control-Allow-Headers"), F("authorization"));
-  // mcl->mwif->WSSend(200, CT_HTML, "");
-}
 
 /**********************************************************************************************************************************************************
  ******************************************************************************************************************************************************************************* 
@@ -784,7 +501,6 @@ void mNextionPanel::Command_ToggleBrightness(){
 }
 
 
-
 /**********************************************************************************************************************************************************
  ******************************************************************************************************************************************************************************* 
  ******************************************************************************************************************************************************************************* 
@@ -792,8 +508,6 @@ void mNextionPanel::Command_ToggleBrightness(){
  ******************************************************************************************************************************************************************************* 
  ******************************************************************************************************************************************************************************* 
  **********************************************************************************************************************************************************************************/
-
-
 
 /***
  * Add subscribes for new connection to mqtt
@@ -815,7 +529,7 @@ void mNextionPanel::mqttConnected()
   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
   // hide QR code
-  nextionSendCmd("vis 3,0");
+  // nextionSendCmd("vis 3,0");
 
 }
 
@@ -1348,47 +1062,14 @@ void mNextionPanel::nextionSendCmd(const char* c_str)
   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
 }
 
-void mNextionPanel::nextionSendCmd_JSON(String s_str)
-{ // Send a raw command to the Nextion panel
-  serial_print(utf8ascii(s_str));
-  serial_print_suffix();
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),s_str.c_str());
-}
+// void mNextionPanel::nextionSendCmd_JSON(String s_str)
+// { // Send a raw command to the Nextion panel
+//   serial_print(utf8ascii(s_str));
+//   serial_print_suffix();
+//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),s_str.c_str());
+// }
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::nextionParseJson(const char* c_str){
- // Parse an incoming JSON array into individual Nextion commands
-  // if (strPayload.endsWith(",]"))
-  // { // Trailing null array elements are an artifact of older Home Assistant automations and need to
-  //   // be removed before parsing by ArduinoJSON 6+
-  //   strPayload.remove(strPayload.length() - 2, 2);
-  //   strPayload.concat("]");
-  // }
-  
-  //StaticJsonDocument<1500> nextionCommands;
-  DynamicJsonDocument nextionCommands(4000);
-  DeserializationError jsonError = deserializeJson(nextionCommands, c_str);
-  if (jsonError)
-  { // Couldn't parse incoming JSON command
-    ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"MQTT: [ERROR] Failed to parse incoming JSON command with error: ")) + String(jsonError.c_str()));
-  }
-  else
-  {
-  //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!ajsonError %d"),nextionCommands.size());
-
-    //deserializeJson(nextionCommands, data_buffer2.payload.ctr);//strPayload);
-    
-  //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!bjsonError %d"),nextionCommands.size());
-
-    for (uint8_t i = 0; i < nextionCommands.size(); i++)
-    {
-      //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "nextionSendCmd %s"),nextionCommands[i]);
-      nextionSendCmd_JSON(nextionCommands[i]);
-    }
-  }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void mNextionPanel::nextionConnect()

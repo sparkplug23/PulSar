@@ -524,6 +524,15 @@ void SetColour_White();         // white
 void SetColour_WarmWhite();     // warm white
 void SetColour_HSB();
 
+ float    HueN2F(uint16_t hue);
+    float    SatN2F(uint8_t sat);
+    float    BrtN2F(uint8_t brt);
+    uint16_t HueF2N(float hue);
+    uint8_t  SatF2N(float sat);
+    uint8_t  BrtF2N(float brt);
+
+    HsbColor GetRandomColour(HsbColor colour1, HsbColor colour2);
+
 
 HsbColor GetHSBColour();
 void SetHSBColour();

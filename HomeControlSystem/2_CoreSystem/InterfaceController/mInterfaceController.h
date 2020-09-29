@@ -221,14 +221,6 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_PWM_CTR)           D_MODULE_DRIVERS_PWM_CTR;
   DEFINE_PROGMEM_CTR(PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR)  D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
 #endif
-#ifdef USE_SONOFF_IFAN
-  #include "4_Drivers/Sonoff_iFan/mSonoffIFan.h"
-  class mSonoffIFan;
-  #define D_MODULE_DRIVERS_IFAN_ID                             47
-  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_CTR)               "mSonoffIFan";
-  DEFINE_PROGMEM_CTR(PM_MODULE_DRIVER_IFAN_FRIENDLY_CTR)      "ifan";
-  #define pCONT_ifan                                           pCONT->mifan
-#endif
 #ifdef USE_MODULE_DRIVERS_RF433MHZ
   // #include "SAWRadios/mSAWMain.h"
   // class mSAWMain;
@@ -429,6 +421,22 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   #define D_MODULE_CUSTOM_EXERCISEBIKE_ID 178
   DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_EXERCISEBIKE_CTR)              "mExerciseBike";
   DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_EXERCISEBIKE_FRIENDLY_CTR)              "exercisebike";
+#endif
+#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+  #include "9_Controller/Sonoff_iFan/mSonoffIFan.h"
+  class mSonoffIFan;
+  #define D_MODULE_CUSTOM_SONOFF_IFAN_ID                             179
+  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_IFAN_CTR)               "mSonoffIFan";
+  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR)      "ifan";
+  #define pCONT_ifan                                           pCONT->mifan
+#endif
+#ifdef USE_MODULE_CUSTOM_PWM_FAN
+  #include "9_Controller/PWMFan/mPWMFan.h"
+  class mPWMFan;
+  #define D_MODULE_CUSTOM_PWM_FAN_ID                            180
+  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_PWMFAN_CTR)               "mPWMFan";
+  DEFINE_PROGMEM_CTR(PM_MODULE_CUSTOM_PWMFAN_FRIENDLY_CTR)      "pwmfan";
+  #define pCONT_mpwmfan                                         pCONT->mpwmfan
 #endif
 
 
@@ -635,8 +643,11 @@ class mInterfaceController{
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
     mRadiatorFan* mrf = nullptr;
   #endif
-  #ifdef USE_SONOFF_IFAN
+  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
     mSonoffIFan* mifan = nullptr;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_PWM_FAN
+    mPWMFan* mpwmfan = nullptr;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     mIRtransceiver* mir = nullptr;

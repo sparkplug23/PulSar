@@ -383,9 +383,9 @@
 
 //   if ((0 == payload) || (99 == payload)) {
 //     uint32_t maxfn = (devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : (!devices_present) ? 1 : devices_present;
-// #ifdef USE_SONOFF_IFAN
+// #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 //     if (IsModuleIfan()) { maxfn = 1; }
-// #endif  // USE_SONOFF_IFAN
+// #endif  // USE_MODULE_CUSTOM_SONOFF_IFAN
 //     stemp[0] = '\0';
 //     for (uint32_t i = 0; i < maxfn; i++) {
 //       snprintf_P(stemp, sizeof(stemp), PSTR("%s%s\"%s\"" ), stemp, (i > 0 ? "," : ""), EscapeJSONString(SettingsText(SET_FRIENDLYNAME1 +i)).c_str());

@@ -273,7 +273,7 @@
   #define D_MODULE_CUSTOM_RADIATORFAN_CTR              "mRadiatorFan"
   #define D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
 //#endif
-//#ifdef USE_SONOFF_IFAN
+//#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
   #define D_MODULE_CUSTOM_CEILINGFAN_CTR               "mCeilingFan"
   #define D_MODULE_CUSTOM_CEILINGFAN_FRIENDLY_CTR      "ceilingfan"
 //#endif
@@ -1355,9 +1355,9 @@
 #define D_JSON_CURRENT "Current"
 #define D_JSON_CRASHDUMP "CrashDump"
 #define D_JSON_COLOUR_PALETTE "colour_palette"
-#define D_JSON_DATA "data"
+#define D_JSON_DATA "Data"
 #define D_JSON_DATETIME "DateTime"
-#define D_JSON_DESIRED "desired"
+#define D_JSON_DESIRED "Desired"
 #define D_JSON_DEVICE "device"
 #define D_JSON_DEVICEID "DeviceID"
 
@@ -1366,7 +1366,7 @@
 
 #define D_JSON_DOOR "Door"
 #define D_JSON_DURATION "duration"
-#define D_JSON_ERROR "error"
+#define D_JSON_ERROR "Error"
 #define D_JSON_FLASHER "Flasher"
 #define D_JSON_FAILSAFE "failsafe"
 #define D_JSON_FUNCTIONS "functions"
@@ -1386,7 +1386,7 @@
 #define D_JSON_METHOD "method"
 #define D_JSON_MINUTES "minutes"
 #define D_JSON_MIN "min"
-#define D_JSON_MODE "mode"
+#define D_JSON_MODE "Mode"
 #define D_JSON_MOTION "Motion"
 #define D_JSON_MODULENAME "ModuleName"
 #define D_JSON_MODULEID "ModuleID"
@@ -1508,6 +1508,7 @@
 #define D_JSON_STATE "State"
 #define D_JSON_POWER "Power"
 #define D_JSON_FANSPEED "FanSpeed"
+#define D_JSON_FANPWM "FanPWM"
 #define D_JSON_POWERONSTATE "PowerOnState"
 #define D_JSON_PULSETIME "PulseTime"
 #define D_JSON_BLINKTIME "BlinkTime"

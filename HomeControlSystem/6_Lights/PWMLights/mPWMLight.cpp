@@ -1393,7 +1393,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // // //  ShowSource(source);
 
-// // // #ifdef USE_SONOFF_IFAN
+// // // #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 // // //   if (IsModuleIfan()) {
 // // //     blink_mask &= 1;                 // No blinking on the fan relays
 // // //     Settings.flag_system_phaseout.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
@@ -1401,7 +1401,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // // //     Settings.pulse_timer[2] = 0;
 // // //     Settings.pulse_timer[3] = 0;
 // // //   }
-// // // #endif  // USE_SONOFF_IFAN
+// // // #endif  // USE_MODULE_CUSTOM_SONOFF_IFAN
 
 // // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteCommandPower(%d,%d,%d)"),device,state,source);
 

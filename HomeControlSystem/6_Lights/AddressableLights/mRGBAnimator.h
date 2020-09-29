@@ -160,19 +160,17 @@ class mRGBAnimator{
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #elif USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
         //typedef NeoEsp32Rmt0Ws2811Method selectedNeoSpeedType;
-       #else
-      //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-
+      #else
+        //   typedef Neo800KbpsMethod selectedNeoSpeedType;
         #ifdef ENABLE_DEBUG_ESP_DECODER
         typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
         #else
         typedef Neo800KbpsMethod selectedNeoSpeedType;
         #endif
-
       #endif  
-    // Configure
-      NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
-    #endif
+      // Configure
+        NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
+      #endif
     #endif
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
@@ -336,7 +334,6 @@ class mRGBAnimator{
 
     void WebSave_RGBColourSelector(void);
 
-
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     void init_NotificationPanel();
     #endif
@@ -347,8 +344,6 @@ class mRGBAnimator{
 
     uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
                                        uint16_t ito_min, uint16_t ito_max) ;
-
-                                       
 
     /*******AMBILIGHT*********************************************************************************************/
 
@@ -361,7 +356,6 @@ class mRGBAnimator{
 
     uint8_t blocking_force_animate_to_complete = true;
     uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
-
 
     void SubTask_Ambilight();
     void Ambilight_Sides();
@@ -393,11 +387,11 @@ class mRGBAnimator{
 
     }ambilightsettings;
     
-uint8_t update_all = false;
+    uint8_t update_all = false;
 
     /*******USER LIGHTS & FLASHER*********************************************************************************************/
 
-// #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+  // #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
   const char* GetFlasherFunctionName(char* buffer);
   const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer);
   int8_t      GetFlasherFunctionIDbyName(const char* c);
@@ -423,7 +417,6 @@ uint8_t update_all = false;
   enum FLASHERREGION{FLASHER_REGION_COLOUR_SELECT_ID=1,
                      FLASHER_REGION_ANIMATE_ID};                    
 
-
   typedef union {
     uint16_t data; // allows full manipulating
     struct { 
@@ -435,14 +428,12 @@ uint8_t update_all = false;
     };
   } FLASHERSETTINGS_FLAGS;
 
-
   enum RANDOM_TRANSITION_TIMINGS_PROFILES_IDS{
     RANDOM_TRANSITION_TIMINGS_PROFILES_TRIANGLE_RAMP_ID=0,
     RANDOM_TRANSITION_TIMINGS_PROFILES_EXPONENTIAL_HIGH_ID, //more on higher
     RANDOM_TRANSITION_TIMINGS_PROFILES_EXPONENTIAL_LOW_ID,  //More on lower
   };
   // Make generate function with lots of mapped values, with percentage 0 to 255 to retrieve it
-
 
   struct FLASHERSETTINGS{
     // Flashing function
@@ -461,9 +452,7 @@ uint8_t update_all = false;
       uint8_t array_index = 0;
       uint8_t array_index_length = 0;
       uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
-
       // uint8_t profile_id;
-
       uint32_t tSavedNewSpeedUpdate = millis();
     }random_transitions;
 
@@ -498,26 +487,26 @@ uint8_t update_all = false;
   void SubTask_Flasher_Animate();
   void SubTask_Flasher_Animate_Mixer();
   
-void SubTask_Flasher_Animate_Function_Slow_Glow();
-void SubTask_Flasher_Animate_Function_Sequential();
-void SubTask_Flasher_Animate_Function_Twinkle_Random();
-void SubTask_Flasher_Animate_Function_Twinkle_Sequential();
-void SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-void SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+  void SubTask_Flasher_Animate_Function_Slow_Glow();
+  void SubTask_Flasher_Animate_Function_Sequential();
+  void SubTask_Flasher_Animate_Function_Twinkle_Random();
+  void SubTask_Flasher_Animate_Function_Twinkle_Sequential();
+  void SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+  void SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
 
   int8_t parsesub_Flasher(JsonObjectConst obj);
   void init_flasher_settings();
-
   
   #define FLASHER_FUNCTION_MIXER_MAX 10
-  enum FLASHER_FUNCTION_MIXER{FLASHER_FUNCTION_MIXER_0_ID=0,
-                              FLASHER_FUNCTION_MIXER_1_ID,
-                              FLASHER_FUNCTION_MIXER_2_ID,
-                              FLASHER_FUNCTION_MIXER_3_ID,
-                              FLASHER_FUNCTION_MIXER_4_ID,
-                              FLASHER_FUNCTION_MIXER_5_ID,
-                              FLASHER_FUNCTION_MIXER_6_ID,
-                              FLASHER_FUNCTION_MIXER_NONE_ID
+  enum FLASHER_FUNCTION_MIXER{
+    FLASHER_FUNCTION_MIXER_0_ID=0,
+    FLASHER_FUNCTION_MIXER_1_ID,
+    FLASHER_FUNCTION_MIXER_2_ID,
+    FLASHER_FUNCTION_MIXER_3_ID,
+    FLASHER_FUNCTION_MIXER_4_ID,
+    FLASHER_FUNCTION_MIXER_5_ID,
+    FLASHER_FUNCTION_MIXER_6_ID,
+    FLASHER_FUNCTION_MIXER_NONE_ID
   };
   #define MIXER_GROUP_MAX 7
   struct MIXER_SETTINGS{
@@ -903,12 +892,7 @@ uint8_t pixels_to_update_as_percentage_map[PIXELS_UPDATE_PERCENTAGE_LENGTH_ID] =
 
 
 
-    float    HueN2F(uint16_t hue);
-    float    SatN2F(uint8_t sat);
-    float    BrtN2F(uint8_t brt);
-    uint16_t HueF2N(float hue);
-    uint8_t  SatF2N(float sat);
-    uint8_t  BrtF2N(float brt);
+   
 
     uint32_t tSavedUpdateRGBString;
     uint8_t first_set;
@@ -1039,8 +1023,6 @@ void WebAppend_Root_ControlUI();
       void WebSend_JSON_RootPage_Parameters_Liveview(AsyncWebServerRequest *request);
 
       void WebSend_JSON_RGBTable(AsyncWebServerRequest *request);
-
-    HsbColor GetRandomColour(HsbColor colour1, HsbColor colour2);
 
     
     struct JSON_RESPONSES{
@@ -1181,7 +1163,6 @@ void WebAppend_Root_RGBPalette();
     uint8_t ConstructJSON_Mixer(uint8_t json_level = 0);
 
   #ifdef USE_MQTT
-
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
@@ -1208,34 +1189,24 @@ void WebAppend_Root_RGBPalette();
     };
 
     const char* postfix_topic_animation = "animation";
-    struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;
-    
+    struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;    
     const char* postfix_topic_ambilight = "ambilight";
     struct handler<mRGBAnimator> mqtthandler_ambilight_teleperiod;
-    
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     const char* postfix_topic_notifications = "notifications";
     struct handler<mRGBAnimator> mqtthandler_notifications_teleperiod;
-  #endif
-
+    #endif
     const char* postfix_topic_scene = "scene";
     struct handler<mRGBAnimator> mqtthandler_scene_teleperiod;
-
     const char* postfix_topic_state = "state";
     struct handler<mRGBAnimator> mqtthandler_state_teleperiod;
-
     const char* postfix_topic_timed = "timed";
     struct handler<mRGBAnimator> mqtthandler_timed_teleperiod;
-
     const char* postfix_topic_flasher = "flasher/animator";
     struct handler<mRGBAnimator> mqtthandler_flasher_teleperiod;
-
     const char* postfix_topic_mixer = "flasher/mixer";
     struct handler<mRGBAnimator> mqtthandler_mixer_teleperiod;
-
   #endif
-
-
   
     /*******NOTIFICATIONS*********************************************************************************************/
 

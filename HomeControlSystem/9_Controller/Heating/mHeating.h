@@ -84,6 +84,10 @@ DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_TM_CTR)           D_HEATING_SENS
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_TB_CTR)           D_HEATING_SENSOR_NAME_SHORT_TB;
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_TO_CTR)           D_HEATING_SENSOR_NAME_SHORT_TO;
 
+#define D_TEMP_MODE_OFF_CTR "Mode Off"
+
+DEFINE_PGM_CTR(PM_TEMP_MODE_OFF_CTR)  D_TEMP_MODE_OFF_CTR
+
 #define D_HEATING_SENSOR_NAME_LONG_DS "Downstairs"
 #define D_HEATING_SENSOR_NAME_LONG_US "Upstairs"
 #define D_HEATING_SENSOR_NAME_LONG_WB "Boiler"
@@ -328,7 +332,14 @@ void AddToHardwareMessage();
 
     // *************** TEMPS/SCHEDULES ****************************************************************************************************
 
-    enum TEMP_MODE{TEMP_MODE_OFF=0,TEMP_MODE_HEATING,TEMP_MODE_MAINTAINING,TEMP_MODE_SCHEDULED,TEMP_MODE_SPLASH_RUN_TIME};
+    enum TEMP_MODE_IDS{
+      TEMP_MODE_OFF_ID=0,
+      TEMP_MODE_HEATING_ID,
+      TEMP_MODE_MAINTAINING_ID,
+      TEMP_MODE_SCHEDULED_ID,
+      TEMP_MODE_SPLASH_RUN_TIME_ID,
+      TEMP_MODE_LENGTH
+    };
     enum SCH_MODE{SCHEDULED_OFF_ID=1,SCHEDULED_SET_ID,SCHEDULED_ON_ID,SCHEDULED_MANUAL_ON_ID};
 
     #define HEATING_DEVICE_TEMPS_MAX 4
@@ -496,9 +507,9 @@ void WebAppend_Root_Draw_Table();
     void SubTasker_ScheduledEvents(void);
 
     uint32_t tTick = millis();
-    const char* GetScheduleNameCtrbyID(uint8_t mode, char* buffer);// = nullptr);
-    const char* GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer);// = nullptr);
-    const char* GetDeviceNameUpperCaseCtrbyID(uint8_t device_id, char* buffer);// = nullptr);
+    const char* GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen);// = nullptr);
+    const char* GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen);// = nullptr);
+    const char* GetDeviceNameUpperCaseCtrbyID(uint8_t device_id, char* buffer, uint8_t buflen);// = nullptr);
 
     void SetHighestImportance(uint8_t* importanceset, int8_t thisvalue);
 
@@ -529,7 +540,7 @@ void WebAppend_Root_Draw_Table();
 
     enum USERID{USERID_MICHAEL=0,USERID_DEIRDRE,USERID_RAYMOND};
 
-    const char* GetDeviceNamebyIDCtr(uint8_t name, char* buffer);// = nullptr);
+    const char* GetDeviceNamebyIDCtr(uint8_t name, char* buffer, uint8_t buflen);// = nullptr);
     int8_t GetScheduleModeIDByCtr(const char* c);
     int8_t GetDeviceIDbyName(const char* c);
     int8_t GetUserIDbyName(const char* c);
@@ -554,7 +565,7 @@ void WebAppend_Root_Draw_Table();
     uint32_t tSavedForceUpdate = millis();
     int cTicker;
     uint8_t fSendSingleFunctionData = false;
-    const char* GetTempModeByDeviceIDCtr(uint8_t device, char* buffer);// = nullptr);
+    const char* GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen);// = nullptr);
 
     // *************** MQTT ****************************************************************************************************
 

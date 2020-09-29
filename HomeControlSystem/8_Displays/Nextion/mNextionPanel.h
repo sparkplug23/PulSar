@@ -70,7 +70,7 @@ int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
 
 int8_t parsesub_Commands(JsonObjectConst obj);
-
+int8_t parsesub_SetMulti(JsonObjectConst obj);
 
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
@@ -102,7 +102,7 @@ void serial_print(String s_str);
 void nextionGetAttr(const char* c_str);
 void nextionSendCmd(const char* c_str);
 
-void nextionSendCmd_JSON(String s_str);
+// void nextionSendCmd_JSON(String s_str);
 
 void Command_SetBrightness(uint8_t brightness_percentage);
 void Command_SetBrightness255(uint8_t brightness);

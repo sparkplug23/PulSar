@@ -18,14 +18,11 @@
 // template<typename T>
 int8_t mRGBAnimator::Tasker(uint8_t function){//}, T param1){  
 
-    // return 0;
   int8_t function_result = 0;
 
-// INIT SECTIONS ARE ALWAYS OUTSIDE MAIN SWITCHCASE
-
-    /************
-     * INIT SECTION * 
-    *******************/
+  /************
+   * INIT SECTION * 
+  *******************/
   if(function == FUNC_PRE_INIT){
     pre_init();
   }else
@@ -37,7 +34,6 @@ int8_t mRGBAnimator::Tasker(uint8_t function){//}, T param1){
   // Check if light is being handled by another function eg ws2812 (long term probably included into this as commands pipe into this)
   if(pCONT_set->light_type != LT_WS2812){ 
     //Serial.println("light_type != LT_WS2812"); Serial.flush();
-    
     #ifdef ENABLE_DEBUG_BOOT_DELAYS
     delay(2000);
     #endif
@@ -574,11 +570,11 @@ void mRGBAnimator::SubTask_Scenes(){
       if(!animations_control->IsAnimating()){   
         // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "!animations_control->IsAnimating scene.parts [%d] animation.transition.time_ms/3 [%d]"),scene.parts,animation.transition.time_ms.val/4);
         switch(scene.parts){
-          case STEP1:  FadeToNewColour(HsbColor(HueN2F(240), SatN2F(100), BrtN2F(1)),  1); break; //instant
-          case STEP2:  FadeToNewColour(HsbColor(HueN2F(30),  SatN2F(50),  BrtN2F(50)), animation.transition.time_ms.val/2); break;
-          case STEP3:  FadeToNewColour(HsbColor(HueN2F(180), SatN2F(60),  BrtN2F(100)),animation.transition.time_ms.val/4); break;
-          case STEP4:  FadeToNewColour(HsbColor(HueN2F(180),  SatN2F(70),  BrtN2F(100)),animation.transition.time_ms.val/4); break;
-          case STEP5:  FadeToNewColour(HsbColor(HueN2F(180),  SatN2F(80),  BrtN2F(100)),animation.transition.time_ms.val/8); break;
+          case STEP1:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(240), pCONT_iLight->SatN2F(100), pCONT_iLight->BrtN2F(1)),  1); break; //instant
+          case STEP2:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(30),  pCONT_iLight->SatN2F(50),  pCONT_iLight->BrtN2F(50)), animation.transition.time_ms.val/2); break;
+          case STEP3:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(60),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
+          case STEP4:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(70),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
+          case STEP5:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(80),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/8); break;
           default: break;
         }
         if(scene.parts<DONE){scene.parts++;};
@@ -719,7 +715,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
     #endif
-    scene.colour.H = HueN2F(hue);
+    scene.colour.H = pCONT_iLight->HueN2F(hue);
     if(hue==361){scene.colour.S = 0;} // hue of max+1(361) automically sets hsb to be white
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,scene.colour.H);
@@ -733,7 +729,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
     #endif
-    scene.colour.S = SatN2F(sat);
+    scene.colour.S = pCONT_iLight->SatN2F(sat);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,scene.colour.S);
     #endif
@@ -746,7 +742,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
     #endif
-    scene.colour.B = animation.brightness = BrtN2F(brt);
+    scene.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
     #endif
@@ -802,9 +798,9 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
         AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]=%d"),val);
         #endif
         switch(index++){
-          case 0: scene.colour.H = HueN2F(val);
-          case 1: scene.colour.S = SatN2F(val);
-          case 2: scene.colour.B = BrtN2F(val);
+          case 0: scene.colour.H = pCONT_iLight->HueN2F(val);
+          case 1: scene.colour.S = pCONT_iLight->SatN2F(val);
+          case 2: scene.colour.B = pCONT_iLight->BrtN2F(val);
         }
       }
     }
@@ -2328,10 +2324,10 @@ void mRGBAnimator::init_Animations(){
 
 void mRGBAnimator::init_Ambilight(){
 
-  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(HueN2F(20),SatN2F(95),BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(HueN2F(8),SatN2F(95),BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(HueN2F(240),SatN2F(100),BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(HueN2F(330),SatN2F(100),BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
@@ -2390,16 +2386,6 @@ void mRGBAnimator::SubTask_Presets(){
 
 
 
-
-
-
-// Generate random colour between two hsb colours
-HsbColor mRGBAnimator::GetRandomColour(HsbColor colour1, HsbColor colour2){
-  int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
-  int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
-  int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
-  return HsbColor(HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
-}
 
 
 /*******************************************************************************************************************
@@ -2574,7 +2560,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
         HsbColor colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
         
         #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "dp%d, pp%d, %d,%d %d"),desired_pixel, pixel_position,HueF2N(colour.H),SatF2N(colour.S),BrtF2N(colour.B));
+        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "dp%d, pp%d, %d,%d %d"),desired_pixel, pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
         #endif
         
         if(pixel_position>=0){
@@ -2584,14 +2570,14 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
             for(uint16_t temp=0;temp<ledout.length;temp++){ hsbcolour[temp] = colour; }
             
             #ifdef ENABLE_LOG_LEVEL_DEBUG
-            AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set ALL %d,%d %d"),HueF2N(colour.H),SatF2N(colour.S),BrtF2N(colour.B));
+            AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set ALL %d,%d %d"),pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
             #endif
 
           }else{
             hsbcolour[pixel_position] = colour;
             
             #ifdef ENABLE_LOG_LEVEL_DEBUG
-            AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position, HueF2N(colour.H),SatF2N(colour.S),BrtF2N(colour.B));
+            AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
             #endif
 
           }
@@ -2667,7 +2653,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
         end_colour   = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel+1,&end_pixel_position);
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "s%d,%d %d %d"),HueF2N(start_colour.H),SatF2N(start_colour.S),BrtF2N(start_colour.B),start_pixel_position);
+        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "s%d,%d %d %d"),pCONT_iLight->HueF2N(start_colour.H),pCONT_iLight->SatF2N(start_colour.S),pCONT_iLight->BrtF2N(start_colour.B),start_pixel_position);
         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "e%d,%d %d %d"),HueF2N(end_colour.H),SatF2N(end_colour.S),BrtF2N(end_colour.B),end_pixel_position);
 #endif
 
@@ -2744,7 +2730,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
         #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
           ledout.pattern[ledout.index],desired_pixel,
-          HueF2N(hsbcolour[ledout.pattern[ledout.index]].H),SatF2N(hsbcolour[ledout.pattern[ledout.index]].S),BrtF2N(hsbcolour[ledout.pattern[ledout.index]].B),
+          pCONT_iLight->HueF2N(hsbcolour[ledout.pattern[ledout.index]].H),pCONT_iLight->SatF2N(hsbcolour[ledout.pattern[ledout.index]].S),pCONT_iLight->BrtF2N(hsbcolour[ledout.pattern[ledout.index]].B),
           pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr),pixel_position
         );
         #endif
@@ -3032,31 +3018,6 @@ void mRGBAnimator::AddToJsonObject_AddHardware(JsonObject root){
 
 // make these static and global supports, requiring no object ? inline??
 
-float mRGBAnimator::HueN2F(uint16_t hue){
-  return hue/360.0f;
-}
-// S at100toFloat
-float mRGBAnimator::SatN2F(uint8_t sat){
-  return sat/100.0f;
-}
-// B rt100toFloat
-float mRGBAnimator::BrtN2F(uint8_t brt){
-  return brt/100.0f;
-}
-
-//remove 360/100 and make HueF2N and HueN2F
-// H ueFloatto360
-uint16_t mRGBAnimator::HueF2N(float hue){
-  return round(hue*360.0f);
-}
-// S atFloatto100
-uint8_t mRGBAnimator::SatF2N(float sat){
-  return round(sat*100.0f);
-}
-// B rtFloatto100
-uint8_t mRGBAnimator::BrtF2N(float brt){
-  return round(brt*100.0f);
-}
 
 
 const char* mRGBAnimator::GetAnimationModeName(char* buffer){
@@ -4148,7 +4109,7 @@ DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
     #endif
-    animation.brightness = BrtN2F(brt);
+    animation.brightness = pCONT_iLight->BrtN2F(brt);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,animation.brightness);
     Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,animation.brightness);
     isserviced++;
@@ -4340,7 +4301,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = HueN2F(hue);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
     isserviced++;
@@ -4348,7 +4309,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = SatN2F(sat);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
     isserviced++;
@@ -4356,7 +4317,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = animation.brightness = BrtN2F(brt);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
     isserviced++;
@@ -4367,7 +4328,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = HueN2F(hue);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
     isserviced++;
@@ -4375,7 +4336,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = SatN2F(sat);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
     isserviced++;
@@ -4383,7 +4344,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = animation.brightness = BrtN2F(brt);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
     isserviced++;

@@ -219,6 +219,7 @@ void mPWM::init(void)
 
 void mPWM::pre_init(){
 
+//change this into the fan module
   if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
     pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
     pinMode(pin, OUTPUT);
@@ -381,16 +382,17 @@ int8_t mPWM::Tasker_Web(uint8_t function){
 
       // BufferWriterI->Append_P(PSTR("{t}<tr>"));
 
-      
-      BufferWriterI->Append_P(PSTR("<div> Fan Speed </div>"), test_val);
-      BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-        WEB_HANDLE_PWM_SLIDER,               // c - Unique HTML id
-        PSTR("#000"), PSTR("#eee"),   // Black to White
-        4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-        0, 1023,  // Range 0/1 to 100%
-        test_val,
-        WEB_HANDLE_PWM_SLIDER
-      );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+      if(settings.fShowManualSlider){
+        BufferWriterI->Append_P(PSTR("<div> Fan Speed </div>"), test_val);
+        BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+          WEB_HANDLE_PWM_SLIDER,               // c - Unique HTML id
+          PSTR("#000"), PSTR("#eee"),   // Black to White
+          4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+          0, 1023,  // Range 0/1 to 100%
+          test_val,
+          WEB_HANDLE_PWM_SLIDER
+        );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+      }
 
         // for(uint8_t button_id=0;button_id<5;button_id++){
         //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
