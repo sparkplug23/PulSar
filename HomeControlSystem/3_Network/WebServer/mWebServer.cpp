@@ -191,39 +191,32 @@ void mWebServer::WebPage_Root_AddHandlers(){
     WebSend_JSON_RootStatus_Table(request);
   });
 
+  // pCONT_web->pWebServer->on("/michael", HTTP_POST, [this](AsyncWebServerRequest *request){
+  //   int params = request->params();
+  //   for(int i=0;i<params;i++){
+  //     AsyncWebParameter* p = request->getParam(i);
+  //     if(p->isFile()){
+  //       Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+  //     } else if(p->isPost()){
+  //       Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+  //     } else {
+  //       Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+  //     }
+  //   }
 
-  pCONT_web->pWebServer->on("/michael", HTTP_POST, [this](AsyncWebServerRequest *request){
+  //   request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
 
-
-    int params = request->params();
-    for(int i=0;i<params;i++){
-      AsyncWebParameter* p = request->getParam(i);
-      if(p->isFile()){
-        Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
-      } else if(p->isPost()){
-        Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-      } else {
-        Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-      }
-    }
-
-    request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
-
-    //  if (request->method() == HTTP_POST && request->url() == "/michael") {
-    //    Serial.println("HTTP_POST && request->url()");
-    //   // Shoudl be already handled by handleBody(..) at this point.
-    //   return;
-    // }
-    // Web_Base_Page_Draw(request);
-  });
+  //   //  if (request->method() == HTTP_POST && request->url() == "/michael") {
+  //   //    Serial.println("HTTP_POST && request->url()");
+  //   //   // Shoudl be already handled by handleBody(..) at this point.
+  //   //   return;
+  //   // }
+  //   // Web_Base_Page_Draw(request);
+  // });
 
   pCONT_web->pWebServer->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
     Console_JSON_Data(request);
   });  
-
-
-
-
 
 
 // pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
@@ -814,82 +807,82 @@ String mWebServer::UrlEncode(const String& text)
 	return encoded;
 }
 
-int mWebServer::WebSend(char *buffer)
-{
-  // [sonoff] POWER1 ON                                               --> Sends http://sonoff/cm?cmnd=POWER1 ON
-  // [192.168.178.86:80,admin:joker] POWER1 ON                        --> Sends http://hostname:80/cm?user=admin&password=joker&cmnd=POWER1 ON
-  // [sonoff] /any/link/starting/with/a/slash.php?log=123             --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
-  // [sonoff,admin:joker] /any/link/starting/with/a/slash.php?log=123 --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
+// int mWebServer::WebSend(char *buffer)
+// {
+//   // [sonoff] POWER1 ON                                               --> Sends http://sonoff/cm?cmnd=POWER1 ON
+//   // [192.168.178.86:80,admin:joker] POWER1 ON                        --> Sends http://hostname:80/cm?user=admin&password=joker&cmnd=POWER1 ON
+//   // [sonoff] /any/link/starting/with/a/slash.php?log=123             --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
+//   // [sonoff,admin:joker] /any/link/starting/with/a/slash.php?log=123 --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
 
-  char *host;
-  char *user;
-  char *password;
-  char *command;
-  int status = 1;                             // Wrong parameters
+//   char *host;
+//   char *user;
+//   char *password;
+//   char *command;
+//   int status = 1;                             // Wrong parameters
 
-                                              // buffer = |  [  192.168.178.86  :  80  ,  admin  :  joker  ]    POWER1 ON   |
-  host = strtok_r(buffer, "]", &command);     // host = |  [  192.168.178.86  :  80  ,  admin  :  joker  |, command = |    POWER1 ON   |
-  if (host && command) {
-    pCONT_sup->RemoveSpace(host);                        // host = |[192.168.178.86:80,admin:joker|
-    host++;                                   // host = |192.168.178.86:80,admin:joker| - Skip [
-    host = strtok_r(host, ",", &user);        // host = |192.168.178.86:80|, user = |admin:joker|
-    String url = F("http://");                // url = |http://|
-    url += host;                              // url = |http://192.168.178.86:80|
+//                                               // buffer = |  [  192.168.178.86  :  80  ,  admin  :  joker  ]    POWER1 ON   |
+//   host = strtok_r(buffer, "]", &command);     // host = |  [  192.168.178.86  :  80  ,  admin  :  joker  |, command = |    POWER1 ON   |
+//   if (host && command) {
+//     pCONT_sup->RemoveSpace(host);                        // host = |[192.168.178.86:80,admin:joker|
+//     host++;                                   // host = |192.168.178.86:80,admin:joker| - Skip [
+//     host = strtok_r(host, ",", &user);        // host = |192.168.178.86:80|, user = |admin:joker|
+//     String url = F("http://");                // url = |http://|
+//     url += host;                              // url = |http://192.168.178.86:80|
 
-    command = pCONT_sup->Trim(command);                  // command = |POWER1 ON| or |/any/link/starting/with/a/slash.php?log=123|
-    if (command[0] != '/') {
-      url += F("/cm?");                       // url = |http://192.168.178.86/cm?|
-      if (user) {
-        user = strtok_r(user, ":", &password);  // user = |admin|, password = |joker|
-        if (user && password) {
-          char userpass[128];
-          snprintf_P(userpass, sizeof(userpass), PSTR("user=%s&password=%s&"), user, password);
-          url += userpass;                    // url = |http://192.168.178.86/cm?user=admin&password=joker&|
-        }
-      }
-      url += F("cmnd=");                      // url = |http://192.168.178.86/cm?cmnd=| or |http://192.168.178.86/cm?user=admin&password=joker&cmnd=|
-    }
-    url += command;                           // url = |http://192.168.178.86/cm?cmnd=POWER1 ON|
+//     command = pCONT_sup->Trim(command);                  // command = |POWER1 ON| or |/any/link/starting/with/a/slash.php?log=123|
+//     if (command[0] != '/') {
+//       url += F("/cm?");                       // url = |http://192.168.178.86/cm?|
+//       if (user) {
+//         user = strtok_r(user, ":", &password);  // user = |admin|, password = |joker|
+//         if (user && password) {
+//           char userpass[128];
+//           snprintf_P(userpass, sizeof(userpass), PSTR("user=%s&password=%s&"), user, password);
+//           url += userpass;                    // url = |http://192.168.178.86/cm?user=admin&password=joker&|
+//         }
+//       }
+//       url += F("cmnd=");                      // url = |http://192.168.178.86/cm?cmnd=| or |http://192.168.178.86/cm?user=admin&password=joker&cmnd=|
+//     }
+//     url += command;                           // url = |http://192.168.178.86/cm?cmnd=POWER1 ON|
 
-//AddLog_P(LOG_LEVEL_DEBUG, PSTR("DBG: Uri |%s|"), url.c_str());
+// //AddLog_P(LOG_LEVEL_DEBUG, PSTR("DBG: Uri |%s|"), url.c_str());
 
-#if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
-    HTTPClient http;
-    if (http.begin(UrlEncode(url))) {         // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
-#else
-    WiFiClient http_client;
-    HTTPClient http;
-    if (http.begin(http_client, UrlEncode(url))) {  // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
-#endif
-      int http_code = http.GET();             // Start connection and send HTTP header
-      if (http_code > 0) {                    // http_code will be negative on error
-        if (http_code == HTTP_CODE_OK || http_code == HTTP_CODE_MOVED_PERMANENTLY) {
-/*
-          // Return received data to the user - Adds 900+ bytes to the code
-          String result = http.getString();   // File found at server - may need lot of ram or trigger out of memory!
-          uint16_t j = 0;
-          for (uint16_t i = 0; i < result.length(); i++) {
-            char text = result.charAt(i);
-            if (text > 31) {                  // Remove control characters like linefeed
-              data_buffer2.payload.ctr[j++] = text;
-              if (j == sizeof(data_buffer2.payload.ctr) -2) { break; }
-            }
-          }
-          data_buffer2.payload.ctr[j] = '\0';
-          MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_JSON_WEBSEND));
-*/
-        }
-        status = 0;                           // No error - Done
-      } else {
-        status = 2;                           // Connection failed
-      }
-      http.end();                             // Clean up connection data
-    } else {
-      status = 3;                             // Host not found or connection error
-    }
-  }
-  return status;
-}
+// #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
+//     HTTPClient http;
+//     if (http.begin(UrlEncode(url))) {         // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
+// #else
+//     WiFiClient http_client;
+//     HTTPClient http;
+//     if (http.begin(http_client, UrlEncode(url))) {  // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
+// #endif
+//       int http_code = http.GET();             // Start connection and send HTTP header
+//       if (http_code > 0) {                    // http_code will be negative on error
+//         if (http_code == HTTP_CODE_OK || http_code == HTTP_CODE_MOVED_PERMANENTLY) {
+// /*
+//           // Return received data to the user - Adds 900+ bytes to the code
+//           String result = http.getString();   // File found at server - may need lot of ram or trigger out of memory!
+//           uint16_t j = 0;
+//           for (uint16_t i = 0; i < result.length(); i++) {
+//             char text = result.charAt(i);
+//             if (text > 31) {                  // Remove control characters like linefeed
+//               data_buffer2.payload.ctr[j++] = text;
+//               if (j == sizeof(data_buffer2.payload.ctr) -2) { break; }
+//             }
+//           }
+//           data_buffer2.payload.ctr[j] = '\0';
+//           MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_JSON_WEBSEND));
+// */
+//         }
+//         status = 0;                           // No error - Done
+//       } else {
+//         status = 2;                           // Connection failed
+//       }
+//       http.end();                             // Clean up connection data
+//     } else {
+//       status = 3;                             // Host not found or connection error
+//     }
+//   }
+//   return status;
+// }
 
 /*********************************************************************************************/
 

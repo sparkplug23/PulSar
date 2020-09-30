@@ -272,6 +272,7 @@ class mRGBAnimator{
      * Predefined SCENES by name
      * SCENES are colours defined as one colour for all pixels
     **************/ 
+   // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
     enum SCENES{
       SCENES_NOTACTIVE_ID=0,
       SCENES_DAYON_ID=1,

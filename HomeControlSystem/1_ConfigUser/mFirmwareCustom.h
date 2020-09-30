@@ -30,7 +30,7 @@
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-#define DEVICE_RGBMICRO2 //projector
+// #define DEVICE_RGBMICRO2 //projector
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT
@@ -43,6 +43,7 @@
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
 **/
 // #define DEVICE_GARAGELIGHT
+#define DEVICE_GARAGELIGHT2
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_BEDROOMBLINDS
@@ -2637,6 +2638,67 @@
         "]"
     "}"
   "}";
+#endif
+
+#ifdef DEVICE_GARAGELIGHT2
+  #define DEVICENAME_CTR          "garagelight2"
+  #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  // #define ENABLE_BUG_TRACING
+  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  // motion comes from switch inputs, which I need to write. Actually, all "motion" should use switch inputs!
+  #define USE_MODULE_SENSORS_MOTION
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
+  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
+  
+  #define USE_MODULE_CUSTOM_SECURITY_LIGHT
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 2
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"13\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      "\"5\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\"," 
+      "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      #endif 
+      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway Light"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden Light"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+        "],"
+        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+        "]"
+    "}"
+  "}";
+
 #endif
 
 /**

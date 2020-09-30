@@ -502,7 +502,7 @@ void mRGBAnimator::init_Scenes(){
 
   pCONT_iLight->setChannels(0,255,0);
   
-    #ifdef DONT_USE_OLD_PRESETS
+  #ifdef DONT_USE_OLD_PRESETS
   scene_preset_dayon.colour       = preset_colour_map[COLOUR_MAP_PINK_ID]; 
   scene_preset_dayoff.colour      = preset_colour_map[COLOUR_MAP_PINK_ID];
   scene_preset_eveningon.colour   = preset_colour_map[COLOUR_MAP_PINK_ID];

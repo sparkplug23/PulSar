@@ -96,7 +96,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
     PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
     4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
     0, 100,  // Range 0/1 to 100%
-    BrtF2N(animation.brightness),
+    pCONT_iLight->BrtF2N(animation.brightness),
     WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER
   );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 

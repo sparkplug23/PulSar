@@ -188,140 +188,140 @@ writeHtmlGzipped("HomeControlSystem/data/root_page.htm", "HomeControlSystem/html
 writeChunks(
   "HomeControlSystem/data",
   [
-    {
-      file: "style.css",
-      name: "PAGE_settingsCss",
-      prepend: "=====(<style>",
-      append: "</style>)=====",
-      method: "plaintext",
-      filter: "css-minify",
-    },
-    {
-      file: "settings.htm",
-      name: "PAGE_settings",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace("%", "%%")
-          .replace(/User Interface\<\/button\>\<\/form\>/gms, "User Interface\<\/button\>\<\/form\>%DMXMENU%"),
-    },
-    {
-      file: "settings_wifi.htm",
-      name: "PAGE_settings_wifi",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "function GetV() {var d=document;\n"
-          ),
-    },
-    {
-      file: "settings_leds.htm",
-      name: "PAGE_settings_leds",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "function GetV() {var d=document;\n"
-          ),
-    },
-    {
-      file: "settings_dmx.htm",
-      name: "PAGE_settings_dmx",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) => {
-        const nocss = str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "function GetV() {var d=document;\n"
-          );
-        return `
-#ifdef WLED_ENABLE_DMX
-${nocss}
-#else
-const char PAGE_settings_dmx[] PROGMEM = R"=====()=====";
-#endif
-`;
-      },
-    },
-    {
-      file: "settings_ui.htm",
-      name: "PAGE_settings_ui",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "function GetV() {var d=document;\n"
-          ),
-    },
-    {
-      file: "settings_sync.htm",
-      name: "PAGE_settings_sync",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(/function GetV().*\<\/script\>/gms, "function GetV() {\n"),
-    },
-    {
-      file: "settings_time.htm",
-      name: "PAGE_settings_time",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(/function GetV().*\<\/script\>/gms, "function GetV() {\n"),
-    },
-    {
-      file: "settings_sec.htm",
-      name: "PAGE_settings_sec",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(/\<link rel="stylesheet".*\>/gms, "")
-          .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "function GetV() {var d=document;\n"
-          ),
-    },
+//     {
+//       file: "style.css",
+//       name: "PAGE_settingsCss",
+//       prepend: "=====(<style>",
+//       append: "</style>)=====",
+//       method: "plaintext",
+//       filter: "css-minify",
+//     },
+//     {
+//       file: "settings.htm",
+//       name: "PAGE_settings",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace("%", "%%")
+//           .replace(/User Interface\<\/button\>\<\/form\>/gms, "User Interface\<\/button\>\<\/form\>%DMXMENU%"),
+//     },
+//     {
+//       file: "settings_wifi.htm",
+//       name: "PAGE_settings_wifi",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(
+//             /function GetV().*\<\/script\>/gms,
+//             "function GetV() {var d=document;\n"
+//           ),
+//     },
+//     {
+//       file: "settings_leds.htm",
+//       name: "PAGE_settings_leds",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(
+//             /function GetV().*\<\/script\>/gms,
+//             "function GetV() {var d=document;\n"
+//           ),
+//     },
+//     {
+//       file: "settings_dmx.htm",
+//       name: "PAGE_settings_dmx",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) => {
+//         const nocss = str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(
+//             /function GetV().*\<\/script\>/gms,
+//             "function GetV() {var d=document;\n"
+//           );
+//         return `
+// #ifdef WLED_ENABLE_DMX
+// ${nocss}
+// #else
+// const char PAGE_settings_dmx[] PROGMEM = R"=====()=====";
+// #endif
+// `;
+//       },
+//     },
+//     {
+//       file: "settings_ui.htm",
+//       name: "PAGE_settings_ui",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(
+//             /function GetV().*\<\/script\>/gms,
+//             "function GetV() {var d=document;\n"
+//           ),
+//     },
+//     {
+//       file: "settings_sync.htm",
+//       name: "PAGE_settings_sync",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(/function GetV().*\<\/script\>/gms, "function GetV() {\n"),
+//     },
+//     {
+//       file: "settings_time.htm",
+//       name: "PAGE_settings_time",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(/function GetV().*\<\/script\>/gms, "function GetV() {\n"),
+//     },
+//     {
+//       file: "settings_sec.htm",
+//       name: "PAGE_settings_sec",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str
+//           .replace(/\<link rel="stylesheet".*\>/gms, "")
+//           .replace(/\<style\>.*\<\/style\>/gms, "%CSS%%SCSS%")
+//           .replace(
+//             /function GetV().*\<\/script\>/gms,
+//             "function GetV() {var d=document;\n"
+//           ),
+//     },
   ],
   "HomeControlSystem/html_settings.h"
 );
@@ -329,64 +329,64 @@ const char PAGE_settings_dmx[] PROGMEM = R"=====()=====";
 writeChunks(
   "HomeControlSystem/data",
   [
-    {
-      file: "usermod.htm",
-      name: "PAGE_usermod",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) =>
-        str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
-    },
-    {
-      file: "msg.htm",
-      name: "PAGE_msg",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) => str.replace(/\<h2\>.*\<\/body\>/gms, "<h2>%MSG%</body>"),
-    },
-    {
-      file: "dmxmap.htm",
-      name: "PAGE_dmxmap",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) => `
-#ifdef WLED_ENABLE_DMX
-${str.replace(/function FM\(\)[ ]?\{/gms, "function FM() {%DMXVARS%\n")}
-#else
-const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
-#endif
-`,
-    },
-    {
-      file: "update.htm",
-      name: "PAGE_update",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-    },
-    {
-      file: "welcome.htm",
-      name: "PAGE_welcome",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-    },
-    {
-      file: "liveview.htm",
-      name: "PAGE_liveview",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-    },
+//     {
+//       file: "usermod.htm",
+//       name: "PAGE_usermod",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
+//     },
+//     {
+//       file: "msg.htm",
+//       name: "PAGE_msg",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) => str.replace(/\<h2\>.*\<\/body\>/gms, "<h2>%MSG%</body>"),
+//     },
+//     {
+//       file: "dmxmap.htm",
+//       name: "PAGE_dmxmap",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) => `
+// #ifdef WLED_ENABLE_DMX
+// ${str.replace(/function FM\(\)[ ]?\{/gms, "function FM() {%DMXVARS%\n")}
+// #else
+// const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
+// #endif
+// `,
+//     },
+//     {
+//       file: "update.htm",
+//       name: "PAGE_update",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//     },
+//     {
+//       file: "welcome.htm",
+//       name: "PAGE_welcome",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//     },
+//     {
+//       file: "liveview.htm",
+//       name: "PAGE_liveview",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//     },
     {
       file: "favicon.ico",
       name: "favicon",

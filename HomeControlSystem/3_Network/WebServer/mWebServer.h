@@ -1662,7 +1662,7 @@ void Web_Base_Page_Draw(AsyncWebServerRequest *request);
     void HandleNotFound(AsyncWebServerRequest *request);
     bool CaptivePortal(AsyncWebServerRequest *request);
     String UrlEncode(const String& text);
-    int WebSend(char *buffer);
+    // int WebSend(char *buffer);
     bool JsonWebColor(const char* dataBuf);
     bool WebCommand(void);
 

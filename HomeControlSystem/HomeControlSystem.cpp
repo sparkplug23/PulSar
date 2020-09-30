@@ -221,7 +221,6 @@ void setup(void)
   #endif
 
   // Init Json builder with memory address and size
-  JsonBuilder_Start(data_buffer2.payload.ctr,&data_buffer2.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   JsonBuilderI->Start(data_buffer2.payload.ctr,&data_buffer2.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   BufferWriterI->Start(data_buffer2.payload.ctr,&data_buffer2.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
 
@@ -240,7 +239,6 @@ void setup(void)
   int8_t result = pCONT->Tasker_Interface(FUNC_CHECK_POINTERS);
 
   if(result != FUNCTION_RESULT_SUCCESS_ID){
-    // jump into a safe state // if failed, connect to wifi, wait for ota, restart after 10 minutes
     delay(10000); // long enough to cause reset
   }  
 
@@ -300,20 +298,17 @@ void setup(void)
   // init mqtt handlers
   pCONT->Tasker_Interface(FUNC_MQTT_INIT); // phase out of handlers to only be init/start
 
-
-// Are these needed here? this is double calling
+  // Are these needed here? this is double calling
   #ifdef FORCE_TEMPLATE_LOADING_SECOND_PHASE_OUT // after settings load..? needs to be after too, think this through
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
     #ifdef ENABLE_LOG
     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
     #endif
-    
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);
   
-
   pCONT_wif->WifiConnect();
 
   #ifdef ENABLE_FUNCTION_DEBUG
