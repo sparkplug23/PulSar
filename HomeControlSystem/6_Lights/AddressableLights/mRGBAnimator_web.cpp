@@ -39,117 +39,120 @@ int8_t mRGBAnimator::Tasker_Web(uint8_t function){
 
 void mRGBAnimator::WebAppend_Root_ControlUI(){
 
+  char end_colour[8];
+  char start_colour[8];
   char buffer[50];
-  char scolor[8];
-  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
 
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Hue
-    "scn_hue",             // b - Unique HTML id
-    "#800", "#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800",  // Hue colors
-    2,               // sl2 - Unique range HTML id - Used as source for Saturation end color
-    1, 359,          // Range valid Hue
-    pCONT_iLight->HueF2N(scene.colour.H),
-    "scn_hue", 0
-  );         // h0 - Value id
+// // WRAP SLIDERS IN A CLASS
 
-  uint8_t dcolor = changeUIntScale(pCONT_iLight->BrtF2N(scene.colour.B), 0, 100, 0, 255);
-  snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
-  //   uint8_t red, green, blue;
-  //   LightHsToRgb(hue, 255, &red, &green, &blue);
-  RgbColor rgb = HsbColor(scene.colour.H,1,1);
-  snprintf_P(buffer, sizeof(buffer), PSTR("#%02X%02X%02X"), rgb.R,rgb.G,rgb.B);  // Saturation end color
+// //ADD METHOD THAT UPDATES HUE,SAT,BRT BASED ON OTHER VALUE
+// //USE INEAR GRAD TO CHANGE IT
 
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Saturation
-    "scn_sat",             // s - Unique HTML id related to eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
-    scolor, buffer,   // Brightness to max current color
-    3,               // sl3 - Unique range HTML id - Not used
-    0, 100,          // Range 0 to 100%
-    changeUIntScale(pCONT_iLight->SatF2N(scene.colour.S), 0, 255, 0, 100),
-    "scn_sat", 0
-  );         // n0 - Value id
+//   BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+  
+//   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+//     "hue",               
+//     "col_sldr",
+//     "#800", "#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800",  // Hue colors
+//     // PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
+//     "hue_sldr",              
+//     D_JSON_HUE,
+//     1, 360,  // Range 0/1 to 100% 
+//     pCONT_iLight->HueF2N(scene.colour.H)
+//   ); 
 
-  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  // Can I use "ORANGE" with RGB as warm white? 
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT,  // Cold Warm
-    "scn_clr_temp",             // a - Unique HTML id
-    "#fff", "#ff0",  // White to Yellow
-    1,               // sl1
-    153, 500,        // Range color temperature
-    200,//LightGetColorTemp(),
-    't', 0
-  );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
+//   uint8_t dcolor = changeUIntScale(pCONT_iLight->BrtF2N(scene.colour.B), 0, 100, 0, 255);
+//   snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
+//   //   uint8_t red, green, blue;
+//   //   LightHsToRgb(hue, 255, &red, &green, &blue);
+//   RgbColor rgb = HsbColor(scene.colour.H,1,1);
+//   snprintf_P(end_colour, sizeof(end_colour), PSTR("#%02X%02X%02X"), rgb.R, rgb.G, rgb.B);  // Saturation end color
 
-  BufferWriterI->Append_P(PSTR("<div> Manual White Channel </div>"));
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-    "scn_w_temp",               // c - Unique HTML id
-    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-    0, 100,  // Range 0/1 to 100%
-    BrtF2N(scene.colourW),
-    WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
-  );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
-  #endif
+//   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+//     "sat",               
+//     "col_sldr",
+//     start_colour, 
+//     end_colour, //fff should be calculated based on colour[5]
+//     "sat_sldr",              
+//     D_JSON_SAT,
+//     0, 100,  // Range 0/1 to 100% 
+//     changeUIntScale(pCONT_iLight->SatF2N(scene.colour.S), 0, 255, 0, 100)
+//   ); 
 
-  BufferWriterI->Append_P(PSTR("<div> Brightness <span class='hsb_brt_ttl'>%d %%</span></div>"), pCONT_iLight->BrtF2N(animation.brightness));
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-    "brt",               // c - Unique HTML id
-    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-    0, 100,  // Range 0/1 to 100%
-    pCONT_iLight->BrtF2N(animation.brightness),
-    WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER
-  );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+//   #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+//   // Can I use "ORANGE" with RGB as warm white? 
+//   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT,  // Cold Warm
+//   //   "scn_clr_temp",             // a - Unique HTML id
+//   //   "#fff", "#ff0",  // White to Yellow
+//   //   1,               // sl1
+//   //   153, 500,        // Range color temperature
+//   //   200,//LightGetColorTemp(),
+//   //   't', 0
+//   // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
 
+//   // BufferWriterI->Append_P(PSTR("<div> Manual White Channel </div>"));
+//   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+//   //   "scn_w_temp",               // c - Unique HTML id
+//   //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+//   //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+//   //   0, 100,  // Range 0/1 to 100%
+//   //   pCONT_iLight->BrtF2N(scene.colourW),
+//   //   WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
+//   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+//   #endif
 
-  BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-  BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
-                            100/2, 
-                            "mainbut" " " "buttonh", //class type of button
-                            "rgb_toggle", 
-                            DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
-                            PSTR("Light Power "),
-                            animation.brightness > 0 ? "ON" : "OFF"
-                          );
+//   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+//     "brt",               
+//     "col_sldr",
+//     PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
+//     "brt_sldr",              
+//     D_JSON_BRIGHTNESS,
+//     0, 100,  // Range 0/1 to 100% 
+//     pCONT_iLight->BrtF2N(animation.brightness)
+//   ); 
 
-  BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
-                            100/2, 
-                            "mainbut" " " "buttonh", //class type of button
-                            "animation_toggle", 
-                            DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
-                            PSTR("Animation  "),
-                            animation.flags.fEnable_Animation ? "Enabled" : "Paused"
-                          );
-  BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
+//   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
+//     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+//                               100/2,
+//                               "", //no span
+//                               D_CLASSNAME_BUTTON_LIGHTPOWER_CTR " " "buttonh",
+//                               D_JSON_LIGHTPOWER, 
+//                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
+//                               PSTR("Light Power "),
+//                               animation.brightness ? "On" : "Off"
+//                             );    
+//     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+//                               100/2,
+//                               "", //no span
+//                               D_CLASSNAME_BUTTON_ANIMATIONENABLE_CTR " " "buttonh",
+//                               D_JSON_ANIMATIONENABLE, 
+//                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
+//                               PSTR("Animation "),
+//                               animation.flags.fEnable_Animation ? "On" : "Off"
+//                             );                  
+//   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
-  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
-  char mode_select_ctr[10]; 
-  BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-  uint8_t option_mode_id = 0;
-  uint8_t option_mode_id_count = 4;
-  #ifndef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    option_mode_id_count = 3;
-  #endif
+  BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
-  for(uint8_t animation_mode_select_id=0;animation_mode_select_id<option_mode_id_count;animation_mode_select_id++){
-    memset(mode_select_ctr,0,sizeof(mode_select_ctr));
-    //send actual wanted mode_ids
-    switch(animation_mode_select_id){
-      case 0: option_mode_id = ANIMATION_MODE_FLASHER_ID; break;
-      case 1: option_mode_id = ANIMATION_MODE_SCENE_ID; break;
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      case 2: option_mode_id = ANIMATION_MODE_NOTIFICATIONS_ID; break;
-      #endif
-      default: option_mode_id = ANIMATION_MODE_NONE_ID; break;
-    }
+  uint8_t animation_mode_list_ids[] = {
+    ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+    ANIMATION_MODE_NOTIFICATIONS_ID,
+    #endif    
+    ANIMATION_MODE_NONE_ID
+  };
 
-    sprintf(mode_select_ctr,PSTR("animod%02d"),option_mode_id);
-    BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR, 
-                                  100/option_mode_id_count, 
-                                  "animod" " " "buttonh",
-                                  mode_select_ctr, 
-                                  DEVICE_CONTROL_BUTTON_ON_ID, 
-                                  GetAnimationModeNameByID(option_mode_id, buffer), ""
-                                );
+  BufferWriterI->Append_P(PSTR("{t}<tr>"));
+  for(uint8_t button_id=0;button_id<sizeof(animation_mode_list_ids);button_id++){
+    BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+                              100/sizeof(animation_mode_list_ids),
+                              "", //no span
+                              "animod" " " "buttonh",
+                              D_JSON_ANIMATIONMODE, 
+                              GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+                              GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+                              ""
+                            );                   
   }
   BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
   
@@ -182,7 +185,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
           );
         break;
         case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
-        case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer));   break;
+        case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
         case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
         case 6: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
         case 7:
@@ -291,52 +294,39 @@ return; }
     SetRefreshLEDs();
   }
 
-
-
-  
-  sprintf_P(arg_ctr,PSTR("scn_hue0"));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    uint16_t hue = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colour.H = pCONT_iLight->HueN2F(hue);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-    // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-    animation.mode_id = ANIMATION_MODE_SCENE_ID;
-    scene.name_id = SCENES_COLOURSCENE_ID;
+  // sprintf_P(arg_ctr,PSTR("scn_hue0"));
+  // if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+  //   pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+  //   uint16_t hue = (!strlen(tmp)) ? 0 : atoi(tmp);
+  //   scene.colour.H = pCONT_iLight->HueN2F(hue);
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //   // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+  //   animation.mode_id = ANIMATION_MODE_SCENE_ID;
+  //   scene.name_id = SCENES_COLOURSCENE_ID;
         
-    SetRefreshLEDs();
-  }
-  sprintf_P(arg_ctr,PSTR("scn_sat0"));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colour.S = pCONT_iLight->SatN2F(arg_value);
-    animation.mode_id = ANIMATION_MODE_SCENE_ID;
-    scene.name_id = SCENES_COLOURSCENE_ID;
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-    // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-    SetRefreshLEDs();
-  }
+  //   SetRefreshLEDs();
+  // }
+  // sprintf_P(arg_ctr,PSTR("scn_sat0"));
+  // if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+  //   pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+  //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+  //   scene.colour.S = pCONT_iLight->SatN2F(arg_value);
+  //   animation.mode_id = ANIMATION_MODE_SCENE_ID;
+  //   scene.name_id = SCENES_COLOURSCENE_ID;
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //   // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+  //   SetRefreshLEDs();
+  // }
 
-
-  
-  sprintf_P(arg_ctr,PSTR(WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    animation.brightness = pCONT_iLight->BrtN2F(arg_value);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-    SetRefreshLEDs();
-  }
-
-  sprintf_P(arg_ctr,PSTR("animation_toggle"));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    animation.flags.fEnable_Animation ^= 1;    
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "fEnable_Animation=%d"),animation.flags.fEnable_Animation);    
-  }
+  // sprintf_P(arg_ctr,PSTR(WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER));
+  // if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+  //   pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+  //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+  //   animation.brightness = pCONT_iLight->BrtN2F(arg_value);
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+  //   SetRefreshLEDs();
+  // }
 
   sprintf_P(arg_ctr,PSTR("pal_set"));
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
@@ -345,51 +335,6 @@ return; }
     animation.palette_id = arg_value;
     SetRefreshLEDs();
   }
-
-
-
-
-  // // check palette selector
-  // sprintf(arg_ctr,"relay0_toggle\0");
-  // if (pCONT_web->pWebServer->hasParam("relay0_toggle")) {
-  //   pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
-  //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-  //   // animation.palette = arg_value;
-
-  //   ExecuteCommandPower(0,POWER_TOGGLE,SRC_MQTT);
-
-  //   // update_all = true; //refresh all
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
-  // }
-
-  for(uint8_t animation_mode_options_id=0;animation_mode_options_id<ANIMATION_MODE_LENGTH_ID;animation_mode_options_id++){
-    
-    sprintf(arg_ctr,"%s%02d\0","animod",animation_mode_options_id);
-
-    if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-      pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-      arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-      // animation.brightness = BrtN2F(arg_value);
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,animation_mode_options_id);
-      // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-      // SetRefreshLEDs();
-      animation.mode_id = animation_mode_options_id;
-
-      if(animation.mode_id == ANIMATION_MODE_SCENE_ID){
-        scene.name_id = SCENES_COLOURSCENE_ID;    // only needed until #Idea56
-      }
-      animation.flags.fForceUpdate=true;
-
-      // ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
-    }
-
-  }
-
-
-
-
-
-
 
 } //end function
 
@@ -2424,12 +2369,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < ANIMATION_MODE_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
-            GetAnimationModeNameByID(row_id, buffer), 
-            GetAnimationModeNameByID(row_id, buffer)
+            GetAnimationModeNameByID(row_id, buffer, sizeof(buffer)), 
+            GetAnimationModeNameByID(row_id, buffer, sizeof(buffer))
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",GetAnimationModeName(buffer));
+      JsonBuilderI->Add("evl",GetAnimationModeName(buffer, sizeof(buffer)));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2589,10 +2534,10 @@ void mRGBAnimator::WebAppend_Root_Draw_RGBPalette(){
 void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRequest *request)
 {
 
-  uint16_t leds_max_to_show = STRIP_SIZE_MAX<MAX_LIVE_LEDS?STRIP_SIZE_MAX:MAX_LIVE_LEDS;
+  uint16_t leds_max_to_show = strip_size<MAX_LIVE_LEDS?strip_size:MAX_LIVE_LEDS;
   uint8_t number_of_pixels = map(
-   pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,STRIP_SIZE_MAX); //only serve every n'th LED if count over MAX_LIVE_LEDS
-  uint8_t pixels_to_iter = ((STRIP_SIZE_MAX-1)/number_of_pixels)+1;
+   pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  uint8_t pixels_to_iter = ((strip_size-1)/number_of_pixels)+1;
 
   char type_ctr[5];
   switch(pCONT_iLight->liveview.show_type){

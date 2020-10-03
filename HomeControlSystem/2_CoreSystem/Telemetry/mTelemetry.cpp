@@ -122,8 +122,6 @@ void mTelemetry::Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerR
 }
 
 
-
-
 void mTelemetry::Init(){
   memset(&hardwarestatus,0,sizeof(hardwarestatus));
   hardwarestatus.len += sprintf(hardwarestatus.ctr,"Restarted");

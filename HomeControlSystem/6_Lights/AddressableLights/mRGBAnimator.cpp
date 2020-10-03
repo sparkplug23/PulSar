@@ -721,6 +721,10 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,scene.colour.H);
     #endif
     Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,scene.colour.H);
+    
+    animation.mode_id = ANIMATION_MODE_SCENE_ID;
+    scene.name_id = SCENES_COLOURSCENE_ID;
+
     isserviced++;
   }
 
@@ -734,6 +738,10 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,scene.colour.S);
     #endif
     Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,scene.colour.S);
+    
+    animation.mode_id = ANIMATION_MODE_SCENE_ID;
+    scene.name_id = SCENES_COLOURSCENE_ID;
+
     isserviced++;
   }
 
@@ -747,6 +755,7 @@ int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
     #endif
     Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
+    
     isserviced++;
   }
 
@@ -3020,10 +3029,10 @@ void mRGBAnimator::AddToJsonObject_AddHardware(JsonObject root){
 
 
 
-const char* mRGBAnimator::GetAnimationModeName(char* buffer){
-  return GetAnimationModeNameByID(animation.mode_id, buffer);
+const char* mRGBAnimator::GetAnimationModeName(char* buffer, uint16_t buflen){
+  return GetAnimationModeNameByID(animation.mode_id, buffer, buflen);
 }
-const char* mRGBAnimator::GetAnimationModeNameByID(uint8_t id, char* buffer){
+const char* mRGBAnimator::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
   switch(id){
     default:
     case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
@@ -3755,6 +3764,11 @@ int8_t mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   animation.flags.fForceUpdate = true;
   data_buffer2.isserviced += isserviced;
 
+  
+  if(isserviced){ //update string, move to shared place
+    SetRefreshLEDs(); // implement in 1 second 
+  }
+
   // t_mqtthandler_status_animation.fSendNow = true;
 
   return isserviced;
@@ -3764,18 +3778,24 @@ int8_t mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 int8_t mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
 //   Serial.println("DISABLED");
 // return 0;
+
+  int8_t isserviced = 0;
     // Serial.println("parsesub_CheckAll1"); Serial.flush();
-  parsesub_ModeManual(obj);
+  isserviced += parsesub_ModeManual(obj);
     // Serial.println("parsesub_CheckAll2"); Serial.flush();
-  parsesub_ModeAmbilight(obj);
+  isserviced += parsesub_ModeAmbilight(obj);
     // Serial.println("parsesub_CheckAll3"); Serial.flush();
-  parsesub_ModeAnimation(obj);
+  isserviced += parsesub_ModeAnimation(obj);
     // Serial.println("parsesub_CheckAll4"); Serial.flush();
-  parsesub_ModeScene(obj);
+  isserviced += parsesub_ModeScene(obj);
     // Serial.println("parsesub_CheckAll5"); Serial.flush();
-  parsesub_Flasher(obj);
+  isserviced += parsesub_Flasher(obj);
     // Serial.println("parsesub_CheckAll6"); Serial.flush();
 
+
+  if(isserviced){ //update string, move to shared place
+    SetRefreshLEDs(); // implement in 1 second 
+  }
 }
 
 
@@ -3848,6 +3868,19 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
     }
   }
 
+
+  if(!obj[D_JSON_ANIMATIONENABLE].isNull()){ 
+    const char* onoff = obj[D_JSON_ANIMATIONENABLE];
+    uint8_t state = pCONT_sup->GetStateNumber(onoff);
+    if(state==2){
+      animation.flags.fEnable_Animation ^= 1;
+    }else{
+      animation.flags.fEnable_Animation = state;
+    }
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "fEnable_Animation=%d"),animation.flags.fEnable_Animation);    
+  }
+
+
   DEBUG_LINE;
 
   // if(obj.containsKey("hue")){
@@ -3895,7 +3928,6 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 // #endif
 
   DEBUG_LINE;
-
 
   return isserviced;
 
@@ -3966,13 +3998,14 @@ DEBUG_LINE;
 
   // }
     
-  
+
+  //LEGACY METHOD  
   if(!obj[D_JSON_MODE].isNull()){ 
     const char* mode = obj[D_JSON_MODE];
     if((tmp_id=GetAnimationModeIDbyName(mode))>=0){
       animation.mode_id = tmp_id;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetAnimationModeName(buffer));
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetAnimationModeName(buffer, sizeof(buffer)));
      #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
       isserviced++;
@@ -3980,6 +4013,23 @@ DEBUG_LINE;
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
     }
   }
+  //NEW METHOD  
+  if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
+    const char* mode = obj[D_JSON_ANIMATIONMODE];
+    if((tmp_id=GetAnimationModeIDbyName(mode))>=0){
+      animation.mode_id = tmp_id;
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,GetAnimationModeName(buffer, sizeof(buffer)));
+     #endif
+      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
+      isserviced++;
+    }else{
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
+    }
+  }
+
+
+
 
 
   if(!obj[D_JSON_RGB_COLOUR_ORDER].isNull()){ 
@@ -4105,7 +4155,7 @@ DEBUG_LINE;
   }
 
   if(!obj[D_JSON_BRIGHTNESS].isNull()){
-    uint16_t brt = obj[D_JSON_BRIGHTNESS];
+    uint8_t brt = obj[D_JSON_BRIGHTNESS];
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
     #endif
@@ -4114,6 +4164,7 @@ DEBUG_LINE;
     Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,animation.brightness);
     isserviced++;
   }
+  
 
   if(!obj[D_JSON_PIXELSGROUPED].isNull()){
     animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
@@ -4153,10 +4204,12 @@ DEBUG_LINE;
     #endif
   }
 
-  animation_override.time_ms = 1000; // implement in 1 second 
+  //animation_override.time_ms = 1000; // implement in 1 second 
 
 
 // #endif
+
+
 
 DEBUG_LINE;
 

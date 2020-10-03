@@ -188,6 +188,8 @@ void mRelays::WebAppend_Root_Add_Buttons(){
 
 Serial.println("WebAppend_Root_Add_Buttons");
 
+
+  #ifndef ENABLE_DEVFEATURE_RELAY_CONTROLS
   JsonBuilderI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
   for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
     memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
@@ -201,6 +203,40 @@ Serial.println("WebAppend_Root_Add_Buttons");
                                 );
   }
   JsonBuilderI->Append_P("%s",PSTR("</tr>{t2}"));
+  #endif
+
+  #ifdef ENABLE_DEVFEATURE_RELAY_CONTROLS
+
+    char button_key_ctr[30];
+    char button_text_ctr[30];
+    char relay_name_ctr[30];
+    char dlist_json_template[100];
+    
+    BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Relay Controls"),"");
+
+    BufferWriterI->Append_P(PSTR("{t}<tr>"));
+      for(uint8_t button_id=0;button_id<relays_connected;button_id++){
+        // Create json template
+        snprintf(dlist_json_template, sizeof(dlist_json_template), 
+          "{\\\"" D_JSON_POWERNAME "\\\":\\\"%s\\\",\\\"" D_JSON_ONOFF "\\\":\\\"%s\\\"}",
+          GetRelayNamebyIDCtr(button_id, relay_name_ctr, sizeof(relay_name_ctr)),
+          "%s"
+        );
+        // Build button
+        BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
+                                  100/relays_connected,
+                                  "", 
+                                  "buttonh " "reltog",
+                                  dlist_json_template, 
+                                  D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR, //button_value_ctr
+                                  GetRelayNameWithStateLongbyIDCtr(button_id, button_text_ctr, sizeof(button_text_ctr)),
+                                  ""
+                                );
+      }
+    BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+
+  #endif
+
 }
 
 
@@ -262,7 +298,7 @@ void mRelays::WebAppend_Root_Status_Table(){
     switch(row){
       default:
         char buffer[20]; memset(buffer,0,sizeof(buffer));
-        JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer));
+        JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
         JsonBuilderI->Add("bc",GetRelay(row) ? "#00ff00" : "#ee2200");
         
         // pCONT_web->AppendBuffer_PI2(PSTR("{\"id\":%d,\"bc\":\"%s\",\"ih\":\"%s\"},"),row,
@@ -316,6 +352,7 @@ void mRelays::WebPage_Root_SendStatus(){
 void mRelays::WebCommand_Parse(void)
 {
   
+  #ifndef ENABLE_DEVFEATURE_RELAY_CONTROLS
   if(pCONT_web->request_web_command == nullptr){ return; }
 
   char tmp[100];
@@ -339,8 +376,7 @@ void mRelays::WebCommand_Parse(void)
     }
 
   }
-
-
+  #endif
 }
 
 
@@ -374,7 +410,7 @@ void mRelays::WebCommand_Parse(void)
 // }
 
 
-int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){ //parsesub_TopicCheck_JSONCommand
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/relays")>=0){
@@ -392,8 +428,9 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   AddLog_P(LOG_LEVEL_INFO,PSTR("mRelays::parsesub_TopicCheck_JSONCommand"));
 
-  uint8_t name_num=-1,state=-1;    
+  uint8_t name_num=0,state=-1;    
 
+  // LEGACY METHOD
   if(!obj[F(D_JSON_NAME)].isNull()){
     if(const char* value = obj["name"]){
       name_num = GetRelayIDbyName(value);
@@ -401,9 +438,16 @@ void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     if(obj["name"].is<int>()){
       name_num  = obj["name"];
     }
+    AddLog_P(LOG_LEVEL_WARN, PSTR("LEGACY: Relay method \"name\" changing to \"PowerName\""));
   }
-  else{
-    name_num = 0; // assume relay 0
+
+  if(!obj[F(D_JSON_POWERNAME)].isNull()){
+    if(const char* value = obj[D_JSON_POWERNAME]){
+      name_num = GetRelayIDbyName(value);
+    }else 
+    if(obj[D_JSON_POWERNAME].is<int>()){
+      name_num  = obj[D_JSON_POWERNAME];
+    }
   }
 
   if(!obj[F(D_JSON_ONOFF)].isNull()){
@@ -510,7 +554,9 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
   }
 
   char buffer_internal[50];
-  sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal), onoffctr);
+  sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal, sizeof(buffer_internal)), onoffctr);
+
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
 
   return buffer;
 }
@@ -530,13 +576,9 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   if(device_id_found == -1){
     // for(int ii=0;ii<pCONT_set->GetDeviceNameCount(D_MODULE_DRIVERS_RELAY_ID);ii++){
     //   AddLog_P(LOG_LEVEL_INFO, PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
-
     // }
     AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\nsearching=%s"),c);
-AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
-
-
-
+    AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
   }
 
 

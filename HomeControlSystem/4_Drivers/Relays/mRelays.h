@@ -143,8 +143,8 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     uint8_t GetRelay(uint8_t num);
     void SetRelay(uint8_t num, uint8_t state);
 
-    const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length = 50);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
-   const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length = 50);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
+    const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
+   const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
     int8_t GetRelayIDbyName(const char* c);
 
     int8_t GetDeviceIDbyName(const char* c);

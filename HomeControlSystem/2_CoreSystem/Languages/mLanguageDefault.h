@@ -1348,7 +1348,7 @@
 #define D_JSON_BRT_RGB "brt_rgb"
 #define D_JSON_BRT_CCT "brt_cct"
 #define D_JSON_WHITE "white"
-#define D_JSON_BRIGHTNESS "brightness"
+#define D_JSON_BRIGHTNESS "Brightness"
 #define D_JSON_BRIGHTNESS_PERCENTAGE "brightness_percentage"
 #define D_JSON_CLIMATE "climate"
 #define D_JSON_CLASSID "ClassID"
@@ -1392,8 +1392,15 @@
 #define D_JSON_MODULEID "ModuleID"
 #define D_JSON_MINUTES_ON "minutes_on"
 #define D_JSON_NAME "name"
+
+// #define D_JSON_SCENENAME "SceneName"
+#define D_JSON_ANIMATIONMODE "AnimationMode"
+
 #define D_JSON_NOTIFICATIONS "Notifications"
 
+#define D_JSON_POWERNAME "PowerName"
+
+#define D_JSON_ANIMATIONENABLE "AnimationEnable"
 
 #define D_JSON_ON "On"
 #define D_JSON_ONTIME "ontime"

@@ -115,14 +115,15 @@ void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
 class mRGBAnimator{
   private:
     // RgbTypeColor needs to be a pointer type so I can pass as single byte 3/4/5 colour types
-    void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
-    RgbTypeColor GetPixelColor(uint16_t indexPixel);
+    
   public:
     //#define D_MODULE_TOPIC_NAME "pixels"
     mRGBAnimator(){};
     void pre_init(void);
     void init(void);
-
+    
+void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
+    RgbTypeColor GetPixelColor(uint16_t indexPixel);
     
 
     enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
@@ -265,8 +266,8 @@ class mRGBAnimator{
       ANIMATION_MODE_LENGTH_ID
     };             
     int8_t GetAnimationModeIDbyName(const char* c);
-    const char* GetAnimationModeName(char* buffer);
-    const char* GetAnimationModeNameByID(uint8_t id, char* buffer);
+    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
+    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
   
     /**************
      * Predefined SCENES by name

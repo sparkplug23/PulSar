@@ -894,16 +894,56 @@
             <div class="container_4"></div>
             <div class="container_5"></div>
             <div class="container_6"></div>
-<!-- 
+
+            
+  <!-- const char HTTP_MSG_SLIDER_GRADIENT3b[] =
+  <div id='brt' class='r' style='background-image:linear-gradient(to right,#000,#eee);'>
+    <input id='sl42' type='range' min='0' max='100' value='50' onchange='lc3("test",value)'>
+    </div>
+
+
+    <div id='brt_sldr_bg' class='col_sldr' style='background-image:linear-gradient(to right,rgb(236, 17, 17),#eee);'>
+        <input id='brt_sldr' data-json_keys="Brightness" type='range' min='0' max='100' value='50'>
+    </div>
+
+
+
+    <div id='%s' class='%s' style='background-image:linear-gradient(to right,%s,%s)'>
+        <input id='%s' data-json_keys="%s" type='range' min='%d' max='%d' value='%d'>
+    </div>
+         -->
+
+
+<!-- BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3b,  // Brightness - Black to White
+  "brt",               // c - Unique HTML id
+  PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+  0, 100,  // Range 0/1 to 100%
+  pCONT_iLight->BrtF2N(animation.brightness),
+  WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER
+);           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp)); -->
+
+
+
+
+
+<!-- <button class="buttonh" data-json_keys="FanSpeed" value="0">Off keys S</button> -->
+
+            <!-- 
             <b>Scene Colour</b>
             <div id="scn_hue" style="background-image:linear-gradient(to right,#800,#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800);">
                 <input id="sl2" type="range" min="1" max="359" value="15">
             </div>
-             -->
+            -->    
 
-    
+            <!-- <button class="buttonh" data-json_template="{'test':'%s'}" value='0'>Off template</button>
 
-             <!-- <button id='test1' class="buttonh fanbut" value='0'>Off</button> -->
+
+            <button class="buttonh" data-json_keys="Fan,FanSpeed" value="0">Off keys M</button> -->
+
+<!-- 
+            <button class="button" id="1" value="0">Off new</button> -->
+
 
             <div id="l1" name="l1">
                 <!-- phase out -->
@@ -1477,65 +1517,78 @@ _C.style.setProperty('--n', N);
 window.addEventListener('resize', size, false);
 
 // Buttons inside main container to have listener
-_C.addEventListener('click', function() {
+
+
+// window.addEventListener('resize', size, false);
+
+// _C.addEventListener('click', function() {
+
+
+    // _C.addEventListener('click', function(){ user_command_json(event) }, false);
+    _C.addEventListener('click', user_command_json, false);
+// _C.addEventListener('mouseup', function(){ user_command_json(event) }, false);
+
+
+
+function user_command_json(event){
+    var json_payload = "";
+
+    console.log('event', event);
+
+    // Template method
+    if(event.target.dataset.json_template){
+        console.log('event.target.dataset.json_template',event.target.dataset.json_template);
+        json_payload = event.target.dataset.json_template.replace(/%(s|d|0\d+d)/g,event.target.value);
+        json_payload = json_payload.replace(/'/g,"\"")
+        console.log('json_payload',json_payload)
+    }else
+    // Encoded method
+    if(event.target.dataset.json_keys){
+        console.log('event.target.dataset.json_keys',event.target.dataset.json_keys);
+        
+        var key = event.target.dataset.json_keys;
+        var value = event.target.value;
+        var object = {};
+
+        // //function start
+        if(key.includes(",")){
+            console.log('multilevel');
+            var new_key = key.split(',');
+            var subobject = {};
+            //check if it exists, then append
+            if(object[new_key[0]]){
+                console.log('multilevel key existed');
+                var old_object = object[new_key[0]];
+                old_object[new_key[1]] = value;                    
+                object[new_key[0]] = old_object;
+            }else{
+                subobject[new_key[1]] = value;                       
+                object[new_key[0]] = subobject;
+            }
+        }else{                        
+            console.log('singlelevel');
+            object[key] = value;
+        }
+        //function end
+
+        json_payload = JSON.stringify(object);
+        console.log('button json_payload', json_payload);
+    }
+
+    var url_command = '/json_command.json'
+    var method = 'POST';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, url_command, true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(json_payload);
     
-    var id = event.target.id;
-    console.log('button id',id);
-
-    console.log('button classname',event.target.className);
-
-
-    var key = id;
-    var value = event.target.value;
-
-
-    var object = {};
-                // const formData = new FormData(form);
-                // formData.forEach(function(value, key){
-                    //multi level
-
-                    
-
-
-                    // //function start
-                    if(key.includes(",")){
-                        console.log('multilevel');
-                        var new_key = key.split(',');
-                        var subobject = {};
-                        //check if it exists, then append
-                        if(object[new_key[0]]){
-                            console.log('multilevel key existed');
-                            var old_object = object[new_key[0]];
-                            old_object[new_key[1]] = value;                    
-                            object[new_key[0]] = old_object;
-                        }else{
-                            subobject[new_key[1]] = value;                       
-                            object[new_key[0]] = subobject;
-                        }
-                    }else{                        
-                        console.log('singlelevel');
-                        object[key] = value;
-                    }
-                    //function end
-
-                    
-                // });
-                var json2 = JSON.stringify(object);
-                console.log('button json', json2);
-
-                var url_command = '/json_command.json'
-                var method = 'POST';
-
-                var xhr = new XMLHttpRequest();
-                xhr.open(method, url_command, true);
-                xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-                xhr.send(json2);
-
-
-
+}
 
     
-}, false);
+// }
+
+
 
 // _C.addEventListener('mousedown', lock, false);
 
@@ -1701,6 +1754,8 @@ _C.addEventListener('click', function() {
             .replace(/{t2}/g,"</table>")
             .replace(/{oc}/g,"'onclick='")
             .replace(/{id}/g,"id='")
+            .replace(/{djk}/g,"data-json_keys='")
+            .replace(/{djt}/g,"data-json_template='")
             .replace(/{va}/g,"value='")
             .replace(/{dc}/g,"<div class='")
             .replace(/}1/g,"</td></tr><tr><th>")

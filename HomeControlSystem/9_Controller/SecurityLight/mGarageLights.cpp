@@ -136,7 +136,7 @@ void mGarageLights::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
   }else{
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    // Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
     return ; // Unknown device, can't execute
   }
 
@@ -194,18 +194,23 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
   // Automatic
   if(pir_detect_copy.ischanged){ pir_detect_copy.ischanged=false;
 
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mGarageLights::SubTask_Light");
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mGarageLights::SubTask_Light");
 
     //driveway
     if(pir_detect_copy.isactive && light_control_driveway.fEnableAutomaticLight){
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
+
+      #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
       if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
+      #endif
         SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
+      #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
       }else{
         //SetLight(LIGHT_DRIVEWAY_ID,OFF);
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"NOT SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
       }
+      #endif
     }
 
     // Clear copy struct
@@ -231,6 +236,7 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
   // for now, use openhab remote control for schedules
   
 
+  // MOVE THIS IN TO RELAYS, NOT SECURITY LIGHTS, USE GETTERS AND SETTERS FOR RELAYS
   // no longer named structs, needs to be veriable, timed goes by relay
   if(mSupport::TimeReached(&tSavedSeconds,1000)){
     if(light_control_driveway.seconds_on>0){ 
@@ -319,31 +325,32 @@ void mGarageLights::SetLight(uint8_t light_id, uint8_t state){
 uint8_t mGarageLights::ConstructJSON_Settings(uint8_t json_method){
 
   memset(&data_buffer2,0,sizeof(data_buffer2));
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  root["tbd"] = 0;
+  // root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
-return 1;
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
+  return 0;
+  
 }
 
 uint8_t mGarageLights::ConstructJSON_Sensor(uint8_t json_level){
 
   memset(&data_buffer2,0,sizeof(data_buffer2));
 
-  uint8_t ischanged=false;
+  // uint8_t ischanged=false;
 
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  root["tbd"] = 0;
+  // root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
 
-  return 1;
+  return 0;
 
 }
 

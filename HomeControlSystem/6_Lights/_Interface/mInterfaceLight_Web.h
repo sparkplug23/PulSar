@@ -12,5 +12,9 @@ void GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b,uin
 void WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest *request);
 
 
+void WebAppend_Root_Sliders();
+
+void WebAppend_Root_ControlUI();
+
 #endif
 #endif

@@ -30,7 +30,7 @@
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-// #define DEVICE_RGBMICRO2 //projector
+#define DEVICE_RGBMICRO2 //projector
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT
@@ -43,7 +43,7 @@
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
 **/
 // #define DEVICE_GARAGELIGHT
-#define DEVICE_GARAGELIGHT2
+// #define DEVICE_GARAGELIGHT2
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_BEDROOMBLINDS
@@ -52,7 +52,7 @@
 //#define DEVICE_GAZEBCON
 // #define DEVICE_HEATING
 // #define DEVICE_KITCHENPANEL
-//#define DEVICE_LANDINGPANEL
+// #define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 // #define DEVICE_BLACKDOORBELL
 // #define DEVICE_BEDROOM_CEILINGFAN
@@ -1143,7 +1143,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  // #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BME
   
   #define USE_MODULE_SENSORS_MOTION
 
@@ -1196,8 +1196,6 @@
       "]"
     "}"
   "}";
-
-  
 
 #endif
 
@@ -2586,6 +2584,8 @@
   
   #define USE_MODULE_SENSORS_SWITCHES
 
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLS "v78.23.10+" //only remove when all device exceed this
+
   // motion comes from switch inputs, which I need to write. Actually, all "motion" should use switch inputs!
   #define USE_MODULE_SENSORS_MOTION
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
@@ -2647,7 +2647,11 @@
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLS "v78.23.10+" //only remove when all device exceed this
+
   // #define ENABLE_BUG_TRACING
+
+  #define DISABLE_MOTIONLIGHT_TIMED_LINK
   
   #define USE_MODULE_SENSORS_SWITCHES
 
@@ -2866,9 +2870,15 @@
     
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
+
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLS "v78.23.10+" //only remove when all device exceed this
   
   #define USE_MODULE_DRIVERS_PWM
   #define USE_MODULE_CUSTOM_PWM_FAN
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 4
+  #define USE_MODULE_DRIVERS_INTERFACE
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -2882,10 +2892,39 @@
       #ifdef USE_MODULE_DRIVERS_PWM
       "\"D1\":\"" D_GPIO_FUNCTION_FAN_PWM1_CTR   "\","    //custom class for fans, but uses driver pwm class
       #endif
+
+      
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+
+
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
+
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Table"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Window"
+  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Window1"
+  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Window2"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
+        "]"
+    "}"
+  "}";
+
+
 
 #endif
 

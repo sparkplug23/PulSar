@@ -225,17 +225,17 @@ int8_t mSwitches::Tasker(uint8_t function){
     break;
     case FUNC_EVERY_SECOND:
     
-      pinMode(13,INPUT);
-      pinMode(5,INPUT);
-      AddLog_P(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
-        digitalRead(13),digitalRead(5),
-        pCONT_set->pin[GPIO_SWT1_NP_ID],pCONT_set->pin[GPIO_SWT2_NP_ID],
-        pCONT_set->pin[GPIO_SWT1_ID],pCONT_set->pin[GPIO_SWT2_ID]
-      );
-      AddLog_P(LOG_LEVEL_INFO,PSTR("Switches(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
-      switches_found,
-      switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
-      switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
+      // pinMode(13,INPUT);
+      // pinMode(5,INPUT);
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
+      //   digitalRead(13),digitalRead(5),
+      //   pCONT_set->pin[GPIO_SWT1_NP_ID],pCONT_set->pin[GPIO_SWT2_NP_ID],
+      //   pCONT_set->pin[GPIO_SWT1_ID],pCONT_set->pin[GPIO_SWT2_ID]
+      // );
+      // AddLog_P(LOG_LEVEL_INFO,PSTR("Switches(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
+      // switches_found,
+      // switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
+      // switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
     break;
     case FUNC_JSON_COMMAND: 
     

@@ -50,6 +50,7 @@ uint8_t mPWMFan::GetFanspeed(void)
 uint8_t mPWMFan::GetLightState(void)
 {
   // return pCONT_mry->GetRelay(0);
+  return 0;
 }
 void mPWMFan::SetLightState(uint8_t state)
 {
@@ -322,19 +323,21 @@ int8_t mPWMFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 }
 int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
 
+  Serial.println("mPWMFan::parsesub_Commands(JsonObjectConst obj)");
+
   int8_t isserviced = 0;
 
-  // if(obj.containsKey(D_JSON_LIGHTPOWER)){
-  //   int light = obj[D_JSON_LIGHTPOWER];
-  //   if(light == 2){
-  //     SetLightState(!GetLightState());
-  //   }else{
-  //     SetLightState(light);      
-  //   }
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
-  //   isserviced++;  
-  // }
+  if(obj.containsKey(D_JSON_LIGHTPOWER)){
+    int light = obj[D_JSON_LIGHTPOWER];
+    // if(light == 2){
+    //   SetLightState(!GetLightState());
+    // }else{
+    //   SetLightState(light);      
+    // }
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+    // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
+    isserviced++;  
+  }
 
   // FanSpeed = 0,1,2,3 ie off,low,med,high
   if(obj.containsKey(D_JSON_FANSPEED)){
@@ -427,7 +430,7 @@ int8_t mPWMFan::Tasker_Web(uint8_t function){
 
       BufferWriterI->Append_P(PSTR("{t}<tr>"));
         for(uint8_t button_id=0;button_id<4;button_id++){
-          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
+          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2, 
                                     100/4,
                                     "", 
                                     "buttonh",
@@ -438,6 +441,59 @@ int8_t mPWMFan::Tasker_Web(uint8_t function){
                                   );
         }
       BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+
+//new json template test
+
+      // create command list
+      char dlist2[200]; memset(dlist2,0,sizeof(dlist2));
+      // pCONT_sup->AppendDList(dlist2, "{\\\"device\\\":\\\"Driveway Light\\\",\\\"onoff\\\":\\\"%s\\\"}");
+      
+      pCONT_sup->AppendDList(dlist2, sizeof(dlist2), "{\\\"" D_JSON_LIGHTPOWER "\\\":\\\"%s\\\",\\\"" D_JSON_FANSPEED "\\\":\\\"%s\\\"}","2","%s");
+      pCONT_sup->AppendDList(dlist2, sizeof(dlist2), "{\\\"device\\\":\\\"%s\\\",\\\"onoff\\\":\\\"%s\\\"}","Garden Light","%s");
+      // pCONT_sup->AppendDList(dlist2, sizeof(dlist2), "%s %s","Garden Light 2","test");
+      // pCONT_sup->AppendDList_P(dlist2, sizeof(dlist2), "{\\\"device\\\":\\\"%s\\\",\\\"onoff\\\":\\\"%s\\\"}\0","Garden Light 2","%s");
+
+      Serial.println(dlist2);
+
+      pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 0, dlist2);
+      AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+
+      pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 1, dlist2);
+      AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+
+      // break;
+      uint8_t button_values2[2] = {2, 2}; //toggle, fanspeed0-3
+          
+      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("JSON Test"),"");
+
+      BufferWriterI->Append_P(PSTR("{t}<tr>"));
+        for(uint8_t button_id=0;button_id<2;button_id++){
+          /*"<td{sw1}
+          %d%%'{cs}
+          %s'{bc}'
+          %s'{djt}
+          %s'{va}
+          %s'>
+          %s
+          %s{bc2}"*/
+          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
+                                    100/4,
+                                    "", 
+                                    "buttonh",
+                                    // dlist2,
+                                    pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist2), 
+                                    pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values2[button_id]),
+                                    pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls_pwm),
+                                    ""
+                                  );
+        }
+      BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+
+
+
+
+
+
 
     }break;
   }

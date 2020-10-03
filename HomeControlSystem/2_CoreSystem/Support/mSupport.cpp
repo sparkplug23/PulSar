@@ -48,6 +48,18 @@ uint8_t getIdentifierID(const char* x){ return IDENTIFIER_STRING_ID; }
 void mSupport::AppendDList(char* buffer, const char* to_add){
   sprintf(buffer+strlen(buffer), "%s|", to_add);
 }
+void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...)
+{
+  uint16_t length = strlen(buffer);
+  if(length >= buflen){ return; }
+  va_list arg;
+  Serial.println(buffer);
+  va_start(arg, formatP);  
+  length += vsnprintf(buffer+length, buflen, formatP, arg);
+  va_end(arg);  
+  length += snprintf(buffer+length, buflen, "|");
+}
+
 
 
 bool mSupport::JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged){
@@ -1634,6 +1646,9 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   }
   else if (GetCommandCode(command, sizeof(command), state_text, kOptionBlinkOff) >= 0) {
     state_number = STATE_NUMBER_BLINK_OFF_ID;
+  }else{
+    //c_str to number
+    state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);

@@ -59,6 +59,10 @@ enum DEVICE_CONTROL_BUTTON_IDS{
   DEVICE_CONTROL_BUTTON_TOGGLE_ID=2
 };
 
+#define D_DEVICE_CONTROL_BUTTON_OFF_CTR "0"
+#define D_DEVICE_CONTROL_BUTTON_ON_CTR "1"
+#define D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR "2"
+
 #define SEND_MINIMAL_STYLESHEET
 #define SEND_MINIMAL_STYLESHEET1
 // #define SEND_MINIMAL_STYLESHEET2
@@ -118,7 +122,30 @@ DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_HANDLE_IHR)   "{sw}%d%%'
 DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR)   
 "<td{sw1}%d%%'{cs}%s'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
 
+DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2)   
+"<td{sw1}%d%%'{cs}%s'{bc}'%s'{djk}%s'{va}%s'>%s%s{bc2}";
 
+DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2)   
+"<td{sw1}%d%%'{cs}%s'{bc}'%s'{djt}%s'{va}%s'>%s%s{bc2}";
+
+
+/*
+there are template strings
+const total = 12.56
+const name = 'devoid'
+
+console.log(`Hello ${name}, your total is ${total}!`)
+if it's not a string literal, then no, not built-in. If you can control them, a pretty simple way to do it is with a regex
+function interpolate(str, ...args) {
+    return str.replace(/{{(\d+)}}/g, (_, index) => args[Number(index)])
+}
+
+const someString = "Hello {{0}}, your change is ${{2}} and your total was ${{1}}"
+console.log(interpolate(someString, 'devoid', 8.68, 1.32))
+or have it take an array instead of being variadic, if you like
+or use an object and keys there, that would be pretty similar
+for something more complex, maybe a template engine would be helpful. ejs is an example of that
+*/
 const char HTTP_TABLE100[] PROGMEM =
   "<table style='width:100%%'>";
 const char HTTP_TABLEEND[] PROGMEM =
@@ -140,6 +167,15 @@ const char HTTP_MSG_SLIDER_TITLE_JUSTIFIED[] PROGMEM =
   "<div><span class='p'>%s</span><span class='q'>%s</span></div>";
 const char HTTP_BTN_MAIN_VARIABLE_ACTION_NAME[] PROGMEM =
   "<p><form action='%s' method='get'><button>%s</button></form></p>";
+
+
+DEFINE_PGM_CTR(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY)
+  "<div id='%s' class='%s' style='background-image:linear-gradient(to right,%s,%s)'>"
+    "<input id='%s' data-json_keys='%s' type='range' min='%d' max='%d' value='%d'>"
+  "</div>";
+
+
+
 
   
 

@@ -217,6 +217,7 @@ char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t in
 bool JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged = false);
 
 void AppendDList(char* buffer, const char* to_add);
+void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
 
     uint32_t tSaved_SlowAllTemplatesOnSerial;
     void SlowAllTemplatesOnSerial();

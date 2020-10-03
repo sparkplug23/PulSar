@@ -191,44 +191,44 @@ class JsonBuilder{
 
 }
 
-    template <typename T, typename U>
-    void Array_AddValue(T* value_arr, U value_arr_len){
+  template <typename T, typename U>
+  void Array_AddValue(T* value_arr, U value_arr_len){
   
-  if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)){ return; }
+    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)){ return; }
 
-  for(uint16_t index=0;index<value_arr_len;index++){
+    for(uint16_t index=0;index<value_arr_len;index++){
 
-    // Add comma for any value after first
-    if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
+      // Add comma for any value after first
+      if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
 
-    if(is_number_type<T>::value){ 
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
-    }else
-    if(is_char_type<T>::value){   
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
-    }else
-    if(is_string_type<T>::value){ 
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
-    }else
-    if(is_float_type<T>::value){ 
-      float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
-      char ctr[10]; dtostrfd2(f,3,ctr);
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
+      if(is_number_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
+      }else
+      if(is_char_type<T>::value){   
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
+      }else
+      if(is_string_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
+      }else
+      if(is_float_type<T>::value){ 
+        float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
+        char ctr[10]; dtostrfd2(f,3,ctr);
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
+      }
     }
+
   }
 
-}
+  template <typename T, typename U>
+  void Array_AddArray(const char* key, T* value_arr, U value_arr_len){
+    Array_Start(key);
+    Array_AddValue(value_arr,value_arr_len);
+    Array_End();
+  }
+  // #endif
 
-template <typename T, typename U>
-void Array_AddArray(const char* key, T* value_arr, U value_arr_len){
-  Array_Start(key);
-  Array_AddValue(value_arr,value_arr_len);
-  Array_End();
-}
-// #endif
-
-void Append(const char* buff);
-void Append_P(const char* formatP, ...);
+  void Append(const char* buff);
+  void Append_P(const char* formatP, ...);
 
 };
 
