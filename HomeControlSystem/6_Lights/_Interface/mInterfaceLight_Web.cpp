@@ -5,6 +5,8 @@
 
 int8_t mInterfaceLight::Tasker_Web(uint8_t function){
 
+
+
   switch(function){  
     
     case FUNC_WEB_ADD_HANDLER:
@@ -53,6 +55,8 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 //USE INEAR GRAD TO CHANGE IT
 
   BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+
+  HsbColor hsb_current = HsbColor(RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
   
   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
     "hue",               
@@ -62,14 +66,14 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     "hue_sldr",              
     D_JSON_HUE,
     1, 360,  // Range 0/1 to 100% 
-    pCONT_iLight->HueF2N(pCONT_ladd->scene.colour.H)
+    pCONT_iLight->HueF2N(hsb_current.H)
   ); 
 
-  uint8_t dcolor = pCONT_ladd->changeUIntScale(pCONT_iLight->BrtF2N(pCONT_ladd->scene.colour.B), 0, 100, 0, 255);
+  uint8_t dcolor = pCONT_ladd->changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
   snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   //   uint8_t red, green, blue;
   //   LightHsToRgb(hue, 255, &red, &green, &blue);
-  RgbColor rgb = HsbColor(pCONT_ladd->scene.colour.H,1,1);
+  RgbColor rgb = HsbColor(hsb_current.H,1,1);
   snprintf_P(end_colour, sizeof(end_colour), PSTR("#%02X%02X%02X"), rgb.R, rgb.G, rgb.B);  // Saturation end color
 
   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
@@ -80,7 +84,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     "sat_sldr",              
     D_JSON_SAT,
     0, 100,  // Range 0/1 to 100% 
-    pCONT_ladd->changeUIntScale(pCONT_iLight->SatF2N(pCONT_ladd->scene.colour.S), 0, 255, 0, 100)
+    pCONT_iLight->SatF2N(hsb_current.S)
   ); 
 
   #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
@@ -100,19 +104,20 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
   //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
   //   0, 100,  // Range 0/1 to 100%
-  //   pCONT_iLight->BrtF2N(scene.colourW),
+  //   pCONT_iLight->BrtF2N(mode_singlecolour.colourW),
   //   WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
   #endif
+
 
   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
     "brt",               
     "col_sldr",
     PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
     "brt_sldr",              
-    D_JSON_BRIGHTNESS,
+    D_JSON_BRT_RGB,
     0, 100,  // Range 0/1 to 100% 
-    pCONT_iLight->BrtF2N(pCONT_ladd->animation.brightness)
+    pCONT_iLight->BrtF2N(hsb_current.B)
   ); 
 
   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
@@ -136,6 +141,10 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                             );                  
   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
+  // Will include all settings related to ANY form of lighting hardware
+  pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
+  
+
 }
 
 // Send updated data for sliders
@@ -144,27 +153,27 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
   JsonBuilderI->Array_Start("col_sldr");// Class name
 
 
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",0);
-        JsonBuilderI->Array_Start("bclg");
-      RgbTypeColor c;
-      int16_t pixel_position = -2;
-      for (uint16_t hue= 1; hue < 360;hue += 10){
-        c = HsbColor(HueN2F(hue),pCONT_ladd->scene.colour.S,pCONT_ladd->scene.colour.B);         
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
-      }
-      JsonBuilderI->Array_End();
-    JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_Start();
+    //   JsonBuilderI->Add("id",0);
+    //     JsonBuilderI->Array_Start("bclg");
+    //   RgbTypeColor c;
+    //   int16_t pixel_position = -2;
+    //   for (uint16_t hue= 1; hue < 360;hue += 10){
+    //     c = HsbColor(HueN2F(hue),scene.colour.,pCONT_ladd->scene.colour.B);         
+    //     JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),scene.colour.R,scene.colour.G,scene.colour.B);
+    //   }
+    //   JsonBuilderI->Array_End();
+    // JsonBuilderI->Level_End();
 
+
+    HsbColor hsb = RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B);
 
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",1);
         JsonBuilderI->Array_Start("bclg");
-      // RgbTypeColor c;
-      // int16_t pixel_position = -2;
-        //use colour array later
-        RgbTypeColor sat_low_colour = RgbColor(HsbColor(pCONT_ladd->scene.colour.H,0,pCONT_ladd->scene.colour.B));
-        RgbTypeColor sat_high_colour = RgbColor(HsbColor(pCONT_ladd->scene.colour.H,1,pCONT_ladd->scene.colour.B));
+
+        RgbTypeColor sat_low_colour = RgbColor(HsbColor(hsb.H,0,hsb.B));
+        RgbTypeColor sat_high_colour = RgbColor(HsbColor(hsb.H,1,hsb.B));
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_low_colour.R,sat_low_colour.G,sat_low_colour.B);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_high_colour.R,sat_high_colour.G,sat_high_colour.B);
 
@@ -174,8 +183,8 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
       JsonBuilderI->Add("id",2);
         JsonBuilderI->Array_Start("bclg");
         
-        RgbTypeColor brt_low_colour = RgbColor(HsbColor(pCONT_ladd->scene.colour.H,pCONT_ladd->scene.colour.S,0));
-        RgbTypeColor brt_high_colour = RgbColor(HsbColor(pCONT_ladd->scene.colour.H,pCONT_ladd->scene.colour.S,1));
+        RgbTypeColor brt_low_colour = RgbColor(HsbColor(hsb.H,hsb.S,0));
+        RgbTypeColor brt_high_colour = RgbColor(HsbColor(hsb.H,hsb.S,1));
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_low_colour.R,brt_low_colour.G,brt_low_colour.B);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_high_colour.R,brt_high_colour.G,brt_high_colour.B);
 
@@ -186,7 +195,6 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
 
 
   JsonBuilderI->Array_End();
-
 
 
 }
@@ -280,7 +288,7 @@ void mInterfaceLight::WebAppend_Root_Draw_RGBLive(){
 
 
 
-void mInterfaceLight::GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b,uint8_t* _w1, uint8_t* _w2)
+void mInterfaceLight::GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b, uint8_t* _w1, uint8_t* _w2)
 {
 
 //if colour is ww or cw, still represent in RGB hex code
@@ -346,12 +354,12 @@ void mInterfaceLight::WebCommand_Parse(void)
         arg_value = map(arg_value,0,1023,0,255);
       switch(i){//}==0){
         default:
-        case 0:  setRGB(arg_value,_g,_b); break;
-        case 1:  setRGB(_r,arg_value,_b); break;
-        case 2:  setRGB(_r,_g,arg_value); break;
+        case 0:  setRGB(arg_value,mode_singlecolour.colour.G,mode_singlecolour.colour.B); break;
+        case 1:  setRGB(mode_singlecolour.colour.R,arg_value,mode_singlecolour.colour.B); break;
+        case 2:  setRGB(mode_singlecolour.colour.R,mode_singlecolour.colour.G,arg_value); break;
       }
 
-      calcLevels();
+      UpdateFinalColourComponents();
 
       // memset(entry_color,0,sizeof(entry_color));
 

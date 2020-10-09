@@ -1,17 +1,17 @@
 #ifndef _DRIVER_ENERGY_H
 #define _DRIVER_ENERGY_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "1_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 // #define USE_MODULE_DRIVERS_ENERGY
 
 #ifdef USE_MODULE_DRIVERS_ENERGY
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 
@@ -213,10 +213,10 @@ void Settings_Save();
     struct handler<mEnergy>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mEnergy> mqtthandler_settings_teleperiod;
     
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mEnergy> mqtthandler_sensor_ifchanged;
     struct handler<mEnergy> mqtthandler_sensor_teleperiod;
     
@@ -227,7 +227,7 @@ void Settings_Save();
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_energystats = "energystats";
+    // const char* postfix_topic_energystats = "energystats";
     struct handler<mEnergy> mqtthandler_energystats_ifchanged;
     struct handler<mEnergy> mqtthandler_energystats_teleperiod;
   //#endif

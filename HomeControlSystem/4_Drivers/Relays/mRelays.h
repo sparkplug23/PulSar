@@ -1,11 +1,11 @@
 #ifndef _MRELAYS_H
 #define _MRELAYS_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #include "3_Network/MQTT/mMQTT.h"
@@ -169,10 +169,10 @@ uint8_t fShowTable = false;
     struct handler<mRelays>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mRelays> mqtthandler_settings_teleperiod;
     
-    const char* postfix_topic_sensors = "power";
+    // const char* postfix_topic_sensors = "power";
     struct handler<mRelays> mqtthandler_sensor_ifchanged;
     struct handler<mRelays> mqtthandler_sensor_teleperiod;
     

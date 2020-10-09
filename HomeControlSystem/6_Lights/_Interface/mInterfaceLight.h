@@ -1,11 +1,31 @@
 #ifndef _DRIVER_INTERFACE_LIGHTS_H
 #define _DRIVER_INTERFACE_LIGHTS_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+struct RgbcctColor{
+  uint8_t R;
+  uint8_t G;
+  uint8_t B;
+  uint8_t WW;
+  uint8_t WC;
+};
+
+enum LightTypes_IDS{
+  LT_BASIC, //relay?
+  LT_PWM1,    LT_PWM2, LT_PWM3,   LT_PWM4,  LT_PWM5,  LT_PWM6, LT_PWM7,
+  LT_NU8,   LT_SERIAL1, LT_SERIAL2,   
+  LT_LIGHT_INTERFACE_END,
+  // Anything after this will not be handled in lightinterface
+  LT_WS2812, 
+  LT_ADDRESSABLE, //replacing above
+  LT_RGBW,  LT_RGBWC,
+};
+
+
+#include "1_TaskerManager/mInterfaceController.h"
 
 #include "3_Network/MQTT/mMQTT.h"
 #include "2_CoreSystem/Time/mTime.h"
@@ -16,6 +36,8 @@
 #include <NeoPixelAnimator.h>
 
 #define LST_MAX 5
+
+// DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PARAMETERS_CTR) "values/parameters";
 
 
   #define WEB_CLASS_RGB_LIVE "rgb_live"
@@ -140,6 +162,23 @@ const char kListPWM_TestColours[] PROGMEM =
   "#ffffff" "|"  
   "#FFE076" "|" ;
 
+  
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR) "scene";
+
+  
+//     #define D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
+//     #define D_MODE_SINGLECOLOUR_DAYON_NAME_CTR           "DAYON"    
+//     #define D_MODE_SINGLECOLOUR_DAYOFF_NAME_CTR          "DAYOFF"    
+//     #define D_MODE_SINGLECOLOUR_EVENINGON_NAME_CTR       "EVENINGON"    
+//     #define D_MODE_SINGLECOLOUR_EVENINGOFF_NAME_CTR      "EVENINGOFF"    
+//     #define D_MODE_SINGLECOLOUR_MIDNIGHTON_NAME_CTR      "MIDNIGHTON"    
+//     #define D_MODE_SINGLECOLOUR_MIDNIGHTOFF_NAME_CTR     "MIDNIGHTOFF"    
+DEFINE_PROGMEM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)     "COLOURSCENE"    ; //PGM_P
+//     #define D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR     "FLASHCOLOUR"    
+//     #define D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR  "SUNRISE_SINGLE"  
+//     #define D_MODE_SINGLECOLOUR_SUNRISE_DUAL_NAME_CTR    "SUNRISE_DUAL" 
+
+
 
   #define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
 
@@ -174,11 +213,116 @@ const char kListPWM_TestColours[] PROGMEM =
       INDEX_TYPE_SCALED_100 
     };
 
+
 class mInterfaceLight{ //name reverse, as Interface is the linking/grouping factor
   public:
     mInterfaceLight(){};
 
     // void Module_Init();
+
+
+    
+    /**************
+     * TURN_ON - fade ON, returns to previous lighting array
+     * TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
+     * NOTHING - to be named "off", does nothing, simply remains off
+     * AMBILIHGT - keep, dell screen, set directly
+     * PRESETS - animation from a group of colour patterns
+     * FLASHER - christmad themes, standard 8, shimmering/twinkling 
+     * SCENE - scene names might be same as presets? or preset subset of scene? scene might best be named "direct"
+    **************/ 
+    enum ANIMATION_MODE{
+      ANIMATION_MODE_NONE_ID = 0,
+      ANIMATION_MODE_TURN_ON_ID,
+      ANIMATION_MODE_TURN_OFF_ID,
+      ANIMATION_MODE_AMBILIGHT_ID,
+      ANIMATION_MODE_SCENE_ID,
+      ANIMATION_MODE_FLASHER_ID,
+      //user option, cant comment out but can disable elsewhere
+      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+        ANIMATION_MODE_NOTIFICATIONS_ID,
+      #endif
+      ANIMATION_MODE_LENGTH_ID
+    };             
+    int8_t GetAnimationModeIDbyName(const char* c);
+    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
+    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
+
+    
+    /**************
+     * ANIMATION_PROFILE - As function argument of "SetAnimationProfile"
+     * This sets numerous aspects of animation struct to cause set animations to happen:
+     * TURN_OFF - will fade leds off
+     * TURN_ON  - will fade leds on
+    **************/ 
+    enum ANIMATION_PROFILE_IDS{
+      ANIMATION_PROFILE_TURN_OFF_ID=0,
+      ANIMATION_PROFILE_TURN_ON_ID,
+      ANIMATION_PROFILE_NOTHING_ID,
+      ANIMAITON_PROFILE_LENGTH_ID    
+    };
+    void SetAnimationProfile(uint8_t profile_id);
+
+    void Settings_Default();  
+
+    // RgbcctColor current_color_main;
+
+    int     hue_test = 0;
+
+    void EveryLoop();
+
+    
+      uint16_t auto_time_off_secs = 0;
+      // uint32_t tSavedAutoOff = 0;
+    uint32_t tSavedAutoOff = 0;
+    
+    
+
+    enum MODE_SINGLECOLOUR_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
+    struct MODE_SINGLECOLOUR_CONFIG{
+      uint8_t name_id;
+      RgbcctColor colour;
+      uint8_t fActive = false;
+      uint8_t parts = DONE;
+      uint32_t tStart;
+      uint32_t tOnTime;
+    };
+    // hold current set scene
+    struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour;
+    // hold scene to switch to later
+    struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour_stored;
+
+
+    // hold when to switch to scene_stored
+    struct SCENE_CONFIG_RUNTIME{
+      uint8_t  fWaiting = false;
+      // For ms or sec delay (until execution) time
+      uint32_t delay_time_ms   = 0; //0 if not set
+      uint32_t delay_time_secs = 0;
+    }scene_stored_runtime;
+
+
+
+
+
+    uint8_t kitchen_preset_set_id;
+    struct SCENE_PRESETS{
+      HsbColor colour; 
+      uint16_t time_ms=1000;
+    };
+    //change to scenes users
+    struct SCENE_PRESETS scene_preset_dayon;
+    struct SCENE_PRESETS scene_preset_dayoff;
+    struct SCENE_PRESETS scene_preset_eveningon;
+    struct SCENE_PRESETS scene_preset_eveningoff;
+    struct SCENE_PRESETS scene_preset_nighton;
+    struct SCENE_PRESETS scene_preset_nightoff;
+    struct SCENE_PRESETS* presenttmp;
+
+
+
+
+
 
 void Template_Load();
 
@@ -243,6 +387,10 @@ int8_t parsesub_Settings(JsonObjectConst obj);
 
 void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
 
+
+uint16_t getHue();
+uint8_t  getSat();
+
 // CT min and max
 const uint16_t CT_MIN = 153;          // 6500K
 const uint16_t CT_MAX = 500;          // 2000K
@@ -254,14 +402,14 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     uint8_t  _sat = 255;  // 0..255
     uint8_t  _briRGB = 255;  // 0..255
     // dimmer is same as _bri but with a range of 0%-100%
-    uint8_t  _r = 255;  // 0..255
-    uint8_t  _g = 255;  // 0..255
-    uint8_t  _b = 255;  // 0..255
+    // uint8_t  _r = 255;  // 0..255
+    // uint8_t  _g = 255;  // 0..255
+    // uint8_t  _b = 255;  // 0..255
 
     uint8_t  _subtype = 0;  // local copy of Light.subtype, if we need multiple lights
     uint16_t _ct = CT_MIN;  // 153..500, default to 153 (cold white)
-    uint8_t  _wc = 255;  // white cold channel
-    uint8_t  _ww = 0;    // white warm channel
+    // uint8_t  _wc = 255;  // white cold channel
+    // uint8_t  _ww = 0;    // white warm channel
     uint8_t  _briCT = 255;
 
     uint8_t  _color_mode = LCM_RGB; // RGB by default
@@ -270,12 +418,47 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     uint16_t _ct_min_range = CT_MIN;   // the minimum CT rendered range
     uint16_t _ct_max_range = CT_MAX;   // the maximum CT rendered range
 
+    /**************
+     * Predefined SCENES by name
+     * SCENES are colours defined as one colour for all pixels
+    **************/ 
+   // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
+    enum SCENES{
+      MODE_SINGLECOLOUR_NOTACTIVE_ID=0,
+      MODE_SINGLECOLOUR_DAYON_ID=1,
+      MODE_SINGLECOLOUR_DAYOFF_ID,
+      MODE_SINGLECOLOUR_EVENINGON_ID,
+      MODE_SINGLECOLOUR_EVENINGOFF_ID,
+      MODE_SINGLECOLOUR_MIDNIGHTON_ID,
+      MODE_SINGLECOLOUR_MIDNIGHTOFF_ID,
+      MODE_SINGLECOLOUR_COLOURSCENE_ID,
+      MODE_SINGLECOLOUR_FADE_OFF_ID,
+      MODE_SINGLECOLOUR_FLASHCOLOUR_ID,
+      MODE_SINGLECOLOUR_WHITEON_ID,
+      MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID,     // From dark blue to sky blue (cyan)
+      MODE_SINGLECOLOUR_SUNRISE_DUAL_ID,       // From dark blue, sunrise orange, sky blue (cyan)
+      MODE_SINGLECOLOUR_SUNRISE_AMBILIGHT_ID,
+      MODE_SINGLECOLOUR_LENGTH_ID
+    };
+    int8_t GetSceneIDbyName(const char* c);
+    const char* GetSceneName(char* buffer, uint8_t buflen);
+
+    uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
+    int8_t parsesub_ModeScene(JsonObjectConst obj);
+    
+    void SubTask_SingleColour();
+    void init_Scenes();
+
+
 
   uint8_t entry_color[LST_MAX];
   uint8_t current_color[LST_MAX]; // r,r,b,cw,ww
   uint8_t new_color[LST_MAX];
   uint8_t last_color[LST_MAX];
   uint8_t color_remap[LST_MAX];
+
+  
+void SubTask_AutoOff();
 
 
 // struct LIGHT {
@@ -312,7 +495,7 @@ void SetColour_CCT(uint16_t val);
 void SetColour_CBrt(uint16_t val);
 
 
-uint16_t auto_time_off_secs = 0; 
+// uint16_t auto_time_off_secs = 0; 
 
   uint8_t wheel = 0;
   uint8_t random2 = 0;
@@ -452,7 +635,7 @@ void changeBri(uint8_t bri);
 void changeBriRGB(uint8_t bri);
 void changeBriCT(uint8_t bri);
 void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-void calcLevels(uint8_t *current_color = nullptr);
+void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
 void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);
 
 
@@ -467,11 +650,22 @@ void saveSettings();
 void changeChannels(uint8_t *channels);
 uint16_t change8to10(uint8_t v);
 uint8_t change10to8(uint16_t v);
+
+
+#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
 uint16_t ledGammaReverse_internal(uint16_t vg, const struct gamma_table_t *gt_ptr);
 uint16_t ledGamma10_10(uint16_t v);
 uint16_t ledGamma10(uint8_t v);
 uint8_t ledGamma(uint8_t v);
+void calcGammaMultiChannels(uint16_t cur_col_10[5]);
+void calcGammaBulbs(uint16_t cur_col_10[5]);
+bool isChannelGammaCorrected(uint32_t channel);
+uint16_t fadeGamma(uint32_t channel, uint16_t v);
+uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
+#endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+
 void LightPwmOffset(uint32_t offset);
 bool LightModuleInit(void);
 void LightCalcPWMRange(void);
@@ -496,12 +690,7 @@ void LightSetPower(void);
 void LightAnimate(void);
 bool LightApplyFade(void);
 void LightApplyPower(uint8_t new_color[LST_MAX], power_t power);
-void calcGammaMultiChannels(uint16_t cur_col_10[5]);
-void calcGammaBulbs(uint16_t cur_col_10[5]);
-bool isChannelGammaCorrected(uint32_t channel);
 bool isChannelCT(uint32_t channel);
-uint16_t fadeGamma(uint32_t channel, uint16_t v);
-uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
 
 uint8_t flag_test = true;
 
@@ -746,7 +935,7 @@ uint8_t getColorMode();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
-    uint8_t ConstructJSON_EnergyStats(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Debug(uint8_t json_method = 0);
 
   
     #ifdef USE_MQTT 
@@ -757,22 +946,37 @@ uint8_t getColorMode();
         struct handler<mInterfaceLight>* mqtthandler_ptr;
         void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-        const char* postfix_topic_settings = "settings";
+        // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
         struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
-        void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
         
-        const char* postfix_topic_sensors = "sensors";
+        // const char* postfix_topic_sensors = "sensors";
         struct handler<mInterfaceLight> mqtthandler_sensor_ifchanged;
         struct handler<mInterfaceLight> mqtthandler_sensor_teleperiod;
-        void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
         
+        // const char* postfix_topic_debug = "debug/parameters";
+        // to be PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PARAMETERS_CTR but needs to handle progmem
+        struct handler<mInterfaceLight> mqtthandler_debug_teleperiod;   
+
+        // const char* postfix_topic_scene = "scene";
+        struct handler<mInterfaceLight> mqtthandler_scene_teleperiod;
+            
         // Extra module only handlers
         // enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
         //   MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
         //   MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID,
         //   MQTT_HANDLER_MODULE_LENGTH_ID, // id count
         // };
-        const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+
+ enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
+      MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
+      MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID,
+      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
+    };
+        
+      //,
+
+
+        // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     #endif
 
 
@@ -811,7 +1015,7 @@ uint8_t getColorMode();
 // /*********************************************************************************************\
 //  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
 //  *
-//  * light_type  Module     Color  ColorTemp  Modules
+//  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
 //  * ----------  ---------  -----  ---------  ----------------------------
 //  *  0          -                 no         (Sonoff Basic)
 //  *  1          PWM1       W      no         (Sonoff BN-SZ)
@@ -879,7 +1083,7 @@ uint8_t getColorMode();
 //  *  .b Actual channel values are computed from RGB or CT combined with brightness.
 //  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
 //  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-//  *     by the light_type: in calcLevels()
+//  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
 //  *     1 channel  - 0:Brightness
 //  *     2 channels - 0:Coldwhite 1:Warmwhite
 //  *     3 channels - 0:Red 1:Green 2:Blue
@@ -915,7 +1119,7 @@ uint8_t getColorMode();
 // /*********************************************************************************************\
 //  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
 //  *
-//  * light_type  Module     Color  ColorTemp  Modules
+//  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
 //  * ----------  ---------  -----  ---------  ----------------------------
 //  *  0          -                 no         (Sonoff Basic)
 //  *  1          PWM1       W      no         (Sonoff BN-SZ)
@@ -983,7 +1187,7 @@ uint8_t getColorMode();
 //  *  .b Actual channel values are computed from RGB or CT combined with brightness.
 //  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
 //  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-//  *     by the light_type: in calcLevels()
+//  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
 //  *     1 channel  - 0:Brightness
 //  *     2 channels - 0:Coldwhite 1:Warmwhite
 //  *     3 channels - 0:Red 1:Green 2:Blue

@@ -1,7 +1,7 @@
 
 #include "mSwitches.h"
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
@@ -388,7 +388,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;

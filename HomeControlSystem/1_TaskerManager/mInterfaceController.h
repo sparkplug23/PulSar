@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include <string.h>
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "1_ConfigUser/mUserConfig.h"           //DEFAULTS
-#include "1_ConfigUser/mUserConfigSecret.h"            // Override previos declarations
+#include "0_ConfigUser/mUserConfig.h"           //DEFAULTS
+#include "0_ConfigUser/mUserConfigSecret.h"            // Override previos declarations
 //ifdef use custom
-#include "1_ConfigUser/mFirmwareCustom.h"     //overrides defaults
+#include "0_ConfigUser/mFirmwareCustom.h"     //overrides defaults
 //endif
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 #include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
@@ -26,6 +26,8 @@
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
 #endif
+
+// #include <variant>
 
 // Returns via tasker that report special status
 // Can also be interpeted as basic numbers
@@ -44,7 +46,7 @@ enum FUNCTION_RESULT_IDS{
 };
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "1_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 
@@ -91,15 +93,56 @@ enum FUNCTION_RESULT_IDS{
 
 #include "2_CoreSystem/Support/mSupport.h"
 
+
+enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
+  MODULE_SUBTYPE_CORE_ID,
+  MODULE_SUBTYPE_NETWORK_ID,
+  MODULE_SUBTYPE_DISPLAY_ID,
+  MODULE_SUBTYPE_SENSOR_ID,
+  MODULE_SUBTYPE_DRIVERS_ID,
+  MODULE_SUBTYPE_LIGHTS_ID,
+  MODULE_SUBTYPE_ENERGY_ID,
+};
+
 #define pCONT mInterfaceController::GetInstance()
 
 #define D_TARGET_TASKER_NONE 0
 
+
+// New method?
+// typedef union {
+//   uint8_t data;
+//   struct {
+//     uint8_t PeriodicEnabled : 1; 
+//     uint8_t SendNow         : 1;
+//     uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes
+//     uint8_t reserved : 4; 
+//   };
+// }Interface_Handler_Flags;
+
+// template <typename Class>
+// struct interface_handler {
+//   Interface_Handler_Flags flags;
+//   const char*   pm_name_ctr;
+//   const char*   pm_friendly_name_ctr;
+//   uint16_t      module_id = 0;
+//   uint8_t       module_subtype_id = 0; //lighting, energy, sensor, custom, core
+//   uint8_t       (Class::*Tasker)(uint8_t function); // member-function to sender with one args
+//   uint8_t       (Class::*Tasker_Json)(uint8_t function, JsonObjectConst obj); // member-function to sender with one args
+// };
+
+
+
+// uint8_t (* const list[])(uint8_t) = {}
+
+
+
 // CoreSystem (Range 0-29)
 #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
 class mHardwarePins;
-#define            D_MODULE_CORE_HARDWAREPINS_ID               0
-#define            pCONT_pins                              pCONT->mod
+#define            D_MODULE_CORE_HARDWAREPINS_ID               0 //index wont be needed?
+#define            D_MODULE_CORE_HARDWAREPINS_SUBTYPE_ID       MODULE_SUBTYPE_CORE_ID
+#define            pCONT_pins                                  pCONT->mod
 DEFINE_PROGMEM_CTR(PM_MODULE_CORE_HARDWAREPINS_CTR)            "mHardwarePins";
 DEFINE_PROGMEM_CTR(PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR)   "hardwarepins";
 
@@ -540,32 +583,34 @@ class mInterfaceController{
     mInterfaceController(mInterfaceController&& other) = delete;
     /* Private constructor to prevent instancing. */
     mInterfaceController(){};
-
+    /* Here will be the instance stored. */
+    static mInterfaceController* instance;
   public:
     // External function to get instance
     static mInterfaceController* GetInstance();
-    /* Here will be the instance stored. */
-    static mInterfaceController* instance;
 
+    // HardwarePins
+    mHardwarePins *mod = nullptr;
+    // interface_handler<mHardwarePins> interfacehandler_logging;
+    // Settings
+    mSettings *mset = nullptr;    
+    // interface_handler<mSettings> interfacehandler_settings;
+    // Support
+    mSupport *msup = nullptr;
+    // interface_handler<mSupport> interfacehandler_support;
+    // Logging
+    mLogging *mso = nullptr;
+    // interface_handler<mLogging> interfacehandler_logging;
     
-    // template<typename T, typename U>
-    // void Tasker_Interface_T(uint8_t function, uint8_t target_tasker, T param1, U* param2);
 
-    // template<typename T>
-    // void Tasker_Interface_T(uint8_t function, T param1, uint8_t number);
-    
-    // void Tasker_Interface_T(uint8_t function, uint8_t param1 = 1, uint8_t number = 6);
-
-    // int8_t Tasker_Interface_AJ(uint8_t function, JsonObjectConst obj, uint16_t target_tasker = 0);
 
     mTime *mt = nullptr;
     mMQTT *mqt = nullptr;
-    mLogging *mso = nullptr;
-    mSettings *mset = nullptr;
-    mSupport *msup = nullptr;
+
+
+
     mWiFi *mwif = nullptr;
     mTelemetry *mtel = nullptr;
-    mHardwarePins *mod = nullptr;
 
     #ifdef USE_WEBSERVER
     mWebServer *mweb = nullptr;
@@ -689,15 +734,17 @@ class mInterfaceController{
   // Overload
   int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0);
 
+  int8_t Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker = 0);
   
-int8_t Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker = 0);
-  
+  // std::variant< int, std::string > GetClassObjectbyID(uint8_t id);
+  // void TaskerTest();
 
   const char* GetTaskName(uint8_t task, char* buffer);
   PGM_P GetClassName(uint8_t id);
   uint8_t InitClassList();
   PGM_P GetModuleFriendlyName(uint8_t module_id);
   uint16_t GetClassCount();
+  void Init_InterfaceHandler();
 
   // enum 
 

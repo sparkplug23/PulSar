@@ -413,7 +413,7 @@ void mPWMLight::WebCommand_Parse(void)
 
 //     if(settings.flags.EnableSceneModeWithSliders){
 //       animation.mode_id = ANIMATION_MODE_SCENE_ID;
-//       scene.name_id = SCENES_COLOURSCENE_ID;
+//       scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
 //     }
 
 //     SetRefreshLEDs();
@@ -430,7 +430,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     animation.mode_id = ANIMATION_MODE_SCENE_ID;
-//     scene.name_id = SCENES_COLOURSCENE_ID;
+//     scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
         
 //     SetRefreshLEDs();
 //   }
@@ -440,7 +440,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     scene.colour.S = SatN2F(arg_value);
 //     animation.mode_id = ANIMATION_MODE_SCENE_ID;
-//     scene.name_id = SCENES_COLOURSCENE_ID;
+//     scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     SetRefreshLEDs();
@@ -504,7 +504,7 @@ void mPWMLight::WebCommand_Parse(void)
 //       animation.mode_id = animation_mode_options_id;
 
 //       if(animation.mode_id == ANIMATION_MODE_SCENE_ID){
-//         scene.name_id = SCENES_COLOURSCENE_ID;    // only needed until #Idea56
+//         scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;    // only needed until #Idea56
 //       }
 //       animation.flags.fForceUpdate=true;
 

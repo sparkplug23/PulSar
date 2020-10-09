@@ -1,9 +1,9 @@
 #include "mMQTT.h"
 
-const char S_CONFIGURE_MQTT[] PROGMEM = D_CONFIGURE_MQTT;
+// const char S_CONFIGURE_MQTT[] PROGMEM = D_CONFIGURE_MQTT;
 
-const char HTTP_BTN_MENU_MQTT[] PROGMEM =
-  "<p><form action='" WEB_HANDLE_MQTT "' method='get'><button>" D_CONFIGURE_MQTT "</button></form></p>";
+// const char HTTP_BTN_MENU_MQTT[] PROGMEM =
+//   "<p><form action='" WEB_HANDLE_MQTT "' method='get'><button>" D_CONFIGURE_MQTT "</button></form></p>";
 
 // bool flag_uptime_reached_reduce_frequency = false;
 
@@ -164,7 +164,22 @@ void mMQTT::MqttSaveSettings(void)
 }
 // #endif  // USE_WEBSERVER
 
+/*before progmem topic postfix
+RAM:   [=====     ]  47.8% (used 39188 bytes from 81920 bytes)
+Flash: [=====     ]  48.2% (used 493564 bytes from 1023984 bytes)
 
+//after mqtt, pgm + inside class
+RAM:   [=====     ]  47.9% (used 39200 bytes from 81920 bytes)
+Flash: [=====     ]  48.2% (used 493744 bytes from 1023984 bytes)
+
+//after mqtt, pgm only
+RAM:   [=====     ]  47.7% (used 39092 bytes from 81920 bytes)
+Flash: [=====     ]  48.2% (used 493556 bytes from 1023984 bytes)
+
+//
+RAM:   [=====     ]  47.6% (used 39028 bytes from 81920 bytes)
+Flash: [=====     ]  48.2% (used 493484 bytes from 1023984 bytes)
+*/
 
 void mMQTT::MQTTHandler_Init(){
 
@@ -176,7 +191,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_health;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Health;
   
   mqtthandler_ptr = &mqtthandler_settings;
@@ -187,7 +202,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Settings;
   
   mqtthandler_ptr = &mqtthandler_log;
@@ -198,7 +213,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_log;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Log;
   
   mqtthandler_ptr = &mqtthandler_firmware;
@@ -209,7 +224,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_firmware;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Firmware;
   
   mqtthandler_ptr = &mqtthandler_memory;
@@ -220,7 +235,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_memory;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Memory;
   
   mqtthandler_ptr = &mqtthandler_network;
@@ -231,7 +246,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_network;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NETWORK_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Network;
   
   mqtthandler_ptr = &mqtthandler_mqtt;
@@ -242,7 +257,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_mqtt;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MQTT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_MQTT;
   
   mqtthandler_ptr = &mqtthandler_time;
@@ -253,7 +268,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_time;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Time;
   
   mqtthandler_ptr = &mqtthandler_devices;
@@ -264,7 +279,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_devices;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Devices;
   
   mqtthandler_ptr = &mqtthandler_reboot;
@@ -275,7 +290,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_reboot;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Reboot;
   
   mqtthandler_ptr = &mqtthandler_reboot_event;
@@ -286,7 +301,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_ALL;
-  mqtthandler_ptr->postfix_topic = postfix_topic_reboot_event;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Reboot;
 
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
@@ -298,7 +313,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_debug_pins;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Debug_Pins;
 
   mqtthandler_ptr = &mqtthandler_debug_template;
@@ -309,7 +324,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_debug_template;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_TEMPLATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Debug_Template;
 
   mqtthandler_ptr = &mqtthandler_debug_moduleinterface;
@@ -320,7 +335,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_debug_moduleinterface;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Debug_ModuleInterface;
   #endif
   
@@ -332,7 +347,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_debug_minimal;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mMQTT::ConstructJSON_Debug_Minimal;
 
 } //end "MQTTHandler_Init"
@@ -549,7 +564,7 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
   }
 
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
-  sprintf(topic_ctr,PSTR("%s/%s/%s%s"),D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix); 
+  snprintf_P(topic_ctr, sizeof(topic_ctr), PSTR("%s/%s/%s%S"),D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix); 
 
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "topic_ctr=\"%s\""),topic_ctr);
   

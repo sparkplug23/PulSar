@@ -1,10 +1,10 @@
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "1_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 // #define USE_MODULE_SENSORS_PZEM004T_MODBUS
@@ -14,7 +14,7 @@
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 class mPzem_AC{
@@ -95,11 +95,11 @@ class mPzem_AC{
     struct handler<mPzem_AC>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPzem_AC> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mPzem_AC> mqtthandler_sensor_ifchanged;
     struct handler<mPzem_AC> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);

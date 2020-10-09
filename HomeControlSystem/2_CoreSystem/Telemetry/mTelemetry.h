@@ -24,7 +24,7 @@
 #define _MTELEMETRY_H_
 
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #include "2_CoreSystem/Support/mSupport.h"
 
@@ -35,7 +35,7 @@
 
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"

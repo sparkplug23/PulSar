@@ -1,11 +1,11 @@
 #ifndef _MCUSE_MODULE_CUSTOM_PWM_FANEILINGFAN_H
 #define _MCUSE_MODULE_CUSTOM_PWM_FANEILINGFAN_H 0.3
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_PWM_FAN
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include <ArduinoJson.h>
@@ -113,10 +113,10 @@ void WebAppend_Root_Status_Table();
     struct handler<mPWMFan>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPWMFan> mqtthandler_settings_teleperiod;
     
-    const char* postfix_topic_sensors = "power";
+    // const char* postfix_topic_sensors = "power";
     struct handler<mPWMFan> mqtthandler_sensor_ifchanged;
     struct handler<mPWMFan> mqtthandler_sensor_teleperiod;
     

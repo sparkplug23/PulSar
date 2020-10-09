@@ -1,7 +1,7 @@
 #ifndef _MBLINDS_H
 #define _MBLINDS_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_BLINDS
 
@@ -9,7 +9,7 @@
 
 
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #ifdef ESP32

@@ -1549,7 +1549,7 @@
 // {
 //   // Interlock 0 - Off, Interlock 1 - On, Interlock 1,2 3,4 5,6,7
 //   uint32_t max_relays = devices_present;
-//   if (light_type) { max_relays--; }
+//   if (Settings.light_settings.type) { max_relays--; }
 //   if (max_relays > sizeof(Settings.interlock[0]) * 8) { max_relays = sizeof(Settings.interlock[0]) * 8; }
 //   if (max_relays > 1) {                                         // Only interlock with more than 1 relay
 //     if (XdrvMailbox.data_len > 0) {
@@ -2886,7 +2886,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if (CMND_INTERLOCK == command_code) {                      // Interlock 0 - Off, Interlock 1 - On, Interlock 1,2 3,4 5,6,7
 //       uint8_t max_relays = devices_present;
-//       if (light_type) { max_relays--; }
+//       if (Settings.light_settings.type) { max_relays--; }
 //       if (max_relays > sizeof(Settings.interlock[0]) * 8) { max_relays = sizeof(Settings.interlock[0]) * 8; }
 //       if (max_relays > 1) {                                         // Only interlock with more than 1 relay
 //         if (data_len > 0) {

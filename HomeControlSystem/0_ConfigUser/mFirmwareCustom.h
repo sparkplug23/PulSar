@@ -35,8 +35,8 @@
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT
 // #define DEVICE_RGBDESK
-// #define DEVICE_RGBCOOKER // new lighting H801
-//  #define DEVICE_RGBUTILITY // new lighting H801
+// #define DEVICE_RGBCOOKER
+//  #define DEVICE_RGBUTILITY
 // #define DEVICE_RGBFRIDGE
 
 /**
@@ -93,7 +93,7 @@
 **/
 // #define DEVICE_KITCHENLIGHT1
 // #define DEVICE_KITCHENLIGHT2
-//  #define DEVICE_KITCHENLIGHT3
+// #define DEVICE_KITCHENLIGHT3
 // #define DEVICE_KITCHENLIGHT4
 // #define DEVICE_KITCHENLIGHT5 //tester
 
@@ -152,14 +152,14 @@
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR "\":["
-          "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
-          "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
@@ -345,10 +345,18 @@
 
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
+
+  #define STRIP_SIZE_MAX 50
+  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
+  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define USE_INTERFACE_NEW
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
@@ -364,14 +372,14 @@
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":50,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
-    // "\"" D_JSON_SCENE_COLOUR   "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS     "\":50"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
+    "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
+    "\"" D_JSON_BRIGHTNESS       "\":50"
   "}";
 
 #endif
@@ -1081,7 +1089,9 @@
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  #define SETTINGS_HOLDER 1
+
+  #define DEVICE_LOCATION_OUTSIDE
    
   //#define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
@@ -1089,12 +1099,14 @@
   #define USE_BUILD_TYPE_CUSTOM
   #define USE_MODULE_CUSTOM_OILFURNACE
   
-  // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_DS18B20
-  // #define USE_MODULE_DRIVERS_RELAY
-  // #define USE_DIGITALIO
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_SENSORS_DS18B20
+  
   #define USE_MODULE_SENSORS_ULTRASONICS
-  //#define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+
+  //#define ENABLE_FORCED_SKIP_AP_ON_IPUNSET
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1103,11 +1115,38 @@
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
       "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","      
+      #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      #endif      
       "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "inflow"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "outflow"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "outside"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "tank1"
+  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "tank2"
+  #define D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "Furnace Power"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
   "}";
 
 #endif
@@ -1913,6 +1952,8 @@
 #ifdef DEVICE_GAZEBCON
   #define DEVICENAME_CTR          "gazebcon"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
+
+  #define DEVICE_LOCATION_OUTSIDE
  
   #define STRIP_REPEAT_OUTPUT_MAX       500
   
@@ -2876,9 +2917,9 @@
   #define USE_MODULE_DRIVERS_PWM
   #define USE_MODULE_CUSTOM_PWM_FAN
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 4
-  #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_RELAY
+  // #define RELAYS_CONNECTED 4
+  // #define USE_MODULE_DRIVERS_INTERFACE
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -2894,10 +2935,10 @@
       #endif
 
       
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
-      "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      // "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      // "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      // "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
 
 
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""

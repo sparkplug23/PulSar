@@ -332,6 +332,9 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
     break;
     case FUNC_EVERY_SECOND:
+
+    
+  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(DEBUG_INSERT_PAGE_BREAK "TaskerTest SUCCESS!!"));
 // SystemSettings_DefaultBody_Network();
       //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
@@ -1586,7 +1589,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.light_settings.light_rotation = 0;
   Settings.light_settings.light_pixels = WS2812_LEDS;
   
-  light_type = LT_WS2812; //default for now
+  Settings.light_settings.type = LT_WS2812; //default for now
   for (uint8_t i = 0; i < MAX_PWMS; i++) {
     Settings.light_settings.light_color[i] = 0;
     Settings.pwm_value[i] = 0;

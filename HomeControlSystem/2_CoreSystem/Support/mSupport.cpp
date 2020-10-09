@@ -99,9 +99,25 @@ int8_t mSupport::Tasker(uint8_t function){
     break;
     case FUNC_LOOP: 
 
-      #ifdef USE_RSS_SAMPLING
-        RSSSampler();
-      #endif
+    //   #ifdef USE_RSS_SAMPLING
+    //     RSSSampler();
+    //   #endif
+
+      
+    //   if(TimeReached(&state_100msecond,100)){ 
+    //     #ifdef ENABLE_ADVANCED_DEBUGGING
+    //       AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every100mSeconds"));
+    //     #endif
+    //     start_millis = millis();
+    //     Every100mSeconds();
+    //     // AddLog_P(LOG_LEVEL_TEST,PSTR("Execution time 1 = %d"),millis()-start_millis);
+    //   }
+    //   if(TimeReached(&state_250msecond,250)){ 
+    //     #ifdef ENABLE_ADVANCED_DEBUGGING
+    //       AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every250mSeconds"));
+    //     #endif
+    //     Every250mSeconds();
+    //   }
       
   //WDT_Reset();
   // MDNS.update();
@@ -132,31 +148,15 @@ int8_t mSupport::Tasker(uint8_t function){
 
     //   AddLog_P(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
     // }break;
-    case FUNC_EVERY_250_MSECOND:
-
-
+    case FUNC_EVERY_100_MSECOND:
+      Every100mSeconds();
     break;
-    case FUNC_EVERY_SECOND:{
-
+    case FUNC_EVERY_250_MSECOND:
+      Every250mSeconds();
+    break;
+    case FUNC_EVERY_SECOND:
       PerformEverySecond();
-
-      
-      if(TimeReached(&state_100msecond,100)){ 
-        #ifdef ENABLE_ADVANCED_DEBUGGING
-          AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every100mSeconds"));
-        #endif
-        start_millis = millis();
-        Every100mSeconds();
-        // AddLog_P(LOG_LEVEL_TEST,PSTR("Execution time 1 = %d"),millis()-start_millis);
-      }
-      if(TimeReached(&state_250msecond,250)){ 
-        #ifdef ENABLE_ADVANCED_DEBUGGING
-          AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR("begin::Every250mSeconds"));
-        #endif
-        Every250mSeconds();
-      }
-      
-    }break;
+    break;
     case FUNC_EVERY_FIVE_MINUTE:
       //CmndCrash();
     break;

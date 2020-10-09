@@ -1,4 +1,30 @@
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
+
+// Rename to "TaskerManager"
+// Move into its own folder path?
+
+
+// std::variant< int, std::string > mInterfaceController::GetClassObjectbyID(uint8_t id){
+
+//   switch(id){
+//     // CoreSystem
+//     #ifdef D_MODULE_NETWORK_WIFI_ID
+//       case D_MODULE_NETWORK_WIFI_ID:       return mwif;
+//     #endif
+//     #ifdef D_MODULE_CORE_SETTINGS_ID
+//       case D_MODULE_CORE_SETTINGS_ID:      return mset;
+//     #endif
+//   } //END switch
+
+// }
+
+// void mInterfaceController::TaskerTest(){
+
+//   auto obj = GetClassObjectbyID(D_MODULE_CORE_SETTINGS_ID);
+//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(DEBUG_INSERT_PAGE_BREAK "TaskerTest"));
+//   obj->Tasker(FUNC_EVERY_SECOND);
+
+// }
 
 
 // Checks if defined pointers are NOT nullptr and therefore initiated
@@ -127,6 +153,31 @@ uint8_t mInterfaceController::Instance_Init(){
   #ifdef USE_MODULE_CUSTOM_PWM_FAN
     if(mpwmfan == nullptr){ mpwmfan = new mPWMFan(); }
   #endif
+
+}
+
+void mInterfaceController::Init_InterfaceHandler(){
+
+
+  // if(mqt  == nullptr){ mqt  = new mMQTT();      }
+  // if(mod  == nullptr){ mod  = new mHardwarePins(); }
+  // if(mt   == nullptr){ mt   = new mTime();      }
+  // if(mset == nullptr){ mset = new mSettings();  }
+  // if(msup == nullptr){ msup = new mSupport();   }
+  // if(mwif == nullptr){ mwif = new mWiFi();      }
+  // if(mweb == nullptr){ mweb = new mWebServer(); }
+  // if(mso  == nullptr){ mso  = new mLogging(); }
+  // if(mtel == nullptr){ mtel = new mTelemetry(); }
+
+
+  // int array[] = {mset, msup};
+
+  // mInterfaceController *array[30];
+  // array[0] = new mSettings();
+  // array[1] = new mSupport();
+
+
+
 
 }
 
@@ -296,6 +347,35 @@ mInterfaceController* mInterfaceController::GetInstance(){
   }
   return instance;
 }
+
+
+
+// class Shared{
+
+//   private:
+//     /* Prevent others from being created */
+//     Shared(Shared const& other) = delete;
+//     Shared(Shared&& other) = delete;
+//     /* Private constructor to prevent instancing. */
+//     Shared(){};
+//     /* Here will be the instance stored. */
+//     static Shared* instance;
+//   public:
+//     // External function to get instance
+//     static Shared* GetInstance();
+    
+//  };
+// #include "class_shared.h"
+
+// Shared* Shared::instance = nullptr;
+
+// Shared* Shared::GetInstance(){
+//   if (instance == nullptr){
+//     instance = new Shared();
+//   }
+//   return instance;
+// }
+
 
 
 
@@ -479,24 +559,28 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
     switch(switch_index){
       // CoreSystem
       #ifdef D_MODULE_NETWORK_WIFI_ID
-        case D_MODULE_NETWORK_WIFI_ID:       result = mwif->Tasker(function); break;
+        case D_MODULE_NETWORK_WIFI_ID:      
+
+          // #ifdef USE_INTERFACE_NEW
+          //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
+          // #else
+            result = mwif->Tasker(function); 
+          // #endif
+        
+        
+        
+        break;
       #endif
       #ifdef D_MODULE_CORE_SETTINGS_ID
         case D_MODULE_CORE_SETTINGS_ID:   
         
-        {
-// Serial.println("D_MODULE_CORE_SETTINGS_ID");
-          //  char test;
-          //uint8_t test;
         
-         result = mset->Tasker(function);// param1); 
+          // #ifdef USE_INTERFACE_NEW
+          //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
+          // #else
+            result = mset->Tasker(function); 
+          // #endif
 
-        // result = mrgbani->Tasker(function, param1); 
-
-        // mset->Tasker(function, test);
-        
-
-        }
         break;
       #endif
       #ifdef D_MODULE_CORE_SUPPORT_ID
@@ -792,7 +876,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
         case D_MODULE_CUSTOM_BLINDS_ID:           result = mbbl->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-        case D_MODULE_CUSTOM_OILFURNACE_ID:       result = mof->Tasker(function); break;
+        case D_MODULE_CUSTOM_OILFURNACE_ID:       result = mof->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
         case D_MODULE_CUSTOM_EXERCISEBIKE_ID:     result = meb->Tasker(function); break;

@@ -1,13 +1,13 @@
 #ifndef _MNEXTIONPANEL2_H
 #define _MNEXTIONPANEL2_H 0.2
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 class mInterfaceController;
 
 #ifdef ESP32
@@ -401,10 +401,10 @@ void HandlePreflightRequest(void);
     struct handler<mNextionPanel>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mNextionPanel> mqtthandler_settings_teleperiod;
     
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
     struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
     
@@ -415,7 +415,7 @@ void HandlePreflightRequest(void);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_energystats = "energystats";
+    // const char* postfix_topic_energystats = "energystats";
     struct handler<mNextionPanel> mqtthandler_energystats_ifchanged;
     struct handler<mNextionPanel> mqtthandler_energystats_teleperiod;
   //#endif

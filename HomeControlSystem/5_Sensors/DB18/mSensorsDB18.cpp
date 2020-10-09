@@ -266,12 +266,13 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
     PSTR("{")
   );
 
-  char name_tmp[25];
+  char buffer[25];
   char float_tmp[25];
   
   for(int i=0;i<db18_sensors_active;i++){
     
     // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), i, name_buffer);
+
     dtostrf(sensor[i].reading.val,5,pCONT_set->Settings.sensors.flags.decimal_precision,float_tmp);
 
     data_buffer2.payload.len += 
@@ -282,7 +283,8 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
           "\"" D_JSON_ISVALID "\":%d"
         "},"
       ), 
-      name_tmp,
+      // name_tmp,
+      pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)),
       float_tmp, 
       sensor[i].reading.isvalid
     );
@@ -573,7 +575,7 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
 void mSensorsDB18::EveryLoop(){
   if(mSupport::TimeReachedNonReset(&tSavedMeasurePipe,settings.rate_measure_ms)){
     
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
+    // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
 
     if(!db18_sensors_active){ // Retry init if failed
       Init(); //search again
@@ -614,7 +616,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
@@ -624,7 +626,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -634,7 +636,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

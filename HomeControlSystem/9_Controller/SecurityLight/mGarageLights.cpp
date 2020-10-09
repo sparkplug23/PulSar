@@ -333,7 +333,7 @@ uint8_t mGarageLights::ConstructJSON_Settings(uint8_t json_method){
   // data_buffer2.payload.len = measureJson(root)+1;
   // serializeJson(doc,data_buffer2.payload.ctr);
   return 0;
-  
+
 }
 
 uint8_t mGarageLights::ConstructJSON_Sensor(uint8_t json_level){
@@ -432,7 +432,7 @@ void mGarageLights::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mGarageLights::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;

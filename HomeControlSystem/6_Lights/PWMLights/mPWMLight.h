@@ -1,11 +1,11 @@
 #ifndef MPWMLIGHT_H
 #define MPWMLIGHT_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_LIGHTS_PWM
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 // #include "3_Network/MQTT/mMQTT.h"
@@ -350,7 +350,7 @@ void WebAppend_Root_Status_Table();
 // void changeBriRGB(uint8_t bri);
 // void changeBriCT(uint8_t bri);
 // void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-// void calcLevels(uint8_t *current_color = nullptr);
+// void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
 // void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);
 // void saveSettings();
 // void changeChannels(uint8_t *channels);
@@ -440,7 +440,7 @@ uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
 //         struct handler<mInterfaceLight>* mqtthandler_ptr;
 //         void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-//         const char* postfix_topic_settings = "settings";
+//         const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
 //         struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
 //         void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
         
@@ -491,7 +491,7 @@ uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
 // // /*********************************************************************************************\
 // //  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
 // //  *
-// //  * light_type  Module     Color  ColorTemp  Modules
+// //  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
 // //  * ----------  ---------  -----  ---------  ----------------------------
 // //  *  0          -                 no         (Sonoff Basic)
 // //  *  1          PWM1       W      no         (Sonoff BN-SZ)
@@ -559,7 +559,7 @@ uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
 // //  *  .b Actual channel values are computed from RGB or CT combined with brightness.
 // //  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
 // //  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-// //  *     by the light_type: in calcLevels()
+// //  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
 // //  *     1 channel  - 0:Brightness
 // //  *     2 channels - 0:Coldwhite 1:Warmwhite
 // //  *     3 channels - 0:Red 1:Green 2:Blue

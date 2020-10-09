@@ -1,14 +1,14 @@
 #ifndef _MHBRIDGE_H
 #define _MHBRIDGE_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
 
 
 #include "ArduinoJson.h"
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 // Input	Output

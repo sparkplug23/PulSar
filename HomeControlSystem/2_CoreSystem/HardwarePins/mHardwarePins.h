@@ -4,12 +4,12 @@
 // MapConfig serves the purpose of feeding the template methods until successful saving of states are archieved
 // In the near future, this mode will be tested by feeding the template via http command
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
 #include <ArduinoJson.h>
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"

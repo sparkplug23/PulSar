@@ -1,7 +1,7 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 /*
 go with a singleton if you really need one global instance, better and safer than extern
@@ -41,7 +41,7 @@ extern struct DATA_BUFFER2 data_buffer2;
 #include "2_CoreSystem/Logging/mLogging.h"
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
@@ -49,7 +49,7 @@ extern struct DATA_BUFFER2 data_buffer2;
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #ifdef ESP32
@@ -311,7 +311,7 @@ const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to 
 // #define NEO_RGBW               5            // Neopixel RGBW leds
 // #define NEO_GRBW               6            // Neopixel GRBW leds
 
-// #define LT_SM16716             16           // Lights that use SM16716 will have this bit set in light_type
+// #define LT_SM16716             16           // Lights that use SM16716 will have this bit set in Settings.light_settings.type
 
 // #define RGB_REMAP_RGBW         0
 // #define RGB_REMAP_RBGW         6
@@ -415,15 +415,6 @@ enum LightSubtypes{
 };
 
 
-enum LightTypes    {
-  LT_BASIC, //relay?
-  LT_PWM1,    LT_PWM2, LT_PWM3,   LT_PWM4,  LT_PWM5,  LT_PWM6, LT_PWM7,
-  LT_NU8,   LT_SERIAL1, LT_SERIAL2,   
-  LT_LIGHT_INTERFACE_END,
-  // Anything after this will not be handled in lightinterface
-  LT_WS2812, 
-  LT_ADDRESSABLE, //replacing above
-  LT_RGBW,  LT_RGBWC, LT_NU14, LT_NU15 };  // Do not insert new fields
 
 //scenes animations?
 enum LightSchemes {LS_POWER, LS_WAKEUP, LS_CYCLEUP, LS_CYCLEDN, LS_RANDOM, LS_MAX};
@@ -1726,7 +1717,7 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
 uint8_t pwm_inverted = 0;                   // PWM inverted flag (1 = inverted)
 uint8_t counter_no_pullup = 0;              // Counter input pullup flag (1 = No pullup)
 uint8_t energy_flg = 0;                     // Energy monitor configured
-uint8_t light_type = 0;                     // Light types
+// uint8_t Settings.light_settings.type = 0;                     // Light types
 uint8_t serial_in_byte;                     // Received byte
 uint8_t ota_retry_counter = OTA_ATTEMPTS;   // OTA retry counter
 uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
@@ -1820,7 +1811,7 @@ int8_t parsesub_FirmwareInformation(JsonObjectConst _obj);
 // #ifndef _MIOINTERFACE
 // #define _MIOINTERFACE
 
-// #include "1_ConfigUser/mUserConfig.h"
+// #include "0_ConfigUser/mUserConfig.h"
 
 // #warning "mIOInterface EOL"
 

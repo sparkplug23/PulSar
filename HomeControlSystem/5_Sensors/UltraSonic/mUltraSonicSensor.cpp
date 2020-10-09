@@ -629,7 +629,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
     // break; 
     // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
     //
-        JsonBuilder_Add(WEB_HANLDE_JSON_WEB_TOP_BAR,1000); 
+        //JsonBuilder_Add(WEB_HANLDE_JSON_WEB_TOP_BAR,1000); 
     //   BufferWriterI->Append_P(PSTR("\"%s\","),"/fetch/tab_ult_sensor.json");
     // break;
     // case FUNC_WEB_APPEND_RUNTIME_ROOT_RATES:
@@ -947,7 +947,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
@@ -957,7 +957,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Sensors;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -967,7 +967,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_Sensors;
   
   mqtthandler_ptr = &mqtthandler_averaged_teleperiod;
@@ -977,7 +977,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_averaged;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_SensorsAveraged;
   
   mqtthandler_ptr = &mqtthandler_averaged_ifchanged;
@@ -987,7 +987,7 @@ void mUltraSonicSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_averaged;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mUltraSonicSensor::ConstructJSON_SensorsAveraged;
 
   

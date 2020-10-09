@@ -32,8 +32,8 @@ int8_t mRGBAnimator::Tasker(uint8_t function){//}, T param1){
 
 
   // Check if light is being handled by another function eg ws2812 (long term probably included into this as commands pipe into this)
-  if(pCONT_set->light_type != LT_WS2812){ 
-    //Serial.println("light_type != LT_WS2812"); Serial.flush();
+  if(pCONT_set->Settings.light_settings.type != LT_WS2812){ 
+    //Serial.println("Settings.light_settings.type != LT_WS2812"); Serial.flush();
     #ifdef ENABLE_DEBUG_BOOT_DELAYS
     delay(2000);
     #endif
@@ -228,8 +228,7 @@ void mRGBAnimator::init(void){
 
 // delay(3000);
 
-  blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
-  //ON FIRST BOOT -- MOVE ELSEWHERE
+   //ON FIRST BOOT -- MOVE ELSEWHERE
   animation_override.fRefreshAllPixels = true;
 
 // Serial.println("1"); Serial.flush();
@@ -259,14 +258,17 @@ void mRGBAnimator::init(void){
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     init_NotificationPanel();
   #endif
-  init_Scenes();
+  
+  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+  blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
+  #endif
   #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
   init_flasher_settings();
   init_mixer_defaults();
   #endif
 
-  animation.auto_time_off_secs = 0; //disable
+  pCONT_iLight->auto_time_off_secs = 0; //disable
 
   settings.flags.EnableModule = true;
 
@@ -406,12 +408,6 @@ void mRGBAnimator::Settings_Default(){
     //   animation.palette_id = PALETTELIST_VARIABLE_USER_01_ID;
     // #endif
 
-    #ifdef DEFAULT_LIGHTING_ANIMATION_MODE_ID
-      animation.mode_id = DEFAULT_LIGHTING_ANIMATION_MODE_ID<ANIMATION_MODE_LENGTH_ID?
-                            DEFAULT_LIGHTING_ANIMATION_MODE_ID:ANIMATION_MODE_FLASHER_ID;
-    #else
-      animation.mode_id = ANIMATION_MODE_FLASHER_ID;
-    #endif
 
     #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
       animation.transition.pixels_to_update_as_percentage.map_id = DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
@@ -427,6 +423,7 @@ void mRGBAnimator::Settings_Default(){
       animation.brightness = 1; //default ot 50% normally for power reasons
     #endif
 
+    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
     #ifdef DONT_USE_OLD_PRESETS
     #ifdef DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID 
       scene.colour = preset_colour_map[DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID];
@@ -434,6 +431,7 @@ void mRGBAnimator::Settings_Default(){
       scene.colour = preset_colour_map[COLOUR_MAP_RED_PASTEL80_ID];
     #endif
     #endif
+    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
     #ifdef DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ
       liveview.refresh_rate = DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ;
@@ -488,467 +486,7 @@ uint8_t mRGBAnimator::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
 
 
 
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ START OF SCENES DEFINITIONS ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-void mRGBAnimator::init_Scenes(){
-  scene.name_id = scene_stored.name_id = SCENES_COLOURSCENE_ID;
-  // scene.colour.H = 1; //chnage to saving in lighting as rgbcct
-  // scene.colour.S = 1;
-  // scene.colour.B = 1;
-
-  pCONT_iLight->setChannels(0,255,0);
-  
-  #ifdef DONT_USE_OLD_PRESETS
-  scene_preset_dayon.colour       = preset_colour_map[COLOUR_MAP_PINK_ID]; 
-  scene_preset_dayoff.colour      = preset_colour_map[COLOUR_MAP_PINK_ID];
-  scene_preset_eveningon.colour   = preset_colour_map[COLOUR_MAP_PINK_ID];
-  scene_preset_eveningoff.colour  = preset_colour_map[COLOUR_MAP_PINK_ID];
-  scene_preset_nighton.colour     = preset_colour_map[COLOUR_MAP_PINK_ID];
-  scene_preset_nightoff.colour    = preset_colour_map[COLOUR_MAP_PINK_ID];
-  #endif
-
-} //end "init_Scenes"
-
-
-// This will handle various colour palettes that are not "user lights" in nature (random colours or flashes per pixel)
-// Instead, whole colour designs, changes over time (sunrise/wakeup light)
-void mRGBAnimator::SubTask_Scenes(){ 
-  #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO D_CLASS_NAME_MRGBANIMATOR "SubTask_Scenes"));
-  #endif
-
-  // Check for reseting SCENES
-  if(scene_stored.fActive){
-    // if(abs(millis()-scene_stored.tStart)>scene_stored.tOnTime){
-    //   scene.name_id = scene_stored.name_id; // restore mode
-    //   scene_stored.fActive = false;   // finish
-    // }
-  }
-
-  switch(scene.name_id){
-
-    //  Change these to be saved as 5 user defined profiles that can be fired by time automatically
-    case SCENES_DAYON_ID:       FadeToNewColour(HsbColor(scene_preset_dayon.colour),scene_preset_dayon.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    case SCENES_DAYOFF_ID:      FadeToNewColour(HsbColor(scene_preset_dayoff.colour),scene_preset_dayoff.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    case SCENES_EVENINGON_ID:   FadeToNewColour(HsbColor(scene_preset_eveningon.colour),scene_preset_eveningon.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    case SCENES_EVENINGOFF_ID:  FadeToNewColour(HsbColor(scene_preset_eveningoff.colour),scene_preset_eveningoff.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    case SCENES_MIDNIGHTON_ID:  FadeToNewColour(HsbColor(scene_preset_nighton.colour),scene_preset_nighton.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    case SCENES_MIDNIGHTOFF_ID: FadeToNewColour(HsbColor(scene_preset_nightoff.colour),scene_preset_nightoff.time_ms);   scene.name_id = SCENES_NOTACTIVE_ID;break;
-    
-    
-    case SCENES_COLOURSCENE_ID:{
-      //FadeToNewColour(HsbColor(scene.colour.H,scene.colour.S,animation.brightness),animation.transition.time_ms.val);   
-      
-
-      // GetColour_HSB();//
-      RgbTypeColor rgbcolour = HsbColor(scene.colour.H,scene.colour.S,animation.brightness);
-      #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-      // scene.colourW = 100;
-      Serial.printf("scene.scene.colourW_f=%d" DEBUG_INSERT_PAGE_BREAK,scene.colourW);
-
-      // Serial.println(scene.colourW_f);
-
-        rgbcolour.W = scene.colourW;//(float)(scene.colourW/255);
-      #endif
-      FadeToNewColour(rgbcolour,animation.transition.time_ms.val);
-
-      scene.name_id = SCENES_NOTACTIVE_ID;
-      #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "scene.name_id=SCENES_COLOURSCENE_ID Executing"));
-      #endif
-    }break;
-    case SCENES_FADE_OFF_ID:{
-      FadeToNewColour(RgbTypeColor(0),animation.transition.time_ms.val);
-      scene.name_id = SCENES_NOTACTIVE_ID;
-    }break;
-    case SCENES_SUNRISE_SINGLE_ID:
-      // SubTask_Scene_Sunrise_Single();
-      if(!animations_control->IsAnimating()){   
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "!animations_control->IsAnimating scene.parts [%d] animation.transition.time_ms/3 [%d]"),scene.parts,animation.transition.time_ms.val/4);
-        switch(scene.parts){
-          case STEP1:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(240), pCONT_iLight->SatN2F(100), pCONT_iLight->BrtN2F(1)),  1); break; //instant
-          case STEP2:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(30),  pCONT_iLight->SatN2F(50),  pCONT_iLight->BrtN2F(50)), animation.transition.time_ms.val/2); break;
-          case STEP3:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(60),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
-          case STEP4:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(70),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
-          case STEP5:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(80),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/8); break;
-          default: break;
-        }
-        if(scene.parts<DONE){scene.parts++;};
-        if(scene.parts>=DONE){scene.parts=STEP1; 
-        //animation.mode_id = ANIMATION_MODE_NONE_ID; 
-        scene.name_id = SCENES_NOTACTIVE_ID; break;}// Stop calling parent function
-      }
-    break;
-    case SCENES_FLASHCOLOUR_ID:
-      // stripbus->ClearTo(HsbColor(scene_stored.colour)); // instant
-      // scene_stored.tOnTime = 200;
-      // scene_stored.name_id = scene.name_id; // save mode to return to
-      // scene_stored.fActive = true;
-      // scene_stored.tStart = millis();
-    break;
-    case SCENES_NOTACTIVE_ID: break;
-  }
-
-  
-  //Auto turn off
-  //PHASE OUT TO BE SHARED METHOD
-  if(mSupport::TimeReached(&scene.tSavedAutoOff,1000)){
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "scene.tSavedAutoOff [%d]"),scene.auto_time_off_secs);
-    #endif
-    if(scene.auto_time_off_secs==1){ //if =1 then turn off and clear to 0
-      scene.name_id = SCENES_FADE_OFF_ID;
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "scene.tSavedAutoOff SCENES_FADE_OFF_ID"));
-      #endif
-    }else
-    if(scene.auto_time_off_secs>1){ //if =1 then turn off and clear to 0
-      scene.auto_time_off_secs--; //decrease
-    }
-  }
-
-
-} // END FUNCTION
-
-
-
-const char* mRGBAnimator::GetSceneName(char* buffer){
-  // return WARNING_NOTHANDLED_CTR;// PSTR("nomatch\0");
-
-  sprintf(buffer,"%s","New");
-
-  return buffer;
-
-  // return (scene.name_id == SCENES_DAYON_ID ? D_SCENES_DAYON_NAME_CTR :
-  //     (scene.name_id == SCENES_DAYOFF_ID ?      D_SCENES_DAYOFF_NAME_CTR :
-  //     (scene.name_id == SCENES_EVENINGON_ID ?     D_SCENES_EVENINGON_NAME_CTR :
-  //     (scene.name_id == SCENES_EVENINGOFF_ID ?    D_SCENES_EVENINGOFF_NAME_CTR :
-  //     (scene.name_id == SCENES_MIDNIGHTON_ID ?    D_SCENES_MIDNIGHTON_NAME_CTR :
-  //     (scene.name_id == SCENES_MIDNIGHTOFF_ID ?    D_SCENES_MIDNIGHTOFF_NAME_CTR :
-  //     (scene.name_id == SCENES_FLASHCOLOUR_ID ?   D_SCENES_FLASHCOLOUR_NAME_CTR :
-  //     (scene.name_id == SCENES_COLOURSCENE_ID ?    D_SCENES_COLOURSCENE_NAME_CTR :
-  //     (scene.name_id == SCENES_SUNRISE_SINGLE_ID ?    D_SCENES_SUNRISE_SINGLE_NAME_CTR :
-  //     (scene.name_id == SCENES_NOTACTIVE_ID ?    D_SCENES_NOTACTIVE_NAME_CTR :
-  //     "NoMatch"))))))))));
-}
-int8_t mRGBAnimator::GetSceneIDbyName(const char* c){
-  if(c=='\0'){
-    return -1;
-  }
-
-// have a bunch of presets, and 5 user options/naming
-
-
-  // if(strstr(c,D_SCENES_DAYON_NAME_CTR)){
-  //   return SCENES_DAYON_ID;
-  // }else if(strstr(c,D_SCENES_DAYOFF_NAME_CTR)){
-  //   return SCENES_DAYOFF_ID;
-  // }else if(strstr(c,D_SCENES_EVENINGON_NAME_CTR)){
-  //   return SCENES_EVENINGON_ID;
-  // }else if(strstr(c,D_SCENES_EVENINGOFF_NAME_CTR)){
-  //   return SCENES_EVENINGOFF_ID;
-  // }else if(strstr(c,D_SCENES_MIDNIGHTON_NAME_CTR)){
-  //   return SCENES_MIDNIGHTON_ID;
-  // }else if(strstr(c,D_SCENES_MIDNIGHTOFF_NAME_CTR)){
-  //   return SCENES_MIDNIGHTOFF_ID;
-  // }else if(strstr(c,D_SCENES_FLASHCOLOUR_NAME_CTR)){
-  //   return SCENES_FLASHCOLOUR_ID;
-  // }else 
-  if(strstr_P(c,PM_SCENES_COLOURSCENE_NAME_CTR)){
-     return SCENES_COLOURSCENE_ID;
-  }
-  //else if(strstr(c,D_SCENES_SUNRISE_SINGLE_NAME_CTR)){
-  //   return SCENES_SUNRISE_SINGLE_ID;
-  // }else if(strstr(c,D_SCENES_NOTACTIVE_NAME_CTR)){
-  //   return SCENES_NOTACTIVE_ID;
-  // }else{
-  //   return -1;
-  // }
-}
-
-
-
-int8_t mRGBAnimator::parsesub_ModeScene(JsonObjectConst obj){
-  
-   // Create local dereferenced variable
-  // JsonObject obj = (*_obj); 
-
-  // DynamicJsonDocument doc(500);
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-  //   return 0;
-  // }
-  // JsonObject obj = doc.as<JsonObject>();
-
-  int8_t tmp_id = 0;
-  int8_t isserviced = 0;
-
-  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
-
-  char buffer[50];
-
-  if(!obj[D_JSON_NAME].isNull()){ 
-    const char* scenectr = obj[D_JSON_NAME];
-    if((tmp_id=GetSceneIDbyName(scenectr))>=0){
-      scene.name_id = tmp_id;
-      animation.mode_id = ANIMATION_MODE_SCENE_ID; //#Idea. make optional
-      // char buffer[30];
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
-      #endif
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
-      isserviced++;
-    }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
-    }
-  }
-  
-  // Includes special case of hue=361 which sets saturation to 0 for white
-  if(!obj[D_JSON_HUE].isNull()){ 
-    uint16_t hue = obj[D_JSON_HUE];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    #endif
-    scene.colour.H = pCONT_iLight->HueN2F(hue);
-    if(hue==361){scene.colour.S = 0;} // hue of max+1(361) automically sets hsb to be white
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,scene.colour.H);
-    #endif
-    Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,scene.colour.H);
-    
-    animation.mode_id = ANIMATION_MODE_SCENE_ID;
-    scene.name_id = SCENES_COLOURSCENE_ID;
-
-    isserviced++;
-  }
-
-  if(!obj[D_JSON_SAT].isNull()){ 
-    uint8_t sat = obj[D_JSON_SAT];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    #endif
-    scene.colour.S = pCONT_iLight->SatN2F(sat);
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,scene.colour.S);
-    #endif
-    Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,scene.colour.S);
-    
-    animation.mode_id = ANIMATION_MODE_SCENE_ID;
-    scene.name_id = SCENES_COLOURSCENE_ID;
-
-    isserviced++;
-  }
-
-  if(!obj[D_JSON_BRT].isNull()){ 
-    uint8_t brt = obj[D_JSON_BRT];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    #endif
-    scene.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
-    #endif
-    Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
-    
-    isserviced++;
-  }
-
-  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  if(!obj[D_JSON_WHITE].isNull()){ 
-    uint8_t whitepixel = obj[D_JSON_WHITE];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_WHITE,whitepixel);
-    #endif
-    scene.colourW = whitepixel;
-
-    // scene.colourW = whitepixel;
-    isserviced++;
-  }else{
-    scene.colourW  = 0; // default to off if not demanded
-  }
-  #endif
-
-  if(!obj[D_JSON_RGB].isNull()){
-    const char* rgbpacked = obj[D_JSON_RGB];
-    uint32_t colour32bit = 0;
-    if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
-    }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
-    RgbColor rgb;
-    rgb.R = colour32bit >> 16; //RGB
-    rgb.G = colour32bit >> 8 & 0xFF; //RGB
-    rgb.B = colour32bit & 0xFF; //RGB
-    scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-      rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-    #endif
-  }
-
-  if(obj.containsKey(D_JSON_SCENE_COLOUR)){
-    // Check HSB format
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR]"));
-    #endif
-    if(!obj[D_JSON_SCENE_COLOUR][D_JSON_HSB].isNull()){
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]"));
-      #endif
-      JsonArrayConst colourarray = obj[D_JSON_SCENE_COLOUR][D_JSON_HSB];
-      uint8_t index = 0;
-      for(JsonVariantConst v : colourarray) {
-        int val = v.as<int>();
-        #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]=%d"),val);
-        #endif
-        switch(index++){
-          case 0: scene.colour.H = pCONT_iLight->HueN2F(val);
-          case 1: scene.colour.S = pCONT_iLight->SatN2F(val);
-          case 2: scene.colour.B = pCONT_iLight->BrtN2F(val);
-        }
-      }
-    }
-
-
-    // Check RGB format
-
-    // Check known HSB index name
-
-    // if(colour_ctr[0]=='#'){ colour32bit = (long) strtol( &colour_ctr[1], NULL, 16);
-    // }else{ colour32bit = (long) strtol( &colour_ctr[0], NULL, 16); }
-    // RgbColor rgb;
-    // rgb.R = colour32bit >> 16; //RGB
-    // rgb.G = colour32bit >> 8 & 0xFF; //RGB
-    // rgb.B = colour32bit & 0xFF; //RGB
-    // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-    //   colour_ctr,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-  }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR("NOT [D_JSON_SCENE_COLOUR]"));
-    #endif
-    }
-
-  // TIME with different units
-  if(!obj[D_JSON_TIME].isNull()){ //default to secs
-    animation.transition.time_ms.val = obj[D_JSON_TIME];
-    animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_SECS].isNull()){
-    animation.transition.time_ms.val = obj[D_JSON_TIME_SECS];
-    animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_MS].isNull()){
-    animation.transition.time_ms.val = obj[D_JSON_TIME_MS];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-    #endif
-  }
-
-
-  // TIME on duration for autooff
-  if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-    scene.auto_time_off_secs = obj[D_JSON_TIME_ON];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),scene.auto_time_off_secs);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-    scene.auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),scene.auto_time_off_secs);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_ON_MS].isNull()){
-    scene.auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
-    scene.auto_time_off_secs /= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),scene.auto_time_off_secs);  
-    #endif
-  }
-
-  // #endif
-  
-// Flash colour needs to NOT be a scene, but part of a manual direct mode
-// if(strstr(scenectr,"FLASHCOLOUR")){pCONT->mso->MessagePrintln("FLASHCOLOUR");
-//       scene_reseting.name_id = scene.name_id; // remember scene to return to
-//       scene.name_id = SCENES_FLASHCOLOUR_ID;
-//     }
-//     // Parse out flashcolour info if it exists
-//     if(scene.name_id == SCENES_FLASHCOLOUR_ID){
-
-//       if(tempctr = obj["hue"]){
-//         scene_reseting.hue = obj["hue"];
-//         pCONT->mso->MessagePrintln("scene_reseting.hue");
-//         pCONT->mso->MessagePrintln(scene_reseting.hue);
-//       }
-//       if(tempctr = obj["sat"]){
-//         scene_reseting.sat = obj["sat"];
-//         pCONT->mso->MessagePrintln("scene_reseting.sat");
-//         pCONT->mso->MessagePrintln(scene_reseting.sat);
-//       }
-//       if(tempctr = obj["brt"]){
-//         scene_reseting.brt = obj["brt"];
-//         pCONT->mso->MessagePrintln("scene_reseting.brt");
-//         pCONT->mso->MessagePrintln(scene_reseting.brt);
-//       }
-//       if(tempctr = obj["time"]){
-//         scene_reseting.tOnTime = obj["time"];
-//         pCONT->mso->MessagePrintln("scene_reseting.tOnTime");
-//         pCONT->mso->MessagePrintln(scene_reseting.tOnTime);
-//       }
-//     }
-  
-  return isserviced;
-
-} // END FUNCTION
-
-
-
-uint8_t mRGBAnimator::ConstructJSON_Scene(uint8_t json_method){
-
-  #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Scene"));
-  #endif
-  // DynamicJsonDocument doc(200);
-  // JsonObject root = doc.to<JsonObject>();
-
-  // root[D_JSON_NAME] = GetSceneName();
-  // root[D_JSON_HUE] = round(HueF2N(scene.colour.H));
-  // root[D_JSON_SAT] = round(SatF2N(scene.colour.S));
-  // root[D_JSON_BRT] = round(BrtF2N(scene.colour.B));
-  // root[D_JSON_TIME] = mSupport::safeDivideInt(animation.transition.time_ms.val,1000);
-  // root[D_JSON_TIME_MS] = animation.transition.time_ms.val;
-
-  // RgbTypeColor c = HsbColor(scene.colour);
-  // char tmpctr[10]; memset(tmpctr,0,sizeof(tmpctr));
-  // sprintf(tmpctr,PSTR("%02X%02X%02X"),c.R,c.G,c.B);
-  // root[D_JSON_RGB] = tmpctr;
-
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
-
-  // return (data_buffer2.payload.len>3?1:0);
-  return 0;
-}
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ END OF SCENES DEFINITIONS ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
+#ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -956,6 +494,20 @@ uint8_t mRGBAnimator::ConstructJSON_Scene(uint8_t json_method){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
+// Limit ambilight to addressible type, else I will just use "scene"
+void mRGBAnimator::init_Ambilight(){
+
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
+  ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
+  ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
+  ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
+
+}
 
 void mRGBAnimator::SubTask_Ambilight(){
 
@@ -982,8 +534,6 @@ void mRGBAnimator::SubTask_Ambilight(){
       //serial input
     }break;
   }
-
-  
 
 } // END function
 
@@ -1032,12 +582,428 @@ void mRGBAnimator::Ambilight_Sides(){
 
 }
 
+
+
+//previous heating panel
+int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
+
+   // Create local dereferenced variable
+  // JsonObject obj = (*_obj); 
+
+  int8_t tmp_id = 0;
+  int8_t isserviced = 0;
+
+  char buffer[50];
+
+#ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+
+  if(!obj[D_JSON_NAME].isNull()){ 
+    const char* scenectr = obj[D_JSON_NAME];
+    if((tmp_id=GetSceneIDbyName(scenectr))>=0){
+      scene.name_id = tmp_id;
+      animation.mode_id = ANIMATION_MODE_SCENE_ID;
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
+      Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
+      isserviced++;
+    }else{
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+    }
+  }
+
+  #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+
+  // USe pointers
+  //side
+  // struct AMBILIGHT_SCREEN_SETTINGS.SCREENS[0]::
+  // ambilightsettings.screens[SCREEN_CENTRE].top
+  //screen
+  
+  if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
+    uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+    isserviced++;
+  }
+  if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
+    uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+    isserviced++;
+  }
+  if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
+    uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
+    isserviced++;
+  }
+
+
+
+  if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
+    uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+    isserviced++;
+  }
+  if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
+    uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+    isserviced++;
+  }
+  if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
+    uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
+    isserviced++;
+  }
+
+
+
+
+  if(!obj[D_JSON_RGB].isNull()){
+    const char* rgbpacked = obj[D_JSON_RGB];
+    uint32_t colour32bit = 0;
+    if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
+    }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
+    RgbColor rgb;
+    rgb.R = colour32bit >> 16; //RGB
+    rgb.G = colour32bit >> 8 & 0xFF; //RGB
+    rgb.B = colour32bit & 0xFF; //RGB
+    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+    //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
+    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  }
+
+  // TIME with different units
+  if(!obj[D_JSON_TIME].isNull()){ //default to secs
+    animation.transition.time_ms.val = obj["time"];
+    animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+  }else
+  if(!obj[D_JSON_TIME].isNull()){
+    animation.transition.time_ms.val = obj["time_secs"];
+    animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+  }else
+  if(!obj[D_JSON_TIME_MS].isNull()){
+    animation.transition.time_ms.val = obj["time_ms"];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+  }
+
+  
+// Flash colour needs to NOT be a scene, but part of a manual direct mode
+// if(strstr(scenectr,"FLASHCOLOUR")){
+//       scene_reseting.name_id = scene.name_id; // remember scene to return to
+//       scene.name_id = MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
+//     }
+//     // Parse out flashcolour info if it exists
+//     if(scene.name_id == MODE_SINGLECOLOUR_FLASHCOLOUR_ID){
+
+//       if(tempctr = obj["hue"]){
+//         scene_reseting.hue = obj["hue"];
+//       }
+//       if(tempctr = obj["sat"]){
+//         scene_reseting.sat = obj["sat"];
+//       }
+//       if(tempctr = obj["brt"]){
+//         scene_reseting.brt = obj["brt"];
+//       }
+//       if(tempctr = obj["time"]){
+//         scene_reseting.tOnTime = obj["time"];
+//       }
+//     }
+  
+  return isserviced;
+
+
+
+//   // create easier names
+//   // char* topic_ctr = data_buffer2.topic.ctr;
+//   // uint8_t topic_len = data_buffer2.topic.len;
+//   // char* payload_ctr = data_buffer2.payload.ctr;
+//   // uint8_t payload_len = data_buffer2.payload.len;
+
+//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/center",sizeof("/center")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /center");
+
+//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+
+//     uint16_t index = 0;
+
+//     ambilightsettings.colour.found_idx = 0;
+
+//     StaticJsonDocument<300> doc;
+//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//     JsonObject root = doc.as<JsonObject>();
+
+//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
+
+//     if(root["RGB"].is<JsonArray>()){
+
+//       JsonArray colourarray = root["RGB"];
+//       int array_length = colourarray.size();
+
+//       const char* pixelcolour;
+//       for(JsonVariantConst v : colourarray) {
+//         pixelcolour = v.as<const char*>();
+
+//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+
+//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+
+
+//         ambilightsettings.colour.found_idx++;
+//         index++;
+//       }
+//       pCONT->mso->MessagePrint("ENDambilightsettings.col.found_idx");
+//       pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+//       pCONT->mso->MessagePrintln(index);
+
+//     }
+//     // else if(root["RGB"].is<const char*>()){ //one colour = string
+//     //
+//     //   const char* pixelcolour;
+//     //   pixelcolour = root["RGB"];
+//     //
+//     //   //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+//     //   if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//     //   }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+//     //
+//     //   ambilightsettings.colour.r[ambilightsettings.colour.found_idx] = colour32bit >> 16; //RGB
+//     //   ambilightsettings.colour.g[ambilightsettings.colour.found_idx] = colour32bit >> 8 & 0xFF; //RGB
+//     //   ambilightsettings.colour.b[ambilightsettings.colour.found_idx] = colour32bit & 0xFF; //RGB
+//     //
+//     //   // Serial.println(parsed.col.r[parsed.col.found_idx]);
+//     //   // Serial.println(parsed.col.g[parsed.col.found_idx]);
+//     //   // Serial.println(parsed.col.b[parsed.col.found_idx]);
+//     //
+//     //   ambilightsettings.colour.found_idx++;
+//     // }
+
+//     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
+//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+//     //strip_size
+//     //ambilightsettings.colour.found_idx
+//     for(int i=0;i<index;i++){
+//         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
+//     }stripbus->Show();
+
+
+// } // END center
+
+
+// #ifdef DEVICE_RGBDELL
+
+//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/left",sizeof("/left")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /left");
+
+//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+
+//     ambilightsettings.colour.found_idx = 0;
+
+//     StaticJsonDocument<300> doc;
+//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//     JsonObject root = doc.as<JsonObject>();
+
+//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
+
+//     if(root["RGB"].is<JsonArray>()){
+//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
+
+//       JsonArray colourarray = root["RGB"];
+//       int array_length = colourarray.size();
+
+//       const char* pixelcolour;
+//       for(JsonVariantConst v : colourarray) {
+//         pixelcolour = v.as<const char*>();
+
+//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
+
+//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+
+//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
+//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
+//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
+
+//         ambilightsettings.colour.found_idx++;
+//       }
+
+//     }else if(root["RGB"].is<const char*>()){ //one colour = string
+
+//       const char* pixelcolour;
+//       pixelcolour = root["RGB"];
+
+//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+
+//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
+//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
+//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
+
+//       ambilightsettings.colour.found_idx++;
+//     }
+
+//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+//     //strip_size
+//     //ambilightsettings.colour.found_idx
+//     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
+//     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
+//     //  }
+//     // /stripbus->Show();
+
+//     uint32_t c; //colourrgb
+//     pinMode(RGB_DATA_LEFT_PIN,OUTPUT);
+//     pinMode(RGB_CLOCK_LEFT_PIN,OUTPUT);
+
+//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
+//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
+//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
+//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
+//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
+//     }
+//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
+
+
+
+// } // END left
+
+
+
+//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/right",sizeof("/right")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /right");
+
+//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+
+//     ambilightsettings.colour.found_idx = 0;
+
+//     StaticJsonDocument<300> doc;
+//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//     JsonObject root = doc.as<JsonObject>();
+
+//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
+
+//     if(root["RGB"].is<JsonArray>()){
+//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
+
+//       JsonArray colourarray = root["RGB"];
+//       int array_length = colourarray.size();
+
+//       const char* pixelcolour;
+//       for(JsonVariantConst v : colourarray) {
+//         pixelcolour = v.as<const char*>();
+
+//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
+
+//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+
+//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
+//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
+//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
+
+//         ambilightsettings.colour.found_idx++;
+//       }
+
+//     }else if(root["RGB"].is<const char*>()){ //one colour = string
+
+//       const char* pixelcolour;
+//       pixelcolour = root["RGB"];
+
+//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+
+//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
+//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
+//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
+
+//       ambilightsettings.colour.found_idx++;
+//     }
+
+//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+//     //strip_size
+//     //ambilightsettings.colour.found_idx
+//     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
+//     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
+//     // }
+//     // mrgbneo_ani->setBrightness(255);
+//     // mrgbneo_ani->show();
+
+//     uint32_t c; //colourrgb
+//     pinMode(RGB_DATA_RIGHT_PIN,OUTPUT);
+//     pinMode(RGB_CLOCK_RIGHT_PIN,OUTPUT);
+
+//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
+//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
+//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
+//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
+//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
+//     }
+//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
+
+
+
+// } // END left
+
+//       //fShowPanelUpdate = true;
+//     //}
+
+
+// //  }
+
+//   //switch modes : USE serial input stream
+//   //send as json array?
+//   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
+//   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
+
+//   animation.mode_id = MODE_AMBILIGHT_ID;
+//   fForcePanelUpdate = true;
+
+  return 0;
+
+} // END FUNCTION
+
+
 /*******************************************************************************************************************
 ********************************************************************************************************************
 ************ END OF AMBILIGHT DEFINITIONS ********************************************************************************************
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
+#endif
 
 
 void mRGBAnimator::init_flasher_settings(){
@@ -2128,7 +2094,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_animation_teleperiod;
@@ -2138,7 +2104,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_animation;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Animation;
 
   mqtthandler_ptr = &mqtthandler_ambilight_teleperiod;
@@ -2148,7 +2114,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_ambilight;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Ambilight;
   
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS      //make this optional, as it uses extra data and is only for special cases
@@ -2162,17 +2128,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = postfix_topic_notifications;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Notifications;
   #endif
-  
-  mqtthandler_ptr = &mqtthandler_scene_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_scene;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Scene;
-  
+    
   mqtthandler_ptr = &mqtthandler_state_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->fPeriodicEnabled = true;
@@ -2180,19 +2136,9 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_state;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_State;
   
-  mqtthandler_ptr = &mqtthandler_timed_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_timed;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Timed;
-
 #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
   mqtthandler_ptr = &mqtthandler_flasher_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -2226,9 +2172,7 @@ void mRGBAnimator::MQTTHandler_Set_fSendNow(){
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
   mqtthandler_notifications_teleperiod.fSendNow = true;
   #endif
-  mqtthandler_scene_teleperiod.fSendNow = true;
   mqtthandler_state_teleperiod.fSendNow = true;
-  mqtthandler_timed_teleperiod.fSendNow = true;
   mqtthandler_flasher_teleperiod.fSendNow = true;
   mqtthandler_mixer_teleperiod.fSendNow = true;
 
@@ -2243,9 +2187,7 @@ void mRGBAnimator::MQTTHandler_Set_TelePeriod(){
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
   mqtthandler_notifications_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   #endif
-  mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_state_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_timed_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_flasher_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_mixer_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
@@ -2269,9 +2211,7 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       case MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID: mqtthandler_ptr=&mqtthandler_notifications_teleperiod; break;
       #endif
-      case MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_scene_teleperiod; break;
       case MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_state_teleperiod; break;
-      case MQTT_HANDLER_MODULE_TIMED_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_timed_teleperiod; break;
       
       #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
       case MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID:      mqtthandler_ptr=&mqtthandler_flasher_teleperiod; break;
@@ -2312,7 +2252,7 @@ void mRGBAnimator::init_Animations(){
   // Set default values (ifdef below sets specific)
   animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
   animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
-  animation.mode_id = ANIMATION_MODE_FLASHER_ID;
+  animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
   flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
   animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
   animation.flags.fForceUpdate = true;
@@ -2328,70 +2268,6 @@ void mRGBAnimator::init_Animations(){
 }
 
 
-
-
-
-void mRGBAnimator::init_Ambilight(){
-
-  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
-  ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
-  ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
-  ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
-  ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
-
-}
-
-// void mRGBAnimator::UpdateBrightness()
-// animation.brightness
-
-  //if(timed event, tasker, reduce time, fill command)
-  // retains setting to excute later, turn off, change pattern etc
-void mRGBAnimator::SubTask_TimedLEDMode(){
-
-  // Need to use stored struct copies for this. 
-  // Set flag that data in stored structs are to be executed after x seconds
-  // animation_stored,scene_stored
-  // copy new pattern over and execute
-
-  // if((abs(millis()-timedon.tick)>=1000)||(timedon.fForceUpdate)){ timedon.tick = millis(); timedon.fForceUpdate = false;
-
-  //   if(timedon.secs>0){timedon.secs--;
-  //     // RefreshLED_Presets();
-  //     // UpdateLEDs();
-  //     // timedon.fUpdated = true;
-  //   }else if(timedon.secs==0){timedon.secs = -1;
-  //     TurnLEDsOff();
-  //     timedon.fUpdated = true;
-  //   }else if(timedon.secs<0){
-  //     //nothing - should be off
-  //   }
-
-  // }
-
-} // END FUNCTION
-
-void mRGBAnimator::SubTask_Presets(){
-
-  //PHASE OUT
-    
-  // if((abs(millis()-tSavedUpdateRGBString)>(animation.transition.rate_ms.val))||(animation.flags.fForceUpdate)){
-  //   tSavedUpdateRGBString = millis(); 
-    
-  //   animation_changed_millis = millis();
-
-  //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "f::SubTask_Presets" "tSavedUpdateRGBString %d"),animation.transition.rate_ms.val);
-          
-  //   if(animation.flags.fForceUpdate){animation.flags.fForceUpdate=false;}
-  //   RefreshLED_Presets();
-  //   ConfigureLEDTransitionAnimation();
-  // }
-
-
-}
 
 
 
@@ -2777,12 +2653,14 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
 
 // optional fromcolor to merge "FadeToNewColour" and "FadeBetweenColours"
 // If unset (as defined in header) the animation will blend from current pixel colours with getpixel
-void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_newcolour,  RgbTypeColor fromcolor){ 
+// void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_newcolour,  RgbTypeColor fromcolor){ 
+void mRGBAnimator::FadeToNewColour(RgbcctColor* targetColor, uint16_t _time_to_newcolour,  RgbcctColor* fromcolor){ 
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
     //AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_NEO "FadeToNewColour"));
   #endif
   
+AddLog_P(LOG_LEVEL_DEBUG, PSTR("RgbcctColor=%d,%d,%d"),targetColor->R,targetColor->G,targetColor->B);
   if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
     _time_to_newcolour /= 1000;// ms to seconds
   }
@@ -2795,15 +2673,31 @@ void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_n
   
   AnimEaseFunction easing = NeoEase::CubicIn;  
 
+  // Translation
+  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+    RgbTypeColor fromcolor_npb = RgbwColor(fromcolor.R,fromcolor.G,fromcolor.B,fromcolor.CW);
+    RgbTypeColor targetColor_npb = RgbwColor(targetColor.R,targetColor.G,targetColor.B,targetColor.CW);
+  #else
+    RgbTypeColor fromcolor_npb = RgbColor(0);
+    if(fromcolor != nullptr){
+      fromcolor_npb = RgbColor(fromcolor->R,fromcolor->G,fromcolor->B);
+    }
+    RgbTypeColor targetColor_npb = RgbColor(targetColor->R,targetColor->G,targetColor->B);
+
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR("fromcolor_npb=%d,%d,%d"),fromcolor_npb.R,fromcolor_npb.G,fromcolor_npb.B);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR("targetColor_npb=%d,%d,%d"),targetColor_npb.R,targetColor_npb.G,targetColor_npb.B);
+
+  #endif
+
   for (uint16_t pixel = 0; pixel < strip_size; pixel++){
-    // Check if fromcolor is defined
-    if(!(fromcolor.R+fromcolor.G+fromcolor.B)){ // This might cause a bug during fully off to on
-      fromcolor = GetPixelColor(pixel);
+    // Check if fromcolor_npb is defined
+    if(!(fromcolor_npb.R+fromcolor_npb.G+fromcolor_npb.B)){ // This might cause a bug during fully off to on
+      fromcolor_npb = GetPixelColor(pixel);
     }
     
     AnimUpdateCallback animUpdate = [=](const AnimationParam& param){
       float progress = easing(param.progress);  
-      RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(fromcolor, targetColor, progress); 
+      RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(fromcolor_npb, targetColor_npb, progress); 
       SetPixelColor(pixel, updatedColor);
     };
     
@@ -2813,70 +2707,6 @@ void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_n
 } // END function
 
 
-void mRGBAnimator::SetAnimationProfile(uint8_t profile_id){
-  #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::SetAnimationProfile" " START"));
-  #endif
-          
-  switch(profile_id){
-    case ANIMATION_PROFILE_TURN_OFF_ID:
-      //if palette, set colour to black and update all
-      switch(animation.mode_id){
-        case ANIMATION_MODE_FLASHER_ID://PRESETS_ID:
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::SetAnimationProfile" "ANIMATION_MODE_FLASHER_ID"));
-          #endif
-          animation_override.time_ms = 1000; //force fast rate to turn on
-          flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-          animation.flags.fForceUpdate = true;
-          animation.brightness = 0;
-          first_set = 1;//set all
-        break;
-        default:
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::SetAnimationProfile" "default"));
-          #endif
-        case ANIMATION_MODE_SCENE_ID:
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
-          #endif
-          animation.brightness = 0;
-          animation.transition.time_ms.val = 1000;
-          animation.flags.fForceUpdate = true;
-          animation_override.time_ms = 1000; //force fast rate to turn on
-          
-          scene.name_id = SCENES_COLOURSCENE_ID;
-          animation.mode_id = ANIMATION_MODE_SCENE_ID;
-          
-          first_set = 1;//set all
-        break;
-      }
-      animation.flags.fEndUpdatesWhenAnimationCompletes = true; //once turned off, stop animations
-    break;
-    case ANIMATION_PROFILE_TURN_ON_ID:
-
-        switch(animation.mode_id){
-          // case ANIMATION_MODE_PRESETS_ID:
-          
-          // break;
-          default:
-          case ANIMATION_MODE_SCENE_ID:
-            scene.name_id = SCENES_COLOURSCENE_ID;
-            animation.mode_id = ANIMATION_MODE_SCENE_ID;
-          break;
-        }
-
-        animation_override.time_ms = 1000; //force fast rate to turn on
-        animation.brightness = 1;
-        animation.flags.fForceUpdate = true;
-        first_set = 1;//set all
-    break;
-    case ANIMATION_PROFILE_NOTHING_ID:
-
-    break;
-  }
-
-}// END SetAnimationProfile function
 
 
 void mRGBAnimator::ConfigureLEDTransitionAnimation(){ 
@@ -3026,41 +2856,6 @@ void mRGBAnimator::AddToJsonObject_AddHardware(JsonObject root){
 // H ue360toFloat
 
 // make these static and global supports, requiring no object ? inline??
-
-
-
-const char* mRGBAnimator::GetAnimationModeName(char* buffer, uint16_t buflen){
-  return GetAnimationModeNameByID(animation.mode_id, buffer, buflen);
-}
-const char* mRGBAnimator::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
-  switch(id){
-    default:
-    case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
-  case ANIMATION_MODE_TURN_ON_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_ON_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_ON_NAME_CTR)); break;
-  case ANIMATION_MODE_TURN_OFF_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_OFF_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR)); break;
-  
-    case ANIMATION_MODE_AMBILIGHT_ID:     memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
-    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      case ANIMATION_MODE_NOTIFICATIONS_ID: memcpy_P(buffer, PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR,sizeof(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)); break;
-    #endif
-    case ANIMATION_MODE_FLASHER_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_FLASHER_NAME_CTR, sizeof(PM_ANIMATION_MODE_FLASHER_NAME_CTR)); break;
-    case ANIMATION_MODE_SCENE_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_SCENE_NAME_CTR , sizeof(PM_ANIMATION_MODE_SCENE_NAME_CTR)); break;
-    }
-  return buffer;
-} 
-int8_t mRGBAnimator::GetAnimationModeIDbyName(const char* c){
-  if(c=='\0'){
-    return -1;
-  }
-  if(strstr_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)){ return ANIMATION_MODE_NONE_ID; }
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  if(strstr_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
-  #endif
-  if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
-  if(strstr_P(c,PM_ANIMATION_MODE_SCENE_NAME_CTR)){          return ANIMATION_MODE_SCENE_ID; }
-  if(strstr_P(c,PM_ANIMATION_MODE_FLASHER_NAME_CTR)){        return ANIMATION_MODE_FLASHER_ID; }
-  return -1;
-}
 
 
 
@@ -3452,10 +3247,13 @@ void mRGBAnimator::SetRefreshLEDs(){
   animation_override.fRefreshAllPixels = true;
   animation_override.time_ms = 10;
 
+  #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+
   // Additional flags to force scene updates
   if(animation.mode_id == ANIMATION_MODE_SCENE_ID){
-    scene.name_id = SCENES_COLOURSCENE_ID;
+    scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
   }
+  #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
 }
 
@@ -3504,57 +3302,11 @@ void mRGBAnimator::EveryLoop(){
     }//animation.flags.fEnable_Animation
 
 
-    //Auto turn off
-    if(mSupport::TimeReached(&animation.tSavedAutoOff,1000)){
-      //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "scene.tSavedAutoOff [%d]"),animation.auto_time_off_secs);
-      if(animation.auto_time_off_secs==1){ //if =1 then turn off and clear to 0
-        // animation.name_id = SCENES_FADE_OFF_ID;
-        #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "animation.auto_time_off_secs==1 and disable"));
-        #endif       
 
-        SetAnimationProfile(ANIMATION_PROFILE_TURN_OFF_ID);
-        //#ifdef ENABLE_LOG_LEVEL_INFO
-        animation.auto_time_off_secs=0;
-        //#endif
-      }else
-      if(animation.auto_time_off_secs>1){ //if =1 then turn off and clear to 0
-        animation.auto_time_off_secs--; //decrease
-        
-        #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "animation.auto_time_off_secs=%d dec"),animation.auto_time_off_secs);
-        #endif
-      }
-    }
-
-
-    //SubTask_TimedLEDMode(); // Delayed commands (should really be generic ie not limited to this class)
-
-    switch(animation.mode_id){
-      //#ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
-      case ANIMATION_MODE_FLASHER_ID:
-        SubTask_Flasher_Main();
-        fLEDStripOnOff = true;
-      break;
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      case ANIMATION_MODE_NOTIFICATIONS_ID:
-        SubTask_NotificationPanel();
-        fLEDStripOnOff = true;
-      break;
-      #endif
-      case ANIMATION_MODE_SCENE_ID:
-        SubTask_Scenes();             //scenes to be moved into interface
-        fLEDStripOnOff = true;
-      break;
-      case ANIMATION_MODE_AMBILIGHT_ID:
-        SubTask_Ambilight();
-        fLEDStripOnOff = true;
-      break;
-      case ANIMATION_MODE_NONE_ID: default: break; // resting position
-    }
-
-
-    scene.colour.B = animation.brightness; // animation.brightness is master
+    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    // scene.colour.B = animation.brightness; // animation.brightness is master
+    // move to have tasmota way to update brightness stored
+    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
     // control relay power
     //(fLEDStripOnOff)
@@ -3727,24 +3479,20 @@ int8_t mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     #endif
     isserviced += parsesub_ModeManual(obj);
   }else 
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/scene",sizeof("/scene")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "scene"));    
-    #endif
-    isserviced += parsesub_ModeScene(obj);
-  }else  
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
     #endif    
     isserviced += parsesub_ModeAnimation(obj);
   }else
+  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/ambilight",sizeof("/ambilight")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "ambilight")); 
     #endif   
     isserviced += parsesub_ModeAmbilight(obj);
   }else
+  #endif
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/flasher",sizeof("/flasher")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
@@ -3783,11 +3531,14 @@ int8_t mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
     // Serial.println("parsesub_CheckAll1"); Serial.flush();
   isserviced += parsesub_ModeManual(obj);
     // Serial.println("parsesub_CheckAll2"); Serial.flush();
+    
+    #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
   isserviced += parsesub_ModeAmbilight(obj);
+  #endif
     // Serial.println("parsesub_CheckAll3"); Serial.flush();
   isserviced += parsesub_ModeAnimation(obj);
     // Serial.println("parsesub_CheckAll4"); Serial.flush();
-  isserviced += parsesub_ModeScene(obj);
+  isserviced += pCONT_iLight->parsesub_ModeScene(obj);
     // Serial.println("parsesub_CheckAll5"); Serial.flush();
   isserviced += parsesub_Flasher(obj);
     // Serial.println("parsesub_CheckAll6"); Serial.flush();
@@ -3845,7 +3596,7 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
       // Add this as "SAVE" state then "LOAD" state
       memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
 
-      SetAnimationProfile(ANIMATION_PROFILE_TURN_ON_ID);
+      pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
       fLEDStripOnOff = true;
 
       //animation.mode_id = MODE_TURN_ON_ID;
@@ -3858,7 +3609,7 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
       #endif
       memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
-      SetAnimationProfile(ANIMATION_PROFILE_TURN_OFF_ID);
+      pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
       fLEDStripOnOff = false;
 
       //animation.mode_id = MODE_TURN_OFF_ID;
@@ -3906,22 +3657,22 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
   
   // TIME on duration for autooff
   if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON];
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_MS].isNull()){
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
-    animation.auto_time_off_secs /= 1000;
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
+    pCONT_iLight->auto_time_off_secs /= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }
 
@@ -4002,10 +3753,10 @@ DEBUG_LINE;
   //LEGACY METHOD  
   if(!obj[D_JSON_MODE].isNull()){ 
     const char* mode = obj[D_JSON_MODE];
-    if((tmp_id=GetAnimationModeIDbyName(mode))>=0){
+    if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
       animation.mode_id = tmp_id;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetAnimationModeName(buffer, sizeof(buffer)));
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
      #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
       isserviced++;
@@ -4016,10 +3767,10 @@ DEBUG_LINE;
   //NEW METHOD  
   if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
     const char* mode = obj[D_JSON_ANIMATIONMODE];
-    if((tmp_id=GetAnimationModeIDbyName(mode))>=0){
+    if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
       animation.mode_id = tmp_id;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,GetAnimationModeName(buffer, sizeof(buffer)));
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
      #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
       isserviced++;
@@ -4185,22 +3936,22 @@ DEBUG_LINE;
   
   // TIME on duration for autooff
   if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON];
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_MS].isNull()){
-    animation.auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
-    animation.auto_time_off_secs /= 1000;
+    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
+    pCONT_iLight->auto_time_off_secs /= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
     #endif
   }
 
@@ -4233,7 +3984,7 @@ void mRGBAnimator::StripUpdate(){
     if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
   }
   
-
+#ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 // #ifdef USE_SPEED_TESTING
   uint8_t channel_count = 3;
@@ -4310,6 +4061,7 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("Estimated Power Consumption = %d (mA)"),(int)estimated_power_new_mA);
     #endif
 }
+#endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
   // for (auto copies = 0; copies < 3; copies++) {
   //   image.Blt(stripbus, copies * image.PixelCount());
@@ -4321,411 +4073,6 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 
 
 
-//previous heating panel
-int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
-
-   // Create local dereferenced variable
-  // JsonObject obj = (*_obj); 
-
-  int8_t tmp_id = 0;
-  int8_t isserviced = 0;
-
-  char buffer[50];
-
-  if(!obj[D_JSON_NAME].isNull()){ 
-    const char* scenectr = obj[D_JSON_NAME];
-    if((tmp_id=GetSceneIDbyName(scenectr))>=0){
-      scene.name_id = tmp_id;
-      animation.mode_id = ANIMATION_MODE_SCENE_ID;
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
-      Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
-      isserviced++;
-    }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
-    }
-  }
-
-  // USe pointers
-  //side
-  // struct AMBILIGHT_SCREEN_SETTINGS.SCREENS[0]::
-  // ambilightsettings.screens[SCREEN_CENTRE].top
-  //screen
-  
-  if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
-    uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-    isserviced++;
-  }
-  if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
-    uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-    isserviced++;
-  }
-  if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
-    uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
-    isserviced++;
-  }
-
-
-
-  if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
-    uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-    isserviced++;
-  }
-  if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
-    uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-    isserviced++;
-  }
-  if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
-    uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
-    isserviced++;
-  }
-
-
-
-
-  if(!obj[D_JSON_RGB].isNull()){
-    const char* rgbpacked = obj[D_JSON_RGB];
-    uint32_t colour32bit = 0;
-    if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
-    }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
-    RgbColor rgb;
-    rgb.R = colour32bit >> 16; //RGB
-    rgb.G = colour32bit >> 8 & 0xFF; //RGB
-    rgb.B = colour32bit & 0xFF; //RGB
-    scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-      rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-  }
-
-  // TIME with different units
-  if(!obj[D_JSON_TIME].isNull()){ //default to secs
-    animation.transition.time_ms.val = obj["time"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-  }else
-  if(!obj[D_JSON_TIME].isNull()){
-    animation.transition.time_ms.val = obj["time_secs"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-  }else
-  if(!obj[D_JSON_TIME_MS].isNull()){
-    animation.transition.time_ms.val = obj["time_ms"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
-  }
-
-  
-// Flash colour needs to NOT be a scene, but part of a manual direct mode
-// if(strstr(scenectr,"FLASHCOLOUR")){
-//       scene_reseting.name_id = scene.name_id; // remember scene to return to
-//       scene.name_id = SCENES_FLASHCOLOUR_ID;
-//     }
-//     // Parse out flashcolour info if it exists
-//     if(scene.name_id == SCENES_FLASHCOLOUR_ID){
-
-//       if(tempctr = obj["hue"]){
-//         scene_reseting.hue = obj["hue"];
-//       }
-//       if(tempctr = obj["sat"]){
-//         scene_reseting.sat = obj["sat"];
-//       }
-//       if(tempctr = obj["brt"]){
-//         scene_reseting.brt = obj["brt"];
-//       }
-//       if(tempctr = obj["time"]){
-//         scene_reseting.tOnTime = obj["time"];
-//       }
-//     }
-  
-  return isserviced;
-
-
-
-//   // create easier names
-//   // char* topic_ctr = data_buffer2.topic.ctr;
-//   // uint8_t topic_len = data_buffer2.topic.len;
-//   // char* payload_ctr = data_buffer2.payload.ctr;
-//   // uint8_t payload_len = data_buffer2.payload.len;
-
-//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/center",sizeof("/center")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /center");
-
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-//     uint16_t index = 0;
-
-//     ambilightsettings.colour.found_idx = 0;
-
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
-
-//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
-
-//     if(root["RGB"].is<JsonArray>()){
-
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
-
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
-
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-
-//         ambilightsettings.colour.found_idx++;
-//         index++;
-//       }
-//       pCONT->mso->MessagePrint("ENDambilightsettings.col.found_idx");
-//       pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//       pCONT->mso->MessagePrintln(index);
-
-//     }
-//     // else if(root["RGB"].is<const char*>()){ //one colour = string
-//     //
-//     //   const char* pixelcolour;
-//     //   pixelcolour = root["RGB"];
-//     //
-//     //   //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//     //   if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//     //   }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-//     //
-//     //   ambilightsettings.colour.r[ambilightsettings.colour.found_idx] = colour32bit >> 16; //RGB
-//     //   ambilightsettings.colour.g[ambilightsettings.colour.found_idx] = colour32bit >> 8 & 0xFF; //RGB
-//     //   ambilightsettings.colour.b[ambilightsettings.colour.found_idx] = colour32bit & 0xFF; //RGB
-//     //
-//     //   // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//     //   // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//     //   // Serial.println(parsed.col.b[parsed.col.found_idx]);
-//     //
-//     //   ambilightsettings.colour.found_idx++;
-//     // }
-
-//     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     for(int i=0;i<index;i++){
-//         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
-//     }stripbus->Show();
-
-
-// } // END center
-
-
-// #ifdef DEVICE_RGBDELL
-
-//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/left",sizeof("/left")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /left");
-
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-//     ambilightsettings.colour.found_idx = 0;
-
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
-
-//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
-
-//     if(root["RGB"].is<JsonArray>()){
-//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
-
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
-
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
-
-//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
-
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
-
-//         ambilightsettings.colour.found_idx++;
-//       }
-
-//     }else if(root["RGB"].is<const char*>()){ //one colour = string
-
-//       const char* pixelcolour;
-//       pixelcolour = root["RGB"];
-
-//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
-
-//       ambilightsettings.colour.found_idx++;
-//     }
-
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-//     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-//     //  }
-//     // /stripbus->Show();
-
-//     uint32_t c; //colourrgb
-//     pinMode(RGB_DATA_LEFT_PIN,OUTPUT);
-//     pinMode(RGB_CLOCK_LEFT_PIN,OUTPUT);
-
-//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
-//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-//     }
-//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
-
-
-
-// } // END left
-
-
-
-//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/right",sizeof("/right")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /right");
-
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
-
-//     ambilightsettings.colour.found_idx = 0;
-
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
-
-//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
-
-//     if(root["RGB"].is<JsonArray>()){
-//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
-
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
-
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
-
-//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
-
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
-
-//         ambilightsettings.colour.found_idx++;
-//       }
-
-//     }else if(root["RGB"].is<const char*>()){ //one colour = string
-
-//       const char* pixelcolour;
-//       pixelcolour = root["RGB"];
-
-//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
-
-//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
-
-//       ambilightsettings.colour.found_idx++;
-//     }
-
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-//     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-//     // }
-//     // mrgbneo_ani->setBrightness(255);
-//     // mrgbneo_ani->show();
-
-//     uint32_t c; //colourrgb
-//     pinMode(RGB_DATA_RIGHT_PIN,OUTPUT);
-//     pinMode(RGB_CLOCK_RIGHT_PIN,OUTPUT);
-
-//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
-//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-//     }
-//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
-
-
-
-// } // END left
-
-//       //fShowPanelUpdate = true;
-//     //}
-
-
-// //  }
-
-//   //switch modes : USE serial input stream
-//   //send as json array?
-//   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
-//   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
-
-//   animation.mode_id = MODE_AMBILIGHT_ID;
-//   fForcePanelUpdate = true;
-
-  return 0;
-
-} // END FUNCTION
 
 
 
@@ -4858,27 +4205,6 @@ uint8_t mRGBAnimator::ConstructJSON_State(uint8_t json_level){
   data_buffer2.payload.len = measureJson(root)+1;
   serializeJson(doc,data_buffer2.payload.ctr);
 
-}
-
-
-uint8_t mRGBAnimator::ConstructJSON_Timed(uint8_t json_level){
-
-  #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Timed"));
-  #endif
-
-  // DynamicJsonDocument doc(1500);
-  // JsonObject root = doc.to<JsonObject>();
-
-  // root[D_JSON_SIZE] = strip_size;
-  // root["timed"] = 0;
-
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
-
-  // return (data_buffer2.payload.len>3?1:0);
-
-  return 0;
 }
 
 
@@ -5048,18 +4374,18 @@ char buffer[50];
   if(mSupport::TimeReached(&notif.tSaved.AutoOff,1000)){// if 1 second past
     for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ //check all
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].pCONT_iLight->auto_time_off_secs);
       #endif
-      if(notif.pixel[i].auto_time_off_secs==1){ //if =1 then turn off and clear to 0
+      if(notif.pixel[i].pCONT_iLight->auto_time_off_secs==1){ //if =1 then turn off and clear to 0
         SetPixelColor(i,0);
-        notif.pixel[i].auto_time_off_secs = 0;
+        notif.pixel[i].pCONT_iLight->auto_time_off_secs = 0;
         notif.pixel[i].mode = NOTIF_MODE_OFF_ID;
         #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].auto_time_off_secs);
+        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].pCONT_iLight->auto_time_off_secs);
         #endif
       }else
-      if(notif.pixel[i].auto_time_off_secs>1){ //if =1 then turn off and clear to 0
-        notif.pixel[i].auto_time_off_secs--; //decrease
+      if(notif.pixel[i].pCONT_iLight->auto_time_off_secs>1){ //if =1 then turn off and clear to 0
+        notif.pixel[i].pCONT_iLight->auto_time_off_secs--; //decrease
       }
     }// END for
   }
@@ -5649,7 +4975,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS "timeon_ms [%d i%d:v%d]"),pixelidx,parsed.timeon_ms.found_idx,parsed.pixelnum.val[pixelidx]);    
       
       int pixelnum = parsed.pixelnum.val[pixelidx++];
-      notif.pixel[pixelnum].auto_time_off_secs = (parsed.timeon_ms.val[subidx]/1000); 
+      notif.pixel[pixelnum].pCONT_iLight->auto_time_off_secs = (parsed.timeon_ms.val[subidx]/1000); 
       if(subidx<parsed.timeon_ms.found_idx-1){subidx++;}
 
       //also reset timer millis so they align and run together
@@ -5731,9 +5057,9 @@ uint8_t mRGBAnimator::ConstructJSON_Notifications(uint8_t json_level){
       
       
       
-  // JsonArray mode_arr = root.createNestedArray("auto_time_off_secs");
+  // JsonArray mode_arr = root.createNestedArray("pCONT_iLight->auto_time_off_secs");
   // for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
-  //   mode_arr.add(notif.pixel[i].auto_time_off_secs);
+  //   mode_arr.add(notif.pixel[i].pCONT_iLight->auto_time_off_secs);
   // }
 
 

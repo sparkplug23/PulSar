@@ -1136,7 +1136,7 @@ void mHardwarePins::GpioInit(void)
    *  Use pins to configure lights present
    * */
   pCONT_set->devices_present = 0;
-  pCONT_set->light_type = LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
+  pCONT_set->Settings.light_settings.type = LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
   pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
@@ -1166,19 +1166,19 @@ void mHardwarePins::GpioInit(void)
   //   baudrate = 19200;
   // }
   // else if (SONOFF_BN == my_module_type) {   // PWM Single color led (White)
-  //   light_type = LT_PWM1;
+  //   Settings.light_settings.type = LT_PWM1;
   // }
   // else if (SONOFF_LED == my_module_type) {  // PWM Dual color led (White warm and cold)
-  //   light_type = LT_PWM2;
+  //   Settings.light_settings.type = LT_PWM2;
   // }
   // else if (AILIGHT == my_module_type) {     // RGBW led
-  //   light_type = LT_RGBW;
+  //   Settings.light_settings.type = LT_RGBW;
   // }
   // else if (SONOFF_B1 == my_module_type) {   // RGBWC led
-  //   light_type = LT_RGBWC;
+  //   Settings.light_settings.type = LT_RGBWC;
   // }
   // else {
-    if (!pCONT_set->light_type) { pCONT_set->devices_present = 0; }
+    if (!pCONT_set->Settings.light_settings.type) { pCONT_set->devices_present = 0; }
 
 // Set PWM immediately to limit unknown states
 #ifdef USE_PWM
@@ -1191,7 +1191,7 @@ void mHardwarePins::GpioInit(void)
 //       analogWriteFreqRange(i,Settings.pwm_frequency,Settings.pwm_range);
 // #endif
 
-      if (pCONT_set->light_type) {      // force PWM GPIOs to low or high mode, see #7165
+      if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
       } else {
         pCONT_set->pwm_present = true;
@@ -1249,15 +1249,15 @@ void mHardwarePins::GpioInit(void)
 
 //bring back, part of light types
 
-  if (!pCONT_set->light_type && (PinUsed(GPIO_RGB_DATA_ID))){  // RGB led
+  if (!pCONT_set->Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))){  // RGB led
     pCONT_set->devices_present++;
-    pCONT_set->light_type = LT_WS2812;
+    pCONT_set->Settings.light_settings.type = LT_WS2812;
   }
 #endif  // USE_WS2812
 // #ifdef USE_SM16716
 //   if (SM16716_ModuleSelected()) {
-//     light_type += 3;
-//     light_type |= LT_SM16716;
+//     Settings.light_settings.type += 3;
+//     Settings.light_settings.type |= LT_SM16716;
 //   }
 // #endif  // ifdef USE_SM16716
 
@@ -1265,7 +1265,7 @@ void mHardwarePins::GpioInit(void)
 // Serial.flush();
 // while(1);
   // Basic PWM controls (PWM1-6)
-  if (!pCONT_set->light_type) {
+  if (!pCONT_set->Settings.light_settings.type) {
     for (uint8_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
       if (PinUsed(GPIO_PWM1_ID,i)) {
         pCONT_set->pwm_present = true;
@@ -1277,7 +1277,7 @@ void mHardwarePins::GpioInit(void)
   }
 
   #ifndef DISABLE_SERIAL_LOGGING
-  Serial.printf("light_type=%d\n\r",pCONT_set->light_type);
+  Serial.printf("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
   #endif
 
   pCONT_sup->SetLedPower(pCONT_set->Settings.ledstate &8);

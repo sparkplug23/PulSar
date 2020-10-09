@@ -38,7 +38,7 @@ Tcelius = Tkelvin - 273.
 
 */
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_OILFURNACE
 
@@ -49,10 +49,23 @@ Tcelius = Tkelvin - 273.
 #include "3_Network/MQTT/mMQTT.h"
 
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR) "litres";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR) "furnace";
+
+
+  const char kTitle_TableTitles_Root[] PROGMEM = 
+    "Row1" "|" 
+    "Update Rate/Speed" "|" 
+    "Update Amount" "|" 
+    "Pattern" "|" 
+    "Mode" "|" 
+    "Flasher Function" "|"
+    "Lighting Power" "|" 
+    "Lights Auto Off Timer";
 
 
 class mOilFurnace{
@@ -180,6 +193,16 @@ void ConstructRoot_JSON_Table(JsonObject root);
     float GetOilHeightMMReading();
     float GetOilHeightCMReading();
 
+    void init_ultrasonic_sensor_parameters();
+
+        
+    int8_t Tasker(uint8_t function, JsonObjectConst obj);
+    int8_t parsesub_CheckAll(JsonObjectConst obj);
+    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+
+
+
     #define ADCSENSORS_MAX 60
 
     #define ADCSENSORS_SMOOTHSLOW_NUMREADINGS ADCSENSORS_MAX // @1hz ie 1 minute
@@ -192,6 +215,10 @@ void ConstructRoot_JSON_Table(JsonObject root);
     void MQQTDataBuilder_UltraSonic2();
     float GetOilHeightMMReadingAdjustedFromTemp();
     // float GetDistanceMMReadingAdjustedForTemp();
+
+    void WebAppend_Root_Draw_Table();
+    void WebAppend_Root_Status_Table();
+    void WebAppend_Root_ControlUI();
 
     uint8_t fUpdateCalculations = false;
     //uint8_t fFirstRun = true; // so I can clear captured
@@ -386,7 +413,7 @@ int8_t parse_JSONCommand();
     struct handler<mOilFurnace>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mOilFurnace> mqtthandler_settings_teleperiod;
     
     // Extra module only handlers
@@ -398,10 +425,10 @@ int8_t parse_JSONCommand();
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_litres = "litres";
+    // const char* postfix_topic_litres = "litres";
     struct handler<mOilFurnace> mqtthandler_litres_ifchanged;
     struct handler<mOilFurnace> mqtthandler_litres_teleperiod;
-    const char* postfix_topic_furnace = "furnace";
+    // const char* postfix_topic_furnace = "furnace";
     struct handler<mOilFurnace> mqtthandler_furnace_ifchanged;
     struct handler<mOilFurnace> mqtthandler_furnace_teleperiod;
   //#endif

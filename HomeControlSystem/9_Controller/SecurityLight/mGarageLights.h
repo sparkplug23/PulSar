@@ -1,13 +1,13 @@
 #ifndef _MGARAGELIGHTS_H
 #define _MGARAGELIGHTS_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT //move into lights? pir activated light, equally a driver of lights..but it senses
 // make light activation method of motion
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "5_Sensors/PIR/mMotionSensor.h"
@@ -87,9 +87,9 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
     struct handler<mGarageLights>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mGarageLights> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mGarageLights> mqtthandler_sensor_ifchanged;
     struct handler<mGarageLights> mqtthandler_sensor_teleperiod;
     
@@ -100,7 +100,7 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_lightstate = "state";
+    // const char* postfix_topic_lightstate = "state";
     struct handler<mGarageLights> mqtthandler_lightstate_ifchanged;
     struct handler<mGarageLights> mqtthandler_lightstate_teleperiod;
   //#endif

@@ -1,7 +1,7 @@
 #ifndef _mDOORBELL_H
 #define _mDOORBELL_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 //doorbellwallchime/set/pixels/mode/notif
 //{"pixelnum":[0,8,9,10,11],"hue":30,"sat":60,"brt":100,"white":255}
@@ -9,7 +9,7 @@
 
 #ifdef USE_MODULE_SENSORS_DOORCHIME
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 class mDoorBell{

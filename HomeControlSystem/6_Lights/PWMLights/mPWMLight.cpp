@@ -25,8 +25,8 @@ int8_t mPWMLight::Tasker(uint8_t function){
     }
 
 //   // Check if light is being handled by another function eg ws2812 (long term probably included into this as commands pipe into this)
-  if(pCONT_set->light_type > LT_LIGHT_INTERFACE_END){
-//     Serial.printf("Skipping light type %d\n\r",pCONT_set->light_type); 
+  if(pCONT_set->Settings.light_settings.type > LT_LIGHT_INTERFACE_END){
+//     Serial.printf("Skipping light type %d\n\r",pCONT_set->Settings.light_settings.type); 
     return FUNCTION_RESULT_MODULE_DISABLED_ID; 
   }
 
@@ -326,7 +326,7 @@ void mPWMLight::Init(void) //LightInit(void)
 
 //   device = pCONT_set->devices_present;
   
-//   //subtype = (pCONT_set->light_type & 7) > LST_MAX ? LST_MAX : (pCONT_set->light_type & 7); // Always 0 - LST_MAX (5)
+//   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
 //   subtype = LST_RGBCW;
   
 //   pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
@@ -398,7 +398,7 @@ void mPWMLight::LightAnimate(void)
     // switch (pCONT_set->Settings.light_settings.light_scheme) {
     //   case LS_POWER:
      // AddLog_P(LOG_LEVEL_TEST, PSTR("new_color[0]=%d"),new_color[0]);
-        pCONT_iLight->calcLevels(pCONT_iLight->new_color);   // I am injecting directly to new_colour
+        pCONT_iLight->UpdateFinalColourComponents(pCONT_iLight->new_color);   // I am injecting directly to new_colour
       //AddLog_P(LOG_LEVEL_TEST, PSTR("new_color[0]=%d"),new_color[0]);
         // break;
 //       case LS_WAKEUP:
@@ -416,7 +416,7 @@ void mPWMLight::LightAnimate(void)
 //           wakeup_dimmer++;
 //           if (wakeup_dimmer <= pCONT_set->Settings.light_settings.light_dimmer) {
 //             setDimmer(wakeup_dimmer);
-//             calcLevels();
+//             UpdateFinalColourComponents();
 //             for (uint32_t i = 0; i < subtype; i++) {
 //               new_color[i] = current_color[i];
 //             }
@@ -771,7 +771,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
   uint16_t pwm_value;
 
   // now apply the actual PWM values, adjusted and remapped 10-bits range
-  if (pCONT_set->light_type < LT_PWM6) {   // only for direct PWM lights, not for Tuya, Armtronix...
+  if (pCONT_set->Settings.light_settings.type < LT_PWM6) {   // only for direct PWM lights, not for Tuya, Armtronix...
     for (uint8_t i = 0; i < (pCONT_iLight->subtype - pCONT_iLight->pwm_offset); i++) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
         // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
@@ -792,7 +792,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
   
 //   // now apply the actual PWM values, adjusted and remapped 10-bits range
-//   if (pCONT_set->light_type < LT_PWM6) {   // only for direct PWM lights, not for Tuya, Armtronix...
+//   if (pCONT_set->Settings.light_settings.type < LT_PWM6) {   // only for direct PWM lights, not for Tuya, Armtronix...
 //     for (uint32_t i = 0; i < (subtype - pwm_offset); i++) {
 //       if (pCONT_sup->PinUsed(GPIO_PWM1_ID, i)) {
 //         // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
@@ -1515,7 +1515,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //   mqtthandler_ptr->tRateSecs = 60; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-// //   mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+// //   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
 // //   mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Settings;
 
 // //   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
@@ -1641,7 +1641,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // // /*********************************************************************************************\
 // //  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
 // //  *
-// //  * light_type  Module     Color  ColorTemp  Modules
+// //  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
 // //  * ----------  ---------  -----  ---------  ----------------------------
 // //  *  0          -                 no         (Sonoff Basic)
 // //  *  1          PWM1       W      no         (Sonoff BN-SZ)
@@ -1709,7 +1709,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //  *  .b Actual channel values are computed from RGB or CT combined with brightness.
 // //  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
 // //  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-// //  *     by the light_type: in calcLevels()
+// //  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
 // //  *     1 channel  - 0:Brightness
 // //  *     2 channels - 0:Coldwhite 1:Warmwhite
 // //  *     3 channels - 0:Red 1:Green 2:Blue
@@ -2414,8 +2414,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     AddLog_P2(LOG_LEVEL_DEBUG_MORE, "LightControllerClass::loadSettings Settings.light_color (%d %d %d %d %d - %d)",
 // //       Settings.light_color[0], Settings.light_color[1], Settings.light_color[2],
 // //       Settings.light_color[3], Settings.light_color[4], Settings.light_dimmer);
-// //     AddLog_P2(LOG_LEVEL_DEBUG_MORE, "LightControllerClass::loadSettings light_type/sub (%d %d)",
-// //       light_type, subtype);
+// //     AddLog_P2(LOG_LEVEL_DEBUG_MORE, "LightControllerClass::loadSettings Settings.light_settings.type/sub (%d %d)",
+// //       Settings.light_settings.type, subtype);
 // // #endif
 // //     if (_pwm_multi_channels) {
 // //     //   _state->setChannelsRaw(Settings.LightSettings.light_color);
@@ -2466,7 +2466,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     // _state->setBriCT(briCT);
 // //     // if (_ct_rgb_linked) { _state->setColorMode(LCM_CT); }   // try to force CT
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //     //debugLogs();
 // //   }
 
@@ -2490,31 +2490,31 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //   void changeBri(uint8_t bri) {
 // //     // _state->setBri(bri);
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //   }
 
 // //   void changeBriRGB(uint8_t bri) {
 // //     // _state->setBriRGB(bri);
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //   }
 
 // //   void changeBriCT(uint8_t bri) {
 // //     // _state->setBriCT(bri);
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //   }
 
 // //   void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false) {
 // //     // _state->setRGB(r, g, b, keep_bri);
 // //     // if (_ct_rgb_linked) { _state->setColorMode(LCM_RGB); }   // try to force RGB
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //   }
 
 // //   calculate the levels for each channel
 // //   if no parameter, results are stored in current_color
-// void mPWMLight::calcLevels(uint8_t *current_color) {
+// void mPWMLight::UpdateFinalColourComponents(uint8_t *current_color) {
 
 //   uint8_t r,g,b,c,w,briRGB,briCT;
 //   if (current_color == nullptr) { current_color = current_color; }
@@ -2563,7 +2563,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 //   setBriRGB(briRGB);
 //   if (_ct_rgb_linked) { setColorMode(LCM_RGB); }   // try to force RGB
 //   saveSettings();
-//   calcLevels();
+//   UpdateFinalColourComponents();
 // }
 
 // // save the current light state to Settings.
@@ -2611,7 +2611,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     // }
 
 // //     // saveSettings();
-// //     // calcLevels();
+// //     // UpdateFinalColourComponents();
 // //   }
 
 // // }; // END CLASS
@@ -2714,7 +2714,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 //   memset(&pwm_channel_test,0,sizeof(pwm_channel_test));
 
 //   device = pCONT_set->devices_present;
-//   subtype = (pCONT_set->light_type & 7) > LST_MAX ? LST_MAX : (pCONT_set->light_type & 7); // Always 0 - LST_MAX (5)
+//   subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
 
 //   subtype = LST_RGBCW;
   
@@ -2746,13 +2746,13 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //   light_controller.setSubType(subtype);
 // //   light_controller.loadSettings();
 // //   light_controller.setAlexaCTRange(Settings.flag4.alexa_ct_range);
-// //   light_controller.calcLevels();    // calculate the initial values (#8058)
+// //   light_controller.UpdateFinalColourComponents();    // calculate the initial values (#8058)
 
 // //   if (LST_SINGLE == subtype) {
 // //     Settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
 // //   }
-// //   if (light_type < LT_PWM6) {           // PWM
-// //     for (uint32_t i = 0; i < light_type; i++) {
+// //   if (Settings.light_settings.type < LT_PWM6) {           // PWM
+// //     for (uint32_t i = 0; i < Settings.light_settings.type; i++) {
 // //       Settings.pwm_value[i] = 0;        // Disable direct PWM control
 // //       if (PinUsed(GPIO_PWM1, i)) {
 // //         pinMode(Pin(GPIO_PWM1, i), OUTPUT);
@@ -2917,7 +2917,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // // char* LightGetColor(char* scolor, boolean force_hex = false)
 // // {
 // //   if ((0 == Settings.light_scheme) || (!pwm_multi_channels)) {
-// //     light_controller.calcLevels();      // recalculate levels only if Scheme 0, otherwise we mess up levels
+// //     light_controller.UpdateFinalColourComponents();      // recalculate levels only if Scheme 0, otherwise we mess up levels
 // //   }
 // //   scolor[0] = '\0';
 // //   for (uint32_t i = 0; i < subtype; i++) {
@@ -3162,7 +3162,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     light_state.setHS(hue, 255);
 // //     light_state.setBri(255);        // If multi-channel, force bri to max, it will be later dimmed to correct value
 // //   }
-// //   light_controller.calcLevels(new_color);
+// //   light_controller.UpdateFinalColourComponents(new_color);
 // }
 
 // void mPWMLight::LightSetPower(void)
@@ -3228,7 +3228,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //   } else {
 // //     switch (Settings.light_scheme) {
 // //       case LS_POWER:
-// //         light_controller.calcLevels(new_color);
+// //         light_controller.UpdateFinalColourComponents(new_color);
 // //         break;
 // //       case LS_WAKEUP:
 // //         if (2 == wakeup_active) {
@@ -3245,7 +3245,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //           wakeup_dimmer++;
 // //           if (wakeup_dimmer <= Settings.light_dimmer) {
 // //             light_state.setDimmer(wakeup_dimmer);
-// //             light_controller.calcLevels();
+// //             light_controller.UpdateFinalColourComponents();
 // //             for (uint32_t i = 0; i < subtype; i++) {
 // //               new_color[i] = current_color[i];
 // //             }

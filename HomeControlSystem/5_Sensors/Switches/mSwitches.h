@@ -25,7 +25,7 @@
 
 
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
@@ -42,7 +42,7 @@
 
 
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 
 #include "2_CoreSystem/Time/mTime.h"
@@ -50,7 +50,7 @@
 
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"
@@ -132,9 +132,9 @@ static void SwitchProbe(void);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSwitches>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mSwitches> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mSwitches> mqtthandler_sensor_ifchanged;
     struct handler<mSwitches> mqtthandler_sensor_teleperiod;
 

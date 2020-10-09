@@ -5,7 +5,7 @@
 
 #include "stdint.h"
 // DEVICE named defines that set modules to use below
-#include "1_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom.h"
 
 enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   FIRMWARE_VERSION_TYPE_RELEASE_ID = 0,  FIRMWARE_VERSION_TYPE_RELEASE_CANDIDATE_ID,
@@ -14,9 +14,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0
-#define FIRMWARE_VERSION_MINOR    78
-#define FIRMWARE_VERSION_CORE     23
-#define FIRMWARE_VERSION_MODULE   10
+#define FIRMWARE_VERSION_MINOR    79
+#define FIRMWARE_VERSION_CORE     24
+#define FIRMWARE_VERSION_MODULE   11
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))

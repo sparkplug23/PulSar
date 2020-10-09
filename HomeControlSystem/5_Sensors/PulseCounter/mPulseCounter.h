@@ -1,13 +1,13 @@
 #ifndef mPulseCounter_H
 #define mPulseCounter_H 0.1
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
 
 #include "stdint.h"
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 #include "2_CoreSystem/Support/mSupport.h"
 
@@ -130,9 +130,9 @@ uint8_t Change_Detected(uint8_t sensor_id);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mPulseCounter>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPulseCounter> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mPulseCounter> mqtthandler_sensor_ifchanged;
     struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;
 

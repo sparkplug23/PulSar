@@ -71,7 +71,7 @@ extern "C" {
 #include <cont.h>
   extern cont_t* g_pcont;
 }
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "2_CoreSystem/Languages/mLanguageDefault.h"

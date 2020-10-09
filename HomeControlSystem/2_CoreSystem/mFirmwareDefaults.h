@@ -57,8 +57,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 }
 #endif
 
-#include "1_ConfigUser/mUserConfig.h"
-#include "1_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mFirmwareCustom.h"
 
 /*********************************************************************************************\
  * Default global defines

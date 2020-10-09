@@ -2,16 +2,16 @@
 #define _ADALIGHTNEOPIXEL_H 7.0
 
 #include "2_CoreSystem/mFirmwareDefaults.h"   // New final firmware defines for modules desired
-#include "1_ConfigUser/mFirmwareCustom.h"   // New final firmware defines for modules desired
+#include "0_ConfigUser/mFirmwareCustom.h"   // New final firmware defines for modules desired
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "6_Lights/_Interface/palettes.h"
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 #include "mRGBAnimator_web.h"
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
@@ -28,6 +28,9 @@
   typedef NeoGrbFeature selectedNeoFeatureType;
   typedef RgbColor RgbTypeColor;
 #endif
+
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR) "ambilight";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR) "animation";
 
 
 
@@ -58,18 +61,6 @@ DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATI
 #endif   
 
     
-//     #define D_SCENES_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
-//     #define D_SCENES_DAYON_NAME_CTR           "DAYON"    
-//     #define D_SCENES_DAYOFF_NAME_CTR          "DAYOFF"    
-//     #define D_SCENES_EVENINGON_NAME_CTR       "EVENINGON"    
-//     #define D_SCENES_EVENINGOFF_NAME_CTR      "EVENINGOFF"    
-//     #define D_SCENES_MIDNIGHTON_NAME_CTR      "MIDNIGHTON"    
-//     #define D_SCENES_MIDNIGHTOFF_NAME_CTR     "MIDNIGHTOFF"    
-DEFINE_PROGMEM_CTR(PM_SCENES_COLOURSCENE_NAME_CTR)     "COLOURSCENE"    ; //PGM_P
-//     #define D_SCENES_FLASHCOLOUR_NAME_CTR     "FLASHCOLOUR"    
-//     #define D_SCENES_SUNRISE_SINGLE_NAME_CTR  "SUNRISE_SINGLE"  
-//     #define D_SCENES_SUNRISE_DUAL_NAME_CTR    "SUNRISE_DUAL" 
-
     
 //     #define D_NOTIF_MODE_OFF_NAME_CTR           "OFF"
 //     #define D_NOTIF_MODE_STATIC_OFF_NAME_CTR    "Static OFF"
@@ -121,7 +112,7 @@ class mRGBAnimator{
     mRGBAnimator(){};
     void pre_init(void);
     void init(void);
-    
+
 void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     RgbTypeColor GetPixelColor(uint16_t indexPixel);
     
@@ -241,87 +232,7 @@ void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     int8_t GetTransitionOrderIDbyName(const char* c);     
     const char* GetTransitionOrderName(char* buffer);
     const char* GetTransitionOrderNameByID(uint8_t id, char* buffer);
-
-    /**************
-     * TURN_ON - fade ON, returns to previous lighting array
-     * TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
-     * NOTHING - to be named "off", does nothing, simply remains off
-     * TIMED  - stores exstruction for later execution, ie set on, with auto off - add scene turn off feature "offtimer"
-     * AMBILIHGT - keep, dell screen, set directly
-     * PRESETS - animation from a group of colour patterns
-     * FLASHER - christmad themes, standard 8, shimmering/twinkling 
-     * SCENE - scene names might be same as presets? or preset subset of scene? scene might best be named "direct"
-    **************/ 
-    enum ANIMATION_MODE{
-      ANIMATION_MODE_NONE_ID = 0,
-      ANIMATION_MODE_TURN_ON_ID,
-      ANIMATION_MODE_TURN_OFF_ID,
-      ANIMATION_MODE_AMBILIGHT_ID,
-      ANIMATION_MODE_SCENE_ID,
-      ANIMATION_MODE_FLASHER_ID,
-      //user option, cant comment out but can disable elsewhere
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-        ANIMATION_MODE_NOTIFICATIONS_ID,
-      #endif
-      ANIMATION_MODE_LENGTH_ID
-    };             
-    int8_t GetAnimationModeIDbyName(const char* c);
-    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
-    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
-  
-    /**************
-     * Predefined SCENES by name
-     * SCENES are colours defined as one colour for all pixels
-    **************/ 
-   // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
-    enum SCENES{
-      SCENES_NOTACTIVE_ID=0,
-      SCENES_DAYON_ID=1,
-      SCENES_DAYOFF_ID,
-      SCENES_EVENINGON_ID,
-      SCENES_EVENINGOFF_ID,
-      SCENES_MIDNIGHTON_ID,
-      SCENES_MIDNIGHTOFF_ID,
-      SCENES_COLOURSCENE_ID,
-      SCENES_FADE_OFF_ID,
-      SCENES_FLASHCOLOUR_ID,
-      SCENES_WHITEON_ID,
-      SCENES_SUNRISE_SINGLE_ID,     // From dark blue to sky blue (cyan)
-      SCENES_SUNRISE_DUAL_ID,       // From dark blue, sunrise orange, sky blue (cyan)
-      SCENES_SUNRISE_AMBILIGHT_ID,
-      SCENES_LENGTH_ID
-    };
-    int8_t GetSceneIDbyName(const char* c);
-    const char* GetSceneName(char* buffer);
-
-    /**************
-     * Ambilight is light patterns around screens or pictures
-     * PRESETS - patterns
-     * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
-    **************/ 
-    enum AMBILIGHT_MODES_IDS{
-      AMBILIGHT_PRESETS_ID=0,
-      AMBILIGHT_SIDES_ID,
-      AMBILIGHT_INPUT_STREAM_ID,
-      AMBILIGHT_LENGTH_ID
-    };
-    int8_t GetAmbilightModeIDbyName(const char* c);
-    const char* GetAmbilightModeName(char* buffer);
-
-    /**************
-     * ANIMATION_PROFILE - As function argument of "SetAnimationProfile"
-     * This sets numerous aspects of animation struct to cause set animations to happen:
-     * TURN_OFF - will fade leds off
-     * TURN_ON  - will fade leds on
-    **************/ 
-    enum ANIMATION_PROFILE_IDS{
-      ANIMATION_PROFILE_TURN_OFF_ID=0,
-      ANIMATION_PROFILE_TURN_ON_ID,
-      ANIMATION_PROFILE_NOTHING_ID,
-      ANIMAITON_PROFILE_LENGTH_ID    
-    };
-    void SetAnimationProfile(uint8_t profile_id);
-
+ 
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
 
     const char* GetColourMapNamebyID(uint8_t id, char* buffer);
@@ -339,7 +250,6 @@ void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     void init_NotificationPanel();
     #endif
-    void init_Scenes();
 
     int16_t FindNearestValueIndexUInt8(uint8_t* tosearch, uint8_t tosearch_len, uint8_t tofind);
     int32_t FindNearestValueIndexUInt16(uint16_t* tosearch, uint16_t tosearch_len, uint16_t tofind);
@@ -347,7 +257,6 @@ void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
                                        uint16_t ito_min, uint16_t ito_max) ;
 
-    /*******AMBILIGHT*********************************************************************************************/
 
     NeoPixelAnimator* animations_control = NULL;
 
@@ -358,6 +267,23 @@ void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
 
     uint8_t blocking_force_animate_to_complete = true;
     uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
+
+    #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+    /**************
+     * Ambilight is light patterns around screens or pictures
+     * PRESETS - patterns
+     * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
+    **************/ 
+    enum AMBILIGHT_MODES_IDS{
+      AMBILIGHT_PRESETS_ID=0,
+      AMBILIGHT_SIDES_ID,
+      AMBILIGHT_INPUT_STREAM_ID,
+      AMBILIGHT_LENGTH_ID
+    };
+    int8_t GetAmbilightModeIDbyName(const char* c);
+    const char* GetAmbilightModeName(char* buffer);
+
+    /*******AMBILIGHT*********************************************************************************************/
 
     void SubTask_Ambilight();
     void Ambilight_Sides();
@@ -388,6 +314,9 @@ void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
       }screens[AMBILIGHT_SCREENS_CONNECTED]; //0,1,2 where 0 is centre and only screen
 
     }ambilightsettings;
+    
+    #endif
+
     
     uint8_t update_all = false;
 
@@ -597,7 +526,6 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     int8_t Tasker_Web(uint8_t function);
 
 
-    void SubTask_Scenes();
     void SubTask_Presets();
 
     void WebAppend_Root_Status_Table();
@@ -605,7 +533,6 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     int8_t parsesub_ModeManual(JsonObjectConst obj);
     int8_t parsesub_ModeAnimation(JsonObjectConst obj);
-    int8_t parsesub_ModeScene(JsonObjectConst obj);
     int8_t parsesub_ModeAmbilight(JsonObjectConst obj);
 
         // make number generator, random, with skewness
@@ -621,12 +548,10 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     
     // Default values if not specified
 
-    
-    // #ifdef USE_WS28XX_FEATURE_GRBW
-    //   void FadeToNewColour(RgbwColor newcolor, uint16_t _time_to_newcolour = 1000, RgbwColor fromcolor = RgbwColor(0,0,0,0));
-    // #else
-      void FadeToNewColour(RgbTypeColor newcolor, uint16_t _time_to_newcolour = 1000, RgbTypeColor fromcolor = RgbTypeColor(0));
-    // #endif
+    // void FadeToNewColour(RgbTypeColor newcolor, uint16_t _time_to_newcolour = 1000, RgbTypeColor fromcolor = RgbTypeColor(0));
+    void FadeToNewColour(RgbcctColor* newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor* fromcolor = nullptr);
+
+
 
 const char* GetAnimationStatusCtr(char* buffer);
 
@@ -697,7 +622,6 @@ void WebSendBody_Palette2();
 
     int8_t parsesub_CheckAll(JsonObjectConst obj);
 
-    void SubTask_TimedLEDMode();
     void TurnLEDsOff();
     void AddToJsonObject_AddHardware(JsonObject root);
     void Append_Hardware_Status_Message();
@@ -799,10 +723,6 @@ uint8_t pixels_to_update_as_percentage_map[PIXELS_UPDATE_PERCENTAGE_LENGTH_ID] =
       
       float brightness = 1; // MOVE OUT OF ANIMATION?? move to "light class"
 
-      
-      uint16_t auto_time_off_secs = 0;
-      uint32_t tSavedAutoOff = 0;
-
       ANIMATION_FLAGS flags;
 
       struct TRANSITIONSETTINGS{
@@ -854,42 +774,6 @@ uint8_t pixels_to_update_as_percentage_map[PIXELS_UPDATE_PERCENTAGE_LENGTH_ID] =
 
     void SetAnimationBrightness(uint8_t brt);
 
-
-
-
-    enum SCENE_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
-    struct SCENES_CONFIG{
-      uint8_t name_id;
-
-
-
-// Scenes will be stored in LIGHT_INTERFACE as array
-      uint8_t colour_255[6];
-
-      HsbColor colour;
-      uint8_t colourW; // save white channel always, even when not needed for struct size compatability
-      // float colourW_f;
-      
-      
-      
-      uint8_t fActive = false;
-      uint8_t parts = DONE;
-      uint32_t tStart;
-      uint32_t tOnTime;
-      uint16_t auto_time_off_secs = 0;
-      uint32_t tSavedAutoOff = 0;
-    };
-    // hold current set scene
-    struct SCENES_CONFIG scene;
-    // hold scene to switch to later
-    struct SCENES_CONFIG scene_stored;
-    // hold when to switch to scene_stored
-    struct SCENE_CONFIG_RUNTIME{
-      uint8_t  fWaiting = false;
-      // For ms or sec delay (until execution) time
-      uint32_t delay_time_ms   = 0; //0 if not set
-      uint32_t delay_time_secs = 0;
-    }scene_stored_runtime;
 
 
 
@@ -1061,28 +945,14 @@ void WebAppend_Root_ControlUI();
     uint16_t LEDp, LEDe, desired_pixel; //pixel and element
 
     // enum FSTATE{ON=1,OFF=2};
-    struct TIMEDON{
-      int16_t secs=60;
-      uint32_t tick = millis();
-      uint8_t fState = 0;
-      uint8_t fEnabled = true;
-      uint8_t fUpdated = true;
-      uint8_t fForceUpdate = true;
-    }timedon;
-
-    uint8_t kitchen_preset_set_id;
-    struct SCENE_PRESETS{
-      HsbColor colour; 
-      uint16_t time_ms=1000;
-    };
-    //change to scenes users
-    struct SCENE_PRESETS scene_preset_dayon;
-    struct SCENE_PRESETS scene_preset_dayoff;
-    struct SCENE_PRESETS scene_preset_eveningon;
-    struct SCENE_PRESETS scene_preset_eveningoff;
-    struct SCENE_PRESETS scene_preset_nighton;
-    struct SCENE_PRESETS scene_preset_nightoff;
-    struct SCENE_PRESETS* presenttmp;
+    // struct TIMEDON{
+    //   int16_t secs=60;
+    //   uint32_t tick = millis();
+    //   uint8_t fState = 0;
+    //   uint8_t fEnabled = true;
+    //   uint8_t fUpdated = true;
+    //   uint8_t fForceUpdate = true;
+    // }timedon;
 
     void SetMode_UpdateColour(uint8_t colour);
 
@@ -1158,9 +1028,7 @@ void WebAppend_Root_RGBPalette();
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     uint8_t ConstructJSON_Notifications(uint8_t json_level = 0);
     #endif
-    uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
     uint8_t ConstructJSON_State(uint8_t json_level = 0);
-    uint8_t ConstructJSON_Timed(uint8_t json_level = 0);
     uint8_t ConstructJSON_Flasher(uint8_t json_level = 0);
     uint8_t ConstructJSON_Mixer(uint8_t json_level = 0);
 
@@ -1172,7 +1040,7 @@ void WebAppend_Root_RGBPalette();
     struct handler<mRGBAnimator>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mRGBAnimator> mqtthandler_settings_teleperiod;
 
     // Extra module only handlers
@@ -1182,31 +1050,25 @@ void WebAppend_Root_RGBPalette();
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
       #endif
-      MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_TIMED_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_animation = "animation";
+    // const char* postfix_topic_animation = "animation";
     struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;    
-    const char* postfix_topic_ambilight = "ambilight";
+    // const char* postfix_topic_ambilight = "ambilight";
     struct handler<mRGBAnimator> mqtthandler_ambilight_teleperiod;
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    const char* postfix_topic_notifications = "notifications";
+    // const char* postfix_topic_notifications = "notifications";
     struct handler<mRGBAnimator> mqtthandler_notifications_teleperiod;
     #endif
-    const char* postfix_topic_scene = "scene";
-    struct handler<mRGBAnimator> mqtthandler_scene_teleperiod;
-    const char* postfix_topic_state = "state";
+    // const char* postfix_topic_state = "state";
     struct handler<mRGBAnimator> mqtthandler_state_teleperiod;
-    const char* postfix_topic_timed = "timed";
-    struct handler<mRGBAnimator> mqtthandler_timed_teleperiod;
-    const char* postfix_topic_flasher = "flasher/animator";
+    // const char* postfix_topic_flasher = "flasher/animator";
     struct handler<mRGBAnimator> mqtthandler_flasher_teleperiod;
-    const char* postfix_topic_mixer = "flasher/mixer";
+    // const char* postfix_topic_mixer = "flasher/mixer";
     struct handler<mRGBAnimator> mqtthandler_mixer_teleperiod;
   #endif
   

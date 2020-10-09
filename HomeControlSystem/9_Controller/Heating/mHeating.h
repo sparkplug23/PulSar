@@ -1,7 +1,7 @@
 #ifndef MHEATING_H
 #define MHEATING_H 0.4
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 
@@ -9,7 +9,7 @@
 #include <NeoPixelBus.h>
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include <stdio.h>
@@ -658,7 +658,7 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
     struct handler<mHeating>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mHeating> mqtthandler_settings_teleperiod;
     
     // Extra module only handlers
@@ -684,29 +684,29 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_program_timers = "program/timers";
+    // const char* postfix_topic_program_timers = "program/timers";
     struct handler<mHeating> mqtthandler_program_timers_ifchanged;
     struct handler<mHeating> mqtthandler_program_timers_teleperiod;
-    const char* postfix_topic_program_temps = "program/temps";
+    // const char* postfix_topic_program_temps = "program/temps";
     struct handler<mHeating> mqtthandler_program_temps_ifchanged;
     struct handler<mHeating> mqtthandler_program_temps_teleperiod;
-    const char* postfix_topic_program_overview = "program/overview"; //active
+    // const char* postfix_topic_program_overview = "program/overview"; //active
     struct handler<mHeating> mqtthandler_program_overview_ifchanged;
     struct handler<mHeating> mqtthandler_program_overview_teleperiod;
-    const char* postfix_topic_sensor_pipes = "sensors/pipes";
+    // const char* postfix_topic_sensor_pipes = "sensors/pipes";
     struct handler<mHeating> mqtthandler_sensor_pipes_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_pipes_teleperiod;
     struct handler<mHeating> mqtthandler_sensor_pipes_roc1m;
     struct handler<mHeating> mqtthandler_sensor_pipes_roc10m;
-    const char* postfix_topic_sensor_climate = "sensors/climate";
+    // const char* postfix_topic_sensor_climate = "sensors/climate";
     struct handler<mHeating> mqtthandler_sensor_climate_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_climate_teleperiod;
     struct handler<mHeating> mqtthandler_sensor_climate_roc1m;
     struct handler<mHeating> mqtthandler_sensor_climate_roc10m;
-    const char* postfix_topic_sensor_pipes_colours = "sensors/pipes/colours";
+    // const char* postfix_topic_sensor_pipes_colours = "sensors/pipes/colours";
     struct handler<mHeating> mqtthandler_sensor_pipes_colours_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_pipes_colours_teleperiod;
-    const char* postfix_topic_relays = "relays";
+    // const char* postfix_topic_relays = "relays";
     struct handler<mHeating> mqtthandler_relays_ifchanged;
     struct handler<mHeating> mqtthandler_relays_teleperiod;
   //#endif

@@ -15,6 +15,7 @@
 
 void mOilFurnace::init(void){
 
+  init_ultrasonic_sensor_parameters();
 
 }
 
@@ -265,29 +266,44 @@ return 0;
 
 } // END FUNCTION
 
+void mOilFurnace::init_ultrasonic_sensor_parameters(){
 
+#ifdef USE_MODULE_SENSORS_DS18B20
+  pCONT->mus->ultrasonic.settings.measure_rate_ms = 2000;
+  pCONT->mus->ultrasonic.settings.blocking_time_ms = 1000;
+  pCONT->mus->ultrasonic.settings.duration_limit_max = 8000;
+  pCONT->mus->ultrasonic.settings.duration_limit_min = 3000;
+#endif
+
+}
 
 
 int8_t mOilFurnace::Tasker(uint8_t function){
 
+  /************
+   * INIT SECTION * 
+  *******************/
+  if(function == FUNC_PRE_INIT){
+    //pre_init();
+  }else
+  if(function == FUNC_INIT){
+    init();
+  }
+
   switch(function){
-    case FUNC_INIT:
-      //init();
-    break;
-    case FUNC_CONFIGURE_MODULES_FOR_DEVICE:
-      pCONT->mus->ultrasonic.settings.measure_rate_ms = 2000;
-      pCONT->mus->ultrasonic.settings.blocking_time_ms = 1000;
-      pCONT->mus->ultrasonic.settings.duration_limit_max = 8000;
-      pCONT->mus->ultrasonic.settings.duration_limit_min = 3000;
-    break;
+    /************
+     * PERIODIC SECTION * 
+    *******************/
     case FUNC_LOOP: 
 
+      #ifdef USE_MODULE_SENSORS_DS18B20
       if(pCONT->mus->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
         //AddLog_P(LOG_LEVEL_TEST,PSTR("OilFurnace::isvalid"));
         SubTask_CopyAveragedSensorValues();
         SubTask_UltraSonicAverageToOilTank();
         SubTask_CalculateOilVolume();
       }
+      #endif
       // //SubTask_RecordLitresOverDays(); EEPROM not active
 
       // #ifdef FURNACE_MONITOR_PIN
@@ -302,28 +318,20 @@ int8_t mOilFurnace::Tasker(uint8_t function){
       //     furnace_detect.ischanged = true;
       //   }
       // #endif
-
       
       // if(mSupport::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
       //   MQTTHandler_Set_fSendNow();
-
       //   // mqtthandler_.fSendNow = true;
       //   // mqtthandler_ifchanged_detailed.fSendNow = true;
       // }
-
 
     break;
     case FUNC_EVERY_SECOND:
     
     break;
+
     case FUNC_SENSOR_UPDATED: // called when ultrasonic is updated -- when a sensor feeds a system status, set flags only, non blocking
       fUpdateCalculations = true; // Only flags, loop will still handle the change
-    break;
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE:
-
-      //#ifdef USE_MQTT_OILFURNACE
-      MQTTHandler_Set_TelePeriod();
-      //#endif
     break;
 
 
@@ -331,14 +339,14 @@ int8_t mOilFurnace::Tasker(uint8_t function){
       parse_JSONCommand();
     break;  
 
-    case FUNC_MQTT_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_HANDLERS_RESET:
-      // Reset to the initial parameters
+      MQTTHandler_Init(); // Reset to the initial parameters
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
       MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
@@ -347,62 +355,234 @@ int8_t mOilFurnace::Tasker(uint8_t function){
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_CONNECTED:
-      //mqttConnected();
+      MQTTHandler_Set_fSendNow();
     break;
-    case FUNC_MQTT_DISCONNECTED:
-      //mqttDisconnected();
-    break;
+  }
 
+  /************
+   * WEBPAGE SECTION * 
+  *******************/
+  //return Tasker_Web(function);
+  switch(function){
 
-
-    case FUNC_WEB_SHOW_PARAMETERS:{
+    // case FUNC_WEB_SHOW_PARAMETERS:{
       
-      uint8_t fsize = 16;
-      char name_ctr[20];
-      char value_ctr[10];
-      char float_ctr[20];
+    //   uint8_t fsize = 16;
+    //   char name_ctr[20];
+    //   char value_ctr[10];
+    //   char float_ctr[20];
 
-      memset(value_ctr,0,sizeof(value_ctr));
-      memset(name_ctr,0,sizeof(name_ctr));
+    //   memset(value_ctr,0,sizeof(value_ctr));
+    //   memset(name_ctr,0,sizeof(name_ctr));
         
 
-      dtostrf(oiltank.instant.final.litres_of_usable_oil,4,1,float_ctr);
+    //   dtostrf(oiltank.instant.final.litres_of_usable_oil,4,1,float_ctr);
       
-      sprintf(name_ctr,"Oil Remaining");
+    //   sprintf(name_ctr,"Oil Remaining");
       
-      sprintf(value_ctr,"%s %s",float_ctr,"Litres");
+    //   sprintf(value_ctr,"%s %s",float_ctr,"Litres");
 
-      BufferWriterI->Append_P(HTTP_SNS_GENERIC, 
-        name_ctr,
-        value_ctr
-      );
+    //   BufferWriterI->Append_P(HTTP_SNS_GENERIC, 
+    //     name_ctr,
+    //     value_ctr
+    //   );
 
-    }break;
-    case FUNC_WEB_ROOT_SEND_STATUS:{
-
-    }
-    break;
+    // }break;
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-
-
-        BufferWriterI->Append_P(PSTR("<tr>"));
-          BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-          BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_oil","?");   
-        BufferWriterI->Append_P(PSTR("</tr>"));
-      
-
+      // BufferWriterI->Append_P(PSTR("<tr>"));
+      //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+      //   BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_oil","?");   
+      // BufferWriterI->Append_P(PSTR("</tr>"));
     break; 
+    // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+    //   // JsonBuilder_Add("/fetch/tab_oil_specific.json",1000);
+    // break;
+
     case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
-      JsonBuilder_Add("/fetch/tab_oil_specific.json",1000);
+      // JsonBuilderI->Add("/draw/palette_selector.json",-500);
     break;
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
+    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+      WebAppend_Root_Draw_Table();
+    break; 
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break;
+    case FUNC_WEB_APPEND_ROOT_BUTTONS:
+      // WebAppend_Root_ControlUI();
+    break;
+    // Generated in "InterfaceLighting" and populated in hardware classes
+  }// END switch
 
+}
+int8_t mOilFurnace::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      //parsesub_CheckAll(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      //return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
 
+int8_t mOilFurnace::parsesub_CheckAll(JsonObjectConst obj){
+  // parsesub_ModeManual(obj);
+  // parsesub_ProgramTimers(obj);
+  // parsesub_ProgramTemps(obj);
+}
+
+int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+  // Check if instruction is for me
+  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/oilfurnace")>=0){
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      parsesub_TopicCheck_JSONCommand(obj);
+      return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
+}
 
+int8_t mOilFurnace::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+  
+  int8_t isserviced = false;
+  
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+  //   #endif
+  //   isserviced += parsesub_ModeManual(obj);
+  // }else
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
+  //   #endif
+  //   isserviced += parsesub_ProgramTimers(obj);
+  // }else
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
+  //   #endif
+  //   isserviced += parsesub_ProgramTemps(obj);
+  // }
+
+}
+
+
+
+void mOilFurnace::WebAppend_Root_Draw_Table(){
+
+  //WebAppend_Root_Draw_RGBLive();
+  // if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+  //   WebAppend_Root_Draw_RGBPalette();
+  // // }
+  // WebAppend_Root_Draw_PaletteSelect_Placeholder();
+  pCONT_web->WebAppend_Root_Draw_Table_dList(8,"oil_table", kTitle_TableTitles_Root);
+  
+}
+
+
+//append to internal buffer if any root messages table
+void mOilFurnace::WebAppend_Root_Status_Table(){
+
+  char buffer[50];
+  
+  JsonBuilderI->Array_Start("oil_table");// Class name
+  for(int row=0;row<8;row++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",row);
+      switch(row){
+        default:
+        case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
+        // case 1:
+        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d/%d (secs)\""), 
+        //     animation.transition.rate_ms.val/1000, 
+        //     animation.transition.time_ms.val/1000
+        //   );
+        // break;
+        // case 2: 
+        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d%% [#%d]\""),
+        //     animation.transition.pixels_to_update_as_percentage.val, 
+        //     GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
+        //   );
+        // break;
+        // case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
+        // case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
+        // case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
+        // case 6: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+        // case 7:
+        //   if(!animation.auto_time_off_secs){ //off
+        //     JsonBuilderI->Add("ih","Unset");
+        //   }else{
+        //     JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""),
+        //       animation.auto_time_off_secs,"secs"
+        //     );
+        //   }
+        // break;
+      } //switch
+    
+    JsonBuilderI->Level_End();
+  }
+  JsonBuilderI->Array_End();
+  
+
+  // char colour_button[8];
+  // char button_ids[] = {ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  // ANIMATION_MODE_NOTIFICATIONS_ID, 
+  // #endif
+  // ANIMATION_MODE_NONE_ID};
+  
+  // JsonBuilderI->Array_Start("animod");// Class name
+  // for(int row=0;row<sizeof(button_ids);row++){
+  //   if(button_ids[row] == animation.mode_id){
+  //     sprintf(colour_button,"%s\0",COLOR_BUTTON_HIGHLIGHT); //selected
+  //   }else{
+  //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
+  //   }        
+  //   JsonBuilderI->Level_Start();
+  //     JsonBuilderI->Add("id",row);
+  //     JsonBuilderI->Add("bc",colour_button);
+  //   JsonBuilderI->Level_End();
+  // }  
+  // JsonBuilderI->Array_End();
+
+}
+
+
+void mOilFurnace::WebAppend_Root_ControlUI(){
+
+  // char buffer[50];
+
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
+
+  // uint8_t animation_mode_list_ids[] = {
+  //   ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+  //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  //   ANIMATION_MODE_NOTIFICATIONS_ID,
+  //   #endif    
+  //   ANIMATION_MODE_NONE_ID
+  // };
+
+  // BufferWriterI->Append_P(PSTR("{t}<tr>"));
+  // for(uint8_t button_id=0;button_id<sizeof(animation_mode_list_ids);button_id++){
+  //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+  //                             100/sizeof(animation_mode_list_ids),
+  //                             "", //no span
+  //                             "animod" " " "buttonh",
+  //                             D_JSON_ANIMATIONMODE, 
+  //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+  //                             GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+  //                             ""
+  //                           );                   
+  // }
+  // BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
+  
 }
 
 
@@ -446,9 +626,9 @@ void mOilFurnace::WebPage_Root_AddHandlers(){
    * JSON data refresh
    * */
 
-  pCONT_web->pWebServer->on(WEB_HANDLE_JSON_OIL_SENSOR_TABLE, HTTP_GET, [this](AsyncWebServerRequest *request){ 
-    WebSend_JSON_Table(request);    
-  });
+  // pCONT_web->pWebServer->on(WEB_HANDLE_JSON_OIL_SENSOR_TABLE, HTTP_GET, [this](AsyncWebServerRequest *request){ 
+  //   WebSend_JSON_Table(request);    
+  // });
 
   // pWebServer->on(WEB_HANDLER_SCRIPT_WEB_DATA_FETCHER, HTTP_GET, [this](AsyncWebServerRequest *request){ 
   //   Serial.println(WEB_HANDLER_SCRIPT_WEB_DATA_FETCHER); Serial.flush();      
@@ -497,7 +677,14 @@ void mOilFurnace::ConstructRoot_JSON_Table(JsonObject root){
         
         char float_ctr[10];
         memset(float_ctr,0,sizeof(float_ctr));
+        
+      #ifdef USE_MODULE_SENSORS_DS18B20
         float height = 120-pCONT->mus->GetDistanceCMReading();
+        #else
+        float height = 120-0;
+
+
+        #endif
         dtostrf(height,4,2,float_ctr);
         sprintf(table_row,"%s (cm)",float_ctr);
 
@@ -687,7 +874,7 @@ void mOilFurnace::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_settings;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mOilFurnace::ConstructJSON_Settings;
   
   mqtthandler_ptr = &mqtthandler_litres_ifchanged;
@@ -697,7 +884,7 @@ void mOilFurnace::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_litres;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mOilFurnace::ConstructJSON_Litres;
   
   mqtthandler_ptr = &mqtthandler_litres_teleperiod;
@@ -707,7 +894,7 @@ void mOilFurnace::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60*60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_litres;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mOilFurnace::ConstructJSON_Litres;
 
   mqtthandler_ptr = &mqtthandler_furnace_ifchanged;
@@ -717,7 +904,7 @@ void mOilFurnace::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_furnace;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mOilFurnace::ConstructJSON_Furnace;
   
   mqtthandler_ptr = &mqtthandler_furnace_teleperiod;
@@ -727,7 +914,7 @@ void mOilFurnace::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60*60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_furnace;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mOilFurnace::ConstructJSON_Furnace;
 
 } //end "MQTTHandler_Init"

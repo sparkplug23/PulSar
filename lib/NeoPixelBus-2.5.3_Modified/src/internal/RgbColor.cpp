@@ -158,40 +158,6 @@ RgbColor::RgbColor(const HsbColor& color)
     B = (uint8_t)(b * 255.0f);
 }
 
-uint8_t RgbColor::CalculateBrightness() const
-{
-	return (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);
-}
-
-void RgbColor::Darken(uint8_t delta)
-{
-	if (R > delta)
-	{
-		R -= delta;
-	}
-	else
-	{
-		R = 0;
-	}
-
-	if (G > delta)
-	{
-		G -= delta;
-	}
-	else
-	{
-		G = 0;
-	}
-
-	if (B > delta)
-	{
-		B -= delta;
-	}
-	else
-	{
-		B = 0;
-	}
-}
 
 void RgbColor::Lighten(uint8_t delta)
 {

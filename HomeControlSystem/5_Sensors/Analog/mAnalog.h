@@ -1,11 +1,11 @@
 #ifndef _MMOTIONSENSOR_H
 #define _MMOTIONSENSOR_H 1.0
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_SENSORS_ANALOG_MEASURE
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 class mAnalog{
@@ -53,9 +53,9 @@ class mAnalog{
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mAnalog>* mqtthandler_ptr;
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mAnalog> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mAnalog> mqtthandler_sensor_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

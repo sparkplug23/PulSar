@@ -2,7 +2,7 @@
 #define _MMQTT 0.7
 
 #include <stdint.h>
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 // Using MQTT to hold latest version of firmware
 // Topic = group_all/
@@ -59,6 +59,31 @@ enum MQTT_FREQUENCY_REDUCTION_LEVEL_IDS{
 #define MQTT_TOPIC_TYPE_IFCHANGED_CTR "ifchanged" //send single items that have changed within 1 second
 #define MQTT_TOPIC_TYPE_TELEPERIOD_CTR "tele"     //send blocks of information, with another parameter controlling the size of the block (important, all)
 
+// Put all shared ones here, eg "settings" and "sensor", with specific inside module.h when needed
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR)       "health";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR)     "settings";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR)          "log";        
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR)     "firmware";        
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR)       "memory";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NETWORK_CTR)      "network";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MQTT_CTR)         "mqtt";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR)         "time";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR)      "devices";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_CTR)       "reboot";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR) "reboot/event";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR)           "debug/pins";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_TEMPLATE_CTR)       "debug/template";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR) "debug/moduleinterface";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR)  "debug/minimal";    
+
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR)
+"sensors";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR)
+"power";
+
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR) "state";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_TIMED_CTR) "timed";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR) "debug";
 
 // enum MQTT_FREQUENCY_REDUNCTION_LEVEL_IDS{
 //   MQTT_FREQUENCY_REDUNCTION_LEVEL_NONE_ID=0,
@@ -95,7 +120,7 @@ struct handler {
 #include "mPubSubClient.h"
 class mPubSubClient;
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 #include "2_CoreSystem/Support/mSupport.h"
 class mSupport;
 
@@ -108,14 +133,12 @@ class mSupport;
 #endif
 #include <WiFiUdp.h>
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 #define WILLQOS_CTR 2
 #define WILLRETAIN_CTR true
 #define WILLMESSAGE_ONDISCONNECT_CTR "{\"LWT\":\"Offline\"}"
 #define WILLMESSAGE_ONCONNECT_CTR "{\"LWT\":\"Online\"}"
-
-#define WEB_HANDLE_MQTT "mq"
 
 
 class mMQTT{
@@ -281,36 +304,36 @@ class mMQTT{
 
     // move into progmem!
 
-    const char* postfix_topic_health = "health";
+    // const char* postfix_topic_health = "health";
     handler<mMQTT> mqtthandler_health;
-    const char* postfix_topic_settings = "settings";    
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";    
     handler<mMQTT> mqtthandler_settings; //ie modes, on, off, states
-    const char* postfix_topic_log = "log";        
+    // const char* postfix_topic_log = "log";        
     handler<mMQTT> mqtthandler_log;
-    const char* postfix_topic_firmware = "firmware";        
+    // const char* postfix_topic_firmware = "firmware";        
     handler<mMQTT> mqtthandler_firmware;
-    const char* postfix_topic_memory = "memory";    
+    // const char* postfix_topic_memory = "memory";    
     handler<mMQTT> mqtthandler_memory;
-    const char* postfix_topic_network = "network";    
+    // const char* postfix_topic_network = "network";    
     handler<mMQTT> mqtthandler_network;
-    const char* postfix_topic_mqtt = "mqtt";    
+    // const char* postfix_topic_mqtt = "mqtt";    
     handler<mMQTT> mqtthandler_mqtt;
-    const char* postfix_topic_time = "time";    
+    // const char* postfix_topic_time = "time";    
     handler<mMQTT> mqtthandler_time;
-    const char* postfix_topic_devices = "devices";    
+    // const char* postfix_topic_devices = "devices";    
     handler<mMQTT> mqtthandler_devices; // appended all ACTIVE sensors from all sensor modules
-    const char* postfix_topic_reboot = "reboot";    
+    // const char* postfix_topic_reboot = "reboot";    
     handler<mMQTT> mqtthandler_reboot;
-    const char* postfix_topic_reboot_event = "reboot/event";    
+    // const char* postfix_topic_reboot_event = "reboot/event";    
     handler<mMQTT> mqtthandler_reboot_event;
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      const char* postfix_topic_debug_pins = "debug/pins";    
+      // const char* postfix_topic_debug_pins = "debug/pins";    
       handler<mMQTT> mqtthandler_debug_pins;
-      const char* postfix_topic_debug_template = "debug/template";    
+      // const char* postfix_topic_debug_template = "debug/template";    
       handler<mMQTT> mqtthandler_debug_template;
-      const char* postfix_topic_debug_moduleinterface = "debug/moduleinterface";    
+      // const char* postfix_topic_debug_moduleinterface = "debug/moduleinterface";    
       handler<mMQTT> mqtthandler_debug_moduleinterface;
-      const char* postfix_topic_debug_minimal = "debug/minimal";    
+      // const char* postfix_topic_debug_minimal = "debug/minimal";    
       handler<mMQTT> mqtthandler_debug_minimal;
     #endif
 

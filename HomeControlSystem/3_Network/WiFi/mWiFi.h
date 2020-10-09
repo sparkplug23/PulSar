@@ -1,14 +1,17 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H 0.4
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
+
+// #define ENABLE_WIFI_DEVELOPMENT
+
 #ifdef ENABLE_USER_CONFIG_OVERRIDE 
-  #include "1_ConfigUser/mUserConfigSecret.h"
+  #include "0_ConfigUser/mUserConfigSecret.h"
 #endif
 #include "2_CoreSystem/Logging/mLogging.h"
 
 #include <ArduinoJson.h>
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"

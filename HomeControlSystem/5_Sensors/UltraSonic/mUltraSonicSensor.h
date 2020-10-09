@@ -1,7 +1,7 @@
 #ifndef _MULTRASONICSENSOR_H
 #define _MULTRASONICSENSOR_H 0.7
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
 
@@ -12,11 +12,13 @@
 #include <ArduinoJson.h>
 #include "3_Network/WebServer/mWebServer.h"
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/averaged";
 
 #define USE_MQTT_ULTRASONIC
 
@@ -209,9 +211,9 @@ uint8_t ConstructJSON_SensorsAveraged(uint8_t json_level);
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mUltraSonicSensor>* mqtthandler_ptr = nullptr;
-    const char* postfix_topic_settings = "settings";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mUltraSonicSensor> mqtthandler_settings_teleperiod;
-    const char* postfix_topic_sensors = "sensors";
+    // const char* postfix_topic_sensors = "sensors";
     struct handler<mUltraSonicSensor> mqtthandler_sensor_ifchanged;
     struct handler<mUltraSonicSensor> mqtthandler_sensor_teleperiod;
 
@@ -222,7 +224,7 @@ uint8_t ConstructJSON_SensorsAveraged(uint8_t json_level);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    const char* postfix_topic_averaged = "sensors/averaged";
+    // const char* postfix_topic_averaged = "sensors/averaged";
     struct handler<mUltraSonicSensor> mqtthandler_averaged_ifchanged;
     struct handler<mUltraSonicSensor> mqtthandler_averaged_teleperiod;
     

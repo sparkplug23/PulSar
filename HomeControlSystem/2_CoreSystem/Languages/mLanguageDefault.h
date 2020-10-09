@@ -1393,7 +1393,7 @@
 #define D_JSON_MINUTES_ON "minutes_on"
 #define D_JSON_NAME "name"
 
-// #define D_JSON_SCENENAME "SceneName"
+#define D_JSON_SCENENAME "SceneName"
 #define D_JSON_ANIMATIONMODE "AnimationMode"
 
 #define D_JSON_NOTIFICATIONS "Notifications"

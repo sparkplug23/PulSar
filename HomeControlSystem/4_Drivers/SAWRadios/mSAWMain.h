@@ -4,7 +4,7 @@
 //#define _MSAWRADIOS_VERSION 3.1 //version that divides basic function and my 8 bytes packet forma
 
 
-#include "1_ConfigUser/mUserConfig.h"
+#include "0_ConfigUser/mUserConfig.h"
 #ifdef USE_SAW_TRANSCEIVER
 
 
@@ -20,7 +20,7 @@ class mSAWProtocol;
 //#include "SAWRadios/mSAWCodes.h"
 // Task as controller -- main SAW controller -- other Files should be considered private
 
-#include "2_CoreSystem/InterfaceController/mInterfaceController.h"
+#include "1_TaskerManager/mInterfaceController.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
 class mLogging;
