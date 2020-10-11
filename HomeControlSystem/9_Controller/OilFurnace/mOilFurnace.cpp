@@ -233,7 +233,7 @@ int8_t mOilFurnace::parse_JSONCommand(){
 
 
 return 0;
-  // uint8_t isserviced = 0;
+  // u
   // int8_t tmp_id = 0;
 
   // #ifdef JSONDOCUMENT_STATIC
@@ -262,7 +262,7 @@ return 0;
   //   }
   // }
 
-  // return isserviced;
+  // 
 
 } // END FUNCTION
 
@@ -321,8 +321,8 @@ int8_t mOilFurnace::Tasker(uint8_t function){
       
       // if(mSupport::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
       //   MQTTHandler_Set_fSendNow();
-      //   // mqtthandler_.fSendNow = true;
-      //   // mqtthandler_ifchanged_detailed.fSendNow = true;
+      //   // mqtthandler_.flags.SendNow = true;
+      //   // mqtthandler_ifchanged_detailed.flags.SendNow = true;
       // }
 
     break;
@@ -869,8 +869,8 @@ void mOilFurnace::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -879,8 +879,8 @@ void mOilFurnace::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_litres_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -889,8 +889,8 @@ void mOilFurnace::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_litres_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60*60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -899,8 +899,8 @@ void mOilFurnace::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_furnace_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -909,8 +909,8 @@ void mOilFurnace::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_furnace_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60*60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -922,11 +922,11 @@ void mOilFurnace::MQTTHandler_Init(){
 
 void mOilFurnace::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_litres_ifchanged.fSendNow = true;
-  mqtthandler_litres_teleperiod.fSendNow = true;
-  mqtthandler_furnace_ifchanged.fSendNow = true;
-  mqtthandler_furnace_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_litres_ifchanged.flags.SendNow = true;
+  mqtthandler_litres_teleperiod.flags.SendNow = true;
+  mqtthandler_furnace_ifchanged.flags.SendNow = true;
+  mqtthandler_furnace_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

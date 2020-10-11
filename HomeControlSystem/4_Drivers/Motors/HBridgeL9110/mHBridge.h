@@ -136,7 +136,7 @@ class mHBridge{
     void ConstructJSON_FanStatus();
     void MQQTSendFanStatus();
     //void parse_JSONCommand(mpkt_t* mpt, char* topic, char* payload);
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
 
     void AddToJsonObject_AddHardware(JsonObject root);
 

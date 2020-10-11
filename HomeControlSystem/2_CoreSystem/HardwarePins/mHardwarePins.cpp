@@ -778,7 +778,7 @@ uint8_t mHardwarePins::ValidPin(uint8_t pin, uint8_t gpio)
   }
   DEBUG_LINE;
   // need to add my other boards here
-  if ((MODULE_WEMOS_ID == pCONT_set->Settings.module) && (!pCONT_set->Settings.flag_network_phaseout.user_esp8285_enable)) {
+  if ((MODULE_WEMOS_ID == pCONT_set->Settings.module) && (!pCONT_set->Settings.flag_network.user_esp8285_enable)) {
     if ((pin == 9) || (pin == 10)) { result = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
   }
   DEBUG_LINE;
@@ -1151,17 +1151,17 @@ void mHardwarePins::GpioInit(void)
   //   ClaimSerial();  // Stop serial loopback mode
   // }
   // else if (SONOFF_DUAL == my_module_type) {
-  //   Settings.flag_system_phaseout.mqtt_serial = 0;
+  //   Settings.flag_system.mqtt_serial = 0;
   //   devices_present = 2;
   //   baudrate = 19200;
   // }
   // else if (CH4 == my_module_type) {
-  //   Settings.flag_system_phaseout.mqtt_serial = 0;
+  //   Settings.flag_system.mqtt_serial = 0;
   //   devices_present = 4;
   //   baudrate = 19200;
   // }
   // else if (SONOFF_SC == my_module_type) {
-  //   Settings.flag_system_phaseout.mqtt_serial = 0;
+  //   Settings.flag_system.mqtt_serial = 0;
   //   devices_present = 0;
   //   baudrate = 19200;
   // }

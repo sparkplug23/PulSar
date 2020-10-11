@@ -302,7 +302,7 @@ int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 }
 int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
 
-  int8_t isserviced = 0;
+  
 
   if(obj.containsKey(D_JSON_LIGHTPOWER)){
     int light = obj[D_JSON_LIGHTPOWER];
@@ -330,7 +330,7 @@ int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
     isserviced++;
   }
   
-  return isserviced;
+  
 
 }
 
@@ -410,8 +410,8 @@ void mSonoffIFan::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -420,8 +420,8 @@ void mSonoffIFan::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -430,8 +430,8 @@ void mSonoffIFan::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -443,9 +443,9 @@ void mSonoffIFan::MQTTHandler_Init(){
 
 void mSonoffIFan::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

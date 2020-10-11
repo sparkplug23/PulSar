@@ -5,12 +5,243 @@
 
 #include "1_TaskerManager/mInterfaceController.h"
 
-// #define USE_DECLARE_AT_COMPILE_TO_DEBUG
+//#define USE_DECLARE_AT_COMPILE_TO_DEBUG
 
-// #ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
-// mRGBAnimator mrgbani;
+#ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
+    mHardwarePins mod;
+    mSettings mset;
+    mSupport msup;
+    mLogging mso;
+    mTime mt;
+    mMQTT mqt;
+    mWiFi mwif;
+    mTelemetry mtel;
+    #ifdef USE_WEBSERVER
+    mWebServer mweb;
+    #endif
+  #ifdef USE_MODULE_SENSORS_DHT
+    mSensorsDHT msdht;
+  #endif
+  #ifdef USE_MODULE_SENSORS_BME
+    mSensorsBME msbme;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DS18B20
+    mSensorsDB18 msdb18;
+  #endif
+  #ifdef USE_MODULE_SENSORS_ULTRASONICS
+    mUltraSonicSensor mus;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_OILFURNACE
+    mOilFurnace mof;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_BLINDS
+    mBlinds mbbl;
+  #endif
+  #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
+    mPulseCounter mpc;
+  #endif
 
-// #endif
+  
+  #ifdef USE_MODULE_DRIVERS_HBRIDGE
+    mHBridge mdhb;
+  #endif
+
+  #ifdef USE_MODULE_DRIVERS_ENERGY
+    mEnergy mdenergy;
+  #endif
+  /*
+    Lights
+    */
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+    mInterfaceLight mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+    mRGBAnimator mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_PWM
+    mPWMLight mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+
+
+
+  #ifdef USE_MODULE_CUSTOM_HEATING
+    mHeating mh;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RELAY
+    mRelays mry;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+    mPWM mpwm;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
+    mGarageLights mrl;
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOTION
+    mMotionSensor mms;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DOOR
+    mDoorSensor mds;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DOORCHIME
+    mDoorBell mdb;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+    mRadiatorFan mrf;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+    mSonoffIFan mifan;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_PWM_FAN
+    mPWMFan mpwmfan;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+    mIRtransceiver mir;
+  #endif
+  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+   mNextionPanel mnext;
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOISTURE
+    mMoistureSensor mois;
+  #endif
+
+  // Sensors
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+    mButtons mbtn;
+  #endif
+  #ifdef USE_MODULE_SENSORS_SWITCHES
+    mSwitches mswh;
+  #endif
+  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+    mPzem_AC mspm;
+  #endif
+
+
+  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+    mExerciseBike meb;
+  #endif
+  
+void init_class_instances(){
+   pCONT->mod = &mod;
+   pCONT->mset = &mset;
+    pCONT-> msup = &msup;
+    pCONT-> mso = &mso;
+    pCONT-> mt = &mt;
+    pCONT-> mqt = &mqt;
+    pCONT-> mwif = &mwif;
+    pCONT-> mtel = &mtel;
+    #ifdef USE_WEBSERVER
+    pCONT-> mweb = &mweb;
+    #endif
+  #ifdef USE_MODULE_SENSORS_DHT
+    pCONT-> msdht = &mset;
+  #endif
+  #ifdef USE_MODULE_SENSORS_BME
+    pCONT-> msbme = &mset;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DS18B20
+    pCONT-> msdb18;
+  #endif
+  #ifdef USE_MODULE_SENSORS_ULTRASONICS
+    pCONT-> mus;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_OILFURNACE
+    pCONT-> mof;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_BLINDS
+    pCONT-> mbbl;
+  #endif
+  #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
+    pCONT-> mpc;
+  #endif
+
+  
+  #ifdef USE_MODULE_DRIVERS_HBRIDGE
+    pCONT-> mdhb;
+  #endif
+
+  #ifdef USE_MODULE_DRIVERS_ENERGY
+    pCONT-> mdenergy;
+  #endif
+  /*
+    Lights
+    */
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+    pCONT-> mil = &mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+    pCONT-> mrgbani = &mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_PWM
+    pCONT-> mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+
+
+
+  #ifdef USE_MODULE_CUSTOM_HEATING
+    pCONT-> mh;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RELAY
+    pCONT-> mry;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+    pCONT-> mpwm;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
+    pCONT-> mrl;
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOTION
+    pCONT-> mms;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DOOR
+    pCONT-> mds;
+  #endif
+  #ifdef USE_MODULE_SENSORS_DOORCHIME
+    pCONT-> mdb;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+    pCONT-> mrf;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+    pCONT-> mifan;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_PWM_FAN
+    pCONT-> mpwmfan;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+    pCONT-> mir;
+  #endif
+  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+   pCONT-> mnext;
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOISTURE
+    pCONT-> mois;
+  #endif
+
+  // Sensors
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+    pCONT-> mbtn;
+  #endif
+  #ifdef USE_MODULE_SENSORS_SWITCHES
+    pCONT-> mswh;
+  #endif
+  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+    pCONT-> mspm;
+  #endif
+
+
+  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+    pCONT-> meb;
+  #endif
+
+}
+
+#endif
+
+
 
 
 
@@ -48,7 +279,7 @@ void ArduinoOTAInit(void)
           //pCONT_web->StopWebserver(); 
           // /}
       // #endif  // USE_WEBSERVER
-      //if (pCONT_set->Settings.flag_system_phaseout.mqtt_enabled) { MqttDisconnect(); }
+      //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
     // #endif
     arduino_ota_triggered = true;
@@ -190,15 +421,6 @@ void HandleFailedBootFailBack(){
 }
 
 
-#ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
-
-void init_class_instances(){
-
-  pCONT->mrgbani = &mrgbani;
-
-}
-
-#endif
 
 #define DISABLE
 
@@ -382,7 +604,7 @@ void loop(void)
   //SmartLoopDelay()
   // #ifndef DISABLE_SLEEP
   // if(pCONT_set->Settings.enable_sleep){
-  //   if (pCONT_set->Settings.flag_network_phaseout.sleep_normal) {
+  //   if (pCONT_set->Settings.flag_network.sleep_normal) {
   //     delay(pCONT_set->sleep);
   //   } else {
 

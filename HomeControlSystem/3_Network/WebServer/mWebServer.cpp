@@ -988,10 +988,10 @@ bool mWebServer::WebCommand(void)
 // #ifdef USE_EMULATION
 //   else if (CMND_EMULATION == command_code) {
 //     if ((XdrvMailbox.payload >= EMUL_NONE) && (XdrvMailbox.payload < EMUL_MAX)) {
-//       pCONT_set->Settings.flag_power_phaseout.emulation = XdrvMailbox.payload;
+//       pCONT_set->Settings.flag_power.emulation = XdrvMailbox.payload;
 //       restart_flag = 2;
 //     }
-//     Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.flag_power_phaseout.emulation);
+//     Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.flag_power.emulation);
 //   }
 // #endif  // USE_EMULATION
 //   else serviced = false;  // Unknown command

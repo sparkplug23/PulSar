@@ -182,10 +182,10 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_SAVEDATA,       0); 
     JsonBuilderI->Add(PM_JSON_SAVESTATE,      0); 
     JsonBuilderI->Add(PM_JSON_SWITCHMODE,     0); 
-    JsonBuilderI->Add(PM_JSON_BUTTONRETAIN,   pCONT_set->Settings.flag_system_phaseout.mqtt_button_retain); 
-    JsonBuilderI->Add(PM_JSON_SWITCHRETAIN,   pCONT_set->Settings.flag_system_phaseout.mqtt_switch_retain); 
-    JsonBuilderI->Add(PM_JSON_SENSORRETAIN,   pCONT_set->Settings.flag_system_phaseout.mqtt_sensor_retain); 
-    JsonBuilderI->Add(PM_JSON_POWERRETAIN,    pCONT_set->Settings.flag_system_phaseout.mqtt_power_retain);
+    JsonBuilderI->Add(PM_JSON_BUTTONRETAIN,   pCONT_set->Settings.flag_system.mqtt_button_retain); 
+    JsonBuilderI->Add(PM_JSON_SWITCHRETAIN,   pCONT_set->Settings.flag_system.mqtt_switch_retain); 
+    JsonBuilderI->Add(PM_JSON_SENSORRETAIN,   pCONT_set->Settings.flag_system.mqtt_sensor_retain); 
+    JsonBuilderI->Add(PM_JSON_POWERRETAIN,    pCONT_set->Settings.flag_system.mqtt_power_retain);
     JsonBuilderI->Add(PM_JSON_BAUDRATE,       (uint16_t)115200);
     JsonBuilderI->Add(PM_JSON_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
     JsonBuilderI->Add(PM_JSON_OTAURL,         "http://something.org/hacs/release/minimal.bin");

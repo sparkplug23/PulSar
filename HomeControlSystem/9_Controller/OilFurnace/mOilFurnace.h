@@ -197,9 +197,9 @@ void ConstructRoot_JSON_Table(JsonObject root);
 
         
     int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    int8_t parsesub_CheckAll(JsonObjectConst obj);
+    void parsesub_CheckAll(JsonObjectConst obj);
     int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
 
 
@@ -305,7 +305,7 @@ float GetOilHeightMMReading(int duration);
 float GetOilHeightMMReadingAdjustedFromTemp(int duration);
 float GetOilHeightCMReadingAdjustedFromTemp(int duration);
 
-int8_t parse_JSONCommand();
+void parse_JSONCommand();
 
 
 // void MQQTHandler_IfChanged_Basic_Litres(void);

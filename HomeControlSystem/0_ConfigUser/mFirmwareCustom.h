@@ -24,16 +24,16 @@
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
-// #define DEVICE_RGBROOF 
+// #define DEVICE_RGBROOF                                 // BETA
 // #define DEVICE_RGBDELL
 // #define DEVICE_RGBCRYSTAL1
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-#define DEVICE_RGBMICRO2 //projector
+// #define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
-// #define DEVICE_RGBBEDLIGHT
+// #define DEVICE_RGBBEDLIGHT                             // BETA
 // #define DEVICE_RGBDESK
 // #define DEVICE_RGBCOOKER
 //  #define DEVICE_RGBUTILITY
@@ -199,11 +199,12 @@
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
     "\"" D_JSON_STRIP_SIZE     "\":50,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 10\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":60,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 03\","
     "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
-    "\"" D_JSON_BRIGHTNESS     "\":5"
+    "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
+
 #endif
 
 
@@ -240,7 +241,7 @@
     "\"" D_JSON_SCENE_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[15,95,70]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "70"
+    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
   "}";  
 #endif
 
@@ -251,7 +252,7 @@
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
-  #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_MOTION
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ADDRESSABLE
@@ -282,7 +283,7 @@
     "\"" D_JSON_SCENE_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[15,95,70]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "70"
+    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
   "}";  
 
   
@@ -338,13 +339,16 @@
     "}";
 #endif
 
-
+//rgbmicro2/set/light/scene
+//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBMICRO2 //projector
   #define DEVICENAME_CTR          "rgbmicro2"
   #define DEVICENAME_FRIENDLY_CTR "Projector Micro Lights"
 
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
+
+  //#define ENABLE_LOG_FILTERING_TEST_ONLY
 
   #define STRIP_SIZE_MAX 50
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
@@ -356,7 +360,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
@@ -377,9 +381,10 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
-    "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
+    // "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_MODE             "\":\"" "Flasher" "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS       "\":50"
+    "\"" D_JSON_BRIGHTNESS       "\":0"
   "}";
 
 #endif
@@ -590,11 +595,10 @@
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_PWM
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define DISABLE_TEMPORARY_RGBANIMATOR
-  #define USE_MODULE_LIGHTS_PWM
-
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define DISABLE_TEMPORARY_RGBANIMATOR
+  // #define USE_MODULE_LIGHTS_PWM
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 

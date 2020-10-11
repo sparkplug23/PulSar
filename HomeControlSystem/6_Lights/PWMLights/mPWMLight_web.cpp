@@ -63,64 +63,64 @@ void mPWMLight::WebAppend_Root_ControlUI(){
 
   
 
-  RgbColor rgb = RgbColor(pCONT_iLight->current_color[0],pCONT_iLight->current_color[1],pCONT_iLight->current_color[2]);
-  HsbColor hsb = HsbColor(rgb);
+  // RgbColor rgb = RgbColor(pCONT_iLight->current_color[0],pCONT_iLight->current_color[1],pCONT_iLight->current_color[2]);
+  // HsbColor hsb = HsbColor(rgb);
 
-  uint16_t hue = 0;
-  uint8_t  sat = 0;
-  uint8_t  brt = 0;
-  pCONT_iLight->getHSB(&hue, &sat, &brt);
+  // uint16_t hue = 0;
+  // uint8_t  sat = 0;
+  // uint8_t  brt = 0;
+  // pCONT_iLight->getHSB(&hue, &sat, &brt);
 
-  BufferWriterI->Append_P(PSTR("<tr><td><b>Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Hue
-    "pwm_hue",             // b - Unique HTML id
-    "#800", "#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800",  // Hue colors
-    2,               // sl2 - Unique range HTML id - Used as source for Saturation end color
-    0, 359,          // Range valid Hue
-    hue,
-    "pwm_hue", 0
-  );         // h0 - Value id
+  // BufferWriterI->Append_P(PSTR("<tr><td><b>Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Hue
+  //   "pwm_hue",             // b - Unique HTML id
+  //   "#800", "#f00 5%,#ff0 20%,#0f0 35%,#0ff 50%,#00f 65%,#f0f 80%,#f00 95%,#800",  // Hue colors
+  //   2,               // sl2 - Unique range HTML id - Used as source for Saturation end color
+  //   0, 359,          // Range valid Hue
+  //   hue,
+  //   "pwm_hue", 0
+  // );         // h0 - Value id
 
-  uint8_t dcolor = mSupport::changeUIntScale(100, 0, 100, 0, 255);
-  snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
-  snprintf_P(stemp, sizeof(stemp), PSTR("#%02X%02X%02X"), rgb.R, rgb.G, rgb.B);  // Saturation end color
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Saturation
-    "pwm_sat",             // s - Unique HTML id related to eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
-    scolor, stemp,   // Brightness to max current color
-    3,               // sl3 - Unique range HTML id - Not used
-    0, 100,          // Range 0 to 100%
-    sat,
-    "pwm_sat", 0
-  );         // n0 - Value id
+  // uint8_t dcolor = mSupport::changeUIntScale(100, 0, 100, 0, 255);
+  // snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
+  // snprintf_P(stemp, sizeof(stemp), PSTR("#%02X%02X%02X"), rgb.R, rgb.G, rgb.B);  // Saturation end color
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Saturation
+  //   "pwm_sat",             // s - Unique HTML id related to eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
+  //   scolor, stemp,   // Brightness to max current color
+  //   3,               // sl3 - Unique range HTML id - Not used
+  //   0, 100,          // Range 0 to 100%
+  //   sat,
+  //   "pwm_sat", 0
+  // );         // n0 - Value id
 
-  // BufferWriterI->Append_P(PSTR("<div> Brightness <span class='hsb_brt_ttl'>%d %%</span></div>"),100);// BrtF2N(animation.brightness))
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-    "pwm_brt",               // c - Unique HTML id
-    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-    0, 100,  // Range 0/1 to 100%
-    pCONT_iLight->_briRGB,
-    "pwm_brt"
-  );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+  // // BufferWriterI->Append_P(PSTR("<div> Brightness <span class='hsb_brt_ttl'>%d %%</span></div>"),100);// BrtF2N(animation.brightness))
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+  //   "pwm_brt",               // c - Unique HTML id
+  //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+  //   0, 100,  // Range 0/1 to 100%
+  //   pCONT_iLight->_briRGB,
+  //   "pwm_brt"
+  // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-  BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
-    "pwm_cct",             // a - Unique HTML id
-    "#fff", "#ff0",  // White to Yellow
-    1,               // sl1
-    153, 500,        // Range color temperature
-    pCONT_iLight->LightGetColorTemp(),
-    "pwm_cct"
-  );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
+  // BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
+  //   "pwm_cct",             // a - Unique HTML id
+  //   "#fff", "#ff0",  // White to Yellow
+  //   1,               // sl1
+  //   153, 500,        // Range color temperature
+  //   pCONT_iLight->LightGetColorTemp(),
+  //   "pwm_cct"
+  // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
 
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-    "pwm_cbrt",               // c - Unique HTML id
-    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-    0, 100,  // Range 0/1 to 100%
-    pCONT_iLight->_briCT,
-    "pwm_cbrt"
-  );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+  //   "pwm_cbrt",               // c - Unique HTML id
+  //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+  //   0, 100,  // Range 0/1 to 100%
+  //   pCONT_iLight->_briCT,
+  //   "pwm_cbrt"
+  // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
   // BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
   // BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE, 
@@ -689,7 +689,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   //         animation.palette_id = arg_value;
 //   //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
 //   //       break;
-//   //     #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+//   //     #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
 //   //         flashersettings.function = arg_value;  
@@ -1323,7 +1323,7 @@ void mPWMLight::WebCommand_Parse(void)
 ********************************************************************************************************************/
 
 
-// #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+// #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
 
 // /******** Page items *****
 //  * 
@@ -2324,7 +2324,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   JsonBuilderI->Array_End();
 
 
-//   #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+//   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
 //   JsonBuilderI->Array_Start("g7");// Class name
 //     JsonBuilderI->Level_Start();
 //       JsonBuilderI->AddKey("eihr");           // function

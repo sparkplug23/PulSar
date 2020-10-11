@@ -1364,7 +1364,7 @@ float mSupport::ConvertTemp(float c)
 {
   // float result = c;
 
-  // if (!isnan(c) && Settings.flag_system_phaseout.temperature_conversion) {
+  // if (!isnan(c) && Settings.flag_system.temperature_conversion) {
   //   result = c * 1.8 + 32;  // Fahrenheit
   // }
   // return result;
@@ -1372,14 +1372,14 @@ float mSupport::ConvertTemp(float c)
 
 char mSupport::TempUnit(void)
 {
-  return (pCONT_set->Settings.flag_system_phaseout.temperature_conversion) ? 'F' : 'C';
+  return (pCONT_set->Settings.flag_system.temperature_conversion) ? 'F' : 'C';
 }
 
 float mSupport::ConvertPressure(float p)
 {
   // float result = p;
 
-  // if (!isnan(p) && Settings.flag_system_phaseout.pressure_conversion) {
+  // if (!isnan(p) && Settings.flag_system.pressure_conversion) {
   //   result = p * 0.75006375541921;  // mmHg
   // }
   // return result;
@@ -1387,7 +1387,7 @@ float mSupport::ConvertPressure(float p)
 
 String mSupport::PressureUnit(void)
 {
-  // return (Settings.flag_system_phaseout.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
+  // return (Settings.flag_system.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
 }
 
 void mSupport::SetGlobalValues(float temperature, float humidity)
@@ -1944,7 +1944,7 @@ void mSupport::PerformEverySecond(void)
 //       //MqttPublishTeleState();
 //       // pCONT_set->data_buffer2.payload.ctr[0] = '\0';
 // //       if (MqttShowSensor()) {
-// //         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_SENSOR), Settings.flag_system_phaseout.mqtt_sensor_retain);
+// //         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_SENSOR), Settings.flag_system.mqtt_sensor_retain);
 // // #ifdef USE_RULES
 // //     //    RulesTeleperiod();  // Allow rule based HA messages
 // // #endif  // USE_RULES
@@ -2022,7 +2022,7 @@ void mSupport::UpdateStatusBlink(){
   uint8_t blinkinterval = 1;
   // global_state.network_down = (global_state.wifi_down && global_state.eth_down);
 
-  if (!pCONT_set->Settings.flag_system_phaseout.global_state) {                      // Problem blinkyblinky enabled
+  if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
     if (pCONT_set->global_state.data) {                              // Any problem
       if (pCONT_set->global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
       if (pCONT_set->global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
@@ -2239,7 +2239,7 @@ void mSupport::Every250mSeconds(void)
     /*if (save_data_counter && (backlog_pointer == backlog_index)) {
       save_data_counter--;
       if (save_data_counter <= 0) { Serial.print("if (save_data_counter <= 0)="); Serial.println(save_data_counter);
-        if (Settings.flag_system_phaseout.save_state) {
+        if (Settings.flag_system.save_state) {
           power_t mask = POWER_MASK;
           for (uint8_t i = 0; i < MAX_PULSETIMERS; i++) {
             if ((Settings.pulse_timer[i] > 0) && (Settings.pulse_timer[i] < 30)) {  // 3 seconds
@@ -2262,15 +2262,15 @@ void mSupport::Every250mSeconds(void)
 // DEBUG_LINE_HERE;
     if (pCONT_set->restart_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
       if ((214 == pCONT_set->restart_flag) || (215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
-        char storage_wifi[sizeof(pCONT_set->Settings.sta_ssid) +
-                          sizeof(pCONT_set->Settings.sta_pwd)];
-        char storage_mqtt[sizeof(pCONT_set->Settings.mqtt_host) +
-                          sizeof(pCONT_set->Settings.mqtt_port) +
-                          sizeof(pCONT_set->Settings.mqtt_client) +
-                          sizeof(pCONT_set->Settings.mqtt_user) +
-                          sizeof(pCONT_set->Settings.mqtt_pwd) +
-                          sizeof(pCONT_set->Settings.mqtt_topic)];
-        memcpy(storage_wifi, pCONT_set->Settings.sta_ssid, sizeof(storage_wifi));     // Backup current SSIDs and Passwords
+        // char storage_wifi[sizeof(pCONT_set->Settings.sta_ssid) +
+        //                   sizeof(pCONT_set->Settings.sta_pwd)];
+        // char storage_mqtt[sizeof(pCONT_set->Settings.mqtt_host) +
+        //                   sizeof(pCONT_set->Settings.mqtt_port) +
+        //                   sizeof(pCONT_set->Settings.mqtt_client) +
+        //                   sizeof(pCONT_set->Settings.mqtt_user) +
+        //                   sizeof(pCONT_set->Settings.mqtt_pwd) +
+        //                   sizeof(pCONT_set->Settings.mqtt_topic)];
+        // memcpy(storage_wifi, pCONT_set->Settings.sta_ssid, sizeof(storage_wifi));     // Backup current SSIDs and Passwords
 
         // // Backup current SSIDs and Passwords
         // char storage_ssid1[strlen(SettingsText(SET_STASSID1)) +1];
@@ -2292,18 +2292,18 @@ void mSupport::Every250mSeconds(void)
         // strncpy(storage_mqtttopic, SettingsText(SET_MQTT_TOPIC), sizeof(storage_mqtttopic));
         // uint16_t mqtt_port = Settings.mqtt_port;
 
-        if (216 == pCONT_set->restart_flag) {
-          memcpy(storage_mqtt, pCONT_set->Settings.mqtt_host, sizeof(storage_mqtt));  // Backup mqtt host, port, client, username and password
-        }
+        // if (216 == pCONT_set->restart_flag) {
+        //   memcpy(storage_mqtt, pCONT_set->Settings.mqtt_host, sizeof(storage_mqtt));  // Backup mqtt host, port, client, username and password
+        // }
         if ((215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
           pCONT_set->SettingsErase(0);  // Erase all flash from program end to end of physical flash
         }
         pCONT_set->SettingsDefault();
-        memcpy(pCONT_set->Settings.sta_ssid, storage_wifi, sizeof(storage_wifi));     // Restore current SSIDs and Passwords
-        if (216 == pCONT_set->restart_flag) {
-          memcpy(pCONT_set->Settings.mqtt_host, storage_mqtt, sizeof(storage_mqtt));  // Restore the mqtt host, port, client, username and password
-          strlcpy(pCONT_set->Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(pCONT_set->Settings.mqtt_client));  // Set client to default
-        }
+        // memcpy(pCONT_set->Settings.sta_ssid, storage_wifi, sizeof(storage_wifi));     // Restore current SSIDs and Passwords
+        // if (216 == pCONT_set->restart_flag) {
+        //   memcpy(pCONT_set->Settings.mqtt_host, storage_mqtt, sizeof(storage_mqtt));  // Restore the mqtt host, port, client, username and password
+        //   strlcpy(pCONT_set->Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(pCONT_set->Settings.mqtt_client));  // Set client to default
+        // }
         pCONT_set->restart_flag = 2;
       }
       else if (213 == pCONT_set->restart_flag) {
@@ -2440,12 +2440,12 @@ void mSupport::Every250mSeconds(void)
 
 // // /*-------------------------------------------------------------------------------------------*/
 
-// //     if (serial_in_byte > 127 && !Settings.flag_system_phaseout.mqtt_serial_raw) {                // Discard binary data above 127 if no raw reception allowed
+// //     if (serial_in_byte > 127 && !Settings.flag_system.mqtt_serial_raw) {                // Discard binary data above 127 if no raw reception allowed
 // //       serial_in_byte_counter = 0;
 // //       Serial.flush();
 // //       return;
 // //     }
-// //     if (!Settings.flag_system_phaseout.mqtt_serial) {                                            // SerialSend active
+// //     if (!Settings.flag_system.mqtt_serial) {                                            // SerialSend active
 // //       if (isprint(serial_in_byte)) {                                             // Any char between 32 and 127
 // //         if (serial_in_byte_counter < INPUT_BUFFER_SIZE -1) {                     // Add char to string if it still fits
 // //           serial_in_buffer[serial_in_byte_counter++] = serial_in_byte;
@@ -2454,11 +2454,11 @@ void mSupport::Every250mSeconds(void)
 // //         }
 // //       }
 // //     } else {
-// //       if (serial_in_byte || Settings.flag_system_phaseout.mqtt_serial_raw) {                     // Any char between 1 and 127 or any char (0 - 255)
+// //       if (serial_in_byte || Settings.flag_system.mqtt_serial_raw) {                     // Any char between 1 and 127 or any char (0 - 255)
 // //         if ((serial_in_byte_counter < INPUT_BUFFER_SIZE -1) &&                   // Add char to string if it still fits and ...
 // //             ((isprint(serial_in_byte) && (128 == Settings.serial_delimiter)) ||  // Any char between 32 and 127
 // //             ((serial_in_byte != Settings.serial_delimiter) && (128 != Settings.serial_delimiter)) ||  // Any char between 1 and 127 and not being delimiter
-// //               Settings.flag_system_phaseout.mqtt_serial_raw)) {                                  // Any char between 0 and 255
+// //               Settings.flag_system.mqtt_serial_raw)) {                                  // Any char between 0 and 255
 // //           serial_in_buffer[serial_in_byte_counter++] = serial_in_byte;
 // //           serial_polling_window = millis();
 // //         } else {
@@ -2483,7 +2483,7 @@ void mSupport::Every250mSeconds(void)
 
 // /*-------------------------------------------------------------------------------------------*
 
-//     // else if (!Settings.flag_system_phaseout.mqtt_serial && (serial_in_byte == '\n')) {
+//     // else if (!Settings.flag_system.mqtt_serial && (serial_in_byte == '\n')) {
 //     //   serial_in_buffer[serial_in_byte_counter] = 0;                              // Serial data completed
 //     //   seriallog_level = (Settings.seriallog_level < LOG_LEVEL_INFO) ? (uint8_t)LOG_LEVEL_INFO : Settings.seriallog_level;
 //     //   AddLog_P2(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "%s"), serial_in_buffer);
@@ -2495,9 +2495,9 @@ void mSupport::Every250mSeconds(void)
 //     // }
 //   }
 
-// //   if (Settings.flag_system_phaseout.mqtt_serial && serial_in_byte_counter && (millis() > (serial_polling_window + SERIAL_POLLING))) {
+// //   if (Settings.flag_system.mqtt_serial && serial_in_byte_counter && (millis() > (serial_polling_window + SERIAL_POLLING))) {
 // //     serial_in_buffer[serial_in_byte_counter] = 0;                                // Serial data completed
-// //     if (!Settings.flag_system_phaseout.mqtt_serial_raw) {
+// //     if (!Settings.flag_system.mqtt_serial_raw) {
 // //       Response_P(PSTR("{\"" D_JSON_SERIALRECEIVED "\":\"%s\"}"), serial_in_buffer);
 // //     } else {
 // //       Response_P(PSTR("{\"" D_JSON_SERIALRECEIVED "\":\""));
@@ -2772,17 +2772,17 @@ float mSupport::FastPrecisePowf(const float x, const float y)
 
 
 //SYSTEM will be single level, basic commands in json format
-int8_t mSupport::parse_JSONCommand(){
+void mSupport::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/system")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_SYSTEM));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
 
-  int8_t isserviced = 0;
+  
 
   StaticJsonDocument<300> doc;
   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
@@ -2792,14 +2792,14 @@ int8_t mSupport::parse_JSONCommand(){
     uint8_t val = obj["resetcounter"];
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
     pCONT->mt->ResetRebootCounter();
-    isserviced++;
+    data_buffer2.isserviced++;
   }else
   if(obj.containsKey("loglevel")){
     const char* name = obj["loglevel"];
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
     pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
     // Add save log here
-    isserviced++;
+    data_buffer2.isserviced++;
   }
   else{
      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
@@ -2815,7 +2815,7 @@ int8_t mSupport::parse_JSONCommand(){
   //   else if (CMND_STATE == command_code) {
   //     data_buffer2.payload.ctr[0] = '\0';
   //     MqttShowState();
-  //     if (Settings.flag_network_phaseout.hass_tele_on_power) {
+  //     if (Settings.flag_network.hass_tele_on_power) {
   //       MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
   //     }
   //   }
@@ -2825,7 +2825,7 @@ int8_t mSupport::parse_JSONCommand(){
   //       sleep = payload;
   //       WiFiSetSleepMode();
   //     }
-  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "");
+  //     snprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "");
   //   }
 
   // else if (CMND_RESTART == command_code) {
@@ -2942,7 +2942,7 @@ int8_t mSupport::parse_JSONCommand(){
 
   //fHardwareInfoSent = false; // resend since its updated
 
-  return isserviced;
+  
 
 }
 
@@ -4543,13 +4543,13 @@ int mSupport::ResponseJsonEndEnd(void)
 // // #endif
 
 //   // ResponseAppend_P(PSTR(",\"SleepMode\":\"%s\",\"Sleep\":%u,\"LoadAvg\":%u"),
-//   //   GetTextIndexed_P(stemp1, sizeof(stemp1), Settings.flag_network_phaseout.sleep_normal, kSleepMode), sleep, loop_load_avg);
+//   //   GetTextIndexed_P(stemp1, sizeof(stemp1), Settings.flag_network.sleep_normal, kSleepMode), sleep, loop_load_avg);
 
 //   // for (uint8_t i = 0; i < devices_present; i++) {
 //   //   // if (i == light_device -1) {
 //   //   //   //LightState(1);
 //   //   // } else {
-//   //    // ResponseAppend_P(PSTR(",\"%s\":\"%s\""), GetPowerDevice(stemp1, i +1, sizeof(stemp1), Settings.flag_system_phaseout.device_index_enable), GetStateText(bitRead(power, i)));
+//   //    // ResponseAppend_P(PSTR(",\"%s\":\"%s\""), GetPowerDevice(stemp1, i +1, sizeof(stemp1), Settings.flag_system.device_index_enable), GetStateText(bitRead(power, i)));
 //   //     // if (SONOFF_IFAN02 == my_module_type) {
 //   //     //   ResponseAppend_P(PSTR(",\"" D_JSON_FANSPEED "\":%d"), GetFanspeed());
 //   //     //   break;

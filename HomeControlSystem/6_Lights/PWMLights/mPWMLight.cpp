@@ -1223,7 +1223,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     rpower = pCONT_set->power;
 // //   }
 
-// //   // if (pCONT_set->Settings.flag_system_phaseout.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
+// //   // if (pCONT_set->Settings.flag_system.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
 // //   //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
 // //   //     power_t mask = 1;
 // //   //     uint32_t count = 0;
@@ -1342,20 +1342,20 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //         break;
 // //       case POWER_ALL_SAVED_TOGGLE:
 // //         pCONT_set->power = (pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1)) ^ POWER_MASK;
-// //         if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
+// //         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
 // //           SetDevicePower(pCONT_set->power, SRC_RESTART);
 // //         }
 // //         break;
 // //       case POWER_ALL_SAVED:
 // //         pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1);
-// //         if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
+// //         if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
 // //           SetDevicePower(pCONT_set->power, SRC_RESTART);
 // //         }
 // //         break;
 // //       }
 // //     // } else {
 // //     //   power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) -1);
-// //     //   if (pCONT_set->Settings.flag_system_phaseout.save_state) {    // SetOption0 - Save power state and use after restart
+// //     //   if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
 // //     //     SetDevicePower(pCONT_set->power, SRC_RESTART);
 // //     //   }
 // //     // }
@@ -1363,7 +1363,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // //   // Issue #526 and #909
 // //   // for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
-// //   //   if (!pCONT_set->Settings.flag_network_phaseout.no_power_feedback) {  // SetOption63 - Don't scan relay pCONT_set->power state at restart - #5594 and #5663
+// //   //   if (!pCONT_set->Settings.flag_network.no_power_feedback) {  // SetOption63 - Don't scan relay pCONT_set->power state at restart - #5594 and #5663
 // //   //     if ((i < MAX_RELAYS) && (pCONT_set->pin[GPIO_REL1 +i] < 99)) {
 // //   //       bitWrite(pCONT_set->power, i, digitalRead(pCONT_set->pin[GPIO_REL1 +i]) ^ bitRead(pCONT_set->rel_inverted, i));
 // //   //     }
@@ -1396,7 +1396,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // // // #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 // // //   if (IsModuleIfan()) {
 // // //     blink_mask &= 1;                 // No blinking on the fan relays
-// // //     Settings.flag_system_phaseout.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
+// // //     Settings.flag_system.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
 // // //     Settings.pulse_timer[1] = 0;     // No pulsetimers on the fan relays
 // // //     Settings.pulse_timer[2] = 0;
 // // //     Settings.pulse_timer[3] = 0;
@@ -1426,7 +1426,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // //     //   MqttPublishPowerBlinkState(device);
 // //     // }
 
-// //     // if (Settings.flag_system_phaseout.interlock &&        // CMND_INTERLOCK - Enable/disable interlock
+// //     // if (Settings.flag_system.interlock &&        // CMND_INTERLOCK - Enable/disable interlock
 // //     //     !interlock_mutex &&
 // //     //     ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(power & mask)))
 // //     //    ) {
@@ -1463,7 +1463,7 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 // // // #ifdef USE_KNX
 // // //     KnxUpdatePowerState(device, power);
 // // // #endif  // USE_KNX
-// //     // if (publish_power && Settings.flag_network_phaseout.hass_tele_on_power) {  // SetOption59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT
+// //     // if (publish_power && Settings.flag_network.hass_tele_on_power) {  // SetOption59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT
 // //     //   MqttPublishTeleState();
 // //     // }
 // //     // if (device <= MAX_PULSETIMERS) {  // Restart PulseTime if powered On
@@ -1510,8 +1510,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // //   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
 // //   mqtthandler_ptr->tSavedLastSent = millis();
-// //   mqtthandler_ptr->fPeriodicEnabled = true;
-// //   mqtthandler_ptr->fSendNow = true;
+// //   mqtthandler_ptr->flags.PeriodicEnabled = true;
+// //   mqtthandler_ptr->flags.SendNow = true;
 // //   mqtthandler_ptr->tRateSecs = 60; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1520,8 +1520,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // //   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
 // //   mqtthandler_ptr->tSavedLastSent = millis();
-// //   mqtthandler_ptr->fPeriodicEnabled = true;
-// //   mqtthandler_ptr->fSendNow = true;
+// //   mqtthandler_ptr->flags.PeriodicEnabled = true;
+// //   mqtthandler_ptr->flags.SendNow = true;
 // //   mqtthandler_ptr->tRateSecs = 60; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1530,8 +1530,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
 // //   mqtthandler_ptr->tSavedLastSent = millis();
-// //   mqtthandler_ptr->fPeriodicEnabled = true;
-// //   mqtthandler_ptr->fSendNow = true;
+// //   mqtthandler_ptr->flags.PeriodicEnabled = true;
+// //   mqtthandler_ptr->flags.SendNow = true;
 // //   mqtthandler_ptr->tRateSecs = 1; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1540,8 +1540,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
   
 // //   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
 // //   mqtthandler_ptr->tSavedLastSent = millis();
-// //   mqtthandler_ptr->fPeriodicEnabled = true;
-// //   mqtthandler_ptr->fSendNow = true;
+// //   mqtthandler_ptr->flags.PeriodicEnabled = true;
+// //   mqtthandler_ptr->flags.SendNow = true;
 // //   mqtthandler_ptr->tRateSecs = 60; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1550,8 +1550,8 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
   
 // //   mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
 // //   mqtthandler_ptr->tSavedLastSent = millis();
-// //   mqtthandler_ptr->fPeriodicEnabled = true;
-// //   mqtthandler_ptr->fSendNow = true;
+// //   mqtthandler_ptr->flags.PeriodicEnabled = true;
+// //   mqtthandler_ptr->flags.SendNow = true;
 // //   mqtthandler_ptr->tRateSecs = 1; 
 // //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 // //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1563,11 +1563,11 @@ void mPWMLight::LightSetOutputs(const uint16_t *cur_col_10) {
 
 // // void mEnergy::MQTTHandler_Set_fSendNow(){
 
-// //   mqtthandler_settings_teleperiod.fSendNow = true;
-// //   mqtthandler_sensor_ifchanged.fSendNow = true;
-// //   mqtthandler_sensor_teleperiod.fSendNow = true;
-// //   mqtthandler_energystats_ifchanged.fSendNow = true;
-// //   mqtthandler_energystats_teleperiod.fSendNow = true;
+// //   mqtthandler_settings_teleperiod.flags.SendNow = true;
+// //   mqtthandler_sensor_ifchanged.flags.SendNow = true;
+// //   mqtthandler_sensor_teleperiod.flags.SendNow = true;
+// //   mqtthandler_energystats_ifchanged.flags.SendNow = true;
+// //   mqtthandler_energystats_teleperiod.flags.SendNow = true;
 
 // // } //end "MQTTHandler_Init"
 

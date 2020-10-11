@@ -155,7 +155,7 @@
 //   sretained[0] = '\0';
 //   snprintf_P(slog_type, sizeof(slog_type), PSTR(D_LOG_RESULT));
 
-//   if (Settings.flag_system_phaseout.mqtt_enabled) {
+//   if (Settings.flag_system.mqtt_enabled) {
 //     if (MqttIsConnected()) {
 //       if (MqttPublishLib(topic, retained)) {
 //         snprintf_P(slog_type, sizeof(slog_type), PSTR(D_LOG_MQTT));
@@ -166,7 +166,7 @@
 //     }
 //   }
 
-//   snprintf_P(log_data, sizeof(log_data), PSTR("%s%s = %s"), slog_type, (Settings.flag_system_phaseout.mqtt_enabled) ? topic : strrchr(topic,'/')+1, mcl->mset->data_buffer.payload.ctr);
+//   snprintf_P(log_data, sizeof(log_data), PSTR("%s%s = %s"), slog_type, (Settings.flag_system.mqtt_enabled) ? topic : strrchr(topic,'/')+1, mcl->mset->data_buffer.payload.ctr);
 //   if (strlen(log_data) >= (sizeof(log_data) - strlen(sretained) -1)) {
 //     log_data[sizeof(log_data) - strlen(sretained) -5] = '\0';
 //     snprintf_P(log_data, sizeof(log_data), PSTR("%s ..."), log_data);
@@ -209,7 +209,7 @@
 //   char romram[33];
 //   char stopic[TOPSZ];
 
-//   snprintf_P(romram, sizeof(romram), ((prefix > 3) && !Settings.flag_system_phaseout.mqtt_response) ? S_RSLT_RESULT : subtopic);
+//   snprintf_P(romram, sizeof(romram), ((prefix > 3) && !Settings.flag_system.mqtt_response) ? S_RSLT_RESULT : subtopic);
 //   for (uint8_t i = 0; i < strlen(romram); i++) {
 //     romram[i] = toupper(romram[i]);
 //   }
@@ -236,19 +236,19 @@
 // //     //  DomoticzUpdateFanState();  // RC Button feedback
 // // #endif  // USE_DOMOTICZ
 // //       snprintf_P(scommand, sizeof(scommand), PSTR(D_JSON_FANSPEED));
-// //       GetTopic_P(stopic, STAT, mqtt_topic, (Settings.flag_system_phaseout.mqtt_response) ? scommand : S_RSLT_RESULT);
+// //       GetTopic_P(stopic, STAT, mqtt_topic, (Settings.flag_system.mqtt_response) ? scommand : S_RSLT_RESULT);
 // //       Response_P(S_JSON_COMMAND_NVALUE, scommand, GetFanspeed());
 // //       MqttPublish(stopic);
 // //     }
 // //   } else {
-//     GetPowerDevice(scommand, device, sizeof(scommand), Settings.flag_system_phaseout.device_index_enable);
-//     GetTopic_P(stopic, STAT, mqtt_topic, (Settings.flag_system_phaseout.mqtt_response) ? scommand : S_RSLT_RESULT);
+//     GetPowerDevice(scommand, device, sizeof(scommand), Settings.flag_system.device_index_enable);
+//     GetTopic_P(stopic, STAT, mqtt_topic, (Settings.flag_system.mqtt_response) ? scommand : S_RSLT_RESULT);
 //     Response_P(S_JSON_COMMAND_SVALUE, scommand, GetStateText(bitRead(power, device -1)));
 //     MqttPublish(stopic);
 
 //     GetTopic_P(stopic, STAT, mqtt_topic, scommand);
 //     Response_P(GetStateText(bitRead(power, device -1)));
-//     MqttPublish(stopic, Settings.flag_system_phaseout.mqtt_power_retain);
+//     MqttPublish(stopic, Settings.flag_system.mqtt_power_retain);
 //  // }
 // }
 
@@ -260,7 +260,7 @@
 //     device = 1;
 //   }
 //   Response_P(PSTR("{\"%s\":\"" D_JSON_BLINK " %s\"}"),
-//     GetPowerDevice(scommand, device, sizeof(scommand), Settings.flag_system_phaseout.device_index_enable), GetStateText(bitRead(blink_mask, device -1)));
+//     GetPowerDevice(scommand, device, sizeof(scommand), Settings.flag_system.device_index_enable), GetStateText(bitRead(blink_mask, device -1)));
 
 //   MqttPublishPrefixTopic_P(RESULT_OR_STAT, S_RSLT_POWER);
 // }
@@ -335,7 +335,7 @@
 //   mqtt_initial_connection_state = 0;
 
 //   global_state.mqtt_down = 0;
-//   if (Settings.flag_system_phaseout.mqtt_enabled) {
+//   if (Settings.flag_system.mqtt_enabled) {
 //     rules_flag.mqtt_connected = 1;
 //   }
 // }
@@ -405,7 +405,7 @@
 // {
 //   char stopic[TOPSZ];
 
-//   mqtt_allowed = Settings.flag_system_phaseout.mqtt_enabled;
+//   mqtt_allowed = Settings.flag_system.mqtt_enabled;
 //   if (mqtt_allowed) {
 // #ifdef USE_DISCOVERY
 // #ifdef MQTT_HOST_DISCOVERY
@@ -474,7 +474,7 @@
 
 // void MqttCheck(void)
 // {
-//   if (Settings.flag_system_phaseout.mqtt_enabled) {
+//   if (Settings.flag_system.mqtt_enabled) {
 //     if (!MqttIsConnected()) {
 //       global_state.mqtt_down = 1;
 //       if (!mqtt_retry_counter) {
@@ -595,7 +595,7 @@
 //       if (!strcmp(dataBuf, mqtt_client)) SetShortcut(dataBuf, SC_DEFAULT);
 //       strlcpy(stemp1, (SC_DEFAULT == Shortcut(dataBuf)) ? MQTT_FULLTOPIC : dataBuf, sizeof(stemp1));
 //       if (strcmp(stemp1, Settings.mqtt_fulltopic)) {
-//         Response_P((Settings.flag_system_phaseout.mqtt_offline) ? S_OFFLINE : "");
+//         Response_P((Settings.flag_system.mqtt_offline) ? S_OFFLINE : "");
 //         MqttPublishPrefixTopic_P(TELE, PSTR(D_LWT), true);  // Offline or remove previous retained topic
 //         strlcpy(Settings.mqtt_fulltopic, stemp1, sizeof(Settings.mqtt_fulltopic));
 //         restart_flag = 2;
@@ -644,7 +644,7 @@
 //       if (!strcmp(dataBuf, mqtt_client)) SetShortcut(dataBuf, SC_DEFAULT);
 //       strlcpy(stemp1, (SC_DEFAULT == Shortcut(dataBuf)) ? MQTT_TOPIC : dataBuf, sizeof(stemp1));
 //       if (strcmp(stemp1, Settings.mqtt_topic)) {
-//         Response_P((Settings.flag_system_phaseout.mqtt_offline) ? S_OFFLINE : "");
+//         Response_P((Settings.flag_system.mqtt_offline) ? S_OFFLINE : "");
 //         MqttPublishPrefixTopic_P(TELE, PSTR(D_LWT), true);  // Offline or remove previous retained topic
 //         strlcpy(Settings.mqtt_topic, stemp1, sizeof(Settings.mqtt_topic));
 //         restart_flag = 2;
@@ -685,9 +685,9 @@
 //           //SendKey(0, i, 9);  // Clear MQTT retain in broker
 //         }
 //       }
-//       Settings.flag_system_phaseout.mqtt_button_retain = payload;
+//       Settings.flag_system.mqtt_button_retain = payload;
 //     }
-//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system_phaseout.mqtt_button_retain));
+//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system.mqtt_button_retain));
 //   }
 //   else if (CMND_SWITCHRETAIN == command_code) {
 //     if ((payload >= 0) && (payload <= 1)) {
@@ -696,33 +696,33 @@
 //           //SendKey(1, i, 9);  // Clear MQTT retain in broker
 //         }
 //       }
-//       Settings.flag_system_phaseout.mqtt_switch_retain = payload;
+//       Settings.flag_system.mqtt_switch_retain = payload;
 //     }
-//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system_phaseout.mqtt_switch_retain));
+//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system.mqtt_switch_retain));
 //   }
 //   else if (CMND_POWERRETAIN == command_code) {
 //     if ((payload >= 0) && (payload <= 1)) {
 //       if (!payload) {
 //         for(i = 1; i <= devices_present; i++) {  // Clear MQTT retain in broker
-//           GetTopic_P(stemp1, STAT, mqtt_topic, GetPowerDevice(scommand, i, sizeof(scommand), Settings.flag_system_phaseout.device_index_enable));
+//           GetTopic_P(stemp1, STAT, mqtt_topic, GetPowerDevice(scommand, i, sizeof(scommand), Settings.flag_system.device_index_enable));
 //           mcl->mset->data_buffer.payload.ctr[0] = '\0';
-//           MqttPublish(stemp1, Settings.flag_system_phaseout.mqtt_power_retain);
+//           MqttPublish(stemp1, Settings.flag_system.mqtt_power_retain);
 //         }
 //       }
-//       Settings.flag_system_phaseout.mqtt_power_retain = payload;
+//       Settings.flag_system.mqtt_power_retain = payload;
 //     }
-//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system_phaseout.mqtt_power_retain));
+//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system.mqtt_power_retain));
 //   }
 //   else if (CMND_SENSORRETAIN == command_code) {
 //     if ((payload >= 0) && (payload <= 1)) {
 //       if (!payload) {
 //         mcl->mset->data_buffer.payload.ctr[0] = '\0';
-//         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_SENSOR), Settings.flag_system_phaseout.mqtt_sensor_retain);
-//         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_ENERGY), Settings.flag_system_phaseout.mqtt_sensor_retain);
+//         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_SENSOR), Settings.flag_system.mqtt_sensor_retain);
+//         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_ENERGY), Settings.flag_system.mqtt_sensor_retain);
 //       }
-//       Settings.flag_system_phaseout.mqtt_sensor_retain = payload;
+//       Settings.flag_system.mqtt_sensor_retain = payload;
 //     }
-//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system_phaseout.mqtt_sensor_retain));
+//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system.mqtt_sensor_retain));
 //   }
 //   else serviced = false;  // Unknown command
 
@@ -745,7 +745,7 @@
 //   //DEBUGLLN("Xdrv02 - START");
 //   bool result = false;
 //
-// //   if (Settings.flag_system_phaseout.mqtt_enabled) {
+// //   if (Settings.flag_system.mqtt_enabled) {
 // //     switch (function) {
 // //       case FUNC_EVERY_50_MSECOND:  // https://github.com/knolleary/pubsubclient/issues/556
 // //       //  M qttClient.loop();

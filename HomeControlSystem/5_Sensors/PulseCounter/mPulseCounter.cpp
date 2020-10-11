@@ -230,7 +230,7 @@ void mPulseCounter::EveryLoop(){
       if(!WithinLimits(settings.min_reading_ms,(uint16_t)sensor[sensor_id].instant.tDeltaTime,settings.max_reading_ms)){
         AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Out of range",sensor_id);
         sensor[sensor_id].instant.ischanged = true;
-        mqtthandler_sensor_ifchanged.fSendNow = true;
+        mqtthandler_sensor_ifchanged.flags.SendNow = true;
       }
 
 
@@ -465,8 +465,8 @@ void mPulseCounter::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -475,8 +475,8 @@ void mPulseCounter::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -485,8 +485,8 @@ void mPulseCounter::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -498,9 +498,9 @@ void mPulseCounter::MQTTHandler_Init(){
 
 void mPulseCounter::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

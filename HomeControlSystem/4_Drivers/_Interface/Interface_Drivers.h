@@ -144,7 +144,7 @@
 // }flash_message;
 
 
-// int8_t parsesub_FlashMessage();
+// void parsesub_FlashMessage();
 
 // struct LAST_SCREEN_PRESS{
 //   uint8_t   page = 0;
@@ -175,7 +175,7 @@
 //     mInterfaceController *mcl = NULL;
 //     void init_object(mInterfaceController* mcl);
 
-//     uint8_t parse_JSONCommand();
+//     uvoid parse_JSONCommand();
 
 //     #define LONG_PRESS_DURATION 500
 //     uint8_t fEnableImmediateButtonTime = false;

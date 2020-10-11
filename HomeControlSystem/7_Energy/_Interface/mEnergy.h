@@ -195,7 +195,7 @@ void Settings_Save();
   //     #endif  // USE_ENERGY_POWER_LIMIT
   // #endif  // USE_ENERGY_MARGIN_DETECTION
 
-  int8_t parse_JSONCommand();
+  void parse_JSONCommand();
 
 
 

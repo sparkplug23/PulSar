@@ -12,7 +12,7 @@
 ********************************************************************************************************************
 ********************************************************************************************************************/
 //UO_ user option prefix
-enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
+enum UO_PIXEL_HARDWARE_COLOR_ORDER_IDS{
   UO_PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default
   UO_PIXEL_HARDWARE_COLOR_ORDER_RGB_ID, //common for WS2811
   UO_PIXEL_HARDWARE_COLOR_ORDER_BRG_ID, 

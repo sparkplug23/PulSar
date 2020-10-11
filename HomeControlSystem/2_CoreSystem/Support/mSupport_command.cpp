@@ -2205,7 +2205,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if ((CMND_POWER == command_code) && (index > 0) && (index <= devices_present)) {
 //       if ((payload < 0) || (payload > 4)) { payload = 9; }
-// //      Settings.flag_system_phaseout.device_index_enable = user_append_index;
+// //      Settings.flag_system.device_index_enable = user_append_index;
 //       ExecuteCommandPower(index, payload, SRC_IGNORE);
 //       fallback_topic_flag = false;
 //       return;
@@ -2235,11 +2235,11 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     else if (CMND_STATE == command_code) {
 //       data_buffer2.payload.ctr[0] = '\0';
 //       MqttShowState();
-//       if (Settings.flag_network_phaseout.hass_tele_on_power) {
+//       if (Settings.flag_network.hass_tele_on_power) {
 //         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
 //       }
 // #ifdef USE_HOME_ASSISTANT
-//       if (Settings.flag_system_phaseout.hass_discovery) {
+//       if (Settings.flag_system.hass_discovery) {
 //         HAssPublishStatus();
 //       }
 // #endif  // USE_HOME_ASSISTANT
@@ -2250,7 +2250,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         sleep = payload;
 //         WiFiSetSleepMode();
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_MILLISECOND : "");
+//       Response_P(S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "");
 //     }
 //     else if ((CMND_UPGRADE == command_code) || (CMND_UPLOAD == command_code)) {
 //       // Check if the payload is numerically 1, and had no trailing chars.
@@ -2272,7 +2272,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if (CMND_SERIALLOG == command_code) {
 //       if ((payload >= LOG_LEVEL_NONE) && (payload <= LOG_LEVEL_ALL)) {
-//         Settings.flag_system_phaseout.mqtt_serial = 0;
+//         Settings.flag_system.mqtt_serial = 0;
 //         SetSeriallog(payload);
 //       }
 //       Response_P(S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, command, Settings.seriallog_level, seriallog_level);
@@ -2389,7 +2389,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //               case 15:           // pwm_control
 //                 restart_flag = 2;
 //               default:
-//                 bitWrite(Settings.flag_system_phaseout.data, pindex, payload);
+//                 bitWrite(Settings.flag_system.data, pindex, payload);
 //             }
 //             if (12 == pindex) {  // stop_flash_rotate
 //               stop_flash_rotate = payload;
@@ -2404,7 +2404,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         }
 //         else if (1 == ptype) {   // SetOption50 .. 81
 //           if (payload <= 1) {
-//             bitWrite(Settings.flag_network_phaseout.data, pindex, payload);
+//             bitWrite(Settings.flag_network.data, pindex, payload);
 //             if (5 == pindex) {   // SetOption55
 //               if (0 == payload) {
 //                 restart_flag = 2;  // Disable mDNS needs restart
@@ -2444,62 +2444,62 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //       }
 //       if (ptype < 99) {
 //         if (2 == ptype) snprintf_P(stemp1, sizeof(stemp1), PSTR("%d"), Settings.param[pindex]);
-//         Response_P(S_JSON_COMMAND_INDEX_SVALUE, command, index, (2 == ptype) ? stemp1 : (1 == ptype) ? GetStateText(bitRead(Settings.flag_network_phaseout.data, pindex)) : GetStateText(bitRead(Settings.flag_system_phaseout.data, pindex)));
+//         Response_P(S_JSON_COMMAND_INDEX_SVALUE, command, index, (2 == ptype) ? stemp1 : (1 == ptype) ? GetStateText(bitRead(Settings.flag_network.data, pindex)) : GetStateText(bitRead(Settings.flag_system.data, pindex)));
 //       }
 //     }
 //     else if (CMND_TEMPERATURE_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.temperature_resolution = payload;
+//         Settings.flag_power.temperature_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.temperature_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.temperature_resolution);
 //     }
 //     else if (CMND_HUMIDITY_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.humidity_resolution = payload;
+//         Settings.flag_power.humidity_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.humidity_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.humidity_resolution);
 //     }
 //     else if (CMND_PRESSURE_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.pressure_resolution = payload;
+//         Settings.flag_power.pressure_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.pressure_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.pressure_resolution);
 //     }
 //     else if (CMND_POWER_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.wattage_resolution = payload;
+//         Settings.flag_power.wattage_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.wattage_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.wattage_resolution);
 //     }
 //     else if (CMND_VOLTAGE_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.voltage_resolution = payload;
+//         Settings.flag_power.voltage_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.voltage_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.voltage_resolution);
 //     }
 //     else if (CMND_FREQUENCY_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.frequency_resolution = payload;
+//         Settings.flag_power.frequency_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.frequency_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.frequency_resolution);
 //     }
 //     else if (CMND_CURRENT_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.current_resolution = payload;
+//         Settings.flag_power.current_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.current_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.current_resolution);
 //     }
 //     else if (CMND_ENERGY_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 5)) {
-//         Settings.flag_power_phaseout.energy_resolution = payload;
+//         Settings.flag_power.energy_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.energy_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.energy_resolution);
 //     }
 //     else if (CMND_WEIGHT_RESOLUTION == command_code) {
 //       if ((payload >= 0) && (payload <= 3)) {
-//         Settings.flag_power_phaseout.weight_resolution = payload;
+//         Settings.flag_power.weight_resolution = payload;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power_phaseout.weight_resolution);
+//       Response_P(S_JSON_COMMAND_NVALUE, command, Settings.flag_power.weight_resolution);
 //     }
 //     else if (CMND_MODULE == command_code) {
 //       if ((payload >= 0) && (payload <= MAXMODULE)) {
@@ -2740,8 +2740,8 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if ((CMND_SERIALSEND == command_code) && (index > 0) && (index <= 5)) {
 //       SetSeriallog(LOG_LEVEL_NONE);
-//       Settings.flag_system_phaseout.mqtt_serial = 1;
-//       Settings.flag_system_phaseout.mqtt_serial_raw = (index > 3) ? 1 : 0;
+//       Settings.flag_system.mqtt_serial = 1;
+//       Settings.flag_system.mqtt_serial_raw = (index > 3) ? 1 : 0;
 //       if (data_len > 0) {
 //         if (1 == index) {
 //           Serial.printf("%s\n", dataBuf);                    // "Hello Tiger\n"
@@ -2918,13 +2918,13 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //               if (minimal_bits < 2) { Settings.interlock[i] = 0; }  // Discard single relay as interlock
 //             }
 //           } else {
-//             Settings.flag_system_phaseout.interlock = payload &1;                   // Enable/disable interlock
-//             if (Settings.flag_system_phaseout.interlock) {
+//             Settings.flag_system.interlock = payload &1;                   // Enable/disable interlock
+//             if (Settings.flag_system.interlock) {
 //               SetDevicePower(power, SRC_IGNORE);                    // Remove multiple relays if set
 //             }
 //           }
 //         }
-//         Response_P(PSTR("{\"" D_JSON_INTERLOCK "\":\"%s\",\"" D_JSON_GROUPS "\":\""), GetStateText(Settings.flag_system_phaseout.interlock));
+//         Response_P(PSTR("{\"" D_JSON_INTERLOCK "\":\"%s\",\"" D_JSON_GROUPS "\":\""), GetStateText(Settings.flag_system.interlock));
 //         uint8_t anygroup = 0;
 //         for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
 //           if (Settings.interlock[i]) {
@@ -2948,8 +2948,8 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         }
 //         ResponseAppend_P(PSTR("\"}"));
 //       } else {
-//         Settings.flag_system_phaseout.interlock = 0;
-//         Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system_phaseout.interlock));
+//         Settings.flag_system.interlock = 0;
+//         Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_system.interlock));
 //       }
 //     }
 //     else if (CMND_TELEPERIOD == command_code) {
@@ -2958,7 +2958,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         if ((Settings.tele_period > 0) && (Settings.tele_period < 10)) Settings.tele_period = 10;   // Do not allow periods < 10 seconds
 //         tele_period = Settings.tele_period;
 //       }
-//       Response_P(S_JSON_COMMAND_NVALUE_UNIT, command, Settings.tele_period, (Settings.flag_system_phaseout.value_units) ? " " D_UNIT_SECOND : "");
+//       Response_P(S_JSON_COMMAND_NVALUE_UNIT, command, Settings.tele_period, (Settings.flag_system.value_units) ? " " D_UNIT_SECOND : "");
 //     }
 //     else if (CMND_RESET == command_code) {
 //       switch (payload) {

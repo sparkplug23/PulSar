@@ -15,10 +15,9 @@ return potato;
 };
 */
 
-
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
-struct DATA_BUFFER2{
+struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
     uint8_t len = 0;
@@ -29,10 +28,9 @@ struct DATA_BUFFER2{
     uint8_t encoded_type_id; //json,raw
   }payload;
   uint8_t fWaiting = false;
-  // uint8_t method = false; // For detailed, ifchanged, all
   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 };
-extern struct DATA_BUFFER2 data_buffer2;
+extern struct DATA_BUFFER data_buffer2;
 
 
 
@@ -66,7 +64,7 @@ extern struct DATA_BUFFER2 data_buffer2;
 
 
 
-const char EMPTY_MESSAGE_CTR[] PROGMEM = "Unused";
+// const char EMPTY_MESSAGE_CTR[] PROGMEM = "Unused";
 
 // default buffer sizes assumed by klists, negates the need to pass it to function
 #define D_DEFAULT_DEVICE_BUFFER_LENGTH 50 
@@ -230,7 +228,7 @@ const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
 const uint8_t MQTT_RETRY_SECS = 10;         // Minimum seconds to retry MQTT connection
 const uint32_t GLOBAL_VALUES_VALID = 300;   // Max number of seconds to keep last received values
 const power_t APP_POWER = 0;                // Default saved power state Off
-const uint16_t WS2812_MAX_LEDS = 512;       // Max number of ledout.index
+//const uint16_t WS2812_MAX_LEDS = 512;       // Max number of ledout.index
 
 const uint32_t PWM_RANGE = 1023;            // 255..1023 needs to be devisible by 256
 //const uint16_t PWM_FREQ = 1000;             // 100..1000 Hz led refresh
@@ -261,7 +259,7 @@ const uint16_t CMDSZ = 2;                  // Max number of characters in comman
 const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
 // const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
 
-const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
+//const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
 
 // #ifdef USE_MQTT_TLS
 //   const uint16_t WEB_LOG_SIZE = 2000;       // Max number of characters in weblog
@@ -282,8 +280,8 @@ const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
 const uint32_t SERIAL_POLLING = 100;        // Serial receive polling in ms
 const uint8_t MAX_STATUS = 11;              // Max number of status lines
 
-const uint32_t DRIVER_BOOT_DELAY = 1;       // Number of milliseconds to retard driver cycles during boot-up time to reduce overall CPU load whilst Wifi is connecting
-const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to go through the main loop using delay when needed
+//const uint32_t DRIVER_BOOT_DELAY = 1;       // Number of milliseconds to retard driver cycles during boot-up time to reduce overall CPU load whilst Wifi is connecting
+//const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to go through the main loop using delay when needed
 
 /*********************************************************************************************\
  * Defines
@@ -302,33 +300,6 @@ const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to 
 #define STR(x) STR_HELPER(x)
 #endif
 
-//enum ws2812NeopixelbusFeature { NEO_RGB, NEO_GRB, NEO_BRG, NEO_RBG, NEO_3LED, NEO_RGBW, NEO_GRBW };  // Doesn't work
-// #define NEO_RGB                0            // Neopixel RGB leds
-// #define NEO_GRB                1            // Neopixel GRB leds
-// #define NEO_BRG                2            // Neopixel BRG leds
-// #define NEO_RBG                3            // Neopixel RBG leds
-// #define NEO_3LED               4            // Placeholder to test for 4 led types
-// #define NEO_RGBW               5            // Neopixel RGBW leds
-// #define NEO_GRBW               6            // Neopixel GRBW leds
-
-// #define LT_SM16716             16           // Lights that use SM16716 will have this bit set in Settings.light_settings.type
-
-// #define RGB_REMAP_RGBW         0
-// #define RGB_REMAP_RBGW         6
-// #define RGB_REMAP_GRBW         24
-// #define RGB_REMAP_GBRW         30
-// #define RGB_REMAP_BRGW         48
-// #define RGB_REMAP_BGRW         54
-
-// // Sunrise and Sunset DawnType
-// #define DAWN_NORMAL            -0.8333
-// #define DAWN_CIVIL             -6.0
-// #define DAWN_NAUTIC            -12.0
-// #define DAWN_ASTRONOMIC        -18.0
-
-
-#define DATA_BUFFER_TOPIC_MAX_LENGTH    100
-#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
 
 
 /*********************************************************************************************\
@@ -351,9 +322,9 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                     LOG_LEVEL_INFO_PARSING, // extra case, this will show when cases are matched 
                     LOG_LEVEL_DEBUG, 
                     LOG_LEVEL_DEBUG_MORE,
-                    #ifdef ENABLE_ADVANCED_DEBUGGING 
-                      LOG_LEVEL_DEBUG_LOWLEVEL, 
-                    #endif
+                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
+                    LOG_LEVEL_DEBUG_LOWLEVEL, 
+                    //#endif
                     LOG_LEVEL_ALL
                   };
 
@@ -399,20 +370,6 @@ enum SettingsParmaIndex {P_HOLD_TIME, P_MAX_POWER_RETRY,
 P_TUYA_DIMMER_ID, P_MDNS_DELAYED_START, P_BOOT_LOOP_OFFSET, 
 P_RGB_REMAP, P_MAX_PARAM8};  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
 
-enum DomoticzSensors {DZ_TEMP, DZ_TEMP_HUM, DZ_TEMP_HUM_BARO, DZ_POWER_ENERGY, DZ_ILLUMINANCE, DZ_COUNT, DZ_VOLTAGE, DZ_CURRENT, DZ_AIRQUALITY, DZ_MAX_SENSORS};
-
-enum Ws2812ClockIndex { WS_SECOND, WS_MINUTE, WS_HOUR, WS_MARKER };
-enum Ws2812Color { WS_RED, WS_GREEN, WS_BLUE };
-
-enum LightSubtypes{ 
-        LST_NONE, 
-        LST_SINGLE, 
-        LST_COLDWARM, 
-        LST_RGB,   
-        LST_RGBW, 
-        LST_RGBWC, 
-        LST_RGBCW
-};
 
 
 
@@ -537,15 +494,15 @@ enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, 
                      SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
 const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
 
-const uint8_t kDefaultRfCode[9] PROGMEM = { 0x21, 0x16, 0x01, 0x0E, 0x03, 0x48, 0x2E, 0x1A, 0x00 };
+//const uint8_t kDefaultRfCode[9] PROGMEM = { 0x21, 0x16, 0x01, 0x0E, 0x03, 0x48, 0x2E, 0x1A, 0x00 };
 
 
-enum COMMAND_LIST_SHARED_IDS {
-  COMMAND_NONE_ID=0,
+// enum COMMAND_LIST_SHARED_IDS {
+//   COMMAND_NONE_ID=0,
 
-  // LAST OF LIST FOR COUNT
-  COMMAND_GENERIC_LIST_LENGTH_ID
-};
+//   // LAST OF LIST FOR COUNT
+//   COMMAND_GENERIC_LIST_LENGTH_ID
+// };
 
 
 
@@ -783,43 +740,6 @@ uint32_t rtc_settings_crc = 0;
 
 #define PARAM8_SIZE 18            // Number of param bytes (SetOption)
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption0 .. SetOption31
-    uint32_t save_state : 1;               // bit 0              - SetOption0  - Save power state and use after restart
-    uint32_t button_restrict : 1;          // bit 1              - SetOption1  - Control button multipress
-    uint32_t value_units : 1;              // bit 2              - SetOption2  - Add units to JSON status messages
-    uint32_t mqtt_enabled : 1;             // bit 3              - SetOption3  - Control MQTT
-    uint32_t mqtt_response : 1;            // bit 4              - SetOption4  - Switch between MQTT RESULT or COMMAND
-    uint32_t mqtt_power_retain : 1;        // bit 5              - CMND_POWERRETAIN
-    uint32_t mqtt_button_retain : 1;       // bit 6              - CMND_BUTTONRETAIN
-    uint32_t mqtt_switch_retain : 1;       // bit 7              - CMND_SWITCHRETAIN
-    uint32_t temperature_conversion : 1;   // bit 8              - SetOption8  - Switch between Celsius or Fahrenheit
-    uint32_t mqtt_sensor_retain : 1;       // bit 9              - CMND_SENSORRETAIN
-    uint32_t mqtt_offline : 1;             // bit 10             - SetOption10 - Control MQTT LWT message format
-    uint32_t button_swap : 1;              // bit 11 (v5.1.6)    - SetOption11 - Swap button single and double press functionality
-    uint32_t stop_flash_rotate : 1;        // bit 12 (v5.2.0)    - SetOption12 - Switch between dynamic or fixed slot flash save location
-    uint32_t button_single : 1;            // bit 13 (v5.4.0)    - SetOption13 - Support only single press to speed up button press recognition
-    uint32_t interlock : 1;                // bit 14 (v5.6.0)    - CMND_INTERLOCK
-    uint32_t pwm_control : 1;              // bit 15 (v5.8.1)    - SetOption15 - Switch between commands PWM or COLOR/DIMMER/CT/CHANNEL
-    uint32_t ws_clock_reverse : 1;         // bit 16 (v5.8.1)    - SetOption16 - Switch between clockwise or counter-clockwise
-    uint32_t decimal_text : 1;             // bit 17 (v5.8.1)    - SetOption17 - Switch between decimal or hexadecimal output
-    uint32_t light_signal : 1;             // bit 18 (v5.10.0c)  - SetOption18 - Pair light signal with CO2 sensor
-    uint32_t hass_discovery : 1;           // bit 19 (v5.11.1a)  - SetOption19 - Control Home Assistantautomatic discovery (See SetOption59)
-    uint32_t not_power_linked : 1;         // bit 20 (v5.11.1f)  - SetOption20 - Control power in relation to Dimmer/Color/Ct changes
-    uint32_t no_power_on_check : 1;        // bit 21 (v5.11.1i)  - SetOption21 - Show voltage even if powered off
-    uint32_t mqtt_serial : 1;              // bit 22 (v5.12.0f)  - CMND_SERIALSEND and CMND_SERIALLOG
-    uint32_t mqtt_serial_raw : 1;          // bit 23 (v6.1.1c)   - CMND_SERIALSEND3
-    uint32_t pressure_conversion : 1;      // bit 24 (v6.3.0.2)  - SetOption24 - Switch between hPa or mmHg pressure unit
-    uint32_t knx_enabled : 1;              // bit 25 (v5.12.0l)  - CMND_KNX_ENABLED
-    uint32_t device_index_enable : 1;      // bit 26 (v5.13.1a)  - SetOption26 - Switch between POWER or POWER1
-    uint32_t knx_enable_enhancement : 1;   // bit 27 (v5.14.0a)  - CMND_KNX_ENHANCED
-    uint32_t rf_receive_decimal : 1;       // bit 28 (v6.0.0a)   - SetOption28 - RF receive data format
-    uint32_t ir_receive_decimal : 1;       // bit 29 (v6.0.0a)   - SetOption29 - IR receive data format
-    uint32_t hass_light : 1;               // bit 30 (v6.0.0b)   - SetOption30 - Enforce HAss autodiscovery as light
-    uint32_t global_state : 1;             // bit 31 (v6.1.0)    - SetOption31 - Control link led blinking
-  };
-} SysBitfield_System_phaseout;
 
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint32_t data;                           // Allow bit manipulation using SetOption
@@ -860,43 +780,43 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 } SysBitfield_System;
 
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption82 .. SetOption113
-    uint32_t alexa_ct_range : 1;           // bit 0 (v8.1.0.2)   - SetOption82 - Reduced CT range for Alexa
-    uint32_t zigbee_use_names : 1;         // bit 1 (v8.1.0.4)   - SetOption83 - Use FriendlyNames instead of ShortAddresses when possible
-    uint32_t awsiot_shadow : 1;            // bit 2 (v8.1.0.5)   - SetOption84 - (AWS IoT) publish MQTT state to a device shadow
-    uint32_t device_groups_enabled : 1;    // bit 3 (v8.1.0.9)   - SetOption85 - Enable Device Groups
-    uint32_t led_timeout : 1;              // bit 4 (v8.1.0.9)   - SetOption86 - PWM Dimmer Turn brightness LED's off 5 seconds after last change
-    uint32_t powered_off_led : 1;          // bit 5 (v8.1.0.9)   - SetOption87 - PWM Dimmer Turn red LED on when powered off
-    uint32_t remote_device_mode : 1;       // bit 6 (v8.1.0.9)   - SetOption88 - Enable relays in separate device groups/PWM Dimmer Buttons control remote devices
-    uint32_t zigbee_distinct_topics : 1;   // bit 7 (v8.1.0.10)  - SetOption89 - Distinct MQTT topics per device for Zigbee (#7835)
-    uint32_t only_json_message : 1;        // bit 8 (v8.2.0.3)   - SetOption90 - Disable non-json MQTT response
-    uint32_t fade_at_startup : 1;          // bit 9 (v8.2.0.3)   - SetOption91 - Enable light fading at start/power on
-    uint32_t pwm_ct_mode : 1;              // bit 10 (v8.2.0.4)  - SetOption92 - Set PWM Mode from regular PWM to ColorTemp control (Xiaomi Philips ...)
-    uint32_t compress_rules_cpu : 1;       // bit 11 (v8.2.0.6)  - SetOption93 - Keep uncompressed rules in memory to avoid CPU load of uncompressing at each tick
-    uint32_t max6675 : 1;                  // bit 12 (v8.3.1.2)  - SetOption94 - Implement simpler MAX6675 protocol instead of MAX31855
-    uint32_t spare13 : 1;
-    uint32_t spare14 : 1;
-    uint32_t spare15 : 1;
-    uint32_t spare16 : 1;
-    uint32_t spare17 : 1;
-    uint32_t spare18 : 1;
-    uint32_t spare19 : 1;
-    uint32_t spare20 : 1;
-    uint32_t spare21 : 1;
-    uint32_t spare22 : 1;
-    uint32_t spare23 : 1;
-    uint32_t spare24 : 1;
-    uint32_t spare25 : 1;
-    uint32_t spare26 : 1;
-    uint32_t spare27 : 1;
-    uint32_t spare28 : 1;
-    uint32_t spare29 : 1;
-    uint32_t spare30 : 1;
-    uint32_t spare31 : 1;                  // bit 31
-  };
-} SysBitfield4;
+// typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+//   uint32_t data;                           // Allow bit manipulation using SetOption
+//   struct {                                 // SetOption82 .. SetOption113
+//     uint32_t alexa_ct_range : 1;           // bit 0 (v8.1.0.2)   - SetOption82 - Reduced CT range for Alexa
+//     uint32_t zigbee_use_names : 1;         // bit 1 (v8.1.0.4)   - SetOption83 - Use FriendlyNames instead of ShortAddresses when possible
+//     uint32_t awsiot_shadow : 1;            // bit 2 (v8.1.0.5)   - SetOption84 - (AWS IoT) publish MQTT state to a device shadow
+//     uint32_t device_groups_enabled : 1;    // bit 3 (v8.1.0.9)   - SetOption85 - Enable Device Groups
+//     uint32_t led_timeout : 1;              // bit 4 (v8.1.0.9)   - SetOption86 - PWM Dimmer Turn brightness LED's off 5 seconds after last change
+//     uint32_t powered_off_led : 1;          // bit 5 (v8.1.0.9)   - SetOption87 - PWM Dimmer Turn red LED on when powered off
+//     uint32_t remote_device_mode : 1;       // bit 6 (v8.1.0.9)   - SetOption88 - Enable relays in separate device groups/PWM Dimmer Buttons control remote devices
+//     uint32_t zigbee_distinct_topics : 1;   // bit 7 (v8.1.0.10)  - SetOption89 - Distinct MQTT topics per device for Zigbee (#7835)
+//     uint32_t only_json_message : 1;        // bit 8 (v8.2.0.3)   - SetOption90 - Disable non-json MQTT response
+//     uint32_t fade_at_startup : 1;          // bit 9 (v8.2.0.3)   - SetOption91 - Enable light fading at start/power on
+//     uint32_t pwm_ct_mode : 1;              // bit 10 (v8.2.0.4)  - SetOption92 - Set PWM Mode from regular PWM to ColorTemp control (Xiaomi Philips ...)
+//     uint32_t compress_rules_cpu : 1;       // bit 11 (v8.2.0.6)  - SetOption93 - Keep uncompressed rules in memory to avoid CPU load of uncompressing at each tick
+//     uint32_t max6675 : 1;                  // bit 12 (v8.3.1.2)  - SetOption94 - Implement simpler MAX6675 protocol instead of MAX31855
+//     uint32_t spare13 : 1;
+//     uint32_t spare14 : 1;
+//     uint32_t spare15 : 1;
+//     uint32_t spare16 : 1;
+//     uint32_t spare17 : 1;
+//     uint32_t spare18 : 1;
+//     uint32_t spare19 : 1;
+//     uint32_t spare20 : 1;
+//     uint32_t spare21 : 1;
+//     uint32_t spare22 : 1;
+//     uint32_t spare23 : 1;
+//     uint32_t spare24 : 1;
+//     uint32_t spare25 : 1;
+//     uint32_t spare26 : 1;
+//     uint32_t spare27 : 1;
+//     uint32_t spare28 : 1;
+//     uint32_t spare29 : 1;
+//     uint32_t spare30 : 1;
+//     uint32_t spare31 : 1;                  // bit 31
+//   };
+// } SysBitfield4;
 
 // Sensors
 typedef union {
@@ -922,30 +842,6 @@ typedef union {
     uint32_t temperature_resolution : 2;
   };
 } SysBitfield_Power;
-
-typedef union {
-  uint32_t data;                           // Allow bit manipulation
-  struct {
-    uint32_t spare00 : 1;
-    uint32_t spare01 : 1;
-    uint32_t spare02 : 1;
-    uint32_t spare03 : 1;
-    uint32_t spare04 : 1;
-    uint32_t spare05 : 1;
-    uint32_t calc_resolution : 3;
-    uint32_t weight_resolution : 2;
-    uint32_t frequency_resolution : 2;
-    uint32_t axis_resolution : 2;
-    uint32_t current_resolution : 2;
-    uint32_t voltage_resolution : 2;
-    uint32_t wattage_resolution : 2;
-    uint32_t emulation : 2;
-    uint32_t energy_resolution : 3;
-    uint32_t pressure_resolution : 2;
-    uint32_t humidity_resolution : 2;
-    uint32_t temperature_resolution : 2;
-  };
-} SysBitfield_Power_PhaseOut;
 
 
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
@@ -986,44 +882,6 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   };
 } SysBitfield_Network;
 
-
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption50 .. SetOption81
-    uint32_t timers_enable : 1;            // bit 0 (v6.1.1b)    - CMND_TIMERS
-    uint32_t user_esp8285_enable : 1;      // bit 1 (v6.1.1.14)  - SetOption51 - Enable ESP8285 user GPIO's
-    uint32_t time_append_timezone : 1;     // bit 2 (v6.2.1.2)   - SetOption52 - Append timezone to JSON time
-    uint32_t gui_hostname_ip : 1;          // bit 3 (v6.2.1.20)  - SetOption53 - Show hostanme and IP address in GUI main menu
-    uint32_t tuya_apply_o20 : 1;           // bit 4 (v6.3.0.4)   - SetOption54 - Apply SetOption20 settings to Tuya device
-    uint32_t mdns_enabled : 1;             // bit 5 (v6.4.1.4)   - SetOption55 - Control mDNS service
-    uint32_t use_wifi_scan : 1;            // bit 6 (v6.3.0.10)  - SetOption56 - Scan wifi network at restart for configured AP's
-    uint32_t use_wifi_rescan : 1;          // bit 7 (v6.3.0.10)  - SetOption57 - Scan wifi network every 44 minutes for configured AP's
-    uint32_t receive_raw : 1;              // bit 8 (v6.3.0.11)  - SetOption58 - Add IR Raw data to JSON message
-    uint32_t hass_tele_on_power : 1;       // bit 9 (v6.3.0.13)  - SetOption59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT
-    uint32_t sleep_normal : 1;             // bit 10 (v6.3.0.15) - SetOption60 - Enable normal sleep instead of dynamic sleep
-    uint32_t button_switch_force_local : 1;// bit 11 (v6.3.0.16) - SetOption61 - Force local operation when button/switch topic is set
-    uint32_t no_hold_retain : 1;           // bit 12 (v6.4.1.19) - SetOption62 - Don't use retain flag on HOLD messages
-    uint32_t no_power_feedback : 1;        // bit 13 (v6.5.0.9)  - SetOption63 - Don't scan relay power state at restart
-    uint32_t use_underscore : 1;           // bit 14 (v6.5.0.12) - SetOption64 - Enable "_" instead of "-" as sensor index separator
-    uint32_t fast_power_cycle_disable : 1; // bit 15 (v6.6.0.20) - SetOption65 - Disable fast power cycle detection for device reset
-    uint32_t tuya_serial_mqtt_publish : 1; // bit 16 (v6.6.0.21) - SetOption66 - Enable TuyaMcuReceived messages over Mqtt
-    uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
-    uint32_t pwm_multi_channels : 1;       // bit 18 (v6.6.0.3)  - SetOption68 - Enable multi-channels PWM instead of Color PWM
-    uint32_t ex_tuya_dimmer_min_limit : 1; // bit 19 (v6.6.0.5)  - SetOption69 - Limits Tuya dimmers to minimum of 10% (25) when enabled.
-    uint32_t energy_weekend : 1;           // bit 20 (v6.6.0.8)  - CMND_TARIFF
-    uint32_t dds2382_model : 1;            // bit 21 (v6.6.0.14) - SetOption71 - Select different Modbus registers for Active Energy (#6531)
-    uint32_t hardware_energy_total : 1;    // bit 22 (v6.6.0.15) - SetOption72 - Enable hardware energy total counter as reference (#6561)
-    uint32_t ex_cors_enabled : 1;          // bit 23 (v7.0.0.1)  - SetOption73 - Enable HTTP CORS
-    uint32_t ds18x20_internal_pullup : 1;  // bit 24 (v7.0.0.1)  - SetOption74 - Enable internal pullup for single DS18x20 sensor
-    uint32_t grouptopic_mode : 1;          // bit 25 (v7.0.0.1)  - SetOption75 - GroupTopic replaces %topic% (0) or fixed topic cmnd/grouptopic (1)
-    uint32_t bootcount_update : 1;         // bit 26 (v7.0.0.4)  - SetOption76 - Enable incrementing bootcount when deepsleep is enabled
-    uint32_t slider_dimmer_stay_on : 1;    // bit 27 (v7.0.0.6)  - SetOption77 - Do not power off if slider moved to far left
-    uint32_t compatibility_check : 1;      // bit 28 (v7.1.2.6)  - SetOption78 - Disable OTA compatibility check
-    uint32_t counter_reset_on_tele : 1;    // bit 29 (v8.1.0.1)  - SetOption79 - Enable resetting of counters after telemetry was sent
-    uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
-    uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
-  };
-} SysBitfield_Network_PhaseOut;
 
 
 typedef union {
@@ -1242,6 +1100,21 @@ struct SensorSettings{
   SysBitfield_Sensors flags;
 };
 
+struct DisplaySettings{
+  uint8_t       model;             // 2D2
+  uint8_t       mode;              // 2D3
+  uint8_t       refresh;           // 2D4
+  uint8_t       rows;              // 2D5
+  uint8_t       cols[2];           // 2D6
+  uint8_t       address[8];        // 2D8
+  uint8_t       dimmer;            // 2E0
+  uint8_t       size;              // 2E1
+  uint8_t       font;              // 312
+  uint8_t       rotate;            // 2FA
+};
+
+
+
 //hold the parsed template from use
 // struct TemplateCurrent{
 //   // For testing only
@@ -1297,6 +1170,19 @@ struct SystemName{
 
 struct SettingsMQTT{
   // char topic_prefix[50]; //temp remove
+  
+   char          host[33];             // 1E9 - Keep together with below as being copied as one chunck with reset 6
+   uint16_t      port;                 // 20A - Keep together
+  char          client[33];           // 20C - Keep together
+  char          user[33];             // 22D - Keep together
+  char          pwd[33];              // 24E - Keep together
+  char          topic[33];            // 26F - Keep together with above items as being copied as one chunck with reset 6
+  // char          button_topic[33];          // 290
+  // char          grptopic[33];         // 2B1
+  // char          prefix[3][11];        // 07C
+  // uint8_t       fingerprint[2][20];   // 1AD
+  uint16_t      retry;                // 396
+  // char          fulltopic[100];       // 558
 };
 
 
@@ -1314,25 +1200,16 @@ struct SYSCFG {
   uint8_t       module;                    // 474
   uint8_t       last_module;               // 399
   // Templates
-  // uint8_t       user_template_base;        // 71F
-  // mytmplt       user_template;             // 720  29 bytes    parsed user template
-  // char          user_template_raw_ctr[100]; //for testing
   Template_Config user_template2;
   SystemName      system_name;
 
-
-
-  
-
-
-
-  SysBitfield_System_phaseout   flag_system_phaseout;                      // 010
   SysBitfield_System   flag_system;                      // 010
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
   // char          ota_url[101];              // 017
   uint8_t       baudrate;                  // 09D
   uint8_t       rule_stop;                 // 1A7
+  //LoggingSettings logging;
   uint8_t       seriallog_level;           // 09E
   uint16_t      syslog_port;               // 1A8
   uint8_t       syslog_level;              // 1AA
@@ -1345,7 +1222,6 @@ struct SYSCFG {
   char          serial_delimiter;          // 451
   uint8_t       sbaudrate;                 // 452
   uint8_t       sleep;                     // 453
-  // char          state_text[4][11];         // 313
 
 // remove params, to be handled as bitmap flags
   uint8_t       param[PARAM8_SIZE];        // 2FC  SetOption32 .. SetOption49
@@ -1359,7 +1235,6 @@ struct SYSCFG {
   char          hostname[33];              // 165
   char          syslog_host[33];           // 186
   uint32_t      ip_address[4];             // 544
-  SysBitfield_Network_PhaseOut  flag_network_phaseout;                     // 3A0
   SysBitfield_Network  flag_network;                     // 3A0
   // Webserver
   uint8_t       webserver;                 // 1AB
@@ -1367,26 +1242,14 @@ struct SYSCFG {
   uint16_t      web_refresh;               // 7CC
   uint8_t       web_color[25][3];          // 73E   //UNSURE OF LENGTH
   // MQTT
-  char          mqtt_host[33];             // 1E9 - Keep together with below as being copied as one chunck with reset 6
-  uint16_t      mqtt_port;                 // 20A - Keep together
-  char          mqtt_client[33];           // 20C - Keep together
-  char          mqtt_user[33];             // 22D - Keep together
-  char          mqtt_pwd[33];              // 24E - Keep together
-  char          mqtt_topic[33];            // 26F - Keep together with above items as being copied as one chunck with reset 6
-  char          button_topic[33];          // 290
-  char          mqtt_grptopic[33];         // 2B1
-  char          mqtt_prefix[3][11];        // 07C
-  uint8_t       mqtt_fingerprint[2][20];   // 1AD
-  uint16_t      mqtt_retry;                // 396
-  char          mqtt_fulltopic[100];       // 558
   SettingsMQTT  mqtt;
   // Time
   int8_t        timezone;                  // 016
   uint8_t       timezone_minutes;          // 66D
-  Timer         timer[MAX_TIMERS];         // 670
-  uint16_t      pulse_timer[8]; // 532 //#define MAX_PULSETIMERS 8  
-  TimeRule      tflag[2];                  // 2E2
-  char          ntp_server[3][33];         // 4CE
+  // Timer         timer[MAX_TIMERS];         // 670
+  // uint16_t      pulse_timer[8]; // 532 //#define MAX_PULSETIMERS 8  
+  // TimeRule      tflag[2];                  // 2E2
+  // char          ntp_server[3][33];         // 4CE
   int16_t       toffset[2];                // 30E
   // Weight
   uint16_t      weight_max;                // 7BE Total max weight in kilogram
@@ -1414,7 +1277,7 @@ struct SYSCFG {
   // uint8_t       mcp230xx_int_prio;         // 716
   // uint16_t      mcp230xx_int_timer;        // 718
   uint16_t      button_debounce;           // 542
-  char          switch_topic[33];          // 430
+  // char          switch_topic[33];          // 430
   uint16_t      switch_debounce;           // 66E
   uint8_t       switchmode[8];//MAX_SWITCHES];  // 3A4  (6.0.0b - moved from 0x4CA)
   SensorSettings sensors;
@@ -1433,43 +1296,25 @@ struct SYSCFG {
   uint16_t      pwm_range;                 // 342
   uint16_t      pwm_frequency;             // 2E6
   uint16_t      pwm_value[MAX_PWMS];       // 2EC
-  uint8_t       rf_code[17][9];            // 5D4
+  // uint8_t       rf_code[17][9];            // 5D4
 
   // Power
   unsigned long power;//power_t       power;                     // 2E8
   uint8_t       poweronstate;              // 398
-  uint8_t       interlock[MAX_INTERLOCKS]; // 4CA
   // Energy
-  // EnergyUsage   energy_usage;              // 77C  //change to "energy"
-  EnergyUsageNew   energy_usage;              // 77C  //change to "energy"
-  //move bitfield into it as flags
+  EnergyUsageNew   energy_usage;              // 77C 
 
-
-
-
-
-  SysBitfield_Power_PhaseOut  flag_power_phaseout;                     // 5BC
   SysBitfield_Power  flag_power;                     // 5BC
   // Displays
-  uint32_t      displays;                  // 7B0
-  uint8_t       display_model;             // 2D2
-  uint8_t       display_mode;              // 2D3
-  uint8_t       display_refresh;           // 2D4
-  uint8_t       display_rows;              // 2D5
-  uint8_t       display_cols[2];           // 2D6
-  uint8_t       display_address[8];        // 2D8
-  uint8_t       display_dimmer;            // 2E0
-  uint8_t       display_size;              // 2E1
-  uint8_t       display_font;              // 312
-  uint8_t       display_rotate;            // 2FA
+  DisplaySettings   display;
   // Rules
-  uint8_t       rule_enabled;              // 49F
-  uint8_t       rule_once;                 // 4A0
+  // uint8_t       rule_enabled;              // 49F
+  // uint8_t       rule_once;                 // 4A0
   // char          mems[MAX_RULE_MEMS][10];   // 7CE
   // char          rules[MAX_RULE_SETS][MAX_RULE_SIZE]; // 800 uses 512 bytes in v5.12.0m, 3 x 512 bytes in v5.14.0b
   
 
-  SysBitfield4  flag4;                     // TEMP FIX
+  // SysBitfield4  flag4;                     // TEMP FIX
 // TO SORT
 
 
@@ -1590,8 +1435,6 @@ typedef union {
 //   ADC_MODE(ADC_VCC);                       // Set ADC input for Power Supply Voltage usage
 // #endif
 
-
-// sonoff.ino
 #define MAX_BUTTON_COMMANDS  5  // Max number of button commands supported
 // const char kCommands[MAX_BUTTON_COMMANDS][14] PROGMEM = {
 //   D_JSON_WIFICONFIG " 1",   // Press button three times
@@ -1610,54 +1453,9 @@ typedef union {
 //   D_WCFG_6_SERIAL,
 //   D_WCFG_7_WIFIMANAGER_RESET_ONLY };
 
-// const char kPrefixes[3][PRFX_MAX_STRING_LENGTH] PROGMEM = {
-//   D_CMND,
-//   D_STAT,
-//   D_TELE };
-    
-// enum TasmotaCommands {
-//   CMND_BACKLOG, CMND_DELAY, CMND_POWER, CMND_FANSPEED, CMND_STATUS, CMND_STATE, CMND_POWERONSTATE, CMND_PULSETIME,
-//   CMND_BLINKTIME, CMND_BLINKCOUNT, CMND_SENSOR, CMND_SAVEDATA, CMND_SETOPTION, CMND_TEMPERATURE_RESOLUTION, CMND_HUMIDITY_RESOLUTION,
-//   CMND_PRESSURE_RESOLUTION, CMND_POWER_RESOLUTION, CMND_VOLTAGE_RESOLUTION, CMND_FREQUENCY_RESOLUTION, CMND_CURRENT_RESOLUTION, CMND_ENERGY_RESOLUTION, CMND_WEIGHT_RESOLUTION,
-//   CMND_MODULE, CMND_MODULES, CMND_GPIO, CMND_GPIOS, CMND_PWM, CMND_PWMFREQUENCY, CMND_PWMRANGE, CMND_COUNTER, CMND_COUNTERTYPE,
-//   CMND_COUNTERDEBOUNCE, CMND_BUTTONDEBOUNCE, CMND_SWITCHDEBOUNCE, CMND_SLEEP, CMND_UPGRADE, CMND_UPLOAD, CMND_OTAURL, CMND_SERIALLOG, CMND_SYSLOG,
-//   CMND_LOGHOST, CMND_LOGPORT, CMND_IPADDRESS, CMND_NTPSERVER, CMND_AP, CMND_SSID, CMND_PASSWORD, CMND_HOSTNAME,
-//   CMND_WIFICONFIG, CMND_FRIENDLYNAME, CMND_SWITCHMODE, CMND_INTERLOCK, CMND_TEMPLATE,
-//   CMND_TELEPERIOD, CMND_RESTART, CMND_RESET, CMND_TIMEZONE, CMND_TIMESTD, CMND_TIMEDST, CMND_ALTITUDE, CMND_LEDPOWER, CMND_LEDSTATE, CMND_LEDMASK,
-//   CMND_I2CSCAN, CMND_SERIALSEND, CMND_BAUDRATE, CMND_SERIALDELIMITER, CMND_DRIVER };
-// const char kTasmotaCommands[] PROGMEM =
-//   D_JSON_BACKLOG "|" D_JSON_DELAY "|" D_JSON_POWER "|" D_JSON_FANSPEED "|" D_JSON_STATUS "|" D_JSON_STATE "|"  D_JSON_POWERONSTATE "|" D_JSON_PULSETIME "|"
-//   D_JSON_BLINKTIME "|" D_JSON_BLINKCOUNT "|" D_JSON_SENSOR "|" D_JSON_SAVEDATA "|" D_JSON_SETOPTION "|" D_JSON_TEMPERATURE_RESOLUTION "|" D_JSON_HUMIDITY_RESOLUTION "|"
-//   D_JSON_PRESSURE_RESOLUTION "|" D_JSON_POWER_RESOLUTION "|" D_JSON_VOLTAGE_RESOLUTION "|" D_JSON_FREQUENCY_RESOLUTION "|" D_JSON_CURRENT_RESOLUTION "|" D_JSON_ENERGY_RESOLUTION "|" D_JSON_WEIGHT_RESOLUTION "|"
-//   D_JSON_MODULE "|" D_JSON_MODULES "|" D_JSON_GPIO "|" D_JSON_GPIOS "|" D_JSON_PWM "|" D_JSON_PWMFREQUENCY "|" D_JSON_PWMRANGE "|" D_JSON_COUNTER "|" D_JSON_COUNTERTYPE "|"
-//   D_JSON_COUNTERDEBOUNCE "|" D_JSON_BUTTONDEBOUNCE "|" D_JSON_SWITCHDEBOUNCE "|" D_JSON_SLEEP "|" D_JSON_UPGRADE "|" D_JSON_UPLOAD "|" D_JSON_OTAURL "|" D_JSON_SERIALLOG "|" D_JSON_SYSLOG "|"
-//   D_JSON_LOGHOST "|" D_JSON_LOGPORT "|" D_JSON_IPADDRESS "|" D_JSON_NTPSERVER "|" D_JSON_AP "|" D_JSON_SSID "|" D_JSON_PASSWORD "|" D_JSON_HOSTNAME "|"
-//   D_JSON_WIFICONFIG "|" D_JSON_FRIENDLYNAME "|" D_JSON_SWITCHMODE "|" D_JSON_INTERLOCK "|" D_JSON_TEMPLATE "|"
-//   D_JSON_TELEPERIOD "|" D_JSON_RESTART "|" D_JSON_RESET "|" D_JSON_TIMEZONE "|" D_JSON_TIMESTD "|" D_JSON_TIMEDST "|" D_JSON_ALTITUDE "|" D_JSON_LEDPOWER "|" D_JSON_LEDSTATE "|" D_JSON_LEDMASK "|"
-//   D_JSON_I2CSCAN "|" D_JSON_SERIALSEND "|" D_JSON_BAUDRATE "|" D_JSON_SERIALDELIMITER "|" D_JSON_DRIVER;
-
-// const char kSleepMode[] PROGMEM = "Dynamic|Normal";
-
-
-  #ifdef ESP8266
-// // Global variables
+#ifdef ESP8266
 SerialConfig serial_config = SERIAL_8N1;    // Serial interface configuration 8 data bits, No parity, 1 stop bit
 #endif
-
-// WiFiUDP PortUdp;                            // UDP Syslog and Alexa
-
-// unsigned long feature_drv1;                 // Compiled driver feature map
-// unsigned long feature_drv2;                 // Compiled driver feature map
-// unsigned long feature_sns1;                 // Compiled sensor feature map
-// unsigned long feature_sns2;                 // Compiled sensor feature map
-// unsigned long serial_polling_window = 0;    // Serial polling window
-// unsigned long state_second = 0;             // State second timer
-// // uint32_t state_50msecond = 0;          // State 50msecond timer
-// // uint32_t state_100msecond = 0;         // State 100msecond timer
-// // uint32_t state_250msecond = 0;         // State 250msecond timer
-// // unsigned long pulse_timer[MAX_PULSETIMERS] = { 0 }; // Power off timer
-// unsigned long blink_timer = 0;              // Power cycle timer
-// unsigned long backlog_delay = 0;            // Command backlog delay
 
 //bit packed and used outside relays for lights too
 power_t power = 0;                          // Current copy of Settings.power
@@ -1797,10 +1595,10 @@ struct FIRMWARE_VERSION{
   uint8_t fCurrentVersionNotSupported = false;
 }firmware_version;
 
-int8_t parse_JSONCommand();
+void parse_JSONCommand();
 void   parsesub_TopicCheck_JSONCommand(JsonObjectConst _obj);
-int8_t parsesub_SystemCommand(JsonObjectConst _obj);
-int8_t parsesub_FirmwareInformation(JsonObjectConst _obj);
+void parsesub_SystemCommand(JsonObjectConst _obj);
+void parsesub_FirmwareInformation(JsonObjectConst _obj);
 
 };
 

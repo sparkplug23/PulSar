@@ -2125,12 +2125,12 @@ int8_t mHeating::parsesub_ModeManual(JsonObjectConst obj){
   #endif
 
   fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.fSendNow = true;
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
 
   //    temp mesaure, send everything
   MQTTHandler_Set_fSendNow();
 
-  return isserviced;
+  
 
 }
 
@@ -2170,12 +2170,12 @@ int8_t mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
   }
 
   fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.fSendNow = true;
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
 
   //    temp mesaure, send everything
   MQTTHandler_Set_fSendNow();
 
-  return isserviced;
+  
 
 }
 
@@ -2262,12 +2262,12 @@ int8_t mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
   #endif
 
   fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.fSendNow = true;
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
 
   //    temp mesaure, send everything
   MQTTHandler_Set_fSendNow();
 
-  return isserviced;
+  
 
 }
 
@@ -2399,8 +2399,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60*60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2409,8 +2409,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_program_timers_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -2419,8 +2419,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_program_timers_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2429,8 +2429,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_program_temps_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2439,8 +2439,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_program_temps_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2449,8 +2449,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_program_overview_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2459,8 +2459,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_program_overview_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2469,8 +2469,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_relays_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2479,8 +2479,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_relays_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2489,8 +2489,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -2499,8 +2499,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2509,8 +2509,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc1m;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2519,8 +2519,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc10m;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60*10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2529,8 +2529,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2539,8 +2539,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2549,8 +2549,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc1m;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2559,8 +2559,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc10m;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60*10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2569,8 +2569,8 @@ void mHeating::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2579,8 +2579,8 @@ void mHeating::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2608,23 +2608,23 @@ void mHeating::MQTTHandler_Init(){
 
 void mHeating::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_program_timers_ifchanged.fSendNow = true;
-  mqtthandler_program_timers_teleperiod.fSendNow = true;
-  mqtthandler_program_temps_ifchanged.fSendNow = true;
-  mqtthandler_program_temps_teleperiod.fSendNow = true;
-  mqtthandler_program_overview_ifchanged.fSendNow = true;
-  mqtthandler_program_overview_teleperiod.fSendNow = true;
-  mqtthandler_sensor_pipes_ifchanged.fSendNow = true;
-  mqtthandler_sensor_pipes_teleperiod.fSendNow = true;
-  mqtthandler_sensor_pipes_roc1m.fSendNow = true;
-  mqtthandler_sensor_pipes_roc10m.fSendNow = true;
-  mqtthandler_sensor_climate_ifchanged.fSendNow = true;
-  mqtthandler_sensor_climate_teleperiod.fSendNow = true;
-  mqtthandler_sensor_climate_roc1m.fSendNow = true;
-  mqtthandler_sensor_climate_roc10m.fSendNow = true;
-  mqtthandler_sensor_pipes_colours_ifchanged.fSendNow = true;
-  mqtthandler_sensor_pipes_colours_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+  mqtthandler_program_timers_teleperiod.flags.SendNow = true;
+  mqtthandler_program_temps_ifchanged.flags.SendNow = true;
+  mqtthandler_program_temps_teleperiod.flags.SendNow = true;
+  mqtthandler_program_overview_ifchanged.flags.SendNow = true;
+  mqtthandler_program_overview_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_pipes_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_pipes_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_pipes_roc1m.flags.SendNow = true;
+  mqtthandler_sensor_pipes_roc10m.flags.SendNow = true;
+  mqtthandler_sensor_climate_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_climate_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_climate_roc1m.flags.SendNow = true;
+  mqtthandler_sensor_climate_roc10m.flags.SendNow = true;
+  mqtthandler_sensor_pipes_colours_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_pipes_colours_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

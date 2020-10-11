@@ -169,7 +169,7 @@ void mWiFi::WiFiSetSleepMode(void)
 // Sleep explanation: https://github.com/esp8266/Arduino/blob/3f0c601cfe81439ce17e9bd5d28994a7ed144482/libraries/ESP8266WiFi/src/ESP8266WiFiGeneric.cpp#L255
 #if defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
 #else  // Enabled in 2.3.0, 2.4.0 and stage
-  // if (sleep && Settings.flag_network_phaseout.sleep_normal) {
+  // if (sleep && Settings.flag_network.sleep_normal) {
   //   WiFi.setSleepMode(WIFI_LIGHT_SLEEP);  // Allow light sleep during idle times
   // } else {
   //   WiFi.setSleepMode(WIFI_MODEM_SLEEP);  // Disable sleep (Esp8288/Arduino core and sdk default)
@@ -549,7 +549,7 @@ void mWiFi::WifiCheckIp(void)
       
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry %d"),wifi_retry);
 
-      if (pCONT_set->Settings.flag_network_phaseout.use_wifi_scan) {
+      if (pCONT_set->Settings.flag_network.use_wifi_scan) {
         if (wifi_retry_init == wifi_retry) {
           wifi_scan_state = 1;    // Select scanned SSID
           AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select scanned SSID"));
@@ -669,7 +669,7 @@ void mWiFi::WifiCheck(uint8_t param)
         
         pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
 
-        //if (pCONT_set->Settings.flag_network_phaseout.use_wifi_rescan) {
+        //if (pCONT_set->Settings.flag_network.use_wifi_rescan) {
           if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
             wifi_scan_state = 2;
             // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"WIFI_RESCAN_MINUTES occurred wifi_scan_state = 2");
@@ -684,7 +684,7 @@ void mWiFi::WifiCheck(uint8_t param)
         #endif  // FIRMWARE_MINIMAL
 
         #ifdef USE_DISCOVERY
-         // if (pCONT_set->Settings.flag_network_phaseout.mdns_enabled) {
+         // if (pCONT_set->Settings.flag_network.mdns_enabled) {
             // if (!mdns_begun) {
             //   if (pCONT_set->mdns_delayed_start) {
             //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_ATTEMPTING_CONNECTION "mdns_delayed_start %d"),pCONT_set->mdns_delayed_start);
@@ -793,7 +793,7 @@ void mWiFi::WifiDisconnect(void)
 void mWiFi::EspRestart(void)
 {
   delay(100);                 // Allow time for message xfer - disabled v6.1.0b
-  //if (Settings.flag_system_phaseout.mqtt_enabled) MqttDisconnect();
+  //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
   WifiDisconnect();
   pCONT_sup->CrashDumpClear();
   ESP.restart();            // This results in exception 3 on restarts on core 2.3.0

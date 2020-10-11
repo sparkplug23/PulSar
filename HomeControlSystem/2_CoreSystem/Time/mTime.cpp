@@ -866,7 +866,7 @@ const char* mTime::GetDateAndTime(uint8_t time_type)
   //     break;
   // }
   // String dt = GetDT(time);  // 2017-03-07T11:08:02
-  // if (Settings.flag_network_phaseout.time_append_timezone && (DT_LOCAL == time_type)) {
+  // if (Settings.flag_network.time_append_timezone && (DT_LOCAL == time_type)) {
   //   dt += GetTimeZone();    // 2017-03-07T11:08:02-07:00
   // }
   return "2017-03-07T11:08:02-07:00";//dt.c_str();  // 2017-03-07T11:08:02-07:00

@@ -268,7 +268,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
   }
 
 
-  uint8_t isserviced = 0;
+  u
   int8_t device_id;
 
   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::parse_JSONCommand()");
@@ -411,8 +411,8 @@ void mExerciseBike::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -421,8 +421,8 @@ void mExerciseBike::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -431,8 +431,8 @@ void mExerciseBike::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -441,8 +441,8 @@ void mExerciseBike::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_lightstate_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -451,8 +451,8 @@ void mExerciseBike::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_lightstate_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -464,11 +464,11 @@ void mExerciseBike::MQTTHandler_Init(){
 
 void mExerciseBike::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
-  mqtthandler_lightstate_ifchanged.fSendNow = true;
-  mqtthandler_lightstate_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  mqtthandler_lightstate_ifchanged.flags.SendNow = true;
+  mqtthandler_lightstate_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

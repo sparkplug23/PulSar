@@ -69,7 +69,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     pCONT_iLight->HueF2N(hsb_current.H)
   ); 
 
-  uint8_t dcolor = pCONT_ladd->changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
+  uint8_t dcolor = mSupport::changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
   snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   //   uint8_t red, green, blue;
   //   LightHsToRgb(hue, 255, &red, &green, &blue);
@@ -87,7 +87,19 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     pCONT_iLight->SatF2N(hsb_current.S)
   ); 
 
-  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+
+  BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+    "brt",               
+    "col_sldr",
+    PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
+    "brt_sldr",              
+    D_JSON_BRT_RGB,
+    0, 100,  // Range 0/1 to 100% 
+    pCONT_iLight->BrtF2N(hsb_current.B)
+  ); 
+
+
+  // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   // Can I use "ORANGE" with RGB as warm white? 
   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT,  // Cold Warm
   //   "scn_clr_temp",             // a - Unique HTML id
@@ -107,19 +119,58 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   //   pCONT_iLight->BrtF2N(mode_singlecolour.colourW),
   //   WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
-  #endif
+
+  BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
+  //   "pwm_cct",             // a - Unique HTML id
+  //   "#fff", "#ff0",  // White to Yellow
+  //   1,               // sl1
+  //   153, 500,        // Range color temperature
+  //   LightGetColorTemp(),
+  //   "pwm_cct"
+  // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
+
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+  //   "pwm_cbrt",               // c - Unique HTML id
+  //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+  //   0, 100,  // Range 0/1 to 100%
+  //   _briCT,
+  //   "pwm_cbrt"
+  // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
 
+  // dcolor = mSupport::changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
+  // snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-    "brt",               
+    "cct_temp",               
     "col_sldr",
-    PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
-    "brt_sldr",              
-    D_JSON_BRT_RGB,
+    // start_colour, 
+    // end_colour, //fff should be calculated based on colour[5]
+    "#fff", "#ff0",  // White to Yellow
+    "cct_temp",              
+    D_JSON_CCT_TEMP,
+    // 0, 100,  // Range 0/1 to 100% 
+    153, 500,        // Range color temperature
+    pCONT_iLight->SatF2N(hsb_current.S)
+  ); 
+  
+  BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+    "cct_brt",               
+    "col_sldr",
+    // start_colour, 
+    // end_colour, //fff should be calculated based on colour[5]
+    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+    "cct_brt",              
+    D_JSON_BRT_CCT,
     0, 100,  // Range 0/1 to 100% 
-    pCONT_iLight->BrtF2N(hsb_current.B)
+    pCONT_iLight->SatF2N(hsb_current.S)
   ); 
 
+  // #endif
+
+
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
                               100/2,
@@ -128,7 +179,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              pCONT_ladd->animation.brightness ? "On" : "Off" //make this a state function
+                              animation.brightness ? "On" : "Off" //make this a state function
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
                               100/2,
@@ -137,13 +188,15 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_ANIMATIONENABLE, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Animation "),
-                              pCONT_ladd->animation.flags.fEnable_Animation ? "On" : "Off"
+                              animation.flags.fEnable_Animation ? "On" : "Off"
                             );                  
   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+  
 
   // Will include all settings related to ANY form of lighting hardware
   pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
   
+   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
 
 }
 

@@ -147,11 +147,11 @@ void mButtons::ButtonHandler(void)
 //       }
 //       else {
         if ((PRESSED == button) && (NOT_PRESSED == lastbutton[button_index])) {
-          // if (pCONT_set->Settings.flag_system_phaseout.button_single) {                   // Allow only single button press for immediate action
+          // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
             AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
             //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
             
-  mqtthandler_sensor_ifchanged.fSendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
               // Type method
               // AddLog_P(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
               // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
@@ -182,14 +182,14 @@ void mButtons::ButtonHandler(void)
           holdbutton[button_index] = 0;
         } else {
           holdbutton[button_index]++;
-          if (pCONT_set->Settings.flag_system_phaseout.button_single) {                   // Allow only single button press for immediate action
+          if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
             if (holdbutton[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
-             pCONT_set->Settings.flag_system_phaseout.button_single = 0;
+             pCONT_set->Settings.flag_system.button_single = 0;
               snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_SETOPTION "13 0"));  // Disable single press only
               // ExecuteCommand(scmnd, SRC_BUTTON);
             }
           } else {
-            if (pCONT_set->Settings.flag_system_phaseout.button_restrict) {               // Button restriction
+            if (pCONT_set->Settings.flag_system.button_restrict) {               // Button restriction
               if (holdbutton[button_index] == loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button hold
                 multipress[button_index] = 0;
                 // SendKey(0, button_index, 3);                // Execute Hold command via MQTT if ButtonTopic is set
@@ -205,7 +205,7 @@ void mButtons::ButtonHandler(void)
           }
         }
 
-        if (!pCONT_set->Settings.flag_system_phaseout.button_single) {                    // Allow multi-press
+        if (!pCONT_set->Settings.flag_system.button_single) {                    // Allow multi-press
           if (multiwindow[button_index]) {
             multiwindow[button_index]--;
           } else {
@@ -215,7 +215,7 @@ void mButtons::ButtonHandler(void)
             //     if ((SONOFF_DUAL_R2 == my_module_type) || (SONOFF_DUAL == my_module_type) || (CH4 == my_module_type)) {
             //       single_press = true;
             //     } else  {
-            //       single_press = (pCONT_set->Settings.flag_system_phaseout.button_swap +1 == multipress[button_index]);
+            //       single_press = (pCONT_set->Settings.flag_system.button_swap +1 == multipress[button_index]);
             //       multipress[button_index] = 1;
             //     }
             //   }
@@ -232,7 +232,7 @@ void mButtons::ButtonHandler(void)
             //     //       //ExecuteCommandPower(button_index + multipress[button_index], POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
             //     //     }
             //     //   } else {                                     // 3 - 7 press
-            //     //     if (!pCONT_set->Settings.flag_system_phaseout.button_restrict) {
+            //     //     if (!pCONT_set->Settings.flag_system.button_restrict) {
             //     //       snprintf_P(scmnd, sizeof(scmnd), kCommands[multipress[button_index] -3]);
             //     //       // ExecuteCommand(scmnd, SRC_BUTTON);
             //     //     }
@@ -394,8 +394,8 @@ void mButtons::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -404,8 +404,8 @@ void mButtons::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -414,8 +414,8 @@ void mButtons::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -427,9 +427,9 @@ void mButtons::MQTTHandler_Init(){
 
 void mButtons::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

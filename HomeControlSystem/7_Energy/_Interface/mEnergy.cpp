@@ -94,7 +94,7 @@ bool mEnergy::EnergyTariff1Active()  // Off-Peak hours
     dst = 1;
   }
   if (pCONT_set->Settings.energy_usage.tariff[0][dst] != pCONT_set->Settings.energy_usage.tariff[1][dst]) {
-    if (pCONT_set->Settings.flag_network_phaseout.energy_weekend && ((pCONT_set->RtcTime.day_of_week == 1) ||   // CMND_TARIFF
+    if (pCONT_set->Settings.flag_network.energy_weekend && ((pCONT_set->RtcTime.day_of_week == 1) ||   // CMND_TARIFF
                                           (pCONT_set->RtcTime.day_of_week == 7))) {
       return true;
     }
@@ -163,7 +163,7 @@ void mEnergy::EnergyUpdateTotal(float value, bool kwh)
   }
 
   if((Energy.total < (value - 0.01)) &&       // We subtract a little offset to avoid continuous updates
-      pCONT_set->Settings.flag_network_phaseout.hardware_energy_total) {  // SetOption72 - Enable hardware energy total counter as reference (#6561)
+      pCONT_set->Settings.flag_network.hardware_energy_total) {  // SetOption72 - Enable hardware energy total counter as reference (#6561)
     pCONT_set->RtcSettings.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
     pCONT_set->Settings.energy_usage.energy_kWhtotal = pCONT_set->RtcSettings.energy_kWhtotal;
     Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
@@ -179,7 +179,7 @@ void mEnergy::EnergyUpdateTotal(float value, bool kwh)
 void mEnergy::Energy200ms(void)
 {
   
-  Energy.power_on = (pCONT_set->power != 0) | pCONT_set->Settings.flag_system_phaseout.no_power_on_check;  // SetOption21 - Show voltage even if powered off
+  Energy.power_on = (pCONT_set->power != 0) | pCONT_set->Settings.flag_system.no_power_on_check;  // SetOption21 - Show voltage even if powered off
 
   Energy.fifth_second++;
   if (5 == Energy.fifth_second) {
@@ -452,7 +452,7 @@ void mEnergy::UpdateEnergyUsagePerMinute(){
     Energy.stats.kwh_per_minute_index = 0;
   }
 
-  mqtthandler_sensor_ifchanged.fSendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
 }
 
@@ -567,8 +567,8 @@ void mEnergy::EnergyShow(bool json)
             }
         }
 
-        pCONT_sup->dtostrfd(apparent_power, pCONT_set->Settings.flag_power_phaseout.wattage_resolution, apparent_power_chr[i]);
-        pCONT_sup->dtostrfd(reactive_power, pCONT_set->Settings.flag_power_phaseout.wattage_resolution, reactive_power_chr[i]);
+        pCONT_sup->dtostrfd(apparent_power, pCONT_set->Settings.flag_power.wattage_resolution, apparent_power_chr[i]);
+        pCONT_sup->dtostrfd(reactive_power, pCONT_set->Settings.flag_power.wattage_resolution, reactive_power_chr[i]);
         pCONT_sup->dtostrfd(power_factor, 2, power_factor_chr[i]);
         
         AddLog_P(LOG_LEVEL_TEST,PSTR("apparent_power=%d,apparent_power_chr[%d]=%s"),(int)apparent_power,i,apparent_power_chr[i]);
@@ -582,7 +582,7 @@ void mEnergy::EnergyShow(bool json)
       if (isnan(pCONT_iEnergy->Energy.frequency[i])) {
         frequency = 0;
       }
-      pCONT_sup->dtostrfd(frequency, pCONT_set->Settings.flag_power_phaseout.frequency_resolution, frequency_chr[i]);
+      pCONT_sup->dtostrfd(frequency, pCONT_set->Settings.flag_power.frequency_resolution, frequency_chr[i]);
     }
   }
 
@@ -596,9 +596,9 @@ void mEnergy::EnergyShow(bool json)
 
   for (uint32_t i = 0; i < pCONT_iEnergy->Energy.phase_count; i++) {
     AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_iEnergy->Energy.phase_count=%d %d"),pCONT_iEnergy->Energy.phase_count,i);
-    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.voltage[i], pCONT_set->Settings.flag_power_phaseout.voltage_resolution, voltage_chr[i]);
-    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.current[i], pCONT_set->Settings.flag_power_phaseout.current_resolution, current_chr[i]);
-    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.active_power[i], pCONT_set->Settings.flag_power_phaseout.wattage_resolution, active_power_chr[i]);
+    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.voltage[i], pCONT_set->Settings.flag_power.voltage_resolution, voltage_chr[i]);
+    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.current[i], pCONT_set->Settings.flag_power.current_resolution, current_chr[i]);
+    pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.active_power[i], pCONT_set->Settings.flag_power.wattage_resolution, active_power_chr[i]);
   }
 
   // AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_iEnergy->Energy.phase_count=%d"),pCONT_iEnergy->Energy.phase_count);
@@ -607,27 +607,27 @@ void mEnergy::EnergyShow(bool json)
 
   char energy_daily_chr[FLOATSZ];
   memset(energy_daily_chr,0,sizeof(energy_daily_chr));
-  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.daily, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_daily_chr);
+  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.daily, pCONT_set->Settings.flag_power.energy_resolution, energy_daily_chr);
  
   char energy_yesterday_chr[FLOATSZ];
   memset(energy_yesterday_chr,0,sizeof(energy_yesterday_chr)); 
-  pCONT_sup->dtostrfd((float)pCONT_set->Settings.energy_usage.energy_kWhyesterday / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_yesterday_chr);
+  pCONT_sup->dtostrfd((float)pCONT_set->Settings.energy_usage.energy_kWhyesterday / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_yesterday_chr);
 
   char energy_total_chr[3][FLOATSZ];
   memset(energy_total_chr,0,sizeof(energy_total_chr));
-  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.total, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_total_chr[0]);
+  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.total, pCONT_set->Settings.flag_power.energy_resolution, energy_total_chr[0]);
 
   char export_active_chr[3][FLOATSZ];
   memset(export_active_chr,0,sizeof(export_active_chr));
-  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.export_active, pCONT_set->Settings.flag_power_phaseout.energy_resolution, export_active_chr[0]);
+  pCONT_sup->dtostrfd(pCONT_iEnergy->Energy.export_active, pCONT_set->Settings.flag_power.energy_resolution, export_active_chr[0]);
 
   uint8_t energy_total_fields = 1;
 
   if (pCONT_set->Settings.energy_usage.tariff[0][0] != pCONT_set->Settings.energy_usage.tariff[1][0]) {
-    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.usage1_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_total_chr[1]);  // Tariff1
-    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.usage2_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_total_chr[2]);  // Tariff2
-    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.return1_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, export_active_chr[1]);  // Tariff1
-    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.return2_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, export_active_chr[2]);  // Tariff2
+    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.usage1_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_total_chr[1]);  // Tariff1
+    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.usage2_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_total_chr[2]);  // Tariff2
+    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.return1_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, export_active_chr[1]);  // Tariff1
+    pCONT_sup->dtostrfd((float)pCONT_set->RtcSettings.energy_usage.return2_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, export_active_chr[2]);  // Tariff2
     energy_total_fields = 3;
   }
 
@@ -659,7 +659,7 @@ void mEnergy::EnergyShow(bool json)
     //   }
     //   pCONT_iEnergy->Energy.period = pCONT_set->RtcSettings.energy_kWhtoday;
     //   char energy_period_chr[FLOATSZ];
-    //   pCONT_sup->dtostrfd(energy, pCONT_set->Settings.flag_power_phaseout.wattage_resolution, energy_period_chr);
+    //   pCONT_sup->dtostrfd(energy, pCONT_set->Settings.flag_power.wattage_resolution, energy_period_chr);
     //   pCONT_sup->ResponseAppend_P(PSTR(",\"" D_JSON_PERIOD "\":%s"), energy_period_chr);
     // }
     // pCONT_sup->ResponseAppend_P(PSTR(",\"" D_JSON_POWERUSAGE "\":%s"),
@@ -1095,7 +1095,7 @@ int8_t mEnergy::parse_JSONCommand(){
     return 0; // not meant for here
   }
 
-  // uint8_t isserviced = 0;
+  // u
   // int8_t tmp_id = 0;
 
   // #ifdef JSONDOCUMENT_STATIC
@@ -1124,7 +1124,7 @@ int8_t mEnergy::parse_JSONCommand(){
   //   }
   // }
 
-  // return isserviced;
+  // 
 
 } // END FUNCTION
 
@@ -1249,8 +1249,8 @@ void mEnergy::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1259,8 +1259,8 @@ void mEnergy::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1269,8 +1269,8 @@ void mEnergy::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -1279,8 +1279,8 @@ void mEnergy::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1289,8 +1289,8 @@ void mEnergy::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1302,11 +1302,11 @@ void mEnergy::MQTTHandler_Init(){
 
 void mEnergy::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
-  mqtthandler_energystats_ifchanged.fSendNow = true;
-  mqtthandler_energystats_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  mqtthandler_energystats_ifchanged.flags.SendNow = true;
+  mqtthandler_energystats_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
@@ -1460,24 +1460,24 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // //   Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
 
 //   char energy_total_chr[FLOATSZ];
-//   pCONT_sup->dtostrfd(Energy.total, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_total_chr);
+//   pCONT_sup->dtostrfd(Energy.total, pCONT_set->Settings.flag_power.energy_resolution, energy_total_chr);
 //   char energy_daily_chr[FLOATSZ];
-//   pCONT_sup->dtostrfd(Energy.daily, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_daily_chr);
+//   pCONT_sup->dtostrfd(Energy.daily, pCONT_set->Settings.flag_power.energy_resolution, energy_daily_chr);
 //   char energy_yesterday_chr[FLOATSZ];
 
 
 
 
-// //   pCONT_sup->dtostrfd((float)Settings.energy_kWhyesterday / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_yesterday_chr);
+// //   pCONT_sup->dtostrfd((float)Settings.energy_kWhyesterday / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_yesterday_chr);
 
 // //   char energy_usage1_chr[FLOATSZ];
-// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.usage1_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_usage1_chr);
+// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.usage1_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_usage1_chr);
 // //   char energy_usage2_chr[FLOATSZ];
-// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.usage2_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_usage2_chr);
+// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.usage2_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_usage2_chr);
 // //   char energy_return1_chr[FLOATSZ];
-// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.return1_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_return1_chr);
+// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.return1_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_return1_chr);
 // //   char energy_return2_chr[FLOATSZ];
-// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.return2_kWhtotal / 100000, pCONT_set->Settings.flag_power_phaseout.energy_resolution, energy_return2_chr);
+// //   pCONT_sup->dtostrfd((float)Settings.energy_usage.return2_kWhtotal / 100000, pCONT_set->Settings.flag_power.energy_resolution, energy_return2_chr);
 
 // //   Response_P(PSTR("{\"%s\":{\"" D_JSON_TOTAL "\":%s,\"" D_JSON_YESTERDAY "\":%s,\"" D_JSON_TODAY "\":%s,\"" D_JSON_USAGE "\":[%s,%s],\"" D_JSON_EXPORT "\":[%s,%s]}}"),
 // //     XdrvMailbox.command, energy_total_chr, energy_yesterday_chr, energy_daily_chr, energy_usage1_chr, energy_usage2_chr, energy_return1_chr, energy_return2_chr);
@@ -1519,13 +1519,13 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //   }
 //   // }
 //   // else if (XdrvMailbox.index == 9) {
-//   //   Settings.flag_network_phaseout.energy_weekend = XdrvMailbox.payload & 1;  // CMND_TARIFF
+//   //   Settings.flag_network.energy_weekend = XdrvMailbox.payload & 1;  // CMND_TARIFF
 //   // }
 //   // Response_P(PSTR("{\"%s\":{\"Off-Peak\":{\"STD\":\"%s\",\"DST\":\"%s\"},\"Standard\":{\"STD\":\"%s\",\"DST\":\"%s\"},\"Weekend\":\"%s\"}}"),
 //   //   XdrvMailbox.command,
 //   //   GetMinuteTime(Settings.tariff[0][0]).c_str(),GetMinuteTime(Settings.tariff[0][1]).c_str(),
 //   //   GetMinuteTime(Settings.tariff[1][0]).c_str(),GetMinuteTime(Settings.tariff[1][1]).c_str(),
-//   //   GetStateText(Settings.flag_network_phaseout.energy_weekend));             // CMND_TARIFF
+//   //   GetStateText(Settings.flag_network.energy_weekend));             // CMND_TARIFF
 // }
 
 // void mEnergy::CmndPowerCal(void)

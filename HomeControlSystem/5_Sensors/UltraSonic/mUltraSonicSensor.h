@@ -123,7 +123,7 @@ class mUltraSonicSensor{
     // void ConstructJSON_Basic();
 
     uint8_t fUpdateCalculations = false;
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
 
 
     struct ULTRASONICSENSOR{

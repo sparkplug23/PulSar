@@ -628,7 +628,7 @@ DEBUG_LINE;
   }
 
   // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
-  // if (pCONT_set->Settings.flag_system_phaseout.interlock) {        
+  // if (pCONT_set->Settings.flag_system.interlock) {        
   //   for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
   //     power_t mask = 1;
   //     uint32_t count = 0;
@@ -732,8 +732,8 @@ void mRelays::RestorePower(bool publish_power, uint32_t source)
   if (pCONT_set->power != last_power) {
     SetDevicePower(last_power, source);
     if (publish_power) {
-      mqtthandler_sensor_teleperiod.fSendNow = true;
-      mqtthandler_sensor_ifchanged.fSendNow = true;
+      mqtthandler_sensor_teleperiod.flags.SendNow = true;
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }
   }
 }
@@ -769,8 +769,8 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
     SetDevicePower(pCONT_set->power, source);
   }
   if (publish_power) {
-    mqtthandler_sensor_teleperiod.fSendNow = true;
-    mqtthandler_sensor_ifchanged.fSendNow = true;
+    mqtthandler_sensor_teleperiod.flags.SendNow = true;
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
   }
 }
 
@@ -795,20 +795,20 @@ void mRelays::SetPowerOnState(void)
         break;
       case POWER_ALL_SAVED_TOGGLE:
         pCONT_set->power = (pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) )) ^ POWER_MASK;
-        if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
+        if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
         pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
-        if (pCONT_set->Settings.flag_system_phaseout.save_state) {  // SetOption0 - Save power state and use after restart
+        if (pCONT_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(pCONT_set->power, SRC_RESTART);
         }
         break;
       }
     // } else {
     //   power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
-    //   if (pCONT_set->Settings.flag_system_phaseout.save_state) {    // SetOption0 - Save power state and use after restart
+    //   if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
     //     SetDevicePower(pCONT_set->power, SRC_RESTART);
     //   }
     // }
@@ -816,7 +816,7 @@ void mRelays::SetPowerOnState(void)
 
   // Issue #526 and #909
   // for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
-  //   if (!pCONT_set->Settings.flag_network_phaseout.no_power_feedback) {  // SetOption63 - Don't scan relay pCONT_set->power state at restart - #5594 and #5663
+  //   if (!pCONT_set->Settings.flag_network.no_power_feedback) {  // SetOption63 - Don't scan relay pCONT_set->power state at restart - #5594 and #5663
   //     if ((i < MAX_RELAYS) && (pCONT_set->pin[GPIO_REL1 +i] < 99)) {
   //       bitWrite(pCONT_set->power, i, digitalRead(pCONT_set->pin[GPIO_REL1 +i]) ^ bitRead(pCONT_set->rel_inverted, i));
   //     }
@@ -857,7 +857,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 // #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 //   if (IsModuleIfan()) {
 //     blink_mask &= 1;                 // No blinking on the fan relays
-//     Settings.flag_system_phaseout.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
+//     Settings.flag_system.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
 //     Settings.pulse_timer[1] = 0;     // No pulsetimers on the fan relays
 //     Settings.pulse_timer[2] = 0;
 //     Settings.pulse_timer[3] = 0;
@@ -893,7 +893,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     //   MqttPublishPowerBlinkState(device);
     // }
     #ifdef USE_RELAY_INTERLOCKS
-    // if (Settings.flag_system_phaseout.interlock &&        // CMND_INTERLOCK - Enable/disable interlock
+    // if (Settings.flag_system.interlock &&        // CMND_INTERLOCK - Enable/disable interlock
     //     !interlock_mutex &&
     //     ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(power & mask)))
     //    ) {
@@ -952,8 +952,8 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
   // }
 
   if (publish_power) {
-    mqtthandler_sensor_teleperiod.fSendNow = true;
-    mqtthandler_sensor_ifchanged.fSendNow = true;
+    mqtthandler_sensor_teleperiod.flags.SendNow = true;
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
   }
 }
 
@@ -1035,8 +1035,8 @@ void mRelays::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1045,8 +1045,8 @@ void mRelays::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1055,8 +1055,8 @@ void mRelays::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -1068,9 +1068,9 @@ void mRelays::MQTTHandler_Init(){
 
 void mRelays::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
-  mqtthandler_sensor_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 

@@ -78,10 +78,10 @@ int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
 
-    int8_t parsesub_Settings();
-    int8_t parsesub_Command();
+    void parsesub_Settings();
+    void parsesub_Command();
 
     typedef struct GPIO_DETECT{
       uint8_t state = false;

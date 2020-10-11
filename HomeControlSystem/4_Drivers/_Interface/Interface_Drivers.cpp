@@ -362,7 +362,7 @@
 // //     }
 // //     mcl->mwif->WSBufferAppend_P(error);
 // //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
-// //     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system_phaseout.stop_flash_rotate;
+// //     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system.stop_flash_rotate;
 // //   } else {
 // //     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_SUCCESS));
 // //     mcl->mwif->WSBufferAppend_P(HTTP_MSG_RSTRT);
@@ -416,7 +416,7 @@
 // // #ifdef USE_ARILUX_RF
 // //       //AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
 // // #endif  // USE_ARILUX_RF
-// //       //if (mcl->mset->Settings.flag_system_phaseout.mqtt_enabled) MqttDisconnect();
+// //       //if (mcl->mset->Settings.flag_system.mqtt_enabled) MqttDisconnect();
 // //       uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
       
 // //           #ifdef ESP8266
@@ -1358,7 +1358,7 @@
 //     return 0; // not meant for here
 //   }
 
-//   int8_t isserviced = 0;
+//   
 //   char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
 
 //   if(strstr(mcl->mset->data_buffer.topic.ctr,"/commands")){ // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
@@ -1383,7 +1383,7 @@
 //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
 //       uint8_t statusupdate = obj["statusupdate"];
 //       sprintf(command_ctr,"statusupdate %d",statusupdate);
-//       mqtthandler_settings_teleperiod.fSendNow = true;
+//       mqtthandler_settings_teleperiod.flags.SendNow = true;
 //     }else
 //     if(!obj["brightness"].isNull()){ 
 //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
@@ -1469,7 +1469,7 @@
 
 //   mcl->mset->data_buffer.isserviced += isserviced;
  
-//   return isserviced;
+//   
 
 // } // end parse
 
@@ -1491,7 +1491,7 @@
 //   JsonObject obj = doc.as<JsonObject>();
 
 //   int8_t tmp_id = 0;
-//   int8_t isserviced = 0;
+//   
 
 //   if(!obj["message"].isNull()){ 
 //     const char* messagectr = obj["message"];
@@ -3689,8 +3689,8 @@
 
 //   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
 //   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->fPeriodicEnabled = true;
-//   mqtthandler_ptr->fSendNow = true;
+//   mqtthandler_ptr->flags.PeriodicEnabled = true;
+//   mqtthandler_ptr->flags.SendNow = true;
 //   mqtthandler_ptr->tRateSecs = 60; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -3699,8 +3699,8 @@
 
 //   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
 //   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->fPeriodicEnabled = false;
-//   mqtthandler_ptr->fSendNow = true;
+//   mqtthandler_ptr->flags.PeriodicEnabled = false;
+//   mqtthandler_ptr->flags.SendNow = true;
 //   mqtthandler_ptr->tRateSecs = 60; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -3709,8 +3709,8 @@
 
 //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
 //   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->fPeriodicEnabled = false;
-//   mqtthandler_ptr->fSendNow = true;
+//   mqtthandler_ptr->flags.PeriodicEnabled = false;
+//   mqtthandler_ptr->flags.SendNow = true;
 //   mqtthandler_ptr->tRateSecs = 1; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -3719,8 +3719,8 @@
   
 //   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
 //   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->fPeriodicEnabled = false;
-//   mqtthandler_ptr->fSendNow = true;
+//   mqtthandler_ptr->flags.PeriodicEnabled = false;
+//   mqtthandler_ptr->flags.SendNow = true;
 //   mqtthandler_ptr->tRateSecs = 60; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -3729,8 +3729,8 @@
   
 //   mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
 //   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->fPeriodicEnabled = false;
-//   mqtthandler_ptr->fSendNow = true;
+//   mqtthandler_ptr->flags.PeriodicEnabled = false;
+//   mqtthandler_ptr->flags.SendNow = true;
 //   mqtthandler_ptr->tRateSecs = 10; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -3742,11 +3742,11 @@
 
 // void mNextionPanel::MQTTHandler_Set_fSendNow(){
 
-//   mqtthandler_settings_teleperiod.fSendNow = true;
-//   mqtthandler_sensor_ifchanged.fSendNow = true;
-//   mqtthandler_sensor_teleperiod.fSendNow = true;
-//   mqtthandler_energystats_ifchanged.fSendNow = true;
-//   mqtthandler_energystats_teleperiod.fSendNow = true;
+//   mqtthandler_settings_teleperiod.flags.SendNow = true;
+//   mqtthandler_sensor_ifchanged.flags.SendNow = true;
+//   mqtthandler_sensor_teleperiod.flags.SendNow = true;
+//   mqtthandler_energystats_ifchanged.flags.SendNow = true;
+//   mqtthandler_energystats_teleperiod.flags.SendNow = true;
 
 // } //end "MQTTHandler_Init"
 

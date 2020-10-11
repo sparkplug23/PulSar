@@ -234,7 +234,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //       iridx = results.decode_type;
 //       if ((iridx < 0) || (iridx > 14)) { iridx = 0; }  // UNKNOWN
 //       char svalue[64];
-//       if (Settings.flag_system_phaseout.ir_receive_decimal) {
+//       if (Settings.flag_system.ir_receive_decimal) {
 //         ulltoa(results.value, svalue, 10);
 //       } else {
 //         snprintf_P(svalue, sizeof(svalue), PSTR("\"%s\""), hvalue);
@@ -242,7 +242,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //       Response_P(PSTR("{\"" D_JSON_IRRECEIVED "\":{\"" D_JSON_IR_PROTOCOL "\":\"%s\",\"" D_JSON_IR_BITS "\":%d,\"" D_JSON_IR_DATA "\":%s"),
 //         GetTextIndexed_P(sirtype, sizeof(sirtype), iridx, kIrRemoteProtocols), results.bits, svalue);
 
-//       if (Settings.flag_network_phaseout.receive_raw) {
+//       if (Settings.flag_network.receive_raw) {
 //         ResponseAppend_P(PSTR(",\"" D_JSON_IR_RAWDATA "\":["));
 //         uint16_t i;
 //         for (i = 1; i < results.rawlen; i++) {

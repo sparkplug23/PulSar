@@ -47,7 +47,7 @@ bool ifan_restart_flag = true;
 
 
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-int8_t parsesub_Commands(JsonObjectConst obj);
+void parsesub_Commands(JsonObjectConst obj);
 
 void init();
 
@@ -74,7 +74,7 @@ void SonoffIfanUpdate(void);
     // #define ONE_BIT_TIME 1252 //+- 30 std
     // #define ZERO_BIT_TIME 439 //+- 30 std
 
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
     //void AddToJsonObject_AddHardware(JsonObject root);
     void AddToHardwareMessage();
 

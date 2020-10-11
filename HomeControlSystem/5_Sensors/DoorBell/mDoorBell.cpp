@@ -149,7 +149,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //     return 0; // not meant for here
 //   }
 
-//   int8_t isserviced = 0;
+//   
     
 //   //new topic names must include pixels
   
@@ -165,7 +165,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
 //   }
 
-//   return isserviced;
+//   
 
 // }
 
@@ -185,7 +185,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //   JsonObject obj = doc.as<JsonObject>();
 
 //   int8_t tmp_id = 0;
-//   int8_t isserviced = 0;
+//   
 
 //   // Ring Door bell manually
 //   if(!obj["doorbell"].isNull()){ 
@@ -201,7 +201,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //     // }
 //   }
   
-//   return isserviced;
+//   
 
 // } // END FUNCTION
 
@@ -222,7 +222,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //   // JsonObject obj = doc.as<JsonObject>();
 
 //   int8_t tmp_id = 0;
-//   int8_t isserviced = 0;
+//   
 
 //   // if(!obj["doorbell_output_binding"].isNull()){ 
 //   //   settings.fEnable_Switch_Relay_Binding = obj["doorbell_output_binding"];
@@ -230,7 +230,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //   //   isserviced++;
 //   // }
   
-//   return isserviced;
+//   
 
 // } // END FUNCTION
 

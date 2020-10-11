@@ -57,7 +57,7 @@ class mExerciseBike{
     // pir_detect_t pir_detect_copy;
     // struct pir_detect pir_detect_copy;
 
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
 
 
 

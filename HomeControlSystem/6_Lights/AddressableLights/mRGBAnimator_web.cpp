@@ -20,7 +20,7 @@ int8_t mRGBAnimator::Tasker_Web(uint8_t function){
     break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
-      if(animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
+      if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
         WebAppend_Root_RGBPalette();
       }
     break;
@@ -81,14 +81,14 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
         case 0: JsonBuilderI->Add("ih",GetAnimationStatusCtr(buffer)); break;
         case 1:
           JsonBuilderI->Add_FP("ih",PSTR("\"%d/%d (secs)\""), 
-            animation.transition.rate_ms.val/1000, 
-            animation.transition.time_ms.val/1000
+            pCONT_iLight->animation.transition.rate_ms.val/1000, 
+            pCONT_iLight->animation.transition.time_ms.val/1000
           );
         break;
         case 2: 
           JsonBuilderI->Add_FP("ih",PSTR("\"%d%% [#%d]\""),
-            animation.transition.pixels_to_update_as_percentage.val, 
-            GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
+            pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 
+            GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
           );
         break;
         case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
@@ -120,7 +120,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
   
   // JsonBuilderI->Array_Start("animod");// Class name
   // for(int row=0;row<sizeof(button_ids);row++){
-  //   if(button_ids[row] == animation.mode_id){
+  //   if(button_ids[row] == pCONT_iLight->animation.mode_id){
   //     sprintf(colour_button,"%s\0",COLOR_BUTTON_HIGHLIGHT); //selected
   //   }else{
   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
@@ -168,46 +168,46 @@ return; }
     switch(fAnyLEDsOnOffCount){
       case 0:
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
-        memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
+        memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
         pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);        // Add this as "SAVE" state then "LOAD" state
-        fLEDStripOnOff = true;
+        pCONT_iLight->light_power = true;
       break;
       default:
       case 1:
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
-        memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
+        memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
         pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-        fLEDStripOnOff = false;
+        pCONT_iLight->light_power = false;
       break;
     }
 
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
   }
 
-  #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-  sprintf_P(arg_ctr,PSTR(WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    scene.colourW = pCONT_iLight->BrtN2F(arg_value);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "scene.colourW=%d"),arg_value);
+  // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  // sprintf_P(arg_ctr,PSTR(WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER));
+  // if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+  //   pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+  //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+  //   scene.colourW = pCONT_iLight->BrtN2F(arg_value);
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "scene.colourW=%d"),arg_value);
 
-    if(settings.flags.EnableSceneModeWithSliders){
-      animation.mode_id = ANIMATION_MODE_SCENE_ID;
-      scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-    }
+  //   if(settings.flags.EnableSceneModeWithSliders){
+  //     pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
+  //     scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  //   }
 
-    SetRefreshLEDs();
-  }
-  #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  //   SetRefreshLEDs();
+  // }
+  // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
   sprintf_P(arg_ctr,PSTR("pal_set"));
   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    animation.palette_id = arg_value;
+    pCONT_iLight->animation.palette_id = arg_value;
     SetRefreshLEDs();
   }
 
@@ -230,14 +230,14 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   if (pCONT_web->pWebServer->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     animation.palette_id = arg_value;
+//     pCONT_iLight->animation.palette_id = arg_value;
 //     update_all = true; //refresh all
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //   }
 
 //   // Secondary edit location, paste to here
 //   //idea: write function that uses id to return pointer to struct
-//   SetPaletteListPtrFromID(animation.palette_id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 
 //   // Only continue to write if the palette is editable type
 //   if(!CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr)){
@@ -299,7 +299,7 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   }
 
 
-//   animation.flags.fForceUpdate = true; // update leds now
+//   pCONT_iLight->animation.flags.fForceUpdate = true; // update leds now
 
 }
 
@@ -317,7 +317,7 @@ void mRGBAnimator::WebSave_RGBColourSelectorOnly(void)
 //   if (pCONT_web->pWebServer->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     animation.palette_id = arg_value;
+//     pCONT_iLight->animation.palette_id = arg_value;
 //     update_all = true; //refresh all
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //   }
@@ -349,46 +349,46 @@ void mRGBAnimator::WebSave_RGBControls(AsyncWebServerRequest *request)
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
   //         // from mapped value to real value
   //         arg_value = pixels_to_update_as_percentage_map[arg_value];
-  //         animation.transition.pixels_to_update_as_percentage.val = constrain(arg_value,0,100);
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+  //         pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = constrain(arg_value,0,100);
+  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
         break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELORDER: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELORDER");
-  //         animation.transition.order_id = arg_value; // no map
+  //         pCONT_iLight->animation.transition.order_id = arg_value; // no map
   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
-  //         animation.transition.rate_ms.val = rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms.val);
+  //         pCONT_iLight->animation.transition.rate_ms.val = rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
+  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.rate_ms.val);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
-  //         animation.transition.time_ms.val = time_map_secs[arg_value]*1000; //seconds to milliseconds
+  //         pCONT_iLight->animation.transition.time_ms.val = time_map_secs[arg_value]*1000; //seconds to milliseconds
   //         // If period > rate, increase period to rate
-  //         animation.transition.time_ms.val = animation.transition.time_ms.val>animation.transition.rate_ms.val?animation.transition.rate_ms.val:animation.transition.time_ms.val;
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val); 
+  //         pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.time_ms.val>pCONT_iLight->animation.transition.rate_ms.val?pCONT_iLight->animation.transition.rate_ms.val:pCONT_iLight->animation.transition.time_ms.val;
+  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val); 
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"TRANSITIONMETHOD");
-  //         animation.transition.method_id = arg_value;
+  //         pCONT_iLight->animation.transition.method_id = arg_value;
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetTransitionMethodName());      
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_ANIMATIONMODE: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"ANIMATIONMODE");
-  //         animation.mode_id = arg_value;
+  //         pCONT_iLight->animation.mode_id = arg_value;
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetAnimationModeName());
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
-  //         animation.palette_id = arg_value;
+  //         pCONT_iLight->animation.palette_id = arg_value;
   //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
   //       break;
-  //     #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+  //     #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
   //         flashersettings.function = arg_value;  
-  //         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;  //restart animation/function
+  //         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;  //restart pCONT_iLight->animation/function
   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID: 
@@ -404,7 +404,7 @@ void mRGBAnimator::WebSave_RGBControls(AsyncWebServerRequest *request)
     } //if
   } //for
 
-  animation.flags.fForceUpdate = true; // update leds now
+  pCONT_iLight->animation.flags.fForceUpdate = true; // update leds now
 
 } // end function
 
@@ -469,8 +469,8 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
 //   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-//   //GetPaletteListPtrFromID(animation.palette_id);
-//   SetPaletteListPtrFromID(animation.palette_id);
+//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
    
 //   // LOAD VALUES 
 //   uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
@@ -546,15 +546,15 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
   // BufferWriterI->Append_P(HTTP_FORM_RGB_LOAD_PIXELS);
 
-  // if(CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[animation.palette_id])){
+  // if(CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
 
   //   BufferWriterI->Append_P(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
   //                             "Edit Name",
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id), //previous name
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             "Enter New Palette Name (maximum 20 characters)",
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
   //                           );
 
   // }
@@ -629,230 +629,230 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
 
 
-/**
- * Send minimal script
- * Send minimal style of page
- * Send all needed script asks
- * Send all needed javascript asks 
- * */
-void mRGBAnimator::BuildPage_RGBPaletteEditor(char** buffer)
-{
+// /**
+//  * Send minimal script
+//  * Send minimal style of page
+//  * Send all needed script asks
+//  * Send all needed javascript asks 
+//  * */
+// void mRGBAnimator::BuildPage_RGBPaletteEditor(char** buffer)
+// {
   
-  char colour_title_ctr[70];
-  uint8_t colour_id = 0;
-  uint8_t element_list_num = 2;//PALETTELIST_COLOUR_AMOUNT_MAX;
-  uint8_t row_id_selected[PALETTELIST_COLOUR_AMOUNT_MAX];
-  for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){row_id_selected[j] = j;}
-  uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
-  for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
+//   char colour_title_ctr[70];
+//   uint8_t colour_id = 0;
+//   uint8_t element_list_num = 2;//PALETTELIST_COLOUR_AMOUNT_MAX;
+//   uint8_t row_id_selected[PALETTELIST_COLOUR_AMOUNT_MAX];
+//   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){row_id_selected[j] = j;}
+//   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
+//   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-  //GetPaletteListPtrFromID(animation.palette_id);
-  pCONT_iLight->SetPaletteListPtrFromID(animation.palette_id);
+//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
    
-  // LOAD VALUES 
-  uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
-  // colours in palette
-  HsbColor set_colours[20];
-  for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-    set_colours[i] = HsbColor(0);//preset_colour_map[palettelist.ptr->colour_map_id[i]]; 
+//   // LOAD VALUES 
+//   uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
+//   // colours in palette
+//   HsbColor set_colours[20];
+//   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
+//     set_colours[i] = HsbColor(0);//preset_colour_map[palettelist.ptr->colour_map_id[i]]; 
 
-// GETCOLOURSFN
+// // GETCOLOURSFN
 
-    //if(palettelist.ptr->flags.fColours_from_map){
-      colour_selected_id[i] = pCONT_iLight->palettelist.ptr->colour_map_id[i];    
-    //}else{
-      // USE * for random colours not within colour_map
-    //
-    //}
-  } // inactive colours set elsewhere   
+//     //if(palettelist.ptr->flags.fColours_from_map){
+//       colour_selected_id[i] = pCONT_iLight->palettelist.ptr->colour_map_id[i];    
+//     //}else{
+//       // USE * for random colours not within colour_map
+//     //
+//     //}
+//   } // inactive colours set elsewhere   
   
-  /*** 
-   * Send Page WITH fields that have been selected, palette type then colours set
-   * */
+//   /*** 
+//    * Send Page WITH fields that have been selected, palette type then colours set
+//    * */
 
-  // uint8_t element_list_num = 9;
-  /***
-   * 0 = Amount number
-            as % 0-10-25-50-75-100 of max leds ie 50% of 50 leds would be 25
-   * 1 = Amount Percentage
-            % 0-10-25-50-75-100
-   * 2 = Animate Order
-            inorder-random-rotate
-   * 3 = Animate Rate/Frequency
-            1-2-3-4-5-10-15-20-30
-   * 4 = Animate Time
-            1-2-3-4-5-10-15-20-30
-   * 5 = Animate Transition Method
-            instant-blend
-   * 6 = Animation Mode
-            presets-flasher-scenes-notifications
-   * 7 = Palette
-            list as before
-   * 8 = Flasher Method
-            Xmas flashers, only show when mode as active
-   * */
+//   // uint8_t element_list_num = 9;
+//   /***
+//    * 0 = Amount number
+//             as % 0-10-25-50-75-100 of max leds ie 50% of 50 leds would be 25
+//    * 1 = Amount Percentage
+//             % 0-10-25-50-75-100
+//    * 2 = Animate Order
+//             inorder-random-rotate
+//    * 3 = Animate Rate/Frequency
+//             1-2-3-4-5-10-15-20-30
+//    * 4 = Animate Time
+//             1-2-3-4-5-10-15-20-30
+//    * 5 = Animate Transition Method
+//             instant-blend
+//    * 6 = Animation Mode
+//             presets-flasher-scenes-notifications
+//    * 7 = Palette
+//             list as before
+//    * 8 = Flasher Method
+//             Xmas flashers, only show when mode as active
+//    * */
 
-  // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-  int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-                                                  sizeof(pixels_to_update_as_percentage_map),
-                                                  animation.transition.pixels_to_update_as_percentage.val
-                                                 );
+//   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
+//                                                   sizeof(pixels_to_update_as_percentage_map),
+//                                                   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val
+//                                                  );
 
-                                                 // ADD getpercetnage that checks flag to mode its in?
+//                                                  // ADD getpercetnage that checks flag to mode its in?
 
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.pixels_to_update_as_percentage.val,
-    perc_index,
-    pixels_to_update_as_percentage_map[perc_index],
-    sizeof(pixels_to_update_as_percentage_map)
-  );
+//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//     pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val,
+//     perc_index,
+//     pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(pixels_to_update_as_percentage_map)
+//   );
 
-  if(perc_index<0){
-    //not found
-    perc_index = 0;// send 0
-  }
+//   if(perc_index<0){
+//     //not found
+//     perc_index = 0;// send 0
+//   }
   
-  uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-                                                  sizeof(rate_map_secs),
-                                                  animation.transition.rate_ms.val/1000
-                                                 );
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
+//                                                   sizeof(rate_map_secs),
+//                                                   pCONT_iLight->animation.transition.rate_ms.val/1000
+//                                                  );
                                          
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.rate_ms.val/1000,
-    rate_index,
-    rate_map_secs[rate_index],
-    sizeof(rate_map_secs)
-  );
+//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//     pCONT_iLight->animation.transition.rate_ms.val/1000,
+//     rate_index,
+//     rate_map_secs[rate_index],
+//     sizeof(rate_map_secs)
+//   );
 
-  uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
-                                                  sizeof(time_map_secs),
-                                                  animation.transition.time_ms.val/1000
-                                                 );
+//   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
+//                                                   sizeof(time_map_secs),
+//                                                   pCONT_iLight->animation.transition.time_ms.val/1000
+//                                                  );
                                             
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.time_ms.val/1000,
-    time_index,
-    time_map_secs[time_index],
-    sizeof(time_map_secs)
-  );
+//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//     pCONT_iLight->animation.transition.time_ms.val/1000,
+//     time_index,
+//     time_map_secs[time_index],
+//     sizeof(time_map_secs)
+//   );
 
 
-  // pCONT_web->WSStartAppend_P2(buffer, S_COLOUR_PALETTE_EDITOR);
+//   // pCONT_web->WSStartAppend_P2(buffer, S_COLOUR_PALETTE_EDITOR);
   
-  // pCONT_web->WSBufferAppend_P2(buffer, "<style>");
-  // pCONT_web->WSBufferAppend_P2(buffer, PM_HTTP_HEAD_STYLE1_MINIMAL,
-  //   pCONT_web->WebColor(pCONT_set->COL_FORM), 
-  //   pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
-  //   pCONT_web->WebColor(pCONT_set->COL_BUTTON),  pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
-  // );
-  // pCONT_web->WSBufferAppend_P2(buffer, "</style>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "<style>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, PM_HTTP_HEAD_STYLE1_MINIMAL,
+//   //   pCONT_web->WebColor(pCONT_set->COL_FORM), 
+//   //   pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
+//   //   pCONT_web->WebColor(pCONT_set->COL_BUTTON),  pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
+//   // );
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</style>");
   
-  // pCONT_web->WSBufferAppend_P2(buffer, "</head>" "<body>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</head>" "<body>");
 
-  // pCONT_web->WSBufferAppend_P2(buffer, HTTP_STYLE_TITLE_CONTAINER_HEAD, 
-  //   pCONT_web->WebColor(pCONT_set->COL_TEXT),
-  //   pCONT_web->WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
-  //   PROJECT_NAME_CTR, pCONT_set->Settings.system_name.friendly
-  // );
+//   // pCONT_web->WSBufferAppend_P2(buffer, HTTP_STYLE_TITLE_CONTAINER_HEAD, 
+//   //   pCONT_web->WebColor(pCONT_set->COL_TEXT),
+//   //   pCONT_web->WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
+//   //   PROJECT_NAME_CTR, pCONT_set->Settings.system_name.friendly
+//   // );
 
-  // // pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_RGB_COLOUR_SELECTOR, GetPaletteFriendlyName());
+//   // // pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_RGB_COLOUR_SELECTOR, GetPaletteFriendlyName());
 
-  // // pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_RGB_LOAD_PIXELS);
+//   // // pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_RGB_LOAD_PIXELS);
   
-  // // if(CheckPaletteIsEditable(&palettelist.users[animation.palette_id])){
+//   // // if(CheckPaletteIsEditable(&palettelist.users[pCONT_iLight->animation.palette_id])){
 
-  // //   pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
-  // //                             "Edit Name",
-  // //                             pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id), //previous name
-  // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
-  // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
-  // //                             "Enter New Palette Name (maximum 20 characters)",
-  // //                             pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
-  // //                           );
+//   // //   pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
+//   // //                             "Edit Name",
+//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
+//   // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
+//   // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
+//   // //                             "Enter New Palette Name (maximum 20 characters)",
+//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+//   // //                           );
 
-  // // }
+//   // // }
 
-  // //   //   palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?
-  // //   //     GetColourMapNamebyID(colour_selected_id[row_id]):GetEstimatedColourMapNamebyColour()
+//   // //   //   palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?
+//   // //   //     GetColourMapNamebyID(colour_selected_id[row_id]):GetEstimatedColourMapNamebyColour()
       
       
       
-  // //   // ID(colour_selected_id[row_id]),
+//   // //   // ID(colour_selected_id[row_id]),
   
-  // // // if not users, then only show number of static fields
-  // // element_list_num = CheckPaletteIsEditable(palettelist.ptr) ? 
-  // //       PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(palettelist.ptr);
+//   // // // if not users, then only show number of static fields
+//   // // element_list_num = CheckPaletteIsEditable(palettelist.ptr) ? 
+//   // //       PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(palettelist.ptr);
 
-  // // // Send Table
-  // // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<br/><p></p><b>" "Pixel Colour (Saturation %)" "</b><table>"));
-  // // for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
+//   // // // Send Table
+//   // // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<br/><p></p><b>" "Pixel Colour (Saturation %)" "</b><table>"));
+//   // // for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
 
-  // //   switch(palettelist.ptr->flags.fMapIDs_Type){
-  // //     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
-  // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-  // //         WebColorFromHsbColour(set_colours[row_id]),
-  // //         row_id+1, //to show 1-20 pixel number
-  // //         GetColourMapNamebyID(colour_selected_id[row_id]),// "??"
-  // //         ""
-  // //         // palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?"":"*"
-  // //       );
+//   // //   switch(palettelist.ptr->flags.fMapIDs_Type){
+//   // //     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
+//   // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
+//   // //         WebColorFromHsbColour(set_colours[row_id]),
+//   // //         row_id+1, //to show 1-20 pixel number
+//   // //         GetColourMapNamebyID(colour_selected_id[row_id]),// "??"
+//   // //         ""
+//   // //         // palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?"":"*"
+//   // //       );
 
-  // //     break;
-  // //     default:{
-  // //       int16_t pixel_num = 0;
-  // //       HsbColor colour = GetColourFromPalette(palettelist.ptr,row_id,&pixel_num);
+//   // //     break;
+//   // //     default:{
+//   // //       int16_t pixel_num = 0;
+//   // //       HsbColor colour = GetColourFromPalette(palettelist.ptr,row_id,&pixel_num);
 
-  // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-  // //         WebColorFromHsbColour(colour),
-  // //         row_id+1,//to show 1-20 pixel number
-  // //         GetColourMapNameNearestbyColour(colour),// "??"
-  // //         "*"
-  // //       );
-  // //     }
-  // //     break;
+//   // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
+//   // //         WebColorFromHsbColour(colour),
+//   // //         row_id+1,//to show 1-20 pixel number
+//   // //         GetColourMapNameNearestbyColour(colour),// "??"
+//   // //         "*"
+//   // //       );
+//   // //     }
+//   // //     break;
 
-  // //   }
+//   // //   }
 
 
-  // //   pCONT_web->WSBufferAppend_P2(buffer, 
-  // //     PSTR("<tr><td style='width:200px'><b>%s</b></td><td style='width:216px'><select id='g%d' name='g%d'></select></td></tr>"), //190/176 to 120/346
-  // //       colour_title_ctr, 
-  // //       row_id_selected[row_id], 
-  // //       row_id_selected[row_id]
-  // //   );
-  // // }
-  // // pCONT_web->WSBufferAppend_P2(buffer, PSTR("</table>"));
-  // // if(palettelist.ptr->flags.fMapIDs_Type!=MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID){
-  // //   BufferWriterI->Append_P(buffer, PSTR("<tr>%s</tr>"),"* Indicates colour is not from selected options, showing nearest colour.");
-  // // }
+//   // //   pCONT_web->WSBufferAppend_P2(buffer, 
+//   // //     PSTR("<tr><td style='width:200px'><b>%s</b></td><td style='width:216px'><select id='g%d' name='g%d'></select></td></tr>"), //190/176 to 120/346
+//   // //       colour_title_ctr, 
+//   // //       row_id_selected[row_id], 
+//   // //       row_id_selected[row_id]
+//   // //   );
+//   // // }
+//   // // pCONT_web->WSBufferAppend_P2(buffer, PSTR("</table>"));
+//   // // if(palettelist.ptr->flags.fMapIDs_Type!=MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID){
+//   // //   BufferWriterI->Append_P(buffer, PSTR("<tr>%s</tr>"),"* Indicates colour is not from selected options, showing nearest colour.");
+//   // // }
 
-  // // BufferWriterI->Append_P(HTTP_FORM_RGB_SELECTOR2, pCONT_set->Settings.syslog_host, pCONT_set->Settings.syslog_port, pCONT_set->Settings.tele_period);
+//   // // BufferWriterI->Append_P(HTTP_FORM_RGB_SELECTOR2, pCONT_set->Settings.syslog_host, pCONT_set->Settings.syslog_port, pCONT_set->Settings.tele_period);
       
       
-  // // if(CheckPaletteIsEditable(palettelist.ptr)){
-  // //   BufferWriterI->Append_P(HTTP_FORM_END);
-  // // }else{
-  // //   BufferWriterI->Append_P(HTTP_FORM_END_NOSAVE);
-  // // }
-  // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<div class='ani_pal_edit_con'></div>")); //animations control container
+//   // // if(CheckPaletteIsEditable(palettelist.ptr)){
+//   // //   BufferWriterI->Append_P(HTTP_FORM_END);
+//   // // }else{
+//   // //   BufferWriterI->Append_P(HTTP_FORM_END_NOSAVE);
+//   // // }
+//   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<div class='ani_pal_edit_con'></div>")); //animations control container
   
-  // // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_PALETTE_EDITOR);
-  // // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_MIXER_EDITOR);
+//   // // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_PALETTE_EDITOR);
+//   // // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_MIXER_EDITOR);
 
-  // pCONT_web->WSSpaceButtonAppend2(buffer, BUTTON_MAIN);
+//   // pCONT_web->WSSpaceButtonAppend2(buffer, BUTTON_MAIN);
 
-  // pCONT_web->WSBufferAppend_SystemVersionBar(buffer);
+//   // pCONT_web->WSBufferAppend_SystemVersionBar(buffer);
 
-  // // #ifdef SEND_MINIMAL_STYLESHEET1 // Minimal
-  //   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<link rel='stylesheet' href='" WEB_HANDLER_STYLE_WEB_BASIC_ROOT "'>")); 
-  // // #endif
+//   // // #ifdef SEND_MINIMAL_STYLESHEET1 // Minimal
+//   //   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<link rel='stylesheet' href='" WEB_HANDLER_STYLE_WEB_BASIC_ROOT "'>")); 
+//   // // #endif
   
-  // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<script type='text/javascript' src='"
-  //   "/" WEB_HANDLE_RGB_COLOUR_PALETTE_EDITOR "/load_script.js" "'></script>"));
+//   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<script type='text/javascript' src='"
+//   //   "/" WEB_HANDLE_RGB_COLOUR_PALETTE_EDITOR "/load_script.js" "'></script>"));
 
-  // pCONT_web->WSBufferAppend_P2(buffer, "</body></html>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</body></html>");
 
-} // end function
+// } // end function
 
 
 
@@ -886,124 +886,124 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
 
 
 
-/**
- * Send minimal script
- * Send minimal style of page
- * Send all needed script asks
- * Send all needed javascript asks 
- * */
-void mRGBAnimator::BuildPage_RGBLightSettings(char** buffer)
-{
+// /**
+//  * Send minimal script
+//  * Send minimal style of page
+//  * Send all needed script asks
+//  * Send all needed javascript asks 
+//  * */
+// void mRGBAnimator::BuildPage_RGBLightSettings(char** buffer)
+// {
   
 
-  /*** 
-   * Send Page WITH fields that have been selected, palette type then colours set
-   * */
+//   /*** 
+//    * Send Page WITH fields that have been selected, palette type then colours set
+//    * */
 
-  uint8_t element_list_num = 9;
-  /***
-   * 0 = Amount number
-            as % 0-10-25-50-75-100 of max leds ie 50% of 50 leds would be 25
-   * 1 = Amount Percentage
-            % 0-10-25-50-75-100
-   * 2 = Animate Order
-            inorder-random-rotate
-   * 3 = Animate Rate/Frequency
-            1-2-3-4-5-10-15-20-30
-   * 4 = Animate Time
-            1-2-3-4-5-10-15-20-30
-   * 5 = Animate Transition Method
-            instant-blend
-   * 6 = Animation Mode
-            presets-flasher-scenes-notifications
-   * 7 = Palette
-            list as before
-   * 8 = Flasher Method
-            Xmas flashers, only show when mode as active
-   * */
+//   uint8_t element_list_num = 9;
+//   /***
+//    * 0 = Amount number
+//             as % 0-10-25-50-75-100 of max leds ie 50% of 50 leds would be 25
+//    * 1 = Amount Percentage
+//             % 0-10-25-50-75-100
+//    * 2 = Animate Order
+//             inorder-random-rotate
+//    * 3 = Animate Rate/Frequency
+//             1-2-3-4-5-10-15-20-30
+//    * 4 = Animate Time
+//             1-2-3-4-5-10-15-20-30
+//    * 5 = Animate Transition Method
+//             instant-blend
+//    * 6 = Animation Mode
+//             presets-flasher-scenes-notifications
+//    * 7 = Palette
+//             list as before
+//    * 8 = Flasher Method
+//             Xmas flashers, only show when mode as active
+//    * */
 
-  // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-  int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-                                                  sizeof(pixels_to_update_as_percentage_map),
-                                                  animation.transition.pixels_to_update_as_percentage.val
-                                                 );
+//   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
+//                                                   sizeof(pixels_to_update_as_percentage_map),
+//                                                   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val
+//                                                  );
 
-                                                 // ADD getpercetnage that checks flag to mode its in?
+//                                                  // ADD getpercetnage that checks flag to mode its in?
 
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.pixels_to_update_as_percentage.val,
-    perc_index,
-    pixels_to_update_as_percentage_map[perc_index],
-    sizeof(pixels_to_update_as_percentage_map)
-  );
+//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//     pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val,
+//     perc_index,
+//     pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(pixels_to_update_as_percentage_map)
+//   );
 
-  if(perc_index<0){
-    //not found
-    perc_index = 0;// send 0
-  }
+//   if(perc_index<0){
+//     //not found
+//     perc_index = 0;// send 0
+//   }
   
-  uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-                                                  sizeof(rate_map_secs),
-                                                  animation.transition.rate_ms.val/1000
-                                                 );
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
+//                                                   sizeof(rate_map_secs),
+//                                                   pCONT_iLight->animation.transition.rate_ms.val/1000
+//                                                  );
                                          
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-  //   animation.transition.rate_ms.val/1000,
-  //   rate_index,
-  //   rate_map_secs[rate_index],
-  //   sizeof(rate_map_secs)
-  // );
+//   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//   //   pCONT_iLight->animation.transition.rate_ms.val/1000,
+//   //   rate_index,
+//   //   rate_map_secs[rate_index],
+//   //   sizeof(rate_map_secs)
+//   // );
 
-  // uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
-  //                                                 sizeof(time_map_secs),
-  //                                                 animation.transition.time_ms.val/1000
-  //                                                );
+//   // uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
+//   //                                                 sizeof(time_map_secs),
+//   //                                                 pCONT_iLight->animation.transition.time_ms.val/1000
+//   //                                                );
                                             
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-  //   animation.transition.time_ms.val/1000,
-  //   time_index,
-  //   time_map_secs[time_index],
-  //   sizeof(time_map_secs)
-  // );
+//   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
+//   //   pCONT_iLight->animation.transition.time_ms.val/1000,
+//   //   time_index,
+//   //   time_map_secs[time_index],
+//   //   sizeof(time_map_secs)
+//   // );
 
 
-  // pCONT_web->WSStartAppend_P2(buffer, "LED Light Controls1");
+//   // pCONT_web->WSStartAppend_P2(buffer, "LED Light Controls1");
   
-  // pCONT_web->WSBufferAppend_P2(buffer, "<style>");
-  // pCONT_web->WSBufferAppend_P2(buffer, PM_HTTP_HEAD_STYLE1_MINIMAL,
-  //   pCONT_web->WebColor(pCONT_set->COL_FORM), 
-  //   pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
-  //   pCONT_web->WebColor(pCONT_set->COL_BUTTON),  pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
-  // );
-  // pCONT_web->WSBufferAppend_P2(buffer, "</style>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "<style>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, PM_HTTP_HEAD_STYLE1_MINIMAL,
+//   //   pCONT_web->WebColor(pCONT_set->COL_FORM), 
+//   //   pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
+//   //   pCONT_web->WebColor(pCONT_set->COL_BUTTON),  pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
+//   // );
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</style>");
   
-  // pCONT_web->WSBufferAppend_P2(buffer, "</head>" "<body>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</head>" "<body>");
 
-  // pCONT_web->WSBufferAppend_P2(buffer, HTTP_STYLE_TITLE_CONTAINER_HEAD, 
-  //   pCONT_web->WebColor(pCONT_set->COL_TEXT),
-  //   pCONT_web->WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
-  //   PROJECT_NAME_CTR, pCONT_set->Settings.system_name.friendly
-  // );
+//   // pCONT_web->WSBufferAppend_P2(buffer, HTTP_STYLE_TITLE_CONTAINER_HEAD, 
+//   //   pCONT_web->WebColor(pCONT_set->COL_TEXT),
+//   //   pCONT_web->WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
+//   //   PROJECT_NAME_CTR, pCONT_set->Settings.system_name.friendly
+//   // );
   
-  // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<div class='ani_controls_con'></div>")); //animations control container
+//   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<div class='ani_controls_con'></div>")); //animations control container
   
-  // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_PALETTE_EDITOR);
-  // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_MIXER_EDITOR);
+//   // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_PALETTE_EDITOR);
+//   // pCONT_web->WSButtonAppend2(buffer, BUTTON_COLOUR_MIXER_EDITOR);
 
-  // pCONT_web->WSSpaceButtonAppend2(buffer, BUTTON_MAIN);
+//   // pCONT_web->WSSpaceButtonAppend2(buffer, BUTTON_MAIN);
 
-  // pCONT_web->WSBufferAppend_SystemVersionBar(buffer);
+//   // pCONT_web->WSBufferAppend_SystemVersionBar(buffer);
 
-  // // #ifdef SEND_MINIMAL_STYLESHEET1 // Minimal
-  //   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<link rel='stylesheet' href='" WEB_HANDLER_STYLE_WEB_BASIC_ROOT "'>")); 
-  // // #endif
+//   // // #ifdef SEND_MINIMAL_STYLESHEET1 // Minimal
+//   //   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<link rel='stylesheet' href='" WEB_HANDLER_STYLE_WEB_BASIC_ROOT "'>")); 
+//   // // #endif
   
-  // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<script type='text/javascript' src='"
-  //   "/" D_WEB_HANDLE_RGB_CONTROLS "/load_script.js" "'></script>"));
+//   // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<script type='text/javascript' src='"
+//   //   "/" D_WEB_HANDLE_RGB_CONTROLS "/load_script.js" "'></script>"));
 
-  // pCONT_web->WSBufferAppend_P2(buffer, "</body></html>");
+//   // pCONT_web->WSBufferAppend_P2(buffer, "</body></html>");
 
-} // end function
+// } // end function
 
 
 
@@ -1028,7 +1028,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 ********************************************************************************************************************/
 
 
-// #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+// #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
 
 // /******** Page items *****
 //  * 
@@ -1055,7 +1055,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //   uint8_t row_id_selected[PALETTELIST_COLOUR_AMOUNT_MAX];
 //   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){row_id_selected[j] = j;}
 
-//   SetPaletteListPtrFromID(animation.palette_id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 //   uint8_t palette_selected_id = palettelist.ptr->id;
 
 //   /***
@@ -1204,11 +1204,11 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
 //   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
 //                                                   sizeof(pixels_to_update_as_percentage_map),
-//                                                   animation.transition.pixels_to_update_as_percentage
+//                                                   pCONT_iLight->animation.transition.pixels_to_update_as_percentage
 //                                                  );
 
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-//     animation.transition.pixels_to_update_as_percentage,
+//     pCONT_iLight->animation.transition.pixels_to_update_as_percentage,
 //     perc_index,
 //     pixels_to_update_as_percentage_map[perc_index],
 //     sizeof(pixels_to_update_as_percentage_map)
@@ -1222,12 +1222,12 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
   
 //   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
 //                                                   sizeof(rate_map_secs),
-//                                                   animation.transition.rate_ms/1000
+//                                                   pCONT_iLight->animation.transition.rate_ms/1000
 //                                                  );
 
                                                  
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-//     animation.transition.rate_ms/1000,
+//     pCONT_iLight->animation.transition.rate_ms/1000,
 //     rate_index,
 //     rate_map_secs[rate_index],
 //     sizeof(rate_map_secs)
@@ -1238,12 +1238,12 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //   BufferWriterI->Append_P(HTTP_SCRIPT_MODULE_TEMPLATE_MIXER_EDITOR);
 //   BufferWriterI->Append_P(HTTP_SCRIPT_MODULE1_MIXER_EDITOR, 
 //                               perc_index,  // "ld('rgb_controls?up=1',x0);" // up = update percentage
-//                               animation.transition.order_id,                           // "ld('rgb_controls?po=1',x1);" // po = pixel order
+//                               pCONT_iLight->animation.transition.order_id,                           // "ld('rgb_controls?po=1',x1);" // po = pixel order
 //                               rate_index,    // "ld('rgb_controls?ra=1',x2);" // ra = rate
-//                               (uint8_t)round(animation.transition.time_ms/1000),    // "ld('rgb_controls?pr=1',x3);" // pr = period time
-//                               animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
-//                               animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
-//                               animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
+//                               (uint8_t)round(pCONT_iLight->animation.transition.time_ms/1000),    // "ld('rgb_controls?pr=1',x3);" // pr = period time
+//                               pCONT_iLight->animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
+//                               pCONT_iLight->animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
+//                               pCONT_iLight->animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
 //                               flashersettings.function,                             // "ld('rgb_controls?fl=1',x7);" // fl  = flasher  
 //                               mixer.running_id                                 // "ld('rgb_controls?mi=1',x8);" // mi  = mixer running id                          
 //                             ); // Send lists
@@ -1824,8 +1824,8 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-  //GetPaletteListPtrFromID(animation.palette_id);
-  pCONT_iLight->SetPaletteListPtrFromID(animation.palette_id);
+  //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
   
   // LOAD VALUES 
   uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
@@ -1847,14 +1847,14 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   pCONT_web->WebAppend_Button2(PSTR("Load Palette"),"loadpixels","bora");
 
 
-  if(pCONT_iLight->CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[animation.palette_id])){
+  if(pCONT_iLight->CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
     JsonBuilderI->AppendBuffer(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
                               PSTR("Edit Name"),
-                              pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id), //previous name
+                              pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
                               WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
                               WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
                               PSTR("Enter New Palette Name (maximum 20 characters)"),
-                              pCONT_iLight->GetPaletteFriendlyNameByID(animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+                              pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
                             );
   }
 
@@ -2078,13 +2078,13 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
                                                   sizeof(pixels_to_update_as_percentage_map),
-                                                  animation.transition.pixels_to_update_as_percentage.val
+                                                  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val
                                                  );
 
                                                  // ADD getpercetnage that checks flag to mode its in?
 
   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.pixels_to_update_as_percentage.val,
+    pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val,
     perc_index,
     pixels_to_update_as_percentage_map[perc_index],
     sizeof(pixels_to_update_as_percentage_map)
@@ -2099,12 +2099,12 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
   
   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
                                                   sizeof(rate_map_secs),
-                                                  animation.transition.rate_ms.val/1000
+                                                  pCONT_iLight->animation.transition.rate_ms.val/1000
                                                  );
 
                                                  
   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.rate_ms.val/1000,
+    pCONT_iLight->animation.transition.rate_ms.val/1000,
     rate_index,
     rate_map_secs[rate_index],
     sizeof(rate_map_secs)
@@ -2114,12 +2114,12 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
   
   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
                                                   sizeof(time_map_secs),
-                                                  animation.transition.time_ms.val/1000
+                                                  pCONT_iLight->animation.transition.time_ms.val/1000
                                                  );
 
                                                  
   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-    animation.transition.time_ms.val/1000,
+    pCONT_iLight->animation.transition.time_ms.val/1000,
     time_index,
     time_map_secs[time_index],
     sizeof(time_map_secs)
@@ -2130,12 +2130,12 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
   
   // pCONT_web->WSBufferAppend_P2(buffer, HTTP_SCRIPT_MODULE1b, 
                             //   perc_index,  // "ld('rgb_controls?up=1',x0);" // up = update percentage
-                            //   animation.transition.order_id,                           // "ld('rgb_controls?po=1',x1);" // po = pixel order
+                            //   pCONT_iLight->animation.transition.order_id,                           // "ld('rgb_controls?po=1',x1);" // po = pixel order
                             //   rate_index,    // "ld('rgb_controls?ra=1',x2);" // ra = rate
                             //   time_index,    // "ld('rgb_controls?pr=1',x3);" // pr = period time
-                            //   animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
-                            //   animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
-                            //   animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
+                            //   pCONT_iLight->animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
+                            //   pCONT_iLight->animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
+                            //   pCONT_iLight->animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
                             // //   flashersettings.function,                             // "ld('rgb_controls?fl=1',x7);" // fl  = flasher  
                             // //   mixer.running_id                                 // "ld('rgb_controls?mi=1',x8);" // mi  = mixer running id                          
                             // // #else
@@ -2169,7 +2169,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val));
+      JsonBuilderI->Add("evl",GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2201,7 +2201,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",(uint16_t)round(animation.transition.rate_ms.val/1000));
+      JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.rate_ms.val/1000));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2217,7 +2217,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",(uint16_t)round(animation.transition.time_ms.val/1000));
+      JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.time_ms.val/1000));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
   
@@ -2270,7 +2270,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
   JsonBuilderI->Array_End();
 
 
-  #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   // JsonBuilderI->Array_Start("g7");// Class name
   //   JsonBuilderI->Level_Start();
   //     JsonBuilderI->AddKey("eihr");           // function
@@ -2327,7 +2327,7 @@ void mRGBAnimator::Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request){
 void mRGBAnimator::WebAppend_Root_Draw_Table(){
 
   //WebAppend_Root_Draw_RGBLive();
-  // if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+  // if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_FLASHER_ID){
     WebAppend_Root_Draw_RGBPalette();
   // }
   WebAppend_Root_Draw_PaletteSelect_Placeholder();
@@ -2448,7 +2448,7 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
 void mRGBAnimator::WebAppend_Root_RGBPalette()
 {
 
-  pCONT_iLight->SetPaletteListPtrFromID(animation.palette_id);
+  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 
   uint8_t length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length
   uint8_t pal_length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length

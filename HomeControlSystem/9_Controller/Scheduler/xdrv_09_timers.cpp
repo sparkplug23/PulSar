@@ -266,7 +266,7 @@
 //   if (RtcTime.valid) {
 //     //Serial.println("RtcTime.valid");
 //     if (!RtcTime.hour && !RtcTime.minute && !RtcTime.second) { TimerSetRandomWindows(); }  // Midnight
-//     if (Settings.flag_network_phaseout.timers_enable && (uptime > 60) && (RtcTime.minute != timer_last_minute)) {  // Execute from one minute after restart every minute only once
+//     if (Settings.flag_network.timers_enable && (uptime > 60) && (RtcTime.minute != timer_last_minute)) {  // Execute from one minute after restart every minute only once
 
 //       timer_last_minute = RtcTime.minute;
 //       int16_t time = (RtcTime.hour *60) + RtcTime.minute;
@@ -308,7 +308,7 @@
 //         }//arm
 //       }//timer loop
 //     }else{
-//       // Serial.print("Settings.flag_network_phaseout.timers_enable");Serial.println(Settings.flag_network_phaseout.timers_enable);
+//       // Serial.print("Settings.flag_network.timers_enable");Serial.println(Settings.flag_network.timers_enable);
 //       //   Serial.print("uptime");Serial.println(uptime);
 //       //     Serial.print("RtcTime.minute");Serial.println(RtcTime.minute);
 //       //       Serial.print("timer_last_minute");Serial.println(timer_last_minute);
@@ -472,14 +472,14 @@
 //   else if (CMND_TIMERS == command_code) {
 //     if (XdrvMailbox.data_len) {
 //       if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 1)) {
-//         Settings.flag_network_phaseout.timers_enable = XdrvMailbox.payload;
+//         Settings.flag_network.timers_enable = XdrvMailbox.payload;
 //       }
 //       if (XdrvMailbox.payload == 2) {
-//         Settings.flag_network_phaseout.timers_enable = !Settings.flag_network_phaseout.timers_enable;
+//         Settings.flag_network.timers_enable = !Settings.flag_network.timers_enable;
 //       }
 //     }
 
-//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_network_phaseout.timers_enable));
+//     Response_P(S_JSON_COMMAND_SVALUE, command, GetStateText(Settings.flag_network.timers_enable));
 //     MqttPublishPrefixTopic_P(RESULT_OR_STAT, command);
 
 //     uint8_t jsflg = 0;
@@ -731,7 +731,7 @@
 //   WSBufferAppend_P(HTTP_TIMER_SCRIPT5, MAX_TIMERS, devices_present);
 //   WSBufferAppend_P(HTTP_TIMER_SCRIPT6, devices_present);
 //   WSContentSendStyle_P(HTTP_TIMER_STYLE, WebColor(COL_FORM));
-//   WSBufferAppend_P(HTTP_FORM_TIMER1, (Settings.flag_network_phaseout.timers_enable) ? " checked" : "");
+//   WSBufferAppend_P(HTTP_FORM_TIMER1, (Settings.flag_network.timers_enable) ? " checked" : "");
 //   for (uint8_t i = 0; i < MAX_TIMERS; i++) {
 //     WSBufferAppend_P(PSTR("%s%u"), (i > 0) ? "," : "", Settings.timer[i].data);
 //   }
@@ -752,10 +752,10 @@
 //   char tmp[MAX_TIMERS *12];  // Need space for MAX_TIMERS x 10 digit numbers separated by a comma
 //   Timer timer;
 
-//   Settings.flag_network_phaseout.timers_enable = WebServer->hasParam("e0");
+//   Settings.flag_network.timers_enable = WebServer->hasParam("e0");
 //   WebGetArg(request,"t0", tmp, sizeof(tmp));
 //   char *p = tmp;
-//   snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_MQTT D_JSON_TIMERS " %d"), Settings.flag_network_phaseout.timers_enable);
+//   snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_MQTT D_JSON_TIMERS " %d"), Settings.flag_network.timers_enable);
 //   for (uint8_t i = 0; i < MAX_TIMERS; i++) {
 //     timer.data = strtol(p, &p, 10);
 //     p++;  // Skip comma

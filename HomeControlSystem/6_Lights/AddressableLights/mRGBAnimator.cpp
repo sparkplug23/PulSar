@@ -11,12 +11,7 @@
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-//overload fix when only one parameter is called
-// int8_t mRGBAnimator::Tasker(uint8_t function, uint8_t param1){  
-//   JsonObjectConst dummy; return Tasker(function, dummy);
-// }
-// template<typename T>
-int8_t mRGBAnimator::Tasker(uint8_t function){//}, T param1){  
+int8_t mRGBAnimator::Tasker(uint8_t function){ 
 
   int8_t function_result = 0;
 
@@ -33,15 +28,15 @@ int8_t mRGBAnimator::Tasker(uint8_t function){//}, T param1){
 
   // Check if light is being handled by another function eg ws2812 (long term probably included into this as commands pipe into this)
   if(pCONT_set->Settings.light_settings.type != LT_WS2812){ 
-    //Serial.println("Settings.light_settings.type != LT_WS2812"); Serial.flush();
-    #ifdef ENABLE_DEBUG_BOOT_DELAYS
-    delay(2000);
-    #endif
-    //return 0; 
+  //   //Serial.println("Settings.light_settings.type != LT_WS2812"); Serial.flush();
+  //   #ifdef ENABLE_DEBUG_BOOT_DELAYS
+  //   delay(2000);
+  //   #endif
+    return 0; 
   }
-  #ifdef DISABLE_TEMPORARY_RGBANIMATOR
-    return 0;
-  #endif
+  // #ifdef DISABLE_TEMPORARY_RGBANIMATOR
+  //   return 0;
+  // #endif
 
   // if animations are enabled
   // pCONT_set->Settings.enable_sleep = false;
@@ -146,19 +141,6 @@ int8_t mRGBAnimator::Tasker(uint8_t function, JsonObjectConst obj){
 
 void mRGBAnimator::pre_init(void){ 
   
-  // if (pCONT_set->pin[GPIO_RGB_DATA_ID] < 99) {  // not set when 255
-  //   //pin_data = pCONT_set->pin[GPIO_RGB_DATA_ID];
-  //   // #ifdef ENABLE_LOG_LEVEL_INFO
-  //   //   AddLog_P(LOG_LEVEL_INFO,PSTR("DIO D: " "Pin %s = GPIO%02d"),"GPIO_RGB_DATA",pin_data);
-  //   // #endif
-  // }
-  // if (pCONT_set->pin[GPIO_RGB_CLOCK_ID] < 99) {  // not set when 255
-  //   // pin_clock = pCONT_set->pin[GPIO_RGB_CLOCK_ID];
-  //   // #ifdef ENABLE_LOG_LEVEL_INFO
-  //   //   AddLog_P(LOG_LEVEL_INFO,PSTR("DIO C: " "Pin %s = GPIO%02d"),"GPIO_RGB_CLOCK",pin_clock);
-  //   // #endif
-  // }
-
   // Allow runtime changes of animation size
   strip_size = STRIP_SIZE_MAX; 
   animator_strip_size = ANIMATOR_SIZE_MAX<=STRIP_SIZE_MAX?ANIMATOR_SIZE_MAX:STRIP_SIZE_MAX; 
@@ -178,7 +160,7 @@ void mRGBAnimator::init(void){
     stripbus = new NeoPixelBus<DotStarBgrFeature, DotStarMethod>(strip_size_tmp, pin_clock, pCONT_set->pin[GPIO_RGB_DATA_ID]);
   #else
     #ifdef ENABLE_DEBUG_ESP_DECODER
-      stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 5);//pCONT_set->pin[GPIO_RGB_DATA_ID]);
+      stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 5);
     #else
       stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, pCONT_set->pin[GPIO_RGB_DATA_ID]);
     #endif
@@ -186,22 +168,10 @@ void mRGBAnimator::init(void){
 
   uint16_t animator_strip_size_tmp = animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
 
-
   animations_control = new NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
 
-  animation.transition.pixels_to_update_as_percentage.val = 100;
+  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;
   ledout.length = animator_strip_size_tmp; //ledout.length needs split out to allow mutiple repeated anaimations to output string
-
-  // #ifdef PIXEL_HARDWARE_COLOR_ORDER_GRB
-  //   settings.pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_GRB_ID;
-  // #else
-  //   settings.pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
-  // #endif//PIXEL_HARDWARE_COLOR_ORDER_GRB
-
-  // // If defined in header directly then override
-  // #ifdef PIXEL_HARDWARE_COLOR_ORDER_CUSTOM_ID
-  //   settings.pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_CUSTOM_ID;
-  // #endif //PIXEL_HARDWARE_COLOR_ORDER_CUSTOM_ID
 
   randomSeed(analogRead(0));
   
@@ -211,7 +181,6 @@ void mRGBAnimator::init(void){
 
   // Clear stored light output
   memset(&hsbcolour,0,sizeof(hsbcolour));
-// pCONT_set->Settings.flag_animations.clear_on_reboot = 1;
   // Start display
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
@@ -223,15 +192,7 @@ void mRGBAnimator::init(void){
     stripbus->Show();
   }
 
-
-
-
-// delay(3000);
-
-   //ON FIRST BOOT -- MOVE ELSEWHERE
-  animation_override.fRefreshAllPixels = true;
-
-// Serial.println("1"); Serial.flush();
+  pCONT_iLight->animation_override.fRefreshAllPixels = true;
 
   GenerateAnimationPixelAmountMaps();
 
@@ -240,21 +201,17 @@ void mRGBAnimator::init(void){
   // New sub init that configures subfunctions
   // init_ColourMap();
   
-// Serial.println("2"); Serial.flush();
-
   uint16_t buffer_length = 0;
   char* buffer = pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;
 
   for(uint8_t i=0;i<20;i++){
    buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
-   }
+  }
    
   #ifndef DISABLE_SERIAL_LOGGING
    Serial.println(buffer);
-   #endif
+  #endif
 
-
-// Serial.println("3"); Serial.flush();
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     init_NotificationPanel();
   #endif
@@ -263,18 +220,19 @@ void mRGBAnimator::init(void){
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
   #endif
-  #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   init_flasher_settings();
+  #endif
+  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   init_mixer_defaults();
   #endif
 
-  pCONT_iLight->auto_time_off_secs = 0; //disable
+  pCONT_iLight->auto_time_off_secs = 0;
 
   settings.flags.EnableModule = true;
 
-  //create copy for animation stored
-
-  memcpy(&animation_stored,&animation,sizeof(animation_stored));// RESTORE copy of state
+  //create copy for pCONT_iLight->animation stored
+  memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation_stored));// RESTORE copy of state
 
 } //end "init"
 
@@ -285,10 +243,10 @@ void mRGBAnimator::Settings_Load(){
   AddLog_P(LOG_LEVEL_TEST,PSTR("mRGBAnimator::Settings_Load"));
   #endif
   
-  animation.brightness = pCONT_set->Settings.light_settings.light_brightness_as_percentage/100.0f;
+  pCONT_iLight->animation.brightness = pCONT_set->Settings.light_settings.light_brightness_as_percentage/100.0f;
   
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST,PSTR("LOADED animation.brightness = %d"),pCONT_set->Settings.light_settings.light_brightness_as_percentage);
+  AddLog_P(LOG_LEVEL_TEST,PSTR("LOADED pCONT_iLight->animation.brightness = %d"),pCONT_set->Settings.light_settings.light_brightness_as_percentage);
   #endif
 
   // uint8_t list = 0;
@@ -311,13 +269,13 @@ void mRGBAnimator::Settings_Load(){
   //   memcpy(palettelist_variable_users_ctr,pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,sizeof(palettelist_variable_users_ctr));
   // }
 
-  animation.mode_id = pCONT_set->Settings.animation_settings.animation_mode;
-  animation.palette_id = pCONT_set->Settings.animation_settings.animation_palette;
-  animation.transition.order_id   = pCONT_set->Settings.animation_settings.animation_transition_order;
-  animation.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
-  animation.transition.time_ms.val = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
-  animation.transition.rate_ms.val = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
-  animation.transition.pixels_to_update_as_percentage.val = pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage;
+  pCONT_iLight->animation.mode_id = pCONT_set->Settings.animation_settings.animation_mode;
+  pCONT_iLight->animation.palette_id = pCONT_set->Settings.animation_settings.animation_palette;
+  pCONT_iLight->animation.transition.order_id   = pCONT_set->Settings.animation_settings.animation_transition_order;
+  pCONT_iLight->animation.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
+  pCONT_iLight->animation.transition.time_ms.val = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
+  pCONT_iLight->animation.transition.rate_ms.val = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
+  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage;
 
 }
 
@@ -326,9 +284,9 @@ void mRGBAnimator::Settings_Save(){
   AddLog_P(LOG_LEVEL_TEST,PSTR("mRGBAnimator::Settings_Save"));
   #endif
   
-  pCONT_set->Settings.light_settings.light_brightness_as_percentage = animation.brightness*100;
+  pCONT_set->Settings.light_settings.light_brightness_as_percentage = pCONT_iLight->animation.brightness*100;
         #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST,PSTR("SAVED animation.brightness = %d"),pCONT_set->Settings.light_settings.light_brightness_as_percentage);
+  AddLog_P(LOG_LEVEL_TEST,PSTR("SAVED pCONT_iLight->animation.brightness = %d"),pCONT_set->Settings.light_settings.light_brightness_as_percentage);
 #endif
   // Save colour map IDS
   // for(uint8_t list=0;list<20;list++){
@@ -343,13 +301,13 @@ void mRGBAnimator::Settings_Save(){
   //   memcpy(pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,palettelist_variable_users_ctr,sizeof(palettelist_variable_users_ctr));
   // }
 
-  pCONT_set->Settings.animation_settings.animation_mode = animation.mode_id;
-  pCONT_set->Settings.animation_settings.animation_palette = animation.palette_id;
-  pCONT_set->Settings.animation_settings.animation_transition_order = animation.transition.order_id;
-  pCONT_set->Settings.animation_settings.animation_transition_method = animation.transition.method_id;
-  pCONT_set->Settings.animation_settings.animation_transition_time_ms = animation.transition.time_ms.val;
-  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = animation.transition.rate_ms.val;
-  pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = animation.transition.pixels_to_update_as_percentage.val;
+  pCONT_set->Settings.animation_settings.animation_mode = pCONT_iLight->animation.mode_id;
+  pCONT_set->Settings.animation_settings.animation_palette = pCONT_iLight->animation.palette_id;
+  pCONT_set->Settings.animation_settings.animation_transition_order = pCONT_iLight->animation.transition.order_id;
+  pCONT_set->Settings.animation_settings.animation_transition_method = pCONT_iLight->animation.transition.method_id;
+  pCONT_set->Settings.animation_settings.animation_transition_time_ms = pCONT_iLight->animation.transition.time_ms.val;
+  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = pCONT_iLight->animation.transition.rate_ms.val;
+  pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
 
 }
 
@@ -373,65 +331,64 @@ void mRGBAnimator::Settings_Default(){
     
     // Check for user defined defaults
     #ifdef DEFAULT_LIGHTING_TRANSITION_ORDER_ID
-      animation.transition.order_id = DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
+      pCONT_iLight->animation.transition.order_id = DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
                                             DEFAULT_LIGHTING_TRANSITION_ORDER_ID:TRANSITION_ORDER_INORDER_ID;
     #else
-      animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+      pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
     #endif
     
     #ifdef DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID
-      animation.transition.time_ms.map_id = DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
+      pCONT_iLight->animation.transition.time_ms.map_id = DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
                                                 DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID:TIME_MAP_SECS_15_ID;
-      animation.transition.time_ms.val = time_map_secs[animation.transition.time_ms.map_id]*1000;
-      animation.flags.ftime_use_map = true;
+      pCONT_iLight->animation.transition.time_ms.val = time_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
+      pCONT_iLight->animation.flags.ftime_use_map = true;
     #else
-      animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
-      animation.transition.time_ms.val = time_map_secs[animation.transition.time_ms.map_id]*1000;
-      animation.flags.ftime_use_map = true;
+      pCONT_iLight->animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
+      pCONT_iLight->animation.transition.time_ms.val = time_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
+      pCONT_iLight->animation.flags.ftime_use_map = true;
     #endif
 
     #ifdef DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID
-      animation.transition.rate_ms.map_id = DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
+      pCONT_iLight->animation.transition.rate_ms.map_id = DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
                                                 DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID:RATE_MAP_SECS_15_ID;
-      animation.transition.rate_ms.val = rate_map_secs[animation.transition.rate_ms.map_id]*1000;
-      animation.flags.frate_use_map = true;
+      pCONT_iLight->animation.transition.rate_ms.val = rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+      pCONT_iLight->animation.flags.frate_use_map = true;
     #else
-      animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
-      animation.transition.rate_ms.val = rate_map_secs[animation.transition.rate_ms.map_id]*1000;
-      animation.flags.frate_use_map = true;
+      pCONT_iLight->animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
+      pCONT_iLight->animation.transition.rate_ms.val = rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+      pCONT_iLight->animation.flags.frate_use_map = true;
     #endif
 
     // #ifdef DEFAULT_LIGHTING_ANIMATION_PALETTE_ID
-    //   animation.palette_id = DEFAULT_LIGHTING_ANIMATION_PALETTE_ID<PALETTELIST_STATIC_LENGTH_ID?
+    //   pCONT_iLight->animation.palette_id = DEFAULT_LIGHTING_ANIMATION_PALETTE_ID<PALETTELIST_STATIC_LENGTH_ID?
     //                           DEFAULT_LIGHTING_ANIMATION_PALETTE_ID:PALETTELIST_VARIABLE_USER_01_ID;
     // #else
-    //   animation.palette_id = PALETTELIST_VARIABLE_USER_01_ID;
+    //   pCONT_iLight->animation.palette_id = PALETTELIST_VARIABLE_USER_01_ID;
     // #endif
 
-
     #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
-      animation.transition.pixels_to_update_as_percentage.map_id = DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
+      pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
                             DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;
     #else
-      animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
+      pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
     #endif
 
     #ifdef DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE
-      animation.brightness = (float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f;//mSupport::WithinLimits(0,(float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f,1)
+      pCONT_iLight->animation.brightness = (float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f;//mSupport::WithinLimits(0,(float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f,1)
     #else
-      // animation.brightness = WithinLimits(0,(float)1/100.0f,1);
-      animation.brightness = 1; //default ot 50% normally for power reasons
+      // pCONT_iLight->animation.brightness = WithinLimits(0,(float)1/100.0f,1);
+      pCONT_iLight->animation.brightness = 1; //default ot 50% normally for power reasons
     #endif
 
-    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-    #ifdef DONT_USE_OLD_PRESETS
-    #ifdef DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID 
-      scene.colour = preset_colour_map[DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID];
-    #else
-      scene.colour = preset_colour_map[COLOUR_MAP_RED_PASTEL80_ID];
-    #endif
-    #endif
-    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    // #ifdef DONT_USE_OLD_PRESETS
+    // #ifdef DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID 
+    //   scene.colour = preset_colour_map[DEFAULT_LIGHTING_SCENE_HUE_COLOUR_MAP_ID];
+    // #else
+    //   scene.colour = preset_colour_map[COLOUR_MAP_RED_PASTEL80_ID];
+    // #endif
+    // #endif
+    // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
     #ifdef DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ
       liveview.refresh_rate = DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ;
@@ -585,32 +542,32 @@ void mRGBAnimator::Ambilight_Sides(){
 
 
 //previous heating panel
-int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
+void mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 
    // Create local dereferenced variable
   // JsonObject obj = (*_obj); 
 
   int8_t tmp_id = 0;
-  int8_t isserviced = 0;
+  
 
   char buffer[50];
 
-#ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
   if(!obj[D_JSON_NAME].isNull()){ 
     const char* scenectr = obj[D_JSON_NAME];
     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
       scene.name_id = tmp_id;
-      animation.mode_id = ANIMATION_MODE_SCENE_ID;
+      pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
       Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
     }
   }
 
-  #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
   // USe pointers
   //side
@@ -624,7 +581,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-    isserviced++;
+    data_buffer2.isserviced++;
   }
   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
@@ -632,15 +589,15 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-    isserviced++;
+    data_buffer2.isserviced++;
   }
   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
-    isserviced++;
+    ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+    data_buffer2.isserviced++;
   }
 
 
@@ -651,7 +608,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-    isserviced++;
+    data_buffer2.isserviced++;
   }
   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
@@ -659,15 +616,15 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-    isserviced++;
+    data_buffer2.isserviced++;
   }
   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = animation.brightness = pCONT_iLight->BrtN2F(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,animation.brightness);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,animation.brightness);
-    isserviced++;
+    ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+    data_buffer2.isserviced++;
   }
 
 
@@ -682,27 +639,27 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
     rgb.R = colour32bit >> 16; //RGB
     rgb.G = colour32bit >> 8 & 0xFF; //RGB
     rgb.B = colour32bit & 0xFF; //RGB
-    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-    scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-    //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+    // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+    // // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+    // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
+    // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
   }
 
   // TIME with different units
   if(!obj[D_JSON_TIME].isNull()){ //default to secs
-    animation.transition.time_ms.val = obj["time"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time"];
+    pCONT_iLight->animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }else
   if(!obj[D_JSON_TIME].isNull()){
-    animation.transition.time_ms.val = obj["time_secs"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
+    pCONT_iLight->animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }else
   if(!obj[D_JSON_TIME_MS].isNull()){
-    animation.transition.time_ms.val = obj["time_ms"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }
 
   
@@ -728,7 +685,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 //       }
 //     }
   
-  return isserviced;
+  
 
 
 
@@ -989,7 +946,7 @@ int8_t mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 //   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
 //   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
 
-//   animation.mode_id = MODE_AMBILIGHT_ID;
+//   pCONT_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
 //   fForcePanelUpdate = true;
 
   return 0;
@@ -1060,19 +1017,20 @@ void mRGBAnimator::init_flasher_settings(){
 
 
         
-  flashersettings.random_transitions.array_index_length = 0;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 20;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 40;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 50;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 75;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 100;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 75;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 50;
-  flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 40;
+  // flashersettings.random_transitions.array_index_length = 0;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 20;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 40;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 50;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 75;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 100;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 75;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 50;
+  // flashersettings.random_transitions.array[flashersettings.random_transitions.array_index_length++] = 40;
   
 }
 
 
+#ifdef ENABLE_PIXEL_FUNCTION_MIXER
 
 void mRGBAnimator::init_mixer_defaults(){
 
@@ -1206,77 +1164,8 @@ void mRGBAnimator::init_mixer_defaults(){
 //   mixer.group[FLASHER_FUNCTION_MIXER_6_ID].animation_palette = PALETTELIST_VARIABLE_USER_17_ID;
 
 
-
-
-
-
 }
 
-
-
-
-int8_t mRGBAnimator::GetFlasherFunctionIDbyName(const char* c){
-  if(c=='\0') return -1;
-//   if(strstr(c,D_FLASHER_FUNCTION_STATIC_NAME_CTR))        return FLASHER_FUNCTION_STATIC_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR))     return FLASHER_FUNCTION_SEQUENTIAL_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SLO_GLO_NAME_CTR))        return FLASHER_FUNCTION_SLO_GLO_ID;
-//   //if(strstr(c,D_FLASHER_FUNCTION_CHASING_FLASH_NAME_CTR))  return FLASHER_FUNCTION_CHASING_FLASH_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR))  return FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID;
-//   if(strstr(c,D_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR))  return FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID;
-  return -1;
-}
-const char* mRGBAnimator::GetFlasherFunctionName(char* buffer){
-  return GetFlasherFunctionNamebyID(flashersettings.function, buffer);
-}
-const char* mRGBAnimator::GetFlasherFunctionNamebyID(uint8_t id, char* buffer){
-  switch(id){
-    default:
-    case FLASHER_FUNCTION_SEQUENTIAL_ID:  memcpy_P(buffer, PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR, sizeof(PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR)); break;
-    case FLASHER_FUNCTION_SLOW_GLOW_ID:   memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
-
-
-  //   case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR;
-  //   case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR;
-  //   case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR;
-  //   case FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR;
-  //   case FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID:  return D_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR;
-  //   case FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID:  return D_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR;
-  }
-  return buffer;
-}
-
-
-int8_t mRGBAnimator::GetFlasherRegionIDbyName(const char* c){
-  if(c=='\0') return -1;
-  if(     strcmp_P(c,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR)==0){ return FLASHER_REGION_COLOUR_SELECT_ID; }
-  else if(strcmp_P(c,PM_FLASHER_REGION_ANIMATE_NAME_CTR)==0){ return FLASHER_REGION_ANIMATE_ID; }
-  return -1;
-}
-const char* mRGBAnimator::GetFlasherRegionName(char* buffer){
-  return GetFlasherRegionNamebyID(flashersettings.region, buffer);
-}
-const char* mRGBAnimator::GetFlasherRegionNamebyID(uint8_t id, char* buffer){
-  switch(id){
-    case FLASHER_REGION_COLOUR_SELECT_ID:    memcpy_P(buffer,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR));
-  case FLASHER_REGION_ANIMATE_ID:    memcpy_P(buffer,PM_FLASHER_REGION_ANIMATE_NAME_CTR,sizeof(PM_FLASHER_REGION_ANIMATE_NAME_CTR));
-  }
-  return buffer;
-}
-
-void mRGBAnimator::SubTask_Flasher_Main(){
-
-  // if(mixer.enabled){
-  //  pCONT_set->Settings.enable_sleep = false; // Turn sleep function off during flasher
-  //  SubTask_Flasher_Animate_Mixer();
-  // }
-
-  SubTask_Flasher_Animate();
-
-} // SubTask_Flasher_Main
 
 
 // void mRGBAnimator::SubTask_Flasher_Animate_Mixer(){
@@ -1394,13 +1283,13 @@ void mRGBAnimator::SubTask_Flasher_Main(){
 
 //       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.running_id = %d"),mixer.running_id);
 
-//       animation.palette_id = mixer.group[mixer.running_id].animation_palette;          
-//       animation.transition.order_id = mixer.group[mixer.running_id].animation_transition_order;
+//       pCONT_iLight->animation.palette_id = mixer.group[mixer.running_id].animation_palette;          
+//       pCONT_iLight->animation.transition.order_id = mixer.group[mixer.running_id].animation_transition_order;
 //       flashersettings.function = mixer.group[mixer.running_id].flashersettings_function;          
 //       mixer.group[mixer.running_id].time_on_secs_decounter = mixer.group[mixer.running_id].run_time_duration_sec*((float)mixer.run_time_duration_scaler_as_percentage/100);
 //       //mixer.time_on_secs_active = mixer.group[mixer.running_id].run_time_duration_sec;
-//       animation.transition.time_ms = mixer.group[mixer.running_id].transition_time_sec*1000;
-//       animation.transition.rate_ms = mixer.group[mixer.running_id].transition_rate_sec*1000;
+//       pCONT_iLight->animation.transition.time_ms = mixer.group[mixer.running_id].transition_time_sec*1000;
+//       pCONT_iLight->animation.transition.rate_ms = mixer.group[mixer.running_id].transition_rate_sec*1000;
       
 //       // "palette|order|function" eg "USER17|RANDOM|SEQUENTIAL"
 //       sprintf(mixer.running_friendly_name_ctr,"%s|%s|%s\0",
@@ -1428,32 +1317,88 @@ void mRGBAnimator::SubTask_Flasher_Main(){
 // } // SubTask_Flasher_Animate
 
 
+#endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+int8_t mRGBAnimator::GetFlasherFunctionIDbyName(const char* c){
+  if(c=='\0') return -1;
+//   if(strstr(c,D_FLASHER_FUNCTION_STATIC_NAME_CTR))        return FLASHER_FUNCTION_STATIC_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR))     return FLASHER_FUNCTION_SEQUENTIAL_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SLO_GLO_NAME_CTR))        return FLASHER_FUNCTION_SLO_GLO_ID;
+//   //if(strstr(c,D_FLASHER_FUNCTION_CHASING_FLASH_NAME_CTR))  return FLASHER_FUNCTION_CHASING_FLASH_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR))      return FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR))  return FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID;
+//   if(strstr(c,D_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR))  return FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID;
+  return -1;
+}
+const char* mRGBAnimator::GetFlasherFunctionName(char* buffer){
+  return GetFlasherFunctionNamebyID(flashersettings.function, buffer);
+}
+const char* mRGBAnimator::GetFlasherFunctionNamebyID(uint8_t id, char* buffer){
+  switch(id){
+    default:
+    case FLASHER_FUNCTION_SEQUENTIAL_ID:  memcpy_P(buffer, PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR, sizeof(PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR)); break;
+    case FLASHER_FUNCTION_SLOW_GLOW_ID:   memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
+
+
+  //   case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR;
+  //   case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR;
+  //   case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR;
+  //   case FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID:      return D_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR;
+  //   case FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID:  return D_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR;
+  //   case FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID:  return D_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR;
+  }
+  return buffer;
+}
+
+
+int8_t mRGBAnimator::GetFlasherRegionIDbyName(const char* c){
+  if(c=='\0') return -1;
+  if(     strcmp_P(c,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR)==0){ return FLASHER_REGION_COLOUR_SELECT_ID; }
+  else if(strcmp_P(c,PM_FLASHER_REGION_ANIMATE_NAME_CTR)==0){ return FLASHER_REGION_ANIMATE_ID; }
+  return -1;
+}
+const char* mRGBAnimator::GetFlasherRegionName(char* buffer){
+  return GetFlasherRegionNamebyID(flashersettings.region, buffer);
+}
+const char* mRGBAnimator::GetFlasherRegionNamebyID(uint8_t id, char* buffer){
+  switch(id){
+    case FLASHER_REGION_COLOUR_SELECT_ID:    memcpy_P(buffer,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR));
+  case FLASHER_REGION_ANIMATE_ID:    memcpy_P(buffer,PM_FLASHER_REGION_ANIMATE_NAME_CTR,sizeof(PM_FLASHER_REGION_ANIMATE_NAME_CTR));
+  }
+  return buffer;
+}
+
+void mRGBAnimator::SubTask_Flasher_Main(){
+
+  // if(mixer.enabled){
+  //  pCONT_set->Settings.enable_sleep = false; // Turn sleep function off during flasher
+  //  SubTask_Flasher_Animate_Mixer();
+  // }
+
+  SubTask_Flasher_Animate();
+
+} // SubTask_Flasher_Main
+
+
 
 
 void mRGBAnimator::SubTask_Flasher_Animate(){
   
-  if((mSupport::TimeReached(&flashersettings.tSaved.Update,animation.transition.rate_ms.val))||(animation.flags.fForceUpdate)){
+  if((mSupport::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms.val))||(pCONT_iLight->animation.flags.fForceUpdate)){
 
-    if(animation.flags.fForceUpdate){ animation.flags.fForceUpdate=false;
+    if(pCONT_iLight->animation.flags.fForceUpdate){ pCONT_iLight->animation.flags.fForceUpdate=false;
       flashersettings.tSaved.Update = millis();
     }
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.tSaved.Update"));
+    //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "flashersettings.tSaved.Update"));
     #endif
 
     switch(flashersettings.function){
       default:
-      
-      // case FLASHER_FUNCTION_RANDOM_ID:   // replaces transition method
-      //   SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-      // break;
-      // case FLASHER_FUNCTION_RANDOM_ID:   // replaces transition method
-      //   SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-      // break;
-      // case FLASHER_FUNCTION_ROTATE_ID:   // replaces transition method
-      //   SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-      // break;
       case FLASHER_FUNCTION_SLOW_GLOW_ID:   //previously presets method and replaces random
         SubTask_Flasher_Animate_Function_Slow_Glow();
       break;
@@ -1482,19 +1427,11 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
   if(flashersettings.flags.enable_random_rate){
     if(mSupport::TimeReached(&flashersettings.random_transitions.tSavedNewSpeedUpdate,flashersettings.random_transitions.rate_ms)){
       flashersettings.random_transitions.rate_ms = (random(flashersettings.random_transitions.lower_secs,flashersettings.random_transitions.upper_secs)*1000);
-      animation.transition.rate_ms.val = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
+      pCONT_iLight->animation.transition.rate_ms.val = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
       if(flashersettings.random_transitions.array_index>=flashersettings.random_transitions.array_index_length) flashersettings.random_transitions.array_index=0;
-      animation.transition.time_ms.val = animation.transition.rate_ms.val/4; //75% of time spent on desired colour
+      pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val/4; //75% of time spent on desired colour
     }
   }
-  // #Idea57
-  // AnimEaseFunction easing = NeoEase::CubicIn;     
-  // float progress = easing(param.progress);  
-
-  
-
-
-
 
 } //end flasher_animate
 
@@ -1507,9 +1444,8 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow(){
 void mRGBAnimator::SubTask_Flasher_Animate_Function_Sequential(){
   
   flashersettings.flag_finish_flasher_pair = false;
-
-  flashersettings.flags.enable_random_rate = true;//test
-
+  flashersettings.flags.enable_random_rate = true;
+  
   do{//must complete the pair together //move inside functions
     switch(flashersettings.region){
       case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
@@ -1521,23 +1457,24 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Sequential(){
       break;
       case FLASHER_REGION_ANIMATE_ID: //shift along
         #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+        AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
         #endif
         // Shift colours (rotate)
         HsbColor colourfirst = hsbcolour[0];
+        // Shift towards first pixel
         for(ledout.index=0;ledout.index<strip_size;ledout.index++){ 
           hsbcolour[ledout.index] = hsbcolour[ledout.index+1]; 
         }
+        // Put first pixel on the end (wrap around)
         hsbcolour[strip_size-1] = colourfirst;
-        // Change animation speed
 
-        // Move this as option for animations
+        // Make this auto changing park of "mixer", some sort of changing mode flag
 
         // if(mSupport::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*1000))){
         //   uint8_t values[8] = {4,8,10,17,20,17,10,8};
-        //   animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
+        //   pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
         //   if(flashersettings.function_seq.rate_index>8) flashersettings.function_seq.rate_index=0;
-        //   animation.transition.time_ms = animation.transition.rate_ms/4; //75% of time spent on desired colour
+        //   pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
         // }
       break;
     }
@@ -1561,7 +1498,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Random(){
       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
       RefreshLED_Presets();
       flashersettings.region = FLASHER_REGION_ANIMATE_ID;
-      animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+      pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
 
       flash_twinkle_random.white_pixel_amount = 8; //how often the leds are
       // by percentage
@@ -1612,10 +1549,10 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Random(){
 
       flashersettings.flag_finish_flasher_pair = false; // must complete regions
 
-      // Change animation speed
+      // Change pCONT_iLight->animation speed
       if(mSupport::TimeReached(&flashersettings.function_flash_twinkle.tSavedNewSpeedUpdate,random(0,1)?5000:10000)){//(random(5,10)*1000))){
-        animation.transition.rate_ms.val = random(0,1)?10:150; // will need to be very fast
-        animation.transition.time_ms.val = 0; //instant
+        pCONT_iLight->animation.transition.rate_ms.val = random(0,1)?10:150; // will need to be very fast
+        pCONT_iLight->animation.transition.time_ms.val = 0; //instant
       }
     break;
   }
@@ -1633,7 +1570,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Sequential(){
 //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
 //             RefreshLED_Presets();
 //             flashersettings.region = FLASHER_REGION_ANIMATE_ID;
-//             animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+//             pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
 
 //             flash_twinkle_random.white_pixel_amount = 7; //how often the leds are
 //             // by percentage
@@ -1685,10 +1622,10 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Sequential(){
 
 //             flashersettings.flag_finish_flasher_pair = false; // must complete regions
 
-//             // Change animation speed
+//             // Change pCONT_iLight->animation speed
 //             if(mSupport::TimeReached(&flashersettings.function_flash_twinkle.tSavedNewSpeedUpdate,random(0,1)?5000:10000)){//(random(5,10)*1000))){
-//               animation.transition.rate_ms = 90;//random(0,1)?30:30; // will need to be very fast
-//               animation.transition.time_ms = 0; //instant
+//               pCONT_iLight->animation.transition.rate_ms = 90;//random(0,1)?30:30; // will need to be very fast
+//               pCONT_iLight->animation.transition.time_ms = 0; //instant
 //             }
 //           break;
 //         }
@@ -1711,12 +1648,12 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All(){
 //             // Change brightness from 0 to 100% (rotate)
 //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
 //             for(ledout.index=0;ledout.index<strip_size;ledout.index++){ hsbcolour[ledout.index].B = direction; }            
-//             // Change animation speed
+//             // Change pCONT_iLight->animation speed
 //             if(mSupport::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*100))){
 //               uint8_t values[8] = {1000,1000,2000,2000,6000,6000,3000,3000}; //off,on,off
-//               animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
+//               pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
 //               if(flashersettings.function_seq.rate_index>=8) flashersettings.function_seq.rate_index=0;
-//               animation.transition.time_ms = animation.transition.rate_ms;///4; // brightness shift takes 100% of the time (no colour shift)
+//               pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms;///4; // brightness shift takes 100% of the time (no colour shift)
 //             }
 //           break;
 //         }
@@ -1725,7 +1662,6 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All(){
 
 
 void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
-      
       
 //       case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
 //         switch(flashersettings.region){
@@ -1749,16 +1685,16 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
                         
 //             for(ledout.index=0;ledout.index<strip_size;ledout.index++){ 
 //               hsbcolour[ledout.index].S = random_saturation; 
-//               hsbcolour[ledout.index].B = adjusted_brightness;//random_saturation<0.5?animation.brightness*0.5:animation.brightness; //test, pair "whiter" less bright (maybe /2)  
+//               hsbcolour[ledout.index].B = adjusted_brightness;//random_saturation<0.5?pCONT_iLight->animation.brightness*0.5:pCONT_iLight->animation.brightness; //test, pair "whiter" less bright (maybe /2)  
 //             }            
-//             // Change animation speed
+//             // Change pCONT_iLight->animation speed
 //             //if(mSupport::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*100))){
 //               uint16_t values[8] = {7,7,9,9,7,7,4,4}; //off,on,off
-//               animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*1000;
+//               pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*1000;
 //               if(flashersettings.function_seq.rate_index>=8) flashersettings.function_seq.rate_index=0;
 //               // holds colour more
-//               //animation.transition.time_ms = direction ? (animation.transition.rate_ms.val/4) : (animation.transition.rate_ms.val); // brightness shift takes 100% of the time (no colour shift)
-//               animation.transition.time_ms = random(0,1) ? (animation.transition.rate_ms.val/4) : (animation.transition.rate_ms.va;); // brightness shift takes 100% of the time (no colour shift)
+//               //pCONT_iLight->animation.transition.time_ms = direction ? (pCONT_iLight->animation.transition.rate_ms.val/4) : (pCONT_iLight->animation.transition.rate_ms.val); // brightness shift takes 100% of the time (no colour shift)
+//               pCONT_iLight->animation.transition.time_ms = random(0,1) ? (pCONT_iLight->animation.transition.rate_ms.val/4) : (pCONT_iLight->animation.transition.rate_ms.va;); // brightness shift takes 100% of the time (no colour shift)
 //             //}
 //           break;
 //         }
@@ -1770,24 +1706,10 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
 }
 
 
-int8_t mRGBAnimator::parsesub_Flasher(JsonObjectConst obj){
+void mRGBAnimator::parsesub_Flasher(JsonObjectConst obj){
   
-   // Create local dereferenced variable
-  // JsonObject obj = (*_obj); 
-
-//   DynamicJsonDocument doc(1500);
-//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-//   if(error){
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-//     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-//     return 0;
-//   }
-//   JsonObject obj = doc.as<JsonObject>();
-
   int8_t tmp_id = 0;
-  int8_t isserviced = 0;
-
-char buffer[50];
+  char buffer[50];
 
   if(!obj["function"].isNull()){ 
     const char* functionctr = obj["function"];
@@ -1799,46 +1721,48 @@ char buffer[50];
 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"function",GetFlasherRegionName(buffer));
       Response_mP(S_JSON_COMMAND_SVALUE,"function",GetFlasherFunctionName(buffer));
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,functionctr);
     }
   }
+
+
+  if(!obj["flasher"]["function"].isNull()){ 
+    flashersettings.function = obj["flasher"]["function"];
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"flasherfunction",flashersettings.function);
+  }
+   
   
   
+  
+#ifdef ENABLE_PIXEL_FUNCTION_MIXER
   if(!obj["mixer"]["enabled"].isNull()){ 
     mixer.enabled = obj["mixer"]["enabled"];
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.enabled",mixer.enabled);
   }
    
-
-  
   if(!obj["time_scaler"].isNull()){ 
     mixer.time_scaler = obj["time_scaler"];
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.time_scaler",mixer.time_scaler);
   }
-   
-
-  
-
+  #endif //ENABLE_PIXEL_FUNCTION_MIXER
 
   // TIME with different units
   if(!obj[D_JSON_TIME].isNull()){ //default to secs
-    animation.transition.time_ms.val = obj["time"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time"];
+    pCONT_iLight->animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }else
   if(!obj[D_JSON_TIME].isNull()){
-    animation.transition.time_ms.val = obj["time_secs"];
-    animation.transition.time_ms.val *= 1000;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
+    pCONT_iLight->animation.transition.time_ms.val *= 1000;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }else
   if(!obj[D_JSON_TIME_MS].isNull()){
-    animation.transition.time_ms.val = obj["time_ms"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
+    pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
   }
-
-  return isserviced;
 
 } // END FUNCTION
 
@@ -1851,20 +1775,20 @@ uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 //   DynamicJsonDocument doc(1500);
 //   JsonObject root = doc.to<JsonObject>();
 
-//   // root[D_JSON_ONOFF] = fLEDStripOnOff ? "ON" : "OFF";
+//   // root[D_JSON_ONOFF] = pCONT_iLight->light_power ? "ON" : "OFF";
 //   // root[D_JSON_MODE] = GetAnimationModeName();
 //   root["function"] = GetFlasherFunctionName();
 //   root["region"] = GetFlasherRegionName();
 //   // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-//   // root[D_JSON_BRIGHTNESS_PERCENTAGE] = animation.brightness*100;
-//   // root[D_JSON_BRIGHTNESS] = animation.brightness;
+//   // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
+//   // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
 
 //   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
 //   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-//   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(animation.transition.time_ms,1000);
-//   //   transitionobj[D_JSON_TIME_MS] = animation.transition.time_ms;
-//   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(animation.transition.rate_ms,1000);
-//   //   transitionobj[D_JSON_RATE_MS] = animation.transition.rate_ms;
+//   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms,1000);
+//   //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms;
+//   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
+//   //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
 //   //   transitionobj["function"] = GetFlasherFunctionName();
 
 //   JsonObject seq_obj = root.createNestedObject("sequential");
@@ -1877,7 +1801,7 @@ uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 
 //   // Flags and states that are used during one transition and reset when completed
 //   // JsonObject overridesobj = root.createNestedObject("transition_overrides"); 
-//   //   overridesobj["fRefreshAllPixels"] = animation_override.fRefreshAllPixels;
+//   //   overridesobj["fRefreshAllPixels"] = pCONT_iLight->animation_override.fRefreshAllPixels;
   
 //   // root["ledout.length"] = ledout.length;
 
@@ -1885,6 +1809,7 @@ uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 //   serializeJson(doc,data_buffer2.payload.ctr);
 
 //   return (data_buffer2.payload.len>3?1:0);
+  return 0;
 }
 
 
@@ -1941,6 +1866,7 @@ uint8_t mRGBAnimator::ConstructJSON_Mixer(uint8_t json_level){
 //   serializeJson(doc,data_buffer2.payload.ctr);
 
 // return (data_buffer2.payload.len>3?1:0);
+  return 0;
 
 }
 
@@ -1976,9 +1902,9 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer){
     sprintf(buffer, "%s", "Animating");
     return buffer;
   }
-  if(animation.flags.fEnable_Animation){
+  if(pCONT_iLight->animation.flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int until_next_millis = animation.transition.rate_ms.val-(millis()-animation_changed_millis);
+    int until_next_millis = pCONT_iLight->animation.transition.rate_ms.val-(millis()-pCONT_iLight->animation_changed_millis);
     float secs_until_next_event = (float)(until_next_millis);
     secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -1989,7 +1915,7 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer){
 
     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetAnimationStatusCtr %d %d"),
     //   until_next_millis,
-    //   //millis(),animation_changed_millis,animation.transition.rate_ms.val,
+    //   //millis(),pCONT_iLight->animation_changed_millis,pCONT_iLight->animation.transition.rate_ms.val,
     //   secs_until_next_event
     // );  
     
@@ -2025,18 +1951,6 @@ void mRGBAnimator::SetPixelColor(uint16_t indexPixel, RgbTypeColor color_interna
     case  4: color_hardware.G = color_internal.B; color_hardware.R = color_internal.G; color_hardware.B = color_internal.R; break; //4 = BGR
     default: color_hardware.G = color_internal.G; color_hardware.R = color_internal.B; color_hardware.B = color_internal.R; break; //5 = GBR
   }
-
-
-//add switch case for how white should be handled
-//off - leave it
-//on - full direct control
-//tied with saturation - works opposite to saturation
-//colour temperature?
-
-  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  //if rgbw then optional bind white channel
-  //color_hardware.W = 1-color_hardware; //need saturation for this
-  #endif
 
   //AddLog_P(LOG_LEVEL_DEBUG,PSTR("pixel[%d] = %d,%d,%d,%d"),indexPixel,color_hardware.R,color_hardware.G,color_hardware.B,color_hardware.W);
 
@@ -2087,20 +2001,26 @@ RgbTypeColor mRGBAnimator::GetPixelColor(uint16_t indexPixel)
 
 void mRGBAnimator::MQTTHandler_Init(){
 
+  uint8_t ii = 0;
+
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Settings;
+  // mqtthandler_list_ids[ii] = mqtthandler_ptr->handler_id;
+  // mqtthandler_list_ptr[ii] = &mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_animation_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2108,9 +2028,10 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Animation;
 
   mqtthandler_ptr = &mqtthandler_ambilight_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2119,9 +2040,10 @@ void mRGBAnimator::MQTTHandler_Init(){
   
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS      //make this optional, as it uses extra data and is only for special cases
   mqtthandler_ptr = &mqtthandler_notifications_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -2130,51 +2052,82 @@ void mRGBAnimator::MQTTHandler_Init(){
   #endif
     
   mqtthandler_ptr = &mqtthandler_state_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_State;
   
-#ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
+  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   mqtthandler_ptr = &mqtthandler_flasher_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_flasher;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Flasher;
+  #endif
 
+#ifdef ENABLE_PIXEL_FUNCTION_MIXER
   mqtthandler_ptr = &mqtthandler_mixer_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = postfix_topic_mixer;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Mixer;
   #endif
+  
+  // mqtt_handler_ids
+  //  = {
+  //   MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID, MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
+  //   MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID
+  //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+  //     MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
+  //   #endif
+  //   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  //     MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID, MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID
+  //   #endif
+  // };
+  
+  // struct handler<mRGBAnimator>* mqtthandler_list_ptr[];
+  // 4] = {
+  //   &mqtthandler_settings_teleperiod, &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
+  //   &mqtthandler_state_teleperiod,
+  //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+  //     &mqtthandler_notifications_teleperiod,
+  //   #endif
+  //   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  //     &mqtthandler_flasher_teleperiod, &mqtthandler_mixer_teleperiod
+  //   #endif
+  // };
+
+
 
 } //end "MQTTHandler_Init"
 
 
 void mRGBAnimator::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_animation_teleperiod.fSendNow = true;
-  mqtthandler_ambilight_teleperiod.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_animation_teleperiod.flags.SendNow = true;
+  mqtthandler_ambilight_teleperiod.flags.SendNow = true;
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
-  mqtthandler_notifications_teleperiod.fSendNow = true;
+  mqtthandler_notifications_teleperiod.flags.SendNow = true;
   #endif
-  mqtthandler_state_teleperiod.fSendNow = true;
-  mqtthandler_flasher_teleperiod.fSendNow = true;
-  mqtthandler_mixer_teleperiod.fSendNow = true;
+  mqtthandler_state_teleperiod.flags.SendNow = true;
+  mqtthandler_flasher_teleperiod.flags.SendNow = true;
+  mqtthandler_mixer_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
@@ -2196,37 +2149,44 @@ void mRGBAnimator::MQTTHandler_Set_TelePeriod(){
 
 void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_not_found = true;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID, MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
+    MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID,
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+      MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+      MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID, 
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+      MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID
+    #endif
+  };
+  
+  struct handler<mRGBAnimator>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod, &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
+    &mqtthandler_state_teleperiod,
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+      &mqtthandler_notifications_teleperiod,
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+      &mqtthandler_flasher_teleperiod, 
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+      &mqtthandler_mixer_teleperiod
+    #endif
+  };
 
-  do{
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("MQTTHandler_Sender ids = %d"),sizeof(mqtthandler_list_ids));
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("MQTTHandler_Sender ptr = %d"),sizeof(mqtthandler_list_ptr));
 
-    //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "MQTTHandler_Sender %d"),mqtt_handler_id);
-
-    handler_not_found=false; // start as true, if none found, default clears to false
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID:    mqtthandler_ptr=&mqtthandler_animation_teleperiod; break;
-      case MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID:    mqtthandler_ptr=&mqtthandler_ambilight_teleperiod; break;
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
-      case MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID: mqtthandler_ptr=&mqtthandler_notifications_teleperiod; break;
-      #endif
-      case MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_state_teleperiod; break;
-      
-      #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
-      case MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID:      mqtthandler_ptr=&mqtthandler_flasher_teleperiod; break;
-      case MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_mixer_teleperiod; break;
-      #endif
-      default: handler_not_found=true; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(!handler_not_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_LIGHTS_ADDRESSABLE_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  // Loop through them all
+  for(uint8_t id=0;id<sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]);id++){    
+    if(mqtthandler_list_ptr[id]->handler_id == mqtthandler_list_ids[id]){ 
+      pCONT_mqtt->MQTTHandler_Command(*this,D_MODULE_LIGHTS_ADDRESSABLE_ID,mqtthandler_list_ptr[id]);
+      if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ break; } //stop if it was to only send this one
+    }
+  }
 
 }
 
@@ -2250,20 +2210,20 @@ void mRGBAnimator::init_Animations(){
 
   
   // Set default values (ifdef below sets specific)
-  animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-  animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
-  animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
+  pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+  pCONT_iLight->animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
+  pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
   flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-  animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
-  animation.flags.fForceUpdate = true;
-  animation.brightness = 0.1;
-  animation.transition.time_ms.val = 1000;
-  animation.transition.rate_ms.val = 20*1000;
-  // tSavedUpdateRGBString = millis() + animation.transition.rate_ms.val;
+  pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
+  pCONT_iLight->animation.flags.fForceUpdate = true;
+  pCONT_iLight->animation.brightness = 0.1;
+  pCONT_iLight->animation.transition.time_ms.val = 1000;
+  pCONT_iLight->animation.transition.rate_ms.val = 20*1000;
+  // tSavedUpdateRGBString = millis() + pCONT_iLight->animation.transition.rate_ms.val;
   first_set = true; //change to one off override flag
 
 
-  animation.flags.fEnable_Animation = true;
+  pCONT_iLight->animation.flags.fEnable_Animation = true;
 
 }
 
@@ -2289,7 +2249,7 @@ void mRGBAnimator::RefreshLED_Presets(void){
   #endif
 
   // Update pointer of struct
-  pCONT_iLight->SetPaletteListPtrFromID(animation.palette_id);
+  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 
   // things that use indexes
   RefreshLEDOutputStream();
@@ -2297,7 +2257,7 @@ void mRGBAnimator::RefreshLED_Presets(void){
   // Handle brightness levels == if not set, use default
   for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
     //if(!palettelist.ptr->fOverride_animation_brightness){
-      hsbcolour[ledout.index].B = animation.brightness;
+      hsbcolour[ledout.index].B = pCONT_iLight->animation.brightness;
     //}
   }
 
@@ -2305,10 +2265,10 @@ void mRGBAnimator::RefreshLED_Presets(void){
 
 void mRGBAnimator::RefreshLEDIndexPattern(){
 
-  // Somehow this orders need to become flasher... which I will rename animation
+  // Somehow this orders need to become flasher... which I will rename pCONT_iLight->animation
 
   // Generate lighting pattern
-  switch(animation.transition.order_id){
+  switch(pCONT_iLight->animation.transition.order_id){
     case TRANSITION_ORDER_INORDER_ID:
       for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
         ledout.pattern[ledout.index] = ledout.index; 
@@ -2425,7 +2385,7 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
 // Using ledout.pattern, fill colours
 void mRGBAnimator::RefreshLEDOutputStream(void){
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "RefreshLED_Presets animation.palette_id  \"%s\""),GetPaletteFriendlyName());
+  // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "RefreshLED_Presets pCONT_iLight->animation.palette_id  \"%s\""),GetPaletteFriendlyName());
   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "RefreshLED_Presets fMapIDs_Type  %d"),pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type);
 
   // Indexed types 
@@ -2509,7 +2469,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
 
 // AnimUpdateCallback animUpdate = [=](const AnimationParam& param){
 //         float progress = easing(param.progress);  // progress will start at 0.0 and end at 1.0 we convert to the curve we want
-//         RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(fromcolor, targetColor, progress);  // use the curve value to apply to the animation
+//         RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(fromcolor, targetColor, progress);  // use the curve value to apply to the pCONT_iLight->animation
 //         SetPixelColor(pixel, updatedColor);
 //       };
 
@@ -2602,7 +2562,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
   
   // Other types with random led patterns, or,
   desired_pixel=0;
-  switch(animation.transition.order_id){
+  switch(pCONT_iLight->animation.transition.order_id){
     case TRANSITION_ORDER_INORDER_ID:
     case TRANSITION_ORDER_RANDOM_ID:{
       RefreshLEDIndexPattern();
@@ -2652,7 +2612,7 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
 
 
 // optional fromcolor to merge "FadeToNewColour" and "FadeBetweenColours"
-// If unset (as defined in header) the animation will blend from current pixel colours with getpixel
+// If unset (as defined in header) the pCONT_iLight->animation will blend from current pixel colours with getpixel
 // void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_newcolour,  RgbTypeColor fromcolor){ 
 void mRGBAnimator::FadeToNewColour(RgbcctColor* targetColor, uint16_t _time_to_newcolour,  RgbcctColor* fromcolor){ 
 
@@ -2665,10 +2625,10 @@ AddLog_P(LOG_LEVEL_DEBUG, PSTR("RgbcctColor=%d,%d,%d"),targetColor->R,targetColo
     _time_to_newcolour /= 1000;// ms to seconds
   }
 
-  // Overwriting single animation methods, set, then clear
-  if(animation_override.time_ms){
-    _time_to_newcolour =animation_override.time_ms;
-    animation_override.time_ms = 0;//reset overwrite
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(pCONT_iLight->animation_override.time_ms){
+    _time_to_newcolour =pCONT_iLight->animation_override.time_ms;
+    pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
   
   AnimEaseFunction easing = NeoEase::CubicIn;  
@@ -2715,19 +2675,19 @@ void mRGBAnimator::ConfigureLEDTransitionAnimation(){
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "f::ConfigureLEDTransitionAnimation"));
   #endif
 
-  animation_changed_millis = millis();
+  pCONT_iLight->animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
-  switch(animation.transition.method_id){
+  switch(pCONT_iLight->animation.transition.method_id){
     default: 
     case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
-    case TRANSITION_METHOD_BLEND_ID:   time_tmp = animation.transition.time_ms.val; break;
+    case TRANSITION_METHOD_BLEND_ID:   time_tmp = pCONT_iLight->animation.transition.time_ms.val; break;
   }
 
-  // Overwriting single animation methods, set, then clear
-  if(animation_override.time_ms){
-    time_tmp = animation_override.time_ms;
-    animation_override.time_ms = 0;//reset overwrite
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(pCONT_iLight->animation_override.time_ms){
+    time_tmp = pCONT_iLight->animation_override.time_ms;
+    pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
 
   if(time_tmp>0){
@@ -2849,8 +2809,8 @@ void mRGBAnimator::AddToJsonObject_AddHardware(JsonObject root){
 // Single calls that configure Tasker into correct mode
 // ie Set Autumn configures preset mode
 // void mRGBAnimator::SetMode_UpdateColour(uint8_t colour){
-//   animation.palette_id = colour;
-//   animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+//   pCONT_iLight->animation.palette_id = colour;
+//   pCONT_iLight->animation.mode_id = ANIMATION_MODE_PRESETS_ID;
 // }
 
 // H ue360toFloat
@@ -2861,7 +2821,7 @@ void mRGBAnimator::AddToJsonObject_AddHardware(JsonObject root){
 
 
 const char* mRGBAnimator::GetHardwareColourTypeName(char* buffer){
-  return GetHardwareColourTypeNameByID(animation.mode_id, buffer);
+  return GetHardwareColourTypeNameByID(pCONT_iLight->animation.mode_id, buffer);
 }
 const char* mRGBAnimator::GetHardwareColourTypeNameByID(uint8_t id, char* buffer){
   switch(id){
@@ -2948,7 +2908,7 @@ int8_t mRGBAnimator::GetHardwareColourTypeIDbyName(const char* c){
 
 
 const char* mRGBAnimator::GetTransitionMethodName(char* buffer){
-  return GetTransitionMethodNameByID(animation.transition.method_id,buffer);
+  return GetTransitionMethodNameByID(pCONT_iLight->animation.transition.method_id,buffer);
 }
 const char* mRGBAnimator::GetTransitionMethodNameByID(uint8_t id, char* buffer){
   switch(id){ default:   
@@ -3175,7 +3135,7 @@ const char* mRGBAnimator::GetColourMapNamebyID(uint8_t id, char* buffer){
 
 
 const char* mRGBAnimator::GetTransitionOrderName(char* buffer){
-  return GetTransitionOrderNameByID(animation.transition.order_id, buffer);
+  return GetTransitionOrderNameByID(pCONT_iLight->animation.transition.order_id, buffer);
 }
 const char* mRGBAnimator::GetTransitionOrderNameByID(uint8_t id, char* buffer){
   switch(id){  default:    
@@ -3243,17 +3203,17 @@ int8_t mRGBAnimator::GetTransitionOrderIDbyName(const char* c){
 
 void mRGBAnimator::SetRefreshLEDs(){
 
-  animation.flags.fForceUpdate = true;
-  animation_override.fRefreshAllPixels = true;
-  animation_override.time_ms = 10;
+  pCONT_iLight->animation.flags.fForceUpdate = true;
+  pCONT_iLight->animation_override.fRefreshAllPixels = true;
+  pCONT_iLight->animation_override.time_ms = 10;
 
-  #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
-  // Additional flags to force scene updates
-  if(animation.mode_id == ANIMATION_MODE_SCENE_ID){
-    scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-  }
-  #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  // // Additional flags to force scene updates
+  // if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_SCENE_ID){
+  //   scene.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  // }
+  // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
 }
 
@@ -3261,63 +3221,63 @@ void mRGBAnimator::SetRefreshLEDs(){
 
 void mRGBAnimator::EveryLoop(){
 
-    //something smarter for delays
-    // pCONT_set->Settings.enable_sleep = (animation.transition.rate_ms.val<pCONT_set->Settings.sleep) ? 0 : 1;
+  //something smarter for delays
+  // pCONT_set->Settings.enable_sleep = (pCONT_iLight->animation.transition.rate_ms.val<pCONT_set->Settings.sleep) ? 0 : 1;
 
-    if(animation.flags.fEnable_Animation){
-    // while(blocking_force_animate_to_complete){
-      if (animations_control->IsAnimating()){ //Serial.print("~a"); // the normal lop just needs these two to run the active animations_fadeall
-        animations_control->UpdateAnimations();
-        StripUpdate();
-        if(!animation.flags.fRunning){   
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Started"));
-          #endif
-        }
-        animation.flags.fRunning = true; 
-        fPixelsUpdated = true;
-        pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
-        //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
-      }else{
-        if(animation.flags.fRunning){ 
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
-          #endif
-          fAnyLEDsOnOffCount = 0;
-          for(int i=0;i<strip_size;i++){ 
-            if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
-          }          
-        }
-        animation.flags.fRunning = false;
-        pCONT_set->Settings.enable_sleep = true;
-        if(blocking_force_animate_to_complete){ //if it was running
-          #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
-          #endif
-          blocking_force_animate_to_complete = false;
-        }
+  if(pCONT_iLight->animation.flags.fEnable_Animation){
+  // while(blocking_force_animate_to_complete){
+    if (animations_control->IsAnimating()){ //Serial.print("~a"); // the normal lop just needs these two to run the active animations_fadeall
+      animations_control->UpdateAnimations();
+      StripUpdate();
+      if(!pCONT_iLight->animation.flags.fRunning){   
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Started"));
+        #endif
       }
-    //   if(mSupport::TimeReached(&tSavedBlocking_ForceAnimateToComplete,5000)) {blocking_force_animate_to_complete = false; break; }//exit blocking lo op
-    // }
-    }//animation.flags.fEnable_Animation
-
-
-
-    #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-    // scene.colour.B = animation.brightness; // animation.brightness is master
-    // move to have tasmota way to update brightness stored
-    #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-
-    // control relay power
-    //(fLEDStripOnOff)
-      if(fLEDStripOnOff!=fLEDStripOnOff_Saved){
-        fLEDStripOnOff_Saved = fLEDStripOnOff;
-        // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "fLEDStripOnOff_Saved"));
-        //pCONT->mry->SetRelay(0,fLEDStripOnOff);
+      pCONT_iLight->animation.flags.fRunning = true; 
+      fPixelsUpdated = true;
+      pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
+      //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
+    }else{
+      if(pCONT_iLight->animation.flags.fRunning){ 
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
+        #endif
+        fAnyLEDsOnOffCount = 0;
+        for(int i=0;i<strip_size;i++){ 
+          if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
+        }          
       }
+      pCONT_iLight->animation.flags.fRunning = false;
+      pCONT_set->Settings.enable_sleep = true;
+      if(blocking_force_animate_to_complete){ //if it was running
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
+        #endif
+        blocking_force_animate_to_complete = false;
+      }
+    }
+  //   if(mSupport::TimeReached(&tSavedBlocking_ForceAnimateToComplete,5000)) {blocking_force_animate_to_complete = false; break; }//exit blocking lo op
+  // }
+  }//pCONT_iLight->animation.flags.fEnable_Animation
 
-      //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "file%sline%d"),__FILE__,__LINE__);
-      DEBUG_LINE;
+
+
+  // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+  // // scene.colour.B = pCONT_iLight->animation.brightness; // pCONT_iLight->animation.brightness is master
+  // // move to have tasmota way to update brightness stored
+  // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+
+  // control relay power
+  //(pCONT_iLight->light_power)
+    if(pCONT_iLight->light_power!=pCONT_iLight->light_power_Saved){
+      pCONT_iLight->light_power_Saved = pCONT_iLight->light_power;
+      // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pCONT_iLight->light_power_Saved"));
+      //pCONT->mry->SetRelay(0,pCONT_iLight->light_power);
+    }
+
+    //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "file%sline%d"),__FILE__,__LINE__);
+    DEBUG_LINE;
 
   if(mSupport::TimeReached(&tSavedCheckAnyLEDsOnOff,1000)){
     fAnyLEDsOnOffCount = 0;
@@ -3358,44 +3318,44 @@ void mRGBAnimator::EveryLoop(){
 //    to_min <= result <= to_max
 //
 
-uint16_t mRGBAnimator::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
-                                       uint16_t ito_min, uint16_t ito_max) {
-  // guard-rails
-  if (ifrom_min >= ifrom_max) {
-    if (ito_min > ito_max) {
-      return ito_max;
-    } else {
-      return ito_min;  // invalid input, return arbitrary value
-    }
-  }
-  // convert to uint31, it's more verbose but code is more compact
-  uint32_t num = inum;
-  uint32_t from_min = ifrom_min;
-  uint32_t from_max = ifrom_max;
-  uint32_t to_min = ito_min;
-  uint32_t to_max = ito_max;
+// uint16_t mRGBAnimator::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
+//                                        uint16_t ito_min, uint16_t ito_max) {
+//   // guard-rails
+//   if (ifrom_min >= ifrom_max) {
+//     if (ito_min > ito_max) {
+//       return ito_max;
+//     } else {
+//       return ito_min;  // invalid input, return arbitrary value
+//     }
+//   }
+//   // convert to uint31, it's more verbose but code is more compact
+//   uint32_t num = inum;
+//   uint32_t from_min = ifrom_min;
+//   uint32_t from_max = ifrom_max;
+//   uint32_t to_min = ito_min;
+//   uint32_t to_max = ito_max;
 
-  // check source range
-  num = (num > from_max ? from_max : (num < from_min ? from_min : num));
+//   // check source range
+//   num = (num > from_max ? from_max : (num < from_min ? from_min : num));
 
-  // check to_* order
-  if (to_min > to_max) {
-    // reverse order
-    num = (from_max - num) + from_min;
-    to_min = ito_max;
-    to_max = ito_min;
-  }
+//   // check to_* order
+//   if (to_min > to_max) {
+//     // reverse order
+//     num = (from_max - num) + from_min;
+//     to_min = ito_max;
+//     to_max = ito_min;
+//   }
 
-  uint32_t numerator = (num - from_min) * (to_max - to_min);
-  uint32_t result;
-  if (numerator >= 0x80000000L) {
-    // don't do rounding as it would create an overflow
-    result = numerator / (from_max - from_min) + to_min;
-  } else {
-    result = (((numerator * 2) / (from_max - from_min)) + 1) / 2 + to_min;
-  }
-  return (uint32_t) (result > to_max ? to_max : (result < to_min ? to_min : result));
-}
+//   uint32_t numerator = (num - from_min) * (to_max - to_min);
+//   uint32_t result;
+//   if (numerator >= 0x80000000L) {
+//     // don't do rounding as it would create an overflow
+//     result = numerator / (from_max - from_min) + to_min;
+//   } else {
+//     result = (((numerator * 2) / (from_max - from_min)) + 1) / 2 + to_min;
+//   }
+//   return (uint32_t) (result > to_max ? to_max : (result < to_min ? to_min : result));
+// }
 
 
 
@@ -3437,114 +3397,86 @@ int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-int8_t mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
-
-  // // Check if instruction is for me
-  // if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pixels")>=0){
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-  //   #endif
-  //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  // }else{
-  //   return 0; // not meant for here
-  // }
-  int8_t isserviced = 0;
-  
-  // DynamicJsonDocument doc(1500);
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  // JsonObject obj = doc.as<JsonObject>();
-
-  // StaticJsonDocument<1500> doc;
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-  //   return 0;
-  // }
-  // JsonObject obj = doc.as<JsonObject>();
-
-  //new topic names must include pixels
+void mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     if(strstr(data_buffer2.topic.ctr,"/notif")){
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "notif"));    
     #endif
-      isserviced += parsesub_NotificationPanel(obj);
+      parsesub_NotificationPanel(obj);
     }else 
   #endif
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
     #endif
-    isserviced += parsesub_ModeManual(obj);
+    parsesub_ModeManual(obj);
   }else 
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
     #endif    
-    isserviced += parsesub_ModeAnimation(obj);
+    parsesub_ModeAnimation(obj);
   }else
   #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/ambilight",sizeof("/ambilight")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "ambilight")); 
     #endif   
-    isserviced += parsesub_ModeAmbilight(obj);
+    parsesub_ModeAmbilight(obj);
   }else
   #endif
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/flasher",sizeof("/flasher")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
     #endif
-    isserviced += parsesub_Flasher(obj);
+    parsesub_Flasher(obj);
   }else
   // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/hardware",sizeof("/hardware")-1)>=0){
   //   
     // #ifdef ENABLE_LOG_LEVEL_INFO
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
-  //   isserviced += parsesub_Flasher(obj);
+  //   parsesub_Flasher(obj);
   // }else
   {
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
   }
 
-  animation.flags.fForceUpdate = true;
-  data_buffer2.isserviced += isserviced;
-
+  pCONT_iLight->animation.flags.fForceUpdate = true;
   
-  if(isserviced){ //update string, move to shared place
+  if(data_buffer2.isserviced){ //update string, move to shared place
     SetRefreshLEDs(); // implement in 1 second 
   }
 
-  // t_mqtthandler_status_animation.fSendNow = true;
+  // t_mqtthandler_status_animation.flags.SendNow = true;
 
-  return isserviced;
+  
 
 }
 
-int8_t mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
+void mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
 //   Serial.println("DISABLED");
 // return 0;
 
-  int8_t isserviced = 0;
+  
     // Serial.println("parsesub_CheckAll1"); Serial.flush();
-  isserviced += parsesub_ModeManual(obj);
+  parsesub_ModeManual(obj);
     // Serial.println("parsesub_CheckAll2"); Serial.flush();
     
-    #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
-  isserviced += parsesub_ModeAmbilight(obj);
+  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+  parsesub_ModeAmbilight(obj);
   #endif
     // Serial.println("parsesub_CheckAll3"); Serial.flush();
-  isserviced += parsesub_ModeAnimation(obj);
+  parsesub_ModeAnimation(obj);
     // Serial.println("parsesub_CheckAll4"); Serial.flush();
-  isserviced += pCONT_iLight->parsesub_ModeScene(obj);
+  pCONT_iLight->parsesub_ModeScene(obj);
     // Serial.println("parsesub_CheckAll5"); Serial.flush();
-  isserviced += parsesub_Flasher(obj);
+  parsesub_Flasher(obj);
     // Serial.println("parsesub_CheckAll6"); Serial.flush();
 
 
-  if(isserviced){ //update string, move to shared place
+  if(data_buffer2.isserviced){ //update string, move to shared place
     SetRefreshLEDs(); // implement in 1 second 
   }
 }
@@ -3552,12 +3484,7 @@ int8_t mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
 
 
 // Directly change and control flags/elements without changing everything ie update brightness without changing to scene
-int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
-
-  int8_t isserviced = -1;
-
-   // Create local dereferenced variable
-  // JsonObject obj = (*_obj); 
+void mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
   if(!obj["external_power_onoff"].isNull()){ 
@@ -3566,13 +3493,13 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
       #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"external_power_onoff\"=\"ON\""));
       #endif
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(strstr(onoff,"OFF")){
       #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"external_power_onoff\"=\"OFF\""));
       #endif
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
     }
@@ -3580,7 +3507,7 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   DEBUG_LINE;
 
-  //external_power_mode = external_power.mode = manual, auto (turn off when off and animation finished)
+  //external_power_mode = external_power.mode = manual, auto (turn off when off and pCONT_iLight->animation finished)
 
   if(!obj[D_JSON_ONOFF].isNull()){ 
     const char* onoff = obj[D_JSON_ONOFF];
@@ -3594,13 +3521,13 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
       #endif
       // Add this as "SAVE" state then "LOAD" state
-      memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
+      memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
 
       pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
-      fLEDStripOnOff = true;
+      pCONT_iLight->light_power = true;
 
-      //animation.mode_id = MODE_TURN_ON_ID;
-      isserviced++;
+      //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
+      data_buffer2.isserviced++;
     }else if(strstr(onoff,"OFF")){
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
@@ -3608,12 +3535,12 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
       #endif
-      memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
+      memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
       pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-      fLEDStripOnOff = false;
+      pCONT_iLight->light_power = false;
 
-      //animation.mode_id = MODE_TURN_OFF_ID;
-      isserviced++;
+      //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
     }
@@ -3624,35 +3551,12 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
     const char* onoff = obj[D_JSON_ANIMATIONENABLE];
     uint8_t state = pCONT_sup->GetStateNumber(onoff);
     if(state==2){
-      animation.flags.fEnable_Animation ^= 1;
+      pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
     }else{
-      animation.flags.fEnable_Animation = state;
+      pCONT_iLight->animation.flags.fEnable_Animation = state;
     }
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "fEnable_Animation=%d"),animation.flags.fEnable_Animation);    
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "fEnable_Animation=%d"),pCONT_iLight->animation.flags.fEnable_Animation);    
   }
-
-
-  DEBUG_LINE;
-
-  // if(obj.containsKey("hue")){
-  //   int hue = obj["hue"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"hue\"=[%d]"),hue);
-  //   scene.colour.H = HueN2F(hue);
-  //   isserviced++;
-  // }
-  // if(obj.containsKey("sat")){
-  //   int sat = obj["sat"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"sat\"=[%d]"),sat);
-  //   scene.colour.S = SatN2F(sat);
-  //   isserviced++;
-  // }
-  // if(obj.containsKey("brt")){
-  //   int brt = obj["brt"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"brt\"=[%d]"),brt);
-  //   scene.colour.B = BrtN2F(brt);
-  //   isserviced++;
-  // }
-
 
   
   // TIME on duration for autooff
@@ -3680,21 +3584,18 @@ int8_t mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   DEBUG_LINE;
 
-  return isserviced;
+  
 
 } // END FUNCTION
 
-//,(animation_override.fRefreshAllPixels?"Set":"UNSET")
-int8_t mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
+
+void mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
 
 
 AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "parsesub_ModeAnimation"));
 
   char buffer[40];
-
-  uint8_t isserviced = 0;
   int8_t tmp_id = 0;
-
 
 DEBUG_LINE;
 
@@ -3705,22 +3606,22 @@ DEBUG_LINE;
     const char* colour = obj[D_JSON_COLOUR_PALETTE];
 DEBUG_LINE;
     if((tmp_id=pCONT_iLight->GetPaletteIDbyName(colour))>=0){
-      animation.palette_id = tmp_id;
+      pCONT_iLight->animation.palette_id = tmp_id;
 AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GetPaletteIDbyName=%d"),tmp_id);
 DEBUG_LINE;
-      #ifdef USE_TASK_RGBLIGHTING_FLASHER_AND_MIXER
-      if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+      #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+      if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_FLASHER_ID){
         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
       }
       #endif
       #ifdef ENABLE_PALETTE_FORCED_MODE
-      //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+      //  pCONT_iLight->animation.mode_id = ANIMATION_MODE_PRESETS_ID;
       #endif
       // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
-      if(animation_override.fRefreshAllPixels){
+      if(pCONT_iLight->animation_override.fRefreshAllPixels){
         first_set = true; //refresh all
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
 DEBUG_LINE;
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,colour);
@@ -3754,12 +3655,12 @@ DEBUG_LINE;
   if(!obj[D_JSON_MODE].isNull()){ 
     const char* mode = obj[D_JSON_MODE];
     if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
-      animation.mode_id = tmp_id;
+      pCONT_iLight->animation.mode_id = tmp_id;
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
      #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
     }
@@ -3768,12 +3669,12 @@ DEBUG_LINE;
   if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
     const char* mode = obj[D_JSON_ANIMATIONMODE];
     if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
-      animation.mode_id = tmp_id;
+      pCONT_iLight->animation.mode_id = tmp_id;
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
      #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
     }
@@ -3791,7 +3692,7 @@ DEBUG_LINE;
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_RGB_COLOUR_ORDER,GetHardwareColourTypeName(buffer));
       #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
     }
@@ -3805,8 +3706,8 @@ DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_STRIP_SIZE,strip_size);
     #endif
-    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-    isserviced++;
+    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+    data_buffer2.isserviced++;
   }
   
   
@@ -3817,22 +3718,22 @@ DEBUG_LINE;
   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER].isNull()){ 
     int amount = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER];
     // Also convert to percentage equivalent
-    animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(amount);
+    pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(amount);
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
     #endif
-    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-    isserviced++;
+    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+    data_buffer2.isserviced++;
   }else
   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE].isNull()){ 
     int percentage = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE];
-    animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
+    pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
     #endif
-    Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
     // Also convert to number equivalent
-    isserviced++;
+    data_buffer2.isserviced++;
   }
 
 DEBUG_LINE;
@@ -3840,64 +3741,64 @@ DEBUG_LINE;
   
   // Transition time in seconds or ms
   if(!obj[D_JSON_TRANSITION][D_JSON_TIME].isNull()){ 
-    animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME];
+    pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val);   
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);   
     #endif
-    animation.transition.time_ms.val *= 1000; // map into ms
+    pCONT_iLight->animation.transition.time_ms.val *= 1000; // map into ms
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);
     #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
-    isserviced++;
-    //check that rate>animation time
-    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
+    data_buffer2.isserviced++;
+    //check that rate>pCONT_iLight->animation time
+    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
   }else
   if(!obj[D_JSON_TRANSITION][D_JSON_TIME_MS].isNull()){ 
-    animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME_MS];
+    pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME_MS];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,animation.transition.time_ms.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
     #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
-    isserviced++;
-    //check that rate>animation time
-    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
+    data_buffer2.isserviced++;
+    //check that rate>pCONT_iLight->animation time
+    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
   }
 
 DEBUG_LINE;
 
   // Rate in seconds as default or ms
   if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
-    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
+    pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
     #endif
-    animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
-    isserviced++;
-    //check that rate>animation time
-    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+    pCONT_iLight->animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
+    data_buffer2.isserviced++;
+    //check that rate>pCONT_iLight->animation time
+    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
   }else
   if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
-    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
+    pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,animation.transition.rate_ms.val);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,pCONT_iLight->animation.transition.rate_ms.val);
     #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
-    isserviced++;
-    //check that rate>animation time
-    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
+    data_buffer2.isserviced++;
+    //check that rate>pCONT_iLight->animation time
+    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
   }
 
   // probably bring transition_order into one command
   if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ 
     const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
     if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
-      animation.transition.order_id = tmp_id;
+      pCONT_iLight->animation.transition.order_id = tmp_id;
       // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
@@ -3910,25 +3811,25 @@ DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
     #endif
-    animation.brightness = pCONT_iLight->BrtN2F(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,animation.brightness);
-    Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,animation.brightness);
-    isserviced++;
+    pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
+    Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
+    data_buffer2.isserviced++;
   }
   
 
   if(!obj[D_JSON_PIXELSGROUPED].isNull()){
-    animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
+    pCONT_iLight->animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,animation.pixelgrouped);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,pCONT_iLight->animation.pixelgrouped);
     #endif
   }
 
-  //override commands that run for one animation cycle then are cleared to 0
+  //override commands that run for one pCONT_iLight->animation cycle then are cleared to 0
   if(!obj[D_JSON_REFRESH_ALLPIXELS].isNull()){
-    animation_override.fRefreshAllPixels = obj[D_JSON_REFRESH_ALLPIXELS];
+    pCONT_iLight->animation_override.fRefreshAllPixels = obj[D_JSON_REFRESH_ALLPIXELS];
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,animation_override.fRefreshAllPixels);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,pCONT_iLight->animation_override.fRefreshAllPixels);
     #endif
   }
 
@@ -3955,7 +3856,7 @@ DEBUG_LINE;
     #endif
   }
 
-  //animation_override.time_ms = 1000; // implement in 1 second 
+  //pCONT_iLight->animation_override.time_ms = 1000; // implement in 1 second 
 
 
 // #endif
@@ -3964,7 +3865,7 @@ DEBUG_LINE;
 
 DEBUG_LINE;
 
-  return isserviced;
+  
 
 } // END FUNCTION
 
@@ -4125,25 +4026,25 @@ uint8_t mRGBAnimator::ConstructJSON_Animation(uint8_t json_method){
   // StaticJsonDocument<600> doc;
   // JsonObject root = doc.to<JsonObject>();
 
-  // root[D_JSON_ONOFF] = fLEDStripOnOff ? "ON" : "OFF";
+  // root[D_JSON_ONOFF] = pCONT_iLight->light_power ? "ON" : "OFF";
   // root[D_JSON_MODE] = GetAnimationModeName();
   // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-  // // root[D_JSON_BRIGHTNESS_PERCENTAGE] = animation.brightness*100;
-  // root[D_JSON_BRIGHTNESS] = animation.brightness;
+  // // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
+  // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
 
   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-  //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(animation.transition.time_ms.val,1000);
-  //   transitionobj[D_JSON_TIME_MS] = animation.transition.time_ms.val;
-  //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(animation.transition.rate_ms.val,1000);
-  //   transitionobj[D_JSON_RATE_MS] = animation.transition.rate_ms.val;
-  //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val);
-  //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = animation.transition.pixels_to_update_as_percentage.val;
+  //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
+  //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms.val;
+  //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms.val,1000);
+  //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms.val;
+  //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+  //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
   //   transitionobj[D_JSON_ORDER] = GetTransitionOrderName();
 
   // // Flags and states that are used during one transition and reset when completed
   // // JsonObject overridesobj = root.createNestedObject("transition_overrides"); 
-  // //   overridesobj["fRefreshAllPixels"] = animation_override.fRefreshAllPixels;
+  // //   overridesobj["fRefreshAllPixels"] = pCONT_iLight->animation_override.fRefreshAllPixels;
   
   // // root["ledout.length"] = ledout.length;
 
@@ -4406,7 +4307,7 @@ char buffer[50];
  * 
  * 
  * */
-int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){ 
+void mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){ 
 
    // Create local dereferenced variable
   // JsonObject obj = (*_obj); 
@@ -4467,7 +4368,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
 
   memset(&parsed,0,sizeof(parsed)); // clear parsing struct
   
-  int8_t isserviced = 0;
+  
 
   // StaticJsonDocument<300> doc;
   // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
@@ -4487,7 +4388,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.pixelnum.val[parsed.pixelnum.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,val);          
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_PIXELNUM].is<const char*>()){
       const char* name = obj[D_JSON_PIXELNUM];
@@ -4495,16 +4396,15 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " const char* " "all"));     
         for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(obj[D_JSON_PIXELNUM].is<int>()){
       int val = obj[D_JSON_PIXELNUM];
       parsed.pixelnum.val[parsed.pixelnum.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " int" " [i%d:v%d]"),parsed.pixelnum.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM "Not Found"));
-      return isserviced; //!isserviced
     }
   } //end pixelnum
   
@@ -4528,7 +4428,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_RGB " JsonArray " " [i%d:v%s]"),parsed.hsb.found_idx-1,val);    
         #endif
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_RGB].is<const char*>()){
       const char* val = obj[D_JSON_RGB];
@@ -4537,7 +4437,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_RGB " JsonArray " " [i%d:v%s]"),parsed.hsb.found_idx-1,val);    
       #endif
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_RGB "Not Found"));
@@ -4561,7 +4461,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.hue.val[parsed.hue.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " JsonArray " " [i%d:v%d]"),parsed.hue.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_HUE].is<const char*>()){
       const char* colour = obj[D_JSON_HUE];
@@ -4570,13 +4470,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_PIXELNUM " const char* " "all"));     
       //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       // }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(obj[D_JSON_HUE].is<int>()){
       int val = obj[D_JSON_HUE];
       parsed.hue.val[parsed.hue.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " int" " [i%d:v%d]"),parsed.hue.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE "Not Found"));
@@ -4599,7 +4499,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.sat.val[parsed.sat.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT " JsonArray " " [i%d:v%d]"),parsed.sat.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_BRT].is<const char*>()){
       const char* name = obj[D_JSON_BRT];
@@ -4608,7 +4508,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_PIXELNUM " const char* " "all"));     
       //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       // }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(obj[D_JSON_SAT].is<int>()){
       int val = obj[D_JSON_SAT];
@@ -4616,7 +4516,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SAT " int" " [i%d:v%d]"),parsed.sat.found_idx-1,val);    
       #endif
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SAT "Not Found"));
@@ -4638,7 +4538,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.brt.val[parsed.brt.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT " JsonArray " " [i%d:v%d]"),parsed.brt.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_BRT].is<const char*>()){
       const char* name = obj[D_JSON_BRT];
@@ -4647,13 +4547,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_PIXELNUM " const char* " "all"));     
       //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       // }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(obj[D_JSON_BRT].is<int>()){
       int val = obj[D_JSON_BRT];
       parsed.brt.val[parsed.brt.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT " int" " [i%d:v%d]"),parsed.brt.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRT "Not Found"));
@@ -4678,7 +4578,7 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         // Serial.println(parsed.white.found_idx);
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_WHITE " JsonArray " " [i%d:v%d]"),parsed.white.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_WHITE].is<const char*>()){
       const char* name = obj[D_JSON_WHITE];
@@ -4687,13 +4587,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
       //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_PIXELNUM " const char* " "all"));     
       //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       // }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else 
     if(obj[D_JSON_WHITE].is<int>()){
       int val = obj[D_JSON_WHITE];
       parsed.white.val[parsed.white.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_WHITE " int" " [i%d:v%d]"),parsed.white.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_WHITE "Not Found"));
@@ -4717,13 +4617,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.flasher.val[parsed.flasher.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER " JsonArray " " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_FLASHER].is<int>()){
       int val = obj[D_JSON_FLASHER];
       parsed.flasher.val[parsed.flasher.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER " int" " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER "Not Found"));
@@ -4747,13 +4647,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.pulser.val[parsed.pulser.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PULSER " JsonArray " " [i%d:v%d]"),parsed.pulser.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_PULSER].is<int>()){
       int val = obj[D_JSON_PULSER];
       parsed.pulser.val[parsed.pulser.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PULSER " int" " [i%d:v%d]"),parsed.pulser.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PULSER "Not Found"));
     }
@@ -4775,13 +4675,13 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.fade.val[parsed.fade.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FADE " JsonArray " " [i%d:v%d]"),parsed.fade.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     if(obj[D_JSON_FADE].is<int>()){
       int val = obj[D_JSON_FADE];
       parsed.fade.val[parsed.fade.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FADE " int" " [i%d:v%d]"),parsed.fade.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FADE "Not Found"));
     }
@@ -4803,14 +4703,14 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val*1000; //secs2ms
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     //no string command
     if(obj[D_JSON_TIME_SECS].is<int>()){
       int val = obj[D_JSON_TIME_SECS];
       parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val*1000; //secs2ms
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS "Not Found"));
     }
@@ -4825,14 +4725,14 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
         parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val;
         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
       }
-      isserviced++;
+      data_buffer2.isserviced++;
     }else
     //no string command
     if(obj[D_JSON_TIME_MS].is<int>()){
       int val = obj[D_JSON_TIME_MS];
       parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val;
       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
-      isserviced++;
+      data_buffer2.isserviced++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS "Not Found"));
     }
@@ -4991,10 +4891,10 @@ int8_t mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
 
   notif.tSaved.Timeout = millis(); // resets timeout counter
   notif.tSaved.TimeoutCounter = millis();
-  animation.mode_id = ANIMATION_MODE_NOTIFICATIONS_ID;
+  pCONT_iLight->animation.mode_id = ANIMATION_MODE_NOTIFICATIONS_ID;
   notif.flags.fForcePanelUpdate = true;
 
-  return isserviced;
+  
 
 
 } // END FUNCTION

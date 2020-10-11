@@ -5,6 +5,22 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
+
+// #ifndef USE_MODULE_LIGHTS_ADDRESSABLE
+#include <NeoPixelBus.h>
+#include <NeoPixelAnimator.h>
+// #endif //  USE_MODULE_LIGHTS_ADDRESSABLE 
+
+
+#if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
+  typedef RgbColor RgbTypeColor;
+#elif defined(PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL)
+  typedef RgbwColor RgbTypeColor;
+#else
+  typedef RgbColor RgbTypeColor;
+#endif
+
+
 struct RgbcctColor{
   uint8_t R;
   uint8_t G;
@@ -22,6 +38,28 @@ enum LightTypes_IDS{
   LT_WS2812, 
   LT_ADDRESSABLE, //replacing above
   LT_RGBW,  LT_RGBWC,
+};
+
+
+enum LightSubtypes{ 
+        LST_NONE, 
+        LST_SINGLE, 
+        LST_COLDWARM, 
+        LST_RGB,   
+        LST_RGBW, 
+        LST_RGBWC, 
+        LST_RGBCW
+};
+
+enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
+  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default
+  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID, //common for WS2811
+  PIXEL_HARDWARE_COLOR_ORDER_BRG_ID, 
+  PIXEL_HARDWARE_COLOR_ORDER_RBG_ID, 
+  PIXEL_HARDWARE_COLOR_ORDER_BGR_ID, 
+  PIXEL_HARDWARE_COLOR_ORDER_GBR_ID,
+  PIXEL_HARDWARE_COLOR_ORDER_GRBW_ID,
+  PIXEL_HARDWARE_COLOR_LENGTH_ID
 };
 
 
@@ -50,7 +88,7 @@ enum LightTypes_IDS{
     #define PALETTELIST_COLOUR_USERS_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
 
-#define DEBUG_LIGHT
+//#define DEBUG_LIGHT
 
 typedef unsigned long power_t;              // Power (Relay) type
 
@@ -165,6 +203,17 @@ const char kListPWM_TestColours[] PROGMEM =
   
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR) "scene";
 
+
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_TURN_ON_NAME_CTR )   "Turn On"     ;    
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR )   "Turn Off"     ;    
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR   )      "Ambilight"  ;                
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_SCENE_NAME_CTR   )          "Scene"      ;             
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_FLASHER_NAME_CTR  )         D_JSON_FLASHER;
+#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS       
+DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;      
+#endif   
+
   
 //     #define D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
 //     #define D_MODE_SINGLECOLOUR_DAYON_NAME_CTR           "DAYON"    
@@ -221,6 +270,79 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     // void Module_Init();
 
 
+// New feature, turning off will overwrite animation struct on "on" will restore to previous
+
+  typedef union {
+    uint16_t data; // allows full manipulating
+    struct { 
+      // enable animations (pause)
+      uint16_t fEnable_Animation : 1;
+
+
+      uint16_t fForceUpdate : 1;
+      uint16_t fRunning : 1;//= false;
+      uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
+      
+        uint16_t ftime_use_map : 1;//= true;
+        uint16_t frate_use_map : 1;//= true;
+
+      // Reserved
+      uint16_t reserved : 12;
+    };
+  } ANIMATION_FLAGS;
+
+    struct ANIMATIONSETTINGS{
+      //mode = turn on/off/scene/pallette
+      uint8_t mode_id; //update mode
+      //palette - stores colour patterns for single led setting
+      uint8_t palette_id; 
+
+      uint8_t pixelgrouped=3; // nearby pixels repeat colours
+      
+      float brightness = 1; // MOVE OUT OF ANIMATION?? move to "light class"
+
+      ANIMATION_FLAGS flags;
+
+      struct TRANSITIONSETTINGS{
+        uint8_t order_id;
+        uint8_t method_id;
+
+        struct PIXELS_TO_UPDATE_AS_PERCENTAGE{
+          uint8_t val;
+          uint8_t map_id = 2;  
+        }pixels_to_update_as_percentage;
+        struct TIME{
+          uint16_t val = 5000;
+          uint8_t  map_id = 2;
+        }time_ms;
+        struct RATE{
+          uint16_t val = 5000;
+          uint8_t  map_id = 2;
+        }rate_ms;
+      
+      }transition;
+    };
+    // store the current state
+    ANIMATIONSETTINGS animation;
+    // store animation to swtich to
+    ANIMATIONSETTINGS animation_stored;
+    // hold when to switch to animation_stored
+    struct ANIMATION_CONFIG_RUNTIME{
+      uint8_t  fWaiting = false;
+      // For ms or sec delay (until execution) time
+      uint32_t delay_time_ms   = 0; //0 if not set
+      uint32_t delay_time_secs = 0;
+    }animation_stored_runtime;
+
+    
+    uint32_t animation_changed_millis = 0;
+
+
+    // Flags and states that are used during one transition and reset when completed
+    struct ANIMATIONOVERRIDES{
+      uint8_t fRefreshAllPixels = false;
+      uint16_t time_ms = 1000; //on boot
+    }animation_override;
     
     /**************
      * TURN_ON - fade ON, returns to previous lighting array
@@ -329,10 +451,10 @@ void Template_Load();
 
 int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     
-int8_t parsesub_CheckAll(JsonObjectConst obj);
-int8_t parsesub_Settings(JsonObjectConst obj);
+void parsesub_CheckAll(JsonObjectConst obj);
+void parsesub_Settings(JsonObjectConst obj);
 
 
 
@@ -344,8 +466,8 @@ int8_t parsesub_Settings(JsonObjectConst obj);
     int8_t Tasker(uint8_t function);
     void Init(void);
 
-    int8_t parse_JSONCommand(void);
-    int8_t parsesub_ModeManual(JsonObjectConst obj);
+    void parse_JSONCommand(void);
+    void parsesub_ModeManual(JsonObjectConst obj);
     
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
   bool     _ct_rgb_linked = true;
@@ -444,7 +566,7 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     const char* GetSceneName(char* buffer, uint8_t buflen);
 
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
-    int8_t parsesub_ModeScene(JsonObjectConst obj);
+    void parsesub_ModeScene(JsonObjectConst obj);
     
     void SubTask_SingleColour();
     void init_Scenes();
@@ -459,6 +581,10 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
 
   
 void SubTask_AutoOff();
+
+
+  uint8_t light_power = 0;
+  uint8_t light_power_Saved = 0;
 
 
 // struct LIGHT {

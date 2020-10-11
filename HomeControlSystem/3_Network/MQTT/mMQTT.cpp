@@ -88,11 +88,11 @@ void mMQTT::DiscoverServer(void)
       }
     }
 //#endif  // MDNS_HOSTNAME
-    snprintf_P(pCONT_set->Settings.mqtt_host, sizeof(pCONT_set->Settings.mqtt_host), MDNS.IP(i).toString().c_str());
-    pCONT_set->Settings.mqtt_port = MDNS.port(i);
+    snprintf_P(pCONT_set->Settings.mqtt.host, sizeof(pCONT_set->Settings.mqtt.host), MDNS.IP(i).toString().c_str());
+    pCONT_set->Settings.mqtt.port = MDNS.port(i);
 
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s, " D_IP_ADDRESS " %s, " D_PORT " %d"), 
-                    MDNS.hostname(i).c_str(), pCONT_set->Settings.mqtt_host, pCONT_set->Settings.mqtt_port);
+                    MDNS.hostname(i).c_str(), pCONT_set->Settings.mqtt.host, pCONT_set->Settings.mqtt.port);
   }
 }
 // #endif  // MQTT_HOST_DISCOVERY
@@ -143,7 +143,7 @@ void mMQTT::MqttSaveSettings(void)
   // strlcpy(stemp2, (!strlen(tmp)) ? MQTT_FULLTOPIC : tmp, sizeof(stemp2));
   // MakeValidMqtt(1,stemp2);
   // if ((strcmp(stemp, pCONT_set->Settings.mqtt_topic)) || (strcmp(stemp2, pCONT_set->Settings.mqtt_fulltopic))) {
-  //   Response_P((pCONT_set->Settings.flag_system_phaseout.mqtt_offline) ? S_OFFLINE : "");
+  //   Response_P((pCONT_set->Settings.flag_system.mqtt_offline) ? S_OFFLINE : "");
   //   MqttPublishPrefixTopic_P(TELE, S_LWT, true);  // Offline or remove previous retained topic
   // }
   // strlcpy(pCONT_set->Settings.mqtt_topic, stemp, sizeof(pCONT_set->Settings.mqtt_topic));
@@ -185,8 +185,8 @@ void mMQTT::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_health;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -196,8 +196,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_settings;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -207,8 +207,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_log;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -218,8 +218,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_firmware;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -229,8 +229,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_memory;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -240,8 +240,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_network;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -251,8 +251,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_mqtt;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -262,8 +262,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_time;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -273,8 +273,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_devices;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -284,8 +284,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_reboot;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -295,8 +295,8 @@ void mMQTT::MQTTHandler_Init(){
   
   mqtthandler_ptr = &mqtthandler_reboot_event;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = false;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR;  
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -307,8 +307,8 @@ void mMQTT::MQTTHandler_Init(){
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
   mqtthandler_ptr = &mqtthandler_debug_pins;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -318,8 +318,8 @@ void mMQTT::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_debug_template;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -329,8 +329,8 @@ void mMQTT::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_debug_moduleinterface;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
@@ -456,17 +456,17 @@ void mMQTT::connect(void) {
 
 //<devicename>/set/<function>/<subfunction>
 //<devicename>/status/<function>/<subfunction>
-int8_t mMQTT::parse_JSONCommand(){
+void mMQTT::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/mqtt")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND " mqtt"));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
 
-  int8_t isserviced = 0;
+  
     
   //new topic names must include pixels
   
@@ -480,19 +480,14 @@ int8_t mMQTT::parse_JSONCommand(){
   }else
   {
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "INVALID"));    
-  }
-  
-  data_buffer2.isserviced += isserviced;
-
-  return isserviced;
+  } 
 
 } // END function
 
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")
-int8_t mMQTT::parsesub_MQTTSettingsCommand(){
+void mMQTT::parsesub_MQTTSettingsCommand(){
 
-  uint8_t isserviced = 0;
   int8_t tmp_id = 0;
 
   #ifdef JSONDOCUMENT_STATIC
@@ -505,7 +500,7 @@ int8_t mMQTT::parsesub_MQTTSettingsCommand(){
   if(error){
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-    return 0;
+    return;
   }
   JsonObject obj = doc.as<JsonObject>();
   
@@ -514,14 +509,14 @@ int8_t mMQTT::parsesub_MQTTSettingsCommand(){
     if(strcmp(command,"system_send_all")==0){ 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
       //MQTTHandler_Set_fSendNow();
-      isserviced++;
+      data_buffer2.isserviced++;
     }
     else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
     }
   }
 
-  return isserviced;
+  
 
 } // END FUNCTION
 
@@ -721,21 +716,21 @@ boolean mMQTT::psubscribe(const char* topic) {
 
 
 void mMQTT::MQTTHandler_Set_fSendNow(){
-  mqtthandler_health.fSendNow = true;
-  mqtthandler_settings.fSendNow = true;
-  // mqtthandler_parameters.fSendNow = true;
-  mqtthandler_log.fSendNow = true;
-  mqtthandler_firmware.fSendNow = true;
-  mqtthandler_memory.fSendNow = true;
-  mqtthandler_network.fSendNow = true;
-  mqtthandler_mqtt.fSendNow = true;
-  mqtthandler_time.fSendNow = true;
-  mqtthandler_devices.fSendNow = true;
-  mqtthandler_reboot.fSendNow = true;
-  mqtthandler_debug_pins.fSendNow = true;
-  mqtthandler_debug_template.fSendNow = true;
-  mqtthandler_debug_moduleinterface.fSendNow = true;
-  mqtthandler_debug_minimal.fSendNow = true;
+  mqtthandler_health.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
+  // mqtthandler_parameters.flags.SendNow = true;
+  mqtthandler_log.flags.SendNow = true;
+  mqtthandler_firmware.flags.SendNow = true;
+  mqtthandler_memory.flags.SendNow = true;
+  mqtthandler_network.flags.SendNow = true;
+  mqtthandler_mqtt.flags.SendNow = true;
+  mqtthandler_time.flags.SendNow = true;
+  mqtthandler_devices.flags.SendNow = true;
+  mqtthandler_reboot.flags.SendNow = true;
+  mqtthandler_debug_pins.flags.SendNow = true;
+  mqtthandler_debug_template.flags.SendNow = true;
+  mqtthandler_debug_moduleinterface.flags.SendNow = true;
+  mqtthandler_debug_minimal.flags.SendNow = true;
 
 
 
@@ -860,7 +855,7 @@ uint8_t mMQTT::ConstructJSON_Debug_Minimal(uint8_t json_level){
 
 int8_t mMQTT::Tasker(uint8_t function){
 
-  if(pCONT_set->Settings.flag_system_phaseout.mqtt_enabled){
+  if(pCONT_set->Settings.flag_system.mqtt_enabled){
 
   switch(function){
     case FUNC_INIT:

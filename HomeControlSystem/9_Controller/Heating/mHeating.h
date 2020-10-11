@@ -476,7 +476,7 @@ void AddToHardwareMessage();
     }activeprograms[4];
     const char* GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer);// = nullptr);
 
-    int8_t parse_JSONCommand(void);
+    void parse_JSONCommand(void);
     void parse_VoiceMQTT(void);
 
     void WebAppend_Root_ControlUI();
@@ -492,13 +492,13 @@ void WebAppend_Root_Draw_Table();
     int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
     
-    int8_t parsesub_CheckAll(JsonObjectConst obj);
+    void parsesub_CheckAll(JsonObjectConst obj);
     int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     
-    int8_t parsesub_ModeManual(JsonObjectConst obj);
-    int8_t parsesub_ProgramTimers(JsonObjectConst obj);
-    int8_t parsesub_ProgramTemps(JsonObjectConst obj);
+    void parsesub_ModeManual(JsonObjectConst obj);
+    void parsesub_ProgramTimers(JsonObjectConst obj);
+    void parsesub_ProgramTemps(JsonObjectConst obj);
 
 
 

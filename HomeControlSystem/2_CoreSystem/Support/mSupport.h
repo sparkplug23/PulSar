@@ -203,7 +203,7 @@ class mSupport{
 
     float FastPrecisePowf(const float x, const float y);
 
-    int8_t parse_JSONCommand();
+    void parse_JSONCommand();
     IPAddress syslog_host_addr;      // Syslog host IP address
     uint32_t syslog_host_hash = 0;   // Syslog host name hash
 

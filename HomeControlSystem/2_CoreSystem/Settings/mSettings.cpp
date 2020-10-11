@@ -31,7 +31,7 @@
 // //   }payload;
 //   uint8_t fWaiting = false;
 // //   uint8_t method = false; // For detailed, ifchanged, all
-// //   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
+// //   u // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 // }data_buffer2;
 
 // struct DATA_BUFFER2{
@@ -46,14 +46,14 @@
 //   }payload;
 //   uint8_t fWaiting = false;
 //   // uint8_t method = false; // For detailed, ifchanged, all
-//   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
+//   u // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 // } data_buffer2;
 
 
 
 
 
-struct DATA_BUFFER2 data_buffer2;
+struct DATA_BUFFER data_buffer2;
 
 // /*********************struct DATA_BUFFER2 data_buffer2;***********************************************************************/
 //
@@ -396,7 +396,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
 
 //<devicename>/set/<function>/<subfunction>
 //<devicename>/status/<function>/<subfunction>
-int8_t mSettings::parse_JSONCommand(){
+void mSettings::parse_JSONCommand(){
 
 //#ifdef ENABLE_BUFFER_STRUCT
   // Check if instruction is for me
@@ -404,11 +404,8 @@ int8_t mSettings::parse_JSONCommand(){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND " system"));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
-
-  int8_t isserviced = 0;
-
   
   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
 
@@ -431,22 +428,17 @@ int8_t mSettings::parse_JSONCommand(){
       // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/system",sizeof("/system")-1)>=0){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"/system")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "system"));    
-    // isserviced += parsesub_SystemCommand(obj);
+    // parsesub_SystemCommand(obj);
   }else
   // if(strstr(data_buffer.topic.ctr,"hacs_firmware/set/settings/firmware")){
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"hacs_firmware/set/settings/firmware",sizeof("hacs_firmware/set/settings/firmware")-1)>=0){
   
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "hacs_firmware/set/settings/firmware"));    
-    // isserviced += parsesub_FirmwareInformation(obj);
+    // parsesub_FirmwareInformation(obj);
   }else
   {
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH D_TOPIC " INVALID"));    
-  }
-  
-  
-  data_buffer2.isserviced += isserviced;
-
-  return isserviced;
+  } 
 
   // #endif
 } // END function
@@ -506,10 +498,9 @@ void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")
-int8_t mSettings::parsesub_SystemCommand(JsonObjectConst obj){
+void mSettings::parsesub_SystemCommand(JsonObjectConst obj){
 
 #ifdef ENABLE_BUFFER_STRUCT
-  uint8_t isserviced = 0;
   int8_t tmp_id = 0;
 
   // #ifdef JSONDOCUMENT_STATIC
@@ -531,31 +522,31 @@ int8_t mSettings::parsesub_SystemCommand(JsonObjectConst obj){
     if(strstr(command,PSTR("system_send_all"))){ 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
       //MQTTHandler_Set_fSendNow();
-      isserviced++;
+      data_buffer2.isserviced++;
     }
     else
     if(strstr(command,PSTR("reset_bootcount"))){ 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"reset_bootcount\""));
       Settings.bootcount = 0;
       SettingsSaveAll();
-      isserviced++;
+      data_buffer2.isserviced++;
     }
     else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_SETTINGS D_PARSING_NOMATCH));
     }
   }
 
-  return isserviced;
+  
   #endif
 
 } // END FUNCTION
 
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")
-int8_t mSettings::parsesub_FirmwareInformation(JsonObjectConst obj){
+void mSettings::parsesub_FirmwareInformation(JsonObjectConst obj){
 
 #ifdef ENABLE_BUFFER_STRUCT
-  uint8_t isserviced = 0;
+  u
   int8_t tmp_id = 0;
 
   // // #ifdef JSONDOCUMENT_STATIC
@@ -660,7 +651,7 @@ int8_t mSettings::parsesub_FirmwareInformation(JsonObjectConst obj){
 
 
 
-  return isserviced;
+  
 
   #endif
 
@@ -914,7 +905,7 @@ uint16_t mSettings::GetSettingsCrc(void)
 void mSettings::SettingsSaveAll(void)
 {
   Serial.println("SettingsSaveAll");
-  // if (Settings.flag_system_phaseout.save_state) {
+  // if (Settings.flag_system.save_state) {
   //   Settings.power = power;
   // } else {
   //   Settings.power = 0;
@@ -1062,7 +1053,7 @@ void mSettings::SettingsLoad(void)
   } _SettingsH;
   unsigned long save_flag = 0;
 
-  Settings.flag_system_phaseout.stop_flash_rotate = 1;// temp measure
+  Settings.flag_system.stop_flash_rotate = 1;// temp measure
 
   settings_location = 0;
   uint32_t flash_location = SETTINGS_LOCATION +1; //next memory location
@@ -1103,7 +1094,7 @@ void mSettings::SettingsLoad(void)
       if (Settings.save_flag > save_flag) {
         save_flag = Settings.save_flag;
         settings_location = flash_location;
-        if (Settings.flag_system_phaseout.stop_flash_rotate && (0 == i)) {  // Stop only if eeprom area should be used and it is valid
+        if (Settings.flag_system.stop_flash_rotate && (0 == i)) {  // Stop only if eeprom area should be used and it is valid
           break;
         }
       }
@@ -1167,7 +1158,10 @@ void mSettings::SettingsLoad(void)
     Settings.weblog_level = LOG_LEVEL_INFO;
     //Settings.telnetlog_level = LOG_LEVEL_INFO;
     Settings.seriallog_level = LOG_LEVEL_DEBUG;
-    //enable_serial_logging_filtering = true;
+    #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
+      enable_serial_logging_filtering = true;
+      Settings.seriallog_level = LOG_LEVEL_TEST;
+    #endif
     //enable_web_logging_filtering = true;
     //Settings.flog_time_short = true;
     #ifdef DEBUG_FOR_FAULT
@@ -1247,7 +1241,7 @@ void mSettings::SettingsLoad_CheckSuccessful(){
   if (Settings.param[P_BOOT_LOOP_OFFSET]) {
     // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET]) {       // Restart twice
-      Settings.flag_network_phaseout.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
+      Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
       if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
         // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
         //   // if (bitRead(Settings.rule_stop, i)) {
@@ -1255,9 +1249,9 @@ void mSettings::SettingsLoad_CheckSuccessful(){
         //   // }
         // }
       }
-      if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
-        Settings.rule_enabled = 0;                  // Disable all rules
-      }
+      // if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
+      //   Settings.rule_enabled = 0;                  // Disable all rules
+      // }
       if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
         for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
           Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
@@ -1273,8 +1267,8 @@ void mSettings::SettingsLoad_CheckSuccessful(){
     }
   }
 
-  memset(Settings.mqtt_topic,0,sizeof(Settings.mqtt_topic));
-  memcpy(Settings.mqtt_topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
+  memset(Settings.mqtt.topic,0,sizeof(Settings.mqtt.topic));
+  memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
   
   // Configure hostname 
   // msup.Format(mqtt_client, Settings.mqtt_client, sizeof(mqtt_client));
@@ -1362,7 +1356,7 @@ bool mSettings::RtcRebootValid(void)
 void mSettings::SettingsDefault(void)
 {
   
-  Settings.flag_system_phaseout.stop_flash_rotate = true;
+  Settings.flag_system.stop_flash_rotate = true;
   stop_flash_rotate = true;
 
    //Serial.println("SettingsDefault");
@@ -1426,7 +1420,7 @@ void mSettings::SystemSettings_DefaultBody_System(void)
   Settings.serial_delimiter = 0xff;
   Settings.sbaudrate = SOFT_BAUDRATE / 1200;
   Settings.sleep = 20;//APP_SLEEP;
-  Settings.flag_network_phaseout.sleep_normal = true; // USE DYNAMIC sleep
+  Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
   
   // strlcpy(Settings.state_text[0], MQTT_STATUS_OFF, sizeof(Settings.state_text[0]));
   // strlcpy(Settings.state_text[1], MQTT_STATUS_ON, sizeof(Settings.state_text[1]));
@@ -1483,33 +1477,33 @@ void mSettings::SystemSettings_DefaultBody_WebServer(){
 
 void mSettings::SystemSettings_DefaultBody_MQTT(){
 
-  strlcpy(Settings.mqtt_host, MQTT_HOST, sizeof(Settings.mqtt_host));
-  Settings.mqtt_port = MQTT_PORT;
-  strlcpy(Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(Settings.mqtt_client));
-  strlcpy(Settings.mqtt_user, MQTT_USER, sizeof(Settings.mqtt_user));
-  strlcpy(Settings.mqtt_pwd, MQTT_PASS, sizeof(Settings.mqtt_pwd));
+  strlcpy(Settings.mqtt.host, MQTT_HOST, sizeof(Settings.mqtt.host));
+  Settings.mqtt.port = MQTT_PORT;
+  strlcpy(Settings.mqtt.client, MQTT_CLIENT_ID, sizeof(Settings.mqtt.client));
+  strlcpy(Settings.mqtt.user, MQTT_USER, sizeof(Settings.mqtt.user));
+  strlcpy(Settings.mqtt.pwd, MQTT_PASS, sizeof(Settings.mqtt.pwd));
   // strlcpy(Settings.mqtt_topic, MQTT_TOPIC, sizeof(Settings.mqtt_topic));
 
-  strlcpy(Settings.button_topic, MQTT_BUTTON_TOPIC, sizeof(Settings.button_topic));
-  strlcpy(Settings.switch_topic, MQTT_SWITCH_TOPIC, sizeof(Settings.switch_topic));
-  strlcpy(Settings.mqtt_grptopic, MQTT_GRPTOPIC, sizeof(Settings.mqtt_grptopic));
-  strlcpy(Settings.mqtt_fulltopic, MQTT_FULLTOPIC, sizeof(Settings.mqtt_fulltopic));
-  Settings.mqtt_retry = MQTT_RETRY_SECS;
-  strlcpy(Settings.mqtt_prefix[0], SUB_PREFIX, sizeof(Settings.mqtt_prefix[0]));
-  strlcpy(Settings.mqtt_prefix[1], PUB_PREFIX, sizeof(Settings.mqtt_prefix[1]));
-  strlcpy(Settings.mqtt_prefix[2], PUB_PREFIX2, sizeof(Settings.mqtt_prefix[2]));
+  // strlcpy(Settings.button_topic, MQTT_BUTTON_TOPIC, sizeof(Settings.button_topic));
+  // strlcpy(Settings.switch_topic, MQTT_SWITCH_TOPIC, sizeof(Settings.switch_topic));
+  // strlcpy(Settings.mqtt_grptopic, MQTT_GRPTOPIC, sizeof(Settings.mqtt_grptopic));
+  // strlcpy(Settings.mqtt_fulltopic, MQTT_FULLTOPIC, sizeof(Settings.mqtt_fulltopic));
+  Settings.mqtt.retry = MQTT_RETRY_SECS;
+  // strlcpy(Settings.mqtt_prefix[0], SUB_PREFIX, sizeof(Settings.mqtt_prefix[0]));
+  // strlcpy(Settings.mqtt_prefix[1], PUB_PREFIX, sizeof(Settings.mqtt_prefix[1]));
+  // strlcpy(Settings.mqtt_prefix[2], PUB_PREFIX2, sizeof(Settings.mqtt_prefix[2]));
 
-  char fingerprint[60];
-  strlcpy(fingerprint, MQTT_FINGERPRINT1, sizeof(fingerprint));
-  char *p = fingerprint;
-  for (uint8_t i = 0; i < 20; i++) {
-    Settings.mqtt_fingerprint[0][i] = strtol(p, &p, 16);
-  }
-  strlcpy(fingerprint, MQTT_FINGERPRINT2, sizeof(fingerprint));
-  p = fingerprint;
-  for (uint8_t i = 0; i < 20; i++) {
-    Settings.mqtt_fingerprint[1][i] = strtol(p, &p, 16);
-  }
+  // char fingerprint[60];
+  // strlcpy(fingerprint, MQTT_FINGERPRINT1, sizeof(fingerprint));
+  // char *p = fingerprint;
+  // for (uint8_t i = 0; i < 20; i++) {
+  //   Settings.mqtt_fingerprint[0][i] = strtol(p, &p, 16);
+  // }
+  // strlcpy(fingerprint, MQTT_FINGERPRINT2, sizeof(fingerprint));
+  // p = fingerprint;
+  // for (uint8_t i = 0; i < 20; i++) {
+  //   Settings.mqtt_fingerprint[1][i] = strtol(p, &p, 16);
+  // }
 
 }
 
@@ -1536,22 +1530,22 @@ void mSettings::SystemSettings_DefaultBody_Time(){
     Settings.timezone_minutes = abs(APP_TIMEZONE % 60);
   }
 
-  memset(&Settings.timer, 0x00, sizeof(Timer) * MAX_TIMERS);  // Reset timers as layout has changed from v5.12.0i
-  Settings.pulse_timer[0] = APP_PULSETIME;
+  // memset(&Settings.timer, 0x00, sizeof(Timer) * MAX_TIMERS);  // Reset timers as layout has changed from v5.12.0i
+  // Settings.pulse_timer[0] = APP_PULSETIME;
 
   SettingsResetStd();// TimeRule      tflag[2];
   SettingsResetDst();
 
-  strlcpy(Settings.ntp_server[0], NTP_SERVER1, sizeof(Settings.ntp_server[0]));
-  strlcpy(Settings.ntp_server[1], NTP_SERVER2, sizeof(Settings.ntp_server[1]));
-  strlcpy(Settings.ntp_server[2], NTP_SERVER3, sizeof(Settings.ntp_server[2]));
-  for (uint8_t j = 0; j < 3; j++) {
-    for (uint8_t i = 0; i < strlen(Settings.ntp_server[j]); i++) {
-      if (Settings.ntp_server[j][i] == ',') {
-        Settings.ntp_server[j][i] = '.';
-      }
-    }
-  }
+  // strlcpy(Settings.ntp_server[0], NTP_SERVER1, sizeof(Settings.ntp_server[0]));
+  // strlcpy(Settings.ntp_server[1], NTP_SERVER2, sizeof(Settings.ntp_server[1]));
+  // strlcpy(Settings.ntp_server[2], NTP_SERVER3, sizeof(Settings.ntp_server[2]));
+  // for (uint8_t j = 0; j < 3; j++) {
+  //   for (uint8_t i = 0; i < strlen(Settings.ntp_server[j]); i++) {
+  //     if (Settings.ntp_server[j][i] == ',') {
+  //       Settings.ntp_server[j][i] = '.';
+  //     }
+  //   }
+  // }
 
 }
 
@@ -1597,18 +1591,18 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.light_settings.light_correction = 0;
   Settings.light_settings.light_dimmer = 10;
   Settings.light_settings.light_wakeup = 0;
-  Settings.light_settings.ws_width[WS_SECOND] = 1;
-  Settings.light_settings.ws_color[WS_SECOND][WS_RED] = 255;
-  Settings.light_settings.ws_color[WS_SECOND][WS_GREEN] = 0;
-  Settings.light_settings.ws_color[WS_SECOND][WS_BLUE] = 255;
-  Settings.light_settings.ws_width[WS_MINUTE] = 3;
-  Settings.light_settings.ws_color[WS_MINUTE][WS_RED] = 0;
-  Settings.light_settings.ws_color[WS_MINUTE][WS_GREEN] = 255;
-  Settings.light_settings.ws_color[WS_MINUTE][WS_BLUE] = 0;
-  Settings.light_settings.ws_width[WS_HOUR] = 5;
-  Settings.light_settings.ws_color[WS_HOUR][WS_RED] = 255;
-  Settings.light_settings.ws_color[WS_HOUR][WS_GREEN] = 0;
-  Settings.light_settings.ws_color[WS_HOUR][WS_BLUE] = 0;
+  // Settings.light_settings.ws_width[WS_SECOND] = 1;
+  // Settings.light_settings.ws_color[WS_SECOND][WS_RED] = 255;
+  // Settings.light_settings.ws_color[WS_SECOND][WS_GREEN] = 0;
+  // Settings.light_settings.ws_color[WS_SECOND][WS_BLUE] = 255;
+  // Settings.light_settings.ws_width[WS_MINUTE] = 3;
+  // Settings.light_settings.ws_color[WS_MINUTE][WS_RED] = 0;
+  // Settings.light_settings.ws_color[WS_MINUTE][WS_GREEN] = 255;
+  // Settings.light_settings.ws_color[WS_MINUTE][WS_BLUE] = 0;
+  // Settings.light_settings.ws_width[WS_HOUR] = 5;
+  // Settings.light_settings.ws_color[WS_HOUR][WS_RED] = 255;
+  // Settings.light_settings.ws_color[WS_HOUR][WS_GREEN] = 0;
+  // Settings.light_settings.ws_color[WS_HOUR][WS_BLUE] = 0;
   
   for (uint8_t j = 0; j < 5; j++) {
     Settings.light_settings.rgbwwTable[j] = 255;
@@ -1662,7 +1656,7 @@ void mSettings::SystemSettings_DefaultBody_Power(){
   #else
     Settings.poweronstate = APP_POWERON_STATE;
   #endif
-  Settings.interlock[0] = 0xFF;         // Legacy support using all relays in one interlock group
+  // Settings.interlock[0] = 0xFF;         // Legacy support using all relays in one interlock group
 }
 
 
@@ -1721,8 +1715,8 @@ void mSettings::SystemSettings_DefaultBody_Drivers(){
  Settings.ledpwm_off = 0;
   Settings.ledpwm_on = 255;
   
-  for (uint8_t i = 0; i < 17; i++) { Settings.rf_code[i][0] = 0; }
-  memcpy_P(Settings.rf_code[0], kDefaultRfCode, 9);
+  // for (uint8_t i = 0; i < 17; i++) { Settings.rf_code[i][0] = 0; }
+  // memcpy_P(Settings.rf_code[0], kDefaultRfCode, 9);
 
   // uint32_t      drivers[3];                // 794
   memset(&Settings.drivers, 0xFF, 32);  // Enable all possible monitors, displays, drivers and sensors
@@ -1734,8 +1728,8 @@ void mSettings::SystemSettings_DefaultBody_Drivers(){
 
 void mSettings::SystemSettings_DefaultBody_Rules(){
 
- Settings.rule_enabled = 0;
- Settings.rule_once = 0;
+//  Settings.rule_enabled = 0;
+//  Settings.rule_once = 0;
   // char          mems[MAX_RULE_MEMS][10];   // 7CE
   //for (uint8_t i = 1; i < MAX_RULE_SETS; i++) { Settings.rules[i][0] = '\0'; }
 
@@ -1744,24 +1738,16 @@ void mSettings::SystemSettings_DefaultBody_Rules(){
 
 void mSettings::SystemSettings_DefaultBody_Displays(){
 
-  Settings.display_model = 0;
-  Settings.display_mode = 1;
-  Settings.display_refresh = 2;
-  Settings.display_rows = 2;
-  Settings.display_cols[0] = 16;
-  Settings.display_cols[1] = 8;
-  Settings.display_dimmer = 1;
-  Settings.display_size = 1;
-  Settings.display_font = 1;
-  Settings.display_rotate = 0;
-  // Settings.display_address[0] = MTX_ADDRESS1;
-  // Settings.display_address[1] = MTX_ADDRESS2;
-  // Settings.display_address[2] = MTX_ADDRESS3;
-  // Settings.display_address[3] = MTX_ADDRESS4;
-  // Settings.display_address[4] = MTX_ADDRESS5;
-  // Settings.display_address[5] = MTX_ADDRESS6;
-  // Settings.display_address[6] = MTX_ADDRESS7;
-  // Settings.display_address[7] = MTX_ADDRESS8;
+  Settings.display.model = 0;
+  Settings.display.mode = 1;
+  Settings.display.refresh = 2;
+  Settings.display.rows = 2;
+  Settings.display.cols[0] = 16;
+  Settings.display.cols[1] = 8;
+  Settings.display.dimmer = 1;
+  Settings.display.size = 1;
+  Settings.display.font = 1;
+  Settings.display.rotate = 0;
 
 }
 
@@ -1811,11 +1797,11 @@ DEBUG_LINE;
   
   //  Serial.println("SystemSettings_DefaultBody_DONE"); Serial.flush();
 
-  Settings.flag_system_phaseout.mqtt_enabled = 1;
-  Settings.flag_network_phaseout.timers_enable = 0;
-  Settings.flag_network_phaseout.use_wifi_rescan = 1;
-  Settings.flag_system_phaseout.stop_flash_rotate = true;
-  stop_flash_rotate = true;//Settings.flag_system_phaseout.stop_flash_rotate;
+  Settings.flag_system.mqtt_enabled = 1;
+  Settings.flag_network.timers_enable = 0;
+  Settings.flag_network.use_wifi_rescan = 1;
+  Settings.flag_system.stop_flash_rotate = true;
+  stop_flash_rotate = true;//Settings.flag_system.stop_flash_rotate;
   devices_present = 6; 
   //global_state.data = 3;  // Init global state (wifi_down, mqtt_down) to solve possible network issues
   // baudrate = Settings.baudrate * 1200;
@@ -1823,40 +1809,40 @@ DEBUG_LINE;
   // seriallog_level = Settings.seriallog_level;
   // seriallog_timer = SERIALLOG_TIMER;
   // syslog_level = Settings.syslog_level;
-  // Settings.flag_system_phaseout.stop_flash_rotate = true;
-  // stop_flash_rotate = true;//Settings.flag_system_phaseout.stop_flash_rotate;
+  // Settings.flag_system.stop_flash_rotate = true;
+  // stop_flash_rotate = true;//Settings.flag_system.stop_flash_rotate;
   // save_data_counter = Settings.save_data; 
   sleep = Settings.sleep;
-//  Settings.flag_system_phaseout.value_units = 0;
-//  Settings.flag_system_phaseout.stop_flash_rotate = 0;
-//  Settings.flag_system_phaseout.interlock = 0;
-  Settings.flag_system_phaseout.save_state = SAVE_STATE;
+//  Settings.flag_system.value_units = 0;
+//  Settings.flag_system.stop_flash_rotate = 0;
+//  Settings.flag_system.interlock = 0;
+  Settings.flag_system.save_state = SAVE_STATE;
 //  for (uint8_t i = 1; i < MAX_PULSETIMERS; i++) { Settings.pulse_timer[i] = 0; }
-  // Settings.flag_power_phaseout.emulation = EMULATION;
-  Settings.flag_network_phaseout.mdns_enabled = MDNS_ENABLED;
-//  Settings.flag_system_phaseout.button_restrict = 0;
-//  Settings.flag_system_phaseout.button_swap = 0;
-//  Settings.flag_system_phaseout.button_single = 0;
-  Settings.flag_system_phaseout.mqtt_enabled = true;
-//  Settings.flag_system_phaseout.mqtt_response = 0;
-  Settings.flag_system_phaseout.mqtt_power_retain = MQTT_POWER_RETAIN;
-  Settings.flag_system_phaseout.mqtt_button_retain = MQTT_BUTTON_RETAIN;
-  Settings.flag_system_phaseout.mqtt_switch_retain = MQTT_SWITCH_RETAIN;
-  Settings.flag_network_phaseout.button_switch_force_local = MQTT_BUTTON_SWITCH_FORCE_LOCAL;
-  Settings.flag_network_phaseout.hass_tele_on_power = TELE_ON_POWER;
-//  Settings.flag_system_phaseout.mqtt_sensor_retain = 0;
-//  Settings.flag_system_phaseout.mqtt_offline = 0;
-//  Settings.flag_system_phaseout.mqtt_serial = 0;
-//  Settings.flag_system_phaseout.device_index_enable = 0;
+  // Settings.flag_power.emulation = EMULATION;
+  Settings.flag_network.mdns_enabled = MDNS_ENABLED;
+//  Settings.flag_system.button_restrict = 0;
+//  Settings.flag_system.button_swap = 0;
+//  Settings.flag_system.button_single = 0;
+  Settings.flag_system.mqtt_enabled = true;
+//  Settings.flag_system.mqtt_response = 0;
+  Settings.flag_system.mqtt_power_retain = MQTT_POWER_RETAIN;
+  Settings.flag_system.mqtt_button_retain = MQTT_BUTTON_RETAIN;
+  Settings.flag_system.mqtt_switch_retain = MQTT_SWITCH_RETAIN;
+  Settings.flag_network.button_switch_force_local = MQTT_BUTTON_SWITCH_FORCE_LOCAL;
+  Settings.flag_network.hass_tele_on_power = TELE_ON_POWER;
+//  Settings.flag_system.mqtt_sensor_retain = 0;
+//  Settings.flag_system.mqtt_offline = 0;
+//  Settings.flag_system.mqtt_serial = 0;
+//  Settings.flag_system.device_index_enable = 0;
   // Settings.sensors.flags.mqtt_retain = true;
-  Settings.flag_power_phaseout.calc_resolution = CALC_RESOLUTION;
-//  Settings.flag_system_phaseout.knx_enabled = 0;
-//  Settings.flag_system_phaseout.knx_enable_enhancement = 0;
-  Settings.flag_system_phaseout.pwm_control = 1;
-  //Settings.flag_system_phaseout.ws_clock_reverse = 0;
-  //Settings.flag_system_phaseout.light_signal = 0;
-  //Settings.flag_system_phaseout.not_power_linked = 0;
-  //Settings.flag_system_phaseout.decimal_text = 0;
+  Settings.flag_power.calc_resolution = CALC_RESOLUTION;
+//  Settings.flag_system.knx_enabled = 0;
+//  Settings.flag_system.knx_enable_enhancement = 0;
+  Settings.flag_system.pwm_control = 1;
+  //Settings.flag_system.ws_clock_reverse = 0;
+  //Settings.flag_system.light_signal = 0;
+  //Settings.flag_system.not_power_linked = 0;
+  //Settings.flag_system.decimal_text = 0;
   
 
   sprintf(my_hostname,"%s",pCONT_set->Settings.user_template2.hardware.name);
@@ -1867,27 +1853,27 @@ DEBUG_LINE;
 
 // void mSettings::SettingsDefaultSet_5_8_1(void)
 // {
-// //  Settings.flag_system_phaseout.ws_clock_reverse = 0;
+// //  Settings.flag_system.ws_clock_reverse = 0;
 // }
 
 
 void mSettings::SettingsResetStd(void)
 {
-  Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
-  Settings.tflag[0].week = TIME_STD_WEEK;
-  Settings.tflag[0].dow = TIME_STD_DAY;
-  Settings.tflag[0].month = TIME_STD_MONTH;
-  Settings.tflag[0].hour = TIME_STD_HOUR;
+  // Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
+  // Settings.tflag[0].week = TIME_STD_WEEK;
+  // Settings.tflag[0].dow = TIME_STD_DAY;
+  // Settings.tflag[0].month = TIME_STD_MONTH;
+  // Settings.tflag[0].hour = TIME_STD_HOUR;
   Settings.toffset[0] = TIME_STD_OFFSET;
 }
 
 void mSettings::SettingsResetDst(void)
 {
-  Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
-  Settings.tflag[1].week = TIME_DST_WEEK;
-  Settings.tflag[1].dow = TIME_DST_DAY;
-  Settings.tflag[1].month = TIME_DST_MONTH;
-  Settings.tflag[1].hour = TIME_DST_HOUR;
+  // Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
+  // Settings.tflag[1].week = TIME_DST_WEEK;
+  // Settings.tflag[1].dow = TIME_DST_DAY;
+  // Settings.tflag[1].month = TIME_DST_MONTH;
+  // Settings.tflag[1].hour = TIME_DST_HOUR;
   Settings.toffset[1] = TIME_DST_OFFSET;
 }
 

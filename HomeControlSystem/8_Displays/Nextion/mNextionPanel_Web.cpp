@@ -1471,7 +1471,7 @@ void mNextionPanel::HandleUploadDone(void)
 //     }
 //     mcl->mwif->WSBufferAppend_P(error);
 //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
-//     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system_phaseout.stop_flash_rotate;
+//     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system.stop_flash_rotate;
 //   } else {
 //     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_SUCCESS));
 //     mcl->mwif->WSBufferAppend_P(HTTP_MSG_RSTRT);
@@ -1525,7 +1525,7 @@ void mNextionPanel::HandleUploadLoop(void)
 // #ifdef USE_ARILUX_RF
 //       //AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
 // #endif  // USE_ARILUX_RF
-//       //if (mcl->mset->Settings.flag_system_phaseout.mqtt_enabled) MqttDisconnect();
+//       //if (mcl->mset->Settings.flag_system.mqtt_enabled) MqttDisconnect();
 //       uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
       
 //           #ifdef ESP8266

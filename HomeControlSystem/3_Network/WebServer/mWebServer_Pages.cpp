@@ -894,7 +894,7 @@ void mWebServer::WebAppend_Page_InformationTable(){
   // }
   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
 
-  // // if (pCONT_set->Settings.flag_system_phaseout.mqtt_enabled) {
+  // // if (pCONT_set->Settings.flag_system.mqtt_enabled) {
   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_HOST "}2%s"), pCONT_set->Settings.mqtt_host);
   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_PORT "}2%d"), pCONT_set->Settings.mqtt_port);
   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_USER "}2%s"), pCONT_set->Settings.mqtt_user);
@@ -907,8 +907,8 @@ void mWebServer::WebAppend_Page_InformationTable(){
   // // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
 
   // #ifdef USE_DISCOVERY
-  //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network_phaseout.mdns_enabled) ? D_ENABLED : D_DISABLED);
-  //   if (pCONT_set->Settings.flag_network_phaseout.mdns_enabled) {
+  //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network.mdns_enabled) ? D_ENABLED : D_DISABLED);
+  //   if (pCONT_set->Settings.flag_network.mdns_enabled) {
   // #ifdef WEBSERVER_ADVERTISE
   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_WEB_SERVER));
   // #else
@@ -1182,7 +1182,7 @@ void mWebServer::HandleOtherConfiguration(AsyncWebServerRequest *request)
 //   pCONT_sup->TemplateJson(); 
 //   char stemp[strlen(data_buffer2.payload.ctr) +1];
 //   strlcpy(stemp, data_buffer2.payload.ctr, sizeof(stemp));  // Get JSON template
-//   WSBufferAppend_P(response, HTTP_FORM_OTHER, stemp, (USER_MODULE == pCONT_set->Settings.module) ? " checked disabled" : "", (pCONT_set->Settings.flag_system_phaseout.mqtt_enabled) ? " checked" : "");
+//   WSBufferAppend_P(response, HTTP_FORM_OTHER, stemp, (USER_MODULE == pCONT_set->Settings.module) ? " checked disabled" : "", (pCONT_set->Settings.flag_system.mqtt_enabled) ? " checked" : "");
 
 //   uint8_t maxfn = (pCONT_set->devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : (!pCONT_set->devices_present) ? 1 : pCONT_set->devices_present;
 //   if (MODULE_SONOFF_IFAN02 == pCONT_set->my_module_type) { maxfn = 1; }
@@ -1201,7 +1201,7 @@ void mWebServer::HandleOtherConfiguration(AsyncWebServerRequest *request)
 //   for (uint8_t i = 0; i < EMUL_MAX; i++) {
 //     WSBufferAppend_P(response, PSTR("<input id='r%d' name='b2' type='radio' value='%d'%s><b>%s</b> %s<br/>"),  // Different id only used for labels
 //       i, i,
-//       (i == pCONT_set->Settings.flag_power_phaseout.emulation) ? " checked" : "",
+//       (i == pCONT_set->Settings.flag_power.emulation) ? " checked" : "",
 //       pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), i, kEmulationOptions),
 //       (i == EMUL_NONE) ? "" : (i == EMUL_WEMO) ? D_SINGLE_DEVICE : D_MULTI_DEVICE);
 //   }
@@ -1221,12 +1221,12 @@ void mWebServer::OtherSaveSettings(AsyncWebServerRequest *request)
 
 //   WebGetArg(request,"wp", tmp, sizeof(tmp));
 //   strlcpy(pCONT_set->Settings.web_password, (!strlen(tmp)) ? "" : (strchr(tmp,'*')) ? pCONT_set->Settings.web_password : tmp, sizeof(pCONT_set->Settings.web_password));
-//   pCONT_set->Settings.flag_system_phaseout.mqtt_enabled = request->hasParam("b1");
+//   pCONT_set->Settings.flag_system.mqtt_enabled = request->hasParam("b1");
 // #ifdef USE_EMULATION
 //   WebGetArg(request,"b2", tmp, sizeof(tmp));
-//   pCONT_set->Settings.flag_power_phaseout.emulation = (!strlen(tmp)) ? 0 : atoi(tmp);
+//   pCONT_set->Settings.flag_power.emulation = (!strlen(tmp)) ? 0 : atoi(tmp);
 // #endif  // USE_EMULATION
-//   snprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_JSON_EMULATION " %d, " D_JSON_FRIENDLYNAME), pCONT_sup->GetStateText(pCONT_set->Settings.flag_system_phaseout.mqtt_enabled), pCONT_set->Settings.flag_power_phaseout.emulation);
+//   snprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), PSTR(D_LOG_OTHER D_MQTT_ENABLE " %s, " D_JSON_EMULATION " %d, " D_JSON_FRIENDLYNAME), pCONT_sup->GetStateText(pCONT_set->Settings.flag_system.mqtt_enabled), pCONT_set->Settings.flag_power.emulation);
 //   for (uint8_t i = 0; i < MAX_FRIENDLYNAMES; i++) {
 //     snprintf_P(webindex, sizeof(webindex), PSTR("a%d"), i);
 //     WebGetArg(request, webindex, tmp, sizeof(tmp));
@@ -1859,7 +1859,7 @@ void mWebServer::HandleUploadDone(AsyncWebServerRequest *request)
 //     }
 //     WSBufferAppend_P(response, error);
 //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
-//     pCONT_set->stop_flash_rotate = pCONT_set->Settings.flag_system_phaseout.stop_flash_rotate;
+//     pCONT_set->stop_flash_rotate = pCONT_set->Settings.flag_system.stop_flash_rotate;
 //   } else {
 //     WSBufferAppend_P(response, PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), WebColor(pCONT_set->COL_TEXT_SUCCESS));
 //     WSBufferAppend_P(response, HTTP_MSG_RSTRT);
@@ -1919,7 +1919,7 @@ void mWebServer::HandleUploadLoop(AsyncWebServerRequest *request)
 //       //UdpDisconnect();
 // #endif  // USE_EMULATION
 
-//       //if (pCONT_set->Settings.flag_system_phaseout.mqtt_enabled) MqttDisconnect();
+//       //if (pCONT_set->Settings.flag_system.mqtt_enabled) MqttDisconnect();
 //       uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
       
 //   AddSerialLog_mP2(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "maxSketchSpace=%d"),maxSketchSpace);

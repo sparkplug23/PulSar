@@ -13,6 +13,9 @@
 // (uint8_t,uint8_t) Arg Function calls
 //#define CALL_MEMBER_FUNCTION_WITH_ARG(object,ptrToMember,X,Y)  ((object).*(ptrToMember)(X,Y))
 
+// From before removing isserviced
+// RAM:   [=====     ]  47.5% (used 38916 bytes from 81920 bytes)
+// Flash: [=====     ]  47.8% (used 489856 bytes from 1023984 bytes)
 
 #define DEFAULT_MQTT_SYSTEM_BOOT_RATE_SECS 1
 #define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
@@ -107,12 +110,13 @@ template <typename Class>
 struct handler {
   uint32_t      tSavedLastSent = 0;
   uint16_t      tRateSecs = 1;
-  uint8_t       fPeriodicEnabled = true;
-  uint8_t       fSendNow = true;
+  // uint8_t       flags.PeriodicEnabled = true;
+  // uint8_t       flags.SendNow = true;
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic;
   uint8_t       module_id = 0;
+  uint8_t       handler_id = 0;
   Handler_Flags flags;
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
 };
@@ -188,8 +192,8 @@ class mMQTT{
     void HandleMqttConfiguration(void);
     void MqttSaveSettings(void);
 
-    int8_t parse_JSONCommand();
-    int8_t parsesub_MQTTSettingsCommand();
+    void parse_JSONCommand();
+    void parsesub_MQTTSettingsCommand();
 
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
 
@@ -212,9 +216,9 @@ class mMQTT{
     #endif
     #endif
 
-      if(handler_ptr->fPeriodicEnabled || handler_ptr->flags.PeriodicEnabled){
+      if(handler_ptr->flags.PeriodicEnabled){
         if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ handler_ptr->tSavedLastSent=millis();
-          handler_ptr->fSendNow = true;
+          handler_ptr->flags.SendNow = true;
           handler_ptr->flags.SendNow = true;
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;
           if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
@@ -226,7 +230,7 @@ class mMQTT{
           }
         }
       }
-      if(handler_ptr->fSendNow || handler_ptr->flags.SendNow){ handler_ptr->fSendNow = false;    handler_ptr->flags.SendNow = false;
+      if(handler_ptr->flags.SendNow || handler_ptr->flags.SendNow){ handler_ptr->flags.SendNow = false;    handler_ptr->flags.SendNow = false;
         handler_ptr->tSavedLastSent = millis();    
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);

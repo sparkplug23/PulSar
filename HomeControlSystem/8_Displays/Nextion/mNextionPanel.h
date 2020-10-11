@@ -66,11 +66,11 @@ class mNextionPanel{
 
 int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-int8_t parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
 
-int8_t parsesub_Commands(JsonObjectConst obj);
-int8_t parsesub_SetMulti(JsonObjectConst obj);
+void parsesub_Commands(JsonObjectConst obj);
+void parsesub_SetMulti(JsonObjectConst obj);
 
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
@@ -154,7 +154,7 @@ struct FLASH_MESSAGE{
 }flash_message;
 
 
-int8_t parsesub_FlashMessage();
+void parsesub_FlashMessage();
 
 struct LAST_SCREEN_PRESS{
   uint8_t   page = 0;
@@ -182,7 +182,7 @@ uint32_t tTest = millis();
     int8_t Tasker(uint8_t function);
     void init(void);
 
-    uint8_t parse_JSONCommand();
+    uvoid parse_JSONCommand();
 
     #define LONG_PRESS_DURATION 500
     uint8_t fEnableImmediateButtonTime = false;

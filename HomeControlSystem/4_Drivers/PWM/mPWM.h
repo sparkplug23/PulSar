@@ -37,7 +37,7 @@ class mPWM{
 
 
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-int8_t parsesub_Commands(JsonObjectConst obj);
+void parsesub_Commands(JsonObjectConst obj);
 
 uint16_t test_val = 0;
 uint8_t dir = 0;
@@ -74,7 +74,7 @@ struct SETTINGS{
 //     // #define ONE_BIT_TIME 1252 //+- 30 std
 //     // #define ZERO_BIT_TIME 439 //+- 30 std
 
-//     int8_t parse_JSONCommand();
+//     void parse_JSONCommand();
 //     //void AddToJsonObject_AddHardware(JsonObject root);
 //     void AddToHardwareMessage();
 

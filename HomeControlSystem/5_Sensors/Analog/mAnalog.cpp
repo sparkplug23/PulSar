@@ -128,7 +128,7 @@ void mAnalog::EveryLoop(){
       }
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),PIR_Detected_Ctr(sensor_id));
       pir_detect[sensor_id].ischanged = true;
-      mqtthandler_sensor_ifchanged.fSendNow = true;
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }
   }
   // Use short timer to automatically clear event
@@ -343,8 +343,8 @@ void mAnalog::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = true;
-  mqtthandler_ptr->fSendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -353,8 +353,8 @@ void mAnalog::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->fPeriodicEnabled = false;
-  mqtthandler_ptr->fSendNow = false;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -373,8 +373,8 @@ void mAnalog::MQTTHandler_Disconnected(){
 
 void mAnalog::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.fSendNow = true;
-  mqtthandler_sensor_ifchanged.fSendNow = true;
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
