@@ -28,6 +28,7 @@ License along with NeoPixel.  If not, see
 #include <Arduino.h>
 
 struct RgbColor;
+struct RgbcctColor;
 struct HslColor;
 struct HsbColor;
 
@@ -76,6 +77,11 @@ struct RgbwColor
     // Construct a RgbwColor using HslColor
     // ------------------------------------------------------------------------
     RgbwColor(const HslColor& color);
+
+    // ------------------------------------------------------------------------
+    // Construct a RgbwColor using RgbcctColor
+    // ------------------------------------------------------------------------
+    RgbwColor(const RgbcctColor& color);
 
     // ------------------------------------------------------------------------
     // Construct a RgbwColor using HsbColor

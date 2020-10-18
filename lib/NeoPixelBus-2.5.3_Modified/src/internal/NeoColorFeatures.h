@@ -147,6 +147,69 @@ public:
     typedef RgbwColor ColorObject;
 };
 
+class Neo5Elements
+{
+public:
+    static const size_t PixelSize = 5;
+
+    static uint8_t* getPixelAddress(uint8_t* pPixels, uint16_t indexPixel) 
+    {
+        return pPixels + indexPixel * PixelSize;
+    }
+    static const uint8_t* getPixelAddress(const uint8_t* pPixels, uint16_t indexPixel)
+    {
+        return pPixels + indexPixel * PixelSize;
+    }
+
+    static void replicatePixel(uint8_t* pPixelDest, const uint8_t* pPixelSrc, uint16_t count)
+    {
+        uint32_t* pDest = (uint32_t*)pPixelDest;
+        const uint32_t* pSrc = (const uint32_t*)pPixelSrc;
+
+        uint32_t* pEnd = pDest + count;
+        while (pDest < pEnd)
+        {
+            *pDest++ = *pSrc;
+        }
+    }
+
+    static void movePixelsInc(uint8_t* pPixelDest, const uint8_t* pPixelSrc, uint16_t count)
+    {
+        uint32_t* pDest = (uint32_t*)pPixelDest;
+        const uint32_t* pSrc = (uint32_t*)pPixelSrc;
+        uint32_t* pEnd = pDest + count;
+        while (pDest < pEnd)
+        {
+            *pDest++ = *pSrc++;
+        }
+    }
+
+    static void movePixelsInc_P(uint8_t* pPixelDest, PGM_VOID_P pPixelSrc, uint16_t count)
+    {
+        uint32_t* pDest = (uint32_t*)pPixelDest;
+        const uint32_t* pSrc = (const uint32_t*)pPixelSrc;
+        uint32_t* pEnd = pDest + count;
+        while (pDest < pEnd)
+        {
+            *pDest++ = pgm_read_dword(pSrc++); 
+        }
+    }
+
+    static void movePixelsDec(uint8_t* pPixelDest, const uint8_t* pPixelSrc, uint16_t count)
+    {
+        uint32_t* pDest = (uint32_t*)pPixelDest;
+        const uint32_t* pSrc = (uint32_t*)pPixelSrc;
+        uint32_t* pDestBack = pDest + count;
+        const uint32_t* pSrcBack = pSrc + count;
+        while (pDestBack > pDest)
+        {
+            *--pDestBack = *--pSrcBack;
+        }
+    }
+
+    typedef RgbcctColor ColorObject;
+};
+
 class NeoGrbFeature : public Neo3Elements
 {
 public:
@@ -262,6 +325,50 @@ public:
         color.G = pgm_read_byte(p++);
         color.B = pgm_read_byte(p++);
         color.W = pgm_read_byte(p);
+
+        return color;
+    }
+    
+};
+
+class NeoRgbcctFeature : public Neo5Elements
+{
+public:
+    static void applyPixelColor(uint8_t* pPixels, uint16_t indexPixel, ColorObject color)
+    {
+        uint8_t* p = getPixelAddress(pPixels, indexPixel);
+
+        *p++ = color.R;
+        *p++ = color.G;
+        *p++ = color.B;
+        *p++ = color.WW;
+        *p = color.WC;
+    }
+
+    static ColorObject retrievePixelColor(uint8_t* pPixels, uint16_t indexPixel)
+    {
+        ColorObject color;
+        uint8_t* p = getPixelAddress(pPixels, indexPixel);
+
+        color.R = *p++;
+        color.G = *p++;
+        color.B = *p++;
+        color.WW = *p++;
+        color.WC = *p;
+
+        return color;
+    }
+    
+    static ColorObject retrievePixelColor_P(PGM_VOID_P pPixels, uint16_t indexPixel)
+    {
+        ColorObject color;
+        const uint8_t* p = getPixelAddress((const uint8_t*)pPixels, indexPixel);
+
+        color.R = pgm_read_byte(p++);
+        color.G = pgm_read_byte(p++);
+        color.B = pgm_read_byte(p++);
+        color.WW = pgm_read_byte(p++);
+        color.WC = pgm_read_byte(p);
 
         return color;
     }

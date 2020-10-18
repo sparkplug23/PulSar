@@ -152,7 +152,7 @@
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
-//#ifdef USE_WEBSERVER
+//#ifdef USE_MODULE_CORE_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
 //#endif
@@ -1354,7 +1354,7 @@
 #define D_JSON_CLASSID "ClassID"
 #define D_JSON_CURRENT "Current"
 #define D_JSON_CRASHDUMP "CrashDump"
-#define D_JSON_COLOUR_PALETTE "colour_palette"
+#define D_JSON_COLOUR_PALETTE "ColourPalette"
 #define D_JSON_DATA "Data"
 #define D_JSON_DATETIME "DateTime"
 #define D_JSON_DESIRED "Desired"
@@ -1941,7 +1941,7 @@ DEFINE_PROGMEM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
 DEFINE_PROGMEM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 
 // xdrv_02_webserver.ino
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
@@ -1985,6 +1985,6 @@ const char S_FIRMWARE_UPGRADE[] PROGMEM = D_FIRMWARE_UPGRADE;
 const char S_CONSOLE[] PROGMEM = D_CONSOLE;
 const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
 const char S_RESTART[] PROGMEM = D_RESTART;
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 
 #endif  // _I18N_H_

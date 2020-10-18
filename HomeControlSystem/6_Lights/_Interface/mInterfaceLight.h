@@ -20,14 +20,26 @@
   typedef RgbColor RgbTypeColor;
 #endif
 
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR)  
+  "{o1}%d'>%s{o2}";   
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM)
+  "{o1}%d'>%d{o2}";
 
-struct RgbcctColor{
-  uint8_t R;
-  uint8_t G;
-  uint8_t B;
-  uint8_t WW;
-  uint8_t WC;
-};
+
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_NUM)  
+  "{o1}%d'>%d{o2}";  
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_CTR)  
+  "{o1}%d'>%s{o2}";   
+DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)  
+  "{o1}%s'>%s{o2}";   
+
+// struct RgbcctColor{
+//   uint8_t R;
+//   uint8_t G;
+//   uint8_t B;
+//   uint8_t WW;
+//   uint8_t WC;
+// };
 
 enum LightTypes_IDS{
   LT_BASIC, //relay?
@@ -63,7 +75,7 @@ enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
 };
 
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include "3_Network/MQTT/mMQTT.h"
 #include "2_CoreSystem/Time/mTime.h"
@@ -101,21 +113,23 @@ struct LRgbColor {
   uint8_t R, G, B;
 };
 const uint8_t MAX_FIXED_COLOR = 12;
-const LRgbColor kFixedColor[MAX_FIXED_COLOR] PROGMEM =
-  { 255,0,0, 0,255,0, 0,0,255, 228,32,0, 0,228,32, 0,32,228, 188,64,0, 0,160,96, 160,32,240, 255,255,0, 255,0,170, 255,255,255 };
+// const LRgbColor kFixedColor[MAX_FIXED_COLOR] PROGMEM =
+//   { 255,0,0, 0,255,0, 0,0,255, 228,32,0, 0,228,32, 0,32,228, 188,64,0, 0,160,96, 160,32,240, 255,255,0, 255,0,170, 255,255,255 };
 
 struct LWColor {
   uint8_t W;
 };
 const uint8_t MAX_FIXED_WHITE = 4;
-const LWColor kFixedWhite[MAX_FIXED_WHITE] PROGMEM = { 0, 255, 128, 32 };
+// const LWColor kFixedWhite[MAX_FIXED_WHITE] PROGMEM = { 0, 255, 128, 32 };
 
 struct LCwColor {
   uint8_t C, W;
 };
 const uint8_t MAX_FIXED_COLD_WARM = 4;
-const LCwColor kFixedColdWarm[MAX_FIXED_COLD_WARM] PROGMEM = { 0,0, 255,0, 0,255, 128,128 };
+// const LCwColor kFixedColdWarm[MAX_FIXED_COLD_WARM] PROGMEM = { 0,0, 255,0, 0,255, 128,128 };
 
+
+#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 // New version of Gamma correction compute
 // Instead of a table, we do a multi-linear approximation, which is close enough
 // At low levels, the slope is a bit higher than actual gamma, to make changes smoother
@@ -146,6 +160,7 @@ const gamma_table_t gamma_table_fast[] = {
   {  1023,   1023 },
   { 0xFFFF, 0xFFFF }          // fail-safe if out of range
 };
+#endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 // For reference, below are the computed gamma tables, via ledGamma()
 // for 8 bits output:
@@ -193,12 +208,12 @@ const gamma_table_t gamma_table_fast[] = {
 // 458,480,496,518,534,557,579,595,617,635,657,673,695,713,743,
 // 773,793,823,843,873,893,923,943,973,993,1023
 
-const char kListPWM_TestColours[] PROGMEM =  
-  "#ff0000" "|" 
-  "#00ff00" "|" 
-  "#0000ff" "|" 
-  "#ffffff" "|"  
-  "#FFE076" "|" ;
+// const char kListPWM_TestColours[] PROGMEM =  
+//   "#ff0000" "|" 
+//   "#00ff00" "|" 
+//   "#0000ff" "|" 
+//   "#ffffff" "|"  
+//   "#FFE076" "|" ;
 
   
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR) "scene";
@@ -222,7 +237,9 @@ DEFINE_PROGMEM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATI
 //     #define D_MODE_SINGLECOLOUR_EVENINGOFF_NAME_CTR      "EVENINGOFF"    
 //     #define D_MODE_SINGLECOLOUR_MIDNIGHTON_NAME_CTR      "MIDNIGHTON"    
 //     #define D_MODE_SINGLECOLOUR_MIDNIGHTOFF_NAME_CTR     "MIDNIGHTOFF"    
-DEFINE_PROGMEM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)     "COLOURSCENE"    ; //PGM_P
+DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)   "ColourSingle"; //COLOURSCENE
+DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR) "PaletteSingle";
+DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTELOOP_NAME_CTR)   "PaletteLoop";
 //     #define D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR     "FLASHCOLOUR"    
 //     #define D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR  "SUNRISE_SINGLE"  
 //     #define D_MODE_SINGLECOLOUR_SUNRISE_DUAL_NAME_CTR    "SUNRISE_DUAL" 
@@ -253,11 +270,15 @@ DEFINE_PROGMEM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)     "COLOURSCENE" 
       MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID,
       MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID,
       MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID, //phase out, assume max index IS set all
+
+      MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID,
+
       MAPIDS_TYPE_RGBCOLOUR_LENGTH_ID
     };
 
     enum fIndexs_Type_IDS{
-      INDEX_TYPE_DIRECT = 0,
+      INDEX_TYPE_NONE = 0,
+      INDEX_TYPE_DIRECT,
       INDEX_TYPE_SCALED_255,
       INDEX_TYPE_SCALED_100 
     };
@@ -269,6 +290,12 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
     // void Module_Init();
 
+
+    #ifdef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    NeoPixelAnimator* animator_controller = nullptr;
+    #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+
+  void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
 
 // New feature, turning off will overwrite animation struct on "on" will restore to previous
 
@@ -299,7 +326,7 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
       uint8_t pixelgrouped=3; // nearby pixels repeat colours
       
-      float brightness = 1; // MOVE OUT OF ANIMATION?? move to "light class"
+      // float brightness = 1; // MOVE OUT OF ANIMATION?? move to "light class"
 
       ANIMATION_FLAGS flags;
 
@@ -404,15 +431,47 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     struct MODE_SINGLECOLOUR_CONFIG{
       uint8_t name_id;
       RgbcctColor colour;
-      uint8_t fActive = false;
-      uint8_t parts = DONE;
+      uint8_t fActive = false; // isrunning
+      uint8_t parts = DONE; //parts aka index
       uint32_t tStart;
       uint32_t tOnTime;
+
+      // struct TRANSITIONSETTINGS{
+      //   uint8_t order_id;
+      //   uint8_t method_id;
+
+      //   struct PIXELS_TO_UPDATE_AS_PERCENTAGE{
+      //     uint8_t val;
+      //     uint8_t map_id = 2;  
+      //   }pixels_to_update_as_percentage;
+      //   struct TIME{
+      //     uint16_t val = 5000;
+      //     uint8_t  map_id = 2;
+      //   }time_ms;
+      //   struct RATE{
+      //     uint16_t val = 5000;
+      //     uint8_t  map_id = 2;
+      //   }rate_ms;
+      
+      // }transition;
+
     };
     // hold current set scene
     struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour;
     // hold scene to switch to later
     struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour_stored;
+
+    
+    timereached_t mode_singlecolour_tSaved;
+
+    
+      RgbcctColor tasint_colour;
+      
+void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
+
+
+void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
+
 
 
     // hold when to switch to scene_stored
@@ -429,16 +488,16 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
     uint8_t kitchen_preset_set_id;
     struct SCENE_PRESETS{
-      HsbColor colour; 
+      RgbTypeColor colour; 
       uint16_t time_ms=1000;
     };
     //change to scenes users
     struct SCENE_PRESETS scene_preset_dayon;
-    struct SCENE_PRESETS scene_preset_dayoff;
-    struct SCENE_PRESETS scene_preset_eveningon;
-    struct SCENE_PRESETS scene_preset_eveningoff;
-    struct SCENE_PRESETS scene_preset_nighton;
-    struct SCENE_PRESETS scene_preset_nightoff;
+    // struct SCENE_PRESETS scene_preset_dayoff;
+    // struct SCENE_PRESETS scene_preset_eveningon;
+    // struct SCENE_PRESETS scene_preset_eveningoff;
+    // struct SCENE_PRESETS scene_preset_nighton;
+    // struct SCENE_PRESETS scene_preset_nightoff;
     struct SCENE_PRESETS* presenttmp;
 
 
@@ -546,24 +605,28 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     **************/ 
    // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
     enum SCENES{
-      MODE_SINGLECOLOUR_NOTACTIVE_ID=0,
-      MODE_SINGLECOLOUR_DAYON_ID=1,
-      MODE_SINGLECOLOUR_DAYOFF_ID,
-      MODE_SINGLECOLOUR_EVENINGON_ID,
-      MODE_SINGLECOLOUR_EVENINGOFF_ID,
-      MODE_SINGLECOLOUR_MIDNIGHTON_ID,
-      MODE_SINGLECOLOUR_MIDNIGHTOFF_ID,
+      MODE_SINGLECOLOUR_NOCHANGE_ID=0,
+      // MODE_SINGLECOLOUR_DAYON_ID=1,
+      // MODE_SINGLECOLOUR_DAYOFF_ID,
+      // MODE_SINGLECOLOUR_EVENINGON_ID,
+      // MODE_SINGLECOLOUR_EVENINGOFF_ID,
+      // MODE_SINGLECOLOUR_MIDNIGHTON_ID,
+      // MODE_SINGLECOLOUR_MIDNIGHTOFF_ID,
       MODE_SINGLECOLOUR_COLOURSCENE_ID,
+      MODE_SINGLECOLOUR_PALETTE_SINGLE_ID,     //use palette as colours
       MODE_SINGLECOLOUR_FADE_OFF_ID,
       MODE_SINGLECOLOUR_FLASHCOLOUR_ID,
-      MODE_SINGLECOLOUR_WHITEON_ID,
-      MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID,     // From dark blue to sky blue (cyan)
-      MODE_SINGLECOLOUR_SUNRISE_DUAL_ID,       // From dark blue, sunrise orange, sky blue (cyan)
-      MODE_SINGLECOLOUR_SUNRISE_AMBILIGHT_ID,
+      // MODE_SINGLECOLOUR_WHITEON_ID,
+      // MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID,     // From dark blue to sky blue (cyan)
+      // MODE_SINGLECOLOUR_SUNRISE_DUAL_ID,       // From dark blue, sunrise orange, sky blue (cyan)
+      // MODE_SINGLECOLOUR_SUNRISE_AMBILIGHT_ID,
       MODE_SINGLECOLOUR_LENGTH_ID
     };
     int8_t GetSceneIDbyName(const char* c);
     const char* GetSceneName(char* buffer, uint8_t buflen);
+    const char* GetSceneNameByID(uint8_t id, char* buffer, uint8_t buflen);
+
+
 
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
     void parsesub_ModeScene(JsonObjectConst obj);
@@ -663,11 +726,11 @@ uint8_t test_index = 0;
 
 void mat3x3(const float *mat33, const float *vec3, float *res3);
 
-uint16_t pwm_tester_val = 0;
-uint8_t pwm_tester_dir = 0;
-uint32_t tSavedTest3=0;
+// uint16_t pwm_tester_val = 0;
+// uint8_t pwm_tester_dir = 0;
+// uint32_t tSavedTest3=0;
 
-uint16_t pwm_channel_test[5];
+// uint16_t pwm_channel_test[5];
 
 
 void WebCommand_Parse();
@@ -703,7 +766,7 @@ uint8_t getChannels(uint8_t *channels);
 void getChannelsRaw(uint8_t *channels);
 void getHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri);
 uint8_t getBri(void);
-inline uint8_t getBriCT();
+uint8_t getBriCT();
 static inline uint8_t DimmerToBri(uint8_t dimmer);
 static uint8_t BriToDimmer(uint8_t bri);
 uint8_t getDimmer(uint32_t mode = 0);
@@ -712,6 +775,14 @@ uint8_t getDimmer(uint32_t mode = 0);
 uint16_t getCT();// const {
 //       return _ct; // 153..500, or CT_MIN..CT_MAX
 //     }
+
+
+    struct PALETTE_VIEW_SETTINGS{
+      uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
+      uint8_t height_as_percentage = 15;
+      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
+    }palette_view;
+
 
 //     // get the CT value within the range into a 10 bits 0..1023 value
 //     uint16_t getCT10bits() const {
@@ -732,7 +803,7 @@ void getXY(float *x, float *y);
 void setBri(uint8_t bri);
 uint8_t setBriRGB(uint8_t bri_rgb);
 uint8_t setBriCT(uint8_t bri_ct);
-inline uint8_t getBriRGB();
+uint8_t getBriRGB();
 void setDimmer(uint8_t dimmer);
 void setCT(uint16_t ct);
 void setCW(uint8_t c, uint8_t w, bool free_range = false);
@@ -769,7 +840,7 @@ void changeHSB_Hue(uint16_t hue);
 void changeHSB_Sat(uint8_t sat);
 void changeHSB_Brt(uint8_t brt);
     
-
+  void init_Animations();
 
 
 void saveSettings();
@@ -839,19 +910,22 @@ void SetColour_White();         // white
 void SetColour_WarmWhite();     // warm white
 void SetColour_HSB();
 
- float    HueN2F(uint16_t hue);
-    float    SatN2F(uint8_t sat);
-    float    BrtN2F(uint8_t brt);
-    uint16_t HueF2N(float hue);
-    uint8_t  SatF2N(float sat);
-    uint8_t  BrtF2N(float brt);
+float    HueN2F(uint16_t hue);
+float    SatN2F(uint8_t sat);
+float    BrtN2F(uint8_t brt);
+uint16_t HueF2N(float hue);
+uint8_t  SatF2N(float sat);
+uint8_t  BrtF2N(float brt);
 
-    HsbColor GetRandomColour(HsbColor colour1, HsbColor colour2);
-
-
+RgbTypeColor GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2);
 HsbColor GetHSBColour();
-void SetHSBColour();
 
+
+
+
+void parsesub_ModeAnimation(JsonObjectConst obj);
+
+void SetHSBColour();
 void SetColour_HSB(HsbColor hsb);
 HsbColor GetColour_HSB(void);
 void SetColour_Hue(uint16_t hue);
@@ -859,9 +933,11 @@ void SetColour_Sat(uint8_t  sat);
 void SetColour_Brt(uint8_t  brt);
 
   uint32_t WebColorFromColourMap(uint8_t i);
-  uint32_t WebColorFromHsbColour(HsbColor hsb);
-  uint32_t WebColorFromHsbColour(RgbwColor rgb);
-  uint32_t WebColorFromHsbColour(RgbColor rgb);
+  uint32_t WebColorFromColourType(RgbwColor rgb);
+  uint32_t WebColorFromColourType(RgbColor rgb);
+  
+RgbTypeColor Color32bit2RgbColour(uint32_t colour32bit);
+
   
     const uint8_t* GetDefaultColourPaletteUserIDs_P(uint8_t id);
     uint8_t  GetDefaultColourPaletteUserIDsCount(uint8_t id);
@@ -889,6 +965,7 @@ uint8_t getColorMode();
     void init_ColourPalettes_Shelf_Hearts();
     void init_ColourPalettes_Gradient_01();
     void init_ColourPalettes_Gradient_02();
+    void init_ColourPalettes_Sunrise_01();
 
 
     enum SHELFFLIES_HEART_INDEX{ //right to left
@@ -951,6 +1028,7 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_AUTUMN_RED_ID,
     PALETTELIST_STATIC_GRADIENT_01_ID,
     PALETTELIST_STATIC_GRADIENT_02_ID,
+    PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
 
     // Count of total handlers and starting point for other modules
@@ -1030,8 +1108,14 @@ uint8_t getColorMode();
       PALETTE shelf_hearts;
       PALETTE gradient_01;
       PALETTE gradient_02;
+      PALETTE sunrise_01;
     }palettelist;
 
+
+    const char* GetColourMapNamebyID(uint8_t id, char* buffer);
+    const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer);
+    int8_t      GetColourMapIDbyName(const char* c);
+    int8_t GetNearestColourMapIDFromColour(HsbColor hsb);
 
     void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, uint8_t* colour_ids, uint8_t colour_ids_len);
 
@@ -1042,10 +1126,15 @@ uint8_t getColorMode();
       uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr);
       HsbColor GetHsbColour(uint8_t id);
 
-        HsbColor GetColourFromPalette(
-          PALETTELIST::PALETTE *ptr, 
-          uint16_t pixel_num, int16_t* pixel_position);//, 
-          // int32_t  *pixel_position);
+        // RgbTypeColor GetColourFromPalette(
+        //   PALETTELIST::PALETTE *ptr, 
+        //   uint16_t pixel_num, int16_t* pixel_position);//, 
+        //   // int32_t  *pixel_position);80
+        
+void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
+
+          
+RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position);
 
           PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
 

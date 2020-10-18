@@ -11,7 +11,7 @@
 #include "6_Lights/_Interface/palettes.h"
 #include "0_ConfigUser/mUserConfig.h"
 #include "mRGBAnimator_web.h"
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
@@ -19,6 +19,7 @@
 #include "ArduinoJson.h"
 
 #define ENABLE_PIXEL_FUNCTION_FLASHER
+#define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef NeoRgbFeature selectedNeoFeatureType;
@@ -27,6 +28,55 @@
 #else
   typedef NeoGrbFeature selectedNeoFeatureType;
 #endif
+
+    enum TIME_MAP_SECS_IDS{
+      TIME_MAP_SECS_0_ID = 0,
+      TIME_MAP_SECS_1_ID,
+      TIME_MAP_SECS_2_ID,
+      TIME_MAP_SECS_4_ID,
+      TIME_MAP_SECS_6_ID,
+      TIME_MAP_SECS_10_ID,
+      TIME_MAP_SECS_15_ID,
+      TIME_MAP_SECS_20_ID,
+      TIME_MAP_SECS_30_ID,
+      TIME_MAP_SECS_60_ID,
+      TIME_MAP_SECS_LENGTH_ID
+    };
+    const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+
+    enum RATE_MAP_SECS_IDS{
+      RATE_MAP_SECS_0_ID = 0,
+      RATE_MAP_SECS_1_ID,
+      RATE_MAP_SECS_2_ID,
+      RATE_MAP_SECS_4_ID,
+      RATE_MAP_SECS_6_ID,
+      RATE_MAP_SECS_10_ID,
+      RATE_MAP_SECS_15_ID,
+      RATE_MAP_SECS_20_ID,
+      RATE_MAP_SECS_30_ID,
+      RATE_MAP_SECS_60_ID,
+      RATE_MAP_SECS_LENGTH_ID
+    };
+    const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+
+    enum PIXELS_UPDATE_PERCENTAGE_IDS{
+      PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
+      PIXELS_UPDATE_PERCENTAGE_5_ID,
+      PIXELS_UPDATE_PERCENTAGE_10_ID,
+      PIXELS_UPDATE_PERCENTAGE_15_ID,
+      PIXELS_UPDATE_PERCENTAGE_20_ID,
+      PIXELS_UPDATE_PERCENTAGE_30_ID,
+      PIXELS_UPDATE_PERCENTAGE_40_ID,
+      PIXELS_UPDATE_PERCENTAGE_50_ID,
+      PIXELS_UPDATE_PERCENTAGE_60_ID,
+      PIXELS_UPDATE_PERCENTAGE_70_ID,
+      PIXELS_UPDATE_PERCENTAGE_80_ID,
+      PIXELS_UPDATE_PERCENTAGE_90_ID,
+      PIXELS_UPDATE_PERCENTAGE_100_ID,
+      PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
+    };
+    const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
+      {0,5,10,15,20,30,40,50,60,70,80,90,100};
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR) "ambilight";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR) "animation";
@@ -93,6 +143,17 @@ class mRGBAnimator{
     mRGBAnimator(){};
     void pre_init(void);
     void init(void);
+    
+    // Put settings at top of class from now on, use it for common settings
+    struct SETTINGS{
+      uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
+      struct FLAGS{
+          uint8_t EnableSceneModeWithSliders = true;
+          uint8_t TemplateProvidedInProgMem = false;
+          uint8_t EnableModule = false;
+      }flags;
+    }settings;
+  
 
     void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     RgbTypeColor GetPixelColor(uint16_t indexPixel);
@@ -134,7 +195,10 @@ class mRGBAnimator{
       #endif
     #endif
     
-    NeoPixelAnimator* animations_control = nullptr;
+    #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    NeoPixelAnimator* animator_controller = nullptr;
+    #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
     #ifndef STRIP_SIZE_MAX
@@ -150,23 +214,29 @@ class mRGBAnimator{
       #define STRIP_REPEAT_OUTPUT_MAX 200
     #endif
     #ifndef ANIMATOR_SIZE_MAX
-      #define ANIMATOR_SIZE_MAX STRIP_SIZE_MAX
+      #ifdef ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
+        #define ANIMATOR_SIZE_MAX 1//STRIP_SIZE_MAX
+      #else
+        #define ANIMATOR_SIZE_MAX STRIP_SIZE_MAX
+      #endif
     #endif
+
+    #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
+    #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
     uint16_t animator_strip_size = ANIMATOR_SIZE_MAX; //allow variable control of size
 
-    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
-    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
-    
-    struct SETTINGS{
-      uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
-      struct FLAGS{
-          uint8_t EnableSceneModeWithSliders = true;
-          uint8_t TemplateProvidedInProgMem = false;
-          uint8_t EnableModule = false;
-      }flags;
-    }settings;
-  
+    // what is stored for state is specific to the need, in this case, the colors.
+    // Basically what ever you need inside the animation update function
+    struct AnimationColours
+    {
+      RgbColor StartingColor;
+      RgbColor DesiredColour;
+    };
+    AnimationColours animation_colours[STRIP_SIZE_MAX];
+
+    void BlendAnimUpdate(const AnimationParam& param);
+
     /**************
      * BLEND - Move between colours with delay
      * INSTANT   - no delay
@@ -204,24 +274,6 @@ class mRGBAnimator{
     const char* GetTransitionOrderName(char* buffer);
     const char* GetTransitionOrderNameByID(uint8_t id, char* buffer);
  
-    #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
-    #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
-
-    const char* GetColourMapNamebyID(uint8_t id, char* buffer);
-    const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer);
-    int8_t      GetColourMapIDbyName(const char* c);
-
-    void WebSave_RGBColourSelector(void);
-
-    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    void init_NotificationPanel();
-    #endif
-
-    int16_t FindNearestValueIndexUInt8(uint8_t* tosearch, uint8_t tosearch_len, uint8_t tofind);
-    int32_t FindNearestValueIndexUInt16(uint16_t* tosearch, uint16_t tosearch_len, uint16_t tofind);
-
-    void SetRGBwithNeoPixel();
-
     #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL_AMBILIGHT
     /**************
      * Ambilight is light patterns around screens or pictures
@@ -333,7 +385,7 @@ class mRGBAnimator{
       uint8_t lower_secs = 1;
       uint8_t array_index = 0;
       uint8_t array_index_length = 0;
-      uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
+      //uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
       // uint8_t profile_id;
       uint32_t tSavedNewSpeedUpdate = millis();
     }random_transitions;
@@ -346,7 +398,7 @@ class mRGBAnimator{
     }tSaved;
     // Function specific animations
     struct FUNCTION_SEQUENTIAL{
-      uint32_t tSavedNewSpeedUpdate = millis();
+      //uint32_t tSavedNewSpeedUpdate = millis();
       uint8_t rate_index = 0;
     }function_seq;
     struct FUNCTION_SLO_GLO{
@@ -354,13 +406,13 @@ class mRGBAnimator{
       uint8_t rate_index = 0;
     }function_slo_glo;
     struct FUNCTION_SLOW_FADE{
-      uint32_t tSavedNewSpeedUpdate = millis();
+      //uint32_t tSavedNewSpeedUpdate = millis();
       uint8_t rate_index = 0;
       uint8_t direction = 0;
     }function_slow_fade;
 
     struct FUNCTION_FLASH_TWINKLE{
-      uint32_t tSavedNewSpeedUpdate = millis();
+      //uint32_t tSavedNewSpeedUpdate = millis();
       uint8_t rate_index = 0;
     }function_flash_twinkle;
 
@@ -401,7 +453,7 @@ class mRGBAnimator{
       // char running_friendly_name_ctr[40];
       uint8_t list_len = 0; // 10 max
       struct TIMES{
-        uint16_t enable_skip_restricted_by_time[FLASHER_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
+       // uint16_t enable_skip_restricted_by_time[FLASHER_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
         struct datetime flashing_starttime;
         struct datetime flashing_endtime;
         uint8_t skip_restricted_by_time_isactive = 0;
@@ -447,9 +499,9 @@ class mRGBAnimator{
     uint8_t white_on_index;
     uint8_t white_total_index = 0;
     uint8_t white_pixel_amount = 0;
-    #ifdef ENABLE_ADVANCED_MODE_TWINKLE // creating this to reduce "white_leds_index" size
-      uint16_t white_leds_index[STRIP_SIZE_MAX];
-    #endif
+    // #ifdef ENABLE_ADVANCED_MODE_TWINKLE // creating this to reduce "white_leds_index" size
+    //   uint16_t white_leds_index[STRIP_SIZE_MAX];
+    // #endif
     //HsbColor stored_colours_index[STRIP_SIZE_MAX];///4]; // THIS DOESNT NEED TO BE THIS LONG
     HsbColor flash_colour;
   }flash_twinkle_random;
@@ -491,14 +543,14 @@ class mRGBAnimator{
     // Default values if not specified
 
     // void FadeToNewColour(RgbTypeColor newcolor, uint16_t _time_to_newcolour = 1000, RgbTypeColor fromcolor = RgbTypeColor(0));
-    void FadeToNewColour(RgbcctColor* newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor* fromcolor = nullptr);
+    void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
 
     const char* GetAnimationStatusCtr(char* buffer);
 
-    uint32_t tSavedSendData, tSavedSendData2, fSendRGBDellStatus;
-    uint8_t testvariable=0;
-    uint8_t testvariable2=0,testvariable3=0;
-    uint8_t timerenabled = false;
+    // uint32_t tSavedSendData, tSavedSendData2, fSendRGBDellStatus;
+    // uint8_t testvariable=0;
+    // uint8_t testvariable2=0,testvariable3=0;
+    // uint8_t timerenabled = false;
 
     int blend_count=0;
     enum BLEND_STEPS{BLEND_START=1,
@@ -519,12 +571,6 @@ class mRGBAnimator{
     }ledout;
 
 
-    struct PALETTE_VIEW_SETTINGS{
-      uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
-      uint8_t height_as_percentage = 15;
-      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
-    }palette_view;
-
     // totally random, or random but not repeating
     enum TRANSITION_ORDER_RANDOM_METHOD_IDS{
       TRANSITION_ORDER_RANDOM_METHOD_REPEATING = 0,
@@ -532,69 +578,16 @@ class mRGBAnimator{
     };
     uint8_t transition_order_random_type = TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING;
     
-    HsbColor hsbcolour[STRIP_SIZE_MAX];
-
-    enum TIME_MAP_SECS_IDS{
-      TIME_MAP_SECS_0_ID = 0,
-      TIME_MAP_SECS_1_ID,
-      TIME_MAP_SECS_2_ID,
-      TIME_MAP_SECS_4_ID,
-      TIME_MAP_SECS_6_ID,
-      TIME_MAP_SECS_10_ID,
-      TIME_MAP_SECS_15_ID,
-      TIME_MAP_SECS_20_ID,
-      TIME_MAP_SECS_30_ID,
-      TIME_MAP_SECS_60_ID,
-      TIME_MAP_SECS_LENGTH_ID
-    };
-    uint8_t time_map_secs[TIME_MAP_SECS_LENGTH_ID] = {0,1,2,4,6,10,15,20,30,60};
-
-    enum RATE_MAP_SECS_IDS{
-      RATE_MAP_SECS_0_ID = 0,
-      RATE_MAP_SECS_1_ID,
-      RATE_MAP_SECS_2_ID,
-      RATE_MAP_SECS_4_ID,
-      RATE_MAP_SECS_6_ID,
-      RATE_MAP_SECS_10_ID,
-      RATE_MAP_SECS_15_ID,
-      RATE_MAP_SECS_20_ID,
-      RATE_MAP_SECS_30_ID,
-      RATE_MAP_SECS_60_ID,
-      RATE_MAP_SECS_LENGTH_ID
-    };
-    uint8_t rate_map_secs[RATE_MAP_SECS_LENGTH_ID] = {0,1,2,4,6,10,15,20,30,60};
-
-    enum PIXELS_UPDATE_PERCENTAGE_IDS{
-      PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
-      PIXELS_UPDATE_PERCENTAGE_5_ID,
-      PIXELS_UPDATE_PERCENTAGE_10_ID,
-      PIXELS_UPDATE_PERCENTAGE_15_ID,
-      PIXELS_UPDATE_PERCENTAGE_20_ID,
-      PIXELS_UPDATE_PERCENTAGE_30_ID,
-      PIXELS_UPDATE_PERCENTAGE_40_ID,
-      PIXELS_UPDATE_PERCENTAGE_50_ID,
-      PIXELS_UPDATE_PERCENTAGE_60_ID,
-      PIXELS_UPDATE_PERCENTAGE_70_ID,
-      PIXELS_UPDATE_PERCENTAGE_80_ID,
-      PIXELS_UPDATE_PERCENTAGE_90_ID,
-      PIXELS_UPDATE_PERCENTAGE_100_ID,
-      PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
-    };
-    uint8_t pixels_to_update_as_percentage_map[PIXELS_UPDATE_PERCENTAGE_LENGTH_ID] =
-      {0,5,10,15,20,30,40,50,60,70,80,90,100};
   
   uint32_t tSavedUpdateRGBString;
   uint8_t first_set;
-  uint8_t hue_preset1_idx;
+  // uint8_t hue_preset1_idx;
   uint16_t rotate_start_index = 0;
   uint16_t LEDp, LEDe, desired_pixel; //pixel and element
   
   // This value holds the brightness of the string and is shared by animations and scene selection.
   // When scene is set, this will also be set automatically.
-  float brightness_as_percentage = 100;
-
-  //types RGB/HSB, Index/not
-  void init_Animations();
+  //float brightness_as_percentage = 100;
 
   HsbColor GetColourFromMapUsingType(
     uint16_t pixel_I_want,
@@ -605,6 +598,13 @@ class mRGBAnimator{
 
 
 
+    void WebSave_RGBColourSelector(void);
+    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
+    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
+    
+
+    
+void ApplyBrightnesstoDesiredColour(uint8_t brightness);
 
 
 void Settings_Load();
@@ -612,58 +612,61 @@ void Settings_Save();
 void Settings_Default();
 void Settings_Reset();
 void ConfigureLEDTransitionAnimation(void);
-void UpdateLEDs2(void);
+// void UpdateLEDs2(void);
 void RefreshLED_Presets(void);
 void parsesub_CheckAll(JsonObjectConst obj);
 void TurnLEDsOff();
-void AddToJsonObject_AddHardware(JsonObject root);
+// void AddToJsonObject_AddHardware(JsonObject root);
 void Append_Hardware_Status_Message();
-void WebSendBody_Palette();
-void WebSendBody_Liveview();
-void WebSendBody_InfoTable();
+// void WebSendBody_Palette();
+// void WebSendBody_Liveview();
+// void WebSendBody_InfoTable();
 void EveryLoop();
-void WebPage_Root_SendStyle();
-void WebPage_Root_SendBody();
-void WebPage_Root_SendStatus();
-void WebAppend_Root_Add_Main_Buttons();
+// void WebPage_Root_SendStyle();
+// void WebPage_Root_SendBody();
+// void WebPage_Root_SendStatus();
+// void WebAppend_Root_Add_Main_Buttons();
 void WebPage_Root_AddHandlers();
-void WebPage_Root_SendParseJSONScripts();
-void WebPage_Root_SendScripts();
+// void WebPage_Root_SendParseJSONScripts();
+// void WebPage_Root_SendScripts();
 void WebPage_Root_SendInformationModule();
-void WebSendBody_InfoTable2();
-void WebSendBody_Palette2();
-void SetRGBwithNeoPixelImageTest();
+// void WebSendBody_InfoTable2();
+// void WebSendBody_Palette2();
+// void SetRGBwithNeoPixel();
+// void SetRGBwithNeoPixelImageTest();
 void SetRefreshLEDs();    
 void GenerateAnimationPixelAmountMaps();
-void SetAnimationBrightness(uint8_t brt);
+// void SetAnimationBrightness(uint8_t brt);
 void WebAppend_JSON_RootPage_LiveviewPixels();
-void WebSend_DivStyle_Root(AsyncWebServerRequest *request);
-void WebSend_JSON_Append_Root();
-void WebSend_JSON_RootPage_Parameters_RGBTable(AsyncWebServerRequest *request);
-void WebSend_JSON_RootPage_Parameters_RGBPalette(AsyncWebServerRequest *request);
-void WebPage_Root_SendJSONFetchURL();
-void SendScript_Root(AsyncWebServerRequest *request);
-void SendStyle_Root(AsyncWebServerRequest *request);
-void SendDrawDiv_Root(AsyncWebServerRequest *request);
-void Web_RGBLightSettings_RunTime_URLs(AsyncWebServerRequest *request);
-void Web_RGBLightSettings_LoadTime_URLs(AsyncWebServerRequest *request);
+// void WebSend_DivStyle_Root(AsyncWebServerRequest *request);
+// void WebSend_JSON_Append_Root();
+// void WebSend_JSON_RootPage_Parameters_RGBTable(AsyncWebServerRequest *request);
+// void WebSend_JSON_RootPage_Parameters_RGBPalette(AsyncWebServerRequest *request);
+// void WebPage_Root_SendJSONFetchURL();
+// void SendScript_Root(AsyncWebServerRequest *request);
+// void SendStyle_Root(AsyncWebServerRequest *request);
+// void SendDrawDiv_Root(AsyncWebServerRequest *request);
+// void Web_RGBLightSettings_RunTime_URLs(AsyncWebServerRequest *request);
+// void Web_RGBLightSettings_LoadTime_URLs(AsyncWebServerRequest *request);
+
+
+
 void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
-void Web_RGBLightSettings_LoadScript(AsyncWebServerRequest *request);
+// void Web_RGBLightSettings_LoadScript(AsyncWebServerRequest *request);
 void Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request);
-void Web_RGBLightSettings_FillOptions(AsyncWebServerRequest *request);
+// void Web_RGBLightSettings_FillOptions(AsyncWebServerRequest *request);
 void WebAppend_RGBLightSettings_FillOptions_Controls();
 void WebAppend_RGBLightSettings_FillOptions_Controls_Selected();
 void WebAppend_RGBLightSettings_Draw_Controls();
-void Web_RGBPaletteEditor_RunTime_URLs(AsyncWebServerRequest *request);
-void Web_RGBPaletteEditor_LoadTime_URLs(AsyncWebServerRequest *request);
-void Web_RGBPaletteEditor_Draw(AsyncWebServerRequest *request);
-void Web_RGBPaletteEditor_LoadScript(AsyncWebServerRequest *request);
-void Web_RGBPaletteEditor_RunTimeScript(AsyncWebServerRequest *request);
-void Web_RGBPaletteEditor_FillOptions(AsyncWebServerRequest *request);
-void WebAppend_RGBPaletteEditor_FillOptions_Controls();
-void WebAppend_RGBPaletteEditor_FillOptions_Controls_Selected();
-void WebAppend_RGBPaletteEditor_Draw_Controls();
-void Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_RunTime_URLs(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_LoadTime_URLs(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_Draw(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_LoadScript(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_RunTimeScript(AsyncWebServerRequest *request);
+// void Web_RGBPaletteEditor_FillOptions(AsyncWebServerRequest *request);
+// void WebAppend_RGBPaletteEditor_FillOptions_Controls();
+// void WebAppend_RGBPaletteEditor_FillOptions_Controls_Selected();
+// void WebAppend_RGBPaletteEditor_Draw_Controls();
 void Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request);
 void Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request);
 void WebAppend_RGBLightSettings_Draw_Animation_Options();
@@ -673,76 +676,71 @@ void Web_PaletteEditor_ListOptions(AsyncWebServerRequest *request);
 void WebAppend_PaletteEditor_FillOptions_Controls();
 void WebAppend_RGBLightSettings_Draw_PageButtons();
 void WebAppend_Root_Draw_Table();
-void WebAppend_Root_Draw_RGBTable();
-void WebAppend_Root_Draw_RGBLive();
-void WebAppend_Root_Draw_RGBPalette();
-void WebAppend_Root_Draw_PaletteSelect();
-void WebAppend_Root_Draw_PaletteSelect_Placeholder();
+// void WebAppend_Root_Draw_RGBTable();
+// // void WebAppend_Root_Draw_RGBLive();
 void Web_PaletteEditor_Draw(AsyncWebServerRequest *request);
 void WebAppend_PaletteEditor_Draw_Editor_Form();
 void WebAppend_Root_ControlUI();
-void WebSend_JSON_RootPage_Parameters_Liveview(AsyncWebServerRequest *request);
-void WebSend_JSON_RGBTable(AsyncWebServerRequest *request);
-void WebSend_JSON_Empty_Response();
+// void WebSend_JSON_RootPage_Parameters_Liveview(AsyncWebServerRequest *request);
+// void WebSend_JSON_RGBTable(AsyncWebServerRequest *request);
+// void WebSend_JSON_Empty_Response();
 void RefreshLEDIndexPattern();
 void RefreshLEDOutputStream();
 void StripUpdate();
-void SetMode_UpdateColour(uint8_t colour);
+// void SetMode_UpdateColour(uint8_t colour);
 void HandlePage_PaletteEditor(AsyncWebServerRequest *request);
-void HandleMixerEditor();
+// void HandleMixerEditor();
 void HandleParameters_RGBLightSettings(AsyncWebServerRequest *request);
 void HandlePage_RGBLightSettings(AsyncWebServerRequest *request);
-void WebAppend_Root_RGBPalette();
-void HandleTimerConfiguration();
-void TimerSaveSettings();
-void WebSend_JSON_RootPage_Parameters();
-void WebSend_JSON_RGBPalette();
-void WebSend_JSON_RootPage_Parameters_Append_Palette(JsonObject root);
-void WebSend_JSON_RootPage_Parameters_Append_Table(JsonObject root);
-int8_t GetNearestColourMapIDFromColour(HsbColor hsb);
-void WebSave_RGBColourSelectorOnly();
-void WebSave_RGBControls(AsyncWebServerRequest *request);
-void WebCommand_Parse(void);
+// void HandleTimerConfiguration();
+// void TimerSaveSettings();
+// void WebSend_JSON_RootPage_Parameters();
+// void WebSend_JSON_RGBPalette();
+// void WebSend_JSON_RootPage_Parameters_Append_Palette(JsonObject root);
+// void WebSend_JSON_RootPage_Parameters_Append_Table(JsonObject root);
+// void WebSave_RGBColourSelectorOnly();
+// void WebSave_RGBControls(AsyncWebServerRequest *request);
+// void WebCommand_Parse(void);
 void WebAppend_Root_Status_Table();
 
 
 
-    struct POWER_RATING{
-      float Average_mA_Per_Pixel_Step = 0.0784; //  20/255 
-      // uint8_t G_Channel_mA = 20;
-      // uint8_t B_Channel_mA = 20;
-      // uint8_t W_Channel_mA = 20;
-      float current_mA;
-      uint8_t power;
-    }power_rating;
+  struct POWER_RATING{
+    float Average_mA_Per_Pixel_Step = 0.0784; //  20/255    //MAKE PROGMEM
+    // uint8_t G_Channel_mA = 20;
+    // uint8_t B_Channel_mA = 20;
+    // uint8_t W_Channel_mA = 20;
+    float current_mA;
+    uint8_t power;
+  }power_rating;
 
-    template<typename T>
-    void swap(T& x, T& y)
-    {
-      T tmp = x;
-      x = y;
-      y = tmp;
-    }
+  template<typename T>
+  void swap(T& x, T& y)
+  {
+    T tmp = x;
+    x = y;
+    y = tmp;
+  }
 
-    timereached_t tSavedCalculatePowerUsage;
+  timereached_t tSavedCalculatePowerUsage;
 
-  #define WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER "animation_brightness"
-  #define WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER "scn_sld_w"
-  #define USE_APPENDED_COLOUR_VALUES_TO_EDITOR_LIST
+  // #define WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER "animation_brightness"
+  // #define WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER "scn_sld_w"
+  // #define USE_APPENDED_COLOUR_VALUES_TO_EDITOR_LIST
   
   
-    enum WEBHANDLE_RGBCONTROLS_ITEM_IDS{
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE=0,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELORDER,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_ANIMATIONMODE,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID,
-      WEBHANDLE_RGBCONTROLS_ITEM_IDS_NONE
-    };
+    // enum WEBHANDLE_RGBCONTROLS_ITEM_IDS{
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE=0,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELORDER,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_ANIMATIONMODE,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID,
+    //   WEBHANDLE_RGBCONTROLS_ITEM_IDS_NONE
+    // };
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0);
     uint8_t ConstructJSON_Animation(uint8_t json_level = 0);
@@ -800,6 +798,10 @@ void WebAppend_Root_Status_Table();
     #ifndef STRIP_NOTIFICATION_SIZE
       #define STRIP_NOTIFICATION_SIZE (STRIP_SIZE_MAX>20?20:STRIP_SIZE_MAX) // Set max if not defined as 20
     #endif
+
+    // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+    void init_NotificationPanel();
+    // #endif
 
     void SubTask_NotificationPanel();
     void SubTask_Notifications();

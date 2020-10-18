@@ -5,7 +5,7 @@
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #include "3_Network/MQTT/mMQTT.h"

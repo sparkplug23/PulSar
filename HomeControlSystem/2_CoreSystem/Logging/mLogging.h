@@ -19,6 +19,34 @@
   #define SERIAL_DEBUG Serial
 #endif
 
+enum LoggingLevels {LOG_LEVEL_NONE, 
+                    LOG_LEVEL_ERROR, 
+                    LOG_LEVEL_WARN, 
+                    LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
+                    LOG_LEVEL_INFO,
+                    LOG_LEVEL_INFO_PARSING, // extra case, this will show when cases are matched 
+                    LOG_LEVEL_DEBUG, 
+                    LOG_LEVEL_DEBUG_MORE,
+                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
+                    LOG_LEVEL_DEBUG_LOWLEVEL, 
+                    //#endif
+                    LOG_LEVEL_ALL
+                  };
+// Put around ALL addlog_p
+
+// // To reduce ram usage
+// #define ENABLE_LOG_LEVEL_NONE 
+// #define ENABLE_LOG_LEVEL_ERROR 
+// #define ENABLE_LOG_LEVEL_WARN 
+// #define ENABLE_LOG_LEVEL_TEST
+// #define ENABLE_LOG_LEVEL_INFO 
+// //#define ENABLE_LOG_LEVEL_DEBUG 
+// //#define ENABLE_LOG_LEVEL_DEBUG_MORE 
+// //#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
+// //#define ENABLE_LOG_LEVEL_ALL
+  
+ 
+
 
 // Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
@@ -71,7 +99,7 @@ extern "C" {
 #include <cont.h>
   extern cont_t* g_pcont;
 }
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -206,33 +234,6 @@ public:
     //mode to include
     // OFF, ON, TIMED_10_MINUTES_FROM_BOOT, TIMED_MINUTES_FROM_USER_REQUEST
 
-
-    #ifdef TEST_SINGLETON
-    uint8_t test_counter = 0;
-    static mLogging* mso3;
-
-    static mLogging *getInstance() {
-      if (!mso3)
-      mso3 = new mLogging;
-      return mso3;
-    }
-
-    #endif
-
-    
-    // HardwareSerial* hs;
-
-    enum LoggingLevels {
-      LOG_LEVEL_NONE, 
-      LOG_LEVEL_ERROR, 
-      LOG_LEVEL_WARN, 
-      LOG_LEVEL_TEST, // New level with elevated privilege - during code development use only
-      LOG_LEVEL_INFO, 
-      LOG_LEVEL_DEBUG, 
-      LOG_LEVEL_DEBUG_MORE, 
-      LOG_LEVEL_DEBUG_LOWLEVEL, 
-      LOG_LEVEL_ALL
-    };
  
     void GetLog(uint8_t idx, char** entry_pp, size_t* len_p);
     void SetSeriallog(uint8_t loglevel);

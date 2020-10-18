@@ -76,7 +76,7 @@ struct functionhandler {
 #endif
 
 #include <ArduinoJson.h>
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 #include "2_CoreSystem/Logging/mLogging.h"
@@ -130,7 +130,7 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 // template<typename KEY, typename VALUE>
 // void AppendJSON_Value(KEY key, VALUE value);
 
-// class mInterfaceController;
+// class mTaskerManager;
     
 // template<typename KEY, typename VALUE>
 // void AppendJSON_Value(KEY key, VALUE value)

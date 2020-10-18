@@ -1058,7 +1058,10 @@ void mHardwarePins::GpioInit(void)
 //start each pin
 
   if ((2 == GetPin(GPIO_SERIAL_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) {
+    //#ifdef DISABLE_SERIAL_ALTERNATE_TX
+    #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
+    #endif // DISABLE_SERIAL_ALTERNATE_TX
   }
 
   // #ifdef USE_SERIAL_ALTERNATE_TX

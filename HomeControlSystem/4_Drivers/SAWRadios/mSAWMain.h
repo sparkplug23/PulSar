@@ -20,7 +20,7 @@ class mSAWProtocol;
 //#include "SAWRadios/mSAWCodes.h"
 // Task as controller -- main SAW controller -- other Files should be considered private
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
 class mLogging;

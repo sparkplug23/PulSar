@@ -7,9 +7,10 @@
 #include "stdint.h"
 
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-
+#endif //USE_MODULE_CORE_WEBSERVER
 
 
 // const char STYLE_RGB_ROOT[] PROGMEM = 

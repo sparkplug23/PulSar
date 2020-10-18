@@ -157,7 +157,7 @@ void AddLog_P(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
   // LOG : WEBSERVER
-  #ifdef USE_WEBSERVER
+  #ifdef USE_MODULE_CORE_WEBSERVER
   if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
     if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
       // Delimited, zero-terminated buffer of log lines.
@@ -180,7 +180,7 @@ void AddLog_P(uint8_t loglevel, PGM_P formatP, ...)
     
     }
   }
-  #endif  // USE_WEBSERVER
+  #endif  // USE_MODULE_CORE_WEBSERVER
   
   // SERIAL_DEBUG.printf("%s %d\r\n","end",millis());
 
@@ -340,7 +340,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   }
 
   // LOG : WEBSERVER
-  #ifdef USE_WEBSERVER
+  #ifdef USE_MODULE_CORE_WEBSERVER
   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
     // Delimited, zero-terminated buffer of log lines.
     // Each entry has this format: [index][log data]['\1']
@@ -368,7 +368,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   // SERIAL_DEBUG.printf("END WEBLOG");
 
   }
-  #endif  // USE_WEBSERVER
+  #endif  // USE_MODULE_CORE_WEBSERVER
 
 }
 
@@ -474,7 +474,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
   *entry_pp = entry_p;
   *len_p = len;
 }
-//#endif  // USE_WEBSERVER
+//#endif  // USE_MODULE_CORE_WEBSERVER
 
 void mLogging::Syslog(void)
 {
@@ -510,7 +510,7 @@ void mLogging::AddLogAddLog(uint8_t loglevel)
 //   if (loglevel <= seriallog_level) {
 //     SERIAL_DEBUG.printf("%s%s\r\n", mxtime, log_data);
 //   }
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //   if (Settings.webserver && (loglevel <= Settings.weblog_level)) {
 //     // Delimited, zero-terminated buffer of log lines.
 //     // Each entry has this format: [index][log data]['\1']
@@ -527,7 +527,7 @@ void mLogging::AddLogAddLog(uint8_t loglevel)
 //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%s\1"), web_log, web_log_index++, mxtime, log_data);
 //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
 //   }
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 //   if (!global_state.wifi_down && (loglevel <= syslog_level)) { Syslog(); }
 }
 

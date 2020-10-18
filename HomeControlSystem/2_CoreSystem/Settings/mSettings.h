@@ -16,7 +16,13 @@ return potato;
 */
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
+
+#ifdef USE_MODULE_CORE_WEBSERVER
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
+#else
+#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1200
+#endif //USE_MODULE_CORE_WEBSERVER
+
 struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
@@ -39,7 +45,7 @@ extern struct DATA_BUFFER data_buffer2;
 #include "2_CoreSystem/Logging/mLogging.h"
 
 #include <ArduinoJson.h>
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
@@ -47,7 +53,7 @@ extern struct DATA_BUFFER data_buffer2;
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 #ifdef ESP32
@@ -311,22 +317,6 @@ enum DayOfTheWeekOptions {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
 enum MonthNamesOptions {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 enum HemisphereOptions {North, South};
 enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_RESTART, DT_ENERGY };
-
-
-
-enum LoggingLevels {LOG_LEVEL_NONE, 
-                    LOG_LEVEL_ERROR, 
-                    LOG_LEVEL_WARN, 
-                    LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
-                    LOG_LEVEL_INFO,
-                    LOG_LEVEL_INFO_PARSING, // extra case, this will show when cases are matched 
-                    LOG_LEVEL_DEBUG, 
-                    LOG_LEVEL_DEBUG_MORE,
-                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
-                    LOG_LEVEL_DEBUG_LOWLEVEL, 
-                    //#endif
-                    LOG_LEVEL_ALL
-                  };
 
 enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 

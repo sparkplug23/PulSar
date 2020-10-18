@@ -315,13 +315,13 @@
 //     Response_P(PSTR("{\"" D_JSON_MODULE "\":\"%s\",\"" D_JSON_VERSION "\":\"%s%s\",\"" D_JSON_FALLBACKTOPIC "\":\"%s\",\"" D_JSON_GROUPTOPIC "\":\"%s\"}"),
 //       ModuleName().c_str(), my_version, my_image, GetFallbackTopic_P(stopic, CMND, ""), Settings.mqtt_grptopic);
 //     MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_INFO "1"));
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //     if (Settings.webserver) {
 //       Response_P(PSTR("{\"" D_JSON_WEBSERVER_MODE "\":\"%s\",\"" D_JSON_HOSTNAME "\":\"%s\",\"" D_JSON_IPADDRESS "\":\"%s\"}"),
 //         (2 == Settings.webserver) ? D_ADMIN : D_USER, my_hostname, WiFi.localIP().toString().c_str());
 //       MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_INFO "2"));
 //     }
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 //     Response_P(PSTR("{\"" D_JSON_RESTARTREASON "\":\"%s\"}"), (GetResetReason() == "Exception") ? ESP.getResetInfo().c_str() : GetResetReason().c_str());
 //     MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_INFO "3"));
 //     for (uint8_t i = 1; i <= devices_present; i++) {
@@ -421,7 +421,7 @@
 //     return;
 //   }
 
-// #if defined(USE_WEBSERVER) && defined(USE_EMULATION)
+// #if defined(USE_MODULE_CORE_WEBSERVER) && defined(USE_EMULATION)
 // //  UdpDisconnect();
 // #endif  // USE_EMULATION
 
@@ -733,7 +733,7 @@
 //  * Presentation
 // \*********************************************************************************************/
 
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 
 
 // /*********************************************************************************************\

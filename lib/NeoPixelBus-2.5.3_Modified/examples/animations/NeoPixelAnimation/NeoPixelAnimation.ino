@@ -64,22 +64,22 @@ struct MyAnimationState
     AnimEaseFunction Easeing; // the acceleration curve it will use 
 };
 
-MyAnimationState animationState[PixelCount];
+MyAnimationState animation_colours[PixelCount];
 // one entry per pixel to match the animation timing manager
 
 void AnimUpdate(const AnimationParam& param)
 {
     // first apply an easing (curve) to the animation
     // this simulates acceleration to the effect
-    float progress = animationState[param.index].Easeing(param.progress);
+    float progress = animation_colours[param.index].Easeing(param.progress);
 
     // this gets called for each animation on every time step
     // progress will start at 0.0 and end at 1.0
     // we use the blend function on the RgbColor to mix
     // color based on the progress given to us in the animation
     RgbColor updatedColor = RgbColor::LinearBlend(
-        animationState[param.index].StartingColor,
-        animationState[param.index].EndingColor,
+        animation_colours[param.index].StartingColor,
+        animation_colours[param.index].EndingColor,
         progress);
     // apply the color to the strip
     strip.SetPixelColor(param.index, updatedColor);
@@ -160,11 +160,11 @@ void SetupAnimationSet()
 
 #ifdef ARDUINO_ARCH_AVR
         // each animation starts with the color that was present
-        animationState[pixel].StartingColor = originalColor;
+        animation_colours[pixel].StartingColor = originalColor;
         // and ends with a random color
-        animationState[pixel].EndingColor = targetColor;
+        animation_colours[pixel].EndingColor = targetColor;
         // using the specific curve
-        animationState[pixel].Easeing = easing;
+        animation_colours[pixel].Easeing = easing;
 
         // now use the animation state we just calculated and start the animation
         // which will continue to run and call the update function until it completes

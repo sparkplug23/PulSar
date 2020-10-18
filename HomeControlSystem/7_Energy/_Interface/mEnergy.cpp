@@ -462,7 +462,7 @@ void mEnergy::UpdateEnergyUsagePerMinute(){
 
 
 
-// // #ifdef USE_WEBSERVER
+// // #ifdef USE_MODULE_CORE_WEBSERVER
 
 const char* mEnergy::EnergyFormatIndex(char* result, char* input, bool json, uint32_t index, bool single)
 {
@@ -726,7 +726,7 @@ void mEnergy::EnergyShow(bool json)
 //       KnxSensor(KNX_ENERGY_START, pCONT_iEnergy->Energy.start_energy);
 //     }
 // #endif  // USE_KNX
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //   // } else {
 
 //       if (pCONT_iEnergy->Energy.voltage_available) {
@@ -758,7 +758,7 @@ void mEnergy::EnergyShow(bool json)
 //       if (!isnan(Energy.export_active)) {
 //         pCONT_web->WSContentSend_PD(HTTP_ENERGY_SNS3, export_active_chr[0]);
 //       }
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
   //} //if json
 }
 
@@ -953,7 +953,7 @@ int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_WEBSERVER
+    #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       // WebAppend_Root_Status_Table_Draw();
     break;
@@ -967,7 +967,7 @@ int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
       //   AddLog_P(LOG_LEVEL_TEST,PSTR("mEnergy::Tasker::FUNC_WEB_SHOW_PARAMETERS:"));
         // EnergyShow(false);
       // break;
-    #endif //USE_WEBSERVER
+    #endif //USE_MODULE_CORE_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/

@@ -3,9 +3,9 @@
    All rights reserved.
 */
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
-//#define USE_DECLARE_AT_COMPILE_TO_DEBUG
+// #define USE_DECLARE_AT_COMPILE_TO_DEBUG
 
 #ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
     mHardwarePins mod;
@@ -16,7 +16,7 @@
     mMQTT mqt;
     mWiFi mwif;
     mTelemetry mtel;
-    #ifdef USE_WEBSERVER
+    #ifdef USE_MODULE_CORE_WEBSERVER
     mWebServer mweb;
     #endif
   #ifdef USE_MODULE_SENSORS_DHT
@@ -131,7 +131,7 @@ void init_class_instances(){
     pCONT-> mqt = &mqt;
     pCONT-> mwif = &mwif;
     pCONT-> mtel = &mtel;
-    #ifdef USE_WEBSERVER
+    #ifdef USE_MODULE_CORE_WEBSERVER
     pCONT-> mweb = &mweb;
     #endif
   #ifdef USE_MODULE_SENSORS_DHT
@@ -274,11 +274,11 @@ void ArduinoOTAInit(void)
   {
     // #ifdef ESP8266
       //pCONT_set->SettingsSave(1);  // Free flash for OTA update
-      //#ifdef USE_WEBSERVER
+      //#ifdef USE_MODULE_CORE_WEBSERVER
         // if (pCONT_set->Settings.webserver) { 
           //pCONT_web->StopWebserver(); 
           // /}
-      // #endif  // USE_WEBSERVER
+      // #endif  // USE_MODULE_CORE_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
     // #endif
@@ -433,6 +433,7 @@ void setup(void)
   Serial.begin(115200);
 
   #ifdef USE_SERIAL_ALTERNATE_TX
+  // #ifdef DISABLE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
   #endif
   Serial.println(F("Rebooting..." DEBUG_INSERT_PAGE_BREAK));

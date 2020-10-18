@@ -292,7 +292,10 @@ int8_t mPWMFan::Tasker(uint8_t function){
   /************
    * WEBPAGE SECTION * 
   *******************/
+  
+  #ifdef USE_MODULE_CORE_WEBSERVER
   return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
 
 } // END Tasker
 

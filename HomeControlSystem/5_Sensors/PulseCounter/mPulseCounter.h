@@ -7,15 +7,17 @@
 
 #include "stdint.h"
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/Support/mSupport.h"
 
 
 #include <ArduinoJson.h>
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#endif //USE_MODULE_CORE_WEBSERVER
 
 class mPulseCounter{
 

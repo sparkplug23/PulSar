@@ -15,7 +15,7 @@ typedef struct pir_detect_s{
   char     detected_rtc_ctr[10]; //HH:MM:SS\0  IMPORTANT! COPIED INTO GARAGE LIGHT, CAUSES ERROR IF CHANGED
 }pir_detect_t;
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 class mMotionSensor{

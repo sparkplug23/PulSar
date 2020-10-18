@@ -5,7 +5,7 @@
 
 #ifdef USE_MODULE_CUSTOM_PWM_FAN
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 #include <ArduinoJson.h>

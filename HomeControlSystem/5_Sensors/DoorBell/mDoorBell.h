@@ -9,7 +9,7 @@
 
 #ifdef USE_MODULE_SENSORS_DOORCHIME
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 class mDoorBell{

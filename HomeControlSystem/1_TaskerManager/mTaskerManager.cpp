@@ -1,10 +1,10 @@
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 // Rename to "TaskerManager"
 // Move into its own folder path?
 
 
-// std::variant< int, std::string > mInterfaceController::GetClassObjectbyID(uint8_t id){
+// std::variant< int, std::string > mTaskerManager::GetClassObjectbyID(uint8_t id){
 
 //   switch(id){
 //     // CoreSystem
@@ -18,7 +18,7 @@
 
 // }
 
-// void mInterfaceController::TaskerTest(){
+// void mTaskerManager::TaskerTest(){
 
 //   auto obj = GetClassObjectbyID(D_MODULE_CORE_SETTINGS_ID);
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(DEBUG_INSERT_PAGE_BREAK "TaskerTest"));
@@ -28,7 +28,7 @@
 
 
 // Checks if defined pointers are NOT nullptr and therefore initiated
-uint8_t mInterfaceController::Instance_Init(){
+uint8_t mTaskerManager::Instance_Init(){
 
   if(mqt  == nullptr){ mqt  = new mMQTT();      }
   if(mod  == nullptr){ mod  = new mHardwarePins(); }
@@ -36,7 +36,9 @@ uint8_t mInterfaceController::Instance_Init(){
   if(mset == nullptr){ mset = new mSettings();  }
   if(msup == nullptr){ msup = new mSupport();   }
   if(mwif == nullptr){ mwif = new mWiFi();      }
+  #ifdef USE_MODULE_CORE_WEBSERVER
   if(mweb == nullptr){ mweb = new mWebServer(); }
+  #endif //USE_MODULE_CORE_WEBSERVER
   if(mso  == nullptr){ mso  = new mLogging(); }
   if(mtel == nullptr){ mtel = new mTelemetry(); }
   
@@ -156,7 +158,7 @@ uint8_t mInterfaceController::Instance_Init(){
 
 }
 
-void mInterfaceController::Init_InterfaceHandler(){
+void mTaskerManager::Init_InterfaceHandler(){
 
 
   // if(mqt  == nullptr){ mqt  = new mMQTT();      }
@@ -172,7 +174,7 @@ void mInterfaceController::Init_InterfaceHandler(){
 
   // int array[] = {mset, msup};
 
-  // mInterfaceController *array[30];
+  // mTaskerManager *array[30];
   // array[0] = new mSettings();
   // array[1] = new mSupport();
 
@@ -182,7 +184,7 @@ void mInterfaceController::Init_InterfaceHandler(){
 }
 
 // Gets the class id's and stores in array, used in interface 
-uint8_t mInterfaceController::InitClassList(){
+uint8_t mTaskerManager::InitClassList(){
 
 DEBUG_LINE;
 
@@ -332,18 +334,18 @@ DEBUG_LINE;
 
 }
 
-uint16_t mInterfaceController::GetClassCount(){
+uint16_t mTaskerManager::GetClassCount(){
   return module_settings.count;
 }
 
 
 /* Null, because instance will be initialized on demand. */
-mInterfaceController* mInterfaceController::instance = nullptr;
+mTaskerManager* mTaskerManager::instance = nullptr;
 
 
-mInterfaceController* mInterfaceController::GetInstance(){
+mTaskerManager* mTaskerManager::GetInstance(){
   if (instance == nullptr){
-    instance = new mInterfaceController();
+    instance = new mTaskerManager();
   }
   return instance;
 }
@@ -380,7 +382,7 @@ mInterfaceController* mInterfaceController::GetInstance(){
 
 
 // Checks if defined pointers are NOT nullptr and therefore initiated
-uint8_t mInterfaceController::CheckPointersPass(){
+uint8_t mTaskerManager::CheckPointersPass(){
 
 //probably phase out? singletons will remove need
 
@@ -392,7 +394,7 @@ uint8_t mInterfaceController::CheckPointersPass(){
   #ifdef USE_MQTT
     if(mqt==nullptr){ return false; }
   #endif
-  #ifdef USE_WEBSERVER
+  #ifdef USE_MODULE_CORE_WEBSERVER
     if(mweb==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
@@ -487,11 +489,11 @@ uint8_t mInterfaceController::CheckPointersPass(){
  * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. If !0, a specific tasker will be called and this function will exit after completion
  * */
 
-int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_tasker){
+int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker){
 //   JsonObjectConst dummy; return Tasker_Interface(function, dummy, target_tasker);
 // }
 // template<typename T>
-// int8_t mInterfaceController::Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker = 0){
+// int8_t mTaskerManager::Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker = 0){
 
   // if(function == FUNC_JSON_COMMAND_OBJECT){
   // Serial.println("BEFORE FUNC_JSON_COMMAND_OBJECT TASKER"); Serial.flush();
@@ -777,7 +779,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, uint8_t target_t
 
 
 // JsonObjectConst  basic 
-int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker){
+int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker){
 
   int8_t result = 0;
   uint8_t fModule_present = false;
@@ -1005,7 +1007,7 @@ int8_t mInterfaceController::Tasker_Interface(uint8_t function, JsonObjectConst 
 
 // Switch case should be faster than getext progmem
 // Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way
-const char* mInterfaceController::GetTaskName(uint8_t task, char* buffer){
+const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
 
   switch(task){
     default:
@@ -1102,7 +1104,7 @@ const char* mInterfaceController::GetTaskName(uint8_t task, char* buffer){
 }
 
 
-PGM_P mInterfaceController::GetClassName(uint8_t task){
+PGM_P mTaskerManager::GetClassName(uint8_t task){
   switch(task){
     // CoreSystem
     case D_MODULE_CORE_TIME_ID:        return PM_MODULE_CORE_TIME_CTR; 
@@ -1163,7 +1165,7 @@ PGM_P mInterfaceController::GetClassName(uint8_t task){
 
 
 
-PGM_P mInterfaceController::GetModuleFriendlyName(uint8_t module_id){
+PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
 
   switch(module_id){
     // CoreSystem (Range 0-29)

@@ -35,7 +35,7 @@
 
 
 #include <ArduinoJson.h>
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"
@@ -91,6 +91,7 @@ class mTelemetry{
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
     #endif
 
+  #ifdef USE_MODULE_CORE_WEBSERVER
     void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
@@ -105,6 +106,7 @@ class mTelemetry{
     void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
+    #endif // #ifdef USE_MODULE_CORE_WEBSERVER
     
     #define HARDWARE_STATUS_MAX_LENGTH 200
     struct STATUSHARDWARE{

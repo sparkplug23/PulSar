@@ -446,7 +446,7 @@ void mNextionPanel::WebSave_NextionSettings(void)
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE: 
   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
   //         // from mapped value to real value
-  //         arg_value = animation.transition.pixels_to_update_as_percentage_map[arg_value];
+  //         arg_value = animation.transition.PROGMEM pixels_to_update_as_percentage_map[arg_value];
   //         animation.transition.pixels_to_update_as_percentage = constrain(arg_value,0,100);
   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage);
   //         // Also convert to number equivalent

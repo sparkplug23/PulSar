@@ -2,6 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
+  #ifdef USE_MODULE_CORE_WEBSERVER
 
 int8_t mInterfaceLight::Tasker_Web(uint8_t function){
 
@@ -24,10 +25,14 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
     break; 
     case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
       JsonBuilderI->Add(WEB_HANDLE_LIVEPIXELS_SHARED_JSON,liveview.refresh_rate);
+      JsonBuilderI->Add("/draw/palette_selector.json",-500);
     break;
     
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
+      if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
+        WebAppend_Root_RGBPalette();
+      }
       WebAppend_Root_Sliders();  //move webui stuff into here, as "scenes" will soon be replaced by colour[5].. make it a struct, but read/write using bytes when need by pointer of struct
 
     break;
@@ -95,7 +100,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     "brt_sldr",              
     D_JSON_BRT_RGB,
     0, 100,  // Range 0/1 to 100% 
-    pCONT_iLight->BrtF2N(hsb_current.B)
+    getBriRGB()
   ); 
 
 
@@ -139,33 +144,26 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   //   "pwm_cbrt"
   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-
-  // dcolor = mSupport::changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
-  // snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
-  BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-    "cct_temp",               
-    "col_sldr",
-    // start_colour, 
-    // end_colour, //fff should be calculated based on colour[5]
-    "#fff", "#ff0",  // White to Yellow
-    "cct_temp",              
-    D_JSON_CCT_TEMP,
-    // 0, 100,  // Range 0/1 to 100% 
-    153, 500,        // Range color temperature
-    pCONT_iLight->SatF2N(hsb_current.S)
-  ); 
-  
-  BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-    "cct_brt",               
-    "col_sldr",
-    // start_colour, 
-    // end_colour, //fff should be calculated based on colour[5]
-    PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    "cct_brt",              
-    D_JSON_BRT_CCT,
-    0, 100,  // Range 0/1 to 100% 
-    pCONT_iLight->SatF2N(hsb_current.S)
-  ); 
+  if(getColorMode() & LCM_CT){
+    BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+      "cct_temp",               
+      "col_sldr",
+      "#fff", "#ff0",  // White to Yellow
+      "cct_temp",              
+      D_JSON_CCT_TEMP,
+      153, 500,        // Range color temperature
+      getCT()
+    ); 
+    BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+      "cct_brt",               
+      "col_sldr",
+      PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+      "cct_brt",              
+      D_JSON_BRT_CCT,
+      0, 100,  // Range 0/1 to 100% 
+      getBriCT()
+    ); 
+  }
 
   // #endif
 
@@ -179,7 +177,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              animation.brightness ? "On" : "Off" //make this a state function
+                              getBriRGB() ? "On" : "Off" //make this a state function
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
                               100/2,
@@ -198,6 +196,59 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   
    #endif // USE_MODULE_LIGHTS_ADDRESSABLE
 
+}
+
+
+void mInterfaceLight::WebAppend_Root_RGBPalette()
+{
+
+  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+
+  uint8_t length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length
+  uint8_t pal_length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length
+  
+  JsonBuilderI->Array_Start("rgb_pal_title");// Class name
+    JsonBuilderI->Level_Start();
+    char title_ctr[30];
+    if(pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
+      JsonBuilderI->Add_FP("ih",PSTR("\"%s (Gradient)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
+    }else{
+      JsonBuilderI->Add_FP("ih",PSTR("\"%s (#%d)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+    }
+    JsonBuilderI->Level_End();
+  JsonBuilderI->Array_End();
+
+  char colourtype[5];
+  switch(palette_view.show_type){
+    default:
+    case RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID:
+      length = pal_length; //only send title and true length
+      sprintf(colourtype,"%s","bclg");
+    break;
+    case RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID:
+      sprintf(colourtype,"%s","bcbl");
+    break;
+  }
+  
+  JsonBuilderI->Array_Start("rgb_pal");// Class name
+    JsonBuilderI->Level_Start();
+
+      JsonBuilderI->Array_Start(colourtype);
+      RgbTypeColor c;
+      int16_t pixel_position = -2;
+      for (uint16_t i= 0; i < length;i++){
+        if(i < pal_length){
+          c = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,i,&pixel_position);
+        }else{      
+          c = RgbColor(0,0,0);//default black
+        }
+        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+      }
+      JsonBuilderI->Array_End();
+
+    JsonBuilderI->Level_End();
+  JsonBuilderI->Array_End();
+  
 }
 
 // Send updated data for sliders
@@ -257,17 +308,92 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
 
 
 
+void mInterfaceLight::Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request){
+        
+  JsonBuilderI->Start();  
+  JsonBuilderI->Array_Start("rgb_palsel_draw");// Class name
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->AddKey("ihr");           // function
+        JsonBuilderI->AppendBuffer("\"");
+          WebAppend_Root_Draw_PaletteSelect();
+        JsonBuilderI->AppendBuffer("\"");
+      JsonBuilderI->Level_End();
+    JsonBuilderI->Array_End();
+  JsonBuilderI->End();
+
+  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+
+} //end function
+
 
 void mInterfaceLight::WebAppend_Root_Draw_Table(){
 
   WebAppend_Root_Draw_RGBLive();
   // if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
-    //WebAppend_Root_Draw_RGBPalette();
+    WebAppend_Root_Draw_RGBPalette();
   // }
-  // WebAppend_Root_Draw_PaletteSelect_Placeholder();
+  WebAppend_Root_Draw_PaletteSelect_Placeholder();
   // pCONT_web->WebAppend_Root_Draw_Table_dList(8,"rgb_table", kTitle_TableTitles_Root);
   
 }
+
+
+
+void mInterfaceLight::WebAppend_Root_Draw_RGBPalette(){
+  char listheading[30];
+  BufferWriterI->Append_P("%s",PSTR("{t}"));
+    BufferWriterI->Append_P(PSTR("<tr><td> Palette: <span class='rgb_pal_title'>?</span></td></tr>"));
+    BufferWriterI->Append_P(PSTR("<tr><td><div class='rgb_pal'></div></td></tr>"));       
+  BufferWriterI->Append_P("%s",PSTR("{t2}"));
+}
+
+
+void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect_Placeholder(){
+  BufferWriterI->Append_P(PSTR("{t}"));
+  BufferWriterI->Append_P(PSTR("<tr><div class='%s';></div></tr>"),"rgb_palsel_draw");
+  BufferWriterI->Append_P(PSTR("{t2}"));
+}
+
+
+void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
+  char listheading[30];
+  // BufferWriterI->Append_P("\"%s\":[{\"ihr\":\"","rgb_palsel_draw");  
+  
+      // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"<b>Palette List Select</b>","");
+
+  // BufferWriterI->Append_P(PSTR("<tr><td><b>Palette List Select</b></td></tr>"));
+  BufferWriterI->Append_P(PSTR("<p><form>"));
+    BufferWriterI->Append_P(PSTR("<select name='pal_set' id='pal_set' onchange='send_value(id);'>"));
+      BufferWriterI->Append_P(PSTR("<optgroup label='User Editable'>"));
+      
+      char name_ctr[20];
+      
+      for (uint8_t row_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID; row_id < pCONT_iLight->PALETTELIST_VARIABLE_USER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+        BufferWriterI->Append_P(
+          PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
+          row_id, 
+          pCONT_iLight->GetPaletteFriendlyNameByID(row_id,name_ctr,20)
+        );
+      }
+      BufferWriterI->Append_P(PSTR("</optgroup>"));
+      BufferWriterI->Append_P(PSTR("<optgroup label='Preset'>"));
+      for (uint8_t row_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_LENGTH_ID; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+        BufferWriterI->Append_P(
+          PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
+          row_id, 
+          pCONT_iLight->GetPaletteFriendlyNameByID(row_id)
+        );
+      }
+      BufferWriterI->Append_P(PSTR("</optgroup>"));
+    BufferWriterI->Append_P(PSTR("</select>"));
+    // BufferWriterI->Append_P(PSTR("<br><br>"));
+    // BufferWriterI->Append_P(PSTR("<input type='submit' value='Set'>"));
+  BufferWriterI->Append_P(PSTR("</form></p>"));
+
+
+}
+
+
 
 
 void mInterfaceLight::WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest *request)
@@ -318,6 +444,13 @@ void mInterfaceLight::WebPage_Root_AddHandlers(){
   pCONT_web->pWebServer->on(WEB_HANDLE_LIVEPIXELS_SHARED_JSON, [this](AsyncWebServerRequest *request){
     WebSend_JSON_RootPage_LiveviewPixels(request);     
   });
+  // pCONT_web->pWebServer->on(WEB_HANDLE_JSON_LIVEPIXELS, [this](AsyncWebServerRequest *request){
+  //   WebSend_JSON_RootPage_LiveviewPixels(request); 
+  // });
+  pCONT_web->pWebServer->on("/draw/palette_selector.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+    Web_Root_Draw_PaletteSelect(request);
+  });
+
 
 
   // pCONT_web->pWebServer->on("/draw/palette_selector.json", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -534,3 +667,4 @@ arg_value = map(arg_value, 0,100, 0,255);
 
 
 #endif
+#endif // USE_MODULE_CORE_WEBSERVER

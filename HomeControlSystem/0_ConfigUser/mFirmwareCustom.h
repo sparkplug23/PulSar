@@ -24,7 +24,7 @@
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
-// #define DEVICE_RGBROOF                                 // BETA
+//#define DEVICE_RGBROOF                                 // BETA
 // #define DEVICE_RGBDELL
 // #define DEVICE_RGBCRYSTAL1
 // #define DEVICE_RGBCRYSTAL2
@@ -33,7 +33,8 @@
 // #define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
-// #define DEVICE_RGBBEDLIGHT                             // BETA
+#define DEVICE_RGBBEDLIGHT                             // BETA
+//#define DEVICE_RGBBEDLIGHT_TEST                             // BETA
 // #define DEVICE_RGBDESK
 // #define DEVICE_RGBCOOKER
 //  #define DEVICE_RGBUTILITY
@@ -348,9 +349,13 @@
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
+  // #define ENABLE_BUG_TRACING
+
+  // #define DISABLE_WEBSERVER
+
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
 
-  #define STRIP_SIZE_MAX 50
+  #define STRIP_SIZE_MAX 50//*15
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -361,6 +366,10 @@
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
+  #define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
@@ -464,18 +473,22 @@
 
   // Need to add protection to not load templates if invalid
 
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":50,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":1,\"" D_JSON_RATE "\":2,\"" D_JSON_ORDER "\":\"Random\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{\"" D_JSON_HSB "\":[120,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS     "\":0"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
+    // "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_MODE             "\":\"" "Flasher" "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
+    "\"" D_JSON_BRIGHTNESS       "\":0"
   "}";
+
+
 #endif
 
 
@@ -585,6 +598,57 @@
 #ifdef DEVICE_RGBBEDLIGHT // for PWM dev
   #define DEVICENAME_CTR          "rgbbedlight"
   #define DEVICENAME_FRIENDLY_CTR "H801 BedLight"
+  
+  // #define ENABLE_FUNCTION_DEBUG  
+
+  #define USE_SERIAL_ALTERNATE_TX
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+   
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_PWM
+  
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define DISABLE_TEMPORARY_RGBANIMATOR
+  // #define USE_MODULE_LIGHTS_PWM
+  
+  #define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+    "{"
+      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+      "\"" D_JSON_STRIP_SIZE     "\":50,"
+      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+      "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
+      "\"" D_JSON_MODE           "\":\"Flasher\","
+      "\"" D_JSON_BRIGHTNESS     "\":99"
+    "}";
+    
+    #define ESP8266
+
+#endif
+
+
+#ifdef DEVICE_RGBBEDLIGHT_TEST // for PWM dev
+  #define DEVICENAME_CTR          "rgbbedlight_test"
+  #define DEVICENAME_FRIENDLY_CTR "H801 BedLight TEST"
   
   // #define ENABLE_FUNCTION_DEBUG  
 

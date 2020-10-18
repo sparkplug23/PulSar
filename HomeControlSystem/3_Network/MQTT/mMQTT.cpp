@@ -162,7 +162,7 @@ void mMQTT::MqttSaveSettings(void)
   //   pCONT_set->Settings.mqtt_host, pCONT_set->Settings.mqtt_port, pCONT_set->Settings.mqtt_client, pCONT_set->Settings.mqtt_user, pCONT_set->Settings.mqtt_topic, pCONT_set->Settings.mqtt_fulltopic);
 
 }
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 
 /*before progmem topic postfix
 RAM:   [=====     ]  47.8% (used 39188 bytes from 81920 bytes)
@@ -886,12 +886,12 @@ int8_t mMQTT::Tasker(uint8_t function){
             // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer2.topic.len,  data_buffer2.topic.ctr);
             // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer2.payload.len,data_buffer2.payload.ctr);
             
-            Serial.println("DeserializationError BEFORE"); Serial.flush();
+            // Serial.println("DeserializationError BEFORE"); Serial.flush();
 
             StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
             DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
 
-            Serial.println("DeserializationError AFTER"); Serial.flush();
+            // Serial.println("DeserializationError AFTER"); Serial.flush();
 
             if(error){
               AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError")); Serial.flush();
@@ -903,17 +903,12 @@ int8_t mMQTT::Tasker(uint8_t function){
             }
 
             //old method for now
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "USING OLD JSON METHOD"));
-            if(pCONT->Tasker_Interface(FUNC_JSON_COMMAND)){
-              AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "NEW METHOD SUCCESS"));
-            }else{
-              AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
-            }
-
-
-
-
-
+            // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "USING OLD JSON METHOD"));
+            // if(pCONT->Tasker_Interface(FUNC_JSON_COMMAND)){
+            //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "NEW METHOD SUCCESS"));
+            // }else{
+            //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
+            // }
 
             AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer2.isserviced);
           }
@@ -963,14 +958,14 @@ flag_uptime_reached_reduce_frequency = true;
     // case FUNC_MQTT_CHECK_REDUNCTION_LEVEL:
 
     // break;    
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS:
       // pCONT_web->WSBufferAppend_P(request, HTTP_BTN_MENU_MQTT);
     break;
     case FUNC_WEB_ADD_HANDLER:
       // pCONT_web->pWebServer->on("/" WEB_HANDLE_MQTT, [this](){HandleMqttConfiguration(); });
     break;
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 
 
   }

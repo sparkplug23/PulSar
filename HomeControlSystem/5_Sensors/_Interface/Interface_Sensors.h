@@ -7,8 +7,8 @@
 
 
 // #include <ArduinoJson.h>
-// #include "1_TaskerManager/mInterfaceController.h"
-// class mInterfaceController;
+// #include "1_TaskerManager/mTaskerManager.h"
+// class mTaskerManager;
 
 // #ifdef ESP32
 // #define SERIAL_NEXTION_RX Serial2 //only in 32
@@ -172,8 +172,8 @@
 //     void Tasker(uint8_t function);
 //     void init(void);
 
-//     mInterfaceController *mcl = NULL;
-//     void init_object(mInterfaceController* mcl);
+//     mTaskerManager *mcl = NULL;
+//     void init_object(mTaskerManager* mcl);
 
 //     uvoid parse_JSONCommand();
 

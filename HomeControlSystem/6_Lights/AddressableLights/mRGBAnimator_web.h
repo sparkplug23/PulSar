@@ -2,6 +2,9 @@
 #ifndef rgb_web_H
 #define rgb_web_H
 
+
+#ifdef USE_MODULE_CORE_WEBSERVER
+
 #include "stdint.h"
 
 #include <ESPAsyncTCP.h>
@@ -41,28 +44,16 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_RGB_ANIMATION_MIXER_EDITOR_CTR) D_BUTTON_NAME_RGB_
   
   #define MAX_LIVE_LEDS 50
 
-const char HTTP_FORM_RGB_SELECTOR1[] PROGMEM =
-  "<fieldset><legend><b>&nbsp;" D_COLOUR_PICKER "&nbsp;</b>"
-  "</legend><form method='get' action='" WEB_HANDLE_RGB_COLOUR_PALETTE_EDITOR "'>";
-const char HTTP_FORM_RGB_LOAD_PIXELS[] PROGMEM =
-  "<button name='loadpixels' type='submit' class='buttonh bora'>" "Load Palette" "</button>";
+// const char HTTP_FORM_RGB_SELECTOR1[] PROGMEM =
+//   "<fieldset><legend><b>&nbsp;" D_COLOUR_PICKER "&nbsp;</b>"
+//   "</legend><form method='get' action='" WEB_HANDLE_RGB_COLOUR_PALETTE_EDITOR "'>";
+// const char HTTP_FORM_RGB_LOAD_PIXELS[] PROGMEM =
+//   "<button name='loadpixels' type='submit' class='buttonh bora'>" "Load Palette" "</button>";
 
 #define D_RGB_COLOUR_SELECTOR "Colour Palette Selector"
 
 #define D_RGB_CONTROLS "Lights Settings"
 
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR)  
-  "{o1}%d'>%s{o2}";   
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM)
-  "{o1}%d'>%d{o2}";
-
-
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_NUM)  
-  "{o1}%d'>%d{o2}";  
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_CTR)  
-  "{o1}%d'>%s{o2}";   
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)  
-  "{o1}%s'>%s{o2}";   
  
   const char kTitle_ListHeadings_Mixer_Editor[] PROGMEM = 
     "Pixels updated (%)" "|" 
@@ -77,13 +68,13 @@ DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)
 
   const char kTitle_TableTitles_Root[] PROGMEM = 
     "Animation Status" "|" 
+    "Lights Auto Off Timer" "|" 
     "Update Rate/Speed" "|" 
     "Update Amount" "|" 
     "Pattern" "|" 
     "Mode" "|" 
     "Flasher Function" "|"
-    "Lighting Power" "|" 
-    "Lights Auto Off Timer";
+    "Lighting Power" ;
 
 #define WEB_HANDLER_SCRIPT_RGBLIGHTSETTINGS_DATA_FETCHER "/script/rgblightsettings_data_fetcher_functions.js"
 
@@ -111,16 +102,16 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_START_VARIABLE)
   "<form method='get' action='%s'>" //action
   "<p></p>";
 
-const char kTitle_ListHeadings[] PROGMEM = 
-    "Pixels updated (%%)" "|" 
-    "Pixel Order" "|" 
-    "Change Rate (secs)" "|" 
-    "Change Period (secs)" "|" 
-    "Transition Method" "|" 
-    "Mode" "|" 
-    "Palette" "|" 
-    "Flasher" "|" 
-    "Mixer (Running ID)";
+// const char kTitle_ListHeadings[] PROGMEM = 
+//     "Pixels updated (%%)" "|" 
+//     "Pixel Order" "|" 
+//     "Change Rate (secs)" "|" 
+//     "Change Period (secs)" "|" 
+//     "Transition Method" "|" 
+//     "Mode" "|" 
+//     "Palette" "|" 
+//     "Flasher" "|" 
+//     "Mixer (Running ID)";
 
     #define WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR "pal_user_name"
     
@@ -192,3 +183,4 @@ int main() {
 */
 
 
+#endif // USE_MODULE_CORE_WEBSERVER

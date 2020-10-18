@@ -1,7 +1,7 @@
 
 #include "0_ConfigUser/mUserConfig.h"
 
-#ifdef USE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 #include "mWebServer.h"
 

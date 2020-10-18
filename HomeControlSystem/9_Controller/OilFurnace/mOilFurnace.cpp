@@ -362,7 +362,10 @@ int8_t mOilFurnace::Tasker(uint8_t function){
   /************
    * WEBPAGE SECTION * 
   *******************/
-  //return Tasker_Web(function);
+  //
+  #ifdef USE_MODULE_CORE_WEBSERVER
+  return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
   switch(function){
 
     // case FUNC_WEB_SHOW_PARAMETERS:{

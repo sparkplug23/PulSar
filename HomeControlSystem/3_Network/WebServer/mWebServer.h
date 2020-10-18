@@ -3,6 +3,8 @@
 
 #include "0_ConfigUser/mUserConfig.h"
 
+#ifdef USE_MODULE_CORE_WEBSERVER
+
 #ifdef DEBUG_WEBSERVER_MEMORY
 typedef struct  FREEMEM_HANDLER{
   uint16_t      bytes_used;
@@ -12,7 +14,6 @@ typedef struct  FREEMEM_HANDLER{
 #endif
 
 
-#ifdef USE_WEBSERVER
 
 #include <Arduino.h>
 #include "2_CoreSystem/Logging/mLogging.h"
@@ -21,7 +22,7 @@ typedef struct  FREEMEM_HANDLER{
 #include "html_ui.h"
 
 #include <ArduinoJson.h>
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"
@@ -88,39 +89,21 @@ DEFINE_PGM_CTR(PM_WEBURL_PAGE_INFO_DRAW_TABLE)  D_WEBURL_PAGE_INFO_DRAW_TABLE;
 
 
 
-/*
- * favicon
- */
-const uint8_t favicon[] PROGMEM = {
-  0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x10, 0x10, 0x00, 0x00, 0x01, 0x00,
-  0x18, 0x00, 0x86, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x89, 0x50,
-  0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48,
-  0x44, 0x52, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x08, 0x06,
-  0x00, 0x00, 0x00, 0x1F, 0xF3, 0xFF, 0x61, 0x00, 0x00, 0x00, 0x4D, 0x49,
-  0x44, 0x41, 0x54, 0x38, 0x8D, 0x63, 0xFC, 0xFF, 0xFF, 0x3F, 0x03, 0xB1,
-  0x80, 0xD1, 0x9E, 0x01, 0x43, 0x31, 0x13, 0xD1, 0xBA, 0x71, 0x00, 0x8A,
-  0x0D, 0x60, 0x21, 0xA4, 0x00, 0xD9, 0xD9, 0xFF, 0x0F, 0x32, 0x30, 0x52,
-  0xDD, 0x05, 0xB4, 0xF1, 0x02, 0xB6, 0xD0, 0xA6, 0x99, 0x0B, 0x68, 0x1F,
-  0x0B, 0xD8, 0x42, 0x9E, 0xAA, 0x2E, 0xA0, 0xD8, 0x00, 0x46, 0x06, 0x3B,
-  0xCC, 0xCC, 0x40, 0xC8, 0xD9, 0x54, 0x75, 0x01, 0xE5, 0x5E, 0x20, 0x25,
-  0x3B, 0x63, 0x03, 0x00, 0x3E, 0xB7, 0x11, 0x5A, 0x8D, 0x1C, 0x07, 0xB4,
-  0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-};
 
-const char HTTP_DEVICE_CONTROL[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\"&o=%d\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
-//const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\"&%s=%d\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
-const char HTTP_DEVICE_STATE[] PROGMEM = "<td style='width:%d{c}%s;font-size:%dpx'>%s</div></td>";  // {c} = %'><div style='text-align:center;font-weight:
+// const char HTTP_DEVICE_CONTROL[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\"&o=%d\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
+// //const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\"&%s=%d\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
+// const char HTTP_DEVICE_STATE[] PROGMEM = "<td style='width:%d{c}%s;font-size:%dpx'>%s</div></td>";  // {c} = %'><div style='text-align:center;font-weight:
 
-const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\\\"&%s=%d\\\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
+// const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\\\"&%s=%d\\\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
 const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE[] PROGMEM = 
   "<td style='width:%d%%'><button class='%s' onclick='la(\\\"&%s=%d\\\");'>%s%s</button></td>";  // ?o is related to WebGetArg(request,"o", tmp, sizeof(tmp));
 const char HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE_IHR[] PROGMEM = 
   "{sw}%d%%'{bc}'%s{oc}la(\\\"&%s=%d\\\");'>%s%s{bc2}";  // {bc} "><button class="
 
-DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_HANDLE_IHR)   "{sw}%d%%'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
+// DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_HANDLE_IHR)   "{sw}%d%%'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
 
-DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR)   
-"<td{sw1}%d%%'{cs}%s'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
+// DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR)   
+// "<td{sw1}%d%%'{cs}%s'{bc}'%s'{id}%s'{va}%s'>%s%s{bc2}";
 
 DEFINE_PGM_CTR(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2)   
 "<td{sw1}%d%%'{cs}%s'{bc}'%s'{djk}%s'{va}%s'>%s%s{bc2}";

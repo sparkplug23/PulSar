@@ -1,7 +1,7 @@
 #include "mPWMLight.h"
 
 #ifdef USE_MODULE_LIGHTS_PWM
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 
 int8_t mPWMLight::Tasker_Web(uint8_t function){
 
@@ -343,18 +343,18 @@ void mPWMLight::WebAppend_Root_Status_Table(){
 // //   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
 // //   return tcolor;
 // // }
-// // uint32_t mPWMLight::WebColorFromHsbColour(RgbColor rgb)
+// // uint32_t mPWMLight::WebColorFromColourType(RgbColor rgb)
 // // {
 // //   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
 // //   return tcolor;
 // // }
-// // uint32_t mPWMLight::WebColorFromHsbColour(HsbColor hsb)
+// // uint32_t mPWMLight::WebColorFromColourType(HsbColor hsb)
 // // {
 // //   RgbColor rgb = RgbColor(hsb);
 // //   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
 // //   return tcolor;
 // // }
-// // uint32_t mPWMLight::WebColorFromHsbColour(RgbwColor rgbw)
+// // uint32_t mPWMLight::WebColorFromColourType(RgbwColor rgbw)
 // // {
 // //   uint32_t tcolor = (rgbw.R << 16) | (rgbw.G << 8) | rgbw.B;
 // //   return tcolor;
@@ -653,7 +653,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
 //   //         // from mapped value to real value
-//   //         arg_value = pixels_to_update_as_percentage_map[arg_value];
+//   //         arg_value = PROGMEM pixels_to_update_as_percentage_map[arg_value];
 //   //         animation.transition.pixels_to_update_as_percentage.val = constrain(arg_value,0,100);
 //   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
 //   //       break;
@@ -664,12 +664,12 @@ void mPWMLight::WebCommand_Parse(void)
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
-//   //         animation.transition.rate_ms.val = rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
+//   //         animation.transition.rate_ms.val = PROGMEM rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
 //   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms.val);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
-//   //         animation.transition.time_ms.val = time_map_secs[arg_value]*1000; //seconds to milliseconds
+//   //         animation.transition.time_ms.val = PROGMEM rate_map_secs[arg_value]*1000; //seconds to milliseconds
 //   //         // If period > rate, increase period to rate
 //   //         animation.transition.time_ms.val = animation.transition.time_ms.val>animation.transition.rate_ms.val?animation.transition.rate_ms.val:animation.transition.time_ms.val;
 //   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val); 
@@ -877,7 +877,7 @@ void mPWMLight::WebCommand_Parse(void)
 // //     switch(palettelist.ptr->flags.fMapIDs_Type){
 // //       case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
 // //         snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-// //           WebColorFromHsbColour(set_colours[row_id]),
+// //           WebColorFromColourType(set_colours[row_id]),
 // //           row_id+1, //to show 1-20 pixel number
 // //           GetColourMapNamebyID(colour_selected_id[row_id]),// "??"
 // //           ""
@@ -890,7 +890,7 @@ void mPWMLight::WebCommand_Parse(void)
 // //         HsbColor colour = GetColourFromPalette(palettelist.ptr,row_id,&pixel_num);
 
 // //         snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-// //           WebColorFromHsbColour(colour),
+// //           WebColorFromColourType(colour),
 // //           row_id+1,//to show 1-20 pixel number
 // //           GetColourMapNameNearestbyColour(colour),// "??"
 // //           "*"
@@ -993,8 +993,8 @@ void mPWMLight::WebCommand_Parse(void)
 //    * */
 
 //   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-//                                                   sizeof(pixels_to_update_as_percentage_map),
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(PROGMEM pixels_to_update_as_percentage_map,
+//                                                   sizeof(PROGMEM pixels_to_update_as_percentage_map),
 //                                                   animation.transition.pixels_to_update_as_percentage.val
 //                                                  );
 
@@ -1003,8 +1003,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.pixels_to_update_as_percentage.val,
 //     perc_index,
-//     pixels_to_update_as_percentage_map[perc_index],
-//     sizeof(pixels_to_update_as_percentage_map)
+//     PROGMEM pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(PROGMEM pixels_to_update_as_percentage_map)
 //   );
 
 //   if(perc_index<0){
@@ -1012,28 +1012,28 @@ void mPWMLight::WebCommand_Parse(void)
 //     perc_index = 0;// send 0
 //   }
   
-//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-//                                                   sizeof(rate_map_secs),
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.rate_ms.val/1000
 //                                                  );
                                          
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.rate_ms.val/1000,
 //     rate_index,
-//     rate_map_secs[rate_index],
-//     sizeof(rate_map_secs)
+//     PROGMEM rate_map_secs[rate_index],
+//     sizeof(PROGMEM rate_map_secs)
 //   );
 
-//   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
-//                                                   sizeof(time_map_secs),
+//   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.time_ms.val/1000
 //                                                  );
                                             
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.time_ms.val/1000,
 //     time_index,
-//     time_map_secs[time_index],
-//     sizeof(time_map_secs)
+//     PROGMEM rate_map_secs[time_index],
+//     sizeof(PROGMEM rate_map_secs)
 //   );
 
 
@@ -1090,7 +1090,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   // //   switch(palettelist.ptr->flags.fMapIDs_Type){
 //   // //     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
 //   // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-//   // //         WebColorFromHsbColour(set_colours[row_id]),
+//   // //         WebColorFromColourType(set_colours[row_id]),
 //   // //         row_id+1, //to show 1-20 pixel number
 //   // //         GetColourMapNamebyID(colour_selected_id[row_id]),// "??"
 //   // //         ""
@@ -1103,7 +1103,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   // //       HsbColor colour = GetColourFromPalette(palettelist.ptr,row_id,&pixel_num);
 
 //   // //       snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-//   // //         WebColorFromHsbColour(colour),
+//   // //         WebColorFromColourType(colour),
 //   // //         row_id+1,//to show 1-20 pixel number
 //   // //         GetColourMapNameNearestbyColour(colour),// "??"
 //   // //         "*"
@@ -1218,8 +1218,8 @@ void mPWMLight::WebCommand_Parse(void)
 //    * */
 
 //   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-//                                                   sizeof(pixels_to_update_as_percentage_map),
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(PROGMEM pixels_to_update_as_percentage_map,
+//                                                   sizeof(PROGMEM pixels_to_update_as_percentage_map),
 //                                                   animation.transition.pixels_to_update_as_percentage.val
 //                                                  );
 
@@ -1228,8 +1228,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.pixels_to_update_as_percentage.val,
 //     perc_index,
-//     pixels_to_update_as_percentage_map[perc_index],
-//     sizeof(pixels_to_update_as_percentage_map)
+//     PROGMEM pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(PROGMEM pixels_to_update_as_percentage_map)
 //   );
 
 //   if(perc_index<0){
@@ -1237,28 +1237,28 @@ void mPWMLight::WebCommand_Parse(void)
 //     perc_index = 0;// send 0
 //   }
   
-//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-//                                                   sizeof(rate_map_secs),
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.rate_ms.val/1000
 //                                                  );
                                          
 //   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //   //   animation.transition.rate_ms.val/1000,
 //   //   rate_index,
-//   //   rate_map_secs[rate_index],
-//   //   sizeof(rate_map_secs)
+//   //   PROGMEM rate_map_secs[rate_index],
+//   //   sizeof(PROGMEM rate_map_secs)
 //   // );
 
-//   // uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
-//   //                                                 sizeof(time_map_secs),
+//   // uint8_t time_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//   //                                                 sizeof(PROGMEM rate_map_secs),
 //   //                                                 animation.transition.time_ms.val/1000
 //   //                                                );
                                             
 //   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //   //   animation.transition.time_ms.val/1000,
 //   //   time_index,
-//   //   time_map_secs[time_index],
-//   //   sizeof(time_map_secs)
+//   //   PROGMEM rate_map_secs[time_index],
+//   //   sizeof(PROGMEM rate_map_secs)
 //   // );
 
 
@@ -1375,11 +1375,11 @@ void mPWMLight::WebCommand_Parse(void)
 //   if (pCONT_web->pWebServer->hasParam("ra")) {
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"pa\")"));
 //     pCONT_web->WSContentBegin(200, CT_PLAIN);
-//     for (uint8_t row_id = 0; row_id < sizeof(rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//     for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //       BufferWriterI->Append_P(
 //         HTTP_MODULE_TEMPLATE_REPLACE3_NUM, 
 //         row_id, 
-//         rate_map_secs[row_id]
+//         PROGMEM rate_map_secs[row_id]
 //       );
 //     }
 //     pCONT_web->WSContentEnd();
@@ -1389,11 +1389,11 @@ void mPWMLight::WebCommand_Parse(void)
 //   if (pCONT_web->pWebServer->hasParam("pr")) {
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"pr\")"));
 //     pCONT_web->WSContentBegin(200, CT_PLAIN);
-//     for (uint8_t row_id = 0; row_id < sizeof(time_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//     for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //       BufferWriterI->Append_P(
 //         HTTP_MODULE_TEMPLATE_REPLACE3_NUM, 
 //         row_id, 
-//         time_map_secs[row_id]
+//         PROGMEM rate_map_secs[row_id]
 //       );
 //     }
 //     pCONT_web->WSContentEnd();
@@ -1497,16 +1497,16 @@ void mPWMLight::WebCommand_Parse(void)
 //    * */
 
 //   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-//                                                   sizeof(pixels_to_update_as_percentage_map),
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(PROGMEM pixels_to_update_as_percentage_map,
+//                                                   sizeof(PROGMEM pixels_to_update_as_percentage_map),
 //                                                   animation.transition.pixels_to_update_as_percentage
 //                                                  );
 
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.pixels_to_update_as_percentage,
 //     perc_index,
-//     pixels_to_update_as_percentage_map[perc_index],
-//     sizeof(pixels_to_update_as_percentage_map)
+//     PROGMEM pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(PROGMEM pixels_to_update_as_percentage_map)
 //   );
 
 //   if(perc_index<0){
@@ -1515,8 +1515,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   }
 
   
-//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-//                                                   sizeof(rate_map_secs),
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.rate_ms/1000
 //                                                  );
 
@@ -1524,8 +1524,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.rate_ms/1000,
 //     rate_index,
-//     rate_map_secs[rate_index],
-//     sizeof(rate_map_secs)
+//     PROGMEM rate_map_secs[rate_index],
+//     sizeof(PROGMEM rate_map_secs)
 //   );
 
 
@@ -1561,7 +1561,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   BufferWriterI->Append_P(PSTR("<table>"));
 //   for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
 //     snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%s</font>"),
-//       WebColorFromHsbColour(preset_colour_map[COLOUR_MAP_WHITE_ID]),
+//       WebColorFromColourType(preset_colour_map[COLOUR_MAP_WHITE_ID]),
 //       pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), row_id, kTitle_ListHeadings_Mixer_Editor)
 //     );
 //     AddLog_P(LOG_LEVEL_TEST,PSTR("kTitle=%s"),pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), row_id, kTitle_ListHeadings_Mixer_Editor));
@@ -1943,7 +1943,7 @@ void mPWMLight::WebCommand_Parse(void)
 // //     switch(palettelist.ptr->flags.fMapIDs_Type){
 // //       case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
 // //         snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("{f1}#%06x'>%02d %s%s{f2}"),
-// //           WebColorFromHsbColour(set_colours[row_id]),
+// //           WebColorFromColourType(set_colours[row_id]),
 // //           row_id+1, //to show 1-20 pixel number
 // //           GetColourMapNamebyID(colour_selected_id[row_id], buffer),// "??"
 // //           ""
@@ -1956,7 +1956,7 @@ void mPWMLight::WebCommand_Parse(void)
 // //         HsbColor colour = GetColourFromPalette(palettelist.ptr,row_id,&pixel_num);
 
 // //         snprintf_P(colour_title_ctr, sizeof(colour_title_ctr), PSTR("<font color='#%06x'>%02d %s%s</font>"),
-// //           WebColorFromHsbColour(colour),
+// //           WebColorFromColourType(colour),
 // //           row_id+1,//to show 1-20 pixel number
 // //           GetColourMapNameNearestbyColour(colour, buffer),// "??"
 // //           "*"
@@ -2058,10 +2058,10 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_Start();
 //       JsonBuilderI->AddKey("eihr"); // function
 //         JsonBuilderI->AppendBuffer("\"");      
-//         for (uint8_t row_id = 0; row_id < sizeof(pixels_to_update_as_percentage_map); row_id++) {  
+//         for (uint8_t row_id = 0; row_id < sizeof(PROGMEM pixels_to_update_as_percentage_map); row_id++) {  
 //           sprintf(buffer,"%d (%d %%)",
-//             GetPixelsToUpdateAsNumberFromPercentage(pixels_to_update_as_percentage_map[row_id]),
-//             pixels_to_update_as_percentage_map[row_id]
+//             GetPixelsToUpdateAsNumberFromPercentage(PROGMEM pixels_to_update_as_percentage_map[row_id]),
+//             PROGMEM pixels_to_update_as_percentage_map[row_id]
 //           );
 //           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
 //             row_id, buffer
@@ -2132,8 +2132,8 @@ void mPWMLight::WebCommand_Parse(void)
 //    * */
 
 //   // find nearest percentage value from its map, get the index (ie 100% is the 10th index)
-//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(pixels_to_update_as_percentage_map,
-//                                                   sizeof(pixels_to_update_as_percentage_map),
+//   int16_t perc_index = mSupport::FindNearestValueIndexUInt8(PROGMEM pixels_to_update_as_percentage_map,
+//                                                   sizeof(PROGMEM pixels_to_update_as_percentage_map),
 //                                                   animation.transition.pixels_to_update_as_percentage.val
 //                                                  );
 
@@ -2142,8 +2142,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.pixels_to_update_as_percentage.val,
 //     perc_index,
-//     pixels_to_update_as_percentage_map[perc_index],
-//     sizeof(pixels_to_update_as_percentage_map)
+//     PROGMEM pixels_to_update_as_percentage_map[perc_index],
+//     sizeof(PROGMEM pixels_to_update_as_percentage_map)
 //   );
 
 //   if(perc_index<0){
@@ -2153,8 +2153,8 @@ void mPWMLight::WebCommand_Parse(void)
 
   
   
-//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(rate_map_secs,
-//                                                   sizeof(rate_map_secs),
+//   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.rate_ms.val/1000
 //                                                  );
 
@@ -2162,14 +2162,14 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.rate_ms.val/1000,
 //     rate_index,
-//     rate_map_secs[rate_index],
-//     sizeof(rate_map_secs)
+//     PROGMEM rate_map_secs[rate_index],
+//     sizeof(PROGMEM rate_map_secs)
 //   );
 
 
   
-//   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(time_map_secs,
-//                                                   sizeof(time_map_secs),
+//   uint8_t time_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
+//                                                   sizeof(PROGMEM rate_map_secs),
 //                                                   animation.transition.time_ms.val/1000
 //                                                  );
 
@@ -2177,8 +2177,8 @@ void mPWMLight::WebCommand_Parse(void)
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
 //     animation.transition.time_ms.val/1000,
 //     time_index,
-//     time_map_secs[time_index],
-//     sizeof(time_map_secs)
+//     PROGMEM rate_map_secs[time_index],
+//     sizeof(PROGMEM rate_map_secs)
 //   );
 
 //     pCONT_web->send_mP(request, 200, CONTENT_TYPE_TEXT_JAVASCRIPT_ID, HTTP_SCRIPT_MODULE_TEMPLATEb,
@@ -2213,10 +2213,10 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_Start();
 //       JsonBuilderI->AddKey("eihr"); // function
 //         JsonBuilderI->AppendBuffer("\"");      
-//         for (uint8_t row_id = 0; row_id < sizeof(pixels_to_update_as_percentage_map); row_id++) {  
+//         for (uint8_t row_id = 0; row_id < sizeof(PROGMEM pixels_to_update_as_percentage_map); row_id++) {  
 //           sprintf(buffer,"%d (%d %%)",
-//             GetPixelsToUpdateAsNumberFromPercentage(pixels_to_update_as_percentage_map[row_id]),
-//             pixels_to_update_as_percentage_map[row_id]
+//             GetPixelsToUpdateAsNumberFromPercentage(PROGMEM pixels_to_update_as_percentage_map[row_id]),
+//             PROGMEM pixels_to_update_as_percentage_map[row_id]
 //           );
 //           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
 //             row_id, buffer
@@ -2248,10 +2248,10 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");      
-//         for (uint8_t row_id = 0; row_id < sizeof(rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//         for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM, 
 //             row_id, 
-//             rate_map_secs[row_id]
+//             PROGMEM rate_map_secs[row_id]
 //           );
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
@@ -2264,10 +2264,10 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");    
-//         for (uint8_t row_id = 0; row_id < sizeof(time_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//         for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM, 
 //             row_id, 
-//             time_map_secs[row_id]
+//             PROGMEM rate_map_secs[row_id]
 //           );
 //         }
 //         JsonBuilderI->AppendBuffer("\"");

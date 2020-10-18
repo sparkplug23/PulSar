@@ -7,8 +7,8 @@
 
 
 #include <ArduinoJson.h>
-#include "1_TaskerManager/mInterfaceController.h"
-class mInterfaceController;
+#include "1_TaskerManager/mTaskerManager.h"
+class mTaskerManager;
 
 #ifdef ESP32
 #define SERIAL_NEXTION_RX Serial2 //only in 32

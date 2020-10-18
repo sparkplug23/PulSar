@@ -2133,9 +2133,9 @@ void mSupport::Every250mSeconds(void)
       if (pCONT_set->ota_state_flag <= 0) {
 
 // DEBUG_LINE_HERE;
-#ifdef USE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
         // if (pCONT_set->Settings.webserver) //StopWebserver();
-#endif  // USE_WEBSERVER
+#endif  // USE_MODULE_CORE_WEBSERVER
 // #ifdef USE_ARILUX_RF
 //         AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
 // #endif  // USE_ARILUX_RF
@@ -2350,7 +2350,7 @@ void mSupport::Every250mSeconds(void)
 //       StartMdns();
 // #endif  // USE_DISCOVERY
 
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //       if (Settings.webserver) {
 
 // #ifdef ESP8266
@@ -2374,7 +2374,7 @@ void mSupport::Every250mSeconds(void)
 // #ifdef USE_EMULATION
 //     if (Settings.flag2.emulation) { UdpConnect(); }
 // #endif  // USE_EMULATION
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 
 // #ifdef USE_DEVICE_GROUPS
 //       DeviceGroupsStart();
@@ -3350,7 +3350,7 @@ uint16_t mSupport::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t i
 // #ifdef USE_MQTT_TLS
 //   feature_drv1 |= 0x00000040;  // sonoff.ino
 // #endif
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //   feature_drv1 |= 0x00000080;  // xdrv_02_webserver.ino
 // #endif
 // #ifdef WEBSERVER_ADVERTISE
@@ -5079,14 +5079,14 @@ void mSupport::DebugFreeMem(void)
 //     Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
 //   }
 // #endif  // USE_DEBUG_SETTING_NAMES
-// #ifdef USE_WEBSERVER
+// #ifdef USE_MODULE_CORE_WEBSERVER
 //   else if (CMND_CFGXOR == command_code) {
 //     if (XdrvMailbox.data_len > 0) {
 //       config_xor_on_set = XdrvMailbox.payload;
 //     }
 //     Response_P(S_JSON_COMMAND_NVALUE, command, config_xor_on_set);
 //   }
-// #endif  // USE_WEBSERVER
+// #endif  // USE_MODULE_CORE_WEBSERVER
 // #ifdef DEBUG_THEO
 //   else if (CMND_EXCEPTION == command_code) {
 //     if (XdrvMailbox.data_len > 0) ExceptionTest(XdrvMailbox.payload);

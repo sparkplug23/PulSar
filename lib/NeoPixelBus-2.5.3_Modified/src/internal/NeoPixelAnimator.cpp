@@ -72,8 +72,10 @@ void NeoPixelAnimator::StartAnimation(uint16_t indexAnimation,
 {
     if (indexAnimation >= _countAnimations || animUpdate == NULL)
     {
+        Serial.println("return EARLY");
         return;
     }
+        Serial.println("StartAnimation cONTINUE");
 
     if (_activeAnimations == 0)
     {

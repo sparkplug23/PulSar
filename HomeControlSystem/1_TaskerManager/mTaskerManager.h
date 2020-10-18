@@ -60,8 +60,11 @@ enum FUNCTION_RESULT_IDS{
 
 // #include "3_Network/WebServer/mWebServer.h"
 #include "ArduinoJson.h"
+
+#ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#endif //USE_MODULE_CORE_WEBSERVER
 
 
 #ifdef ESP32
@@ -86,8 +89,10 @@ enum FUNCTION_RESULT_IDS{
   #include <WiFiUdp.h>
   #define WDT_RESET() ESP.wdtFeed()
   #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
+#ifdef USE_MODULE_CORE_WEBSERVER
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif //USE_MODULE_CORE_WEBSERVER
 #endif
 
 #include "2_CoreSystem/JSON/mJSON.h"
@@ -105,7 +110,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_ENERGY_ID,
 };
 
-#define pCONT mInterfaceController::GetInstance()
+#define pCONT mTaskerManager::GetInstance()
 
 #define D_TARGET_TASKER_NONE 0
 
@@ -198,7 +203,7 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_CTR)              "mMQTT";
 DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //changing to mqtt required total rewrite
 #define pCONT_mqtt pCONT->mqt
 
-#ifdef USE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
   #include "3_Network/WebServer/mWebServer.h"
   class mWebServer;
   #define D_MODULE_NETWORK_WEBSERVER_ID 22
@@ -576,19 +581,19 @@ DEFINE_PROGMEM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_D
 
 
 
-class mInterfaceController{
+class mTaskerManager{
 
   private:
     /* Prevent others from being created */
-    mInterfaceController(mInterfaceController const& other) = delete;
-    mInterfaceController(mInterfaceController&& other) = delete;
+    mTaskerManager(mTaskerManager const& other) = delete;
+    mTaskerManager(mTaskerManager&& other) = delete;
     /* Private constructor to prevent instancing. */
-    mInterfaceController(){};
+    mTaskerManager(){};
     /* Here will be the instance stored. */
-    static mInterfaceController* instance;
+    static mTaskerManager* instance;
   public:
     // External function to get instance
-    static mInterfaceController* GetInstance();
+    static mTaskerManager* GetInstance();
 
     // HardwarePins
     mHardwarePins *mod = nullptr;
@@ -613,7 +618,7 @@ class mInterfaceController{
     mWiFi *mwif = nullptr;
     mTelemetry *mtel = nullptr;
 
-    #ifdef USE_WEBSERVER
+    #ifdef USE_MODULE_CORE_WEBSERVER
     mWebServer *mweb = nullptr;
     #endif
 

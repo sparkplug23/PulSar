@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-RgbwColor provides a color object that can be directly consumed by NeoPixelBus
+RgbcctColor provides a color object that can be directly consumed by NeoPixelBus
 
 Written by Michael C. Miller.
 
@@ -25,13 +25,12 @@ License along with NeoPixel.  If not, see
 -------------------------------------------------------------------------*/
 
 #include "RgbColor.h"
-#include "RgbcctColor.h"
 #include "HslColor.h"
 #include "HsbColor.h"
-#include "RgbwColor.h"
+#include "RgbcctColor.h"
 #include "HtmlColor.h"
 
-RgbwColor::RgbwColor(const HtmlColor& color)
+RgbcctColor::RgbcctColor(const HtmlColor& color)
 {
     uint32_t temp = color.Color;
     B = (temp & 0xff);
@@ -40,35 +39,31 @@ RgbwColor::RgbwColor(const HtmlColor& color)
     temp = temp >> 8;
     R = (temp & 0xff);
     temp = temp >> 8;
-    W = (temp & 0xff);
+    WW = (temp & 0xff);
 };
 
-RgbwColor::RgbwColor(const HslColor& color)
+RgbcctColor::RgbcctColor(const HslColor& color)
 {
     RgbColor rgbColor(color);
     *this = rgbColor;
 }
 
-RgbwColor::RgbwColor(const RgbcctColor& color)
-{
-    R = color.R;
-    G = color.G;
-    B = color.B;
-    W = color.WW;
-}
-
-RgbwColor::RgbwColor(const HsbColor& color)
+RgbcctColor::RgbcctColor(const HsbColor& color)
 {
     RgbColor rgbColor(color);
     *this = rgbColor;
 }
 
-uint8_t RgbwColor::CalculateBrightness() const
+uint8_t RgbcctColor::CalculateBrightness() const
 {
     uint8_t colorB = (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);
-    if (W > colorB)
+    if (WW > colorB)
     {
-        return W;
+        return WW;
+    }
+    else if (WC > colorB)
+    {
+        return WC;
     }
     else
     {
@@ -76,7 +71,7 @@ uint8_t RgbwColor::CalculateBrightness() const
     }
 }
 
-void RgbwColor::Darken(uint8_t delta)
+void RgbcctColor::Darken(uint8_t delta)
 {
     if (R > delta)
     {
@@ -105,27 +100,27 @@ void RgbwColor::Darken(uint8_t delta)
         B = 0;
     }
 
-    if (W > delta)
+    if (WW > delta)
     {
-        W -= delta;
+        WW -= delta;
     }
     else
     {
-        W = 0;
+        WW = 0;
     }
 }
 
-void RgbwColor::Lighten(uint8_t delta)
+void RgbcctColor::Lighten(uint8_t delta)
 {
     if (IsColorLess())
     {
-        if (W < 255 - delta)
+        if (WW < 255 - delta)
         {
-            W += delta;
+            WW += delta;
         }
         else
         {
-            W = 255;
+            WW = 255;
         }
     }
     else
@@ -159,18 +154,21 @@ void RgbwColor::Lighten(uint8_t delta)
     }
 }
 
-RgbwColor RgbwColor::LinearBlend(const RgbwColor& left, const RgbwColor& right, float progress)
+RgbcctColor RgbcctColor::LinearBlend(const RgbcctColor& left, const RgbcctColor& right, float progress)
 {
-    return RgbwColor( left.R + ((right.R - left.R) * progress),
-        left.G + ((right.G - left.G) * progress),
-        left.B + ((right.B - left.B) * progress),
-        left.W + ((right.W - left.W) * progress) );
+    return RgbcctColor( 
+        left.R +  ((right.R  - left.R)  * progress),
+        left.G +  ((right.G  - left.G)  * progress),
+        left.B +  ((right.B  - left.B)  * progress),
+        left.WW + ((right.WW - left.WW) * progress),
+        left.WC + ((right.WC - left.WC) * progress) 
+    );
 }
 
-RgbwColor RgbwColor::BilinearBlend(const RgbwColor& c00, 
-    const RgbwColor& c01, 
-    const RgbwColor& c10, 
-    const RgbwColor& c11, 
+RgbcctColor RgbcctColor::BilinearBlend(const RgbcctColor& c00, 
+    const RgbcctColor& c01, 
+    const RgbcctColor& c10, 
+    const RgbcctColor& c11, 
     float x, 
     float y)
 {
@@ -179,9 +177,9 @@ RgbwColor RgbwColor::BilinearBlend(const RgbwColor& c00,
     float v01 = (1.0f - x) * y;
     float v11 = x * y;
 
-    return RgbwColor(
+    return RgbcctColor(
         c00.R * v00 + c10.R * v10 + c01.R * v01 + c11.R * v11,
         c00.G * v00 + c10.G * v10 + c01.G * v01 + c11.G * v11,
         c00.B * v00 + c10.B * v10 + c01.B * v01 + c11.B * v11,
-        c00.W * v00 + c10.W * v10 + c01.W * v01 + c11.W * v11 );
+        c00.WW * v00 + c10.WW * v10 + c01.WW * v01 + c11.WW * v11 );
 }

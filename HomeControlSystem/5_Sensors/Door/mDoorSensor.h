@@ -5,7 +5,7 @@
 
 #ifdef USE_MODULE_SENSORS_DOOR
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
 class mDoorSensor{

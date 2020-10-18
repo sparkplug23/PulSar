@@ -5,7 +5,7 @@
 
 mNextionPanel::mNextionPanel(void){}
 
-// void mNextionPanel::init_object(mInterfaceController* _mcl){ mcl = _mcl; }
+// void mNextionPanel::init_object(mTaskerManager* _mcl){ mcl = _mcl; }
 
 /**********************************************************************************************************************************************************
  ******************************************************************************************************************************************************************************* 
@@ -171,7 +171,10 @@ int8_t mNextionPanel::Tasker(uint8_t function){
   /************
    * WEBPAGE SECTION * 
   *******************/
-  // return Tasker_Web(function);
+  // 
+  #ifdef USE_MODULE_CORE_WEBSERVER
+  return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
 
 }
 

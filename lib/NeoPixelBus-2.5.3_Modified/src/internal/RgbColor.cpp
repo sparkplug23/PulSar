@@ -25,6 +25,7 @@ License along with NeoPixel.  If not, see
 -------------------------------------------------------------------------*/
 
 #include "RgbColor.h"
+#include "RgbcctColor.h"
 #include "HslColor.h"
 #include "HsbColor.h"
 #include "HtmlColor.h"
@@ -156,6 +157,14 @@ RgbColor::RgbColor(const HsbColor& color)
     R = (uint8_t)(r * 255.0f);
     G = (uint8_t)(g * 255.0f);
     B = (uint8_t)(b * 255.0f);
+}
+
+
+RgbColor::RgbColor(const RgbcctColor& color)
+{
+    R = color.R;
+    G = color.G;
+    B = color.B;
 }
 
 

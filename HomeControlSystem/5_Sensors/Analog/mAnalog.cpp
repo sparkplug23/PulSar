@@ -195,7 +195,7 @@ int8_t mAnalog::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    // #ifdef USE_WEBSERVER
+    // #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
@@ -210,7 +210,7 @@ int8_t mAnalog::Tasker(uint8_t function){
         pCONT_web->AppendBuffer_PI2(PSTR("</tr>"));
       }
     }break;
-    // #endif //USE_WEBSERVER    
+    // #endif //USE_MODULE_CORE_WEBSERVER    
     /************
      * MQTT SECTION * 
     *******************/

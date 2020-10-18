@@ -497,6 +497,10 @@
 
     #endif
 
+
+
+//Add that first pixel contains palette type? the type of encoding, yes do, this
+
   // Default user palettes I like ()
   // must , COLOUR_MAP_NONE_ID finish with none, this is now length
   const uint8_t DEFAULT_COLOUR_PALETTE_USER_01_IDS[] PROGMEM = {
@@ -745,6 +749,40 @@
       204,  55,  3,  1,
       249,  17,  1,  1,
       255,  17,  1,  1
+    };
+
+    #ifndef D_PALETTE_SUNRISE_01_NAME_CTR
+    #define D_PALETTE_SUNRISE_01_NAME_CTR        "Sunrise 01"   
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+    DEF_PGM_CTR  (PM_PALETTE_SUNRISE_01_NAME_CTR)        D_PALETTE_SUNRISE_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_SUNRISE_01_COLOUR_MAP_IDS)
+    { //R,G,B,WW,CW
+      0x06, 0x2B, 0x79, 0, 0, // Dark Blue
+      0x16, 0x49, 0x8A, 0, 0,
+      0x16, 0x49, 0x8A, 25, 25,
+      0x16, 0x49, 0x8A, 50, 50,
+      0x59, 0x95, 0xB7, 100, 100,
+      0x59, 0x95, 0xB7, 175, 175,
+      255, 255,   255, 255, 255,
+      
+      // 1, 2, 3, 4, 5, // Dark Blue
+      // 6, 7, 8, 9, 10,
+      // 11, 12, 13, 14, 15,
+      // 16, 17, 18, 19, 20,
+
+      // 1, 2, 3, 4, 5, // Dark Blue
+      // 6, 7, 8, 9, 10,
+      // 11, 12, 13, 14, 15,
+      // 16, 17, 18, 19, 20,
+
+      //test
+      // 255,  0,  0, 0, 0,
+      // 0, 255,  0, 0, 0,
+      // 0,  0,  255, 0, 0,
+      // 0,  0,  0, 255, 0,
+      // 0,  0,  0, 0, 255
+
     };
 
 

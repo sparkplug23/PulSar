@@ -12,11 +12,13 @@
 #include <ArduinoJson.h>
 #include "3_Network/WebServer/mWebServer.h"
 
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#endif //USE_MODULE_CORE_WEBSERVER
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/averaged";
 

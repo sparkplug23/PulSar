@@ -15,8 +15,8 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0
 #define FIRMWARE_VERSION_MINOR    79
-#define FIRMWARE_VERSION_CORE     30
-#define FIRMWARE_VERSION_MODULE   20
+#define FIRMWARE_VERSION_CORE     31
+#define FIRMWARE_VERSION_MODULE   22
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))
@@ -36,8 +36,6 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   #define ENABLE_DELAYED_BOOT
   
   #define ENABLE_LOG
-  #define ENABLE_LOG_LEVEL_DEBUG // Addlog of debug level or lower
-  #define ENABLE_LOG_LEVEL_INFO  // General useful info, will be enabled at most times
 
 #endif
 #ifdef ENABLE_BUG_TRACING2
@@ -51,16 +49,25 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   #define ENABLE_DELAYED_BOOT
   
   // #define ENABLE_LOG
-  // #define ENABLE_LOG_LEVEL_DEBUG // Addlog of debug level or lower
-  // #define ENABLE_LOG_LEVEL_INFO  // General useful info, will be enabled at most times
 
 #endif
 
 #define ENABLE_LOG
-#define ENABLE_LOG_LEVEL_DEBUG // Addlog of debug level or lower
-#define ENABLE_LOG_LEVEL_INFO  // General useful info, will be enabled at most times
-
 #define ENABLE_SETTINGS_STORAGE
+
+
+// To reduce ram usage
+#define ENABLE_LOG_LEVEL_NONE 
+#define ENABLE_LOG_LEVEL_ERROR 
+#define ENABLE_LOG_LEVEL_WARN 
+#define ENABLE_LOG_LEVEL_TEST
+#define ENABLE_LOG_LEVEL_INFO 
+#define ENABLE_LOG_LEVEL_INFO_PARSING
+#define ENABLE_LOG_LEVEL_DEBUG 
+//#define ENABLE_LOG_LEVEL_DEBUG_MORE 
+//#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
+//#define ENABLE_LOG_LEVEL_ALL
+  
 
 #define DEBUG_WEBSERVER_LIB  //used in improving core lib
 #define DEBUG_WEBSERVER_MEMORY

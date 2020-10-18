@@ -157,7 +157,7 @@ void mPulseCounter::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_WEBSERVER
+    #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
@@ -167,7 +167,7 @@ void mPulseCounter::Tasker(uint8_t function){
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
     break;
-    #endif //USE_WEBSERVER
+    #endif //USE_MODULE_CORE_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/

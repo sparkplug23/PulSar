@@ -575,7 +575,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    // #ifdef USE_WEBSERVER
+    // #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ROOT_SEND_STYLE: // Change to sending outside of script as url
       // WebPage_Root_SendStyle(); 
     break;
@@ -654,7 +654,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
     break;
-    // #endif //USE_WEBSERVER
+    // #endif //USE_MODULE_CORE_WEBSERVER
     
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather

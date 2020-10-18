@@ -461,7 +461,10 @@ int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   if(!obj[F(D_JSON_DEVICENAME)].isNull()){
+    
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_RELAYS D_PARSING_MATCHED "%s"), F(D_JSON_DEVICENAME)); 
+    #endif // LOG_LEVEL_INFO_PARSING
 
     char module_friendlyname_buffer[30];
     uint16_t module_id = 0;
@@ -472,10 +475,14 @@ void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
       module_id = pCONT->module_settings.list[module_list_id];
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
-      
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING    
+  
       if(!obj[F(D_JSON_DEVICENAME)][module_friendlyname_buffer].isNull()){
+        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         //Get devices already present
 
 //NEED FIXED -- Doesnt 
@@ -485,8 +492,10 @@ void mSettings::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
         for(JsonVariantConst v : array) {
           const char* device_name_ctr = v.as<const char*>();
           pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
+          #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+          #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         }
       }
 
@@ -1885,10 +1894,13 @@ void mSettings::SettingsResetDst(void)
 
 void mSettings::SettingsDefaultWebColor(void)
 {
+  
+  #ifdef USE_MODULE_CORE_WEBSERVER
   char scolor[10];
   for (uint8_t i = 0; i < COL_LAST; i++) {
     pCONT_web->WebHexCode(i, pCONT_sup->GetTextIndexed_P(scolor, sizeof(scolor), i, kWebColors));
   }
+  #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
 }
 
 // /********************************************************************************************/

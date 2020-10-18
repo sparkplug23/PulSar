@@ -12,6 +12,14 @@
  * */
 
 
+void mInterfaceLight::Init_NeoPixelAnimator(uint16_t size, uint8_t timebase){
+
+ animator_controller = new NeoPixelAnimator(size, timebase); // NeoPixel animation management object
+  
+}  
+
+
+
 
 void mInterfaceLight::Settings_Default(){
 
@@ -25,7 +33,7 @@ void mInterfaceLight::Settings_Default(){
   
   // if(settings.flags.TemplateProvidedInProgMem){// use template provided in progmem || override template
   
-  //   pCONT_iLight->Template_Load();
+  //   Template_Load();
 
   // }else{
     
@@ -52,6 +60,8 @@ void mInterfaceLight::init_Scenes(){
 
   mode_singlecolour.name_id = mode_singlecolour_stored.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
 
+      mode_singlecolour.name_id = MODE_SINGLECOLOUR_PALETTE_SINGLE_ID;
+
   changeHSB(120,100,0);
   
   // #ifdef DONT_USE_OLD_PRESETS
@@ -65,6 +75,20 @@ void mInterfaceLight::init_Scenes(){
 
 } //end "init_Scenes"
 
+
+void mInterfaceLight::StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
+
+
+AddLog_P(LOG_LEVEL_INFO, PSTR("BEFORE1 _briCT, _briRGB %d %d"), pCONT_iLight->_briCT, pCONT_iLight->_briRGB);
+
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  pCONT_ladd->FadeToNewColour(targetColor, _time_to_newcolour);
+  #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+  #ifdef USE_MODULE_LIGHTS_PWM
+  pCONT_lPWM->FadeToNewColour(targetColor, _time_to_newcolour);
+  #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+
+}
 
 // This will handle various colour palettes that are not "user lights" in nature (random colours or flashes per pixel)
 // Instead, whole colour designs, changes over time (sunrise/wakeup light)
@@ -81,50 +105,75 @@ void mInterfaceLight::SubTask_SingleColour(){
     // }
   }
 
+  //if enable scene sleep
+
   switch(mode_singlecolour.name_id){
     case MODE_SINGLECOLOUR_COLOURSCENE_ID:{
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      pCONT_ladd->FadeToNewColour(&mode_singlecolour.colour, animation.transition.time_ms.val);
-      #endif // USE_MODULE_LIGHTS_ADDRESSABLE
-      mode_singlecolour.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;
+      // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      // pCONT_ladd->FadeToNewColour(mode_singlecolour.colour, animation.transition.time_ms.val);
+      // #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+        
+        // adjusted for brightness
+        RgbcctColor targetColor = RgbcctColor(0);
+        targetColor.R = pCONT_iLight->current_color[0];
+        targetColor.G = pCONT_iLight->current_color[1];
+        targetColor.B = pCONT_iLight->current_color[2];
+        targetColor.WC = pCONT_iLight->current_color[3];
+        targetColor.WW = pCONT_iLight->current_color[4];
+
+        AddLog_P(LOG_LEVEL_TEST, PSTR("animation.transition.time_ms.val=%d"),animation.transition.time_ms.val);
+        
+        // AddLog_P(LOG_LEVEL_TEST, PSTR("[%d|%d] colour\t%d\t%d\t%d\t%d\t%d"),mode_singlecolour.parts,pixels_in_map,colour.R,colour.G,colour.B,colour.WW,colour.WC);                        
+        StartFadeToNewColour(targetColor, animation.transition.time_ms.val);
+
+      mode_singlecolour.name_id = MODE_SINGLECOLOUR_NOCHANGE_ID;
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "mode_singlecolour.name_id=MODE_SINGLECOLOUR_COLOURSCENE_ID Executing"));
       #endif
     }break;
+    case MODE_SINGLECOLOUR_PALETTE_SINGLE_ID:{
+
+      // animation.transition.time_ms.val = 1000;
+
+      if(mTime::TimeReached(&mode_singlecolour_tSaved,animation.transition.time_ms.val)){
+        
+        // Update pointer of struct
+        SetPaletteListPtrFromID(animation.palette_id);
+        
+        uint8_t pixels_in_map = GetPixelsInMap(palettelist.ptr);
+        
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "pixels_in_map %d"),pixels_in_map);
+        #endif
+      
+        uint16_t desired_pixel = mode_singlecolour.parts < pixels_in_map ? mode_singlecolour.parts : pixels_in_map;
+        int16_t start_pixel_position = -1;
+        RgbcctColor colour = GetColourFromPalette(palettelist.ptr, desired_pixel, &start_pixel_position);
+
+        ApplyGlobalBrightnesstoColour(&colour);//??
+
+        // force instant change on first part
+        if(mode_singlecolour.parts == 0){ animation_override.time_ms = 1;}
+        
+        AddLog_P(LOG_LEVEL_TEST, PSTR("[%d|%d] colour\t%d\t%d\t%d\t%d\t%d"),mode_singlecolour.parts,pixels_in_map,colour.R,colour.G,colour.B,colour.WW,colour.WC);                        
+        StartFadeToNewColour(colour, animation.transition.time_ms.val);
+   
+        mode_singlecolour.parts++;
+        if(mode_singlecolour.parts>=pixels_in_map){
+          mode_singlecolour.parts = 0;
+          mode_singlecolour.name_id = MODE_SINGLECOLOUR_NOCHANGE_ID;
+        }
+      }
+
+    }break;
     case MODE_SINGLECOLOUR_FADE_OFF_ID:{
       changeRGB(0,0,0);
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      pCONT_ladd->FadeToNewColour(&mode_singlecolour.colour,animation.transition.time_ms.val);
+      pCONT_ladd->FadeToNewColour(mode_singlecolour.colour,animation.transition.time_ms.val);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
-      mode_singlecolour.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;
+      mode_singlecolour.name_id = MODE_SINGLECOLOUR_NOCHANGE_ID;
     }break;
 
-    // //  Change these to be saved as 5 user defined profiles that can be fired by time automatically
-    // case MODE_SINGLECOLOUR_DAYON_ID:       FadeToNewColour(HsbColor(scene_preset_dayon.colour),scene_preset_dayon.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;
-    // case MODE_SINGLECOLOUR_DAYOFF_ID:      FadeToNewColour(HsbColor(scene_preset_dayoff.colour),scene_preset_dayoff.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;
-    // case MODE_SINGLECOLOUR_EVENINGON_ID:   FadeToNewColour(HsbColor(scene_preset_eveningon.colour),scene_preset_eveningon.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;
-    // case MODE_SINGLECOLOUR_EVENINGOFF_ID:  FadeToNewColour(HsbColor(scene_preset_eveningoff.colour),scene_preset_eveningoff.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;
-    // case MODE_SINGLECOLOUR_MIDNIGHTON_ID:  FadeToNewColour(HsbColor(scene_preset_nighton.colour),scene_preset_nighton.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;
-    // case MODE_SINGLECOLOUR_MIDNIGHTOFF_ID: FadeToNewColour(HsbColor(scene_preset_nightoff.colour),scene_preset_nightoff.time_ms);   scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID;break;    
-    
-    // case MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID:
-    //   // SubTask_Scene_Sunrise_Single();
-    //   if(!animations_control->IsAnimating()){   
-    //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "!animations_control->IsAnimating scene.parts [%d] animation.transition.time_ms/3 [%d]"),scene.parts,animation.transition.time_ms.val/4);
-    //     switch(scene.parts){
-    //       case STEP1:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(240), pCONT_iLight->SatN2F(100), pCONT_iLight->BrtN2F(1)),  1); break; //instant
-    //       case STEP2:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(30),  pCONT_iLight->SatN2F(50),  pCONT_iLight->BrtN2F(50)), animation.transition.time_ms.val/2); break;
-    //       case STEP3:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(60),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
-    //       case STEP4:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(70),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/4); break;
-    //       case STEP5:  FadeToNewColour(HsbColor(pCONT_iLight->HueN2F(180), pCONT_iLight->SatN2F(80),  pCONT_iLight->BrtN2F(100)),animation.transition.time_ms.val/8); break;
-    //       default: break;
-    //     }
-    //     if(scene.parts<DONE){scene.parts++;};
-    //     if(scene.parts>=DONE){scene.parts=STEP1; 
-    //     //animation.mode_id = ANIMATION_MODE_NONE_ID; 
-    //     scene.name_id = MODE_SINGLECOLOUR_NOTACTIVE_ID; break;}// Stop calling parent function
-    //   }
-    // break;
     // case MODE_SINGLECOLOUR_FLASHCOLOUR_ID:
     //   // stripbus->ClearTo(HsbColor(scene_stored.colour)); // instant
     //   // scene_stored.tOnTime = 200;
@@ -132,7 +181,7 @@ void mInterfaceLight::SubTask_SingleColour(){
     //   // scene_stored.fActive = true;
     //   // scene_stored.tStart = millis();
     // break;
-    case MODE_SINGLECOLOUR_NOTACTIVE_ID: break;
+    case MODE_SINGLECOLOUR_NOCHANGE_ID: break;
   }
 
 } // END FUNCTION
@@ -140,12 +189,16 @@ void mInterfaceLight::SubTask_SingleColour(){
 
 
 const char* mInterfaceLight::GetSceneName(char* buffer, uint8_t buflen){
-  // return WARNING_NOTHANDLED_CTR;// PSTR("nomatch\0");
-
-  sprintf(buffer,"%s","New");
-
+  return GetSceneNameByID(mode_singlecolour.name_id, buffer, buflen);
+}
+const char* mInterfaceLight::GetSceneNameByID(uint8_t id, char* buffer, uint8_t buflen){
+  switch(id){
+    default:
+    case MODE_SINGLECOLOUR_COLOURSCENE_ID:    snprintf_P(buffer, buflen, PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR); break;
+    case MODE_SINGLECOLOUR_PALETTE_SINGLE_ID: snprintf_P(buffer, buflen, PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR); break;
+  }
   return buffer;
-
+  
   // return (scene.name_id == MODE_SINGLECOLOUR_DAYON_ID ? D_MODE_SINGLECOLOUR_DAYON_NAME_CTR :
   //     (scene.name_id == MODE_SINGLECOLOUR_DAYOFF_ID ?      D_MODE_SINGLECOLOUR_DAYOFF_NAME_CTR :
   //     (scene.name_id == MODE_SINGLECOLOUR_EVENINGON_ID ?     D_MODE_SINGLECOLOUR_EVENINGON_NAME_CTR :
@@ -155,9 +208,12 @@ const char* mInterfaceLight::GetSceneName(char* buffer, uint8_t buflen){
   //     (scene.name_id == MODE_SINGLECOLOUR_FLASHCOLOUR_ID ?   D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR :
   //     (scene.name_id == MODE_SINGLECOLOUR_COLOURSCENE_ID ?    D_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR :
   //     (scene.name_id == MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID ?    D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR :
-  //     (scene.name_id == MODE_SINGLECOLOUR_NOTACTIVE_ID ?    D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR :
+  //     (scene.name_id == MODE_SINGLECOLOUR_NOCHANGE_ID ?    D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR :
   //     "NoMatch"))))))))));
+
 }
+
+
 int8_t mInterfaceLight::GetSceneIDbyName(const char* c){
   if(c=='\0'){
     return -1;
@@ -182,12 +238,15 @@ int8_t mInterfaceLight::GetSceneIDbyName(const char* c){
   //   return MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
   // }else 
   if(strstr_P(c,PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)){
-     return MODE_SINGLECOLOUR_COLOURSCENE_ID;
+    return MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  }
+  if(strstr_P(c,PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR)){
+    return MODE_SINGLECOLOUR_PALETTE_SINGLE_ID;
   }
   //else if(strstr(c,D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR)){
   //   return MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID;
   // }else if(strstr(c,D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR)){
-  //   return MODE_SINGLECOLOUR_NOTACTIVE_ID;
+  //   return MODE_SINGLECOLOUR_NOCHANGE_ID;
   // }else{
   //   return -1;
   // }
@@ -200,18 +259,21 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
   int8_t tmp_id = 0;
   char buffer[50];
 
-  
   if(!obj[D_JSON_ONOFF].isNull()){ 
     uint8_t value = obj[D_JSON_ONOFF];
     setBri(value ? 255 : 0);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_ONOFF,0);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
   if(!obj[D_JSON_HUE].isNull()){ 
     uint16_t hue = obj[D_JSON_HUE];
     changeHSB_Hue(hue);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+    #endif//#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
@@ -220,7 +282,9 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     sat = sat > 100 ? 100 : sat;
     sat = map(sat, 0,100, 0,255);
     changeHSB_Sat(sat);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
@@ -229,7 +293,9 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     changeHSB_Brt(brt);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
   if(!obj[D_JSON_BRT_RGB].isNull()){    // Assume range 0-100
@@ -237,7 +303,9 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     setBriRGB(brt);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
@@ -247,58 +315,71 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     setBriCT(brt);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_CCT,brt);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
   if(!obj[D_JSON_CCT_PERCENTAGE].isNull()){    // Assume range 0-100
     uint16_t cct_value = obj[D_JSON_CCT_PERCENTAGE];
     LightSetColorTemp(cct_value);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_PERCENTAGE,cct_value);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
   if(!obj[D_JSON_CCT_TEMP].isNull()){    // Assume range 0-100
     uint16_t cct_value = obj[D_JSON_CCT_TEMP];
     LightSetColorTemp(cct_value);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_TEMP,cct_value);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
   if(!obj[D_JSON_RGBCCT_LINKED].isNull()){    // Assume range 0-100
     uint8_t value = obj[D_JSON_RGBCCT_LINKED];
     setCTRGBLinked(value);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_RGBCCT_LINKED,value);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
   // #endif // PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   
-
-
-
 
   if(!obj[D_JSON_SCENENAME].isNull()){ 
     const char* mode_singlecolourctr = obj[D_JSON_SCENENAME];
     if((tmp_id=GetSceneIDbyName(mode_singlecolourctr))>=0){
       mode_singlecolour.name_id = tmp_id;
       animation.mode_id = ANIMATION_MODE_SCENE_ID; //#Idea. make optional
-      // char buffer[30];
-      #ifdef ENABLE_LOG_LEVEL_INFO
+
+      // if(mode_singlecolour.name_id == MODE_SINGLECOLOUR_PALETTE_SINGLE_ID){
+      //   mode_singlecolour.parts = 0;
+      // }
+      mode_singlecolour.parts = 0;
+
+      //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      char buffer[30];
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,GetSceneName(buffer, sizeof(buffer)));
-      #endif
+      //#endif
       data_buffer2.isserviced++;
     }else{
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,mode_singlecolourctr);
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
   
   // Includes special case of hue=361 which sets saturation to 0 for white
   if(!obj[D_JSON_HUE].isNull()){ 
     uint16_t hue = obj[D_JSON_HUE];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
     #endif
 
     changeHSB_Hue(hue);
 
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
     #endif
     
@@ -310,7 +391,7 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
 
   if(!obj[D_JSON_SAT].isNull()){ 
     uint8_t sat = obj[D_JSON_SAT];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
     #endif
 
@@ -318,7 +399,7 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     sat = map(sat, 0,100, 0,255);
     changeHSB_Sat(sat);
   
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
     #endif
     
@@ -330,7 +411,7 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
 
   if(!obj[D_JSON_BRT].isNull()){ 
     uint8_t brt = obj[D_JSON_BRT];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
     #endif
 
@@ -338,29 +419,29 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     brt = map(brt, 0,100, 0,255);
     changeHSB_Brt(brt);
     
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
     #endif
     
     data_buffer2.isserviced++;
   }
 
-  if(!obj[D_JSON_BRT_RGB].isNull()){ 
-    uint8_t brt = obj[D_JSON_BRT_RGB];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
-    #endif
+  // if(!obj[D_JSON_BRT_RGB].isNull()){ 
+  //   uint8_t brt = obj[D_JSON_BRT_RGB];
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
+  //   #endif
 
-    brt = brt > 100 ? 100 : brt;
-    brt = map(brt, 0,100, 0,255);
-    changeBriRGB(brt);
+  //   brt = brt > 100 ? 100 : brt;
+  //   brt = map(brt, 0,100, 0,255);
+  //   changeBriRGB(brt);
     
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
-    #endif
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
+  //   #endif
     
-    data_buffer2.isserviced++;
-  }
+  //   data_buffer2.isserviced++;
+  // }
 
   // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
   // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
@@ -396,18 +477,18 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
 
   if(obj.containsKey(D_JSON_SCENE_COLOUR)){
     // Check HSB format
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR]"));
     #endif
     if(!obj[D_JSON_SCENE_COLOUR][D_JSON_HSB].isNull()){
-      #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]"));
       #endif
       JsonArrayConst colourarray = obj[D_JSON_SCENE_COLOUR][D_JSON_HSB];
       uint8_t index = 0;
       for(JsonVariantConst v : colourarray) {
         int val = v.as<int>();
-        #ifdef ENABLE_LOG_LEVEL_INFO
+        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]=%d"),val);
         #endif
         switch(index++){
@@ -433,7 +514,7 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
     //   colour_ctr,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
   }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_INFO, PSTR("NOT [D_JSON_SCENE_COLOUR]"));
     #endif
   }
@@ -444,20 +525,20 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
   if(!obj[D_JSON_TIME].isNull()){ //default to secs
     animation.transition.time_ms.val = obj[D_JSON_TIME];
     animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
   }else
   if(!obj[D_JSON_TIME_SECS].isNull()){
     animation.transition.time_ms.val = obj[D_JSON_TIME_SECS];
     animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
   }else
   if(!obj[D_JSON_TIME_MS].isNull()){
     animation.transition.time_ms.val = obj[D_JSON_TIME_MS];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
   }
@@ -466,20 +547,20 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
   // TIME on duration for autooff
   if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
     auto_time_off_secs = obj[D_JSON_TIME_ON];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_SECS].isNull()){
     auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
     #endif
   }else
   if(!obj[D_JSON_TIME_ON_MS].isNull()){
     auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
     auto_time_off_secs /= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
     #endif
   }
@@ -488,6 +569,22 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
   
 
 } // END FUNCTION
+
+
+RgbTypeColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
+  RgbTypeColor rgb;
+  // #if RgbTypeColor == RgbwColor
+    rgb.R = colour32bit >> 24; //RGB
+    rgb.G = colour32bit >> 16; //RGB
+    rgb.B = colour32bit >> 8 & 0xFF; //RGB
+  //   rgb.W = colour32bit & 0xFF; //RGB
+  // #else
+  //   rgb.R = colour32bit >> 16; //RGB
+  //   rgb.G = colour32bit >> 8 & 0xFF; //RGB
+  //   rgb.B = colour32bit & 0xFF; //RGB
+  // #endif
+  return rgb;
+}
 
 
 
@@ -583,7 +680,7 @@ bool mInterfaceLight::LightModuleInit(void)
 
 void mInterfaceLight::Template_Load(){
 
-  #ifndef DISABLE_SERIAL_LOGGING
+  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
   #endif
 
@@ -616,8 +713,6 @@ void mInterfaceLight::Init(void) //LightInit(void)
     //colour_arr_ptr = reinterpret_cast<uint8_t*>(&scene_colour);
   // }
 
-  memset(&pwm_channel_test,0,sizeof(pwm_channel_test));
-
   device = pCONT_set->devices_present;
   
   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
@@ -634,10 +729,13 @@ void mInterfaceLight::Init(void) //LightInit(void)
   pCONT_set->Settings.light_settings.light_fade = 1;
   pCONT_set->Settings.light_settings.light_speed = 5*2;
   pCONT_set->power = 1;
+
+  auto_time_off_secs = 0;
   
   init_Scenes();
 
   init_PresetColourPalettes();
+  init_Animations();
 
   //new_color[0] = 255;
   // LightApplyPower(new_color, 1);
@@ -669,7 +767,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // loadSettings();
   UpdateFinalColourComponents();    // calculate the initial values (#8058)
 
-  Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
+  // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
 
   if (LST_SINGLE == subtype) {
     pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
@@ -688,6 +786,14 @@ void mInterfaceLight::Init(void) //LightInit(void)
   //     }
   //   }
   // }
+
+  // Set light mode
+  if(pCONT_set->Settings.light_settings.type == LT_WS2812){ //RGB only
+    setColorMode(LCM_RGB);
+  }else{
+    setColorMode(LCM_BOTH);
+  }
+
 
   uint32_t max_scheme = max_scheme;
   if (subtype < LST_RGB) {
@@ -730,6 +836,35 @@ changeBri(0); //default off
 } //light_init
 
 
+
+void mInterfaceLight::init_Animations(){
+
+  
+  // Set default values (ifdef below sets specific)
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  animation.transition.order_id = pCONT_ladd->TRANSITION_ORDER_INORDER_ID;
+  #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+  animation.palette_id = PALETTELIST_VARIABLE_USER_01_ID;
+  animation.mode_id = ANIMATION_MODE_FLASHER_ID;
+  // flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  animation.transition.method_id = pCONT_ladd->TRANSITION_METHOD_BLEND_ID;
+  #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+  animation.flags.fForceUpdate = true;
+  // animation.brightness = 0.1;
+  animation.transition.time_ms.val = 1000;
+  animation.transition.rate_ms.val = 20*1000;
+  // tSavedUpdateRGBString = millis() + animation.transition.rate_ms.val;
+  // first_set = true; //change to one off override flag
+
+
+  animation.flags.fEnable_Animation = true;
+
+}
+
+
+
+
 // Colours etc will be made or called using a func_update_light_Values
 // Another func will push those values to the output, which each hardware class will handle
 
@@ -764,7 +899,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
     break;
     case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
       Settings_Default();
-      // pCONT_iLight->Module_Init(); // User defined values in progmem, later to be parsed via webcommand
+      // Module_Init(); // User defined values in progmem, later to be parsed via webcommand
     break;
     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
       Settings_Default();
@@ -777,6 +912,10 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
       EveryLoop();
     break;
     case FUNC_EVERY_SECOND:
+
+    
+      // mode_singlecolour.name_id = MODE_SINGLECOLOUR_PALETTE_SINGLE_ID;
+
     
     break;
     case FUNC_EVERY_MINUTE:
@@ -814,7 +953,9 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
   /************
    * WEBPAGE SECTION * 
   *******************/
+  #ifdef USE_MODULE_CORE_WEBSERVER
   return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
 
 } // END function // END FUNCTION
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonObjectConst obj){
@@ -833,8 +974,10 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/light")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "mInterfaceLight"));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "mInterfaceLight"));
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
@@ -847,24 +990,358 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 void mInterfaceLight::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     parsesub_ModeManual(obj);
   }else  
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/scene",sizeof("/scene")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "scene"));    
     #endif
     parsesub_ModeScene(obj);
+  }else 
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));    
+    #endif
+    parsesub_ModeAnimation(obj);
   }else  
-  {
+  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/all",sizeof("/all")-1)>=0){
     // Check all commands
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "Checking all commands"));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     parsesub_CheckAll(obj); 
+    #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+    pCONT_ladd->parsesub_CheckAll(obj);
+    #endif // USE_MODULE_LIGHTS_ADDRESSABLE
   }
+
+}
+
+
+
+void mInterfaceLight::parsesub_ModeAnimation(JsonObjectConst obj){
+
+  char buffer[40];
+  int8_t tmp_id = 0;
+
+DEBUG_LINE;
+
+  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
+DEBUG_LINE;
+  if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
+DEBUG_LINE;
+
+
+    // if(obj[D_JSON_COLOUR_PALETTE].is<const char*>()){
+
+      const char* colour = obj[D_JSON_COLOUR_PALETTE];
+      if((tmp_id=pCONT_iLight->GetPaletteIDbyName(colour))>=0){
+        pCONT_iLight->animation.palette_id = tmp_id;
+
+        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+        AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GetPaletteIDbyName=%d"),tmp_id);
+        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+
+  DEBUG_LINE;
+        #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+        if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+          flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
+        }
+        #endif
+        #ifdef ENABLE_PALETTE_FORCED_MODE
+        //  pCONT_iLight->animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+        #endif
+        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
+        // if(pCONT_iLight->animation_override.fRefreshAllPixels){
+        //   first_set = true; //refresh all
+        // }
+        data_buffer2.isserviced++;
+      // }
+    }else{
+
+    // }
+    // if(obj[D_JSON_COLOUR_PALETTE].is<int>()){
+
+
+      uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
+      pCONT_iLight->animation.palette_id = colour < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
+
+      char buffer[50];
+
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_NVALUE),D_JSON_COLOUR_PALETTE,pCONT_iLight->animation.palette_id);
+        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,pCONT_iLight->GetPaletteNameByID(pCONT_iLight->animation.palette_id, buffer));
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      
+
+    }
+//     else{
+// DEBUG_LINE;
+// // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+// //       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,colour);
+// //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    
+//     }
+  }
+
+  // //temp method, roll into above when its a number
+  // if(obj.containsKey(D_JSON_COLOUR_PALETTE "_Number")){ 
+
+
+  // }
+
+
+
+    //{"colour_selector":{"red":"on"}}
+    //{"colour_selector":{"all":"on"}} 
+    //{"colour_selector":"reset"} //all off
+    //{"colour_selector":"all"} //all off
+    //what about colour order? on/off or number for index?
+  
+      // int randnum = random(0,selectorlist.amount); 
+      // desired_colour[ledsindex[ledout.index]].H = selectorlist.colour[randnum].H;
+      
+  // if(!obj["colour_selector"].isNull()){ 
+  //   const char* onoff = obj["colour_selector"];
+
+  // // if(!obj[D_JSON_ONOFF].isNull()){ 
+  // //   const char* onoff = obj[D_JSON_ONOFF];
+  // //   if(strstr(onoff,"ON")){ 
+  // //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+
+  // }
+    
+
+  //LEGACY METHOD  
+  // if(!obj[D_JSON_MODE].isNull()){ 
+  //   const char* mode = obj[D_JSON_MODE];
+  //   if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
+  //     pCONT_iLight->animation.mode_id = tmp_id;
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
+  //    #endif
+  //     // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
+  //     data_buffer2.isserviced++;
+  //   }else{
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
+  //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   }
+  // }
+  // //NEW METHOD  
+  if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
+    const char* mode = obj[D_JSON_ANIMATIONMODE];
+    if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
+      pCONT_iLight->animation.mode_id = tmp_id;
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
+      #endif
+      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
+      data_buffer2.isserviced++;
+    }else{
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    }
+  }
+
+
+
+
+
+//   if(!obj[D_JSON_RGB_COLOUR_ORDER].isNull()){ 
+//     const char* mode = obj[D_JSON_RGB_COLOUR_ORDER];
+//     if((tmp_id=GetHardwareColourTypeIDbyName(mode))>=0){
+//       settings.pixel_hardware_color_order_id = tmp_id;
+//       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_RGB_COLOUR_ORDER,GetHardwareColourTypeName(buffer));
+//       #endif
+//       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
+//       data_buffer2.isserviced++;
+//     }else{
+//       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
+//       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     }
+//   }
+
+
+//   if(!obj[D_JSON_STRIP_SIZE].isNull()){ 
+//     int amount = obj[D_JSON_STRIP_SIZE];
+//     // Also convert to percentage equivalent
+//     strip_size = amount;
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_STRIP_SIZE,strip_size);
+//     #endif
+//     // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+//     data_buffer2.isserviced++;
+//   }
+  
+  
+// DEBUG_LINE;
+
+//   // struct TRANSITIONSETTINGS
+
+//   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER].isNull()){ 
+//     int amount = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER];
+//     // Also convert to percentage equivalent
+//     pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(amount);
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+//     #endif
+//     // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+//     data_buffer2.isserviced++;
+//   }else
+//   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE].isNull()){ 
+//     int percentage = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE];
+//     pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+//     #endif
+//     Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+//     // Also convert to number equivalent
+//     data_buffer2.isserviced++;
+//   }
+
+// DEBUG_LINE;
+
+  
+//   // Transition time in seconds or ms
+//   if(!obj[D_JSON_TRANSITION][D_JSON_TIME].isNull()){ 
+//     pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);   
+//     #endif
+//     pCONT_iLight->animation.transition.time_ms.val *= 1000; // map into ms
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);
+//     #endif
+//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
+//     data_buffer2.isserviced++;
+//     //check that rate>pCONT_iLight->animation time
+//     if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
+//   }else
+//   if(!obj[D_JSON_TRANSITION][D_JSON_TIME_MS].isNull()){ 
+//     pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME_MS];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
+//     #endif
+//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
+//     data_buffer2.isserviced++;
+//     //check that rate>pCONT_iLight->animation time
+//     if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
+//   }
+
+// DEBUG_LINE;
+
+//   // Rate in seconds as default or ms
+//   if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
+//     pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
+//     #endif
+//     pCONT_iLight->animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
+//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
+//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     data_buffer2.isserviced++;
+//     //check that rate>pCONT_iLight->animation time
+//     if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
+//   }else
+//   if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
+//     pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,pCONT_iLight->animation.transition.rate_ms.val);
+//     #endif
+//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
+//     data_buffer2.isserviced++;
+//     //check that rate>pCONT_iLight->animation time
+//     if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
+//   }
+
+//   // probably bring transition_order into one command
+//   if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ 
+//     const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
+//     if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
+//       pCONT_iLight->animation.transition.order_id = tmp_id;
+//       // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
+//       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
+//       data_buffer2.isserviced++;
+//     }else{
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
+//     #endif
+//     }
+//   }
+
+//   if(!obj[D_JSON_BRIGHTNESS].isNull()){
+//     uint8_t brt = obj[D_JSON_BRIGHTNESS];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
+//     #endif
+//     // pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+//     pCONT_iLight->setBriRGB(brt);
+//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
+//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
+//     data_buffer2.isserviced++;
+//   }
+  
+
+//   if(!obj[D_JSON_PIXELSGROUPED].isNull()){
+//     pCONT_iLight->animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,pCONT_iLight->animation.pixelgrouped);
+//     #endif
+//   }
+
+//   //override commands that run for one pCONT_iLight->animation cycle then are cleared to 0
+//   if(!obj[D_JSON_REFRESH_ALLPIXELS].isNull()){
+//     pCONT_iLight->animation_override.fRefreshAllPixels = obj[D_JSON_REFRESH_ALLPIXELS];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,pCONT_iLight->animation_override.fRefreshAllPixels);
+//     #endif
+//   }
+
+  
+  
+//   // TIME on duration for autooff
+//   if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
+//     pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
+//     #endif
+//   }else
+//   if(!obj[D_JSON_TIME_ON_SECS].isNull()){
+//     pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
+//     #endif
+//   }else
+//   if(!obj[D_JSON_TIME_ON_MS].isNull()){
+//     pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
+//     pCONT_iLight->auto_time_off_secs /= 1000;
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
+//     #endif
+//   }
+
+  //pCONT_iLight->animation_override.time_ms = 1000; // implement in 1 second 
+
+
+// #endif
+
+
+
+DEBUG_LINE;
 
   
 
-}
+} // END FUNCTION
+
 
 
 // Directly change and control flags/elements without changing everything ie update brightness without changing to scene
@@ -873,20 +1350,22 @@ void mInterfaceLight::parsesub_Settings(JsonObjectConst obj){
   if(!obj[D_JSON_HARDWARE_TYPE].isNull()){ 
     const char* onoff = obj[D_JSON_HARDWARE_TYPE];
     if(strstr(onoff,"RGBCCT_PWM")){ 
-      // #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "RGBCCT_PWM");
-      // #endif
+      #endif
       pCONT_set->Settings.light_settings.type = LT_PWM5;
       data_buffer2.isserviced++;
     }else 
     if(strstr(onoff,D_JSON_WS2812)){
-      // #ifdef ENABLE_LOG_LEVEL_INFOdd
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "WS2812");
-      // #endif
+      #endif
       pCONT_set->Settings.light_settings.type = LT_WS2812;
       data_buffer2.isserviced++;
     }else{
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
 
@@ -899,6 +1378,8 @@ void mInterfaceLight::parsesub_CheckAll(JsonObjectConst obj){
 
   parsesub_Settings(obj); 
   parsesub_ModeManual(obj);
+  parsesub_ModeScene(obj);
+  parsesub_ModeAnimation(obj);
 
 }
 
@@ -935,11 +1416,10 @@ void mInterfaceLight::EveryLoop(){
 
   if(pCONT_set->Settings.light_settings.type == LT_WS2812){ 
     
-
     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     switch(animation.mode_id){
       case ANIMATION_MODE_FLASHER_ID:
-        //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "ANIMATION_MODE_FLASHER_ID"));
+        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "ANIMATION_MODE_FLASHER_ID"));
         pCONT_ladd->SubTask_Flasher_Main();
         light_power = true;
       break;
@@ -968,7 +1448,7 @@ void mInterfaceLight::SubTask_AutoOff(){
     //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "scene.tSavedAutoOff [%d]"),animation.auto_time_off_secs);
     if(auto_time_off_secs==1){ //if =1 then turn off and clear to 0
       // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF_ID;
-      #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "animation.auto_time_off_secs==1 and disable"));
       #endif       
 
@@ -980,7 +1460,7 @@ void mInterfaceLight::SubTask_AutoOff(){
     if(auto_time_off_secs>1){ //if =1 then turn off and clear to 0
       auto_time_off_secs--; //decrease
       
-      #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "auto_time_off_secs=%d dec"),auto_time_off_secs);
       #endif
     }
@@ -993,6 +1473,21 @@ void mInterfaceLight::SubTask_AutoOff(){
 ************MQTT**************************************************************************************************
 ********************************************************************************************************************
 ********************************************************************************************************************/
+
+
+
+void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
+
+  colour->R  = mSupport::changeUIntScale(colour->R,  0, 255, 0, _briRGB);
+  colour->G  = mSupport::changeUIntScale(colour->G,  0, 255, 0, _briRGB);
+  colour->B  = mSupport::changeUIntScale(colour->B,  0, 255, 0, _briRGB);
+  colour->WW = mSupport::changeUIntScale(colour->WW, 0, 255, 0, _briCT);
+  colour->WC = mSupport::changeUIntScale(colour->WC, 0, 255, 0, _briCT);
+
+}
+
+
+
 
 
 void mInterfaceLight::SetAnimationProfile(uint8_t profile_id){
@@ -1022,7 +1517,8 @@ void mInterfaceLight::SetAnimationProfile(uint8_t profile_id){
           #ifdef ENABLE_LOG_LEVEL_DEBUG
           AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
           #endif
-          animation.brightness = 0;
+          pCONT_iLight->setBriRGB(0);
+          // animation.brightness = 0;
           animation.transition.time_ms.val = 1000;
           animation.flags.fForceUpdate = true;
           animation_override.time_ms = 1000; //force fast rate to turn on
@@ -1051,7 +1547,8 @@ void mInterfaceLight::SetAnimationProfile(uint8_t profile_id){
         }
 
         animation_override.time_ms = 1000; //force fast rate to turn on
-        animation.brightness = 1;
+        // animation.brightness = 1;
+        pCONT_iLight->setBriRGB(100);
         animation.flags.fForceUpdate = true;
         // pCONT_ladd->first_set = 1;//set all
     break;
@@ -1110,11 +1607,11 @@ uint8_t mInterfaceLight::BrtF2N(float brt){
 
 
 // Generate random colour between two hsb colours
-HsbColor mInterfaceLight::GetRandomColour(HsbColor colour1, HsbColor colour2){
-  int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
-  int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
-  int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
-  return HsbColor(HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
+RgbTypeColor mInterfaceLight::GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2){
+  // int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
+  // int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
+  // int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
+  return RgbTypeColor(0);//HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
 }
 
 
@@ -1257,6 +1754,13 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     JsonBuilderI->Add("WW", mode_singlecolour.colour.WW);
     JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
     JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
+  JsonBuilderI->Level_Start("tasint_colour");
+    JsonBuilderI->Add("R", tasint_colour.R);
+    JsonBuilderI->Add("G", tasint_colour.G);
+    JsonBuilderI->Add("B", tasint_colour.B);
+    JsonBuilderI->Add("WW", tasint_colour.WW);
+    JsonBuilderI->Add("WC", tasint_colour.WC);
+    JsonBuilderI->Add("WC", tasint_colour.WC);
   JsonBuilderI->Level_End();
   JsonBuilderI->Level_Start("fade");
     JsonBuilderI->Add("running", fade.running);
@@ -1311,7 +1815,7 @@ void mInterfaceLight::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1672,6 +2176,196 @@ void mInterfaceLight::LightApplyPower(uint8_t new_color[LST_MAX], power_t power)
 
 
 
+int8_t mInterfaceLight::GetNearestColourMapIDFromColour(HsbColor hsb){
+
+}
+
+const char* mInterfaceLight::GetColourMapNameNearestbyColour(HsbColor c, char* buffer){
+
+// TOO MUCH MEMROY!!!
+  return WARNING_NOTHANDLED_CTR;
+// return "memory issue";
+
+  // uint32_t colour32bit_tofind = WebColorFromColourType(RgbColor(c));
+
+  // uint64_t colour32bit_tosearch[PRESET_COLOUR_MAP_INDEXES_MAX];
+  
+  // for(int i=0; i<PRESET_COLOUR_MAP_INDEXES_MAX; i++) {
+  //   colour32bit_tosearch[i] = (WebColorFromColourType(RgbColor(c))-colour32bit_tofind);
+  // }
+
+  // uint64_t temp = colour32bit_tosearch[0];
+  // uint16_t index = 0;
+  // for(int i=0; i<PRESET_COLOUR_MAP_INDEXES_MAX; i++) {
+  //     if(temp>colour32bit_tosearch[i]) {
+  //        temp=colour32bit_tosearch[i];
+  //        index = i;
+  //     }
+  // }
+
+  // return GetColourMapNamebyID(index);
+
+}
+
+
+
+
+int8_t mInterfaceLight::GetColourMapIDbyName(const char* c){
+  if(c=='\0') return -1;
+  // if(strstr(c,D_COLOUR_MAP_RED_CTR))          return COLOUR_MAP_RED_ID;
+  // if(strstr(c,D_COLOUR_MAP_RED_PASTEL80_CTR))          return COLOUR_MAP_RED_PASTEL80_ID;
+  // if(strstr(c,D_COLOUR_MAP_RED_PASTEL60_CTR))          return COLOUR_MAP_RED_PASTEL60_ID;
+  // if(strstr(c,D_COLOUR_MAP_ORANGE_CTR))       return COLOUR_MAP_ORANGE_ID;
+  // if(strstr(c,D_COLOUR_MAP_LIGHTORANGE_CTR))  return COLOUR_MAP_LIGHTORANGE_ID;
+  // if(strstr(c,D_COLOUR_MAP_YELLOW_CTR))       return COLOUR_MAP_YELLOW_ID;
+  // if(strstr(c,D_COLOUR_MAP_LIMEGREEN_CTR))    return COLOUR_MAP_LIMEGREEN_ID;
+  // if(strstr(c,D_COLOUR_MAP_GREEN_CTR))        return COLOUR_MAP_GREEN_ID;
+  // if(strstr(c,D_COLOUR_MAP_CYAN_CTR))         return COLOUR_MAP_CYAN_ID;
+  // if(strstr(c,D_COLOUR_MAP_BLUE_CTR))         return COLOUR_MAP_BLUE_ID;
+  // if(strstr(c,D_COLOUR_MAP_BLUEPURPLE_CTR))   return COLOUR_MAP_BLUEPURPLE_ID;
+  // if(strstr(c,D_COLOUR_MAP_PURPLE_CTR))       return COLOUR_MAP_PURPLE_ID;
+  // if(strstr(c,D_COLOUR_MAP_PINK_CTR))         return COLOUR_MAP_PINK_ID;
+  // if(strstr(c,D_COLOUR_MAP_HOTPINK_CTR))      return COLOUR_MAP_HOTPINK_ID;
+  // if(strstr(c,D_COLOUR_MAP_NONE_CTR))      return COLOUR_MAP_NONE_ID;
+  // if(strstr(c,D_COLOUR_MAP_PALETTE_OPTIONS_END_CTR))      return COLOUR_MAP_PALETTE_OPTIONS_END_ID;
+
+  
+  return -1;
+}
+const char* mInterfaceLight::GetColourMapNamebyID(uint8_t id, char* buffer){
+
+  return 0;
+
+  switch(id){
+    // Red
+    case COLOUR_MAP_RED_ID:                    return D_COLOUR_MAP_RED_CTR;
+    case COLOUR_MAP_RED_PASTEL95_ID:           return D_COLOUR_MAP_RED_PASTEL95_CTR;
+    case COLOUR_MAP_RED_PASTEL90_ID:           return D_COLOUR_MAP_RED_PASTEL90_CTR;
+    case COLOUR_MAP_RED_PASTEL80_ID:           return D_COLOUR_MAP_RED_PASTEL80_CTR;
+    case COLOUR_MAP_RED_PASTEL70_ID:           return D_COLOUR_MAP_RED_PASTEL70_CTR;
+    case COLOUR_MAP_RED_PASTEL60_ID:           return D_COLOUR_MAP_RED_PASTEL60_CTR;
+    case COLOUR_MAP_RED_PASTEL50_ID:           return D_COLOUR_MAP_RED_PASTEL50_CTR;
+    case COLOUR_MAP_RED_PASTEL40_ID:           return D_COLOUR_MAP_RED_PASTEL40_CTR;
+    case COLOUR_MAP_RED_PASTEL20_ID:           return D_COLOUR_MAP_RED_PASTEL20_CTR;
+    // Orange
+    case COLOUR_MAP_ORANGE_ID:        return D_COLOUR_MAP_ORANGE_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL95_ID:        return D_COLOUR_MAP_ORANGE_PASTEL95_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL90_ID:        return D_COLOUR_MAP_ORANGE_PASTEL90_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL80_ID:        return D_COLOUR_MAP_ORANGE_PASTEL80_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL70_ID:        return D_COLOUR_MAP_ORANGE_PASTEL70_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL60_ID:        return D_COLOUR_MAP_ORANGE_PASTEL60_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL50_ID:        return D_COLOUR_MAP_ORANGE_PASTEL50_CTR;
+    case COLOUR_MAP_ORANGE_PASTEL40_ID:        return D_COLOUR_MAP_ORANGE_PASTEL40_CTR;
+    // Light Orange
+    case COLOUR_MAP_LIGHTORANGE_ID:   return D_COLOUR_MAP_LIGHTORANGE_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL95_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL95_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL90_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL90_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL80_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL80_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL70_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL70_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL60_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL60_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL50_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL50_CTR;
+    case COLOUR_MAP_LIGHTORANGE_PASTEL40_ID:   return D_COLOUR_MAP_LIGHTORANGE_PASTEL40_CTR;
+    // White
+    case COLOUR_MAP_WHITE_ID: return D_COLOUR_MAP_WHITE_CTR;
+    case COLOUR_MAP_WHITE_PASTEL95_ID: return D_COLOUR_MAP_WHITE_PASTEL95_CTR;
+    case COLOUR_MAP_WHITE_PASTEL90_ID: return D_COLOUR_MAP_WHITE_PASTEL90_CTR;
+    case COLOUR_MAP_WHITE_PASTEL80_ID: return D_COLOUR_MAP_WHITE_PASTEL80_CTR;
+    case COLOUR_MAP_WHITE_PASTEL70_ID: return D_COLOUR_MAP_WHITE_PASTEL70_CTR;
+    case COLOUR_MAP_WHITE_PASTEL60_ID: return D_COLOUR_MAP_WHITE_PASTEL60_CTR;
+    case COLOUR_MAP_WHITE_PASTEL50_ID: return D_COLOUR_MAP_WHITE_PASTEL50_CTR;
+    case COLOUR_MAP_WHITE_PASTEL40_ID: return D_COLOUR_MAP_WHITE_PASTEL40_CTR;
+    case COLOUR_MAP_WHITE_PASTEL20_ID: return D_COLOUR_MAP_WHITE_PASTEL20_CTR;
+    // Yellow
+    case COLOUR_MAP_YELLOW_ID:        return D_COLOUR_MAP_YELLOW_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL95_ID:        return D_COLOUR_MAP_YELLOW_PASTEL95_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL90_ID:        return D_COLOUR_MAP_YELLOW_PASTEL90_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL80_ID:        return D_COLOUR_MAP_YELLOW_PASTEL80_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL70_ID:        return D_COLOUR_MAP_YELLOW_PASTEL70_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL60_ID:        return D_COLOUR_MAP_YELLOW_PASTEL60_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL50_ID:        return D_COLOUR_MAP_YELLOW_PASTEL50_CTR;
+    case COLOUR_MAP_YELLOW_PASTEL40_ID:        return D_COLOUR_MAP_YELLOW_PASTEL40_CTR;
+    // Lime Green
+    case COLOUR_MAP_LIMEGREEN_ID:     return D_COLOUR_MAP_LIMEGREEN_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL95_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL95_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL90_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL90_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL80_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL80_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL70_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL70_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL60_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL60_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL50_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL50_CTR;
+    case COLOUR_MAP_LIMEGREEN_PASTEL40_ID:     return D_COLOUR_MAP_LIMEGREEN_PASTEL40_CTR;
+    // Green
+    case COLOUR_MAP_GREEN_ID:         return D_COLOUR_MAP_GREEN_CTR;
+    case COLOUR_MAP_GREEN_PASTEL95_ID:         return D_COLOUR_MAP_GREEN_PASTEL95_CTR;
+    case COLOUR_MAP_GREEN_PASTEL90_ID:         return D_COLOUR_MAP_GREEN_PASTEL90_CTR;
+    case COLOUR_MAP_GREEN_PASTEL80_ID:         return D_COLOUR_MAP_GREEN_PASTEL80_CTR;
+    case COLOUR_MAP_GREEN_PASTEL70_ID:         return D_COLOUR_MAP_GREEN_PASTEL70_CTR;
+    case COLOUR_MAP_GREEN_PASTEL60_ID:         return D_COLOUR_MAP_GREEN_PASTEL60_CTR;
+    case COLOUR_MAP_GREEN_PASTEL50_ID:         return D_COLOUR_MAP_GREEN_PASTEL50_CTR;
+    case COLOUR_MAP_GREEN_PASTEL40_ID:         return D_COLOUR_MAP_GREEN_PASTEL40_CTR;
+    // Cyan
+    case COLOUR_MAP_CYAN_ID:          return D_COLOUR_MAP_CYAN_CTR;
+    case COLOUR_MAP_CYAN_PASTEL95_ID:          return D_COLOUR_MAP_CYAN_PASTEL95_CTR;
+    case COLOUR_MAP_CYAN_PASTEL90_ID:          return D_COLOUR_MAP_CYAN_PASTEL90_CTR;
+    case COLOUR_MAP_CYAN_PASTEL80_ID:          return D_COLOUR_MAP_CYAN_PASTEL80_CTR;
+    case COLOUR_MAP_CYAN_PASTEL70_ID:          return D_COLOUR_MAP_CYAN_PASTEL70_CTR;
+    case COLOUR_MAP_CYAN_PASTEL60_ID:          return D_COLOUR_MAP_CYAN_PASTEL60_CTR;
+    case COLOUR_MAP_CYAN_PASTEL50_ID:          return D_COLOUR_MAP_CYAN_PASTEL50_CTR;
+    case COLOUR_MAP_CYAN_PASTEL40_ID:          return D_COLOUR_MAP_CYAN_PASTEL40_CTR;
+    // Blue
+    case COLOUR_MAP_BLUE_ID:          return D_COLOUR_MAP_BLUE_CTR;
+    case COLOUR_MAP_BLUE_PASTEL95_ID:          return D_COLOUR_MAP_BLUE_PASTEL95_CTR;
+    case COLOUR_MAP_BLUE_PASTEL90_ID:          return D_COLOUR_MAP_BLUE_PASTEL90_CTR;
+    case COLOUR_MAP_BLUE_PASTEL80_ID:          return D_COLOUR_MAP_BLUE_PASTEL80_CTR;
+    case COLOUR_MAP_BLUE_PASTEL70_ID:          return D_COLOUR_MAP_BLUE_PASTEL70_CTR;
+    case COLOUR_MAP_BLUE_PASTEL60_ID:          return D_COLOUR_MAP_BLUE_PASTEL60_CTR;
+    case COLOUR_MAP_BLUE_PASTEL50_ID:          return D_COLOUR_MAP_BLUE_PASTEL50_CTR;
+    case COLOUR_MAP_BLUE_PASTEL40_ID:          return D_COLOUR_MAP_BLUE_PASTEL40_CTR;
+    // Blue Purple
+    case COLOUR_MAP_BLUEPURPLE_ID:    return D_COLOUR_MAP_BLUEPURPLE_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL95_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL95_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL90_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL90_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL80_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL80_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL70_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL70_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL60_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL60_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL50_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL50_CTR;
+    case COLOUR_MAP_BLUEPURPLE_PASTEL40_ID:    return D_COLOUR_MAP_BLUEPURPLE_PASTEL40_CTR;
+    // Purple
+    case COLOUR_MAP_PURPLE_ID:        return D_COLOUR_MAP_PURPLE_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL95_ID:        return D_COLOUR_MAP_PURPLE_PASTEL95_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL90_ID:        return D_COLOUR_MAP_PURPLE_PASTEL90_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL80_ID:        return D_COLOUR_MAP_PURPLE_PASTEL80_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL70_ID:        return D_COLOUR_MAP_PURPLE_PASTEL70_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL60_ID:        return D_COLOUR_MAP_PURPLE_PASTEL60_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL50_ID:        return D_COLOUR_MAP_PURPLE_PASTEL50_CTR;
+    case COLOUR_MAP_PURPLE_PASTEL40_ID:        return D_COLOUR_MAP_PURPLE_PASTEL40_CTR;
+    // Pink
+    case COLOUR_MAP_PINK_ID:          return D_COLOUR_MAP_PINK_CTR;
+    case COLOUR_MAP_PINK_PASTEL95_ID:          return D_COLOUR_MAP_PINK_PASTEL95_CTR;
+    case COLOUR_MAP_PINK_PASTEL90_ID:          return D_COLOUR_MAP_PINK_PASTEL90_CTR;
+    case COLOUR_MAP_PINK_PASTEL80_ID:          return D_COLOUR_MAP_PINK_PASTEL80_CTR;
+    case COLOUR_MAP_PINK_PASTEL70_ID:          return D_COLOUR_MAP_PINK_PASTEL70_CTR;
+    case COLOUR_MAP_PINK_PASTEL60_ID:          return D_COLOUR_MAP_PINK_PASTEL60_CTR;
+    case COLOUR_MAP_PINK_PASTEL50_ID:          return D_COLOUR_MAP_PINK_PASTEL50_CTR;
+    case COLOUR_MAP_PINK_PASTEL40_ID:          return D_COLOUR_MAP_PINK_PASTEL40_CTR;
+    // Hotpink
+    case COLOUR_MAP_HOTPINK_ID:       return D_COLOUR_MAP_HOTPINK_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL95_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL95_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL90_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL90_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL80_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL80_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL70_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL70_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL60_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL60_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL50_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL50_CTR;
+    case COLOUR_MAP_HOTPINK_PASTEL40_ID:       return D_COLOUR_MAP_HOTPINK_PASTEL40_CTR;
+    // None ie not set/used
+    case COLOUR_MAP_NONE_ID:       return D_COLOUR_MAP_NONE_CTR;
+    case COLOUR_MAP_PALETTE_OPTIONS_END_ID: return D_COLOUR_MAP_PALETTE_OPTIONS_END_CTR;
+  }
+  return WARNING_NOTHANDLED_CTR;
+  // return "Unset";
+}
+
+
+
 
 //   void loadSettings() {
 // #ifdef DEBUG_LIGHT
@@ -1818,6 +2512,7 @@ void mInterfaceLight::init_PresetColourPalettes(){
   init_ColourPalettes_Pastel();
   init_ColourPalettes_Gradient_01();
   init_ColourPalettes_Gradient_02();
+  init_ColourPalettes_Sunrise_01();
 
 }
 
@@ -1895,6 +2590,20 @@ void mInterfaceLight::init_ColourPalettes_Gradient_02(){
   
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Sunrise_01(){
+  palettelist.ptr     = &palettelist.sunrise_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_SUNRISE_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_SUNRISE_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_SUNRISE_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_SUNRISE_01_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_NONE;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_Array_P(LOG_LEVEL_TEST, "Sunrise01", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
   #endif
 }
 
@@ -2084,7 +2793,7 @@ DEBUG_LINE;
     sprintf(name_ctr,PSTR("%s %02d\0"),D_PALETTE_USER_NAME_CTR,ii);
     // Default names
     if(strstr(c,name_ctr)){
-      return pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID+ii;
+      return PALETTELIST_VARIABLE_USER_01_ID+ii;
     }
     // Friendly names in memory
     // if(strstr(c,palettelist.users[PALETTELIST_VARIABLE_USER_01_ID+ii].friendly_name_ctr)){
@@ -2132,6 +2841,7 @@ mInterfaceLight::PALETTELIST::PALETTE* mInterfaceLight::GetPalettePointerByID(ui
     case PALETTELIST_STATIC_OCEAN_01_ID:       return &palettelist.ocean_01;
     case PALETTELIST_STATIC_GRADIENT_01_ID:         return &palettelist.gradient_01;
     case PALETTELIST_STATIC_GRADIENT_02_ID:         return &palettelist.gradient_02;
+    case PALETTELIST_STATIC_SUNRISE_01_ID:         return &palettelist.sunrise_01;
   }
 }
 
@@ -2204,6 +2914,7 @@ uint16_t mInterfaceLight::GetPixelsInMap(PALETTELIST::PALETTE *ptr){
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID: pixel_width = 2; break;
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID: pixel_width = 2; break;
     case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID: pixel_width = 3; break;
+    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID: pixel_width = 5; break;
     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID: pixel_width = 4; break;
     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID: pixel_width = 4; break;
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID: pixel_width = 2; break;
@@ -2346,10 +3057,116 @@ void mInterfaceLight::SetPaletteListPtrFromID(uint8_t id){
 }
 
 
-HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
+// RgbTypeColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
+// {
+
+//   RgbTypeColor colour = RgbTypeColor(0);
+
+//   // if(ptr->id >= PALETTELIST_VARIABLE_USER_LENGTH_ID){ //temp progmem issue
+//   //   return colour;
+//   // }
+
+//   //load palette
+//   uint8_t palette_elements[ptr->colour_map_size];
+  
+//   if(ptr->id < PALETTELIST_VARIABLE_USER_LENGTH_ID){
+//     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+//   }
+//   // ptr
+//   else{
+//     memcpy_P(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+//   }
+
+//   *pixel_position = -1;
+
+//   #ifdef ENABLE_LOG_LEVEL_DEBUG
+//   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
+//   #endif
+
+//   switch(ptr->flags.fMapIDs_Type){
+//     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: default:{
+//       *pixel_position = 1;
+      
+//       #ifdef DONT_USE_OLD_PRESETS
+//       colour = preset_colour_map[palette_elements[pixel_num]]; // direct
+//       #else
+//       colour = RgbTypeColor(GetHsbColour(palette_elements[pixel_num]));
+//       #endif
+//     }
+//     break;
+//     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID:{
+
+//       uint16_t index_relative = pixel_num*4; // get expected pixel position
+//       uint16_t expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
+      
+//       *pixel_position = palette_elements[index_relative];
+//       // Get colour
+//       colour = RgbTypeColor(
+//         palette_elements[index_relative+1],
+//         palette_elements[index_relative+2],
+//         palette_elements[index_relative+3]
+//       );
+
+//     }break;
+//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID:
+//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID: //0,h,s,b (only if uint16 is allowed for hue>255)
+//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID:{
+      
+//       uint16_t index_relative = pixel_num*2; // get expected pixel position
+//       uint16_t expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
+      
+//       *pixel_position = palette_elements[index_relative];
+//       // colour = preset_colour_map[palette_elements[index_relative+1]];
+
+//       #ifdef DONT_USE_OLD_PRESETS
+//       colour = preset_colour_map[palette_elements[index_relative+1]]; // direct
+//       #else
+//       colour = RgbTypeColor(GetHsbColour(palette_elements[index_relative+1]));
+//       #endif
+      
+//     }
+//     break;
+//     case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:{
+//       // Get expected pixel position
+//       uint16_t index_relative = pixel_num*3;
+//       // Get colour
+//       colour = RgbTypeColor(
+//         palette_elements[index_relative  ],
+//         palette_elements[index_relative+1],
+//         palette_elements[index_relative+2]
+//       );
+//     }
+//     break;
+//     case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID:{
+//       // Get expected pixel position
+//       uint16_t index_relative = pixel_num*5;
+
+//       RgbcctColor test = RgbcctColor(0,1,2,3,4);
+//       RgbColor test2 = test;
+//       test = test2;
+
+//       // Get colour
+//       // colour = RgbTypeColor(
+//       //   palette_elements[index_relative  ],
+//       //   palette_elements[index_relative+1],
+//       //   palette_elements[index_relative+2],
+//       //   palette_elements[index_relative+3],
+//       //   palette_elements[index_relative+4]
+//       // );
+//     }
+//     break;
+//   }
+
+//   return colour;
+
+// } // end function
+
+
+
+RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
 
-  HsbColor colour = HsbColor(0);
+  RgbcctColor colour = RgbcctColor(0);
 
   // if(ptr->id >= PALETTELIST_VARIABLE_USER_LENGTH_ID){ //temp progmem issue
   //   return colour;
@@ -2369,7 +3186,7 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
   *pixel_position = -1;
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "here fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
   #endif
 
   switch(ptr->flags.fMapIDs_Type){
@@ -2379,7 +3196,8 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
       #ifdef DONT_USE_OLD_PRESETS
       colour = preset_colour_map[palette_elements[pixel_num]]; // direct
       #else
-      colour = GetHsbColour(palette_elements[pixel_num]);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "here palette_elements[pixel_num]=%d %d"),palette_elements[pixel_num],pixel_num);
+      colour = RgbTypeColor(GetHsbColour(palette_elements[pixel_num]));
       #endif
     }
     break;
@@ -2390,11 +3208,11 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
       
       *pixel_position = palette_elements[index_relative];
       // Get colour
-      colour = HsbColor(RgbColor(
+      colour = RgbTypeColor(
         palette_elements[index_relative+1],
         palette_elements[index_relative+2],
         palette_elements[index_relative+3]
-      ));
+      );
 
     }break;
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID:
@@ -2410,7 +3228,7 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
       #ifdef DONT_USE_OLD_PRESETS
       colour = preset_colour_map[palette_elements[index_relative+1]]; // direct
       #else
-      colour = GetHsbColour(palette_elements[index_relative+1]);
+      colour = RgbTypeColor(GetHsbColour(palette_elements[index_relative+1]));
       #endif
       
     }
@@ -2419,11 +3237,24 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
       // Get expected pixel position
       uint16_t index_relative = pixel_num*3;
       // Get colour
-      colour = HsbColor(RgbColor(
+      colour = RgbTypeColor(
         palette_elements[index_relative  ],
         palette_elements[index_relative+1],
         palette_elements[index_relative+2]
-      ));
+      );
+    }
+    break;
+    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID:{
+      // Get expected pixel position
+      uint16_t index_relative = pixel_num*5;
+      // Get colour
+      colour = RgbcctColor(
+        palette_elements[index_relative  ],
+        palette_elements[index_relative+1],
+        palette_elements[index_relative+2],
+        palette_elements[index_relative+3],
+        palette_elements[index_relative+4]
+      );
     }
     break;
   }
@@ -2431,7 +3262,6 @@ HsbColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16
   return colour;
 
 } // end function
-
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -2447,18 +3277,18 @@ uint32_t mInterfaceLight::WebColorFromColourMap(uint8_t i)
   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
   return tcolor;
 }
-uint32_t mInterfaceLight::WebColorFromHsbColour(RgbColor rgb)
+uint32_t mInterfaceLight::WebColorFromColourType(RgbColor rgb)
 {
   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
   return tcolor;
 }
-uint32_t mInterfaceLight::WebColorFromHsbColour(HsbColor hsb)
-{
-  RgbColor rgb = RgbColor(hsb);
-  uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-  return tcolor;
-}
-uint32_t mInterfaceLight::WebColorFromHsbColour(RgbwColor rgbw)
+// uint32_t mInterfaceLight::WebColorFromColourType(HsbColor hsb)
+// {
+//   RgbColor rgb = RgbColor(hsb);
+//   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
+//   return tcolor;
+// }
+uint32_t mInterfaceLight::WebColorFromColourType(RgbwColor rgbw)
 {
   uint32_t tcolor = (rgbw.R << 16) | (rgbw.G << 8) | rgbw.B;
   return tcolor;
@@ -2640,9 +3470,9 @@ uint8_t mInterfaceLight::setColorMode(uint8_t cm) {
     _briRGB = 0;
     if (0 == _briCT) { _briCT = maxbri; }
   }
-#ifdef DEBUG_LIGHT
-  AddLog_P(LOG_LEVEL_TEST, PSTR("setColorMode prev_cm (%d) req_cm (%d) new_cm (%d)"), prev_cm, cm, _color_mode);
-#endif
+// #ifdef DEBUG_LIGHT
+  AddLog_P(LOG_LEVEL_TEST, PSTR("setColorMode prev_cm (%d) req_cm (%d) new_cm (%d) subtype (%d)"), prev_cm, cm, _color_mode, _subtype);
+// #endif
   return prev_cm;
 }
 
@@ -2662,16 +3492,16 @@ void mInterfaceLight::addCTMode() {
 
 // Get RGB color, always at full brightness (ie. one of the components is 255)
 void mInterfaceLight::getRGB(uint8_t *r, uint8_t *g, uint8_t *b) {
-  if (r) { *r = mode_singlecolour.colour.R; }
-  if (g) { *g = mode_singlecolour.colour.G; }
-  if (b) { *b = mode_singlecolour.colour.B; }
+  if (r) { *r = tasint_colour.R; }
+  if (g) { *g = tasint_colour.G; }
+  if (b) { *b = tasint_colour.B; }
 }
 
 // get full brightness values for warm and cold channels.
 // either w=c=0 (off) or w+c >= 255
 void mInterfaceLight::getCW(uint8_t *rc, uint8_t *rw) {
-  if (rc) { *rc = mode_singlecolour.colour.WC; }
-  if (rw) { *rw = mode_singlecolour.colour.WW; }
+  if (rc) { *rc = tasint_colour.WC; }
+  if (rw) { *rw = tasint_colour.WW; }
 }
 
 // Get the actual values for each channel, ie multiply with brightness
@@ -2680,12 +3510,27 @@ void mInterfaceLight::getActualRGBCW(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t
   bool rgb_channels_on = _color_mode & LCM_RGB;
   bool ct_channels_on =   _color_mode & LCM_CT;
 
-  if (r) { *r = rgb_channels_on ? mSupport::changeUIntScale(mode_singlecolour.colour.R, 0, 255, 0, _briRGB) : 0; }
-  if (g) { *g = rgb_channels_on ? mSupport::changeUIntScale(mode_singlecolour.colour.G, 0, 255, 0, _briRGB) : 0; }
-  if (b) { *b = rgb_channels_on ? mSupport::changeUIntScale(mode_singlecolour.colour.B, 0, 255, 0, _briRGB) : 0; }
+  #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR("bgetActualRGBCW result %d,%d,%d,%d,%d %d,%d"),
+    tasint_colour.R,
+    tasint_colour.G,
+    tasint_colour.B,
+    tasint_colour.WC,
+    tasint_colour.WW,
+    // *r,*g,*b,*w,*c,  
+     _briRGB,_briCT);
+  #endif
+  
+  if (r) { *r = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.R, 0, 255, 0, _briRGB) : 0; }
+  if (g) { *g = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.G, 0, 255, 0, _briRGB) : 0; }
+  if (b) { *b = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.B, 0, 255, 0, _briRGB) : 0; }
 
-  if (c) { *c = ct_channels_on  ? mSupport::changeUIntScale(mode_singlecolour.colour.WC, 0, 255, 0, _briCT) : 0; }
-  if (w) { *w = ct_channels_on  ? mSupport::changeUIntScale(mode_singlecolour.colour.WW, 0, 255, 0, _briCT) : 0; }
+  if (c) { *c = ct_channels_on  ? mSupport::changeUIntScale(tasint_colour.WC, 0, 255, 0, _briCT) : 0; }
+  if (w) { *w = ct_channels_on  ? mSupport::changeUIntScale(tasint_colour.WW, 0, 255, 0, _briCT) : 0; }
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR("agetActualRGBCW result %d,%d,%d,%d,%d %d,%d"),*r,*g,*b,*w,*c,   _briRGB,_briCT);
+  #endif
 
 }
 
@@ -2694,11 +3539,11 @@ uint8_t mInterfaceLight::getChannels(uint8_t *channels) {
 }
 
 void mInterfaceLight::getChannelsRaw(uint8_t *channels) {
-    channels[0] = mode_singlecolour.colour.R;
-    channels[1] = mode_singlecolour.colour.G;
-    channels[2] = mode_singlecolour.colour.B;
-    channels[3] = mode_singlecolour.colour.WC;
-    channels[4] = mode_singlecolour.colour.WW;
+    channels[0] = tasint_colour.R;
+    channels[1] = tasint_colour.G;
+    channels[2] = tasint_colour.B;
+    channels[3] = tasint_colour.WC;
+    channels[4] = tasint_colour.WW;
 }
 
 void mInterfaceLight::getHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri) {
@@ -2774,7 +3619,7 @@ void mInterfaceLight::setBri(uint8_t bri) {
   setBriRGB(_color_mode & LCM_RGB ? bri : 0);
   setBriCT(_color_mode & LCM_CT ? bri : 0);
 #ifdef DEBUG_LIGHT
-  AddLog_P(LOG_LEVEL_TEST, PSTR("setBri RGB raw (%d %d %d) HS (%d %d) bri (%d)"), mode_singlecolour.colour.R, mode_singlecolour.colour.G, mode_singlecolour.colour.B, _hue, _sat, _briRGB);
+  AddLog_P(LOG_LEVEL_TEST, PSTR("setBri RGB raw (%d %d %d) HS (%d %d) bri (%d)"), tasint_colour.R, tasint_colour.G, tasint_colour.B, _hue, _sat, _briRGB);
 #endif
 }
 
@@ -2812,13 +3657,13 @@ void mInterfaceLight::setCT(uint16_t ct) {
     setColorMode(LCM_RGB);  // try deactivating CT mode, setColorMode() will check which is legal
   } else {
     ct = (ct < CT_MIN ? CT_MIN : (ct > CT_MAX ? CT_MAX : ct));
-    mode_singlecolour.colour.WW = mSupport::changeUIntScale(ct, _ct_min_range, _ct_max_range, 0, 255);
-    mode_singlecolour.colour.WC = 255 - mode_singlecolour.colour.WW;
+    tasint_colour.WW = mSupport::changeUIntScale(ct, _ct_min_range, _ct_max_range, 0, 255);
+    tasint_colour.WC = 255 - tasint_colour.WW;
     _ct = ct;
     addCTMode();
   }
 #ifdef DEBUG_LIGHT
-  AddLog_P(LOG_LEVEL_INFO, PSTR("setCT RGB raw (%d %d %d) HS (%d %d) briRGB (%d) briCT (%d) CT (%d)"), mode_singlecolour.colour.R, mode_singlecolour.colour.G, mode_singlecolour.colour.B, _hue, _sat, _briRGB, _briCT, _ct);
+  AddLog_P(LOG_LEVEL_INFO, PSTR("setCT RGB raw (%d %d %d) HS (%d %d) briRGB (%d) briCT (%d) CT (%d)"), tasint_colour.R, tasint_colour.G, tasint_colour.B, _hue, _sat, _briRGB, _briCT, _ct);
 #endif
 }
 
@@ -2848,11 +3693,11 @@ void mInterfaceLight::setCW(uint8_t c, uint8_t w, bool free_range) {
   } else {
     if (!free_range) {
       // we need to normalize to sum = 255
-      mode_singlecolour.colour.WW = mSupport::changeUIntScale(w, 0, sum, 0, 255);
-      mode_singlecolour.colour.WC = 255 - mode_singlecolour.colour.WW;
+      tasint_colour.WW = mSupport::changeUIntScale(w, 0, sum, 0, 255);
+      tasint_colour.WC = 255 - tasint_colour.WW;
     } else {  // we normalize to max = 255
-      mode_singlecolour.colour.WW = mSupport::changeUIntScale(w, 0, max, 0, 255);
-      mode_singlecolour.colour.WC = mSupport::changeUIntScale(c, 0, max, 0, 255);
+      tasint_colour.WW = mSupport::changeUIntScale(w, 0, max, 0, 255);
+      tasint_colour.WC = mSupport::changeUIntScale(c, 0, max, 0, 255);
     }
     _ct = mSupport::changeUIntScale(w, 0, sum, _ct_min_range, _ct_max_range);
     addCTMode();   // activate CT mode if needed
@@ -2865,13 +3710,7 @@ void mInterfaceLight::setCW(uint8_t c, uint8_t w, bool free_range) {
 
 // sets RGB and returns the Brightness. Bri is updated unless keep_bri is true
 uint8_t mInterfaceLight::setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri) {
-
-  // New method
-  mode_singlecolour.colour.R = r;
-  mode_singlecolour.colour.G = g;
-  mode_singlecolour.colour.B = b;
-  // mode_singlecolour.colour.R = r;
-  // mode_singlecolour.colour.R = r;
+  
   uint16_t hue;
   uint8_t  sat;
   #ifdef DEBUG_LIGHT
@@ -2896,13 +3735,13 @@ uint8_t mInterfaceLight::setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri) 
   }
 
   RgbToHsb(r, g, b, &hue, &sat, nullptr);
-  mode_singlecolour.colour.R = r;
-  mode_singlecolour.colour.G = g;
-  mode_singlecolour.colour.B = b;
+  tasint_colour.R = r;
+  tasint_colour.G = g;
+  tasint_colour.B = b;
   _hue = hue;
   _sat = sat;
 #ifdef DEBUG_LIGHT
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setRGB RGB raw (%d %d %d) HS (%d %d) bri (%d)"), mode_singlecolour.colour.R, mode_singlecolour.colour.G, mode_singlecolour.colour.B, _hue, _sat, _briRGB);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setRGB RGB raw (%d %d %d) HS (%d %d) bri (%d)"), tasint_colour.R, tasint_colour.G, tasint_colour.B, _hue, _sat, _briRGB);
 #endif
   return max;
 }
@@ -2911,27 +3750,37 @@ void mInterfaceLight::setHS(uint16_t hue, uint8_t sat) {
   uint8_t r, g, b;
   HsToRgb(hue, sat, &r, &g, &b);
   
-  mode_singlecolour.colour.R = r;
-  mode_singlecolour.colour.G = g;
-  mode_singlecolour.colour.B = b;
+  tasint_colour.R = r;
+  tasint_colour.G = g;
+  tasint_colour.B = b;
 
   _hue = hue;
   _sat = sat;
   addRGBMode();
 #ifdef DEBUG_LIGHT
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d)"), hue, sat, r, g, b);
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS RGB raw (%d %d %d) HS (%d %d) bri (%d)"), mode_singlecolour.colour.R, mode_singlecolour.colour.G, mode_singlecolour.colour.B, _hue, _sat, _briRGB);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS RGB raw (%d %d %d) HS (%d %d) bri (%d)"), tasint_colour.R, tasint_colour.G, tasint_colour.B, _hue, _sat, _briRGB);
 #endif
 }
 
 // set all 5 channels at once, don't modify the values in ANY way
 // Channels are: R G B CW WW
 void mInterfaceLight::setChannelsRaw(uint8_t *channels) {
-  mode_singlecolour.colour.R = channels[0];
-  mode_singlecolour.colour.G = channels[1];
-  mode_singlecolour.colour.B = channels[2];
-  mode_singlecolour.colour.WC = channels[3];
-  mode_singlecolour.colour.WW = channels[4];
+  tasint_colour.R = channels[0];
+  tasint_colour.G = channels[1];
+  tasint_colour.B = channels[2];
+  tasint_colour.WC = channels[3];
+  tasint_colour.WW = channels[4];
+}
+
+
+void mInterfaceLight::setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww) {
+  tasint_colour.R = r;
+  tasint_colour.G = g;
+  tasint_colour.B = b;
+  tasint_colour.WC = wc;
+  tasint_colour.WW = ww;
+
 }
 
 
@@ -2956,7 +3805,7 @@ void mInterfaceLight::setChannels(uint8_t *channels) {
 #ifdef DEBUG_LIGHT
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("setChannels (%d %d %d %d %d)"), channels[0], channels[1], channels[2], channels[3], channels[4]);
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("setChannels CT (%d) briRGB (%d) briCT (%d)"), _ct, _briRGB, _briCT);
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setChannels Actuals (%d %d %d %d %d)"), mode_singlecolour.colour.R, mode_singlecolour.colour.G, mode_singlecolour.colour.B, mode_singlecolour.colour.WC, mode_singlecolour.colour.WW);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("setChannels Actuals (%d %d %d %d %d)"), tasint_colour.R, tasint_colour.G, tasint_colour.B, tasint_colour.WC, tasint_colour.WW);
 #endif
 }
 
@@ -3230,6 +4079,7 @@ void mInterfaceLight::UpdateFinalColourComponents(uint8_t *_current_color) {
    // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT f:_current_color == nullptr use global"));    
   }
 
+
   // if (_pwm_multi_channels) { // if PWM multi channel, no more transformation required
   //   _state->getChannelsRaw(current_color);
   //   return;
@@ -3237,9 +4087,22 @@ void mInterfaceLight::UpdateFinalColourComponents(uint8_t *_current_color) {
 
   DEBUG_LINE;
 
+  #ifdef ENABLE_LOG_LEVEL_DEBUG
+  AddLog_P(LOG_LEVEL_DEBUG, "BEFORE brightness _current_color (%d %d %d %d %d)",
+    tasint_colour.R,tasint_colour.G,tasint_colour.B,tasint_colour.WW,tasint_colour.WC
+  );
+  #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
+
   getActualRGBCW(&r,&g,&b,&c,&w);
   briRGB = getBriRGB();
   briCT  = getBriCT();
+  
+  #ifdef ENABLE_LOG_LEVEL_DEBUG
+  AddLog_P(LOG_LEVEL_DEBUG, "After1 brightness _current_color (%d %d %d %d %d -- rgb%d ct%d)",
+    r,g,b,c,w,briRGB,briCT
+  );
+  #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
+
 
   DEBUG_LINE;
 
@@ -3271,14 +4134,13 @@ void mInterfaceLight::UpdateFinalColourComponents(uint8_t *_current_color) {
       _current_color[2] = b;
       break;
   }
-  
-  mode_singlecolour.colour.R = _current_color[0];
-  mode_singlecolour.colour.G = _current_color[1];
-  mode_singlecolour.colour.B = _current_color[2];
-  
-  AddLog_P(LOG_LEVEL_TEST, "_current_color (%d %d %d %d %d)",
+   
+  // #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
+  #ifdef ENABLE_LOG_LEVEL_DEBUG
+  AddLog_P(LOG_LEVEL_DEBUG, "AFTER2 brightness _current_color (%d %d %d %d %d)",
     _current_color[0],_current_color[1],_current_color[2],_current_color[3],_current_color[4]
   );
+  #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
 
   // mqtthandler_debug_teleperiod.flags.SendNow = true;
 

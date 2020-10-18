@@ -355,7 +355,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #undef USE_HOME_ASSISTANT                     // Disable Home Assistant
 // #undef USE_MQTT_TLS                           // Disable TLS support won't work as the MQTTHost is not set
 // #undef USE_KNX                                // Disable KNX IP Protocol Support
-// //#undef USE_WEBSERVER                          // Disable Webserver
+// //#undef USE_MODULE_CORE_WEBSERVER                          // Disable Webserver
 // //#undef USE_EMULATION                          // Disable Wemo or Hue emulation
 // #undef USE_CUSTOM                             // Disable Custom features
 // #undef USE_DISCOVERY                          // Disable Discovery services for both MQTT and web server
@@ -421,7 +421,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #undef USE_HOME_ASSISTANT                     // Disable Home Assistant
 // #undef USE_MQTT_TLS                           // Disable TLS support won't work as the MQTTHost is not set
 // #undef USE_KNX                                // Disable KNX IP Protocol Support
-// //#undef USE_WEBSERVER                          // Disable Webserver
+// //#undef USE_MODULE_CORE_WEBSERVER                          // Disable Webserver
 // #undef USE_EMULATION                          // Disable Wemo or Hue emulation
 // #undef USE_CUSTOM                             // Disable Custom features
 // #undef USE_DISCOVERY                          // Disable Discovery services for both MQTT and web server

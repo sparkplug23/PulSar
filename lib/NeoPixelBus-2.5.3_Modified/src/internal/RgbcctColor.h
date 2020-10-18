@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-RgbColor provides a color object that can be directly consumed by NeoPixelBus
+RgbcctColor provides a color object that can be directly consumed by NeoPixelBus
 
 Written by Michael C. Miller.
 
@@ -27,23 +27,22 @@ License along with NeoPixel.  If not, see
 
 #include <Arduino.h>
 
+struct RgbColor;
 struct HslColor;
 struct HsbColor;
-struct RgbcctColor;
-struct HtmlColor;
 
 // ------------------------------------------------------------------------
-// RgbColor represents a color object that is represented by Red, Green, Blue
-// component values.  It contains helpful color routines to manipulate the 
-// color.
+// RgbcctColor represents a color object that is represented by Red, Green, Blue
+// component values and an extra White component.  It contains helpful color 
+// routines to manipulate the color.
 // ------------------------------------------------------------------------
-struct RgbColor
+struct RgbcctColor
 {
     // ------------------------------------------------------------------------
-    // Construct a RgbColor using R, G, B values (0-255)
+    // Construct a RgbcctColor using R, G, B, W values (0-255)
     // ------------------------------------------------------------------------
-    RgbColor(uint8_t r, uint8_t g, uint8_t b) :
-        R(r), G(g), B(b)
+    RgbcctColor(uint8_t r, uint8_t g, uint8_t b, uint8_t ww = 0, uint8_t wc = 0) :
+        R(r), G(g), B(b), WW(ww), WC(wc)
     {
     };
 
@@ -52,50 +51,74 @@ struct RgbColor
     // This works well for creating gray tone colors
     // (0) = black, (255) = white, (128) = gray
     // ------------------------------------------------------------------------
-    RgbColor(uint8_t brightness) :
-        R(brightness), G(brightness), B(brightness)
+    RgbcctColor(uint8_t brightness) :
+        R(0), G(0), B(0), WW(brightness), WC(brightness)
     {
     };
 
     // ------------------------------------------------------------------------
-    // Construct a RgbColor using HtmlColor
+    // Construct a RgbcctColor using RgbColor
     // ------------------------------------------------------------------------
-    RgbColor(const HtmlColor& color);
+    RgbcctColor(const RgbColor& color) :
+        R(color.R),
+        G(color.G),
+        B(color.B),
+        WW(0),
+        WC(0)
+    {
+    };
 
     // ------------------------------------------------------------------------
-    // Construct a RgbColor using HslColor
+    // Construct a RgbcctColor using HtmlColor
     // ------------------------------------------------------------------------
-    RgbColor(const HslColor& color);
+    RgbcctColor(const HtmlColor& color);
 
     // ------------------------------------------------------------------------
-    // Construct a RgbColor using HsbColor
+    // Construct a RgbcctColor using HslColor
     // ------------------------------------------------------------------------
-    RgbColor(const HsbColor& color);
-    
-    // ------------------------------------------------------------------------
-    // Construct a RgbColor using RgbcctColor
-    // ------------------------------------------------------------------------
-    RgbColor(const RgbcctColor& color);
+    RgbcctColor(const HslColor& color);
 
     // ------------------------------------------------------------------------
-    // Construct a RgbColor that will have its values set in latter operations
-    // CAUTION:  The R,G,B members are not initialized and may not be consistent
+    // Construct a RgbcctColor using HsbColor
     // ------------------------------------------------------------------------
-    RgbColor()
+    RgbcctColor(const HsbColor& color);
+
+    // ------------------------------------------------------------------------
+    // Construct a RgbcctColor that will have its values set in latter operations
+    // CAUTION:  The R,G,B, W members are not initialized and may not be consistent
+    // ------------------------------------------------------------------------
+    RgbcctColor()
     {
     };
 
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
-    bool operator==(const RgbColor& other) const
+    bool operator==(const RgbcctColor& other) const
     {
-        return (R == other.R && G == other.G && B == other.B);
+        return (R == other.R && G == other.G && B == other.B && WW == other.WW && WC == other.WC);
     };
 
-    bool operator!=(const RgbColor& other) const
+    bool operator!=(const RgbcctColor& other) const
     {
         return !(*this == other);
+    };
+
+    // ------------------------------------------------------------------------
+    // Returns if the color is grey, all values are equal other than white
+    // ------------------------------------------------------------------------
+    bool IsMonotone() const
+    {
+        return (R == B && R == G);
+    };
+
+    // ------------------------------------------------------------------------
+    // Returns if the color components are all zero, the white component maybe 
+    // anything
+    // ------------------------------------------------------------------------
+    bool IsColorLess() const
+    {
+        return (R == 0 && B == 0 && G == 0);
     };
 
     // ------------------------------------------------------------------------
@@ -125,7 +148,7 @@ struct RgbColor
     // progress - (0.0 - 1.0) value where 0 will return left and 1.0 will return right
     //     and a value between will blend the color weighted linearly between them
     // ------------------------------------------------------------------------
-    static RgbColor LinearBlend(const RgbColor& left, const RgbColor& right, float progress);
+    static RgbcctColor LinearBlend(const RgbcctColor& left, const RgbcctColor& right, float progress);
     
     // ------------------------------------------------------------------------
     // BilinearBlend between four colors by the amount defined by 2d variable
@@ -136,19 +159,22 @@ struct RgbColor
     // x - unit value (0.0 - 1.0) that defines the blend progress in horizontal space
     // y - unit value (0.0 - 1.0) that defines the blend progress in vertical space
     // ------------------------------------------------------------------------
-    static RgbColor BilinearBlend(const RgbColor& c00, 
-        const RgbColor& c01, 
-        const RgbColor& c10, 
-        const RgbColor& c11, 
+    static RgbcctColor BilinearBlend(const RgbcctColor& c00, 
+        const RgbcctColor& c01, 
+        const RgbcctColor& c10, 
+        const RgbcctColor& c11, 
         float x, 
         float y);
 
     // ------------------------------------------------------------------------
-    // Red, Green, Blue color members (0-255) where 
-    // (0,0,0) is black and (255,255,255) is white
+    // Red, Green, Blue, White color members (0-255) where 
+    // (0,0,0,0) is black and (255,255,255, 0) and (0,0,0,255) is white
+    // Note (255,255,255,255) is extreme bright white
     // ------------------------------------------------------------------------
     uint8_t R;
     uint8_t G;
     uint8_t B;
+    uint8_t WW;
+    uint8_t WC;
 };
 

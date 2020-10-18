@@ -10,13 +10,14 @@
 // class mTime;
 #include "5_Sensors/DHT/DHTesp.h"
 class DHTesp;
-#include "1_TaskerManager/mInterfaceController.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include <ArduinoJson.h>
 
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-
+#ifdef USE_MODULE_CORE_WEBSERVER
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif //USE_MODULE_CORE_WEBSERVER
 class mSensorsDHT{
 
   private:

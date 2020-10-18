@@ -64,6 +64,7 @@ int8_t mTelemetry::Tasker(uint8_t function){
 
 
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 void mTelemetry::Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request){
   ConstructJSON_Health(JSON_LEVEL_ALL);
   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
@@ -120,6 +121,7 @@ void mTelemetry::Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerR
   ConstructJSON_Debug_ModuleInterface(JSON_LEVEL_ALL);
   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
 }
+#endif //  #ifdef USE_MODULE_CORE_WEBSERVER
 
 
 void mTelemetry::Init(){

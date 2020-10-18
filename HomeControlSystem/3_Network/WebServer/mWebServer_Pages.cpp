@@ -3,6 +3,7 @@
 
 #include "mWebServer.h"
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 /*************************************************************************************************************************************************************************************
   ************************************************************************************************************************************************************************************
@@ -122,9 +123,9 @@ char buffer[30];
         case 1:{        
           int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
           char colour_ctr[7];
-          if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
-          else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
-          else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
+          if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
+          else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
+          else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
           JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);   
           // JsonBuilderI->Add("fc", "red");    
@@ -2319,3 +2320,6 @@ void mWebServer::WebAppend_Title(){
 void mWebServer::WebAppend_Script_P(PGM_P url){
     BufferWriterI->Append_P(PSTR("<script type='text/javascript' src='%s'></script>"), url);    
 }
+
+
+#endif //   #ifdef USE_MODULE_CORE_WEBSERVER

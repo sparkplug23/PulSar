@@ -115,7 +115,7 @@ void mWiFi::WifiConfig(uint8_t type)
   AddLog_P(LOG_LEVEL_INFO, PSTR("return"));
       return; 
     }
-    #if defined(USE_WEBSERVER) && defined(USE_EMULATION)
+    #if defined(USE_MODULE_CORE_WEBSERVER) && defined(USE_EMULATION)
       //  UdpDisconnect();
     #endif  // USE_EMULATION
     WiFi.disconnect();                       // Solve possible Wifi hangs
@@ -124,9 +124,9 @@ void mWiFi::WifiConfig(uint8_t type)
     #ifndef USE_WPS
         if (WIFI_WPSCONFIG == wifi_config_type) { wifi_config_type = WIFI_MANAGER; }
     #endif  // USE_WPS
-    #ifndef USE_WEBSERVER
+    #ifndef USE_MODULE_CORE_WEBSERVER
         if (WIFI_MANAGER == wifi_config_type) { wifi_config_type = WIFI_SMARTCONFIG; }
-    #endif  // USE_WEBSERVER
+    #endif  // USE_MODULE_CORE_WEBSERVER
     #ifndef USE_SMARTCONFIG
         if (WIFI_SMARTCONFIG == wifi_config_type) { wifi_config_type = WIFI_SERIAL; }
     #endif  // USE_SMARTCONFIG
@@ -140,12 +140,12 @@ void mWiFi::WifiConfig(uint8_t type)
     else if (WIFI_SERIAL == wifi_config_type) {
       AddLog_P(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
     }
-#ifdef USE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
     else if (WIFI_MANAGER == wifi_config_type || WIFI_MANAGER_RESET_ONLY == wifi_config_type) {
      AddLog_P(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
      pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == wifi_config_type);
     }
-#endif  // USE_WEBSERVER
+#endif  // USE_MODULE_CORE_WEBSERVER
   }else{
     
   AddLog_P(LOG_LEVEL_INFO, PSTR("else wifi_config_type"));
@@ -185,7 +185,7 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 
   const char kWifiPhyMode[] = " BGN";
 
-#if defined(USE_WEBSERVER) && defined(USE_EMULATION)
+#if defined(USE_MODULE_CORE_WEBSERVER) && defined(USE_EMULATION)
 //  UdpDisconnect();
 #endif  // USE_EMULATION
 
@@ -706,7 +706,7 @@ void mWiFi::WifiCheck(uint8_t param)
           //}
         #endif  // USE_DISCOVERY
 
-        #ifdef USE_WEBSERVER
+        #ifdef USE_MODULE_CORE_WEBSERVER
           if (pCONT_set->Settings.webserver) {
             pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
             #ifdef USE_DISCOVERY
@@ -722,7 +722,7 @@ void mWiFi::WifiCheck(uint8_t param)
           } else {
             pCONT_web->StopWebserver();
           }
-        #endif  // USE_WEBSERVER
+        #endif  // USE_MODULE_CORE_WEBSERVER
 
       } else {
 
@@ -730,7 +730,7 @@ void mWiFi::WifiCheck(uint8_t param)
     
         //pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
 
-        #if defined(USE_WEBSERVER)
+        #if defined(USE_MODULE_CORE_WEBSERVER)
           //  UdpDisconnect();
         #endif  // USE_EMULATION
         mdns_begun = 0;
