@@ -1657,6 +1657,24 @@ int8_t mSupport::GetStateNumber(const char *state_text)
 
 }
 
+
+
+uint8_t mSupport::ConvertStateNumberIfToggled(uint8_t command_state, uint8_t check_state){
+  
+  uint8_t result_state = 0;
+  if(command_state == STATE_NUMBER_TOGGLE_ID){
+    if(check_state){
+      result_state = STATE_NUMBER_OFF_ID;
+    }else{
+      result_state = STATE_NUMBER_ON_ID;
+    }
+  }
+  return result_state;
+}
+
+
+
+
 void mSupport::SetSerialBaudrate(int baudrate)
 {
   // pCONT_set->Settings.baudrate = baudrate / 1200;

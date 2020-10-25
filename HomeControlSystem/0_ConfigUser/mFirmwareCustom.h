@@ -39,7 +39,7 @@ debug
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-// #define DEVICE_RGBMICRO2 //projector                   // BETA
+#define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT                             // BETA
@@ -48,7 +48,7 @@ debug
 // #define DEVICE_RGBCOOKER
 //  #define DEVICE_RGBUTILITY
 // #define DEVICE_RGBFRIDGE
-#define DEVICE_RGBOUTSIDETREE                           // BETA
+// #define DEVICE_RGBOUTSIDETREE                           // BETA
 // #define DEVICE_CHRISTMAS_HALLWAYTREE                           // BETA
 // #define DEVICE_RGBBEDROOMFLOOR
 
@@ -389,7 +389,7 @@ debug
 
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
 
-  #define STRIP_SIZE_MAX 50//*15
+  #define STRIP_SIZE_MAX 100//*15
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 

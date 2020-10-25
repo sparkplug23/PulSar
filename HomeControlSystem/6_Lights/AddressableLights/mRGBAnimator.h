@@ -551,7 +551,7 @@ class mRGBAnimator{
     // void FadeToNewColour(RgbTypeColor newcolor, uint16_t _time_to_newcolour = 1000, RgbTypeColor fromcolor = RgbTypeColor(0));
     void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
 
-    const char* GetAnimationStatusCtr(char* buffer);
+    const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
 
     // uint32_t tSavedSendData, tSavedSendData2, fSendRGBDellStatus;
     // uint8_t testvariable=0;

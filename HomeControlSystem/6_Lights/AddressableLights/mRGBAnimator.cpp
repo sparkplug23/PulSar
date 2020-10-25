@@ -1896,21 +1896,21 @@ uint8_t mRGBAnimator::ConstructJSON_Mixer(uint8_t json_level){
 /********************************************************************************************/
 /********************************************************************************************/
 
-const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer){
+const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
   if(pCONT_iLight->animator_controller->IsAnimating()){
-    sprintf(buffer, "%s", "Animating");
+    snprintf_P(buffer, buflen, PSTR("Animating"));
     return buffer;
   }
   if(pCONT_iLight->animation.flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int until_next_millis = pCONT_iLight->animation.transition.rate_ms.val-(millis()-pCONT_iLight->animation_changed_millis);
-    float secs_until_next_event = (float)(until_next_millis);
-    secs_until_next_event/=1000;
+    int16_t until_next_millis = pCONT_iLight->animation.transition.rate_ms.val-(millis()-pCONT_iLight->animation_changed_millis);
+    int16_t secs_until_next_event = until_next_millis/1000;
+    // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
 
-    char float_ctr[10];
-    dtostrf(secs_until_next_event,3,1,float_ctr);
+    // char float_ctr[10];
+    // dtostrf(round(secs_until_next_event),3,1,float_ctr);
     // Serial.println(float_ctr);
 
     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetAnimationStatusCtr %d %d"),
@@ -1919,16 +1919,22 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer){
     //   secs_until_next_event
     // );  
     
-     sprintf(buffer,PSTR("Enabled (in %s secs)"),float_ctr);
+    if(secs_until_next_event>=0){
+      snprintf_P(buffer, buflen, PSTR("Enabled (in %d secs)"), secs_until_next_event);//float_ctr);
+    }else{
+      snprintf_P(buffer, buflen, PSTR("Not currently running"));
+      //  sprintf(buffer,PSTR("Not currently running"));//float_ctr);
+    }
+
     // sprintf(ctr,PSTR("Enabled (%d secs)\0"),secs_until_next_event);
     // sprintf(ctr,PSTR("Enabled (123 secs)\0"),secs_until_next_event);
     // Serial.println(ctr);
     return buffer;
   }else{
-    return WARNING_NOTHANDLED_CTR;
+    return D_CSTRING_ERROR_MESSAGE_CTR;
     // return "Paused";
   }
-  return 0;
+  return D_CSTRING_ERROR_MESSAGE_CTR;
 }
 
 
@@ -3375,44 +3381,46 @@ void mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   //external_power_mode = external_power.mode = manual, auto (turn off when off and pCONT_iLight->animation finished)
 
-  if(!obj[D_JSON_ONOFF].isNull()){ 
-    const char* onoff = obj[D_JSON_ONOFF];
-    if(strstr(onoff,"ON")){ 
+
+  // if(!obj[D_JSON_ONOFF].isNull()){ 
+  //   const char* onoff = obj[D_JSON_ONOFF];
+  //   if(strstr(onoff,"ON")){ 
       
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-      #endif
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+  //     #endif
       
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
-      #endif
-      // Add this as "SAVE" state then "LOAD" state
-      memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
+  //     #endif
+  //     // Add this as "SAVE" state then "LOAD" state
+  //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
 
-      pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
-      pCONT_iLight->light_power = true;
+  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
+  //     pCONT_iLight->light_power = true;
 
-      //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
-      data_buffer2.isserviced++;
-    }else if(strstr(onoff,"OFF")){
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-      #endif
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
-      #endif
-      memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
-      pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-      pCONT_iLight->light_power = false;
+  //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
+  //     data_buffer2.isserviced++;
+  //   }else if(strstr(onoff,"OFF")){
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
+  //     #endif
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
+  //     #endif
+  //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
+  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
+  //     pCONT_iLight->light_power = false;
 
-      //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
-      data_buffer2.isserviced++;
-    }else{
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    }
-  }
+  //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
+  //     data_buffer2.isserviced++;
+  //   }else{
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+  //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   }
+  // }
+
 
 
   if(!obj[D_JSON_ANIMATIONENABLE].isNull()){ 
@@ -3719,10 +3727,10 @@ DEBUG_LINE;
   if(!obj[D_JSON_BRIGHTNESS].isNull()){
     uint8_t brt = obj[D_JSON_BRIGHTNESS];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS "ani",brt);
     #endif
     // pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-    pCONT_iLight->setBriRGB(brt);
+    pCONT_iLight->changeBriRGB(brt);
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
     data_buffer2.isserviced++;
@@ -3800,7 +3808,6 @@ void mRGBAnimator::StripUpdate(){
   #endif // STRIP_REPEAT_OUTPUT_MAX
 
 
-  
   // Replicate SetPixel for repeated output
   #ifdef STRIP_REPEAT_OUTPUT_MAX
   int pixels_existing_index = 0;
@@ -3809,6 +3816,9 @@ void mRGBAnimator::StripUpdate(){
     if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
   }
   #endif // STRIP_REPEAT_OUTPUT_MAX
+
+
+
   
 #ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){

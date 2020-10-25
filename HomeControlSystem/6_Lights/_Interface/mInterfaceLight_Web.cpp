@@ -180,7 +180,8 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              getBriRGB() ? "On" : "Off" //make this a state function
+                              getBriRGB() ? D_JSON_ON : D_JSON_OFF //make this a state function
+                              //mSupport::GetStateCtr_P()
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
                               100/2,
@@ -189,7 +190,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_ANIMATIONENABLE, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Animation "),
-                              animation.flags.fEnable_Animation ? "On" : "Off"
+                              animation.flags.fEnable_Animation ? D_JSON_ON : D_JSON_OFF
                             );                  
   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
   

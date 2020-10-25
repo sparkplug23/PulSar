@@ -87,7 +87,8 @@ extern "C" {
 extern struct rst_info resetInfo;
 }
 
-
+const char D_CSTRING_ERROR_MESSAGE_CTR[] = "Error";
+const char PM_CSTRING_ERROR_MESSAGE_CTR[] PROGMEM = "Error";
 
 
 // Returns value if its between values, if not, returns midpoint
@@ -210,6 +211,8 @@ class mSupport{
     uint32_t state_100msecond,state_250msecond;
 
     Ticker tickerOSWatch;
+
+    uint8_t ConvertStateNumberIfToggled(uint8_t command_state, uint8_t check_state);
 
 
     // Randomise array (aka std lib)

@@ -72,7 +72,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",row);
       switch(row){
-        case 0: JsonBuilderI->Add("ih",GetAnimationStatusCtr(buffer)); break;
+        case 0: JsonBuilderI->Add("ih",GetAnimationStatusCtr(buffer, sizeof(buffer))); break;
         case 1:
           if(!pCONT_iLight->auto_time_off_secs){ //off
             JsonBuilderI->Add("ih","Unset");
