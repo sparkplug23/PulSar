@@ -330,7 +330,8 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     uint8_t brt = obj[D_JSON_BRT_CCT];
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
-    setBriCT(brt);
+    changeBriCT(brt);
+    // setBriCT(brt);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_CCT,brt);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -1411,11 +1412,11 @@ void mInterfaceLight::EveryLoop(){
        // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "settings.type == EveryLoop"));
   SubTask_AutoOff();
 
-  if(animation.flags.fForceUpdate){
-   if(animation.mode_id == ANIMATION_MODE_SCENE_ID){ //if scene, with colour change push output (change this to be a flag "animation.force" then do this check)
-      mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-    }
-  }
+  // if(animation.flags.fForceUpdate){
+  //  if(animation.mode_id == ANIMATION_MODE_SCENE_ID){ //if scene, with colour change push output (change this to be a flag "animation.force" then do this check)
+  //     mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  //   }
+  // }
 
   // Single colour methods
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
@@ -1469,9 +1470,9 @@ void mInterfaceLight::EveryLoop(){
   // }
 
   // Clear any flags now it should have been handled
-  if(animation.flags.fForceUpdate){
-    animation.flags.fForceUpdate = false;
-  }
+  // if(animation.flags.fForceUpdate){
+  //   animation.flags.fForceUpdate = false;
+  // }
 
 } // END everyloop
 
@@ -1854,6 +1855,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     JsonBuilderI->Add("WW", mode_singlecolour.colour.WW);
     JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
     JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
+  JsonBuilderI->Level_End();
   JsonBuilderI->Level_Start("tasint_colour");
     JsonBuilderI->Add("R", tasint_colour.R);
     JsonBuilderI->Add("G", tasint_colour.G);
@@ -1862,6 +1864,11 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     JsonBuilderI->Add("WC", tasint_colour.WC);
     JsonBuilderI->Add("WC", tasint_colour.WC);
   JsonBuilderI->Level_End();
+
+
+  JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
+
+
   JsonBuilderI->Level_Start("fade");
     JsonBuilderI->Add("running", fade.running);
   JsonBuilderI->Level_End();
