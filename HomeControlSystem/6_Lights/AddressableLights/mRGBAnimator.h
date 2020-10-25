@@ -345,6 +345,7 @@ class mRGBAnimator{
     FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
     FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
+    FLASHER_FUNCTION_FADE_GRADIENT_ID, //single pixels: static, twinkle, pick from palette
     //another flash to "off" or simple set flash colour to off??
     FLASHER_FUNCTION_FLASH_GLIMMER_RANDOM_ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
     FLASHER_FUNCTION_LENGTH_ID
@@ -433,6 +434,7 @@ class mRGBAnimator{
   void SubTask_Flasher_Animate_Function_Twinkle_Sequential();
   void SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
   void SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+  void SubTask_Flasher_Animate_Function_Fade_Gradient();
 
   void parsesub_Flasher(JsonObjectConst obj);
   void init_flasher_settings();

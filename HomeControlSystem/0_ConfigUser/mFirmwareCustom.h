@@ -39,7 +39,7 @@ debug
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-// #define DEVICE_RGBMICRO2 //projector                   // BETA
+#define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT                             // BETA
@@ -383,13 +383,15 @@ debug
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
   // #define ENABLE_BUG_TRACING
 
   // #define DISABLE_WEBSERVER
 
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
 
-  #define STRIP_SIZE_MAX 100//*15
+  #define STRIP_SIZE_MAX 50//*15
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -553,11 +555,12 @@ debug
   // #define ENABLE_BUG_TRACING
   #define DEBUG_PRINT_FUNCTION_NAME
 
-  #define DISABLE_WEBSERVER
+  // #define DISABLE_WEBSERVER
 
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define STRIP_SIZE_MAX 500//*15
+  #define STRIP_SIZE_MAX 100//*15
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 

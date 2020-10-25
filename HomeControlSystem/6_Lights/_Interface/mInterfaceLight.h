@@ -1156,7 +1156,7 @@ uint8_t getColorMode();
 void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
 
           
-RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position);
+RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position = nullptr);
 
           PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
 

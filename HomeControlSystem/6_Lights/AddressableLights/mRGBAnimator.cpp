@@ -950,6 +950,11 @@ void mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 
 void mRGBAnimator::init_flasher_settings(){
   
+
+
+// A "wipe" or "sine wave" that applies a saturation change across the string. So either, from all christmas coloured to slowly blending from the top of the tree to the bottom, to white (or another solid colour), or apply the saturation change in a loop/rotation. 
+
+
 // // #ifdef DEVICE_OUTSIDETREE
 //   // #define FLASHER_FUNCTION_MIXER_MAX 10
 //   // enum FLASHER_FUNCTION_MIXER{FLASHER_FUNCTION_MIXER_1_ID=0,
@@ -1382,7 +1387,7 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "flashersettings.tSaved.Update"));
     // #endif
 
-    flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
+    flashersettings.function = FLASHER_FUNCTION_FADE_GRADIENT_ID;
 
     switch(flashersettings.function){
       default:
@@ -1404,6 +1409,15 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
       case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
         SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
       break;
+      case FLASHER_FUNCTION_FADE_GRADIENT_ID:
+        SubTask_Flasher_Animate_Function_Fade_Gradient();
+      break;
+
+//https://photos.google.com/search/green%20light/photo/AF1QipONCC4dPcCk3AUmff17venI28Jih0iAsLwwX-Po
+//gradient light
+
+//apply saturation rotation or "wipe"
+
     } //end SWITCH
 
     ConfigureLEDTransitionAnimation();
@@ -1472,6 +1486,62 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Sequential(){
 // //   flashersettings.region=FLASHER_REGION_COLOUR_SELECT_ID;
 // //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flashersettings TEMP FIX METHOD"));
 // // }
+
+}
+
+
+// Fade solid colour from 0 to 75%, and a palette from 25 to 100% (50% overlap)
+void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
+  
+  flashersettings.flag_finish_flasher_pair = false;
+  flashersettings.flags.enable_random_rate = true;
+  
+  // Apply green gradient, brightest at start
+
+  uint16_t start = strip_size/2;
+  uint16_t end = strip_size; 
+  RgbTypeColor colour_gradient = HsbColor(
+                                          pCONT_iLight->HueN2F(120),
+                                          pCONT_iLight->SatN2F(100),
+                                          pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100))  
+                                          );
+  RgbTypeColor colour_random = RgbTypeColor(255,0,0); 
+  HsbColor colour_random_adjusted = HsbColor(0);
+  uint8_t gradient_end_percentage = 75;
+  uint16_t strip_size_gradient = strip_size*(gradient_end_percentage/100.0f);
+  uint16_t strip_size_single   = strip_size*(75/100.0f);
+  
+  start = 0;
+  end = strip_size;
+  for(ledout.index=start;ledout.index<end;ledout.index++){ 
+    animation_colours[ledout.index].DesiredColour = RgbTypeColor(0);
+  }
+  
+  //0 to 75% 
+  start = 0;
+  end = map(75,0,100,0,strip_size);
+  for(ledout.index=start;ledout.index<end;ledout.index++){ 
+    animation_colours[ledout.index].DesiredColour.R = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.R,0));
+    animation_colours[ledout.index].DesiredColour.G = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.G,0));
+    animation_colours[ledout.index].DesiredColour.B = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.B,0));
+  }
+
+  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+  uint8_t pixels = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+  uint8_t desired_pixel;
+  
+  // 25 to 100%
+  start = map(25,0,100,0,strip_size);
+  end = strip_size;
+  for(ledout.index=start;ledout.index<end;ledout.index++){ 
+    desired_pixel = random(0,pixels-1);
+    colour_random = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel);
+    if((ledout.index%3)==0){
+      colour_random_adjusted = RgbTypeColor(colour_random);
+      colour_random_adjusted.B = pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100));
+      animation_colours[ledout.index].DesiredColour = colour_random_adjusted;
+    }
+  }
 
 }
 

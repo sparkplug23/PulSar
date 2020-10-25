@@ -588,7 +588,7 @@ mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
     }
   }
 
-  
+
   mqtthandler_debug_teleperiod.flags.SendNow = true;
   
 
@@ -3178,8 +3178,6 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
     memcpy_P(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }
 
-  *pixel_position = -1;
-
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
   #endif
@@ -3187,7 +3185,7 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
   switch(ptr->flags.fMapIDs_Type){
     default:
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:{
-      *pixel_position = 1;      
+      if(pixel_position != nullptr){ *pixel_position = 1; }
       colour = RgbcctColor(
         GetHsbColour(palette_elements[pixel_num])
       );
@@ -3198,7 +3196,7 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
       index_relative = pixel_num*4; // get expected pixel position
       expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
       
-      *pixel_position = palette_elements[index_relative];
+      if(pixel_position != nullptr){ *pixel_position = palette_elements[index_relative]; }
       // Get colour
       colour = RgbcctColor(
         palette_elements[index_relative+1],
@@ -3216,7 +3214,7 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
       index_relative = pixel_num*2; // get expected pixel position
       expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
       
-      *pixel_position = palette_elements[index_relative];
+      if(pixel_position != nullptr){ *pixel_position = palette_elements[index_relative]; }
 
       colour = RgbcctColor(
         GetHsbColour(palette_elements[index_relative+1])
@@ -4252,71 +4250,71 @@ void mInterfaceLight::calcGammaMultiChannels(uint16_t cur_col_10[5]) {
 }
 
 void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
-  // Apply gamma correction for 8 and 10 bits resolutions, if needed
+//   // Apply gamma correction for 8 and 10 bits resolutions, if needed
 
-  // First apply combined correction to the overall white power
-  if ((LST_COLDWARM == subtype) || (LST_RGBCW == subtype)) {
-    // channels for white are always the last two channels
-    uint32_t cw1 = subtype - 1;       // address for the ColorTone PWM
-    uint32_t cw0 = subtype - 2;       // address for the White Brightness PWM
-    uint16_t white_bri10 = cur_col_10[cw0] + cur_col_10[cw1];   // cumulated brightness
-    uint16_t white_bri10_1023 = (white_bri10 > 1023) ? 1023 : white_bri10;    // max 1023
+//   // First apply combined correction to the overall white power
+//   if ((LST_COLDWARM == subtype) || (LST_RGBCW == subtype)) {
+//     // channels for white are always the last two channels
+//     uint32_t cw1 = subtype - 1;       // address for the ColorTone PWM
+//     uint32_t cw0 = subtype - 2;       // address for the White Brightness PWM
+//     uint16_t white_bri10 = cur_col_10[cw0] + cur_col_10[cw1];   // cumulated brightness
+//     uint16_t white_bri10_1023 = (white_bri10 > 1023) ? 1023 : white_bri10;    // max 1023
 
-#ifdef ESP8266
-    if (
-      // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
-      (pCONT_set->Settings.flag4.pwm_ct_mode)) {   // channel 1 is the color tone, mapped to cold channel (0..255)
-      // Xiaomi Philips bulbs follow a different scheme:
-      cur_col_10[cw1] = getCT10bits();
-      // channel 0=intensity, channel1=temperature
-      if (pCONT_set->Settings.light_settings.light_correction) { // gamma correction
-        cur_col_10[cw0] = ledGamma10_10(white_bri10_1023);    // 10 bits gamma correction
-      } else {
-        cur_col_10[cw0] = white_bri10_1023;  // no gamma, extend to 10 bits
-      }
-    } else
-#endif  // ESP8266
-    if (pCONT_set->Settings.light_settings.light_correction) {
-      // if sum of both channels is > 255, then channels are probably uncorrelated
-      if (white_bri10 <= 1031) {      // take a margin of 8 above 1023 to account for rounding errors
-        // we calculate the gamma corrected sum of CW + WW
-        uint16_t white_bri_gamma10 = ledGamma10_10(white_bri10_1023);
-        // then we split the total energy among the cold and warm leds
-        cur_col_10[cw0] = mSupport::changeUIntScale(cur_col_10[cw0], 0, white_bri10_1023, 0, white_bri_gamma10);
-        cur_col_10[cw1] = mSupport::changeUIntScale(cur_col_10[cw1], 0, white_bri10_1023, 0, white_bri_gamma10);
-      } else {
-        cur_col_10[cw0] = ledGamma10_10(cur_col_10[cw0]);
-        cur_col_10[cw1] = ledGamma10_10(cur_col_10[cw1]);
-      }
-    }
-  }
+// #ifdef ESP8266
+//     if (
+//       // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
+//       (pCONT_set->Settings.flag4.pwm_ct_mode)) {   // channel 1 is the color tone, mapped to cold channel (0..255)
+//       // Xiaomi Philips bulbs follow a different scheme:
+//       cur_col_10[cw1] = getCT10bits();
+//       // channel 0=intensity, channel1=temperature
+//       if (pCONT_set->Settings.light_settings.light_correction) { // gamma correction
+//         cur_col_10[cw0] = ledGamma10_10(white_bri10_1023);    // 10 bits gamma correction
+//       } else {
+//         cur_col_10[cw0] = white_bri10_1023;  // no gamma, extend to 10 bits
+//       }
+//     } else
+// #endif  // ESP8266
+//     if (pCONT_set->Settings.light_settings.light_correction) {
+//       // if sum of both channels is > 255, then channels are probably uncorrelated
+//       if (white_bri10 <= 1031) {      // take a margin of 8 above 1023 to account for rounding errors
+//         // we calculate the gamma corrected sum of CW + WW
+//         uint16_t white_bri_gamma10 = ledGamma10_10(white_bri10_1023);
+//         // then we split the total energy among the cold and warm leds
+//         cur_col_10[cw0] = mSupport::changeUIntScale(cur_col_10[cw0], 0, white_bri10_1023, 0, white_bri_gamma10);
+//         cur_col_10[cw1] = mSupport::changeUIntScale(cur_col_10[cw1], 0, white_bri10_1023, 0, white_bri_gamma10);
+//       } else {
+//         cur_col_10[cw0] = ledGamma10_10(cur_col_10[cw0]);
+//         cur_col_10[cw1] = ledGamma10_10(cur_col_10[cw1]);
+//       }
+//     }
+//   }
 
-  if (pCONT_set->Settings.light_settings.light_correction) {
-    // then apply gamma correction to RGB channels
-    if (LST_RGB <= subtype) {
-      for (uint32_t i = 0; i < 3; i++) {
-        cur_col_10[i] = ledGamma10_10(cur_col_10[i]);
-      }
-    }
-    // If RGBW or Single channel, also adjust White channel
-    if ((LST_SINGLE == subtype) || (LST_RGBW == subtype)) {
-      cur_col_10[subtype - 1] = ledGamma10_10(cur_col_10[subtype - 1]);
-    }
-  }
+//   if (pCONT_set->Settings.light_settings.light_correction) {
+//     // then apply gamma correction to RGB channels
+//     if (LST_RGB <= subtype) {
+//       for (uint32_t i = 0; i < 3; i++) {
+//         cur_col_10[i] = ledGamma10_10(cur_col_10[i]);
+//       }
+//     }
+//     // If RGBW or Single channel, also adjust White channel
+//     if ((LST_SINGLE == subtype) || (LST_RGBW == subtype)) {
+//       cur_col_10[subtype - 1] = ledGamma10_10(cur_col_10[subtype - 1]);
+//     }
+//   }
 }
 
 
 bool mInterfaceLight::isChannelGammaCorrected(uint32_t channel) {
-  if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
-  if (channel >= subtype) { return false; }     // Out of range
-#ifdef ESP8266
-  if (
-    // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
-  (pCONT_set->Settings.flag4.pwm_ct_mode)) {
-    if ((LST_COLDWARM == subtype) && (1 == channel)) { return false; }   // PMW reserved for CT
-    if ((LST_RGBCW == subtype) && (4 == channel)) { return false; }   // PMW reserved for CT
-  }
-#endif  // ESP8266
+//   if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
+//   if (channel >= subtype) { return false; }     // Out of range
+// #ifdef ESP8266
+//   if (
+//     // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
+//   (pCONT_set->Settings.flag4.pwm_ct_mode)) {
+//     if ((LST_COLDWARM == subtype) && (1 == channel)) { return false; }   // PMW reserved for CT
+//     if ((LST_RGBCW == subtype) && (4 == channel)) { return false; }   // PMW reserved for CT
+//   }
+// #endif  // ESP8266
   return true;
 }
 
