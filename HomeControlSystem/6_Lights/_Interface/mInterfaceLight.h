@@ -109,23 +109,23 @@ enum LightColorModes {
   LCM_RGB = 1, LCM_CT = 2, LCM_BOTH = 3 
 };
 
-struct LRgbColor {
-  uint8_t R, G, B;
-};
-const uint8_t MAX_FIXED_COLOR = 12;
-// const LRgbColor kFixedColor[MAX_FIXED_COLOR] PROGMEM =
-//   { 255,0,0, 0,255,0, 0,0,255, 228,32,0, 0,228,32, 0,32,228, 188,64,0, 0,160,96, 160,32,240, 255,255,0, 255,0,170, 255,255,255 };
+// struct LRgbColor {
+//   uint8_t R, G, B;
+// };
+// const uint8_t MAX_FIXED_COLOR = 12;
+// // const LRgbColor kFixedColor[MAX_FIXED_COLOR] PROGMEM =
+// //   { 255,0,0, 0,255,0, 0,0,255, 228,32,0, 0,228,32, 0,32,228, 188,64,0, 0,160,96, 160,32,240, 255,255,0, 255,0,170, 255,255,255 };
 
-struct LWColor {
-  uint8_t W;
-};
-const uint8_t MAX_FIXED_WHITE = 4;
-// const LWColor kFixedWhite[MAX_FIXED_WHITE] PROGMEM = { 0, 255, 128, 32 };
+// struct LWColor {
+//   uint8_t W;
+// };
+// const uint8_t MAX_FIXED_WHITE = 4;
+// // const LWColor kFixedWhite[MAX_FIXED_WHITE] PROGMEM = { 0, 255, 128, 32 };
 
-struct LCwColor {
-  uint8_t C, W;
-};
-const uint8_t MAX_FIXED_COLD_WARM = 4;
+// struct LCwColor {
+//   uint8_t C, W;
+// };
+// const uint8_t MAX_FIXED_COLD_WARM = 4;
 // const LCwColor kFixedColdWarm[MAX_FIXED_COLD_WARM] PROGMEM = { 0,0, 255,0, 0,255, 128,128 };
 
 
@@ -289,6 +289,8 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     mInterfaceLight(){};
 
     // void Module_Init();
+
+    uint8_t force_strip_update_test = false;
 
     typedef union {
       uint8_t data; // allows full manipulating

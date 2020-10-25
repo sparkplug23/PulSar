@@ -364,28 +364,6 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
   // #endif // PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   
 
-  if(!obj[D_JSON_SCENENAME].isNull()){ 
-    const char* mode_singlecolourctr = obj[D_JSON_SCENENAME];
-    if((tmp_id=GetSceneIDbyName(mode_singlecolourctr))>=0){
-      mode_singlecolour.name_id = tmp_id;
-      animation.mode_id = ANIMATION_MODE_SCENE_ID; //#Idea. make optional
-
-      // if(mode_singlecolour.name_id == MODE_SINGLECOLOUR_PALETTE_SINGLE_ID){
-      //   mode_singlecolour.parts = 0;
-      // }
-      mode_singlecolour.parts = 0;
-
-      //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      char buffer[30];
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,GetSceneName(buffer, sizeof(buffer)));
-      //#endif
-      data_buffer2.isserviced++;
-    }else{
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,mode_singlecolourctr);
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    }
-  }
   
   // Includes special case of hue=361 which sets saturation to 0 for white
   if(!obj[D_JSON_HUE].isNull()){ 
@@ -582,7 +560,35 @@ void mInterfaceLight::parsesub_ModeScene(JsonObjectConst obj){
     #endif
   }
 
+//temp fix
+mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
     
+
+    
+  if(!obj[D_JSON_SCENENAME].isNull()){ 
+    const char* mode_singlecolourctr = obj[D_JSON_SCENENAME];
+    if((tmp_id=GetSceneIDbyName(mode_singlecolourctr))>=0){
+      mode_singlecolour.name_id = tmp_id;
+      animation.mode_id = ANIMATION_MODE_SCENE_ID; //#Idea. make optional
+
+      // if(mode_singlecolour.name_id == MODE_SINGLECOLOUR_PALETTE_SINGLE_ID){
+      //   mode_singlecolour.parts = 0;
+      // }
+      mode_singlecolour.parts = 0;
+
+      //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      char buffer[30];
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,GetSceneName(buffer, sizeof(buffer)));
+      //#endif
+      data_buffer2.isserviced++;
+    }else{
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,mode_singlecolourctr);
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    }
+  }
+
+  
   mqtthandler_debug_teleperiod.flags.SendNow = true;
   
 
