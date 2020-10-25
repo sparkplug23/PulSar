@@ -290,10 +290,27 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
     // void Module_Init();
 
+    typedef union {
+      uint8_t data; // allows full manipulating
+      struct { 
+        // enable animations (pause)
+        uint8_t enable_cct_channel_sliders : 1;
 
-    #ifdef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+        // Reserved
+        uint8_t reserved : 7;
+      };
+    } SETTINGS_FLAGS;
+
+
+    struct SETTINGS{
+      SETTINGS_FLAGS flags;
+
+    }settings;
+
+
+    //#ifdef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
     NeoPixelAnimator* animator_controller = nullptr;
-    #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    //#endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
 
   void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
 
@@ -932,8 +949,11 @@ void SetColour_Hue(uint16_t hue);
 void SetColour_Sat(uint8_t  sat);
 void SetColour_Brt(uint8_t  brt);
 
+
+uint16_t light_count = 1;
+
   uint32_t WebColorFromColourMap(uint8_t i);
-  uint32_t WebColorFromColourType(RgbwColor rgb);
+  // uint32_t WebColorFromColourType(RgbwColor rgb);
   uint32_t WebColorFromColourType(RgbColor rgb);
   
 RgbTypeColor Color32bit2RgbColour(uint32_t colour32bit);
@@ -1164,7 +1184,7 @@ RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, 
         // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
         struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
         
-        // const char* postfix_topic_sensors = "sensors";
+        // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
         struct handler<mInterfaceLight> mqtthandler_sensor_ifchanged;
         struct handler<mInterfaceLight> mqtthandler_sensor_teleperiod;
         

@@ -134,7 +134,7 @@ uint8_t Change_Detected(uint8_t sensor_id);
     struct handler<mPulseCounter>* mqtthandler_ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPulseCounter> mqtthandler_settings_teleperiod;
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mPulseCounter> mqtthandler_sensor_ifchanged;
     struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;
 

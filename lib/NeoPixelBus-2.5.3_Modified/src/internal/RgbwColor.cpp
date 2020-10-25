@@ -63,6 +63,7 @@ RgbwColor::RgbwColor(const HsbColor& color)
     *this = rgbColor;
 }
 
+
 uint8_t RgbwColor::CalculateBrightness() const
 {
     uint8_t colorB = (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);

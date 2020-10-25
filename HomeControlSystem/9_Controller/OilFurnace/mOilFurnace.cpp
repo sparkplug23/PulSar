@@ -220,7 +220,7 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 
 
 
-int8_t mOilFurnace::parse_JSONCommand(){
+void mOilFurnace::parse_JSONCommand(){
 
 
   // Check if instruction is for me
@@ -228,11 +228,11 @@ int8_t mOilFurnace::parse_JSONCommand(){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
 
 
-return 0;
+return;
   // u
   // int8_t tmp_id = 0;
 
@@ -268,12 +268,12 @@ return 0;
 
 void mOilFurnace::init_ultrasonic_sensor_parameters(){
 
-#ifdef USE_MODULE_SENSORS_DS18B20
+// #ifdef USE_MODULE_SENSORS_DS18B20
   pCONT->mus->ultrasonic.settings.measure_rate_ms = 2000;
   pCONT->mus->ultrasonic.settings.blocking_time_ms = 1000;
-  pCONT->mus->ultrasonic.settings.duration_limit_max = 8000;
-  pCONT->mus->ultrasonic.settings.duration_limit_min = 3000;
-#endif
+  pCONT->mus->ultrasonic.settings.duration_limit_max = 10000;
+  pCONT->mus->ultrasonic.settings.duration_limit_min = 4000;
+// #endif
 
 }
 
@@ -363,61 +363,62 @@ int8_t mOilFurnace::Tasker(uint8_t function){
    * WEBPAGE SECTION * 
   *******************/
   //
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
-  switch(function){
+  // #ifdef USE_MODULE_CORE_WEBSERVER
+  // return Tasker_Web(function);
+  // #endif // USE_MODULE_CORE_WEBSERVER
 
-    // case FUNC_WEB_SHOW_PARAMETERS:{
+  // switch(function){
+
+  //   // case FUNC_WEB_SHOW_PARAMETERS:{
       
-    //   uint8_t fsize = 16;
-    //   char name_ctr[20];
-    //   char value_ctr[10];
-    //   char float_ctr[20];
+  //   //   uint8_t fsize = 16;
+  //   //   char name_ctr[20];
+  //   //   char value_ctr[10];
+  //   //   char float_ctr[20];
 
-    //   memset(value_ctr,0,sizeof(value_ctr));
-    //   memset(name_ctr,0,sizeof(name_ctr));
+  //   //   memset(value_ctr,0,sizeof(value_ctr));
+  //   //   memset(name_ctr,0,sizeof(name_ctr));
         
 
-    //   dtostrf(oiltank.instant.final.litres_of_usable_oil,4,1,float_ctr);
+  //   //   dtostrf(oiltank.instant.final.litres_of_usable_oil,4,1,float_ctr);
       
-    //   sprintf(name_ctr,"Oil Remaining");
+  //   //   sprintf(name_ctr,"Oil Remaining");
       
-    //   sprintf(value_ctr,"%s %s",float_ctr,"Litres");
+  //   //   sprintf(value_ctr,"%s %s",float_ctr,"Litres");
 
-    //   BufferWriterI->Append_P(HTTP_SNS_GENERIC, 
-    //     name_ctr,
-    //     value_ctr
-    //   );
+  //   //   BufferWriterI->Append_P(HTTP_SNS_GENERIC, 
+  //   //     name_ctr,
+  //   //     value_ctr
+  //   //   );
 
-    // }break;
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      // BufferWriterI->Append_P(PSTR("<tr>"));
-      //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      //   BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_oil","?");   
-      // BufferWriterI->Append_P(PSTR("</tr>"));
-    break; 
-    // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
-    //   // JsonBuilder_Add("/fetch/tab_oil_specific.json",1000);
-    // break;
+  //   // }break;
+  //   case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+  //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+  //     //   BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Tank Height");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+  //     //   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_oil","?");   
+  //     // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  //   break; 
+  //   // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+  //   //   // JsonBuilder_Add("/fetch/tab_oil_specific.json",1000);
+  //   // break;
 
-    case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
-      // JsonBuilderI->Add("/draw/palette_selector.json",-500);
-    break;
-    case FUNC_WEB_ADD_HANDLER:
-      WebPage_Root_AddHandlers();
-    break;
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      WebAppend_Root_Draw_Table();
-    break; 
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break;
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:
-      // WebAppend_Root_ControlUI();
-    break;
-    // Generated in "InterfaceLighting" and populated in hardware classes
-  }// END switch
+  //   case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+  //     // JsonBuilderI->Add("/draw/palette_selector.json",-500);
+  //   break;
+  //   case FUNC_WEB_ADD_HANDLER:
+  //     WebPage_Root_AddHandlers();
+  //   break;
+  //   case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+  //     WebAppend_Root_Draw_Table();
+  //   break; 
+  //   case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+  //     WebAppend_Root_Status_Table();
+  //   break;
+  //   case FUNC_WEB_APPEND_ROOT_BUTTONS:
+  //     // WebAppend_Root_ControlUI();
+  //   break;
+  //   // Generated in "InterfaceLighting" and populated in hardware classes
+  // }// END switch
 
 }
 int8_t mOilFurnace::Tasker(uint8_t function, JsonObjectConst obj){
@@ -431,7 +432,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonObjectConst obj){
   }
 }
 
-int8_t mOilFurnace::parsesub_CheckAll(JsonObjectConst obj){
+void mOilFurnace::parsesub_CheckAll(JsonObjectConst obj){
   // parsesub_ModeManual(obj);
   // parsesub_ProgramTimers(obj);
   // parsesub_ProgramTemps(obj);
@@ -451,7 +452,7 @@ int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-int8_t mOilFurnace::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mOilFurnace::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   
   int8_t isserviced = false;
   

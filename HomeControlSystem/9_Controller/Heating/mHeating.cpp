@@ -549,12 +549,12 @@ void mHeating::SubTask_HeatingTemps(void){
     // Schedule temp settings
     switch(program_temps[device_id].schedule.mode_sch){
       case SCHEDULED_MANUAL_ON_ID:
-        program_temps[device_id].status.mode = TEMP_MODE_HEATING;
+        program_temps[device_id].status.mode = TEMP_MODE_HEATING_ID;
         activeprograms[device_id].temps.state = ACTIVEP_ON;
         fRunTemp = true;
         break;
       case SCHEDULED_ON_ID: //IE RUNNING
-        program_temps[device_id].status.mode = TEMP_MODE_HEATING;
+        program_temps[device_id].status.mode = TEMP_MODE_HEATING_ID;
         activeprograms[device_id].temps.state = ACTIVEP_ON;
         fRunTemp = true;
         //if on, check time limits
@@ -616,7 +616,7 @@ void mHeating::SubTask_HeatingTemps(void){
             program_temps[device_id].time_maintaining.limit = -1;
           }else{ //stay on
             SetHeater(device_id,1);
-            program_temps[device_id].status.mode = TEMP_MODE_HEATING;
+            program_temps[device_id].status.mode = TEMP_MODE_HEATING_ID;
             activeprograms[device_id].temps.state = ACTIVEP_ON;
           }
 
@@ -627,7 +627,7 @@ void mHeating::SubTask_HeatingTemps(void){
       
             // Check should we maintain temp (> minus 1, less than max)
             if((program_temps[device_id].time_maintaining.on>=0)&&(program_temps[device_id].time_maintaining.on < program_temps[device_id].time_maintaining.limit)){
-              program_temps[device_id].status.mode = TEMP_MODE_MAINTAINING;
+              program_temps[device_id].status.mode = TEMP_MODE_MAINTAINING_ID;
               activeprograms[device_id].temps.state = ACTIVEP_ON;
             }
             // Turn off
@@ -649,11 +649,11 @@ void mHeating::SubTask_HeatingTemps(void){
 
               if(program_temps[device_id].schedule.mode_sch == SCHEDULED_ON_ID){
                 program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
-                program_temps[device_id].status.mode = TEMP_MODE_OFF;
+                program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
                 activeprograms[device_id].temps.state = ACTIVEP_OFF;
               }else{ //manual
                 program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
-                program_temps[device_id].status.mode = TEMP_MODE_OFF;
+                program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
                 activeprograms[device_id].temps.state = ACTIVEP_OFF;
               }
 
@@ -708,22 +708,22 @@ int i=0;
       default:
         memcpy(&program_temps[device_id].status.data.ctr[0],"Error:Unknown",sizeof("Error:Unknown")-1);
       break;
-      case TEMP_MODE_OFF:
+      case TEMP_MODE_OFF_ID:
         memcpy(&program_temps[device_id].status.data.ctr[0],"Off",sizeof("Off")-1); program_temps[device_id].status.data.len += sizeof("Off")-1;
       break;
-      case TEMP_MODE_HEATING: // Heating for 0/120 minutes
+      case TEMP_MODE_HEATING_ID: // Heating for 0/120 minutes
         memset(time_ctr,'\0',sizeof(time_ctr));
         sprintf(time_ctr, "Heating for %d/%d minutes",(program_temps[device_id].time_running.on<1?0:program_temps[device_id].time_running.on),(program_temps[device_id].time_running.limit));
         memcpy(&program_temps[device_id].status.data.ctr[program_temps[device_id].status.data.len],time_ctr,strlen(time_ctr));
         program_temps[device_id].status.data.len += strlen(time_ctr);
       break;
-      case TEMP_MODE_MAINTAINING:
+      case TEMP_MODE_MAINTAINING_ID:
         memset(time_ctr,'\0',sizeof(time_ctr));
         sprintf(time_ctr, "Maintaining for %d/%d minutes",(program_temps[device_id].time_maintaining.on<1?0:program_temps[device_id].time_maintaining.on),(program_temps[device_id].time_maintaining.limit));
         memcpy(&program_temps[device_id].status.data.ctr[program_temps[device_id].status.data.len],time_ctr,strlen(time_ctr));
         program_temps[device_id].status.data.len += strlen(time_ctr);
       break;
-      case TEMP_MODE_SCHEDULED: // Waiting: Set for 07:00 (T-03:45)
+      case TEMP_MODE_SCHEDULED_ID: // Waiting: Set for 07:00 (T-03:45)
         memset(time_ctr,'\0',sizeof(time_ctr));
         sprintf(time_ctr, "Set for %02d:%02d (in %02d:%02d)",
         program_temps[device_id].schedule.ontime.hour,program_temps[device_id].schedule.ontime.minute,
@@ -731,7 +731,7 @@ int i=0;
         memcpy(&program_temps[device_id].status.data.ctr[program_temps[device_id].status.data.len],time_ctr,strlen(time_ctr));
         program_temps[device_id].status.data.len += strlen(time_ctr);
       break;
-      case TEMP_MODE_SPLASH_RUN_TIME:
+      case TEMP_MODE_SPLASH_RUN_TIME_ID:
         // Scheduled to run in xx hours and yy minutes (xx:xx:xx/yy:yy:yy)
         if(abs(millis()-program_temps[device_id].status.tSplashTime)<10000){//program_temps[device_id].status.msSplashtime){
           memset(time_ctr,'\0',sizeof(time_ctr));
@@ -1944,8 +1944,6 @@ int8_t mHeating::Tasker(uint8_t function){
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    break;
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); // Reset to the initial parameters
     break;
@@ -1981,10 +1979,12 @@ int8_t mHeating::Tasker(uint8_t function, JsonObjectConst obj){
 }
 
 
-int8_t mHeating::parsesub_CheckAll(JsonObjectConst obj){
+void mHeating::parsesub_CheckAll(JsonObjectConst obj){
+
   parsesub_ModeManual(obj);
   parsesub_ProgramTimers(obj);
   parsesub_ProgramTemps(obj);
+
 }
 
 int8_t mHeating::CheckAndExecute_JSONCommands(JsonObjectConst obj){
@@ -2001,63 +2001,197 @@ int8_t mHeating::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-int8_t mHeating::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
-  
-  int8_t isserviced = false;
-  
+void mHeating::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+    
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
     #endif
-    isserviced += parsesub_ModeManual(obj);
+    parsesub_ModeManual(obj);
   }else
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
     #endif
-    isserviced += parsesub_ProgramTimers(obj);
+    parsesub_ProgramTimers(obj);
   }else
   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
     #endif
-    isserviced += parsesub_ProgramTemps(obj);
+    parsesub_ProgramTemps(obj);
   }
 
 }
 
 
-int8_t mHeating::parsesub_ModeManual(JsonObjectConst obj){
+void mHeating::parsesub_ModeManual(JsonObjectConst obj){
 
-  int8_t device_id,schedule_id,isserviced;
+  int8_t device_id,schedule_id;
   uint8_t timeon,tempset;
 
   if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
   }else{
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-    return 0; // Unknown device, can't execute
+    //Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return; // Unknown device, can't execute
   }
 
   if(!obj[D_JSON_TIME_ON].isNull()){ 
     program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
     program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
     // fForceHeatingTimerUpdate = true;
     functionhandler_programs_timers.flags.run_now = true;
     isanychanged_timers = true;
-    isserviced++;
+    data_buffer2.isserviced++;
   }
 
   if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
     program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
     fForceHeatingTempUpdate = true;
-    isserviced++;
+    data_buffer2.isserviced++;
+  }
+
+// #ifdef USE_HEATING_TEMPS
+//   // TEMP RELATED
+//   if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
+//     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
+//     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
+//     fForceHeatingTempUpdate = true;
+//     data_buffer2.isserviced++;
+//   }
+
+//   // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
+//   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+//   //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+//   //   fForceHeatingTempsUpdate = true;
+//   //   data_buffer2.isserviced++;
+
+//   //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
+//   //     program_temps[device_id].time_running.on = 0;
+//   //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
+//   //     program_temps[device_id].time_running.on = -1;
+//   //     program_temps[device_id].time_maintaining.on = -1;
+//   //     SetHeater(device_id,0);
+//   //   }
+//   // }
+//   // if(!obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
+//   //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
+//   //   program_temps[device_id].schedule.ontime = ontime;
+
+//   //   //pCONT->mso->MessagePrint("ontime>>\t "); 
+//   //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
+//   //   //pCONT->mso->MessagePrintln(" ");
+//   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
+//   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
+//   //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
+
+//   //   // Check if new hour is tomorrow
+//   //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->mtime.hour){
+//   //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
+//   //   // }
+
+//   //   // add off time based on max limit possible
+//   //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
+//   //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
+
+//   //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
+//   //   //pCONT->mso->MessagePrintln(" ");
+//   //   //pCONT->mso->MessagePrint("mtime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->mtime);
+
+//   //    // splash result (add new ctr for this message)
+//   //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
+//   //    program_temps[device_id].schedule.fHasRun = 0;
+//   //    program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
+//   //    program_temps[device_id].status.mode_next = program_temps[device_id].status.mode;
+//   //    program_temps[device_id].status.mode = TEMP_MODE_SPLASH_RUN_TIME;
+
+//   //    program_temps[device_id].status.tSplashTime = millis();
+//   //    program_temps[device_id].status.msSplashtime = 5000; // 2 seconds
+
+//   //   fForceHeatingTempsUpdate = true;
+//   //   fForceMQTTUpdate = true;
+
+
+//   //   data_buffer2.isserviced++;
+//   // }
+//   #endif
+
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+  mqtthandler_program_temps_ifchanged.flags.SendNow = true;
+
+  //    temp mesaure, send everything
+  // MQTTHandler_Set_fSendNow();
+
+  
+
+}
+
+
+
+void mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
+
+  int8_t device_id,schedule_id;
+  uint8_t timeon,tempset;
+
+  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+    //Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return; // Unknown device, can't execute
+  }
+
+  if(!obj[D_JSON_TIME_ON].isNull()){ 
+    program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
+    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
+    // fForceHeatingTimerUpdate = true;
+    functionhandler_programs_timers.flags.run_now = true;
+    isanychanged_timers = true;
+    data_buffer2.isserviced++;
+  }
+
+  if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
+    program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
+    fForceHeatingTempUpdate = true;
+    data_buffer2.isserviced++;
+  }
+
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+
+  //    temp mesaure, send everything
+  // MQTTHandler_Set_fSendNow();
+
+  
+
+}
+
+
+void mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
+
+  int8_t device_id,schedule_id;
+  uint8_t timeon,tempset;
+
+  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
+  }else{
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+    //Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
+    return; // Unknown device, can't execute
   }
 
 #ifdef USE_HEATING_TEMPS
@@ -2065,17 +2199,16 @@ int8_t mHeating::parsesub_ModeManual(JsonObjectConst obj){
   if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
     fForceHeatingTempUpdate = true;
-    isserviced++;
+    data_buffer2.isserviced++;
   }
 
   // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+  //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
   //   fForceHeatingTempsUpdate = true;
-  //   isserviced++;
 
   //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
   //     program_temps[device_id].time_running.on = 0;
@@ -2122,153 +2255,13 @@ int8_t mHeating::parsesub_ModeManual(JsonObjectConst obj){
   //   fForceHeatingTempsUpdate = true;
   //   fForceMQTTUpdate = true;
 
-
-  //   isserviced++;
   // }
   #endif
 
-  fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+  mqtthandler_program_temps_ifchanged.flags.SendNow = true;
 
   //    temp mesaure, send everything
-  MQTTHandler_Set_fSendNow();
-
-  
-
-}
-
-
-
-int8_t mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
-
-  int8_t device_id,schedule_id,isserviced;
-  uint8_t timeon,tempset;
-
-  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
-  }else{
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-    return 0; // Unknown device, can't execute
-  }
-
-  if(!obj[D_JSON_TIME_ON].isNull()){ 
-    program_timers[device_id].time_minutes_on = obj[D_JSON_TIME_ON];
-    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,program_timers[device_id].time_minutes_on);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON, program_timers[device_id].time_minutes_on);
-    // fForceHeatingTimerUpdate = true;
-    functionhandler_programs_timers.flags.run_now = true;
-    isanychanged_timers = true;
-    isserviced++;
-  }
-
-  if(!obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT].isNull()){ 
-    program_temps[device_id].time_running.limit = obj[D_JSON_TIME_RUNNING][D_JSON_LIMIT];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_LIMIT,program_temps[device_id].time_running.limit);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_LIMIT,program_temps[device_id].time_running.limit);
-    fForceHeatingTempUpdate = true;
-    isserviced++;
-  }
-
-  fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
-
-  //    temp mesaure, send everything
-  MQTTHandler_Set_fSendNow();
-
-  
-
-}
-
-
-int8_t mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
-
-  int8_t device_id,schedule_id,isserviced;
-  uint8_t timeon,tempset;
-
-  if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
-  }else{
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-    return 0; // Unknown device, can't execute
-  }
-
-#ifdef USE_HEATING_TEMPS
-  // TEMP RELATED
-  if(!obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
-    program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-    fForceHeatingTempUpdate = true;
-    isserviced++;
-  }
-
-  // if(!obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
-  //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-  //   fForceHeatingTempsUpdate = true;
-  //   isserviced++;
-
-  //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
-  //     program_temps[device_id].time_running.on = 0;
-  //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
-  //     program_temps[device_id].time_running.on = -1;
-  //     program_temps[device_id].time_maintaining.on = -1;
-  //     SetHeater(device_id,0);
-  //   }
-  // }
-  // if(!obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
-  //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
-  //   program_temps[device_id].schedule.ontime = ontime;
-
-  //   //pCONT->mso->MessagePrint("ontime>>\t "); 
-  //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
-  //   //pCONT->mso->MessagePrintln(" ");
-  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
-  //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
-  //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
-
-  //   // Check if new hour is tomorrow
-  //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->mtime.hour){
-  //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
-  //   // }
-
-  //   // add off time based on max limit possible
-  //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
-  //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
-
-  //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
-  //   //pCONT->mso->MessagePrintln(" ");
-  //   //pCONT->mso->MessagePrint("mtime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->mtime);
-
-  //    // splash result (add new ctr for this message)
-  //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
-  //    program_temps[device_id].schedule.fHasRun = 0;
-  //    program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
-  //    program_temps[device_id].status.mode_next = program_temps[device_id].status.mode;
-  //    program_temps[device_id].status.mode = TEMP_MODE_SPLASH_RUN_TIME;
-
-  //    program_temps[device_id].status.tSplashTime = millis();
-  //    program_temps[device_id].status.msSplashtime = 5000; // 2 seconds
-
-  //   fForceHeatingTempsUpdate = true;
-  //   fForceMQTTUpdate = true;
-
-
-  //   isserviced++;
-  // }
-  #endif
-
-  fForceMQTTUpdate = true;
-  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
-
-  //    temp mesaure, send everything
-  MQTTHandler_Set_fSendNow();
+  // MQTTHandler_Set_fSendNow();
 
   
 
@@ -2417,7 +2410,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_timers;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTimers;
   
   mqtthandler_ptr = &mqtthandler_program_timers_teleperiod;
@@ -2427,7 +2420,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_timers;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTimers;
 
   mqtthandler_ptr = &mqtthandler_program_temps_ifchanged;
@@ -2437,7 +2430,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_temps;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTemps;
   
   mqtthandler_ptr = &mqtthandler_program_temps_teleperiod;
@@ -2447,7 +2440,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_temps;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTemps;
 
   mqtthandler_ptr = &mqtthandler_program_overview_ifchanged;
@@ -2457,7 +2450,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_overview;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramActive;
   
   mqtthandler_ptr = &mqtthandler_program_overview_teleperiod;
@@ -2467,7 +2460,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_program_overview;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramActive;
   
   mqtthandler_ptr = &mqtthandler_relays_teleperiod;
@@ -2477,7 +2470,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_relays;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_HeatingRelays;
 
   mqtthandler_ptr = &mqtthandler_relays_ifchanged;
@@ -2487,7 +2480,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_relays;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_HeatingRelays;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_ifchanged;
@@ -2497,7 +2490,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;//postfix_topic_sensor_pipes;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_teleperiod;
@@ -2507,7 +2500,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc1m;
@@ -2517,7 +2510,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTempsROC1m;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc10m;
@@ -2527,7 +2520,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60*10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTempsROC10m;
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_ifchanged;
@@ -2537,7 +2530,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_climate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTemps;
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_teleperiod;
@@ -2547,7 +2540,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_climate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc1m;
@@ -2557,7 +2550,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_climate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTempsROC1m;
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc10m;
@@ -2567,7 +2560,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60*10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_climate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTempsROC10m;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_ifchanged;
@@ -2577,7 +2570,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes_colours;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PIPES_COLOUR_CTR;//postfix_topic_sensor_pipes_colours;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructSON_PipeTempsByColours;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_teleperiod;
@@ -2587,7 +2580,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensor_pipes_colours;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PIPES_COLOUR_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructSON_PipeTempsByColours;
 
   // Measure and report every second
@@ -2644,6 +2637,7 @@ void mHeating::MQTTHandler_Set_TelePeriod(){
 
 } //end "MQTTHandler_Set_TelePeriod"
 
+
 void mHeating::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t flag_handle_all = false, handler_not_found = false;
@@ -2671,8 +2665,8 @@ void mHeating::MQTTHandler_Sender(uint8_t mqtt_handler_id){
       case MQTT_HANDLER_MODULE_SENSOR_CLIMATE_ROC10M_ID:            mqtthandler_ptr=&mqtthandler_sensor_climate_roc10m; break;
       case MQTT_HANDLER_MODULE_SENSOR_PIPES_COLOURS_IFCHANGED_ID:   mqtthandler_ptr=&mqtthandler_sensor_pipes_colours_ifchanged; break;
       case MQTT_HANDLER_MODULE_SENSOR_PIPES_COLOURS_TELEPERIOD_ID:  mqtthandler_ptr=&mqtthandler_sensor_pipes_colours_teleperiod; break;
-      case MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID:                 mqtthandler_ptr=&mqtthandler_relays_ifchanged; break;
-      case MQTT_HANDLER_MODULE_DRIVERS_RELAYS_TELEPERIOD_ID:                mqtthandler_ptr=&mqtthandler_relays_teleperiod; break;
+      case MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID:         mqtthandler_ptr=&mqtthandler_relays_ifchanged; break;
+      case MQTT_HANDLER_MODULE_DRIVERS_RELAYS_TELEPERIOD_ID:        mqtthandler_ptr=&mqtthandler_relays_teleperiod; break;
       default: handler_not_found=true; break; // nothing 
     } // switch
 

@@ -259,6 +259,36 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
   return count;
 }
 
+
+
+// JsonObjectConst mSettings::Function_Template_Parse_Only(){
+
+
+//   // load from progmem
+//   uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
+//   progmem_size = progmem_size>1500?1500:progmem_size;
+//   // create parse buffer
+//   char buffer[progmem_size];
+//   // Read into local
+//   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+
+//   AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "FUNCTION_TEMPLATE READ = \"%s\""), buffer);
+
+//   DynamicJsonDocument doc(1500);
+//   DeserializationError error = deserializeJson(doc, buffer);
+
+//   if(error){
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+//     return;
+//   }
+//   JsonObjectConst obj = doc.as<JsonObject>();
+//   return obj;
+
+
+// }
+
+
+
 // load in driver and sensor template settings
 void mSettings::Function_Template_Load(){
 
@@ -286,18 +316,10 @@ void mSettings::Function_Template_Load(){
   }
   JsonObjectConst obj = doc.as<JsonObject>();
 
-  // pObj = &obj;
-
-  // Serial.println("ERROR: NOT HANDLED");
-  // parsesub_TopicCheck_JSONCommand(obj);
-
   // clear old buffer
   pCONT_set->ClearAllDeviceName();
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
-
-  // Reads the object for any commands
-  // pCONT->Tasker_Interface_AJ(FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD, obj);
 
   #endif //USE_FUNCTION_TEMPLATE
   
@@ -705,142 +727,6 @@ void mSettings::RtcRebootLoad(void)
 }
 
 
-/*********************************************************************************************\
- * Optional EEPROM support based on EEPROM library and tuned for Tasmota
-\*********************************************************************************************/
-//#define USE_EEPROM
-#ifdef USE_EEPROM
-
-uint32_t eeprom_sector = SPIFFS_END;
-uint8_t* eeprom_data = 0;
-size_t eeprom_size = 0;
-bool eeprom_dirty = false;
-
-void EepromBegin(size_t size)
-{
-  if (size <= 0) { return; }
-  if (size > SPI_FLASH_SEC_SIZE - sizeof(Settings) -4) { size = SPI_FLASH_SEC_SIZE - sizeof(Settings) -4; }
-  size = (size + 3) & (~3);
-
-  // In case begin() is called a 2nd+ time, don't reallocate if size is the same
-  if (eeprom_data && size != eeprom_size) {
-    delete[] eeprom_data;
-    eeprom_data = new uint8_t[size];
-  } else if (!eeprom_data) {
-    eeprom_data = new uint8_t[size];
-  }
-  eeprom_size = size;
-
-  size_t flash_offset = SPI_FLASH_SEC_SIZE - eeprom_size;
-  uint8_t* flash_buffer;
-  flash_buffer = new uint8_t[SPI_FLASH_SEC_SIZE];
-  noInterrupts();
-  spi_flash_read(eeprom_sector * SPI_FLASH_SEC_SIZE, reinterpret_cast<uint32_t*>(flash_buffer), SPI_FLASH_SEC_SIZE);
-  interrupts();
-  memcpy(eeprom_data, flash_buffer + flash_offset, eeprom_size);
-  delete[] flash_buffer;
-
-  eeprom_dirty = false;  // make sure dirty is cleared in case begin() is called 2nd+ time
-}
-
-size_t EepromLength(void)
-{
-  return eeprom_size;
-}
-
-uint8_t EepromRead(int const address)
-{
-  if (address < 0 || (size_t)address >= eeprom_size) { return 0; }
-  if (!eeprom_data) { return 0; }
-
-  return eeprom_data[address];
-}
-
-// Prototype needed for Arduino IDE - https://forum.arduino.cc/index.php?topic=406509.0
-template<typename T> T EepromGet(int const address, T &t);
-template<typename T> T EepromGet(int const address, T &t)
-{
-  if (address < 0 || address + sizeof(T) > eeprom_size) { return t; }
-  if (!eeprom_data) { return 0; }
-
-  memcpy((uint8_t*) &t, eeprom_data + address, sizeof(T));
-  return t;
-}
-
-void EepromWrite(int const address, uint8_t const value)
-{
-  if (address < 0 || (size_t)address >= eeprom_size) { return; }
-  if (!eeprom_data) { return; }
-
-  // Optimise eeprom_dirty. Only flagged if data written is different.
-  uint8_t* pData = &eeprom_data[address];
-  if (*pData != value) {
-    *pData = value;
-    eeprom_dirty = true;
-  }
-}
-
-// Prototype needed for Arduino IDE - https://forum.arduino.cc/index.php?topic=406509.0
-template<typename T> void EepromPut(int const address, const T &t);
-template<typename T> void EepromPut(int const address, const T &t)
-{
-  if (address < 0 || address + sizeof(T) > eeprom_size) { return; }
-  if (!eeprom_data) { return; }
-
-  // Optimise eeprom_dirty. Only flagged if data written is different.
-  if (memcmp(eeprom_data + address, (const uint8_t*)&t, sizeof(T)) != 0) {
-    eeprom_dirty = true;
-    memcpy(eeprom_data + address, (const uint8_t*)&t, sizeof(T));
-  }
-}
-
-bool EepromCommit(void)
-{
-  bool ret = false;
-  if (!eeprom_size) { return false; }
-  if (!eeprom_dirty) { return true; }
-  if (!eeprom_data) { return false; }
-
-  size_t flash_offset = SPI_FLASH_SEC_SIZE - eeprom_size;
-  uint8_t* flash_buffer;
-  flash_buffer = new uint8_t[SPI_FLASH_SEC_SIZE];
-  noInterrupts();
-  spi_flash_read(eeprom_sector * SPI_FLASH_SEC_SIZE, reinterpret_cast<uint32_t*>(flash_buffer), SPI_FLASH_SEC_SIZE);
-  memcpy(flash_buffer + flash_offset, eeprom_data, eeprom_size);
-  if (spi_flash_erase_sector(eeprom_sector) == SPI_FLASH_RESULT_OK) {
-    if (spi_flash_write(eeprom_sector * SPI_FLASH_SEC_SIZE, reinterpret_cast<uint32_t*>(flash_buffer), SPI_FLASH_SEC_SIZE) == SPI_FLASH_RESULT_OK) {
-      eeprom_dirty = false;
-      ret = true;
-    }
-  }
-  interrupts();
-  delete[] flash_buffer;
-
-  return ret;
-}
-
-uint8_t * EepromGetDataPtr()
-{
-  eeprom_dirty = true;
-  return &eeprom_data[0];
-}
-
-void EepromEnd(void)
-{
-  if (!eeprom_size) { return; }
-
-  EepromCommit();
-  if (eeprom_data) {
-    delete[] eeprom_data;
-  }
-  eeprom_data = 0;
-  eeprom_size = 0;
-  eeprom_dirty = false;
-}
-#endif  // USE_EEPROM
-/********************************************************************************************/
-
-
 
 
 const char* mSettings::GetTelePeriodJsonLevelCtr(char* buffer){
@@ -913,7 +799,7 @@ uint16_t mSettings::GetSettingsCrc(void)
 
 void mSettings::SettingsSaveAll(void)
 {
-  Serial.println("SettingsSaveAll");
+  // Serial.println("SettingsSaveAll");
   // if (Settings.flag_system.save_state) {
   //   Settings.power = power;
   // } else {
@@ -956,23 +842,23 @@ void mSettings::SettingsSave(uint8_t rotate)
  * stop_flash_rotate 0 = Allow flash slot rotation (SetOption12 0)
  * stop_flash_rotate 1 = Allow only eeprom flash slot use (SetOption12 1)
  */
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
 // #ifndef FIRMWARE_MINIMAL
   if ((GetSettingsCrc() != settings_crc) || rotate) {
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
     if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
       stop_flash_rotate = 1;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
+      //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
     }
     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
       settings_location = SETTINGS_LOCATION +1;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
+      //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
     }
     if (stop_flash_rotate) {
       settings_location = SETTINGS_LOCATION;
     } else {
       settings_location--;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
+      //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
       if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
         settings_location = SETTINGS_LOCATION;
       //AddLog_P(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
@@ -982,7 +868,7 @@ DEBUG_LINE_HERE;
     Settings.cfg_size = sizeof(SYSCFG);
     Settings.cfg_crc = GetSettingsCrc();
 
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
 // #ifdef USE_EEPROM
 //     if (SPIFFS_END == settings_location) {
 //       uint8_t* flash_buffer;
@@ -1005,16 +891,16 @@ DEBUG_LINE_HERE;
 
 // ESP.wdtFeed();
 // ESP.wdtDisable();
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
     // settings_location = SETTINGS_LOCATION;
-    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
+//     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
 
-AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
+// AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
 
 // Serial.flush();
 // delay(1000);
 
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
 
 #ifdef ENABLE_FLASH_ERASE_SECTOR_CURRENTLY_BUG
   if (ESP.flashEraseSector(settings_location)) {
@@ -1022,19 +908,19 @@ DEBUG_LINE_HERE;
   }
 #endif
 
-AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
+// AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
 // ESP.wdtFeed();
 // delay(1000);
 
     // ESP.flashEraseSector(settings_location);
-// DEBUG_LINE_HERE;
+// //DEBUG_LINE_HERE;
 //     ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
 // #endif  // USE_EEPROM
 
     if (!stop_flash_rotate && rotate) {
       for (uint8_t i = 1; i < CFG_ROTATES; i++) {
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
         ESP.flashEraseSector(settings_location -i);  // Delete previous configurations by resetting to 0xFF
         delay(1);
       }
@@ -1045,7 +931,7 @@ DEBUG_LINE_HERE;
     settings_crc = Settings.cfg_crc;
   }
 // #endif  // FIRMWARE_MINIMAL
-DEBUG_LINE_HERE;
+//DEBUG_LINE_HERE;
   RtcSettingsSave();
 
 }
@@ -1592,7 +1478,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.light_settings.light_rotation = 0;
   Settings.light_settings.light_pixels = WS2812_LEDS;
   
-  Settings.light_settings.type = LT_WS2812; //default for now
+  Settings.light_settings.type = 0;//LT_WS2812; //default for now
   for (uint8_t i = 0; i < MAX_PWMS; i++) {
     Settings.light_settings.light_color[i] = 0;
     Settings.pwm_value[i] = 0;
@@ -1854,7 +1740,7 @@ DEBUG_LINE;
   //Settings.flag_system.decimal_text = 0;
   
 
-  sprintf(my_hostname,"%s",pCONT_set->Settings.user_template2.hardware.name);
+  sprintf(my_hostname,"%s",D_NO_MATCH_CTR);//);//pCONT_set->Settings.user_template2.hardware.name);
 
 }
 

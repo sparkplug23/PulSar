@@ -157,6 +157,14 @@ DEFINE_PGM_CTR(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY)
     "<input id='%s' data-json_keys='%s' type='range' min='%d' max='%d' value='%d'>"
   "</div>";
 
+// New method
+// xV = variable count
+
+DEFINE_PGM_CTR(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V) "<td><div class='%s'>%s</div></td>";
+
+DEFINE_PGM_CTR(PM_WEBAPPEND_TABLE_ROW_START_0V) "<tr>";
+DEFINE_PGM_CTR(PM_WEBAPPEND_TABLE_ROW_END_0V) "</tr>";
+
 
 
 
@@ -242,27 +250,27 @@ const char HTTP_SCRIPT_ROOT_MICHAEL[] PROGMEM =
   "window.onload=start();"
 ;
 
-#define WEB_HANDLER_HTTP_SCRIPT_SLIDERS "/script/root_sliders.js"
-const char HTTP_SCRIPT_SLIDERS[] PROGMEM =
-"function lc2(v,i,p){"
-  "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
-    "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
-      "var sl=eb('sl4').value;"
-      "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
-    "}"
-  "}"
-  "la('&'+v+i+'='+p);"
-"}"
-"function lc3(v,p){"
-  "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
-    "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
-      "var sl=eb('sl4').value;"
-      "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
-    "}"
-  "}"
-  "la('&'+v+'='+p);"
-"}"
-;
+// #define WEB_HANDLER_HTTP_SCRIPT_SLIDERS "/script/root_sliders.js"
+// const char HTTP_SCRIPT_SLIDERS[] PROGMEM =
+// "function lc2(v,i,p){"
+//   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
+//     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
+//       "var sl=eb('sl4').value;"
+//       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
+//     "}"
+//   "}"
+//   "la('&'+v+i+'='+p);"
+// "}"
+// "function lc3(v,p){"
+//   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
+//     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
+//       "var sl=eb('sl4').value;"
+//       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
+//     "}"
+//   "}"
+//   "la('&'+v+'='+p);"
+// "}"
+// ;
 
 const char HTTP_SCRIPT_WIFI[] PROGMEM =
   "function c(l){"

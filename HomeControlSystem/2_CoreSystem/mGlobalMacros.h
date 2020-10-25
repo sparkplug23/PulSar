@@ -27,6 +27,12 @@
 #define DEFINE_END_SVALUE(X,Y) "\"" X "\":\"" Y "\""   
 
 
+#define STR_HELPER2(x) #x
+#ifndef STR2
+#define STR2(x) STR_HELPER2(x)
+#endif
+
+
 #define DEF_PGM_CTR(X) \
   const char X[] PROGMEM =
 #define DEF_PGM_UINT8(X) \

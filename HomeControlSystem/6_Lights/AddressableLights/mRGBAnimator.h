@@ -80,6 +80,7 @@
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR) "ambilight";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR) "animation";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR) "notifications";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR) "flasher";
 
 // TRANSITION_METHOD
@@ -195,15 +196,20 @@ class mRGBAnimator{
       #endif
     #endif
     
-    #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-    NeoPixelAnimator* animator_controller = nullptr;
-    #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    // #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    // NeoPixelAnimator* animator_controller = nullptr;
+    // #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
 
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
-    #ifndef STRIP_SIZE_MAX
+    #ifdef STRIP_SIZE_MAX
+      #ifndef STRIP_REPEAT_OUTPUT_MAX
+        #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
+      #endif
+    #else
       #define STRIP_SIZE_MAX 50 //default length of 50
     #endif
+    
     #ifndef STRIP_SIZE_REPEAT_MAX
       #define STRIP_SIZE_REPEAT_MAX 50 //default length of 50
     #endif
@@ -230,8 +236,8 @@ class mRGBAnimator{
     // Basically what ever you need inside the animation update function
     struct AnimationColours
     {
-      RgbColor StartingColor;
-      RgbColor DesiredColour;
+      RgbTypeColor StartingColor;
+      RgbTypeColor DesiredColour;
     };
     AnimationColours animation_colours[STRIP_SIZE_MAX];
 
@@ -847,10 +853,11 @@ void WebAppend_Root_Status_Table();
         uint16_t period_ms = 1000; // Time between fully on and off
         uint8_t  transition_progess = 0; // Used for pulsing only   || reuse for fade progress
         uint16_t fade_time_ms = 1000;
-        HsbColor colour; // colour of the led
-        #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-          uint8_t colourWhite;
-        #endif
+        // HsbColor colour; // colour of the led
+        // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+        //   uint8_t colourWhite;
+        // #endif
+        RgbcctColor colour;
         uint32_t tSavedUpdate; // millis last updated
         uint16_t tRateUpdate = 10; // time between updating
         uint16_t auto_time_off_secs = 0; // reset pixel to off

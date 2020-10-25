@@ -894,7 +894,6 @@
 
 #define D_GPIO_FUNCTION_TXD_CTR            "Serial Tx"
 
-#define D_GPIO_FUNCTION_DOOR_DETECT_CTR    "Door Detect"
 
 
 #define D_GPIO_FUNCTION_COUNTER_CTR       "Counter"    // Suffix "1"
@@ -1254,6 +1253,7 @@
 #define D_JSON_NETWORK "Network"
 #define D_JSON_OR "or"
 #define D_JSON_OTAURL "OTAURL"
+#define D_JSON_OPEN "Open"
 #define D_JSON_PERIOD "Period"
 #define D_JSON_PHASE_ANGLE "PhaseAngle"
 #define D_JSON_POWERFACTOR "PowerFactor"
@@ -1352,6 +1352,8 @@
 #define D_JSON_BRIGHTNESS_PERCENTAGE "brightness_percentage"
 #define D_JSON_CLIMATE "climate"
 #define D_JSON_CLASSID "ClassID"
+#define D_JSON_CLOSED "Closed"
+
 #define D_JSON_CURRENT "Current"
 #define D_JSON_CRASHDUMP "CrashDump"
 #define D_JSON_COLOUR_PALETTE "ColourPalette"
@@ -1365,6 +1367,7 @@
 #define D_JSON_DEVICEFRIENDLYNAME "DeviceFriendlyName"
 
 #define D_JSON_DOOR "Door"
+#define D_JSON_RINGDOORBELL "DoorbellRing"
 #define D_JSON_DURATION "duration"
 #define D_JSON_ERROR "Error"
 #define D_JSON_FLASHER "Flasher"
@@ -1377,6 +1380,7 @@
 #define D_JSON_ISCHANGEDMETHOD "IsChangedMethod"
 #define D_JSON_ISRUNNING "isrunning"
 #define D_JSON_ISVALID "isvalid"
+#define D_JSON_CAPTURE_UPSECONDS "CaptureUpSeconds"
 #define D_JSON_IMPORTANCE "importance"
 #define D_JSON_INORDER "InOrder"
 #define D_JSON_LIMIT "limit"
@@ -1433,6 +1437,7 @@
 #define D_JSON_SET "set"
 #define D_JSON_SENS1 "sens1"
 #define D_JSON_SENSOR "sensor"
+#define D_JSON_SENSORADDRESS "SensorAddress"
 #define D_JSON_SECS "secs"
 #define D_JSON_SIZE "size"
 #define D_JSON_SIGNIFICANTLY "significantly"

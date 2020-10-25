@@ -12,15 +12,27 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
   int8_t function_result = 0;
 
+  // DEBUG_LINE_HERE;
+
+  //return 0;
+
   /************
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
+  DEBUG_LINE_HERE;
     pre_init();
+  DEBUG_LINE_HERE;
   }else
   if(function == FUNC_INIT){
+  DEBUG_LINE_HERE;
     init();
+    
+  DEBUG_LINE_HERE;
   }
+
+  // DEBUG_LINE_HERE;
+  //  return 0;
 
   if(pCONT_set->Settings.light_settings.type != LT_WS2812){ return 0; }
   // if(!settings.flags.EnableModule){ return 0;}
@@ -132,6 +144,7 @@ void mRGBAnimator::pre_init(void){
   // Allow runtime changes of animation size
   strip_size = STRIP_SIZE_MAX; 
   animator_strip_size = ANIMATOR_SIZE_MAX<=STRIP_SIZE_MAX?ANIMATOR_SIZE_MAX:STRIP_SIZE_MAX; 
+  pCONT_iLight->light_count = strip_size;
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
 }
@@ -141,7 +154,13 @@ void mRGBAnimator::init(void){
   // if pixel size changes, free and init again
   uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//strip_size<STRIP_SIZE_MAX?strip_size:STRIP_SIZE_MAX; // Catch values exceeding limit
   ledout.length = STRIP_SIZE_MAX; 
+
+DEBUG_LINE_HERE;
+  // return;
+
+  pCONT_iLight->light_count = STRIP_SIZE_MAX;
   
+DEBUG_LINE_HERE;
   #ifdef USE_WS28XX_HARDWARE_WS2801
     stripbus = new NeoPixelBus<DotStarBgrFeature, DotStarMethod>(strip_size_tmp, pin_clock, pCONT_set->pin[GPIO_RGB_DATA_ID]);
   #else
@@ -152,37 +171,40 @@ void mRGBAnimator::init(void){
     #endif
   #endif //USE_WS28XX_HARDWARE_WS2801
 
-  uint16_t animator_strip_size_tmp = animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
+DEBUG_LINE_HERE;
+  uint16_t animator_strip_size_tmp = 1;//animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
 
-  #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-  animator_controller = new NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
-  #else
+DEBUG_LINE_HERE;
   pCONT_iLight->Init_NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE);  
-  #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
 
-
-  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;
+DEBUG_LINE_HERE;
+  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   
-  
+DEBUG_LINE_HERE;
   randomSeed(analogRead(0));
   
-  for(ledout.index=0;ledout.index<sizeof(ledout.pattern);ledout.index++){ 
+  for(ledout.index=0;ledout.index<
+  // sizeof(ledout.pattern)/2
+  STRIP_SIZE_MAX
+  ;ledout.index++){ 
     ledout.pattern[ledout.index] = ledout.index; 
   }
 
+DEBUG_LINE_HERE;
   // Clear stored light output
   memset(&animation_colours,0,sizeof(animation_colours));
   // Start display
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
     #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-      stripbus->ClearTo(RgbwColor(0,255,0,0));
+      stripbus->ClearTo(RgbwColor(0,0,0,0));
     #else
-      stripbus->ClearTo(RgbColor(0,255,0));
+      stripbus->ClearTo(RgbColor(0,0,0));
     #endif
     stripbus->Show();
   }
 
+DEBUG_LINE_HERE;
   pCONT_iLight->animation_override.fRefreshAllPixels = true;
 
   GenerateAnimationPixelAmountMaps();
@@ -197,6 +219,7 @@ void mRGBAnimator::init(void){
    buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
   }
    
+DEBUG_LINE_HERE;
   #ifndef DISABLE_SERIAL_LOGGING
    Serial.println(buffer);
   #endif
@@ -216,11 +239,13 @@ void mRGBAnimator::init(void){
   init_mixer_defaults();
   #endif
 
+DEBUG_LINE_HERE;
   settings.flags.EnableModule = true;
 
   //create copy for pCONT_iLight->animation stored
   memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation_stored));// RESTORE copy of state
 
+DEBUG_LINE_HERE;
 } //end "init"
 
 
@@ -1325,8 +1350,8 @@ const char* mRGBAnimator::GetFlasherRegionName(char* buffer){
 }
 const char* mRGBAnimator::GetFlasherRegionNamebyID(uint8_t id, char* buffer){
   switch(id){
-    case FLASHER_REGION_COLOUR_SELECT_ID:    memcpy_P(buffer,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR));
-  case FLASHER_REGION_ANIMATE_ID:    memcpy_P(buffer,PM_FLASHER_REGION_ANIMATE_NAME_CTR,sizeof(PM_FLASHER_REGION_ANIMATE_NAME_CTR));
+    case FLASHER_REGION_COLOUR_SELECT_ID:   memcpy_P(buffer,PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR));
+    case FLASHER_REGION_ANIMATE_ID:         memcpy_P(buffer,PM_FLASHER_REGION_ANIMATE_NAME_CTR,sizeof(PM_FLASHER_REGION_ANIMATE_NAME_CTR));
   }
   return buffer;
 }
@@ -2023,7 +2048,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_notifications;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Notifications;
   #endif
     
@@ -2238,9 +2263,21 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
     case TRANSITION_ORDER_RANDOM_ID:
       switch(transition_order_random_type){
         case TRANSITION_ORDER_RANDOM_METHOD_REPEATING:     //  Serial.println("TRANSITION_ORDER_INORDER_ID1");
-          for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
-            ledout.pattern[ledout.index] = random(0,ledout.length); 
-          }
+         
+          
+          #ifdef ENABLE_DEVFEATURE_STDSHUFFLE_PIXEL_RANDOM
+            for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
+              ledout.pattern[ledout.index] = ledout.index;//random(0,ledout.length); 
+            }
+            std::shuffle(ledout.pattern.begin(),ledout.pattern.end(),std::default_random_engine(analogRead(0)));
+          #else 
+            for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
+              ledout.pattern[ledout.index] = random(0,ledout.length); 
+            }
+          #endif // ENABLE_DEVFEATURE_STDSHUFFLE_PIXEL_RANDOM
+
+
+
         break;
         case TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING: default:  {     //  Serial.println("TRANSITION_ORDER_INORDER_ID2");
           // Generate a full list inorder
@@ -2496,9 +2533,16 @@ void mRGBAnimator::RefreshLEDOutputStream(void){
           //)
           ;
           #else
+            animation_colours[ledout.index].DesiredColour =
 
-          RgbTypeColor rgb = RgbTypeColor::LinearBlend(start_colour, end_colour, progress);
-          desired_colour[ledout.index] = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+
+          //HsbColor(
+            RgbTypeColor::LinearBlend(start_colour, end_colour, progress)
+          //)
+          ;
+
+          // RgbTypeColor rgb = RgbTypeColor::LinearBlend(start_colour, end_colour, progress);
+          // desired_colour[ledout.index] = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
 
           // desired_colour[ledout.index] = RgbwColor(0);
           
@@ -2603,8 +2647,8 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
 
   // Translation
   #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-    RgbTypeColor fromcolor_npb = RgbwColor(fromcolor.R,fromcolor.G,fromcolor.B,fromcolor.CW);
-    RgbTypeColor targetColor_npb = RgbwColor(targetColor.R,targetColor.G,targetColor.B,targetColor.CW);
+    RgbTypeColor fromcolor_npb = RgbwColor(fromcolor.R,fromcolor.G,fromcolor.B,fromcolor.WC);
+    RgbTypeColor targetColor_npb = RgbwColor(targetColor.R,targetColor.G,targetColor.B,targetColor.WC);
   #else
     RgbcctColor fromcolor_npb = RgbcctColor(0);
     if(fromcolor != RgbcctColor(0)){
@@ -3057,7 +3101,7 @@ void mRGBAnimator::EveryLoop(){
       pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
       //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
     }else{
-      if(pCONT_iLight->animation.flags.fRunning){ 
+      if(pCONT_iLight->animation.flags.fRunning){ // Was running
         #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
         #endif
@@ -3566,6 +3610,7 @@ DEBUG_LINE;
     int amount = obj[D_JSON_STRIP_SIZE];
     // Also convert to percentage equivalent
     strip_size = amount;
+    pCONT_iLight->light_count = amount;
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_STRIP_SIZE,strip_size);
     #endif
@@ -3743,6 +3788,18 @@ void mRGBAnimator::StripUpdate(){
   // STRIP_SIZE_REPEAT_MAX
 
   // if(settings.strip_size_repeat_animation)
+
+  // Calculate output pixel size
+  uint16_t pixel_output_length = strip_size;
+  if(strip_size>STRIP_SIZE_MAX){
+    pixel_output_length = STRIP_SIZE_MAX;
+  }
+  // Replicate SetPixel for repeated output
+  #ifdef STRIP_REPEAT_OUTPUT_MAX
+  pixel_output_length = STRIP_REPEAT_OUTPUT_MAX;  
+  #endif // STRIP_REPEAT_OUTPUT_MAX
+
+
   
   // Replicate SetPixel for repeated output
   #ifdef STRIP_REPEAT_OUTPUT_MAX
@@ -3987,12 +4044,13 @@ void mRGBAnimator::init_NotificationPanel(){
   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
     notif.flags.fForcePanelUpdate = true; //clear presets
     notif.pixel[i].mode = NOTIF_MODE_OFF_ID;
-    notif.pixel[i].colour.H = (i*30)/360.0f;
-    notif.pixel[i].colour.S = 1;
-    notif.pixel[i].colour.B = 1;
-    #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-    notif.pixel[i].colourWhite = 0;
-    #endif
+    notif.pixel[i].colour.R = map(i,0,STRIP_NOTIFICATION_SIZE,0,255);
+    notif.pixel[i].colour.G = map(i,0,STRIP_NOTIFICATION_SIZE,255,0);
+    // notif.pixel[i].colour.S = 1;
+    // notif.pixel[i].colour.B = 1;
+    // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+    // notif.pixel[i].colourWhite = 0;
+    // #endif
   }
   notif.flags.fWhenOnlyWhiteExistsSetBrightnessOfHSBtoZero = true;
 
@@ -4020,7 +4078,7 @@ void mRGBAnimator::SubTask_NotificationPanel(){
     }
   }
 
-char buffer[50];
+  char buffer[50];
 
   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
     if(
@@ -4032,19 +4090,24 @@ char buffer[50];
         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d:%s"),i,GetNotificationModeNamebyID(notif.pixel[i].mode, buffer));
         #endif
       
-      RgbTypeColor colour = RgbTypeColor(0);
+      RgbcctColor colour = RgbcctColor(0);
 
       switch(notif.pixel[i].mode){
         default:
         case NOTIF_MODE_OFF_ID:
         case NOTIF_MODE_STATIC_OFF_ID:
-          colour = RgbTypeColor(0);
+          colour = RgbcctColor(0);
         break;
         case NOTIF_MODE_STATIC_ON_ID:{
-          colour = HsbColor(notif.pixel[i].colour);
-          #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-            colour.W = notif.pixel[i].colourWhite;
-          #endif
+          
+          colour = notif.pixel[i].colour;
+
+          // colour = HsbColor(notif.pixel[i].colour);
+          // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+          //   colour.W = notif.pixel[i].colourWhite;
+          // #endif
+
+
         }break;
         case NOTIF_MODE_FADE_ON_ID: //slow transition to static ON
           if(notif.pixel[i].transition_progess<100){
@@ -4057,6 +4120,10 @@ char buffer[50];
           AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "FADING on progress [%d]"),notif.pixel[i].transition_progess); 
           #endif
           notif.pixel[i].colour.B = BrtN2F(notif.pixel[i].transition_progess);
+
+          Change_RgbcctColor_Hue
+
+          
           colour = HsbColor(notif.pixel[i].colour);
           #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
             colour.W = map(notif.pixel[i].transition_progess,0,100,0,notif.pixel[i].colourWhite);
@@ -4079,15 +4146,14 @@ char buffer[50];
           #endif  
         }break;
         case NOTIF_MODE_BLINKING_OFF_ID:
-          colour = RgbTypeColor(0);
+          colour = RgbcctColor(0);
           notif.pixel[i].mode = NOTIF_MODE_BLINKING_ON_ID;
           notif.pixel[i].tRateUpdate = (notif.pixel[i].period_ms/2);
         break;
         case NOTIF_MODE_BLINKING_ON_ID:
-          colour = HsbColor(notif.pixel[i].colour);
-          #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-            colour.W = notif.pixel[i].colourWhite;
-          #endif      
+
+          colour = notif.pixel[i].colour;
+
           notif.pixel[i].mode = NOTIF_MODE_BLINKING_OFF_ID;
           notif.pixel[i].tRateUpdate = (notif.pixel[i].period_ms/2);
           break;
@@ -4102,10 +4168,7 @@ char buffer[50];
           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "PULSING progress [%d]"),notif.pixel[i].transition_progess); 
           #endif
           notif.pixel[i].colour.B = notif.pixel[i].transition_progess/100.0f;
-          colour = HsbColor(notif.pixel[i].colour);
-          #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-            colour.W = notif.pixel[i].colourWhite;
-          #endif
+          colour = notif.pixel[i].colour;
         break;
         case NOTIF_MODE_PULSING_ON_ID:
           if(notif.pixel[i].transition_progess>0){
@@ -4118,10 +4181,7 @@ char buffer[50];
           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "PULSING progress [%d]"),notif.pixel[i].transition_progess); 
           #endif
           notif.pixel[i].colour.B = notif.pixel[i].transition_progess/100.0f;
-          colour = HsbColor(notif.pixel[i].colour);
-          #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-            colour.W = notif.pixel[i].colourWhite;
-          #endif            
+          colour = notif.pixel[i].colour;            
         break;
       }
       SetPixelColor(i,colour);    
@@ -4133,18 +4193,18 @@ char buffer[50];
   if(mSupport::TimeReached(&notif.tSaved.AutoOff,1000)){// if 1 second past
     for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ //check all
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].pCONT_iLight->auto_time_off_secs);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
       #endif
-      if(notif.pixel[i].pCONT_iLight->auto_time_off_secs==1){ //if =1 then turn off and clear to 0
+      if(notif.pixel[i].auto_time_off_secs==1){ //if =1 then turn off and clear to 0
         SetPixelColor(i,0);
-        notif.pixel[i].pCONT_iLight->auto_time_off_secs = 0;
+        notif.pixel[i].auto_time_off_secs = 0;
         notif.pixel[i].mode = NOTIF_MODE_OFF_ID;
         #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].pCONT_iLight->auto_time_off_secs);
+        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].auto_time_off_secs);
         #endif
       }else
-      if(notif.pixel[i].pCONT_iLight->auto_time_off_secs>1){ //if =1 then turn off and clear to 0
-        notif.pixel[i].pCONT_iLight->auto_time_off_secs--; //decrease
+      if(notif.pixel[i].auto_time_off_secs>1){ //if =1 then turn off and clear to 0
+        notif.pixel[i].auto_time_off_secs--; //decrease
       }
     }// END for
   }
@@ -4645,24 +4705,24 @@ void mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     }
   }
   
-  #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  // RGB method - white part
-  if(parsed.white.found_idx){
-    pixelidx = 0; subidx = 0;
-    while(pixelidx<parsed.pixelnum.found_idx){     // Step across all pixels
-      int pixelnum = parsed.pixelnum.val[pixelidx++];
-      notif.pixel[pixelnum].colourWhite = parsed.white.val[subidx];
-      notif.pixel[pixelnum].mode = NOTIF_MODE_STATIC_ON_ID; //default
-      if(subidx<parsed.white.found_idx-1){subidx++;}
-      if(notif.flags.fWhenOnlyWhiteExistsSetBrightnessOfHSBtoZero){
-        if(!parsed.brt.found_idx){ //no brightness defined
-          notif.pixel[pixelnum].colour.B = 0;        
-        }
-      }
+  // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+  // // RGB method - white part
+  // if(parsed.white.found_idx){
+  //   pixelidx = 0; subidx = 0;
+  //   while(pixelidx<parsed.pixelnum.found_idx){     // Step across all pixels
+  //     int pixelnum = parsed.pixelnum.val[pixelidx++];
+  //     notif.pixel[pixelnum].colourWhite = parsed.white.val[subidx];
+  //     notif.pixel[pixelnum].mode = NOTIF_MODE_STATIC_ON_ID; //default
+  //     if(subidx<parsed.white.found_idx-1){subidx++;}
+  //     if(notif.flags.fWhenOnlyWhiteExistsSetBrightnessOfHSBtoZero){
+  //       if(!parsed.brt.found_idx){ //no brightness defined
+  //         notif.pixel[pixelnum].colour.B = 0;        
+  //       }
+  //     }
 
-    }
-  }
-  #endif
+  //   }
+  // }
+  // #endif
 
   if(parsed.flasher.found_idx){
     pixelidx = 0; subidx = 0;
@@ -4733,7 +4793,7 @@ void mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS "timeon_ms [%d i%d:v%d]"),pixelidx,parsed.timeon_ms.found_idx,parsed.pixelnum.val[pixelidx]);    
       
       int pixelnum = parsed.pixelnum.val[pixelidx++];
-      notif.pixel[pixelnum].pCONT_iLight->auto_time_off_secs = (parsed.timeon_ms.val[subidx]/1000); 
+      notif.pixel[pixelnum].auto_time_off_secs = (parsed.timeon_ms.val[subidx]/1000); 
       if(subidx<parsed.timeon_ms.found_idx-1){subidx++;}
 
       //also reset timer millis so they align and run together
@@ -4749,7 +4809,7 @@ void mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){
 
   notif.tSaved.Timeout = millis(); // resets timeout counter
   notif.tSaved.TimeoutCounter = millis();
-  pCONT_iLight->animation.mode_id = ANIMATION_MODE_NOTIFICATIONS_ID;
+  pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_NOTIFICATIONS_ID;
   notif.flags.fForcePanelUpdate = true;
 
   

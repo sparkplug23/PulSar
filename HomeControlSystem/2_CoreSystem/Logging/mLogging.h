@@ -58,6 +58,23 @@ enum LoggingLevels {LOG_LEVEL_NONE,
   #define DEBUG_LINE   //nothing, no code
 #endif
 
+
+// Can only be used when hardware serial is enabled
+#if defined(USE_DEBUG_PRINT_FUNCTION_NAME) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
+                                      SERIAL_DEBUG.print("\t");\
+                                      SERIAL_DEBUG.println(__FUNCTION__);\
+                                      SERIAL_DEBUG.print("\t");\
+                                      SERIAL_DEBUG.println(__LINE__);\
+                                      SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_PRINT_FUNCTION_NAME   //nothing, no code
+#endif
+
+
+
+
+
 //For single test use, no ifdefs
 // #ifdef USE_DEBUG_LINE
 #if !defined(USE_SOFTWARE_SERIAL_DEBUG)

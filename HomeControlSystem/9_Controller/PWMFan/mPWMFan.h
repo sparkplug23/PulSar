@@ -116,7 +116,7 @@ void WebAppend_Root_Status_Table();
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPWMFan> mqtthandler_settings_teleperiod;
     
-    // const char* postfix_topic_sensors = "power";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mPWMFan> mqtthandler_sensor_ifchanged;
     struct handler<mPWMFan> mqtthandler_sensor_teleperiod;
     

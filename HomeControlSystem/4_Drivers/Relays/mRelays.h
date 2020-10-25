@@ -172,7 +172,7 @@ uint8_t fShowTable = false;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mRelays> mqtthandler_settings_teleperiod;
     
-    // const char* postfix_topic_sensors = "power";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mRelays> mqtthandler_sensor_ifchanged;
     struct handler<mRelays> mqtthandler_sensor_teleperiod;
     

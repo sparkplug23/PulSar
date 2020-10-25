@@ -85,10 +85,8 @@ int8_t mGarageLights::Tasker(uint8_t function){
     break;
     //#ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    break;
     case FUNC_MQTT_HANDLERS_RESET:
-      // Reset to the initial parameters
+      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
       MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
@@ -442,7 +440,7 @@ void mGarageLights::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mGarageLights::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -452,7 +450,7 @@ void mGarageLights::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mGarageLights::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_lightstate_teleperiod;
@@ -462,7 +460,7 @@ void mGarageLights::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_lightstate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;//postfix_topic_lightstate;
   mqtthandler_ptr->ConstructJSON_function = &mGarageLights::ConstructJSON_LightStates;
 
   mqtthandler_ptr = &mqtthandler_lightstate_ifchanged;
@@ -472,7 +470,7 @@ void mGarageLights::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_lightstate;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mGarageLights::ConstructJSON_LightStates;
 
 } //end "MQTTHandler_Init"

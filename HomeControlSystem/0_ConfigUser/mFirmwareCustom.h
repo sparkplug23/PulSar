@@ -19,6 +19,15 @@
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
+/*todo
+show/hide palette
+debug
+
+
+
+*/
+
+
 //--------------------------------[Enable Device]-------------------------------------
 
 /**
@@ -33,12 +42,15 @@
 // #define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
-#define DEVICE_RGBBEDLIGHT                             // BETA
+// #define DEVICE_RGBBEDLIGHT                             // BETA
 //#define DEVICE_RGBBEDLIGHT_TEST                             // BETA
 // #define DEVICE_RGBDESK
 // #define DEVICE_RGBCOOKER
 //  #define DEVICE_RGBUTILITY
 // #define DEVICE_RGBFRIDGE
+#define DEVICE_RGBOUTSIDETREE                           // BETA
+// #define DEVICE_CHRISTMAS_HALLWAYTREE                           // BETA
+// #define DEVICE_RGBBEDROOMFLOOR
 
 /**
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
@@ -48,8 +60,8 @@
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_BEDROOMBLINDS
-// #define DEVICE_DOORBELLWALLCHIME
-// #define DEVICE_OILFURNACE
+// #define DEVICE_DOORBELLWALLCHIME                  // BETA
+//  #define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
 // #define DEVICE_HEATING
 // #define DEVICE_KITCHENPANEL
@@ -71,7 +83,7 @@
 // #define DEVICE_ATTICSENSOR
 // #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_KITCHENSENSOR
-// #define DEVICE_UTILITYSENSOR
+//#define DEVICE_UTILITYSENSOR
 // #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_ENSUITESENSOR
 // #define DEVICE_TESTSENSOR
@@ -183,6 +195,8 @@
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
+  //#define ENABLE_DEVFEATURE_STDSHUFFLE_PIXEL_RANDOM "v79.32.23+" 
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -193,16 +207,23 @@
     "},"
   "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
+
+  
+  #define STRIP_SIZE_MAX 100
     
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"      
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":60,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 03\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
 
@@ -236,11 +257,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "133"          ","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[15,95,70]" 
+          "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS     "\":"    "0"
   "}";  
@@ -273,18 +298,23 @@
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 50
+  #define STRIP_SIZE_MAX 60
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "50"          ","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[15,95,70]" 
+          "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
   "}";  
 
   
@@ -331,11 +361,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"      
       "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-      "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_GRB "\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":4,\"" D_JSON_RATE "\":10,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"User 16\","
-      "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
       "\"" D_JSON_BRIGHTNESS     "\":100"
     "}";
 #endif
@@ -367,7 +401,9 @@
 
   // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
-  #define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+  #define ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW    "v79.31.22+" 
+  #define ENABLE_DEVFEATURE_PIXEL_NEW_JSON_PALETTE_SELECT_ROOT
 
 
 
@@ -386,14 +422,19 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
-    // "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_MODE             "\":\"" "Flasher" "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS       "\":0"
+    // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_ANIMATIONMODE             "\":\"" "Scene" "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
   "}";
 
 #endif
@@ -424,11 +465,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":30,\"" D_JSON_RATE "\":60,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 18\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":60"
   "}";
 #endif
@@ -478,16 +523,81 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
-    // "\"" D_JSON_MODE             "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_MODE             "\":\"" "Flasher" "\","
+    // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
     "\"" D_JSON_BRIGHTNESS       "\":0"
   "}";
 
+
+#endif
+
+
+//rgbmicro2/set/light/scene
+//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+#ifdef DEVICE_RGBOUTSIDETREE
+  #define DEVICENAME_CTR          "rgboutsidetree"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  // #define ENABLE_BUG_TRACING
+  #define DEBUG_PRINT_FUNCTION_NAME
+
+  #define DISABLE_WEBSERVER
+
+  //#define ENABLE_LOG_FILTERING_TEST_ONLY
+
+  #define STRIP_SIZE_MAX 500//*15
+  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
+  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define USE_INTERFACE_NEW
+    
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
+    "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
+    "\"" D_JSON_BRIGHTNESS       "\":100"
+  "}";
 
 #endif
 
@@ -615,7 +725,7 @@
   // #define DISABLE_TEMPORARY_RGBANIMATOR
   // #define USE_MODULE_LIGHTS_PWM
   
-  #define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -633,17 +743,79 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"
       "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
-      "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
-      "\"" D_JSON_MODE           "\":\"Flasher\","
-      "\"" D_JSON_BRIGHTNESS     "\":99"
+      "\"" D_JSON_ANIMATIONMODE           "\":\"Flasher\","
+      "\"" D_JSON_BRIGHTNESS     "\":0"
     "}";
     
     #define ESP8266
 
 #endif
+
+
+
+
+#ifdef DEVICE_RGBBEDROOMFLOOR
+  #define DEVICENAME_CTR          "rgbbedroomfloor"
+  #define DEVICENAME_FRIENDLY_CTR "H801 Bedroom Floor Light"
+  
+  // #define ENABLE_FUNCTION_DEBUG  
+
+  #define USE_SERIAL_ALTERNATE_TX
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2 
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_PWM
+  
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define DISABLE_TEMPORARY_RGBANIMATOR
+  // #define USE_MODULE_LIGHTS_PWM
+  
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+    "{"
+      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+      "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
+      "\"" D_JSON_BRIGHTNESS     "\":0"
+    "}";
+    
+    #define ESP8266
+
+#endif
+
 
 
 #ifdef DEVICE_RGBBEDLIGHT_TEST // for PWM dev
@@ -680,11 +852,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"
       "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
-      "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
-      "\"" D_JSON_MODE           "\":\"Flasher\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"Flasher\","
       "\"" D_JSON_BRIGHTNESS     "\":99"
     "}";
     
@@ -719,11 +895,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"
       "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
-      "\"" D_JSON_STRIP_SIZE     "\":50," //really 150
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":4,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\"," //purple/pink/red (at sunset orange?)
-      "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
       "\"" D_JSON_BRIGHTNESS     "\":100"
     "}";
 
@@ -755,11 +935,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"
       "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
-      "\"" D_JSON_STRIP_SIZE     "\":50," //really 150
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
-      "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
       "\"" D_JSON_BRIGHTNESS     "\":14"
     "}";
 
@@ -790,11 +974,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":33,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
 
@@ -909,12 +1097,16 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE)                                                  //parsed via lighting interface
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
-    "\"" D_JSON_STRIP_SIZE     "\":50,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_REPEAT   "\":5,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
   // #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
@@ -1063,9 +1255,13 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "12"          ","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[180,100,0]" 
         "},"
@@ -1174,6 +1370,8 @@
   #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
 
+  #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+
   //#define ENABLE_FORCED_SKIP_AP_ON_IPUNSET
 
   #define USE_MODULE_TEMPLATE
@@ -1182,12 +1380,16 @@
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
+      #ifdef USE_MODULE_SENSORS_ULTRASONICS
       "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","      
+      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      #endif    
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif      
-      "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      
+
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1214,11 +1416,19 @@
       "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "\""
       "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
+        "[40,170,67,3,30,19,2,25],"     // D3 group of 2                                 
+        "[40,255,169,120,53,22,4,240],"
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
     "}"
   "}";
 
 #endif
-
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_SENSORS == Sensing only] ----------------------------
 
@@ -1276,11 +1486,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "28"          ","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) "," //12
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[25,90,10]" 
+          "\"" D_JSON_HSB    "\":[25,90,100]" 
           // "\"" D_JSON_RGBW    "\":[0,0,0,255]" 
         "},"
     "\"" D_JSON_BRIGHTNESS     "\":"    "100"
@@ -1393,21 +1607,22 @@
   // #define ENABLE_BUG_TRACING
 
   #define USE_MODULE_SENSORS_DOOR
-  // #define USE_SENSOR_DOOR_LOCK
-  #define DOORALERT_PAYLOAD_CTR "bedroom"
+  // // #define USE_SENSOR_DOOR_LOCK
+  // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  // #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18B20
+  // #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
 
-  #define USE_MODULE_SENSORS_MOTION
-  #define MOTIONALERT_PAYLOAD1_CTR "bedroom"
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define MOTIONALERT_PAYLOAD1_CTR "bedroom"
   
-  #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_BME
 
-  // #define USE_MODULE_SENSORS_BUTTONS
+  // // #define USE_MODULE_SENSORS_BUTTONS
 
-  // #define USE_MODULE_DRIVERS_RELAY
-  // #define RELAYS_CONNECTED 1
-  // #define USE_MODULE_DRIVERS_INTERFACE
+  // // #define USE_MODULE_DRIVERS_RELAY
+  // // #define RELAYS_CONNECTED 1
+  // // #define USE_MODULE_DRIVERS_INTERFACE
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
@@ -1452,21 +1667,26 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE)                                                  //parsed via lighting interface
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"WS2812\","
-    "\"" D_JSON_STRIP_SIZE     "\":12,"
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_REPEAT   "\":5,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
+  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
   #define STRIP_SIZE_MAX                      12   
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "LED1"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "LED2"
 
+// maybe I need to delay template name loading until after init phase?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
@@ -1481,9 +1701,27 @@
         "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
           "\"" "Bedroom" "\""
         "],"
+        "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+          "\"" "Bedroom01" "\","
+          "\"" "Bedroom02" "\","
+          "\"" "Bedroom03" "\","
+          "\"" "Bedroom04" "\","
+          "\"" "Bedroom05" "\","
+          "\"" "Bedroom06" "\","
+          "\"" "Bedroom07" "\""
+        "],"
         "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
           "\"" "bedroomDOOR" "\""
         "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
+        "[40,255,100,29,194,102,202,187],"     // D3 group of 2                                 
+        "[40,255,100,29,195,135,215,193],"
+        "[40,255,100,29,194,124,254,111],"   //D6 group of 3                                           
+        "[40,255,100,29,195,134,175,63],"                                             
+        "[40,255,100,29,195,135,126,242]"  
+      "]"  
     "}"
   "}";
 
@@ -1519,13 +1757,12 @@
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_ULTRASONICS
-      "\"D0\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\"," //d0 to d3
       "\"D5\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_PIR_3_INV_CTR     "\""  //END
+      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\"" //END
       #endif
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1543,8 +1780,8 @@
         "],"
         "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_SENSOR_MOTION_2_FRIENDLY_NAME_LONG "\""
+          // "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
         "]"
     "}"
   "}";
@@ -1706,7 +1943,7 @@
 //     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
 //     "\"" D_JSON_STRIP_SIZE     "\":"    "50"          ","
 //     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-//     "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+//     "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
 //     "\"" D_JSON_SCENE_COLOUR   "\":{"
 //           "\"" D_JSON_HSB    "\":[30,80,100]" 
 //         "},"
@@ -1790,11 +2027,9 @@
 
   #define USE_MODULE_SENSORS_BME
 
-  
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  
+  #define USE_MODULE_LIGHTS_ADDRESSABLE  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1819,11 +2054,15 @@
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
-    "\"" D_JSON_STRIP_SIZE     "\":"    "28"          ","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_MODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[25,90,10]" 
+          "\"" D_JSON_HSB    "\":[25,90,0]" 
           // "\"" D_JSON_RGBW    "\":[0,0,0,255]" 
         "},"
     "\"" D_JSON_BRIGHTNESS     "\":"    "0"
@@ -1946,7 +2185,7 @@
       DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_PIR_1_INV_CTR)
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_DETECT_CTR)
+      DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
       #endif
       DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LEDLNK_CTR)
     "},"
@@ -1955,7 +2194,7 @@
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Utility"
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Utility"
-  #define D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "Side Door"
+  #define D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "SideDoor"
   
   // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
@@ -2060,7 +2299,7 @@
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 10\","
-    "\"" D_JSON_MODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":5"
   "}";
 

@@ -97,7 +97,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
         case 4: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
         case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
-        case 7: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+        case 7: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
     
     JsonBuilderI->Level_End();
@@ -1315,14 +1315,14 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //     }else{
 //       sprintf(onoff_ctr,PSTR("Lights OFF"));
 //     }
-//     BufferWriterI->Append_P(PSTR("<tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //     BufferWriterI->Append_P(HTTP_DEVICE_STATE, 
 //       100 / 1, //FULL WIDTH 1 item for length
 //       onoff ? "bold" : "normal", 
 //       fsize, 
 //       onoff_ctr
 //     );
-//     BufferWriterI->Append_P(PSTR("</tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //     // Animation info
 //     memset(onoff_ctr,0,sizeof(onoff_ctr));
 //     fsize = 20;
@@ -1548,13 +1548,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
           JsonBuilderI->AppendBuffer(PSTR("{t}"));
           for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
             snprintf_P(title_ctr, sizeof(title_ctr), pCONT_sup->GetTextIndexed_P(dlist_result, sizeof(dlist_result), row_id, kTitle_TableTitles_Root));
-            JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+            JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
               JsonBuilderI->AppendBuffer(PSTR("<td style='width:200px'><b>%s</b></td>"),title_ctr);
               JsonBuilderI->AppendBuffer(PSTR("<td style='width:216px'><select id='g%d' name='%s'></select></td>"),
                 row_id_selected[row_id],
                 pCONT_sup->GetTextIndexed_P(dlist_result, sizeof(dlist_result), row_id, dlist)
               );
-            JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+            JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
           }
           JsonBuilderI->AppendBuffer(PSTR("{t2}"));
 
@@ -1648,10 +1648,10 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
           // JsonBuilderI->AppendBuffer(PSTR("{t}"));
           // for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
           //   snprintf_P(title_ctr, sizeof(title_ctr), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), row_id, kTitle_ListHeadings));
-          //   JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+          //   JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
           //     JsonBuilderI->AppendBuffer(PSTR("<td style='width:200px'><b>%s</b></td>"),title_ctr);
           //     JsonBuilderI->AppendBuffer(PSTR("<td style='width:216px'><select id='g%d' name='g%d'></select></td>"),row_id_selected[row_id],row_id_selected[row_id]);
-          //   JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+          //   JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
           // }
           // JsonBuilderI->AppendBuffer(PSTR("{t2}"));
 
@@ -1716,10 +1716,10 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
 
   for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
     snprintf_P(title_ctr, sizeof(title_ctr), "%02d None", row_id+1);
-    JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+    JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
       JsonBuilderI->AppendBuffer(PSTR("{sw}200px'><b>%s</b></td>"),title_ctr);
       JsonBuilderI->AppendBuffer(PSTR("{sw}216px'>{si}g%d' name='g%d{si2}"),row_id_selected[row_id],row_id_selected[row_id]);
-    JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+    JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }
 
 
@@ -2161,8 +2161,15 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
 {
 
   uint16_t leds_max_to_show = strip_size<MAX_LIVE_LEDS?strip_size:MAX_LIVE_LEDS;
-  uint8_t number_of_pixels = map(
-   pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  uint8_t number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+
+   
+  // uint8_t number_of_pixels = strip_size;
+  // if(strip_size>MAX_LIVE_LEDS){
+  //   number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  // }
+
+
   uint8_t pixels_to_iter = ((strip_size-1)/number_of_pixels)+1;
 
   char type_ctr[5];
@@ -2175,9 +2182,9 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
   // if(pCONT_web->RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
   // JsonBuilderI->Start();
+  
   JsonBuilderI->Array_Start(WEB_CLASS_RGB_LIVE);// Class name
     JsonBuilderI->Level_Start();
-
       JsonBuilderI->Array_Start(type_ctr);
       RgbTypeColor c;
       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
@@ -2185,9 +2192,26 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
       }  
       JsonBuilderI->Array_End();
-
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
+
+
+  #ifdef ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW
+  JsonBuilderI->Array_Start("wrapper"); // Class name
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Array_Start(type_ctr);
+      RgbTypeColor c2;
+      for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
+        c2 = GetPixelColor(i);
+        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c2.R,c2.G,c2.B);
+      }  
+      JsonBuilderI->Array_End();
+    JsonBuilderI->Level_End();
+  JsonBuilderI->Array_End();
+  #endif // ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW
+
+
+
   // JsonBuilderI->End();
 
   // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  

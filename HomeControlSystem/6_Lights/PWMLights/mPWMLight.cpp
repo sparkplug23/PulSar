@@ -2,6 +2,8 @@
 
 #ifdef USE_MODULE_LIGHTS_PWM // interface is the gateway
 
+
+
 // // Used for timed on or off events
 int8_t mPWMLight::Tasker(uint8_t function){
 
@@ -134,13 +136,6 @@ void mPWMLight::LightUpdate(){
   LightSetPWMOutputsRgbcctColor(output_colour);
 
 }
-
-
-//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
-//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
-//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
-//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
-//{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
 
 
 // optional fromcolor to merge "FadeToNewColour" and "FadeBetweenColours"

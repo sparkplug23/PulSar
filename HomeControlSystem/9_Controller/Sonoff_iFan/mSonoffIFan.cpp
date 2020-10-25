@@ -428,7 +428,7 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -438,7 +438,7 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

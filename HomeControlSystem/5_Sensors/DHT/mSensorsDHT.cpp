@@ -246,17 +246,17 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Draw(){
       uint8_t multiline_enabled = false;
 
 
-    JsonBuilderI->Append_P(PSTR("<tr>"));
+    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       JsonBuilderI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      JsonBuilderI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_dht","?");   
+      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
       
     if(multiline_enabled){
-      JsonBuilderI->Append_P(PSTR("</tr>"));
-      JsonBuilderI->Append_P(PSTR("<tr>"));
+      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
         JsonBuilderI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
     }
-    JsonBuilderI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_dht","?");   
-    JsonBuilderI->Append_P(PSTR("</tr>"));
+    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
+    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }
 }
 
@@ -453,7 +453,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -466,7 +466,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 120;//pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -476,7 +476,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

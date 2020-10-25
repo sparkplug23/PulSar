@@ -8,7 +8,7 @@
 #include "stdint.h"
 // #include "2_CoreSystem/Time/mTime.h"
 // class mTime;
-#include "5_Sensors/DHT/DHTesp.h"
+#include "DHTesp.h"
 class DHTesp;
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -145,7 +145,7 @@ class mSensorsDHT{
     struct handler<mSensorsDHT>* mqtthandler_ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mSensorsDHT> mqtthandler_settings_teleperiod;
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mSensorsDHT> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsDHT> mqtthandler_sensor_teleperiod;
 

@@ -216,7 +216,7 @@ void Settings_Save();
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mEnergy> mqtthandler_settings_teleperiod;
     
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mEnergy> mqtthandler_sensor_ifchanged;
     struct handler<mEnergy> mqtthandler_sensor_teleperiod;
     

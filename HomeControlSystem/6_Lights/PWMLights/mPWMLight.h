@@ -42,9 +42,9 @@ class mPWMLight{//} : public mInterfaceLight{
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     RgbcctColor output_colour; // what is shown
     
-    #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-    NeoPixelAnimator* animator_controller = nullptr;    //move on animator object into interface, using pointer, change its size when needed
-    #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    // #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    // NeoPixelAnimator* animator_controller = nullptr;    //move on animator object into interface, using pointer, change its size when needed
+    // #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
 
     void LightUpdate();
 

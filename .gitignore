@@ -10,8 +10,8 @@
 ##sonoff/user_config_override.h
 build
 firmware.map
-;FutureIdeas.txt
-UserConfigSecret.h
+FutureIdeas.txt
+HomeControlSystem/0_ConfigUser/mUserConfigSecret.h
 RevisionHistory.txt
 ##FutureIdeas.txt
 

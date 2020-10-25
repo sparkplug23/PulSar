@@ -70,7 +70,7 @@ class mMotionSensor{
     struct handler<mMotionSensor>* mqtthandler_ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mMotionSensor> mqtthandler_settings_teleperiod;
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mMotionSensor> mqtthandler_sensor_ifchanged;
 
     // No specialised payload therefore use system default instead of enum

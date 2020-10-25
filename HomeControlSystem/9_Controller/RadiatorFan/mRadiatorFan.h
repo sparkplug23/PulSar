@@ -71,7 +71,7 @@ void SubTasker_MQTTSender();
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mRadiatorFan> mqtthandler_settings_teleperiod;
     
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mRadiatorFan> mqtthandler_sensor_ifchanged;
     struct handler<mRadiatorFan> mqtthandler_sensor_teleperiod;
     

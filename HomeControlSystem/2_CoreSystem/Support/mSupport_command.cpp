@@ -680,30 +680,34 @@
 //   Response_P(S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, XdrvMailbox.command, Settings.seriallog_level, seriallog_level);
 // }
 
-// void CmndRestart(void)
-// {
-//   switch (XdrvMailbox.payload) {
-//   case 1:
-//     restart_flag = 2;
-//     ResponseCmndChar(D_JSON_RESTARTING);
-//     break;
-//   case -1:
-//     CmndCrash();    // force a crash
-//     break;
-//   case -2:
-//     CmndWDT();
-//     break;
-//   case -3:
-//     CmndBlockedLoop();
-//     break;
-//   case 99:
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
-//     EspRestart();
-//     break;
-//   default:
-//     ResponseCmndChar_P(PSTR(D_JSON_ONE_TO_RESTART));
-//   }
-// }
+void mSupport::CmndRestart(void)
+{
+
+
+
+
+  // switch (XdrvMailbox.payload) {
+  // case 1:
+  //   restart_flag = 2;
+  //   ResponseCmndChar(D_JSON_RESTARTING);
+  //   break;
+  // case -1:
+  //   CmndCrash();    // force a crash
+  //   break;
+  // case -2:
+  //   CmndWDT();
+  //   break;
+  // case -3:
+  //   CmndBlockedLoop();
+  //   break;
+  // case 99:
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+  //   EspRestart();
+  //   break;
+  // default:
+  //   ResponseCmndChar_P(PSTR(D_JSON_ONE_TO_RESTART));
+  // }
+}
 
 // void CmndPowerOnState(void)
 // {

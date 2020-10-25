@@ -286,6 +286,9 @@ const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
 const uint32_t SERIAL_POLLING = 100;        // Serial receive polling in ms
 const uint8_t MAX_STATUS = 11;              // Max number of status lines
 
+
+const char D_NO_MATCH_CTR[] = "NoMatch";
+
 //const uint32_t DRIVER_BOOT_DELAY = 1;       // Number of milliseconds to retard driver cycles during boot-up time to reduce overall CPU load whilst Wifi is connecting
 //const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to go through the main loop using delay when needed
 
@@ -1382,6 +1385,25 @@ struct XDRVMAILBOX {
   char         *topic;
   char         *data;
 } XdrvMailbox;
+
+
+
+typedef union {
+  uint8_t data;
+  struct {
+    uint8_t waiting : 1;
+    uint8_t reserved : 7;
+  };
+} COMMAND_JSON_FLAG;
+
+struct COMMAND_JSON{
+  COMMAND_JSON_FLAG flag;
+  JsonObjectConst json;
+
+}command;
+
+
+
 
 const uint8_t MAX_RULES_FLAG = 8;          // Number of bits used in RulesBitfield (tricky I know...)
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...

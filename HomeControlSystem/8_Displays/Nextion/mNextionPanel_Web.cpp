@@ -36,7 +36,7 @@
 
       // // Power Toggle
       // mcl->mweb->WSBufferAppend_P(HTTP_TABLE100);
-      // mcl->mweb->WSBufferAppend_P(PSTR("<tr>"));
+      // mcl->mweb->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       // mcl->mweb->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE, 
       //                           36, 
       //                           WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE, 
@@ -50,7 +50,7 @@
 
       // mcl->mweb->WSBufferAppend_P(HTTP_TABLE100);
       // mcl->mweb->WSBufferAppend_P(PSTR("<tr> Page Number</tr>"));
-      // mcl->mweb->WSBufferAppend_P(PSTR("<tr>"));
+      // mcl->mweb->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       // for (uint8_t idx = 0; idx < keys_max; idx++) {
       //   snprintf_P(stemp, sizeof(stemp), PSTR(" %d"), idx);
       //   mcl->mweb->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE,         

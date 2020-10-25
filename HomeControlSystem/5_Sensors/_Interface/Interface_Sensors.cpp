@@ -170,7 +170,7 @@
 
 //       // // Power Toggle
 //       // mcl->mweb->WSBufferAppend_P(HTTP_TABLE100);
-//       // mcl->mweb->WSBufferAppend_P(PSTR("<tr>"));
+//       // mcl->mweb->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //       // mcl->mweb->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE, 
 //       //                           36, 
 //       //                           WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE, 
@@ -184,7 +184,7 @@
 
 //       // mcl->mweb->WSBufferAppend_P(HTTP_TABLE100);
 //       // mcl->mweb->WSBufferAppend_P(PSTR("<tr> Page Number</tr>"));
-//       // mcl->mweb->WSBufferAppend_P(PSTR("<tr>"));
+//       // mcl->mweb->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //       // for (uint8_t idx = 0; idx < keys_max; idx++) {
 //       //   snprintf_P(stemp, sizeof(stemp), PSTR(" %d"), idx);
 //       //   mcl->mweb->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE,         
@@ -3704,7 +3704,7 @@
 //   mqtthandler_ptr->tRateSecs = 60; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
 //   mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
 
 //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -3714,7 +3714,7 @@
 //   mqtthandler_ptr->tRateSecs = 1; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
 //   mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
   
 //   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;

@@ -23,8 +23,13 @@ class mDoorSensor{
     int8_t pin_open = -1;
     int8_t pin_lock = -1;
 
+    struct SETTINGS{
+      uint8_t fEnableSensor = false;
+
+    }settings;
+
     uint8_t     IsDoorOpen();
-    const char* IsDoorOpen_Ctr();
+    const char* IsDoorOpen_Ctr(char* buffer, uint8_t buflen);
 
     struct DOOR_DETECT{
       uint8_t state = false;
@@ -81,7 +86,7 @@ void WebAppend_Root_Status_Table_Data();
     struct handler<mDoorSensor>* mqtthandler_ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mDoorSensor> mqtthandler_settings_teleperiod;
-    // const char* postfix_topic_sensors = "sensors";
+    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mDoorSensor> mqtthandler_sensor_ifchanged;
     struct handler<mDoorSensor> mqtthandler_sensor_teleperiod;
 

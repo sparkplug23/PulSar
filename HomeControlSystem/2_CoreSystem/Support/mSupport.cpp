@@ -90,7 +90,7 @@ char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
 
 
 int8_t mSupport::Tasker(uint8_t function){
-  
+
   uint32_t start_millis = millis();
     start_millis = millis();
   switch(function){
@@ -5469,6 +5469,7 @@ void mSupport::CmndWDT(void)
 // This will trigger the os watch after OSWATCH_RESET_TIME (=120) seconds
 void mSupport::CmndBlockedLoop(void)
 {
+  DEBUG_PRINT_FUNCTION_NAME;
   while (1) {
     delay(1000);
   }
@@ -5477,9 +5478,13 @@ void mSupport::CmndBlockedLoop(void)
 // Clear the RTC dump counter when we do a normal reboot, this avoids garbage data to stay in RTC
 void mSupport::CrashDumpClear(void)
 {
+  DEBUG_PRINT_FUNCTION_NAME;
+  return;
   uint32_t value = 0;
   ESP.rtcUserMemoryWrite(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
 }
+
+
 
 /*********************************************************************************************\
  * CmndCrashDump - dump the crash history - called by `Status 12`
@@ -5487,13 +5492,15 @@ void mSupport::CrashDumpClear(void)
 
 bool mSupport::CrashFlag(void)
 {
+  DEBUG_PRINT_FUNCTION_NAME;
   return ((ResetReason() == REASON_EXCEPTION_RST) || (ResetReason() == REASON_SOFT_WDT_RST) || oswatch_blocked_loop);
 }
 
 void mSupport::CrashDump_AddJson(void)
 {
-    char buffer[30];
+  char buffer[30];
 
+  DEBUG_PRINT_FUNCTION_NAME;
   pCONT_sup->WriteBuffer_P(PSTR("\"Exception\":%d,\"Reason\":\"%s\",\"EPC\":[\"%08x\",\"%08x\",\"%08x\"],\"EXCVADDR\":\"%08x\",\"DEPC\":\"%08x\""),
     resetInfo.exccause,        // Exception Cause
     pCONT_sup->GetResetReason(buffer, sizeof(buffer)),  // Reset Reason

@@ -324,9 +324,10 @@ int8_t mPWMFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   }
 
 }
-int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
 
-  Serial.println("mPWMFan::parsesub_Commands(JsonObjectConst obj)");
+void mPWMFan::parsesub_Commands(JsonObjectConst obj){
+
+  // Serial.println("mPWMFan::parsesub_Commands(JsonObjectConst obj)");
 
   
 
@@ -339,7 +340,7 @@ int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
     // }
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
     // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
-    isserviced++;  
+    // isserviced++;  
   }
 
   // FanSpeed = 0,1,2,3 ie off,low,med,high
@@ -363,7 +364,7 @@ int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-    isserviced++;
+    // isserviced++;
   }
 
   //FanPWM = 0-1023
@@ -383,7 +384,7 @@ int8_t mPWMFan::parsesub_Commands(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANPWM,set_fan_pwm);
-    isserviced++;
+    // isserviced++;
   }
 
   mqtthandler_sensor_ifchanged.flags.SendNow = true;

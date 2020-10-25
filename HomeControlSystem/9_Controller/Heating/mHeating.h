@@ -66,6 +66,15 @@
 
 
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR) "program/timers";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR) "program/temps";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR) "program/overview";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR) "sensors/pipes";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR) "sensors/climate";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_PIPES_COLOUR_CTR) "sensors/pipes/colours";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR) "relays";
+
+
 #define D_HEATING_SENSOR_NAME_SHORT_DS "DS"
 #define D_HEATING_SENSOR_NAME_SHORT_US "US"
 #define D_HEATING_SENSOR_NAME_SHORT_WB "WB"
@@ -74,6 +83,7 @@
 #define D_HEATING_SENSOR_NAME_SHORT_TM "TM"
 #define D_HEATING_SENSOR_NAME_SHORT_TB "TB"
 #define D_HEATING_SENSOR_NAME_SHORT_TO "TO"
+
 
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_DS_CTR)           D_HEATING_SENSOR_NAME_SHORT_DS;
 DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_US_CTR)           D_HEATING_SENSOR_NAME_SHORT_US;
@@ -86,7 +96,7 @@ DEFINE_PROGMEM_CTR(PM_HEATING_SENSOR_NAME_SHORT_TO_CTR)           D_HEATING_SENS
 
 #define D_TEMP_MODE_OFF_CTR "Mode Off"
 
-DEFINE_PGM_CTR(PM_TEMP_MODE_OFF_CTR)  D_TEMP_MODE_OFF_CTR
+DEFINE_PGM_CTR(PM_TEMP_MODE_OFF_CTR)  D_TEMP_MODE_OFF_CTR;
 
 #define D_HEATING_SENSOR_NAME_LONG_DS "Downstairs"
 #define D_HEATING_SENSOR_NAME_LONG_US "Upstairs"
@@ -115,6 +125,15 @@ DEFINE_PROGMEM_CTR(PM_HEATING_SCHEDULED_NAME_ON_CTR)             D_JSON_SCHEDULE
 DEFINE_PROGMEM_CTR(PM_HEATING_SCHEDULED_NAME_MANUAL_ON_CTR)      D_JSON_MANUAL_ON;
 
 
+    enum TEMP_MODE_IDS{
+      TEMP_MODE_OFF_ID=0,
+      TEMP_MODE_HEATING_ID,
+      TEMP_MODE_MAINTAINING_ID,
+      TEMP_MODE_SCHEDULED_ID,
+      TEMP_MODE_SPLASH_RUN_TIME_ID,
+      TEMP_MODE_LENGTH
+    };
+    enum SCH_MODE{SCHEDULED_OFF_ID=1,SCHEDULED_SET_ID,SCHEDULED_ON_ID,SCHEDULED_MANUAL_ON_ID};
 // Temp lookup table
 // [15,16,17]
 // if(15,16)
@@ -332,15 +351,6 @@ void AddToHardwareMessage();
 
     // *************** TEMPS/SCHEDULES ****************************************************************************************************
 
-    enum TEMP_MODE_IDS{
-      TEMP_MODE_OFF_ID=0,
-      TEMP_MODE_HEATING_ID,
-      TEMP_MODE_MAINTAINING_ID,
-      TEMP_MODE_SCHEDULED_ID,
-      TEMP_MODE_SPLASH_RUN_TIME_ID,
-      TEMP_MODE_LENGTH
-    };
-    enum SCH_MODE{SCHEDULED_OFF_ID=1,SCHEDULED_SET_ID,SCHEDULED_ON_ID,SCHEDULED_MANUAL_ON_ID};
 
     #define HEATING_DEVICE_TEMPS_MAX 4
     struct HEATING_DEVICE_TEMPS{
@@ -492,15 +502,12 @@ void WebAppend_Root_Draw_Table();
     int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
     
-    void parsesub_CheckAll(JsonObjectConst obj);
     int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
-    
+    void parsesub_CheckAll(JsonObjectConst obj);
     void parsesub_ModeManual(JsonObjectConst obj);
     void parsesub_ProgramTimers(JsonObjectConst obj);
     void parsesub_ProgramTemps(JsonObjectConst obj);
-
-
 
     void SubTasker_HeatingTimers(void);
     void SubTasker_HeatingTemps(void);
@@ -529,11 +536,6 @@ void WebAppend_Root_Draw_Table();
 
     uint8_t rateSavedSendActive = 1;
 
-    void setfForceMQTTUpdate(uint8_t state);
-    uint8_t getfForceMQTTUpdate(void);
-    uint8_t getclearfForceMQTTUpdate(void);
-    uint8_t fForceMQTTUpdate;
-
     const char* GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* buffer);// = nullptr);
 
     uint32_t tSavedHeatingTemps,tSavedHeatingTemps2,tSavedHeatingTemps3;
@@ -548,8 +550,8 @@ void WebAppend_Root_Draw_Table();
     const char* GetUserNameByID(int8_t id, char* buffer);// = nullptr);
 
     struct FAILSAFES{
-    uint32_t tSaved;
-    int tSavedMinuteFailSafe;
+      uint32_t tSaved;
+      int tSavedMinuteFailSafe;
     }failsafes;
 
     int8_t SubContructCtr_HardwareStatus();

@@ -153,18 +153,18 @@ void mSensorsBME::WebAppend_Root_Status_Table_Draw(){
   char value_ctr[8];
   uint8_t sensor_counter = 0;
     
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     BufferWriterI->Append_P(PSTR("<td>BME%s Temperature</td>"), "280");
     BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr));   
-  BufferWriterI->Append_P(PSTR("</tr>"));
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     BufferWriterI->Append_P(PSTR("<td>BME%s Humidity</td>"), "280");
     BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr));   
-  BufferWriterI->Append_P(PSTR("</tr>"));
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     BufferWriterI->Append_P(PSTR("<td>BME%s Pressure</td>"), "280");
     BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr));   
-  BufferWriterI->Append_P(PSTR("</tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   
 }
 
@@ -357,7 +357,7 @@ void mSensorsBME::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 600;//pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -370,7 +370,7 @@ void mSensorsBME::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 120;//pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -380,7 +380,7 @@ void mSensorsBME::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

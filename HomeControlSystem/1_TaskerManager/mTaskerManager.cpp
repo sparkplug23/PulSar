@@ -538,12 +538,12 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
     DEBUG_LINE;
     switch_index = target_tasker ? target_tasker : module_settings.list[i];
-    // #ifdef ENABLE_ADVANCED_DEBUGGING
-    //   AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-    //     switch_index, 
-    //     GetTaskName(function, buffer_taskname),
-    //     GetModuleFriendlyName(switch_index));
-    // #endif
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+        switch_index, 
+        GetTaskName(function, buffer_taskname),
+        GetModuleFriendlyName(switch_index));
+    #endif
     
     // char buffer_taskname[40];
     //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
@@ -748,7 +748,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     #endif
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms"),millis()-start_millis);
+      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
     #endif
 
     if(target_tasker!=0){
@@ -769,7 +769,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
   
   DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
+    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
   DEBUG_LINE;
@@ -869,7 +869,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1
         case D_MODULE_SENSORS_BME_ID:       result = msbme->Tasker(function); break;
       #endif
       #ifdef D_MODULE_SENSORS_DB18S20_ID
-        case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function); break;
+        case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function, param1); break;
       #endif
       #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
         case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;

@@ -1638,14 +1638,14 @@ void mPWMLight::WebCommand_Parse(void)
 //     }else{
 //       sprintf(onoff_ctr,PSTR("Lights OFF"));
 //     }
-//     BufferWriterI->Append_P(PSTR("<tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //     BufferWriterI->Append_P(HTTP_DEVICE_STATE, 
 //       100 / 1, //FULL WIDTH 1 item for length
 //       onoff ? "bold" : "normal", 
 //       fsize, 
 //       onoff_ctr
 //     );
-//     BufferWriterI->Append_P(PSTR("</tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //     // Animation info
 //     memset(onoff_ctr,0,sizeof(onoff_ctr));
 //     fsize = 20;
@@ -1779,10 +1779,10 @@ void mPWMLight::WebCommand_Parse(void)
 //           JsonBuilderI->AppendBuffer(PSTR("{t}"));
 //           for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
 //             snprintf_P(title_ctr, sizeof(title_ctr), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), row_id, kTitle_ListHeadings));
-//             JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+//             JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //               JsonBuilderI->AppendBuffer(PSTR("<td style='width:200px'><b>%s</b></td>"),title_ctr);
 //               JsonBuilderI->AppendBuffer(PSTR("<td style='width:216px'><select id='g%d' name='g%d'></select></td>"),row_id_selected[row_id],row_id_selected[row_id]);
-//             JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+//             JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //           }
 //           JsonBuilderI->AppendBuffer(PSTR("{t2}"));
 
@@ -1862,10 +1862,10 @@ void mPWMLight::WebCommand_Parse(void)
 //           // JsonBuilderI->AppendBuffer(PSTR("{t}"));
 //           // for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
 //           //   snprintf_P(title_ctr, sizeof(title_ctr), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), row_id, kTitle_ListHeadings));
-//           //   JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+//           //   JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //           //     JsonBuilderI->AppendBuffer(PSTR("<td style='width:200px'><b>%s</b></td>"),title_ctr);
 //           //     JsonBuilderI->AppendBuffer(PSTR("<td style='width:216px'><select id='g%d' name='g%d'></select></td>"),row_id_selected[row_id],row_id_selected[row_id]);
-//           //   JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+//           //   JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //           // }
 //           // JsonBuilderI->AppendBuffer(PSTR("{t2}"));
 
@@ -1930,10 +1930,10 @@ void mPWMLight::WebCommand_Parse(void)
 
 //   for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
 //     snprintf_P(title_ctr, sizeof(title_ctr), "%02d None", row_id+1);
-//     JsonBuilderI->AppendBuffer(PSTR("<tr>"));
+//     JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //       JsonBuilderI->AppendBuffer(PSTR("{sw}200px'><b>%s</b></td>"),title_ctr);
 //       JsonBuilderI->AppendBuffer(PSTR("{sw}216px'>{si}g%d' name='g%d{si2}"),row_id_selected[row_id],row_id_selected[row_id]);
-//     JsonBuilderI->AppendBuffer(PSTR("</tr>"));
+//     JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }
 
 
@@ -2393,10 +2393,10 @@ void mPWMLight::WebCommand_Parse(void)
 //   char listheading[30];
 //   BufferWriterI->Append_P("%s",PSTR("{t}"));
 //   for(int ii=0;ii<8;ii++){
-//     BufferWriterI->Append_P(PSTR("<tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-//       BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"rgb_table"," ");   
-//     BufferWriterI->Append_P(PSTR("</tr>"));
+//       BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"rgb_table"," ");   
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }    
 //   BufferWriterI->Append_P("%s",PSTR("{t2}"));
 // }

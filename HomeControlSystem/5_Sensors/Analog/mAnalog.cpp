@@ -204,10 +204,10 @@ int8_t mAnalog::Tasker(uint8_t function){
       for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
         memset(sensor_ctr,0,sizeof(sensor_ctr));
         sprintf(sensor_ctr,"PIR Motion %s",pir_detect[sensor_id].friendly_name_ctr);
-        pCONT_web->AppendBuffer_PI2(PSTR("<tr>"));
+        pCONT_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
           pCONT_web->AppendBuffer_PI2(PSTR("<td>%s</td>"), sensor_ctr);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-          pCONT_web->AppendBuffer_PI2(PSTR("<td><div class='%s'>%s</div></td>"),"tab_pir","?");   
-        pCONT_web->AppendBuffer_PI2(PSTR("</tr>"));
+          pCONT_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_pir","?");   
+        pCONT_web->AppendBuffer_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
       }
     }break;
     // #endif //USE_MODULE_CORE_WEBSERVER    
@@ -358,7 +358,7 @@ void mAnalog::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnalog::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

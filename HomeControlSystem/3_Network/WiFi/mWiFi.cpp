@@ -93,7 +93,9 @@ void mWiFi::WifiConnectForced(){
 
   if(WiFi.status() == WL_CONNECTED){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "Connected to %s with %s (%d dBm)"),WiFi.SSID().c_str(),WiFi.localIP().toString().c_str(),WiFi.RSSI());
+    #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
     //MDNS.begin(pCONT_set->Settings.system_name.device);
+    #endif // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
   }else{
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_WIFI "FAILED to connect!"));
   }
@@ -441,7 +443,7 @@ void mWiFi::WifiCheckIp(void)
 
   if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0)) { //WIFI CONNECTED so assumed wifi_status is connected
     
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "WiFi.status() = WL_CONNECTED"));
+    //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "WiFi.status() = WL_CONNECTED"));
     WifiSetState(1);
     wifi_counter = WIFI_CHECK_SEC; //20 secs
     wifi_retry = wifi_retry_init;
@@ -461,19 +463,20 @@ void mWiFi::WifiCheckIp(void)
 
     wifi_status = WL_CONNECTED;    //assert status to be connected
     // #ifdef USE_DISCOVERY
+    #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
     //   #ifdef WEBSERVER_ADVERTISE
         if (2 == mdns_begun) {
-          //#ifdef ESP8266
-            // MDNS.update();
-            // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s"), "MDNS.update");
-            //       pCONT_set->boot_status.mdns_started_succesfully = mdns_begun;
-          //#endif
-        }else{
+          #ifdef ESP8266
           
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s %d"), "MDNS.update NOT SET", mdns_begun);
+            MDNS.update();
+            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s"), "MDNS.update");
+                  pCONT_set->boot_status.mdns_started_succesfully = mdns_begun;
+          #endif
+        }else{
+          AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s %d"), "MDNS.update NOT SET", mdns_begun);
         }
     //   #endif  // USE_DISCOVERY
-    // #endif  // WEBSERVER_ADVERTISE
+    #endif  // WEBSERVER_ADVERTISE // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
 
   } else { //not connected
     
@@ -684,6 +687,7 @@ void mWiFi::WifiCheck(uint8_t param)
         #endif  // FIRMWARE_MINIMAL
 
         #ifdef USE_DISCOVERY
+        #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
          // if (pCONT_set->Settings.flag_network.mdns_enabled) {
             // if (!mdns_begun) {
             //   if (pCONT_set->mdns_delayed_start) {
@@ -704,12 +708,14 @@ void mWiFi::WifiCheck(uint8_t param)
             //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_ATTEMPTING_CONNECTION " already started"));
             // }
           //}
+          #endif // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
         #endif  // USE_DISCOVERY
 
         #ifdef USE_MODULE_CORE_WEBSERVER
           if (pCONT_set->Settings.webserver) {
             pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
             #ifdef USE_DISCOVERY
+            #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
               #ifdef WEBSERVER_ADVERTISE
               if (1 == mdns_begun) {
                 mdns_begun = 2;
@@ -719,6 +725,7 @@ void mWiFi::WifiCheck(uint8_t param)
               }
               #endif  // WEBSERVER_ADVERTISE
             #endif  // USE_DISCOVERY
+            #endif // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
           } else {
             pCONT_web->StopWebserver();
           }
@@ -765,6 +772,8 @@ void mWiFi::WifiConnect(void)
   wifi_counter = 1;
 
 //  #ifdef ESP8266
+
+  #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
   uint8_t result = MDNS.begin(pCONT_set->Settings.system_name.device); // NEEDED OR CAUSES ERROR MDNS FAILURE
   MDNS.update();
   if(result){
@@ -772,7 +781,7 @@ void mWiFi::WifiConnect(void)
   }else{
     AddLog_P(LOG_LEVEL_ERROR,PSTR("MDNS with %s started failed to start!"),pCONT_set->Settings.system_name.device);
   }
-// #endif
+  #endif // ENABLE_DEVFEATURE_WIFI_MDNS
   
 }
 
@@ -795,7 +804,7 @@ void mWiFi::EspRestart(void)
   delay(100);                 // Allow time for message xfer - disabled v6.1.0b
   //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
   WifiDisconnect();
-  pCONT_sup->CrashDumpClear();
+  //pCONT_sup->CrashDumpClear();
   ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
   #ifdef ESP8266
     ESP.reset();
@@ -845,6 +854,7 @@ const char* mWiFi::GetWiFiConfigTypeCtr(void){
 
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function){
+
 
   switch(function){
     case FUNC_INIT:

@@ -91,32 +91,32 @@ uint8_t mDoorBell::RingDoorBellLoop(uint8_t reset){
 
 
 
-void mDoorBell::WebCommand_Parse(void)
-{
-  char tmp[100];
+// void mDoorBell::WebCommand_Parse(void)
+// {
+//   char tmp[100];
 
-//  selectorlist.amount = 0;
-  uint8_t  arg_value = 0;
+// //  selectorlist.amount = 0;
+//   uint8_t  arg_value = 0;
 
-  if(pCONT_web->request_web_command == nullptr){ return; }
+//   if(pCONT_web->request_web_command == nullptr){ return; }
 
-  char arg_ctr[10]; memset(arg_ctr,0,sizeof(arg_ctr));
+//   char arg_ctr[10]; memset(arg_ctr,0,sizeof(arg_ctr));
 
-  // check palette selector
-  sprintf(arg_ctr,"doorbell_ring\0");
-  if (pCONT_web->request_web_command->hasParam("doorbell_ring")) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    // animation.palette = arg_value;
-    // update_all = true; //refresh all
-    RingDoorBellSet(1,2);
+//   // check palette selector
+//   sprintf(arg_ctr,"doorbell_ring\0");
+//   if (pCONT_web->request_web_command->hasParam("doorbell_ring")) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     // animation.palette = arg_value;
+//     // update_all = true; //refresh all
+//     RingDoorBellSet(1,2);
 
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-  }
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//   }
 
   
 
-}
+// }
 
 void mDoorBell::BellChime_Set(uint8_t onoff){
   digitalWrite(pin_relay_chime,!onoff);
@@ -370,9 +370,9 @@ int8_t mDoorBell::Tasker(uint8_t function){
 
 
 
-    case FUNC_WEB_COMMAND:
-      WebCommand_Parse();
-    break;
+    // case FUNC_WEB_COMMAND:
+    //   WebCommand_Parse();
+    // break;
 
     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
       // char relay_handle_ctr[20]; 
@@ -389,9 +389,38 @@ int8_t mDoorBell::Tasker(uint8_t function){
       //                               );
       // // }
       // BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
- char relay_handle_ctr[10]; 
-  char buffer[30];
-  uint8_t relays_connected = 1;
+
+      
+  BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
+    BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+                              100/2,
+                              "", //no span
+                              "buttonh",
+                              D_JSON_RINGDOORBELL, 
+                              D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
+                              PSTR("Ring Doorbell"), ""
+                            );               
+  BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+  
+
+      
+  BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
+    BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+                              100/2,
+                              "", //no span
+                              "buttonh",
+                              D_JSON_RINGDOORBELL "_Single", 
+                              D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
+                              PSTR("Ring Doorbell Single"), ""
+                            );               
+  BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+  
+
+
+
+//  char relay_handle_ctr[10]; 
+//   char buffer[30];
+//   uint8_t relays_connected = 1;
       
   // JsonBuilderI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
   // // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
@@ -424,7 +453,7 @@ int8_t mDoorBell::Tasker(uint8_t function){
 
     //     // Power Toggle
     //     // pCONT_web->WSBufferAppend_P(HTTP_TABLE100);
-    //     // pCONT_web->WSBufferAppend_P(PSTR("<tr>"));
+    //     // pCONT_web->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     //     // pCONT_web->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE, 36, "doorbell_ring", 1, "Ring Doorbell", "");
     //     // pCONT_web->WSBufferAppend_P(PSTR("</tr></table>"));
 
@@ -511,10 +540,29 @@ void mDoorBell::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
 
   // Ring Door bell manually
-  if(!obj["doorbell"].isNull()){ 
+  if(!obj[D_JSON_RINGDOORBELL].isNull()){ 
 
 
     RingDoorBellSet(1,2);
+
+
+
+//     // const char* scenectr = obj[D_JSON_NAME];
+//     // if((tmp_id=GetSceneIDbyName(scenectr))>=0){
+//     //   scene.name_id = tmp_id;
+//     //   animation.mode = ANIMATION_MODE_SCENE_ID;
+//     //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName());
+//     //   Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName());
+//     //   isserviced++;
+//     // }else{
+//     //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+//     // }
+  }
+
+  if(!obj[D_JSON_RINGDOORBELL "_Single"].isNull()){ 
+
+
+    RingDoorBellSet(1,1);
 
 
 
@@ -548,14 +596,14 @@ void mDoorBell::WebAppend_Root_Status_Table_Draw(){
       // sprintf(title_ctr,"Chime %s Rang",ringer.friendly_name_ctr);
 
   // for(int ii=0;ii<fSensorCount;ii++){ //add number in name? List needed? also hold user defined name?
-    BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       BufferWriterI->Append_P(PSTR("<td>Chime %s Rang</td>"), ringer.friendly_name_ctr);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_dbl","?");   
-    BufferWriterI->Append_P(PSTR("</tr>"));
-    BufferWriterI->Append_P(PSTR("<tr>"));
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dbl","?");   
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       BufferWriterI->Append_P(PSTR("<td>Doorbell %s Pressed</td>"), doorbell_switch.friendly_name_ctr);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_dbl","?");   
-    BufferWriterI->Append_P(PSTR("</tr>"));
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dbl","?");   
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   // }
 }
 

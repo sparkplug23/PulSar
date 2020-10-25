@@ -211,6 +211,28 @@ class mSupport{
 
     Ticker tickerOSWatch;
 
+
+    // Randomise array (aka std lib)
+    template<typename DATA, typename LENGTH>
+    void ArrayRandomise(DATA* data, LENGTH length){
+
+      //duplicate original array
+      // DATA data_original[length];
+      // memcpy(data_original,data,sizeof(DATA)*length);
+
+      //
+  // std::array<int,5> foo {1,2,3,4,5};
+
+   
+  //     std::shuffle(foo.begin(),array.end(),std::default_random_engine(analogRead(0)));
+
+
+
+
+    }
+
+
+
 char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);
 
 
@@ -309,6 +331,9 @@ static uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifro
                                        uint16_t ito_min, uint16_t ito_max) ;
 
 
+
+
+void CmndRestart(void);
 
 
 

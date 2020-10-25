@@ -486,7 +486,7 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_PIR_2_NP_CTR)          D_GPIO_FUNCTION_PIR_2_NP_
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_PIR_3_NP_CTR)          D_GPIO_FUNCTION_PIR_3_NP_CTR;
 // #endif
 // #ifdef USE_MODULE_SENSORS_DOOR
-DEFINE_PGM_CTR(PM_GPIO_FUNCTION_DOOR_DETECT_CTR)       D_GPIO_FUNCTION_DOOR_DETECT_CTR;
+// DEFINE_PGM_CTR(PM_GPIO_FUNCTION_DOOR_DETECT_CTR)       D_GPIO_FUNCTION_DOOR_DETECT_CTR;
 // #endif
 
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_CHIME_INPUT_CTR)       D_GPIO_FUNCTION_CHIME_INPUT_CTR;
@@ -734,9 +734,9 @@ typedef union {
 } gpio_flag;
 
 
-#define FRIENDLY_NAME_TEMPLATE_MAX_LENGTH 20
+//#define FRIENDLY_NAME_TEMPLATE_MAX_LENGTH 20
 typedef struct MYTMPLT {
-  char         name[FRIENDLY_NAME_TEMPLATE_MAX_LENGTH];  //freindly name
+  //char         name[FRIENDLY_NAME_TEMPLATE_MAX_LENGTH];  //freindly name
   mycfgio      gp;
   gpio_flag    flag;
 } mytmplt;
@@ -853,7 +853,7 @@ DEFINE_PGM_CTR(kModules_Name_list)
 // Move names OUT of kModule to klist style
 // Default module settings
 const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
-  { D_MODULE_NAME_GENERIC_CTR,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
+  { //D_MODULE_NAME_GENERIC_CTR,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
     GPIO_USER_ID,        // GPIO00 D3 Wemos Button Shield
     GPIO_USER_ID,        // GPIO01 TX Serial RXD
     GPIO_USER_ID,        // GPIO02 D4 Wemos DHT Shield
@@ -874,7 +874,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
     GPIO_FLAG_ADC0_ID    // ADC0 A0 Analog input
   },
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
-  { D_MODULE_NAME_SONOFF_BASIC_CTR,    // Sonoff Basic (ESP8266)
+  { //D_MODULE_NAME_SONOFF_BASIC_CTR,    // Sonoff Basic (ESP8266)
     GPIO_KEY1_ID,     // GPIO00 Button
     GPIO_USER_ID,     // GPIO01 Serial RXD and Optional sensor
     GPIO_LED2_INV_ID,     // GPIO02 Only available on newer Sonoff Basic R2 V1
@@ -896,7 +896,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_H801
-  { D_MODULE_NAME_H801_CTR,            // Lixada H801 Wifi (ESP8266)
+  { //D_MODULE_NAME_H801_CTR,            // Lixada H801 Wifi (ESP8266)
     GPIO_USER_ID,        // GPIO00 E-FW Button
     GPIO_LED1_ID,        // GPIO01 Green LED - Link and Power status
     GPIO_USER_ID,        // GPIO02 TX and Optional sensor - Pin next to TX on the PCB
@@ -917,7 +917,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_MAGICHOME
-  { D_MODULE_NAME_MAGICHOME_CTR,       // Magic Home (aka Flux-light) (ESP8266) and Arilux LC10 (ESP8285)
+  { //D_MODULE_NAME_MAGICHOME_CTR,       // Magic Home (aka Flux-light) (ESP8266) and Arilux LC10 (ESP8285)
                       // https://www.aliexpress.com/item/Magic-Home-Mini-RGB-RGBW-Wifi-Controller-For-Led-Strip-Panel-light-Timing-Function-16million-colors/32686853650.html
     0,
     GPIO_USER_ID,        // GPIO01 Serial RXD and Optional sensor
@@ -939,7 +939,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY1
-  { D_MODULE_NAME_SHELLY1_CTR,        // Shelly1 Open Source (ESP8266 - 2MB) - https://shelly.cloud/shelly1-open-source/
+  { //D_MODULE_NAME_SHELLY1_CTR,        // Shelly1 Open Source (ESP8266 - 2MB) - https://shelly.cloud/shelly1-open-source/
      0,                // GPIO00 - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
      0,                // GPIO01 Serial RXD - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
      0,
@@ -956,7 +956,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY2P5  
-  {  D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
+  {  //D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
      0,
      0,//GPIO_MCP39F5_TX_ID,  // GPIO01 MCP39F501 Serial input
      0,//GPIO_KEY1_ID,
@@ -978,7 +978,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-  { D_MODULE_NAME_SONOFF_IFAN03_CTR,    // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
+  { //D_MODULE_NAME_SONOFF_IFAN03_CTR,    // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
     GPIO_KEY1_ID,          // GPIO00 WIFI_KEY0 Button 1
     GPIO_SERIAL_TX_ID,           // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
     0,                         // GPIO02 ESP_LOG
@@ -2113,7 +2113,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
 //      GPIO_USER,        // GPIO16 N.C.
 //      GPIO_FLAG_ADC0    // ADC0 A0 Analog input
 //   }
-  { D_MODULE_NAME_NODEMCU_CTR,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
+  { //D_MODULE_NAME_NODEMCU_CTR,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
     GPIO_USER_ID,        // GPIO00 D3 Wemos Button Shield
     GPIO_USER_ID,        // GPIO01 TX Serial RXD
     GPIO_USER_ID,        // GPIO02 D4 Wemos DHT Shield

@@ -2,11 +2,21 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
+
+
+//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
+//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
+//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
+//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
+//{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+
+
+
 /*** 
  * * Dev notes
  * 
- * - Any non add LEDs will be controlled through here for the short term 
- * - Long term, with several colour types and gamma stuff, introduce this is a gateway to rgbanimator (ie if led type, send command to the class AFTER calculating its colour etc for mode_singlecolours
+//  * - Any non add LEDs will be controlled through here for the short term 
+//  * - Long term, with several colour types and gamma stuff, introduce this is a gateway to rgbanimator (ie if led type, send command to the class AFTER calculating its colour etc for mode_singlecolours
  * )
  * 
  * */
@@ -14,7 +24,7 @@
 
 void mInterfaceLight::Init_NeoPixelAnimator(uint16_t size, uint8_t timebase){
 
- animator_controller = new NeoPixelAnimator(size, timebase); // NeoPixel animation management object
+  animator_controller = new NeoPixelAnimator(size, timebase); // NeoPixel animation management object
   
 }  
 
@@ -737,6 +747,14 @@ void mInterfaceLight::Init(void) //LightInit(void)
   init_PresetColourPalettes();
   init_Animations();
 
+  #ifdef USE_MODULE_LIGHTS_PWM
+    settings.flags.enable_cct_channel_sliders = true;
+  #else
+    settings.flags.enable_cct_channel_sliders = false;
+  #endif // USE_MODULE_LIGHTS_PWM
+
+
+
   //new_color[0] = 255;
   // LightApplyPower(new_color, 1);
 
@@ -872,6 +890,8 @@ void mInterfaceLight::init_Animations(){
 int8_t mInterfaceLight::Tasker(uint8_t function){
   
   int8_t function_result = 0;
+
+  // return 0;
  
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   if(function == FUNC_TEMPLATE_MODULE_LOAD){
@@ -1016,6 +1036,9 @@ void mInterfaceLight::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     pCONT_ladd->parsesub_CheckAll(obj);
     #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+    #ifdef USE_MODULE_LIGHTS_PWM
+    // pCONT_lPWM->parsesub_CheckAll(obj);
+    #endif // USE_MODULE_LIGHTS_PWM
   }
 
 }
@@ -1027,13 +1050,7 @@ void mInterfaceLight::parsesub_ModeAnimation(JsonObjectConst obj){
   char buffer[40];
   int8_t tmp_id = 0;
 
-DEBUG_LINE;
-
-  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
-DEBUG_LINE;
   if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
-DEBUG_LINE;
-
 
     // if(obj[D_JSON_COLOUR_PALETTE].is<const char*>()){
 
@@ -1045,7 +1062,6 @@ DEBUG_LINE;
         AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GetPaletteIDbyName=%d"),tmp_id);
         #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 
-  DEBUG_LINE;
         #ifdef ENABLE_PIXEL_FUNCTION_MIXER
         if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_FLASHER_ID){
           flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
@@ -1068,8 +1084,6 @@ DEBUG_LINE;
 
       uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
       pCONT_iLight->animation.palette_id = colour < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
-
-      char buffer[50];
 
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_NVALUE),D_JSON_COLOUR_PALETTE,pCONT_iLight->animation.palette_id);
@@ -1815,7 +1829,7 @@ void mInterfaceLight::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -2490,15 +2504,6 @@ void mInterfaceLight::init_PresetColourPalettes(){
 
   // memcpy_P(palettelist.ptr->colour_map_id,DEFAULT_COLOUR_PALETTE_USER_01_IDS,sizeof(DEFAULT_COLOUR_PALETTE_USER_01_IDS));
 
-
-
-  // // for(uint8_t id=0;id<400;id++){
-  // AddLog_Array(LOG_LEVEL_TEST, "test3", 
-  //   &pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[0],
-  //   (uint8_t)400);//palettelist.ptr->colour_map_size);
-  // // }
-
-
   // init defaults
   init_ColourPalettes_Autumn_Red();
   init_ColourPalettes_Autumn();
@@ -2773,7 +2778,7 @@ DEBUG_LINE;
 
 
     if(ptr->friendly_name_ctr == nullptr){ 
-AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr == nullptr"));
+      AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr == nullptr"));
       // return 0;
       break; //break for loop and ignore this .. NEEDS fixed
       
@@ -2829,19 +2834,19 @@ mInterfaceLight::PALETTELIST::PALETTE* mInterfaceLight::GetPalettePointerByID(ui
     case PALETTELIST_VARIABLE_USER_18_ID: return &palettelist.users[17];
     case PALETTELIST_VARIABLE_USER_19_ID: return &palettelist.users[18];
     case PALETTELIST_VARIABLE_USER_20_ID: return &palettelist.users[19];
-    case PALETTELIST_STATIC_SHELF_HEARTS_ID:   return &palettelist.shelf_hearts;
-    case PALETTELIST_STATIC_HOLLOWEEN_OP_ID:  return &palettelist.holloween_op;
-    case PALETTELIST_STATIC_HOLLOWEEN_OGP_ID: return &palettelist.holloween_ogp;
-    case PALETTELIST_STATIC_RAINBOW_ID:       return &palettelist.rainbow;
-    case PALETTELIST_STATIC_RAINBOW_INVERTED_ID:       return &palettelist.rainbow_inverted;
-    case PALETTELIST_STATIC_PASTEL_ID:        return &palettelist.pastel;
-    case PALETTELIST_STATIC_WINTER_ID:        return &palettelist.winter;
-    case PALETTELIST_STATIC_AUTUMN_ID:        return &palettelist.autumn;
-    case PALETTELIST_STATIC_AUTUMN_RED_ID:    return &palettelist.autumn_red;
-    case PALETTELIST_STATIC_OCEAN_01_ID:       return &palettelist.ocean_01;
-    case PALETTELIST_STATIC_GRADIENT_01_ID:         return &palettelist.gradient_01;
-    case PALETTELIST_STATIC_GRADIENT_02_ID:         return &palettelist.gradient_02;
-    case PALETTELIST_STATIC_SUNRISE_01_ID:         return &palettelist.sunrise_01;
+    case PALETTELIST_STATIC_SHELF_HEARTS_ID:    return &palettelist.shelf_hearts;
+    case PALETTELIST_STATIC_HOLLOWEEN_OP_ID:    return &palettelist.holloween_op;
+    case PALETTELIST_STATIC_HOLLOWEEN_OGP_ID:   return &palettelist.holloween_ogp;
+    case PALETTELIST_STATIC_RAINBOW_ID:         return &palettelist.rainbow;
+    case PALETTELIST_STATIC_RAINBOW_INVERTED_ID:return &palettelist.rainbow_inverted;
+    case PALETTELIST_STATIC_PASTEL_ID:          return &palettelist.pastel;
+    case PALETTELIST_STATIC_WINTER_ID:          return &palettelist.winter;
+    case PALETTELIST_STATIC_AUTUMN_ID:          return &palettelist.autumn;
+    case PALETTELIST_STATIC_AUTUMN_RED_ID:      return &palettelist.autumn_red;
+    case PALETTELIST_STATIC_OCEAN_01_ID:        return &palettelist.ocean_01;
+    case PALETTELIST_STATIC_GRADIENT_01_ID:     return &palettelist.gradient_01;
+    case PALETTELIST_STATIC_GRADIENT_02_ID:     return &palettelist.gradient_02;
+    case PALETTELIST_STATIC_SUNRISE_01_ID:      return &palettelist.sunrise_01;
   }
 }
 
@@ -3057,124 +3062,15 @@ void mInterfaceLight::SetPaletteListPtrFromID(uint8_t id){
 }
 
 
-// RgbTypeColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
-// {
-
-//   RgbTypeColor colour = RgbTypeColor(0);
-
-//   // if(ptr->id >= PALETTELIST_VARIABLE_USER_LENGTH_ID){ //temp progmem issue
-//   //   return colour;
-//   // }
-
-//   //load palette
-//   uint8_t palette_elements[ptr->colour_map_size];
-  
-//   if(ptr->id < PALETTELIST_VARIABLE_USER_LENGTH_ID){
-//     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-//   }
-//   // ptr
-//   else{
-//     memcpy_P(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-//   }
-
-//   *pixel_position = -1;
-
-//   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
-//   #endif
-
-//   switch(ptr->flags.fMapIDs_Type){
-//     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: default:{
-//       *pixel_position = 1;
-      
-//       #ifdef DONT_USE_OLD_PRESETS
-//       colour = preset_colour_map[palette_elements[pixel_num]]; // direct
-//       #else
-//       colour = RgbTypeColor(GetHsbColour(palette_elements[pixel_num]));
-//       #endif
-//     }
-//     break;
-//     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID:{
-
-//       uint16_t index_relative = pixel_num*4; // get expected pixel position
-//       uint16_t expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
-      
-//       *pixel_position = palette_elements[index_relative];
-//       // Get colour
-//       colour = RgbTypeColor(
-//         palette_elements[index_relative+1],
-//         palette_elements[index_relative+2],
-//         palette_elements[index_relative+3]
-//       );
-
-//     }break;
-//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID:
-//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID: //0,h,s,b (only if uint16 is allowed for hue>255)
-//     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID:{
-      
-//       uint16_t index_relative = pixel_num*2; // get expected pixel position
-//       uint16_t expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
-      
-//       *pixel_position = palette_elements[index_relative];
-//       // colour = preset_colour_map[palette_elements[index_relative+1]];
-
-//       #ifdef DONT_USE_OLD_PRESETS
-//       colour = preset_colour_map[palette_elements[index_relative+1]]; // direct
-//       #else
-//       colour = RgbTypeColor(GetHsbColour(palette_elements[index_relative+1]));
-//       #endif
-      
-//     }
-//     break;
-//     case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:{
-//       // Get expected pixel position
-//       uint16_t index_relative = pixel_num*3;
-//       // Get colour
-//       colour = RgbTypeColor(
-//         palette_elements[index_relative  ],
-//         palette_elements[index_relative+1],
-//         palette_elements[index_relative+2]
-//       );
-//     }
-//     break;
-//     case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID:{
-//       // Get expected pixel position
-//       uint16_t index_relative = pixel_num*5;
-
-//       RgbcctColor test = RgbcctColor(0,1,2,3,4);
-//       RgbColor test2 = test;
-//       test = test2;
-
-//       // Get colour
-//       // colour = RgbTypeColor(
-//       //   palette_elements[index_relative  ],
-//       //   palette_elements[index_relative+1],
-//       //   palette_elements[index_relative+2],
-//       //   palette_elements[index_relative+3],
-//       //   palette_elements[index_relative+4]
-//       // );
-//     }
-//     break;
-//   }
-
-//   return colour;
-
-// } // end function
-
-
 
 RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
 
   RgbcctColor colour = RgbcctColor(0);
-
-  // if(ptr->id >= PALETTELIST_VARIABLE_USER_LENGTH_ID){ //temp progmem issue
-  //   return colour;
-  // }
-
-  //load palette
   uint8_t palette_elements[ptr->colour_map_size];
-  
+  uint16_t index_relative = 0; // get expected pixel position
+  uint16_t expected_pixel_count = 0; // get expected pixel position
+
   if(ptr->id < PALETTELIST_VARIABLE_USER_LENGTH_ID){
     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }
@@ -3186,32 +3082,31 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
   *pixel_position = -1;
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "here fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
   #endif
 
   switch(ptr->flags.fMapIDs_Type){
-    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: default:{
-      *pixel_position = 1;
-      
-      #ifdef DONT_USE_OLD_PRESETS
-      colour = preset_colour_map[palette_elements[pixel_num]]; // direct
-      #else
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "here palette_elements[pixel_num]=%d %d"),palette_elements[pixel_num],pixel_num);
-      colour = RgbTypeColor(GetHsbColour(palette_elements[pixel_num]));
-      #endif
+    default:
+    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:{
+      *pixel_position = 1;      
+      colour = RgbcctColor(
+        GetHsbColour(palette_elements[pixel_num])
+      );
     }
     break;
     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID:{
 
-      uint16_t index_relative = pixel_num*4; // get expected pixel position
-      uint16_t expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
+      index_relative = pixel_num*4; // get expected pixel position
+      expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
       
       *pixel_position = palette_elements[index_relative];
       // Get colour
-      colour = RgbTypeColor(
+      colour = RgbcctColor(
         palette_elements[index_relative+1],
         palette_elements[index_relative+2],
-        palette_elements[index_relative+3]
+        palette_elements[index_relative+3],
+        0,
+        0
       );
 
     }break;
@@ -3219,34 +3114,33 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID: //0,h,s,b (only if uint16 is allowed for hue>255)
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID:{
       
-      uint16_t index_relative = pixel_num*2; // get expected pixel position
-      uint16_t expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
+      index_relative = pixel_num*2; // get expected pixel position
+      expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
       
       *pixel_position = palette_elements[index_relative];
-      // colour = preset_colour_map[palette_elements[index_relative+1]];
 
-      #ifdef DONT_USE_OLD_PRESETS
-      colour = preset_colour_map[palette_elements[index_relative+1]]; // direct
-      #else
-      colour = RgbTypeColor(GetHsbColour(palette_elements[index_relative+1]));
-      #endif
+      colour = RgbcctColor(
+        GetHsbColour(palette_elements[index_relative+1])
+      );
       
     }
     break;
     case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:{
       // Get expected pixel position
-      uint16_t index_relative = pixel_num*3;
+      index_relative = pixel_num*3;
       // Get colour
-      colour = RgbTypeColor(
+      colour = RgbcctColor(
         palette_elements[index_relative  ],
         palette_elements[index_relative+1],
-        palette_elements[index_relative+2]
+        palette_elements[index_relative+2],
+        0,
+        0
       );
     }
     break;
     case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID:{
       // Get expected pixel position
-      uint16_t index_relative = pixel_num*5;
+      index_relative = pixel_num*5;
       // Get colour
       colour = RgbcctColor(
         palette_elements[index_relative  ],
@@ -3280,17 +3174,6 @@ uint32_t mInterfaceLight::WebColorFromColourMap(uint8_t i)
 uint32_t mInterfaceLight::WebColorFromColourType(RgbColor rgb)
 {
   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-  return tcolor;
-}
-// uint32_t mInterfaceLight::WebColorFromColourType(HsbColor hsb)
-// {
-//   RgbColor rgb = RgbColor(hsb);
-//   uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-//   return tcolor;
-// }
-uint32_t mInterfaceLight::WebColorFromColourType(RgbwColor rgbw)
-{
-  uint32_t tcolor = (rgbw.R << 16) | (rgbw.G << 8) | rgbw.B;
   return tcolor;
 }
 
@@ -4191,6 +4074,9 @@ HsbColor mInterfaceLight::GetColour_HSB(void){
 }
 
 
+// void mInterfaceLight::Change_RgbcctColor_Hue(){
+
+// }
 
 
 /*********************************************************************************************\

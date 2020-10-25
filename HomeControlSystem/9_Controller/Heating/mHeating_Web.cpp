@@ -6,7 +6,7 @@ int8_t mHeating::Tasker_Web(uint8_t function){
 
   switch(function){    
     case FUNC_WEB_COMMAND:
-      WebCommand_Parse();
+      //WebCommand_Parse();
     break;  
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
@@ -69,10 +69,10 @@ void mHeating::WebAppend_Root_Draw_Table(){
   // if(settings.fShowTable){
       BufferWriterI->Append_P(PSTR("{t}"));
     for(int ii=0;ii<4;ii++){
-      BufferWriterI->Append_P(PSTR("<tr>"));
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
         BufferWriterI->Append_P(PSTR("<td>%s Status</td>"), GetDeviceNameLongbyIDCtr(ii,buffer, sizeof(buffer)));
         BufferWriterI->Append_P(PSTR("<td><span class='%s'>%s</span></td>"),"prog_status_tab","?");   
-      BufferWriterI->Append_P(PSTR("</tr>"));
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
     }    
     
       BufferWriterI->Append_P(PSTR("{t2}"));
@@ -349,78 +349,78 @@ void mHeating::WebPage_Root_AddHandlers(){
 
 
 
-void mHeating::WebCommand_Parse(void)
-{
+// void mHeating::WebCommand_Parse(void)
+// {
   
-  if(pCONT_web->request_web_command == nullptr){ return; }
+//   if(pCONT_web->request_web_command == nullptr){ return; }
 
-  char tmp[100];
+//   char tmp[100];
 
-//  selectorlist.amount = 0;
-  uint8_t  arg_value = 0;
+// //  selectorlist.amount = 0;
+//   uint8_t  arg_value = 0;
 
-  char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
+//   char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
 
-  // // check palette selector
-  // sprintf(arg_ctr,"relay0_toggle\0");
-  // if (pCONT_web->pWebServer->hasParam("relay0_toggle")) {
-  //   pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
-  //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-  //   // animation.palette = arg_value;
+//   // // check palette selector
+//   // sprintf(arg_ctr,"relay0_toggle\0");
+//   // if (pCONT_web->pWebServer->hasParam("relay0_toggle")) {
+//   //   pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
+//   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//   //   // animation.palette = arg_value;
 
-  //   ExecuteCommandPower(0,POWER_TOGGLE,SRC_MQTT);
+//   //   ExecuteCommandPower(0,POWER_TOGGLE,SRC_MQTT);
 
-  //   // update_all = true; //refresh all
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
-  // }
+//   //   // update_all = true; //refresh all
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
+//   // }
 
-  for(uint8_t relay_id=0;relay_id<4;relay_id++){
+//   for(uint8_t relay_id=0;relay_id<4;relay_id++){
     
-    sprintf(arg_ctr,"%s%d",WEB_HANDLE_BUTTON_NAME_TIMER_SET,relay_id);
+//     sprintf(arg_ctr,"%s%d",WEB_HANDLE_BUTTON_NAME_TIMER_SET,relay_id);
 
-    if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-      pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-      arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-      // animation.brightness = BrtN2F(arg_value);
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-      // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-      // SetRefreshLEDs();
-
-    
-    functionhandler_programs_timers.flags.run_now = true;
-      // program_timers[relay_id].mapped_defaults[]
-      program_timers[relay_id].time_minutes_on = arg_value;
-    program_timers[relay_id].time_minutes_on_start = program_timers[relay_id].time_minutes_on;
-
-      // ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
-    }
-
-  }
-
-
-
-  for(uint8_t relay_id=0;relay_id<4;relay_id++){
-    
-    sprintf(arg_ctr,"%s%d",WEB_HANDLE_BUTTON_NAME_TEMP_SET,relay_id);
-
-    if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-      pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-      arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-      // animation.brightness = BrtN2F(arg_value);
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-      // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-      // SetRefreshLEDs();
+//     if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//       // animation.brightness = BrtN2F(arg_value);
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       // SetRefreshLEDs();
 
     
-      // program_timers[relay_id].mapped_defaults[]
-      program_temps[relay_id].temp.desired = (float)arg_value;
+//     functionhandler_programs_timers.flags.run_now = true;
+//       // program_timers[relay_id].mapped_defaults[]
+//       program_timers[relay_id].time_minutes_on = arg_value;
+//     program_timers[relay_id].time_minutes_on_start = program_timers[relay_id].time_minutes_on;
 
-      // ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
-    }
+//       // ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
+//     }
 
-  }
+//   }
 
-}
+
+
+//   for(uint8_t relay_id=0;relay_id<4;relay_id++){
+    
+//     sprintf(arg_ctr,"%s%d",WEB_HANDLE_BUTTON_NAME_TEMP_SET,relay_id);
+
+//     if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//       // animation.brightness = BrtN2F(arg_value);
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       // SetRefreshLEDs();
+
+    
+//       // program_timers[relay_id].mapped_defaults[]
+//       program_temps[relay_id].temp.desired = (float)arg_value;
+
+//       // ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
+//     }
+
+//   }
+
+// }
 
 
 

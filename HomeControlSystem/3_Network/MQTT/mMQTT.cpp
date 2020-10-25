@@ -855,12 +855,21 @@ uint8_t mMQTT::ConstructJSON_Debug_Minimal(uint8_t json_level){
 
 int8_t mMQTT::Tasker(uint8_t function){
 
+
   if(pCONT_set->Settings.flag_system.mqtt_enabled){
 
+    
   switch(function){
     case FUNC_INIT:
       init();
     break;
+
+  }
+
+// DEBUG_LINE_HERE;
+//   return 0;
+
+  switch(function){
     case FUNC_JSON_COMMAND:
       parse_JSONCommand(); // mqtt config commands
     break;

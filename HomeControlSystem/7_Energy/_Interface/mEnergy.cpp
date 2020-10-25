@@ -996,7 +996,7 @@ void mEnergy::WebAppend_Root_Draw_Table(){
   BufferWriterI->Append_P(PSTR("{t}"));
   // BufferWriterI->Append_P(PSTR("<table style='border: 1px solid white;border-collapse:collapse;'>"));
   //headers
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
   for(int col=0;col<9;col++){
     if(col==0){ //first column blank
       // BufferWriterI->Append_P(PSTR("<th>    Parameter /\nDevice      </th>"));
@@ -1006,10 +1006,10 @@ void mEnergy::WebAppend_Root_Draw_Table(){
         BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceName(D_MODULE_DRIVERS_ENERGY_ID,col-1,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex    
     }
   }    
-  BufferWriterI->Append_P(PSTR("</tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   //rows
   for(int row=0;row<7;row++){
-    BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     for(int col=0;col<9;col++){
       if(col==0){ //row name
         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS));
@@ -1018,7 +1018,7 @@ void mEnergy::WebAppend_Root_Draw_Table(){
         BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ener_tab");  
       }
     }
-    BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
   }
   BufferWriterI->Append_P(PSTR("{t2}")); 
 }
@@ -1264,7 +1264,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -1274,7 +1274,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Sensor;
   
   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;

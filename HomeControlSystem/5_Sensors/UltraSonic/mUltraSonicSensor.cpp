@@ -35,6 +35,8 @@ void mUltraSonicSensor::init(void){
 int mUltraSonicSensor::GetDurationReading(void){
 
   // If sensor is invalid, use shorter delay to read again (but not too fast)
+  
+  #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   int blockingtime = ultrasonic.settings.blocking_time_ms;
   if(!ultrasonic.isvalid){
     blockingtime = ultrasonic.settings.blocking_time_ms*4; //retry 2 times longer is previous sample was wrong
@@ -42,11 +44,12 @@ int mUltraSonicSensor::GetDurationReading(void){
 
   // Return early
   if((abs(millis()-ultrasonic.tUltraSonicSensorReadLast)<blockingtime)){ // if not valid try again right away
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime"));
+   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime"));
     return ultrasonic.duration;
   }
+  #endif //   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
 
   float duration=0;
 
@@ -58,10 +61,12 @@ int mUltraSonicSensor::GetDurationReading(void){
   delayMicroseconds(10);
   digitalWrite(pin_trig, LOW);
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(pin_echo, HIGH, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
+  duration = pulseIn(pin_echo, HIGH);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
+  ultrasonic.duration_raw = duration;
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
 
+  #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   //if outside possible range
   if((duration>ultrasonic.settings.duration_limit_min)&&(duration<ultrasonic.settings.duration_limit_max)){ //pCONT->mso->MessagePrintln("[ULTRA] SAMPLING");
 
@@ -70,18 +75,18 @@ int mUltraSonicSensor::GetDurationReading(void){
     ultrasonic.threshold.lowervalue = lower;
     ultrasonic.threshold.uppervalue = upper;
 
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
+    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
 
     // New method under test
     // GET how new duration relates to previous
     if(duration>ultrasonic.duration){ // Positive range
       ultrasonic.threshold.ratio_pos = duration/ultrasonic.threshold.uppervalue;
       ultrasonic.threshold.relative = ultrasonic.threshold.ratio_pos;  
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
+      // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
     }else{ // Negative range
       ultrasonic.threshold.ratio_neg = -1*(ultrasonic.threshold.lowervalue/duration);
       ultrasonic.threshold.relative = ultrasonic.threshold.ratio_neg; 
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
+      // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
     }
 
     // Check if its within threshold
@@ -150,6 +155,16 @@ int mUltraSonicSensor::GetDurationReading(void){
     ultrasonic.accuracy.outsidecount++;
     return ultrasonic.duration;
   }
+
+  #else
+  
+    ultrasonic.duration = duration; //update stored
+    ultrasonic.tUltraSonicSensorReadLast = millis();
+    ultrasonic.isvalid = true;
+    ultrasonic.ischanged = true;
+    ultrasonic.accuracy.insidecount++;
+
+  #endif // ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
 }
 
@@ -477,14 +492,20 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
     break;
     case FUNC_LOOP: //AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_ULTRASONIC D_DEBUG_FUNCTION "mUltraSonicSensor::Tasker"));
      
+  //  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::Tasker = %d"),function);
+  ultrasonic.settings.measure_rate_ms = 1000;
+        
       if(abs(millis()-ultrasonic.tReadLast)>=ultrasonic.settings.measure_rate_ms){
         //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tReadLast %d"),ultrasonic.duration);
         GetDurationReading();
         if(ultrasonic.isvalid){ // stop trying
           ultrasonic.tReadLast = millis();
           fUpdateCalculations = true;
-          AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d"),ultrasonic.duration);
+          //AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d"),ultrasonic.duration);
         }
+      }else{
+          //AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration2 = %d"),ultrasonic.duration);
+
       }
 
       if(ultrasonic.isvalid){
@@ -686,14 +707,14 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
 
 void mUltraSonicSensor::WebAppend_Root_Status_Table_Draw(){
   
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Ultrasonic Distance");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-    BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_ult","?");   
-  BufferWriterI->Append_P(PSTR("</tr>"));
-  BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_ult","?");   
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
     BufferWriterI->Append_P(PSTR("<td>%s</td>"), "Ultrasonic Event");//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-    BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"tab_ult","?");   
-  BufferWriterI->Append_P(PSTR("</tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_ult","?");   
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 }
 
 
@@ -734,7 +755,7 @@ void mUltraSonicSensor::WebPage_Root_AddHandlers(){
 
 
 
-int8_t mUltraSonicSensor::parse_JSONCommand(){
+void mUltraSonicSensor::parse_JSONCommand(){
 
 
   // Check if instruction is for me
@@ -742,12 +763,12 @@ int8_t mUltraSonicSensor::parse_JSONCommand(){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
 
 
 // WRONG
-  u
+  // u
   int8_t tmp_id = 0;
 
   // #ifdef JSONDOCUMENT_STATIC
@@ -803,16 +824,16 @@ int8_t mUltraSonicSensor::parse_JSONCommand(){
 
 uint8_t mUltraSonicSensor::ConstructJSON_Settings(uint8_t json_level){
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
-    DynamicJsonDocument doc(200);
-    JsonObject root = doc.to<JsonObject>();
+    // memset(&data_buffer2,0,sizeof(data_buffer2));
+    // DynamicJsonDocument doc(200);
+    // JsonObject root = doc.to<JsonObject>();
 
-    // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
+    // // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
 
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+    // data_buffer2.payload.len = measureJson(root)+1;
+    // serializeJson(doc,data_buffer2.payload.ctr);
 
-    return 1;
+    return 0;
 
 }
 
@@ -825,6 +846,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
     JsonObject sensorobj = root.createNestedObject("sensor");
     sensorobj["isvalid"] = ultrasonic.isvalid;
     sensorobj["duration"] = ultrasonic.duration;
+    sensorobj["duration_raw"] = ultrasonic.duration_raw;
     sensorobj["temp"] = ultrasonic.temperature;
     sensorobj["temp_age"] = abs(millis()-ultrasonic.tPermitTempUpdate);
     sensorobj["speedofsound"] = mSupport::roundfloat(ultrasonic.speedofsound,1);
@@ -877,18 +899,18 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
 
 uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
 
-  Serial.println("ConstructJSON_SensorsAveraged");
+  // Serial.println("ConstructJSON_SensorsAveraged");
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-  DynamicJsonDocument doc(200);
-  JsonObject root = doc.to<JsonObject>();
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // DynamicJsonDocument doc(200);
+  // JsonObject root = doc.to<JsonObject>();
 
-  // root["json_teleperiod_level"] = "test";//pCONT_set->GetTelePeriodJsonLevelCtr();
+  // // root["json_teleperiod_level"] = "test";//pCONT_set->GetTelePeriodJsonLevelCtr();
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
 
-  return 1;
+  return 0;
 
 }
 
@@ -1031,19 +1053,7 @@ void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ 
-
-      // if(mqtthandler_ptr==nullptr){
-      //   Serial.println("mqtthandler_ptr==nullptr");
-      // }
-      // if(mqtt_handler_id == 7){
-
-      //   // Serial.printf("handler_found = %d %s\n\r",handler_found,mqtthandler_ptr->ConstructJSON_function);
-      // }
-      
-      // Serial.printf("handler_found = %d %s\n\r",handler_found,mqtthandler_ptr->postfix_topic);
-      pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_ULTRASONIC_ID,mqtthandler_ptr); 
-    }
+    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_ULTRASONIC_ID,mqtthandler_ptr);  }
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

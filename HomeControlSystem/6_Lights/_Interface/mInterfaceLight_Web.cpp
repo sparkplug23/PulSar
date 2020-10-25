@@ -125,45 +125,48 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   //   WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-  BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
-  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
-  //   "pwm_cct",             // a - Unique HTML id
-  //   "#fff", "#ff0",  // White to Yellow
-  //   1,               // sl1
-  //   153, 500,        // Range color temperature
-  //   LightGetColorTemp(),
-  //   "pwm_cct"
-  // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
+  if(settings.flags.enable_cct_channel_sliders){
+    BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
+    // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
+    //   "pwm_cct",             // a - Unique HTML id
+    //   "#fff", "#ff0",  // White to Yellow
+    //   1,               // sl1
+    //   153, 500,        // Range color temperature
+    //   LightGetColorTemp(),
+    //   "pwm_cct"
+    // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
 
-  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-  //   "pwm_cbrt",               // c - Unique HTML id
-  //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-  //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-  //   0, 100,  // Range 0/1 to 100%
-  //   _briCT,
-  //   "pwm_cbrt"
-  // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+    // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+    //   "pwm_cbrt",               // c - Unique HTML id
+    //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+    //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+    //   0, 100,  // Range 0/1 to 100%
+    //   _briCT,
+    //   "pwm_cbrt"
+    // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-  if(getColorMode() & LCM_CT){
-    BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-      "cct_temp",               
-      "col_sldr",
-      "#fff", "#ff0",  // White to Yellow
-      "cct_temp",              
-      D_JSON_CCT_TEMP,
-      153, 500,        // Range color temperature
-      getCT()
-    ); 
-    BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-      "cct_brt",               
-      "col_sldr",
-      PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-      "cct_brt",              
-      D_JSON_BRT_CCT,
-      0, 100,  // Range 0/1 to 100% 
-      getBriCT()
-    ); 
-  }
+    if(getColorMode() & LCM_CT){
+      BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+        "cct_temp",               
+        "col_sldr",
+        "#fff", "#ff0",  // White to Yellow
+        "cct_temp",              
+        D_JSON_CCT_TEMP,
+        153, 500,        // Range color temperature
+        getCT()
+      ); 
+      BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+        "cct_brt",               
+        "col_sldr",
+        PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+        "cct_brt",              
+        D_JSON_BRT_CCT,
+        0, 100,  // Range 0/1 to 100% 
+        getBriCT()
+      ); 
+    }
+
+  } // enable cct controls
 
   // #endif
 
@@ -240,7 +243,7 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
         if(i < pal_length){
           c = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,i,&pixel_position);
         }else{      
-          c = RgbColor(0,0,0);//default black
+          c = RgbColor(0);//default black
         }
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
       }
@@ -270,28 +273,25 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
     // JsonBuilderI->Level_End();
 
 
-    HsbColor hsb = RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B);
+    HsbColor hsb = RgbColor(tasint_colour.R,tasint_colour.G,tasint_colour.B);
 
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",1);
         JsonBuilderI->Array_Start("bclg");
-
-        RgbTypeColor sat_low_colour = RgbColor(HsbColor(hsb.H,0,hsb.B));
-        RgbTypeColor sat_high_colour = RgbColor(HsbColor(hsb.H,1,hsb.B));
+        RgbColor sat_low_colour = HsbColor(hsb.H,0,hsb.B);
+        RgbColor sat_high_colour = HsbColor(hsb.H,1,hsb.B);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_low_colour.R,sat_low_colour.G,sat_low_colour.B);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_high_colour.R,sat_high_colour.G,sat_high_colour.B);
-
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();
+
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",2);
-        JsonBuilderI->Array_Start("bclg");
-        
-        RgbTypeColor brt_low_colour = RgbColor(HsbColor(hsb.H,hsb.S,0));
-        RgbTypeColor brt_high_colour = RgbColor(HsbColor(hsb.H,hsb.S,1));
+        JsonBuilderI->Array_Start("bclg");    
+        RgbColor brt_low_colour = HsbColor(hsb.H,hsb.S,0);
+        RgbColor brt_high_colour = HsbColor(hsb.H,hsb.S,1);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_low_colour.R,brt_low_colour.G,brt_low_colour.B);
         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_high_colour.R,brt_high_colour.G,brt_high_colour.B);
-
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();
 
@@ -350,7 +350,7 @@ void mInterfaceLight::WebAppend_Root_Draw_RGBPalette(){
 
 void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect_Placeholder(){
   BufferWriterI->Append_P(PSTR("{t}"));
-  BufferWriterI->Append_P(PSTR("<tr><div class='%s';></div></tr>"),"rgb_palsel_draw");
+  BufferWriterI->Append_P(PSTR("<tr><div class='%s'></div></tr>"),"rgb_palsel_draw");
   BufferWriterI->Append_P(PSTR("{t2}"));
 }
 
@@ -363,7 +363,14 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
 
   // BufferWriterI->Append_P(PSTR("<tr><td><b>Palette List Select</b></td></tr>"));
   BufferWriterI->Append_P(PSTR("<p><form>"));
-    BufferWriterI->Append_P(PSTR("<select name='pal_set' id='pal_set' onchange='send_value(id);'>"));
+    
+    // #ifdef ENABLE_DEVFEATURE_PIXEL_NEW_JSON_PALETTE_SELECT_ROOT
+    BufferWriterI->Append_P(PSTR("<select name='pal_set' data-json_keys=\\\"%s\\\">"),D_JSON_COLOUR_PALETTE); //working
+    // #else
+    // // BufferWriterI->Append_P(PSTR("<select name='pal_set' id='pal_set' onchange='send_value(id);'>")); //not working
+    // #endif // ENABLE_DEVFEATURE_PIXEL_NEW_JSON_PALETTE_SELECT_ROOT
+
+
       BufferWriterI->Append_P(PSTR("<optgroup label='User Editable'>"));
       
       char name_ctr[20];
@@ -462,13 +469,21 @@ void mInterfaceLight::WebPage_Root_AddHandlers(){
 }
 
 
+//
+  // "<div><span class='p'>%s</span><span class='q'>%s</span></div>";
 void mInterfaceLight::WebAppend_Root_Draw_RGBLive(){
-  char listheading[30];
+  
   BufferWriterI->Append_P(PSTR("{t}"));
-  BufferWriterI->Append_P(PSTR("<tr><td>Liveview<span class='%s'>%d</span></td></tr>"), "rgb_live_ttl", liveview.refresh_rate);//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
+  #ifdef ENABLE_DEVFEATURE_PIXEL_PIXELCOUNT_IN_LIVEVIEW
+  BufferWriterI->Append_P(PSTR("<tr><td>Liveview <span class='p %s'>%d</span></td><td>Amount<span class='q %s'>%d</span></td></tr>"), "rgb_live_ttl", liveview.refresh_rate, "rgb_live_ttl", light_count);//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
   BufferWriterI->Append_P(PSTR("<tr><td><div class='rgb_live' style='width:100%%;height:%dpx';></div></td></tr>"),
                             map(liveview.height_as_percentage,0,100,1,300)); //pixel height option for liveview
+  #else
+  BufferWriterI->Append_P(PSTR("<tr><td>Liveview <span class='%s'>%d</span></td></tr>"), "rgb_live_ttl", liveview.refresh_rate);
+  BufferWriterI->Append_P(PSTR("<tr><td><div class='rgb_live' style='width:100%%;height:%dpx';></div></td></tr>"), map(liveview.height_as_percentage,0,100,1,300)); //pixel height option for liveview
+  #endif // ENABLE_DEVFEATURE_PIXEL_PIXELCOUNT_IN_LIVEVIEW         
   BufferWriterI->Append_P(PSTR("{t2}"));
+
 }
 
 

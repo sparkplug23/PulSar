@@ -248,10 +248,10 @@ void mRelays::WebAppend_Root_Draw_PageTable(){
   DEBUG_LINE;
   if(settings.fShowTable){
     for(int ii=0;ii<relays_connected;ii++){
-      BufferWriterI->Append_P(PSTR("<tr>"));
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
         BufferWriterI->Append_P(PSTR("<td>%s</td>"), GetRelayNamebyIDCtr(ii,buffer,sizeof(buffer)));
-        BufferWriterI->Append_P(PSTR("<td><div class='%s'>%s</div></td>"),"relpow_tab","?");   
-      BufferWriterI->Append_P(PSTR("</tr>"));
+        BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"relpow_tab","?");   
+      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
     }    
   }
 
@@ -333,14 +333,14 @@ void mRelays::WebPage_Root_SendStatus(){
   // }else{
   //   sprintf(onoff_ctr,PSTR("Lights OFF"));
   // }
-  // pCONT_web->WSBufferAppend_PI2(PSTR("<tr>"));
+  // pCONT_web->WSBufferAppend_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
   // pCONT_web->WSBufferAppend_PI2(HTTP_DEVICE_STATE, 
   //   100 / 1, //FULL WIDTH 1 item for length
   //   onoff ? "bold" : "normal", 
   //   fsize, 
   //   onoff_ctr
   // );
-  // pCONT_web->WSBufferAppend_PI2(PSTR("</tr>"));
+  // pCONT_web->WSBufferAppend_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
 
   // // Animation info
   // memset(onoff_ctr,0,sizeof(onoff_ctr));
@@ -1050,7 +1050,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -1060,7 +1060,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"

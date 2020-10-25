@@ -48,7 +48,7 @@ void mHardwarePins::ModuleSettings_ShowTemplateLog()
   AddLog_P(LOG_LEVEL_TEST,
     PSTR(
       "\n\r"
-      "Template: %s\n\r"
+      //"Template: %s\n\r"
       "(Friendly)Name: %s\n\r"
       "MQTT Topic Prefix: %s\n\r"
       "Gpio: \n\r"
@@ -68,7 +68,7 @@ void mHardwarePins::ModuleSettings_ShowTemplateLog()
       "BASE : %08X (%s)\n\r"
     ),
     pCONT_set->Settings.user_template2.full_ctr,
-    pCONT_set->Settings.user_template2.hardware.name,
+    //pCONT_set->Settings.user_template2.hardware.name,
     pCONT_set->Settings.system_name.device,
     0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
     1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
@@ -110,7 +110,7 @@ void mHardwarePins::ModuleSettings_ShowActiveTemplate()
     PSTR(
       "\n\r"
       //"Template: %s\n\r"
-      "(Friendly)Name: %s\n\r"
+      //"(Friendly)Name: %s\n\r"
       "MQTT Topic Prefix: %s\n\r"
       "Gpio: \n\r"
         "\t%d(%d):%d\n\r"
@@ -129,7 +129,7 @@ void mHardwarePins::ModuleSettings_ShowActiveTemplate()
       "Module : %s\n\r"
     ),
     //pCONT_set->Settings.user_template2.full_ctr,
-    pCONT_set->Settings.user_template2.hardware.name,
+    //pCONT_set->Settings.user_template2.hardware.name,
     pCONT_set->Settings.system_name.device,
     0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
     1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
@@ -291,7 +291,7 @@ void mHardwarePins::ParseModuleTemplate(){
     snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr); //dont set directly?
 
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
-    snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
+    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
   
   }
 
@@ -648,7 +648,7 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
  
   if (USER_MODULE == index) {
   // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
-    return pCONT_set->Settings.user_template2.hardware.name; //returns pointer
+    return D_NO_MATCH_CTR;//pCONT_set->Settings.user_template2.hardware.name; //returns pointer
   } else {
     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != %d index %s"),index,kModules[index].name);
     // return kModules[index].name;
@@ -668,10 +668,10 @@ const char* mHardwarePins::AnyModuleName2(uint8_t index)
 {
   if (USER_MODULE == index) {
   // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
-    return pCONT_set->Settings.user_template2.hardware.name;
+    return D_NO_MATCH_CTR;//pCONT_set->Settings.user_template2.hardware.name;
   } else {
   // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != index %s"),kModules[index].name);
-    return "";//FPSTR(kModules[index].name);
+    return D_NO_MATCH_CTR;//"";//FPSTR(kModules[index].name);
   }
 }
 
@@ -1139,7 +1139,7 @@ void mHardwarePins::GpioInit(void)
    *  Use pins to configure lights present
    * */
   pCONT_set->devices_present = 0;
-  pCONT_set->Settings.light_settings.type = LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
+  pCONT_set->Settings.light_settings.type = 0;//LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
   pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
@@ -1379,7 +1379,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_INV_CTR)==0){  return GPIO_PIR_3_INV_ID; }
   // #endif
   // #ifdef USE_MODULE_SENSORS_DOOR
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_DETECT_CTR)==0){  return GPIO_DOOR_OPEN_ID; }
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_DETECT_CTR)==0){  return GPIO_DOOR_OPEN_ID; }
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_INPUT_CTR)==0){  return GPIO_CHIME_INPUT_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_RINGER_CTR)==0){  return GPIO_CHIME_RINGER_ID; }

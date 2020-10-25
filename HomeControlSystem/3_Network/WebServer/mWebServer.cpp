@@ -22,11 +22,13 @@ void mWebServer::init(void){
 void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max)
 {
   
-  #ifndef DISABLE_SERIAL_LOGGING
-  P_PHASE_OUT();
-  #endif
+  // #ifndef DISABLE_SERIAL_LOGGING
+  // P_PHASE_OUT();
+  // #endif
+
   String s = request->arg(arg);
   strlcpy(out, s.c_str(), max);
+
 }
 
 bool mWebServer::WifiIsInManagerMode(){
@@ -111,10 +113,10 @@ void mWebServer::WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* 
   char listheading[50];
   BufferWriterI->Append_P(PSTR("{t}"));
   for(int ii=0;ii<row_count;ii++){
-    BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-    BufferWriterI->Append_P(PSTR("</tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }    
   BufferWriterI->Append_P(PSTR("{t2}"));
 }
@@ -123,10 +125,10 @@ void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_c
   
   BufferWriterI->Append_P(PSTR("{t}"));
   for(int ii=0;ii<row_count;ii++){
-    BufferWriterI->Append_P(PSTR("<tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
       BufferWriterI->Append_P(PSTR("<td>%s %d</td>"), dList_titles);
       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-    BufferWriterI->Append_P(PSTR("</tr>"));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }    
   BufferWriterI->Append_P(PSTR("{t2}"));
 }
@@ -138,10 +140,10 @@ void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_c
 //   char listheading[50];
 //   BufferWriterI->Append_P(PSTR("{t}"));
 //   for(int ii=0;ii<row_count;ii++){
-//     BufferWriterI->Append_P(PSTR("<tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
 //       BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
 //       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-//     BufferWriterI->Append_P(PSTR("</tr>"));
+//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 //   }    
 //   BufferWriterI->Append_P(PSTR("{t2}"));
 // }
@@ -158,13 +160,13 @@ void mWebServer::WebAppend_Draw_Table_FP(const char* table_class_col2, const cha
   va_list arg;
   va_start(arg, formatP_row1);
   //Write cell 1
-  BufferWriterI->Append_P(PSTR("<tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
   BufferWriterI->Append_P(PSTR("<td>"));
     *len += vsnprintf_P(&buff[*len], size, formatP_row1, arg);
   BufferWriterI->Append_P(PSTR("</td>"));
   //Write cell 2
   BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),table_class_col2);
-  BufferWriterI->Append_P(PSTR("</tr>"));
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   va_end(arg);
   BufferWriterI->Append_P(PSTR("{t2}"));
 
@@ -772,9 +774,9 @@ bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 
 String mWebServer::UrlEncode(const String& text)
 {
-  #ifndef DISABLE_SERIAL_LOGGING
-  P_PHASE_OUT();
-  #endif
+  // #ifndef DISABLE_SERIAL_LOGGING
+  // P_PHASE_OUT();
+  // #endif
   const char hex[] = "0123456789ABCDEF";
 
 	String encoded = "";

@@ -1768,10 +1768,10 @@ _C.addEventListener('touchend', move, false);
 
     }
     
-    function send_value(id){
-        var p=document.getElementById(id).value;
-        la('&'+id+'='+p);
-    }
+    // function send_value(id){
+    //     var p=document.getElementById(id).value;
+    //     la('&'+id+'='+p);
+    // }
     var x=null,lt,to,tp,pc='';
     function eb(s){
         return document.getElementById(s);
@@ -1783,7 +1783,7 @@ _C.addEventListener('touchend', move, false);
         return document.querySelector(s);
     }
     function start(p){
-        la(p);
+        // la(p);
         init_urls_for_page();
         execute_updated_urls();            
     }
@@ -1829,54 +1829,54 @@ _C.addEventListener('touchend', move, false);
 
 
 
-    function la(p){
-        var a=' ';
-        if(la.arguments.length==1){
-            a=p;
-            clearTimeout(lt);
-        }
-        if(x!=null){
-            x.abort();
-        }
-        x=new XMLHttpRequest();
-        x.onreadystatechange=function(){
-            if(x.readyState==4&&x.status==200){
-                var s=x.responseText.replace(/{t}/g,"<table style='width:100%'>")
-                                    .replace(/{s}/g,"<tr><th>")
-                                    .replace(/{m}/g,"</th><td>")
-                                    .replace(/{e}/g,"</td></tr>")
-                                    .replace(/{t2}/g,"</table>")
-                                    .replace(/{c}/g,"%'><div style='text-align:center;font-weight:");
-                eb('l1').innerHTML=s;
-            }
-        };
-        console.log('PHASE OUT');
-        x.open('GET','./?m=1'+a,true);
-        x.send();
-        lt=setTimeout(la,5000);
-    }
-    function lb(p){
-        la('&d='+p);
-    }
-    function lc(p){
-        la('&t='+p);
-    }
-    function lc2(v,i,p){
-        if(eb('s')){
-            if(v=='h'||v=='d'){
-                var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
-            }
-        }
-        la('&'+v+i+'='+p);
-    }
-    function lc3(v,p){
-        if(eb('s')){
-            if(v=='h'||v=='d'){
-                var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
-            }
-        }
-        la('&'+v+'='+p);
-    }
+    // function la(p){
+    //     var a=' ';
+    //     if(la.arguments.length==1){
+    //         a=p;
+    //         clearTimeout(lt);
+    //     }
+    //     if(x!=null){
+    //         x.abort();
+    //     }
+    //     x=new XMLHttpRequest();
+    //     x.onreadystatechange=function(){
+    //         if(x.readyState==4&&x.status==200){
+    //             var s=x.responseText.replace(/{t}/g,"<table style='width:100%'>")
+    //                                 .replace(/{s}/g,"<tr><th>")
+    //                                 .replace(/{m}/g,"</th><td>")
+    //                                 .replace(/{e}/g,"</td></tr>")
+    //                                 .replace(/{t2}/g,"</table>")
+    //                                 .replace(/{c}/g,"%'><div style='text-align:center;font-weight:");
+    //             eb('l1').innerHTML=s;
+    //         }
+    //     };
+    //     console.log('PHASE OUT');
+    //     x.open('GET','./?m=1'+a,true);
+    //     x.send();
+    //     lt=setTimeout(la,5000);
+    // }
+    // function lb(p){
+    //     la('&d='+p);
+    // }
+    // function lc(p){
+    //     la('&t='+p);
+    // }
+    // function lc2(v,i,p){
+    //     if(eb('s')){
+    //         if(v=='h'||v=='d'){
+    //             var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
+    //         }
+    //     }
+    //     la('&'+v+i+'='+p);
+    // }
+    // function lc3(v,p){
+    //     if(eb('s')){
+    //         if(v=='h'||v=='d'){
+    //             var sl=eb('sl4').value;eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';
+    //         }
+    //     }
+    //     la('&'+v+'='+p);
+    // }
 
     window.onload=start(0);
     </script>

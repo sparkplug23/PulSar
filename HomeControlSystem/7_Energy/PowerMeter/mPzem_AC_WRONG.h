@@ -141,7 +141,7 @@
 //     struct handler<mPzem_AC> mqtthandler_settings_teleperiod;
 //     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     
-//     const char* postfix_topic_sensors = "sensors";
+//     const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
 //     struct handler<mPzem_AC> mqtthandler_sensor_ifchanged;
 //     struct handler<mPzem_AC> mqtthandler_sensor_teleperiod;
 //     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);

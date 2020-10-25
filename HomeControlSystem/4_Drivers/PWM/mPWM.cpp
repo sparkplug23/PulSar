@@ -329,7 +329,7 @@ int8_t mPWM::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   }
 
 }
-int8_t mPWM::parsesub_Commands(JsonObjectConst obj){
+void mPWM::parsesub_Commands(JsonObjectConst obj){
 
   
 
@@ -351,8 +351,8 @@ int8_t mPWM::parsesub_Commands(JsonObjectConst obj){
     // SonoffIFanSetFanspeed(speed, false);
     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-    Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-    isserviced++;
+    // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+    // isserviced++;
   }
   
   
@@ -496,7 +496,7 @@ void mPWM::WebCommand_Parse(void)
 //   mqtthandler_ptr->tRateSecs = 600; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
 //   mqtthandler_ptr->ConstructJSON_function = &mPWM::ConstructJSON_Sensor;
 
 //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
@@ -506,7 +506,7 @@ void mPWM::WebCommand_Parse(void)
 //   mqtthandler_ptr->tRateSecs = 60; 
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = postfix_topic_sensors;
+//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
 //   mqtthandler_ptr->ConstructJSON_function = &mPWM::ConstructJSON_Sensor;
   
 // } //end "MQTTHandler_Init"

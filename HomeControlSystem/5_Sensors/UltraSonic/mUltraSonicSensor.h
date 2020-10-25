@@ -132,6 +132,7 @@ class mUltraSonicSensor{
         uint32_t tReadLast;
         uint32_t tUltraSonicSensorReadLast;
         int duration;
+        int duration_raw;
         float temperature;
         uint32_t tPermitTempUpdate = 0;
         float speedofsound;
@@ -155,10 +156,10 @@ class mUltraSonicSensor{
           uint8_t outsidecount = 0;
         }threshold;
         struct SETTINGS{
-          uint16_t measure_rate_ms = 2000;
-          uint16_t blocking_time_ms = 500;
-          uint16_t duration_limit_max = 40000;
-          uint16_t duration_limit_min = 100;
+          uint16_t measure_rate_ms = 10000;
+          uint16_t blocking_time_ms = 2000;
+          uint16_t duration_limit_max = 20000;
+          uint16_t duration_limit_min = 1000;
         }settings;
     }ultrasonic;
 
