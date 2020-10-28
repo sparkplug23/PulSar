@@ -120,8 +120,6 @@ int8_t mSupport::Tasker(uint8_t function){
     //   }
       
   //WDT_Reset();
-  // MDNS.update();
-
       // OsWatchTicker();
 
       // testtime2.run = true;
@@ -202,7 +200,7 @@ void mSupport::init_FirmwareVersion(){
     snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%s.%d"), pCONT_set->my_version, PROJECT_VERSION & 0xff);
   }
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
 //Serial.printf("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
 
   // Version Current
@@ -246,7 +244,7 @@ void mSupport::init_FirmwareVersion(){
   char code_image[20];
   snprintf_P(pCONT_set->my_image, sizeof(pCONT_set->my_image), PSTR("(%s)"), 
     GetTextIndexed_P(code_image, sizeof(code_image), CODE_IMAGE, kCodeImage));
-  AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
 
   Serial.flush();
 
@@ -2382,9 +2380,9 @@ void mSupport::Every250mSeconds(void)
 // #endif
 
 // #ifdef USE_DISCOVERY
-// #ifdef WEBSERVER_ADVERTISE
+// #ifdef USE_NETWORK_MDNS
 //         MdnsAddServiceHttp();
-// #endif  // WEBSERVER_ADVERTISE
+// #endif  // USE_NETWORK_MDNS
 // #endif  // USE_DISCOVERY
 //       } else {
 //         StopWebserver();
@@ -3371,7 +3369,7 @@ uint16_t mSupport::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t i
 // #ifdef USE_MODULE_CORE_WEBSERVER
 //   feature_drv1 |= 0x00000080;  // xdrv_02_webserver.ino
 // #endif
-// #ifdef WEBSERVER_ADVERTISE
+// #ifdef USE_NETWORK_MDNS
 //   feature_drv1 |= 0x00000100;  // xdrv_02_webserver.ino
 // #endif
 // #ifdef USE_EMULATION
@@ -4505,7 +4503,7 @@ void mSupport::SetLedPowerAll(uint32_t state)
 
 void mSupport::SetLedLink(uint32_t state)
 {
-  AddLog_P(LOG_LEVEL_TEST,PSTR("SetLedLink(%d)"),state);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
 
   uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
   uint32_t led_inv = pCONT_set->ledlnk_inverted;

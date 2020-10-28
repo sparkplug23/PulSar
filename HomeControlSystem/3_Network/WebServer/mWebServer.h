@@ -32,12 +32,12 @@ typedef struct  FREEMEM_HANDLER{
   #include <WiFi.h>
   #include <WiFiClient.h>
   #include <WebServer.h>
-  #include <ESPmDNS.h>
+  // #include <ESPmDNS.h>
   #include <HTTPClient.h>
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
-  #include <ESP8266mDNS.h>
+  // #include <ESP8266mDNS.h>
   #include <ESP8266HTTPClient.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>

@@ -372,43 +372,58 @@ enum LightSchemes {LS_POWER, LS_WAKEUP, LS_CYCLEUP, LS_CYCLEDN, LS_RANDOM, LS_MA
 // enum COMMAND_FUNCTIONS_IDS{}
 
 enum XsnsFunctions {
-  // Init stuff (in importance order)
-  FUNC_POINTER_INIT, // Any pointers to buffers, anything not set in this (unset nullptr) must be protected 
+  // Init stuff (in importance of boot)
+  
+  FUNC_CHECK_POINTERS,
   FUNC_TEMPLATE_MODULE_LOAD,  // Read progmem configs if needed, read settings configuration
-  FUNC_TEMPLATE_DEVICE_LOAD,  // Read progmem configs if needed, read settings configuration
-  FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD, // This is called from the above function, used to parse the object json
+  FUNC_SETTINGS_DEFAULT,   // Use defaults in code
+  FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT,   // Use defaults in code
+  FUNC_POINTER_INIT, // Any pointers to buffers, anything not set in this (unset nullptr) must be protected 
   FUNC_MODULE_INIT,  // Read progmem configs if needed, read settings configuration
   FUNC_PRE_INIT,     // Configure sub modules and classes as needed
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
-  // Configure sensors and drivers for device
+  FUNC_FUNCTION_LAMBDA_INIT,
+  FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES,   // Use defaults in code
+  FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE, // Load values from settings struct and overwrite module values
   FUNC_CONFIGURE_MODULES_FOR_DEVICE, // Configure any sensors that are needed for controllers, to the required settings
+  FUNC_MQTT_HANDLERS_INIT,
+  // FUNC_MQTT_INIT,
+  
+  FUNC_TEMPLATE_DEVICE_LOAD,  // Read progmem configs if needed, read settings configuration
+  FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD, // This is called from the above function, used to parse the object json
+  
+  
+  
+  FUNC_ON_SUCCESSFUL_BOOT, //also used as boot percentage progress divisor
+// END OF BOOT SECTION 
+
+  // Configure sensors and drivers for device
   // Looping trigger times
   FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_200_MSECOND, FUNC_EVERY_250_MSECOND, FUNC_EVERY_SECOND, 
   FUNC_EVERY_FIVE_SECOND, //Used mainly as debugging
   FUNC_EVERY_FIVE_MINUTE,
   FUNC_EVERY_MINUTE, FUNC_EVERY_HOUR, FUNC_EVERY_MIDNIGHT, FUNC_EVERY_MIDDAY,
   // Run once from restart/uptime
-  FUNC_ON_SUCCESSFUL_BOOT, 
   FUNC_UPTIME_10_SECONDS,
   FUNC_UPTIME_1_MINUTES,
   FUNC_UPTIME_10_MINUTES,
   FUNC_UPTIME_60_MINUTES,
   // Welcome message to show on boot after X seconds with config
-  FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
+  // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
   
-  FUNC_PREP_BEFORE_TELEPERIOD, FUNC_JSON_APPEND, 
+  // FUNC_PREP_BEFORE_TELEPERIOD, 
+  FUNC_JSON_APPEND, 
   
   // Saving/EEPROM related
   FUNC_SAVE_BEFORE_RESTART, //phase out
-  FUNC_SETTINGS_DEFAULT,   // Use defaults in code
-  FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES,   // Use defaults in code
-  FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT,   // Use defaults in code
-  FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE, // Load values from settings struct and overwrite module values
+  
   FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE, // Save internal module values to global settings struct, prior to saving to memory
 
   // New call functio similar to mqtt method, called from class loop (checked in support)
-  FUNC_FUNCTION_LAMBDA_INIT,
   FUNC_FUNCTION_LAMBDA_LOOP,
+
+  // System/Status message
+  FUNC_BOOT_MESSAGE, //at 10 seconds, show how the function is configured
 
   //Light commands
   FUNC_LIGHT_POWER_ON,
@@ -421,8 +436,8 @@ enum XsnsFunctions {
   // Wifi 
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
-  FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_INIT, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
-  FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_INIT, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
+  FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
+  FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, //
   // 
   FUNC_SET_POWER, FUNC_SET_DEVICE_POWER, FUNC_SHOW_SENSOR,
@@ -455,10 +470,10 @@ enum XsnsFunctions {
   FUNC_WEB_ADD_ROOT_SCRIPT,
   FUNC_WEB_ADD_ROOT_STYLE,  
 
-  FUNC_WEB_APPEND_LOADTIME_ROOT_URLS,
-  FUNC_WEB_APPEND_LOADTIME_ROOT_RATES,
+  // FUNC_WEB_APPEND_LOADTIME_ROOT_URLS,
+  // FUNC_WEB_APPEND_LOADTIME_ROOT_RATES,
   FUNC_WEB_APPEND_RUNTIME_ROOT_URLS,
-  FUNC_WEB_APPEND_RUNTIME_ROOT_RATES,
+  // FUNC_WEB_APPEND_RUNTIME_ROOT_RATES,
   
   FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED, //send table data
   FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED,
@@ -471,7 +486,7 @@ enum XsnsFunctions {
   FUNC_WEB_RESPOND_LIGHT_LIVEVIEW_JSON, //reply with liveview json data "WEB_RESPOND"=func group, "LIGHT"=interface, LIVEVIEW_JSON=type
 
 
-  FUNC_WEB_COMMAND,   FUNC_CHECK_POINTERS, 
+  FUNC_WEB_COMMAND,    
   // FUNC_WEB_SHOW_PARAMETERS,   PHASED OUT
   // FUNC_WEB_SHOW_PARAMETERS2, 
   FUNC_WEB_SYSTEM_INFO,  //WEBSERVER
@@ -566,7 +581,8 @@ void ClearAllDeviceName(void);
 int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
 
 // int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
-int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
+// int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
+int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id, int8_t class_id = -1);
 
 void Function_Template_Load();
 
@@ -679,7 +695,7 @@ void SettingsLoad_CheckSuccessful();
   void SetFlashModeDout(void);
   void SettingsBufferFree(void);
   bool SettingsBufferAlloc(void);
-  uint16_t GetSettingsCrc(void);
+  
   void SettingsSaveAll(void);
   uint32_t GetSettingsAddress(void);
   void SettingsSave(uint8_t rotate);
@@ -705,6 +721,13 @@ void SettingsLoad_CheckSuccessful();
   void SystemSettings_DefaultBody_Drivers();
   void SystemSettings_DefaultBody_Displays();
   void SystemSettings_DefaultBody_Rules();
+
+
+
+uint16_t GetCfgCrc16(uint8_t *bytes, uint32_t size);
+uint16_t GetSettingsCrc(void);
+uint32_t GetCfgCrc32(uint8_t *bytes, uint32_t size);
+uint32_t GetSettingsCrc32(void);
 
 
   void SettingsResetStd(void) ;
@@ -1312,6 +1335,7 @@ struct SYSCFG {
 
 
   // E00 - FFF (4095 ie eeprom size) free locations
+  uint32_t      cfg_crc32;                 // FFC
 } Settings;
 
 // NEW flag that allows anything to run on reboot
@@ -1358,6 +1382,9 @@ struct TIME_T {
   unsigned long days;
   unsigned long valid;
 } RtcTime;
+
+
+uint8_t flag_boot_complete = false;
 
 
 /**
@@ -1532,8 +1559,14 @@ uint8_t serial_in_byte;                     // Received byte
 uint8_t ota_retry_counter = OTA_ATTEMPTS;   // OTA retry counter
 uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
 uint8_t devices_present = 0;                // Max number of devices supported
+
+
 uint8_t seriallog_level;                    // Current copy of Settings.seriallog_level
 uint8_t syslog_level;                       // Current copy of Settings.syslog_level
+uint8_t seriallog_level_during_boot;
+
+
+
 uint8_t my_module_type;                     // Current copy of Settings.module or user template type
 uint8_t my_adc0;                            // Active copy of Module ADC0
 uint8_t last_source = 0;                    // Last command source
@@ -1607,10 +1640,10 @@ struct FIRMWARE_VERSION{
   uint8_t fCurrentVersionNotSupported = false;
 }firmware_version;
 
-void parse_JSONCommand();
-void   parsesub_TopicCheck_JSONCommand(JsonObjectConst _obj);
-void parsesub_SystemCommand(JsonObjectConst _obj);
-void parsesub_FirmwareInformation(JsonObjectConst _obj);
+void parse_JSONCommand(JsonObjectConst _obj);
+
+// void parsesub_SystemCommand(JsonObjectConst _obj);
+// void parsesub_FirmwareInformation(JsonObjectConst _obj);
 
 };
 

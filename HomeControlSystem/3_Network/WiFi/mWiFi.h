@@ -22,7 +22,7 @@
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
-  #include <ESP8266mDNS.h>
+  // #include <ESP8266mDNS.h>
 #endif
 
 #include "2_CoreSystem/Time/mTime.h"

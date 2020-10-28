@@ -180,10 +180,9 @@ int8_t mNextionPanel::Tasker(uint8_t function){
 
 
 int8_t mNextionPanel::Tasker(uint8_t function, JsonObjectConst obj){
-  AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);

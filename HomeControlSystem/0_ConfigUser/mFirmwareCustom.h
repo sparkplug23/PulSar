@@ -23,8 +23,6 @@
 show/hide palette
 debug
 
-
-
 */
 
 
@@ -39,7 +37,7 @@ debug
 // #define DEVICE_RGBCRYSTAL2
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBMICRO1 //glass box
-#define DEVICE_RGBMICRO2 //projector                   // BETA
+// #define DEVICE_RGBMICRO2 //projector                   // BETA
 // #define DEVICE_RGBMICRO3 //bedroom string esp01
 // #define DEVICE_RGBMICRO4 //gazebo
 // #define DEVICE_RGBBEDLIGHT                             // BETA
@@ -50,7 +48,8 @@ debug
 // #define DEVICE_RGBFRIDGE
 // #define DEVICE_RGBOUTSIDETREE                           // BETA
 // #define DEVICE_CHRISTMAS_HALLWAYTREE                           // BETA
-// #define DEVICE_RGBBEDROOMFLOOR
+#define DEVICE_RGBBEDROOMFLOOR
+// #define DEVICE_H801_TESTER
 
 /**
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
@@ -381,7 +380,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Projector Micro Lights"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 1//random(1,1000)
 
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -395,19 +394,17 @@ debug
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define USE_INTERFACE_NEW
+  // #define USE_INTERFACE_NEW
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
-  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
+  //#define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  //#define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
   #define ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW    "v79.31.22+" 
   #define ENABLE_DEVFEATURE_PIXEL_NEW_JSON_PALETTE_SELECT_ROOT
-
-
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
@@ -429,11 +426,10 @@ debug
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
-    // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_ANIMATIONMODE             "\":\"" "Scene" "\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_SCENE "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
     "\"" D_JSON_BRIGHTNESS       "\":0,"
     "\"" D_JSON_BRT_RGB          "\":0"
@@ -531,7 +527,7 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
     // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_SCENE "\","
     "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
@@ -595,7 +591,7 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
     "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
@@ -609,14 +605,16 @@ debug
   #define DEVICENAME_CTR          "h801_tester"
   #define DEVICENAME_FRIENDLY_CTR "H801 Tester Strip"
     
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
-
   #define USE_SERIAL_ALTERNATE_TX
-   
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-
+  #define USE_MODULE_LIGHTS_PWM
+  
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -626,19 +624,24 @@ debug
       "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
       "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
     "},"
-    "\"FLAG\":0,"
     "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
-
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
-    "{"
-      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
-      "\"" D_JSON_CCT_TEMP       "\":500,"
-      "\"" D_JSON_BRIGHTNESS     "\":99"
-    "}";
-
-    #define ESP8266
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
+    "\"" D_JSON_BRIGHTNESS     "\":0"
+  "}";
 
 #endif
 
@@ -752,7 +755,7 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
       "\"" D_JSON_ANIMATIONMODE           "\":\"Flasher\","
       "\"" D_JSON_BRIGHTNESS     "\":0"
@@ -772,6 +775,7 @@ debug
   // #define ENABLE_FUNCTION_DEBUG  
 
   #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2 
@@ -780,13 +784,6 @@ debug
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_PWM
   
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define DISABLE_TEMPORARY_RGBANIMATOR
-  // #define USE_MODULE_LIGHTS_PWM
-  
-  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -801,22 +798,20 @@ debug
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
-    "{"
-      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
-      "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-      "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
-      "\"" D_JSON_BRIGHTNESS     "\":0"
-    "}";
-    
-    #define ESP8266
-
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
+    "\"" D_JSON_BRIGHTNESS     "\":0"
+  "}";
+  
 #endif
 
 
@@ -861,7 +856,7 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
       "\"" D_JSON_ANIMATIONMODE           "\":\"Flasher\","
       "\"" D_JSON_BRIGHTNESS     "\":99"
@@ -1107,7 +1102,7 @@ debug
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_REPEAT   "\":5,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
     "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":100"
@@ -1372,8 +1367,7 @@ debug
   
   #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-
-  #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+  //#define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
   //#define ENABLE_FORCED_SKIP_AP_ON_IPUNSET
 
@@ -1391,8 +1385,6 @@ debug
       "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif      
       "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
-      
-
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1402,7 +1394,7 @@ debug
   #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "outflow"
   #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "outside"
   #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "tank1"
-  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "tank2"
+  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "speed_of_sound_ambient"
   #define D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "Furnace Power"
   
   #define USE_FUNCTION_TEMPLATE
@@ -1609,15 +1601,21 @@ debug
   
   // #define ENABLE_BUG_TRACING
 
-  #define USE_MODULE_SENSORS_DOOR
+  // #define USE_MODULE_SENSORS_DOOR
   // // #define USE_SENSOR_DOOR_LOCK
   // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
   #define USE_MODULE_SENSORS_DS18B20
-  // #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
+  #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
 
   // #define USE_MODULE_SENSORS_MOTION
   // #define MOTIONALERT_PAYLOAD1_CTR "bedroom"
+  
+  // Test ultrasonic oilfurnace code
+  // #define USE_BUILD_TYPE_CUSTOM
+  // #define USE_MODULE_CUSTOM_OILFURNACE
+  #define USE_MODULE_SENSORS_ULTRASONICS  
+  #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
   // #define USE_MODULE_SENSORS_BME
 
@@ -1627,9 +1625,10 @@ debug
   // // #define RELAYS_CONNECTED 1
   // // #define USE_MODULE_DRIVERS_INTERFACE
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1637,9 +1636,14 @@ debug
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
+    
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"D0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif
+      #ifdef USE_MODULE_SENSORS_ULTRASONICS
+      "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      #endif  
       #ifdef USE_MODULE_SENSORS_BME
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
@@ -1677,7 +1681,7 @@ debug
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_REPEAT   "\":5,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"Random\"},"
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
     "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
@@ -1705,7 +1709,7 @@ debug
           "\"" "Bedroom" "\""
         "],"
         "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-          "\"" "Bedroom01" "\","
+          "\"" "speed_of_sound_ambient" "\","
           "\"" "Bedroom02" "\","
           "\"" "Bedroom03" "\","
           "\"" "Bedroom04" "\","
@@ -1744,6 +1748,7 @@ debug
   #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "DriveFront"
 
   #define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
   #define USE_MODULE_SENSORS_BME
   #define D_DEVICE_SENSOR_CLIMATE "LivingRoom"
@@ -2781,7 +2786,7 @@ debug
   #define USE_MODULE_DRIVERS_INTERFACE
 
   #define USE_VIRTUAL_REMOTE_URL_RELAY
-  #define VIRTUAL_DEVICE_MDNS_NAME          "kitchenlight4"
+  // #define VIRTUAL_DEVICE_MDNS_NAME          "kitchenlight4"
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 

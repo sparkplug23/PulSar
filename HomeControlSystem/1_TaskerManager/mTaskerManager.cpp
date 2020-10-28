@@ -751,6 +751,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
     #endif
 
+    // print boot info as it proceeds
+    // if(function == FUNC_INIT){
+    //   AddLog_P(LOG_LEVEL_INFO, PSTR("\t\tBootProgress: %s %d %%"),GetModuleFriendlyName(switch_index),map(i,0,module_settings.count,0,100));
+    // }
+
     if(target_tasker!=0){
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
       break; //only run for loop for the class set. if 0, rull all
@@ -765,7 +770,26 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
   } //end for
 
-  // yield();
+  if(!mset->flag_boot_complete){
+    char buffer_taskname[50];
+    if(function != last_function){
+      uint8_t boot_percentage = map(function,0,FUNC_ON_SUCCESSFUL_BOOT,0,100);
+      // Optional progress bar using block symbols?
+      //5% = 1 bar, 20 bars total [B                   ]
+      //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
+      #ifndef DISABLE_SERIAL_LOGGING
+      Serial.printf("[");
+      for(uint8_t percent=0;percent<100;percent+=5){  
+        if(percent<boot_percentage){ Serial.print((char)219); }else{ Serial.printf(" "); }
+      }
+      Serial.printf("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
+      #endif
+      //}
+      last_function = function;
+    }
+    if(function == FUNC_ON_SUCCESSFUL_BOOT){ mset->flag_boot_complete = true; }
+  }//flag_boot_complete
+
   
   DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
@@ -1032,8 +1056,8 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_UPTIME_1_MINUTES:                       return PM_FUNC_UPTIME_1_MINUTES_CTR;
     case FUNC_UPTIME_10_MINUTES:                      return PM_FUNC_UPTIME_10_MINUTES_CTR;
     case FUNC_UPTIME_60_MINUTES:                      return PM_FUNC_UPTIME_60_MINUTES_CTR;
-    case FUNC_RESTART_SPLASH_INFORMATION:             return PM_FUNC_RESTART_SPLASH_INFORMATION_CTR;
-    case FUNC_PREP_BEFORE_TELEPERIOD:                 return PM_FUNC_PREP_BEFORE_TELEPERIOD_CTR;
+    // case FUNC_RESTART_SPLASH_INFORMATION:             return PM_FUNC_RESTART_SPLASH_INFORMATION_CTR;
+    // case FUNC_PREP_BEFORE_TELEPERIOD:                 return PM_FUNC_PREP_BEFORE_TELEPERIOD_CTR;
     case FUNC_JSON_APPEND:                            return PM_FUNC_JSON_APPEND_CTR;
     case FUNC_SAVE_BEFORE_RESTART:                    return PM_FUNC_SAVE_BEFORE_RESTART_CTR;
     case FUNC_SETTINGS_DEFAULT:                       return PM_FUNC_SETTINGS_DEFAULT_CTR;
@@ -1051,7 +1075,7 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_WIFI_CONNECTED:                         return PM_FUNC_WIFI_CONNECTED_CTR;
     case FUNC_WIFI_DISCONNECTED:                      return PM_FUNC_WIFI_DISCONNECTED_CTR;
     case FUNC_MQTT_SUBSCRIBE:                         return PM_FUNC_MQTT_SUBSCRIBE_CTR;
-    case FUNC_MQTT_INIT:                              return PM_FUNC_MQTT_INIT_CTR;
+    // case FUNC_MQTT_INIT:                              return PM_FUNC_MQTT_INIT_CTR;
     case FUNC_MQTT_CONNECTED:                         return PM_FUNC_MQTT_CONNECTED_CTR;
     case FUNC_MQTT_DISCONNECTED:                      return PM_FUNC_MQTT_DISCONNECTED_CTR;
     case FUNC_MQTT_COMMAND:                           return PM_FUNC_MQTT_COMMAND_CTR;
@@ -1086,10 +1110,10 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:                return PM_FUNC_WEB_ADD_ROOT_TABLE_ROWS_CTR;
     case FUNC_WEB_ADD_ROOT_SCRIPT:                    return PM_FUNC_WEB_ADD_ROOT_SCRIPT_CTR;
     case FUNC_WEB_ADD_ROOT_STYLE:                     return PM_FUNC_WEB_ADD_ROOT_STYLE_CTR;
-    case FUNC_WEB_APPEND_LOADTIME_ROOT_URLS:          return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_URLS_CTR;
-    case FUNC_WEB_APPEND_LOADTIME_ROOT_RATES:         return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_RATES_CTR;
+    // case FUNC_WEB_APPEND_LOADTIME_ROOT_URLS:          return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_URLS_CTR;
+    // case FUNC_WEB_APPEND_LOADTIME_ROOT_RATES:         return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_RATES_CTR;
     case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:           return PM_FUNC_WEB_APPEND_RUNTIME_ROOT_URLS_CTR;
-    case FUNC_WEB_APPEND_RUNTIME_ROOT_RATES:          return PM_FUNC_WEB_APPEND_RUNTIME_ROOT_RATES_CTR;
+    // case FUNC_WEB_APPEND_RUNTIME_ROOT_RATES:          return PM_FUNC_WEB_APPEND_RUNTIME_ROOT_RATES_CTR;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED: return PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED_CTR;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:    return PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED_CTR;
     case FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS:       return PM_FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS_CTR;

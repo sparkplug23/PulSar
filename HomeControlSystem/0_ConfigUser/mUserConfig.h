@@ -77,6 +77,8 @@
 #define SYS_LOG_PORT           514               // [LogPort] default syslog UDP port
 #define SYS_LOG_LEVEL          LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define SERIAL_LOG_LEVEL       LOG_LEVEL_DEBUG    // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
+#define SERIAL_LOG_LEVEL_DURING_BOOT LOG_LEVEL_ALL //LOG_LEVEL_ALL LOG_LEVEL_TEST
+
 #define WEB_LOG_LEVEL          LOG_LEVEL_INFO    // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 
 #define ENABLE_TELNET_LOGGING
@@ -87,7 +89,7 @@
 #define PWM_MAX_SLEEP          10                // Sleep will be lowered to this value when light is on, to avoid flickering
 
 // -- Ota -----------------------------------------
-#define OTA_URL                "http://thehackbox.org/tasmota/release/sonoff-minimal.bin"  // [OtaUrl]
+#define OTA_URL                "http://minimal.bin"  // [OtaUrl]
 
 // -- MQTT ----------------------------------------
 //#define MQTT_USE               1                 // [SetOption3] Select default MQTT use (0 = Off, 1 = On)
@@ -133,8 +135,11 @@
 
 #define D_MQTT_COMMAND        "set"
 #define D_MQTT_SYNC           "sync"
+
+#ifdef USE_NETWORK_MDNS
 #define MDNS_MQTT_HOSTNAME1   "TOWER.local" 
 #define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
+#endif // #ifdef USE_NETWORK_MDNS
 
 // %prefix% token options
 #define SUB_PREFIX             "set"            // [Prefix1] Sonoff devices subscribe to %prefix%/%topic% being SUB_PREFIX/MQTT_TOPIC and SUB_PREFIX/MQTT_GRPTOPIC
@@ -195,8 +200,6 @@
   #define D_COL_TEXT_MODULE_TITLE_CTR "#fff"
 #endif
 
-// -- mDNS ----------------------------------------
-#define MDNS_ENABLED           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)
 
 // -- Time - Up to three NTP servers in your region
 #define NTP_SERVER1            "pool.ntp.org"       // [NtpServer1] Select first NTP server by name or IP address (129.250.35.250)
@@ -275,8 +278,10 @@
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
-  #define WEBSERVER_ADVERTISE                    // Provide access to webserver by name <Hostname>.local/
+  //#define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
   #define MQTT_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
+// -- mDNS ----------------------------------------
+// #define USE_NETWORK_MDNS           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)
 
 // -- Time ----------------------------------------
 #define USE_RTC

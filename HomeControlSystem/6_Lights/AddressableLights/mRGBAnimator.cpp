@@ -12,27 +12,17 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
   int8_t function_result = 0;
 
-  // DEBUG_LINE_HERE;
-
-  //return 0;
-
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
-  DEBUG_LINE_HERE;
-    pre_init();
-  DEBUG_LINE_HERE;
-  }else
-  if(function == FUNC_INIT){
-  DEBUG_LINE_HERE;
-    init();
-    
-  DEBUG_LINE_HERE;
+  switch(function){
+    case FUNC_PRE_INIT:
+      pre_init();  
+      break;
+    case FUNC_INIT:
+      init();
+      break;
   }
-
-  // DEBUG_LINE_HERE;
-  //  return 0;
 
   if(pCONT_set->Settings.light_settings.type != LT_WS2812){ return 0; }
   // if(!settings.flags.EnableModule){ return 0;}
@@ -122,7 +112,7 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 int8_t mRGBAnimator::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_CheckAll(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);
@@ -155,12 +145,12 @@ void mRGBAnimator::init(void){
   uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//strip_size<STRIP_SIZE_MAX?strip_size:STRIP_SIZE_MAX; // Catch values exceeding limit
   ledout.length = STRIP_SIZE_MAX; 
 
-DEBUG_LINE_HERE;
+
   // return;
 
   pCONT_iLight->light_count = STRIP_SIZE_MAX;
   
-DEBUG_LINE_HERE;
+
   #ifdef USE_WS28XX_HARDWARE_WS2801
     stripbus = new NeoPixelBus<DotStarBgrFeature, DotStarMethod>(strip_size_tmp, pin_clock, pCONT_set->pin[GPIO_RGB_DATA_ID]);
   #else
@@ -171,16 +161,16 @@ DEBUG_LINE_HERE;
     #endif
   #endif //USE_WS28XX_HARDWARE_WS2801
 
-DEBUG_LINE_HERE;
+
   uint16_t animator_strip_size_tmp = 1;//animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
 
-DEBUG_LINE_HERE;
+
   pCONT_iLight->Init_NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE);  
 
-DEBUG_LINE_HERE;
+
   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   
-DEBUG_LINE_HERE;
+
   randomSeed(analogRead(0));
   
   for(ledout.index=0;ledout.index<
@@ -190,7 +180,7 @@ DEBUG_LINE_HERE;
     ledout.pattern[ledout.index] = ledout.index; 
   }
 
-DEBUG_LINE_HERE;
+
   // Clear stored light output
   memset(&animation_colours,0,sizeof(animation_colours));
   // Start display
@@ -204,7 +194,7 @@ DEBUG_LINE_HERE;
     stripbus->Show();
   }
 
-DEBUG_LINE_HERE;
+
   pCONT_iLight->animation_override.fRefreshAllPixels = true;
 
   GenerateAnimationPixelAmountMaps();
@@ -219,9 +209,9 @@ DEBUG_LINE_HERE;
    buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
   }
    
-DEBUG_LINE_HERE;
+
   #ifndef DISABLE_SERIAL_LOGGING
-   Serial.println(buffer);
+  //  Serial.println(buffer); log debuf more
   #endif
 
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
@@ -239,13 +229,13 @@ DEBUG_LINE_HERE;
   init_mixer_defaults();
   #endif
 
-DEBUG_LINE_HERE;
+
   settings.flags.EnableModule = true;
 
   //create copy for pCONT_iLight->animation stored
   memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation_stored));// RESTORE copy of state
 
-DEBUG_LINE_HERE;
+
 } //end "init"
 
 
@@ -321,7 +311,7 @@ void mRGBAnimator::Settings_Save(){
 void mRGBAnimator::Settings_Default(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST,PSTR("mRGBAnimator::Settings_Default"));
+  // AddLog_P(LOG_LEVEL_TEST,PSTR("mRGBAnimator::Settings_Default"));
   #endif
 
   #ifdef USE_LIGHTING_TEMPLATE
@@ -330,7 +320,7 @@ void mRGBAnimator::Settings_Default(){
   
   if(settings.flags.TemplateProvidedInProgMem){// use template provided in progmem || override template
   
-    pCONT_iLight->Template_Load();
+    //pCONT_iLight->Template_Load();
 
   }else{
     
@@ -1492,7 +1482,9 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Sequential(){
 
 // Fade solid colour from 0 to 75%, and a palette from 25 to 100% (50% overlap)
 void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
-  
+    
+#ifdef ENABLE_FLASHER_ANIMATE_FUNCTION_FADE_GRADIENT
+
   flashersettings.flag_finish_flasher_pair = false;
   flashersettings.flags.enable_random_rate = true;
   
@@ -1542,6 +1534,8 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
       animation_colours[ledout.index].DesiredColour = colour_random_adjusted;
     }
   }
+
+  #endif
 
 }
 
@@ -1763,80 +1757,6 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
 }
 
 
-void mRGBAnimator::parsesub_Flasher(JsonObjectConst obj){
-  
-  int8_t tmp_id = 0;
-  char buffer[50];
-
-  if(!obj["function"].isNull()){ 
-    const char* functionctr = obj["function"];
-    if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
-      flashersettings.function = tmp_id;
-
-      //new function, then generate its 
-      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"function",GetFlasherRegionName(buffer));
-      #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-      Response_mP(S_JSON_COMMAND_SVALUE,"function",GetFlasherFunctionName(buffer));
-      data_buffer2.isserviced++;
-    }else{
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,functionctr);
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    }
-  }
-
-
-  if(!obj["flasher"]["function"].isNull()){ 
-    flashersettings.function = obj["flasher"]["function"];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"flasherfunction",flashersettings.function);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-   
-  
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  if(!obj["mixer"]["enabled"].isNull()){ 
-    mixer.enabled = obj["mixer"]["enabled"];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.enabled",mixer.enabled);
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-   
-  if(!obj["time_scaler"].isNull()){ 
-    mixer.time_scaler = obj["time_scaler"];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.time_scaler",mixer.time_scaler);
-    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
-
-  // TIME with different units
-  if(!obj[D_JSON_TIME].isNull()){ //default to secs
-    pCONT_iLight->animation.transition.time_ms.val = obj["time"];
-    pCONT_iLight->animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }else
-  if(!obj[D_JSON_TIME].isNull()){
-    pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
-    pCONT_iLight->animation.transition.time_ms.val *= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }else
-  if(!obj[D_JSON_TIME_MS].isNull()){
-    pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-} // END FUNCTION
-
-
 // // Update struct that shows overview, always sends
 uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 
@@ -2012,7 +1932,7 @@ void mRGBAnimator::SetPixelColor(uint16_t indexPixel, RgbTypeColor color_interna
 {
 
   RgbTypeColor color_hardware = color_internal; //to keep white component if available
-  switch (settings.pixel_hardware_color_order_id){
+  switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
     case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
       color_hardware.G = color_internal.G; 
       color_hardware.R = color_internal.R; 
@@ -2047,7 +1967,7 @@ RgbTypeColor mRGBAnimator::GetPixelColor(uint16_t indexPixel)
   RgbTypeColor color_internal = color_hardware; // To catch white element if present
   DEBUG_LINE;
 
-  switch (settings.pixel_hardware_color_order_id){
+  switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
     case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
       color_internal.G = color_hardware.G; 
       color_internal.R = color_hardware.R; 
@@ -2947,31 +2867,6 @@ void mRGBAnimator::Append_Hardware_Status_Message(){
 
 
 
-const char* mRGBAnimator::GetHardwareColourTypeName(char* buffer){
-  return GetHardwareColourTypeNameByID(pCONT_iLight->animation.mode_id, buffer);
-}
-const char* mRGBAnimator::GetHardwareColourTypeNameByID(uint8_t id, char* buffer){
-  switch(id){
-    default:
-    case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
-    case PIXEL_HARDWARE_COLOR_ORDER_RGB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)); break;
-    case PIXEL_HARDWARE_COLOR_ORDER_BRG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)); break;
-    case PIXEL_HARDWARE_COLOR_ORDER_RBG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)); break;
-  }
-  return buffer;
-}
-int8_t mRGBAnimator::GetHardwareColourTypeIDbyName(const char* c){
-  if(!c){ return -1; }
-  //3 PIXEL TYPE
-  if(     strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_GRB_ID; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RGB_ID; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_BRG_ID; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RBG_ID; }   
-
-  return -1;
-}
-
-
 // Searches for friendly names (e.g. saved user) first, if not, calls normal GetPaletteNameByID 
 // const char* mRGBAnimator::GetPaletteNameFriendlyFirstByID(uint8_t id){
 
@@ -3237,7 +3132,7 @@ void mRGBAnimator::EveryLoop(){
     // #endif
   }
   DEBUG_LINE;
-// DEBUG_LINE_HERE;
+// 
 
 }
 
@@ -3317,116 +3212,75 @@ void mRGBAnimator::EveryLoop(){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-
-// CheckAndExecute_JSONCommands
-
-
 int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pixels")>=0){
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand(obj);
+    return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
 
-void mRGBAnimator::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mRGBAnimator::parse_JSONCommand(JsonObjectConst obj){
   
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    if(strstr(data_buffer2.topic.ctr,"/notif")){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "notif"));    
-    #endif
-      parsesub_NotificationPanel(obj);
-    }else 
-  #endif
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
-    #endif
-    parsesub_ModeManual(obj);
-  }else 
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
-    #endif    
-    parsesub_ModeAnimation(obj);
-  }else
-  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/ambilight",sizeof("/ambilight")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "ambilight")); 
-    #endif   
-    parsesub_ModeAmbilight(obj);
-  }else
-  #endif
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/flasher",sizeof("/flasher")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
-    #endif
-    parsesub_Flasher(obj);
-  }else
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/hardware",sizeof("/hardware")-1)>=0){
-  //   
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
+  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  //   if(strstr(data_buffer2.topic.ctr,"/notif")){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "notif"));    
+  //   #endif
+  //     parsesub_NotificationPanel(obj);
+  //   }else 
+  // #endif
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+  //   #endif
+  //   parsesub_ModeManual(obj);
+  // }else 
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
+  //   #endif    
+  //   parsesub_ModeAnimation(obj);
+  // }else
+  // #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/ambilight",sizeof("/ambilight")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "ambilight")); 
+  //   #endif   
+  //   parsesub_ModeAmbilight(obj);
+  // }else
+  // #endif
+  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/flasher",sizeof("/flasher")-1)>=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
+  //   #endif
   //   parsesub_Flasher(obj);
   // }else
-  {
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID")); 
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING   
-  }
+  // // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/hardware",sizeof("/hardware")-1)>=0){
+  // //   
+  //   // #ifdef ENABLE_LOG_LEVEL_INFO
+  //   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "flasher"));    
+  // //   parsesub_Flasher(obj);
+  // // }else
+  // {
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID")); 
+  //   #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING   
+  // }
 
-  pCONT_iLight->animation.flags.fForceUpdate = true;
-  
-  if(data_buffer2.isserviced){ //update string, move to shared place
-    SetRefreshLEDs(); // implement in 1 second 
-  }
-
-  // t_mqtthandler_status_animation.flags.SendNow = true;
-
-  
-
-}
-
-void mRGBAnimator::parsesub_CheckAll(JsonObjectConst obj){
-//   Serial.println("DISABLED");
-// return 0;
-
-  
-    // Serial.println("parsesub_CheckAll1"); Serial.flush();
-  parsesub_ModeManual(obj);
-    // Serial.println("parsesub_CheckAll2"); Serial.flush();
-    
-  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
-  parsesub_ModeAmbilight(obj);
-  #endif
-    // Serial.println("parsesub_CheckAll3"); Serial.flush();
-  parsesub_ModeAnimation(obj);
-    // Serial.println("parsesub_CheckAll4"); Serial.flush();
-  pCONT_iLight->parsesub_ModeScene(obj);
-    // Serial.println("parsesub_CheckAll5"); Serial.flush();
-  parsesub_Flasher(obj);
-    // Serial.println("parsesub_CheckAll6"); Serial.flush();
-
-
-  if(data_buffer2.isserviced){ //update string, move to shared place
-    SetRefreshLEDs(); // implement in 1 second 
-  }
-}
 
 
 
 // Directly change and control flags/elements without changing everything ie update brightness without changing to scene
-void mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
+// void mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
   if(!obj["external_power_onoff"].isNull()){ 
@@ -3534,329 +3388,116 @@ void mRGBAnimator::parsesub_ModeManual(JsonObjectConst obj){
 
   
 
-} // END FUNCTION
+// } // END FUNCTION
 
 
-void mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
+// void mRGBAnimator::parsesub_ModeAnimation(JsonObjectConst obj){
 
-  char buffer[40];
+
+
+
+
+DEBUG_LINE;
+
+  
+
+// } // END FUNCTION
+
+
+
+// void mRGBAnimator::parsesub_Flasher(JsonObjectConst obj){
+  
   int8_t tmp_id = 0;
+  char buffer[50];
 
-DEBUG_LINE;
+  if(!obj["function"].isNull()){ 
+    const char* functionctr = obj["function"];
+    if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
+      flashersettings.function = tmp_id;
 
-  // #ifdef USE_JSON_TO_FLASH_MEMORY_TEST
-DEBUG_LINE;
-  if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
-DEBUG_LINE;
-
-
-    // if(obj[D_JSON_COLOUR_PALETTE].is<const char*>()){
-
-      const char* colour = obj[D_JSON_COLOUR_PALETTE];
-      if((tmp_id=pCONT_iLight->GetPaletteIDbyName(colour))>=0){
-        pCONT_iLight->animation.palette_id = tmp_id;
-
-        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GetPaletteIDbyName=%d"),tmp_id);
-        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-
-  DEBUG_LINE;
-        #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-        if(pCONT_iLight->animation.mode_id == ANIMATION_MODE_FLASHER_ID){
-          flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
-        }
-        #endif
-        #ifdef ENABLE_PALETTE_FORCED_MODE
-        //  pCONT_iLight->animation.mode_id = ANIMATION_MODE_PRESETS_ID;
-        #endif
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
-        if(pCONT_iLight->animation_override.fRefreshAllPixels){
-          first_set = true; //refresh all
-        }
-        data_buffer2.isserviced++;
-      // }
-    }else{
-
-    // }
-    // if(obj[D_JSON_COLOUR_PALETTE].is<int>()){
-
-
-      uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
-      pCONT_iLight->animation.palette_id = colour < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
-
-      char buffer[50];
-
+      //new function, then generate its 
+      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_NVALUE),D_JSON_COLOUR_PALETTE,pCONT_iLight->animation.palette_id);
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,pCONT_iLight->GetPaletteNameByID(pCONT_iLight->animation.palette_id, buffer));
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      
-
-    }
-//     else{
-// DEBUG_LINE;
-// // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-// //       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,colour);
-// //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    
-//     }
-  }
-
-  // //temp method, roll into above when its a number
-  // if(obj.containsKey(D_JSON_COLOUR_PALETTE "_Number")){ 
-
-
-  // }
-
-
-
-    //{"colour_selector":{"red":"on"}}
-    //{"colour_selector":{"all":"on"}} 
-    //{"colour_selector":"reset"} //all off
-    //{"colour_selector":"all"} //all off
-    //what about colour order? on/off or number for index?
-  
-      // int randnum = random(0,selectorlist.amount); 
-      // desired_colour[ledsindex[ledout.index]].H = selectorlist.colour[randnum].H;
-      
-  // if(!obj["colour_selector"].isNull()){ 
-  //   const char* onoff = obj["colour_selector"];
-
-  // // if(!obj[D_JSON_ONOFF].isNull()){ 
-  // //   const char* onoff = obj[D_JSON_ONOFF];
-  // //   if(strstr(onoff,"ON")){ 
-  // //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-
-  // }
-    
-
-  //LEGACY METHOD  
-  // if(!obj[D_JSON_MODE].isNull()){ 
-  //   const char* mode = obj[D_JSON_MODE];
-  //   if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
-  //     pCONT_iLight->animation.mode_id = tmp_id;
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-  //    #endif
-  //     // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
-  //     data_buffer2.isserviced++;
-  //   }else{
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
-  //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   }
-  // }
-  // //NEW METHOD  
-  if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
-    const char* mode = obj[D_JSON_ANIMATIONMODE];
-    if((tmp_id=pCONT_iLight->GetAnimationModeIDbyName(mode))>=0){
-      pCONT_iLight->animation.mode_id = tmp_id;
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-      #endif
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"function",GetFlasherRegionName(buffer));
+      #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+      Response_mP(S_JSON_COMMAND_SVALUE,"function",GetFlasherFunctionName(buffer));
       data_buffer2.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,functionctr);
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
 
 
-
-
-
-  if(!obj[D_JSON_RGB_COLOUR_ORDER].isNull()){ 
-    const char* mode = obj[D_JSON_RGB_COLOUR_ORDER];
-    if((tmp_id=GetHardwareColourTypeIDbyName(mode))>=0){
-      settings.pixel_hardware_color_order_id = tmp_id;
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_RGB_COLOUR_ORDER,GetHardwareColourTypeName(buffer));
-      #endif
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
-      data_buffer2.isserviced++;
-    }else{
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    }
-  }
-
-
-  if(!obj[D_JSON_STRIP_SIZE].isNull()){ 
-    int amount = obj[D_JSON_STRIP_SIZE];
-    // Also convert to percentage equivalent
-    strip_size = amount;
-    pCONT_iLight->light_count = amount;
+  if(!obj["flasher"]["function"].isNull()){ 
+    flashersettings.function = obj["flasher"]["function"];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_STRIP_SIZE,strip_size);
-    #endif
-    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-    data_buffer2.isserviced++;
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"flasherfunction",flashersettings.function);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
   }
+   
   
-  
-DEBUG_LINE;
-
-  // struct TRANSITIONSETTINGS
-
-  if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER].isNull()){ 
-    int amount = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER];
-    // Also convert to percentage equivalent
-    pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(amount);
+  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  if(!obj["mixer"]["enabled"].isNull()){ 
+    mixer.enabled = obj["mixer"]["enabled"];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-    #endif
-    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-    data_buffer2.isserviced++;
-  }else
-  if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE].isNull()){ 
-    int percentage = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE];
-    pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-    #endif
-    Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-    // Also convert to number equivalent
-    data_buffer2.isserviced++;
-  }
-
-DEBUG_LINE;
-
-  
-  // Transition time in seconds or ms
-  if(!obj[D_JSON_TRANSITION][D_JSON_TIME].isNull()){ 
-    pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);   
-    #endif
-    pCONT_iLight->animation.transition.time_ms.val *= 1000; // map into ms
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val);
-    #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
-    data_buffer2.isserviced++;
-    //check that rate>pCONT_iLight->animation time
-    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
-  }else
-  if(!obj[D_JSON_TRANSITION][D_JSON_TIME_MS].isNull()){ 
-    pCONT_iLight->animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME_MS];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
-    #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.time_ms.val);
-    data_buffer2.isserviced++;
-    //check that rate>pCONT_iLight->animation time
-    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
-  }
-
-DEBUG_LINE;
-
-  // Rate in seconds as default or ms
-  if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
-    pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
-    #endif
-    pCONT_iLight->animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.time_ms.val);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.enabled",mixer.enabled);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
-    //check that rate>pCONT_iLight->animation time
-    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
-  }else
-  if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
-    pCONT_iLight->animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,pCONT_iLight->animation.transition.rate_ms.val);
-    #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,pCONT_iLight->animation.transition.rate_ms.val);
-    data_buffer2.isserviced++;
-    //check that rate>pCONT_iLight->animation time
-    if(pCONT_iLight->animation.transition.rate_ms.val<pCONT_iLight->animation.transition.time_ms.val){ pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val;}
   }
+   
+  if(!obj["time_scaler"].isNull()){ 
+    mixer.time_scaler = obj["time_scaler"];
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"mixer.time_scaler",mixer.time_scaler);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+  #endif //ENABLE_PIXEL_FUNCTION_MIXER
 
-  // probably bring transition_order into one command
-  if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ 
-    const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
-    if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
-      pCONT_iLight->animation.transition.order_id = tmp_id;
-      // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
-      data_buffer2.isserviced++;
-    }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
-    #endif
-    }
-  }
+  // TIME with different units
+  // if(!obj[D_JSON_TIME].isNull()){ //default to secs
+  //   pCONT_iLight->animation.transition.time_ms.val = obj["time"];
+  //   pCONT_iLight->animation.transition.time_ms.val *= 1000;
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+  //   #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  // }else
+  // if(!obj[D_JSON_TIME].isNull()){
+  //   pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
+  //   pCONT_iLight->animation.transition.time_ms.val *= 1000;
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+  //   #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  // }else
+  // if(!obj[D_JSON_TIME_MS].isNull()){
+  //   pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+  //   #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  // }
 
-  if(!obj[D_JSON_BRIGHTNESS].isNull()){
-    uint8_t brt = obj[D_JSON_BRIGHTNESS];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS "ani",brt);
-    #endif
-    // pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-    pCONT_iLight->changeBriRGB(brt);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
-    // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,pCONT_iLight->animation.brightness);
-    data_buffer2.isserviced++;
-  }
+// } // END FUNCTION
+
+
+#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+parsesub_NotificationPanel
+#endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+
+
+  pCONT_iLight->animation.flags.fForceUpdate = true;
   
-
-  if(!obj[D_JSON_PIXELSGROUPED].isNull()){
-    pCONT_iLight->animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,pCONT_iLight->animation.pixelgrouped);
-    #endif
+  if(data_buffer2.isserviced){ //update string, move to shared place
+    SetRefreshLEDs(); // implement in 1 second 
   }
 
-  //override commands that run for one pCONT_iLight->animation cycle then are cleared to 0
-  if(!obj[D_JSON_REFRESH_ALLPIXELS].isNull()){
-    pCONT_iLight->animation_override.fRefreshAllPixels = obj[D_JSON_REFRESH_ALLPIXELS];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,pCONT_iLight->animation_override.fRefreshAllPixels);
-    #endif
-  }
-
-  
-  
-  // TIME on duration for autooff
-  if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
-    #endif
-  }else
-  if(!obj[D_JSON_TIME_ON_MS].isNull()){
-    pCONT_iLight->auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
-    pCONT_iLight->auto_time_off_secs /= 1000;
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->auto_time_off_secs);  
-    #endif
-  }
-
-  //pCONT_iLight->animation_override.time_ms = 1000; // implement in 1 second 
-
-
-// #endif
-
-
-
-DEBUG_LINE;
+  // t_mqtthandler_status_animation.flags.SendNow = true;
 
   
 
-} // END FUNCTION
+}
+
+
 
 
 

@@ -14,15 +14,12 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-
 #ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #endif //USE_MODULE_CORE_WEBSERVER
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/averaged";
-
-#define USE_MQTT_ULTRASONIC
 
 class mUltraSonicSensor{
 
@@ -33,8 +30,28 @@ class mUltraSonicSensor{
 
     int8_t pin_trig = -1;
     int8_t pin_echo = -1;
+
     
-    void Pin_Config();
+    typedef union {
+      uint8_t data; // allows full manipulating
+      struct { 
+        // enable animations (pause)
+        uint8_t EnableSensor : 1;
+
+        // Reserved
+        uint8_t reserved : 7;
+      };
+    } SETTINGS_FLAGS;
+
+
+    struct SETTINGS{
+      SETTINGS_FLAGS flags;
+
+    }settings;
+
+
+    
+    void Pre_Init();
 
     struct TRIGGER_EVENTS{
       uint16_t trigger_cm_max=400;
@@ -42,6 +59,7 @@ class mUltraSonicSensor{
       uint8_t ispresent = false;
       uint32_t tSavedCheck = millis();
     }object_detected_static;   
+    void SubTask_DetectMotion();
     
     void MQQTSendObjectDetected(void);
     void MQQTDataBuilder_ObjectDetected();
@@ -73,38 +91,26 @@ class mUltraSonicSensor{
       char detected_rtc_ctr[10];
     }presence_detect;
 
-    uint8_t WITHINLIMITS(int minv, float var, int maxv);
     int8_t Tasker(uint8_t function);
-    void init(void);
-    uint32_t tUpdateOilReading;
-    uint32_t tSaved;
+    void Init(void);
     float GetSpeedOfSoundInMetres();
-    float stored_speedofsound_inmetres=0;
-    uint32_t tCheckTime = millis(), tReadStoredLitres=millis();
 
     int GetDurationReading();
     int GetDurationReading2();
     float GetDistanceMMReading();
     float GetDistanceCMReading();
     void SubTask_UltraSonicAverage();
-    // float GetOilHeightMMReading();
-    // float GetOilHeightCMReading();
     void WebAppend_Root_Status_Table_Draw();
     void WebAppend_Root_Status_Table_Data();
 
     void MQQTSend_1m_Detailed(void);
     void MQQTSend_UltraSonicBasic(void);
 
-    uint8_t fEnableSensor = false;
-
     #define ADCSENSORS_MAX 60
 
     #define ADCSENSORS_SMOOTHSLOW_NUMREADINGS ADCSENSORS_MAX // @1hz ie 1 minute
     #define ADCSENSORS_SMOOTHSUPERSLOW_NUMREADINGS ADCSENSORS_MAX // @ EVERY 60 SECONDS hz ie 1 hour
 
-    uint16_t pressure;
-    // void SubTask_CalculateOilVolume();
-    // void SubTask_CalculateOilVolumeAdjusted();
     void MQQTDataBuilder_TestingArray();
     void MQQTDataBuilder_UltraSonic2();
     float GetOilHeightMMReadingAdjustedFromTemp();
@@ -115,14 +121,9 @@ class mUltraSonicSensor{
     void MQQTDataBuilder_UltraSonicBasic();
     void MQQTSendUltraSonicBasic();
 
-    #define WEB_HANDLE_JSON_ULT_SENSOR_TABLE "/fetch/tab_ult_sensor.json"
     void WebPage_Root_AddHandlers();
-    void WebSend_JSON_Table(AsyncWebServerRequest *request);
-    void ConstructRoot_JSON_Table(JsonObject root);
 
 
-    // void ConstructJSON_Detailed();
-    // void ConstructJSON_Basic();
 
     uint8_t fUpdateCalculations = false;
     void parse_JSONCommand();
@@ -157,9 +158,9 @@ class mUltraSonicSensor{
         }threshold;
         struct SETTINGS{
           uint16_t measure_rate_ms = 10000;
-          uint16_t blocking_time_ms = 2000;
-          uint16_t duration_limit_max = 20000;
-          uint16_t duration_limit_min = 1000;
+          uint16_t blocking_time_ms = 5000;
+          uint16_t duration_limit_max = 50000;
+          uint16_t duration_limit_min = 30000;
         }settings;
     }ultrasonic;
 
@@ -194,17 +195,13 @@ class mUltraSonicSensor{
       struct SENSOR instant;
       struct SENSOR smooth_1m;
       struct SENSOR smooth_1hr;
-      struct SENSOR smooth_1hr_from_1m;
+      // struct SENSOR smooth_1hr_from_1m;
       struct SENSOR* ptr;
     }averaged;
 
-
-    void SubTask_RecordLitresOverDays();
-    uint32_t tRecordLitresOverDays;
-
-uint8_t ConstructJSON_Settings(uint8_t json_level);
-uint8_t ConstructJSON_Sensors(uint8_t json_level);
-uint8_t ConstructJSON_SensorsAveraged(uint8_t json_level);
+    uint8_t ConstructJSON_Settings(uint8_t json_level);
+    uint8_t ConstructJSON_Sensors(uint8_t json_level);
+    uint8_t ConstructJSON_SensorsAveraged(uint8_t json_level);
 
   //#ifdef USE_CORE_MQTT 
 

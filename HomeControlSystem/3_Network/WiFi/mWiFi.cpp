@@ -93,9 +93,11 @@ void mWiFi::WifiConnectForced(){
 
   if(WiFi.status() == WL_CONNECTED){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "Connected to %s with %s (%d dBm)"),WiFi.SSID().c_str(),WiFi.localIP().toString().c_str(),WiFi.RSSI());
+    #ifdef USE_NETWORK_MDNS
     #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
     //MDNS.begin(pCONT_set->Settings.system_name.device);
     #endif // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+    #endif // #ifdef USE_NETWORK_MDNS
   }else{
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_WIFI "FAILED to connect!"));
   }
@@ -248,8 +250,8 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
   //   WiFi.begin(pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active], channel, wifi_bssid);
   // } else {
     
-    AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK  D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active]);
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active]);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
 
     WiFi.begin(pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
   //}
@@ -463,8 +465,9 @@ void mWiFi::WifiCheckIp(void)
 
     wifi_status = WL_CONNECTED;    //assert status to be connected
     // #ifdef USE_DISCOVERY
+    #ifdef USE_NETWORK_MDNS
     #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
-    //   #ifdef WEBSERVER_ADVERTISE
+    //   #ifdef USE_NETWORK_MDNS
         if (2 == mdns_begun) {
           #ifdef ESP8266
           
@@ -476,7 +479,8 @@ void mWiFi::WifiCheckIp(void)
           AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s %d"), "MDNS.update NOT SET", mdns_begun);
         }
     //   #endif  // USE_DISCOVERY
-    #endif  // WEBSERVER_ADVERTISE // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+    #endif  // USE_NETWORK_MDNS // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+    #endif // #ifdef USE_NETWORK_MDNS
 
   } else { //not connected
     
@@ -651,7 +655,7 @@ void mWiFi::WifiCheck(uint8_t param)
 // #ifdef ENABLE_FORCED_SKIP_AP_ON_IPUNSET
 //       //skip to next AP
 //       if(strcmp(WiFi.localIP().toString().c_str(),"(IP unset)")==0){
-//         AddLog_P(LOG_LEVEL_WARN, PSTR(DEBUG_INSERT_PAGE_BREAK "Forcing new AP %s"),pCONT_set->Settings.sta_active+1);
+//         AddLog_P(LOG_LEVEL_WARN, PSTR("Forcing new AP %s"),pCONT_set->Settings.sta_active+1);
 //   //cant toggle, needs to shift between 3
 //   if ('\0' == pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active][0]) { 
 //     if(pCONT_set->Settings.sta_active++>2){ pCONT_set->Settings.sta_active = WifiBegin_FLAG_SSID0_ID; } 
@@ -687,7 +691,8 @@ void mWiFi::WifiCheck(uint8_t param)
         #endif  // FIRMWARE_MINIMAL
 
         #ifdef USE_DISCOVERY
-        #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+        #ifdef USE_NETWORK_MDNS
+        // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
          // if (pCONT_set->Settings.flag_network.mdns_enabled) {
             // if (!mdns_begun) {
             //   if (pCONT_set->mdns_delayed_start) {
@@ -715,16 +720,16 @@ void mWiFi::WifiCheck(uint8_t param)
           if (pCONT_set->Settings.webserver) {
             pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
             #ifdef USE_DISCOVERY
-            #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
-              #ifdef WEBSERVER_ADVERTISE
-              if (1 == mdns_begun) {
-                mdns_begun = 2;
-                //#ifdef ESP8266
-                  MDNS.addService("http", "tcp", WEB_PORT);
-                //#endif
-              }
-              #endif  // WEBSERVER_ADVERTISE
-            #endif  // USE_DISCOVERY
+            // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+            //   #ifdef USE_NETWORK_MDNS
+            //   if (1 == mdns_begun) {
+            //     mdns_begun = 2;
+            //     //#ifdef ESP8266
+            //       MDNS.addService("http", "tcp", WEB_PORT);
+            //     //#endif
+            //   }
+            //   #endif  // USE_NETWORK_MDNS
+            // #endif  // USE_DISCOVERY
             #endif // #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
           } else {
             pCONT_web->StopWebserver();
@@ -740,7 +745,9 @@ void mWiFi::WifiCheck(uint8_t param)
         #if defined(USE_MODULE_CORE_WEBSERVER)
           //  UdpDisconnect();
         #endif  // USE_EMULATION
+        #ifdef USE_NETWORK_MDNS
         mdns_begun = 0;
+        #endif // #ifdef USE_NETWORK_MDNS
       }
     } //if discovery
   }
@@ -766,14 +773,14 @@ void mWiFi::WifiConnect(void)
     wifi_retry_init = WIFI_RETRY_OFFSET_SEC + ((750325 & 0xF) * 2);
   #endif
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI "wifi_retry_init=%d"),wifi_retry_init);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "wifi_retry_init=%d"),wifi_retry_init);
 
   wifi_retry = wifi_retry_init;
   wifi_counter = 1;
 
 //  #ifdef ESP8266
 
-  #ifdef ENABLE_DEVFEATURE_WIFI_MDNS
+ #ifdef USE_NETWORK_MDNS
   uint8_t result = MDNS.begin(pCONT_set->Settings.system_name.device); // NEEDED OR CAUSES ERROR MDNS FAILURE
   MDNS.update();
   if(result){
@@ -858,7 +865,7 @@ int8_t mWiFi::Tasker(uint8_t function){
 
   switch(function){
     case FUNC_INIT:
-
+      WifiConnect();
     break;
     case FUNC_LOOP: 
     

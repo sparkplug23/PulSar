@@ -970,7 +970,7 @@ void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
   //   temp[D_JSON_MAX] = mSupport::roundfloat(heating_profiles[device_id].temperature_max,1);
   //   temp[D_JSON_MIN] = mSupport::roundfloat(heating_profiles[device_id].temperature_min,1);;
   //   temp[D_JSON_STEP] = mSupport::roundfloat(heating_profiles[device_id].temperature_step,1);;
-  //   JsonArray temparr = temp.createNestedArray(D_JSON_VALUES);
+  //   JsonArray temparr = temp.createNestedArray(D_JSON_VALUE);
   //   for(int i=0;i<HEATINGPROFILE_RESOLUTION;i++){
   //     temparr.add(mSupport::roundfloat(heating_profiles[device_id].temperature[i],1));
   //   }
@@ -1970,7 +1970,7 @@ int8_t mHeating::Tasker(uint8_t function){
 int8_t mHeating::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_CheckAll(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);

@@ -380,7 +380,9 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
     JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay);
     JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
     JsonBuilderI->Add(PM_JSON_LOOPRATIO,      pCONT_sup->this_cycle_ratio);
+    #ifdef USE_NETWORK_MDNS
     JsonBuilderI->Add(PM_JSON_MDNS,           pCONT_set->boot_status.mdns_started_succesfully);
+    #endif // #ifdef USE_NETWORK_MDNS
     JsonBuilderI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,    pCONT_set->firmware_version.current.name_ctr);
     JsonBuilderI->Add_FP(PM_JSON_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);

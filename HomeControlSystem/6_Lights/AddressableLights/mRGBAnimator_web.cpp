@@ -1433,7 +1433,7 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
         {
             JsonObject obj = jsonDoc.as<JsonObject>();
 
-            pCONT_ladd->parsesub_CheckAll(jsonDoc.as<JsonObjectConst>());
+            pCONT_ladd->parse_JSONCommand(jsonDoc.as<JsonObjectConst>());
 
             for (JsonPair keyValue : obj) {
               // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());

@@ -73,7 +73,9 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
     void setMethod(WebRequestMethodComposite method){ _method = method; }
     void onRequest(ArRequestHandlerFunction fn){ _onRequest = fn; }
     void onUpload(ArUploadHandlerFunction fn){ _onUpload = fn; }
-    void onBody(ArBodyHandlerFunction fn){ _onBody = fn; Serial.println("onBody(ArBodyHandlerFunction fn)");}
+    void onBody(ArBodyHandlerFunction fn){ _onBody = fn; 
+   // Serial.println("onBody(ArBodyHandlerFunction fn)");
+    }
 
     virtual bool canHandle(AsyncWebServerRequest *request) override final{
 

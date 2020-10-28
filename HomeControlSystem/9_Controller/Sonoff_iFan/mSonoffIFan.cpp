@@ -283,7 +283,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
 int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_Commands(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);

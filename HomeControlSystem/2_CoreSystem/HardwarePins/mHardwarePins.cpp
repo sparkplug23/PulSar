@@ -196,12 +196,12 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
   uint16_t size_source = sizeof(MODULE_TEMPLATE);
   uint16_t size_dest = sizeof(pCONT_set->Settings.user_template2.full_ctr);
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR("source=%d, dest=%d"),size_source,size_dest);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("source=%d, dest=%d"),size_source,size_dest);
 
   size_source = size_source > size_dest ? size_source : size_dest;
   memcpy_P(pCONT_set->Settings.user_template2.full_ctr,MODULE_TEMPLATE,size_source);
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR("MODULE_TEMPLATE READ = \"%s\""),pCONT_set->Settings.user_template2.full_ctr);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("MODULE_TEMPLATE READ = \"%s\""),pCONT_set->Settings.user_template2.full_ctr);
 
   #ifdef ENABLE_DEBUG_BOOT_DELAYS
     delay(1000);
@@ -248,7 +248,7 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
     AddLog_P(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
   }
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("GetGPIONumberFromName = %d"), pin);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
 
   return pin;
 
@@ -270,7 +270,7 @@ void mHardwarePins::ParseModuleTemplate(){
   // Keep split for now, but work towards better solution
   if(!obj[F("NAME")].isNull()){ 
     const char* name_ctr = obj[F("NAME")];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Settings.system_name.device Template MQTTName %s"),name_ctr);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Settings.system_name.device Template MQTTName %s"),name_ctr);
     // snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
   
   
@@ -287,7 +287,7 @@ void mHardwarePins::ParseModuleTemplate(){
   // }
   // if(!obj[F("FRIENDLYNAME")].isNull()){    //maybe phase this one out? its the new "NAME"
     const char* name_ctr = obj[F("FRIENDLYNAME")];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
     snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr); //dont set directly?
 
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
@@ -306,7 +306,7 @@ void mHardwarePins::ParseModuleTemplate(){
         pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
         // Only existing pins
         pCONT_set->Settings.user_template2.hardware.gp.io[pin_num_count] = gpio_function_id;
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_CONFIG "GPIO[%d] = %d"),pin_num_count,gpio_function_id);  
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "GPIO[%d] = %d"),pin_num_count,gpio_function_id);  
         pin_num_count++;        
     }
     // Array of named functions "RGB_DATA"
@@ -321,7 +321,7 @@ void mHardwarePins::ParseModuleTemplate(){
   
   // if(!obj[F("GPIOC")].isNull()){ 
   if(obj.containsKey(F("GPIOC"))){ 
-    AddLog_P(LOG_LEVEL_INFO, PSTR("GPIOC FOUND"));
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GPIOC FOUND"));
     JsonObject list = obj[F("GPIOC")];
     // get key and value
     pCONT_set->boot_status.module_template_parse_success = true;
@@ -346,7 +346,7 @@ void mHardwarePins::ParseModuleTemplate(){
           // FULL pin list
           // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
 
-          AddLog_P(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
+          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
             pin_number, pin_number_array_index,
 
             pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
@@ -355,20 +355,20 @@ void mHardwarePins::ParseModuleTemplate(){
           // AddLog_P(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
       
         }else{
-          AddLog_P(LOG_LEVEL_INFO, PSTR("DECODE ERROR \"%s\""),kv.value());
+          AddLog_P(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\""),kv.value());
         }
 
         }// end UsuableGPIOPin
     }
 
-    AddLog_Array(LOG_LEVEL_TEST, "hardware.gp.io", (uint8_t *)&pCONT_set->Settings.user_template2.hardware.gp.io, (uint8_t) sizeof(pCONT_set->Settings.user_template2.hardware.gp.io));
+    // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "hardware.gp.io", (uint8_t *)&pCONT_set->Settings.user_template2.hardware.gp.io, (uint8_t) sizeof(pCONT_set->Settings.user_template2.hardware.gp.io));
 
   } // end GPIOC
 
   
   if(!obj[F("BASE")].isNull()){ 
     const char* base_ctr = obj[F("BASE")];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
 
     //GetBaseIDbyName();
       // pin_number = ;
@@ -377,7 +377,7 @@ void mHardwarePins::ParseModuleTemplate(){
 
     char buffer[40];
 
-    AddLog_P(LOG_LEVEL_TEST,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
 
     //snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
 
@@ -685,7 +685,7 @@ void mHardwarePins::ModuleGpios(myio *gp)
   uint8_t src[sizeof(mycfgio)];
   if (USER_MODULE == pCONT_set->Settings.module) {
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
-    AddLog_P(LOG_LEVEL_TEST, PSTR("ModuleGpios memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ModuleGpios memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
   } else {
     memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
   }
@@ -693,7 +693,7 @@ void mHardwarePins::ModuleGpios(myio *gp)
 
 //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)&src, sizeof(mycfgio));
 
-  AddLog_Array(LOG_LEVEL_TEST, "ModuleGpios::gp", (uint8_t *)&src, (uint8_t) sizeof(mycfgio));
+  //AddLog_Array(LOG_LEVEL_DEBUG_MORE, "ModuleGpios::gp", (uint8_t *)&src, (uint8_t) sizeof(mycfgio));
 
   uint8_t j = 0;
   for (uint8_t i = 0; i < sizeof(mycfgio); i++) {
@@ -704,7 +704,7 @@ void mHardwarePins::ModuleGpios(myio *gp)
   }
   // 11 85 00 85 85 00 00 00 00 00 00 00 15 38 85 00 00 81
 
-  AddLog_Array(LOG_LEVEL_TEST, "ModuleGpios::gp", (uint8_t *)dest, (uint8_t)sizeof(mycfgio));
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "ModuleGpios::gp", (uint8_t *)dest, (uint8_t)sizeof(mycfgio));
 //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
 }
 
@@ -728,7 +728,7 @@ AddLog_P(LOG_LEVEL_DEBUG,PSTR("&kModules[module_id] %d"),module_id);
   }
   // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
 DEBUG_LINE;
- AddLog_Array(LOG_LEVEL_DEBUG, "src", src, (uint8_t)sizeof(mycfgio));
+//  AddLog_Array(LOG_LEVEL_DEBUG, "src", src, (uint8_t)sizeof(mycfgio));
 
   uint8_t j = 0;
   for (uint8_t i = 0; i < sizeof(mycfgio); i++) {
@@ -739,7 +739,7 @@ DEBUG_LINE;
   }
   // 11 85 00 85 85 00 00 00 00 00 00 00 15 38 85 00 00 81
 
- AddLog_Array(LOG_LEVEL_DEBUG, "gp", (uint8_t *)gp, (uint8_t)sizeof(myio));
+//  AddLog_Array(LOG_LEVEL_DEBUG, "gp", (uint8_t *)gp, (uint8_t)sizeof(myio));
 //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
 }
 
@@ -898,7 +898,7 @@ void mHardwarePins::GpioInit(void)
 
 // delay(2000);
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MODULE "GpioInit"));
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MODULE "GpioInit"));
   uint8_t mpin;
 
   /**
@@ -927,7 +927,7 @@ void mHardwarePins::GpioInit(void)
    * */
   for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template2.hardware.gp); i++) {
     if(!ValidUserGPIOFunction(pCONT_set->Settings.user_template2.hardware.gp.io,i)){
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
       pCONT_set->Settings.user_template2.hardware.gp.io[i] = GPIO_USER_ID;  // Fix not supported sensor ids in template    }
     }
   }
@@ -938,17 +938,17 @@ void mHardwarePins::GpioInit(void)
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(pCONT_set->Settings.module_pins.io,i)){
       pCONT_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "my_module.io[i] = Settings.module_pins.io[%d]"),i);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = Settings.module_pins.io[%d]"),i);
     }
     // Set any pins set in template
     if ((def_gp.io[i] > GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) {
       pCONT_set->my_module.io[i] = def_gp.io[i];
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
     }
     // else{
     //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "ELSE my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
@@ -957,7 +957,7 @@ void mHardwarePins::GpioInit(void)
   }
   pCONT_set->my_module_flag = ModuleFlag();
 
-  AddLog_Array(LOG_LEVEL_TEST, "my_module.io", (uint8_t *)&pCONT_set->my_module.io, (uint8_t)sizeof(pCONT_set->my_module.io));
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", (uint8_t *)&pCONT_set->my_module.io, (uint8_t)sizeof(pCONT_set->my_module.io));
 
   // Reset all pins to be "unset"
   for (uint16_t i = 0; i < GPIO_MAX_ID; i++) {
@@ -1044,7 +1044,7 @@ void mHardwarePins::GpioInit(void)
       if (mpin){ 
         pCONT_set->pin[mpin] = i;
 
-        AddLog_P(LOG_LEVEL_INFO, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
+        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
 
       }
     #endif
@@ -1111,7 +1111,7 @@ void mHardwarePins::GpioInit(void)
     uint32_t mpin = ValidPin(i, pCONT_set->my_module.io[i]);
     
   DEBUG_LINE;
-   AddLog_P(LOG_LEVEL_DEBUG, PSTR("INI: gpio pin %d, mpin %d"), i, mpin);
+   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mpin %d"), i, mpin);
     if (((i < 6) || (i > 11)) && (0 == mpin)) {  // Skip SPI flash interface
 
       // if((i == 2)&&(pCONT_set->))
@@ -1280,7 +1280,7 @@ void mHardwarePins::GpioInit(void)
   }
 
   #ifndef DISABLE_SERIAL_LOGGING
-  Serial.printf("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
+  //Serial.printf("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
   #endif
 
   pCONT_sup->SetLedPower(pCONT_set->Settings.ledstate &8);

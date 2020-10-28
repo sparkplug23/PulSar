@@ -110,8 +110,6 @@ template <typename Class>
 struct handler {
   uint32_t      tSavedLastSent = 0;
   uint16_t      tRateSecs = 1;
-  // uint8_t       flags.PeriodicEnabled = true;
-  // uint8_t       flags.SendNow = true;
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic;

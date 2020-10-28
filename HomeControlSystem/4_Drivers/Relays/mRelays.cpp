@@ -168,7 +168,7 @@ int8_t mRelays::Tasker(uint8_t function){
 int8_t mRelays::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
       return CheckAndExecute_JSONCommands(obj);
@@ -673,7 +673,7 @@ DEBUG_LINE;
   // }
   // else {
 
-
+#ifdef USE_NETWORK_MDNS
     #ifdef USE_VIRTUAL_REMOTE_URL_RELAY
 
       char remote_url[100];
@@ -699,6 +699,7 @@ DEBUG_LINE;
 
       return; // not local control
 
+#endif // #ifdef USE_NETWORK_MDNS
     #endif
 
 

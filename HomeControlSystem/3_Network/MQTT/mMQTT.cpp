@@ -30,7 +30,9 @@ void mMQTT::init(void){
 
   //Set primary mqtt broker address as first
   memset(settings.hostname_ctr,0,sizeof(settings.hostname_ctr));
+  #ifdef USE_NETWORK_MDNS
   memcpy(settings.hostname_ctr,MDNS_MQTT_HOSTNAME1,strlen(MDNS_MQTT_HOSTNAME1));
+  #endif // #ifdef USE_NETWORK_MDNS
 
   memset(settings.prefixtopic,0,sizeof(settings.prefixtopic));
 
@@ -62,41 +64,41 @@ void mMQTT::setprefixtopic(const char* _prefixtopic){
 }
 
 
-// #ifdef USE_DISCOVERY
-// #ifdef MQTT_HOST_DISCOVERY
+#ifdef USE_DISCOVERY
+#ifdef MQTT_HOST_DISCOVERY
 void mMQTT::DiscoverServer(void)
 {
-  if (!pCONT_wif->mdns_begun) { return; }
+//   if (!pCONT_wif->mdns_begun) { return; }
 
-  int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
+//   int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
+//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
 
-  if(n == 0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " No services found"));
-  }
+//   if(n == 0){
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " No services found"));
+//   }
 
-  if (n > 0) {
+//   if (n > 0) {
 
-  Serial.print(n); Serial.println(" service(s) found"); 
+//   Serial.print(n); Serial.println(" service(s) found"); 
 
-    uint8_t i = 0;             // If the hostname isn't set, use the first record found.
-//#ifdef MDNS_HOSTNAME
-    for (i = n; i > 0; i--) {  // Search from last to first and use first if not found
-      if (!strcmp(MDNS.hostname(i).c_str(), MDNS_MQTT_HOSTNAME1)) {
-        break;                 // Stop at matching record
-      }
-    }
-//#endif  // MDNS_HOSTNAME
-    snprintf_P(pCONT_set->Settings.mqtt.host, sizeof(pCONT_set->Settings.mqtt.host), MDNS.IP(i).toString().c_str());
-    pCONT_set->Settings.mqtt.port = MDNS.port(i);
+//     uint8_t i = 0;             // If the hostname isn't set, use the first record found.
+// //#ifdef MDNS_HOSTNAME
+//     for (i = n; i > 0; i--) {  // Search from last to first and use first if not found
+//       if (!strcmp(MDNS.hostname(i).c_str(), MDNS_MQTT_HOSTNAME1)) {
+//         break;                 // Stop at matching record
+//       }
+//     }
+// //#endif  // MDNS_HOSTNAME
+//     snprintf_P(pCONT_set->Settings.mqtt.host, sizeof(pCONT_set->Settings.mqtt.host), MDNS.IP(i).toString().c_str());
+//     pCONT_set->Settings.mqtt.port = MDNS.port(i);
 
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s, " D_IP_ADDRESS " %s, " D_PORT " %d"), 
-                    MDNS.hostname(i).c_str(), pCONT_set->Settings.mqtt.host, pCONT_set->Settings.mqtt.port);
-  }
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s, " D_IP_ADDRESS " %s, " D_PORT " %d"), 
+//                     MDNS.hostname(i).c_str(), pCONT_set->Settings.mqtt.host, pCONT_set->Settings.mqtt.port);
+//   }
 }
-// #endif  // MQTT_HOST_DISCOVERY
-// #endif  // USE_DISCOVERY
+#endif  // MQTT_HOST_DISCOVERY
+#endif  // USE_DISCOVERY
 
 
 
@@ -220,7 +222,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -910,14 +912,6 @@ int8_t mMQTT::Tasker(uint8_t function){
             if(!error){
               pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC, doc.as<JsonObjectConst>());
             }
-
-            //old method for now
-            // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "USING OLD JSON METHOD"));
-            // if(pCONT->Tasker_Interface(FUNC_JSON_COMMAND)){
-            //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "NEW METHOD SUCCESS"));
-            // }else{
-            //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
-            // }
 
             AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer2.isserviced);
           }

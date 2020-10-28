@@ -50,7 +50,11 @@ int8_t mTime::Tasker(uint8_t function){
         ((mtime.minute%5)==0)&&
         (uptime.seconds_nonreset>60)
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
-      if(mtime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);}
+
+      //I need another for stable boot
+      //if(mtime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);}
+      
+      if(mtime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
       if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 

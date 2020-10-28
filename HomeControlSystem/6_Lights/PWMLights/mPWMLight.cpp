@@ -91,10 +91,10 @@ void mPWMLight::Init(void) //LightInit(void)
 void mPWMLight::SubTask_Animation(){
   //if(pCONT_iLight->animation.flags.fEnable_Animation){
   // while(blocking_force_animate_to_complete){
-  if (pCONT_iLight->animator_controller->IsAnimating()){ Serial.print("~a"); // the normal lop just needs these two to run the active animations_fadeall
+  if (pCONT_iLight->animator_controller->IsAnimating()){ //Serial.print("~a"); // the normal lop just needs these two to run the active animations_fadeall
     pCONT_iLight->animator_controller->UpdateAnimations();
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);  //Serial.flush();
+    // AddLog_P(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);  //Serial.flush();
     #endif // ENABLE_LOG_LEVEL_DEBUG
     LightUpdate();
     // if(!pCONT_iLight->animation.flags.fRunning){   

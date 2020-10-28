@@ -879,7 +879,14 @@ void mEnergy::Settings_Save(){
     
 int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
 {
-
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      parse_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
   // return 0;
 
   // testing without pzem hardware
@@ -1081,9 +1088,9 @@ void mEnergy::WebAppend_Root_Status_Table(){
 
 
 
-int8_t mEnergy::parse_JSONCommand(){
+void mEnergy::parse_JSONCommand(){
 
-  return 0;// THIS IS WRONG!!
+  return;// THIS IS WRONG!!
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/energy")>=0){
@@ -1092,7 +1099,7 @@ int8_t mEnergy::parse_JSONCommand(){
     // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
     // fOpenHABDataStreamActive = true;
   }else{
-    return 0; // not meant for here
+    return; // not meant for here
   }
 
   // u
@@ -1284,7 +1291,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_EnergyStats;
   
   mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
@@ -1294,7 +1301,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->tRateSecs = 10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_EnergyStats;
 
 } //end "MQTTHandler_Init"

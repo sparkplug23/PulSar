@@ -24,6 +24,9 @@ DEFINE_PGM_CTR(PM_DLIM_LIST_TABLE_HEADERS)
 "Energy (kWh)";
 
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR) "energystats";
+
+
 #include "3_Network/MQTT/mMQTT.h"
 
 class mEnergy{

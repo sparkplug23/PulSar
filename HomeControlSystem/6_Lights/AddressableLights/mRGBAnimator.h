@@ -132,11 +132,6 @@ DEFINE_PROGMEM_CTR(PM_FLASHER_REGION_TWINKLE_FLASH_NAME_CTR)                    
 DEFINE_PGM_CTR(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR) D_FLASHER_REGION_COLOUR_SELECT_NAME_CTR;
 DEFINE_PGM_CTR(PM_FLASHER_REGION_ANIMATE_NAME_CTR) D_FLASHER_REGION_ANIMATE_NAME_CTR;
 
-DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)                      "GRB";
-DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)                      "RGB";
-DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)                      "BRG";
-DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG";
-
 
 class mRGBAnimator{
   private:
@@ -147,7 +142,6 @@ class mRGBAnimator{
     
     // Put settings at top of class from now on, use it for common settings
     struct SETTINGS{
-      uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
       struct FLAGS{
           uint8_t EnableSceneModeWithSliders = true;
           uint8_t TemplateProvidedInProgMem = false;
@@ -159,9 +153,6 @@ class mRGBAnimator{
     void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     RgbTypeColor GetPixelColor(uint16_t indexPixel);
     
-    const char* GetHardwareColourTypeName(char* buffer);
-    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer);
-    int8_t GetHardwareColourTypeIDbyName(const char* c);
 
     #ifdef PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
       typedef NeoSk6812Method selectedNeoSpeedType;
@@ -537,6 +528,8 @@ class mRGBAnimator{
     void parsesub_ModeAnimation(JsonObjectConst obj);
     void parsesub_ModeAmbilight(JsonObjectConst obj);
 
+void parse_JSONCommand(JsonObjectConst obj);
+
         // make number generator, random, with skewness
         // int Range0to100[20] = {0,10,20,30,40, // random(12,24)*10;
         //                 50,60,70,80,90,
@@ -622,7 +615,7 @@ void Settings_Reset();
 void ConfigureLEDTransitionAnimation(void);
 // void UpdateLEDs2(void);
 void RefreshLED_Presets(void);
-void parsesub_CheckAll(JsonObjectConst obj);
+// void parsesub_CheckAll(JsonObjectConst obj);
 void TurnLEDsOff();
 // void AddToJsonObject_AddHardware(JsonObject root);
 void Append_Hardware_Status_Message();

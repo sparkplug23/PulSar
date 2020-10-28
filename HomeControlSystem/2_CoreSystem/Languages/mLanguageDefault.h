@@ -500,8 +500,6 @@
 #define D_ERROR_UNSUPPORTED "ERROR : Feature not currently supported"
 #define D_ERROR_JSON_DESERIALIZATION "JSON DeserializationError"
 
-#define D_SERIAL_NEWLINE_BLOCK "\n\r\n\r\n\r\n\r\n\r\n\r\n\r"
-
 // settings.ino
 #define D_SAVED_TO_FLASH_AT "Saved to flash at"
 #define D_LOADED_FROM_FLASH_AT "Loaded from flash at"
@@ -1154,6 +1152,7 @@
 
 #define D_JSON_ABORTED "Aborted"
 #define D_JSON_ACTIVE "Active"
+#define D_JSON_ACCURACY "Accuracy"
 #define D_JSON_ADDRESS "Address"
 #define D_JSON_AIRQUALITY "AirQuality"
 #define D_JSON_ANALOG_INPUT "Analog"
@@ -1226,6 +1225,8 @@
 #define D_JSON_IMPORT_ACTIVE "ImportActivePower"
 #define D_JSON_IMPORT_REACTIVE "ImportReactivePower"
 #define D_JSON_INFRARED "Infrared"
+#define D_JSON_INSIDE "Inside"
+#define D_JSON_INSTANT "Instant"
 #define D_JSON_UNKNOWN "Unknown"
 #define D_JSON_LIGHT "Light"
 #define D_JSON_LIGHTPOWER "LightPower"
@@ -1251,13 +1252,19 @@
 #define D_JSON_NOISE "Noise"
 #define D_JSON_NONE "None"
 #define D_JSON_NETWORK "Network"
+#define D_JSON_NEGATIVE "Negative"
+#define D_JSON_NARROW "Narrow"
 #define D_JSON_OR "or"
 #define D_JSON_OTAURL "OTAURL"
 #define D_JSON_OPEN "Open"
+#define D_JSON_OUTSIDE "Outside"
 #define D_JSON_PERIOD "Period"
+#define D_JSON_PERCENTAGE "Percentage"
+#define D_JSON_PERCENT "Percent"
 #define D_JSON_PHASE_ANGLE "PhaseAngle"
 #define D_JSON_POWERFACTOR "PowerFactor"
 #define D_JSON_POWERUSAGE "Power"
+#define D_JSON_POSITIVE "Positive"
 #define D_JSON_ACTIVE_POWERUSAGE "ActivePower"
 #define D_JSON_APPARENT_POWERUSAGE "ApparentPower"
 #define D_JSON_REACTIVE_POWERUSAGE "ReactivePower"
@@ -1268,6 +1275,7 @@
 #define D_JSON_PROGRAMFLASHSIZE "ProgramFlashSize"
 #define D_JSON_PROGRAMSIZE "ProgramSize"
 #define D_JSON_REFERENCETEMPERATURE "ReferenceTemperature"
+#define D_JSON_RELATIVE "Relative"
 #define D_JSON_RESET "Reset"
 #define D_JSON_RESOLUTION "Resolution"
 #define D_JSON_RESTARTING "Restarting"
@@ -1290,6 +1298,10 @@
 #define D_JSON_STARTDST "StartDST"       // Start Daylight Savings Time
 #define D_JSON_STARTED "Started"
 #define D_JSON_STARTUPUTC "StartupUTC"
+#define D_JSON_SMOOTH "Smooth"
+
+#define D_JSON_SPEEDOFSOUND "SpeedOfSound"
+
 #define D_JSON_STATIC_IPADDRESS "StaticIPAddress"
 #define D_JSON_SUBNETMASK "Subnetmask"
 #define D_JSON_SUCCESSFUL "Successful"
@@ -1301,6 +1313,7 @@
 #define D_JSON_TEMPERATURE "Temperature"
 #define D_JSON_TEMPERATURE_UNIT "TempUnit"
 #define D_JSON_TEMPLATE_USED "TemplateUsed"
+#define D_JSON_THRESHOLD "Threshold"
 #define D_JSON_TEMPLATE_PARSE_SUCCESS "TemplateParseSucess"
 #define D_JSON_TELNET "Telnet"
 #define D_JSON_TEMPLATE "Template"
@@ -1313,6 +1326,7 @@
 #define D_JSON_TVOC "TVOC"
 #define D_JSON_UPTIME "Uptime"
 #define D_JSON_UPSECONDS "UpSeconds"
+#define D_JSON_UPPER "Upper"
 #define D_JSON_UTC_TIME "UTC"
 #define D_JSON_UV_INDEX "UvIndex"
 #define D_JSON_UV_INDEX_TEXT "UvIndexText"
@@ -1326,6 +1340,7 @@
 #define D_JSON_WEIGHT "Weight"
 #define D_JSON_WEB "Web"
 #define D_JSON_WIFI "Wifi"
+#define D_JSON_WIDE "Wide"
 #define D_JSON_WRONG "Wrong"
 #define D_JSON_WRONG_PARAMETERS "Wrong parameters"
 #define D_JSON_WEBSERVER_ENABLED "Webserver Enabled"
@@ -1363,12 +1378,15 @@
 #define D_JSON_DEVICE "device"
 #define D_JSON_DEVICEID "DeviceID"
 
+#define D_JSON_DEVIATION "Deviation"
+
 #define D_JSON_DEVICENAME "DeviceName"
 #define D_JSON_DEVICEFRIENDLYNAME "DeviceFriendlyName"
 
 #define D_JSON_DOOR "Door"
 #define D_JSON_RINGDOORBELL "DoorbellRing"
-#define D_JSON_DURATION "duration"
+#define D_JSON_DURATION "Duration"
+#define D_JSON_DURATION_RAW "DurationRaw"
 #define D_JSON_ERROR "Error"
 #define D_JSON_FLASHER "Flasher"
 #define D_JSON_FAILSAFE "failsafe"
@@ -1384,6 +1402,7 @@
 #define D_JSON_IMPORTANCE "importance"
 #define D_JSON_INORDER "InOrder"
 #define D_JSON_LIMIT "limit"
+#define D_JSON_LASTREAD "LastRead"
 #define D_JSON_LENGTH "length"
 #define D_JSON_MAX "max"
 #define D_JSON_MESSAGE "Message"
@@ -1412,6 +1431,7 @@
 #define D_JSON_OFF "Off"
 #define D_JSON_OFFTIME "offtime"
 #define D_JSON_ORDER "order"
+#define D_JSON_OUTLIERS "Outliers"
 #define D_JSON_PACKETS "Packets"
 #define D_JSON_PIXELSGROUPED "pixels_grouped"
 
@@ -1428,13 +1448,14 @@
 #define D_JSON_RATE "rate"
 #define D_JSON_RATE_MS "rate_ms"
 #define D_JSON_RECEIVEDCOUNT "ReceivedCount"
+#define D_JSON_RATIO "Ratio"
 
   #define D_JSON_RELAY_NAME "Relay Name"
   #define D_JSON_MOTION_NAME "Motion Name"
 
 #define D_JSON_SAT "sat"
 #define D_JSON_SECONDS "seconds"
-#define D_JSON_SET "set"
+#define D_JSON_SET "Set"
 #define D_JSON_SENS1 "sens1"
 #define D_JSON_SENSOR "sensor"
 #define D_JSON_SENSORADDRESS "SensorAddress"
@@ -1477,7 +1498,10 @@
 #define D_JSON_HSB "HSB"
 
 #define D_JSON_RANDOM "Random"
-#define D_JSON_VALUES "values"
+#define D_JSON_VALUE "Value"
+
+
+#define D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "GRB"
 
 
 #define D_JSON_HARDWARE_TYPE "hardware_type"
@@ -1561,6 +1585,7 @@
 #define D_JSON_SYSLOG "SysLog"
 #define D_JSON_LOGHOST "LogHost"
 #define D_JSON_LOGPORT "LogPort"
+#define D_JSON_LOWER "Lower"
 #define D_JSON_IPADDRESS "IPAddress"
 #define D_JSON_NTPSERVER "NtpServer"
 #define D_JSON_AP "Ap"

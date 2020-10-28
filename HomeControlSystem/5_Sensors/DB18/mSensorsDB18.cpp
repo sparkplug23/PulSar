@@ -66,7 +66,7 @@ uint8_t mSensorsDB18::GetCorrectedDeviceID(uint8_t id_desired){
     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
       // Check address has been set    
       if(sensor[sensor_count].id == id_desired){
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id == id_desired %d"),sensor_count,id_desired); 
+        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_DSB "sensor[sensor_count%d].id == id_desired %d"),sensor_count,id_desired); 
         return sensor_count;
       }
       sensor_count++;
@@ -79,7 +79,7 @@ uint8_t mSensorsDB18::GetCorrectedDeviceID(uint8_t id_desired){
 
 void mSensorsDB18::Init(void){
 
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(DEBUG_INSERT_PAGE_BREAK "mSensorsDB18::init"));
+  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
 
   // sensor group 1 exists
   uint8_t sensor_group_count = 0;
@@ -487,11 +487,11 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
 }//end function
 int8_t mSensorsDB18::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return JSONCommands_CheckTopic_ThisModule(obj); //return to allow stopping checking other module
-    break;
     case FUNC_JSON_COMMAND_OBJECT:
-      JSONCommands_CheckAll(obj); //no return
+      parse_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      return CheckAndExecute_JSONCommands(obj);
     break;
   }
 }

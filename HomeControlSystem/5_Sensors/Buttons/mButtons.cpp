@@ -40,7 +40,7 @@ void mButtons::ButtonInvertFlag(uint8 button_bit)
 void mButtons::ButtonInit(void)
 {
   
-      AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "mButtons::ButtonInit"));
+      AddLog_P(LOG_LEVEL_INFO, PSTR("ButtonInit"));
 
   buttons_found = 0;
   for (uint8_t i = 0; i < MAX_KEYS; i++) {

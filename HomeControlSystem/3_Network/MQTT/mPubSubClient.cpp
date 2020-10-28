@@ -576,11 +576,15 @@ boolean mPubSubClient::publish_P(const char* topic, const uint8_t* payload, unsi
 
 boolean mPubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) { //Serial.println("write");
     
+    DEBUG_LINE;
     if (!connected()) {
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"write\" failed!"));
+        
+    DEBUG_LINE;
         return 0;
     }
 
+    DEBUG_LINE;
     if (!length) {
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "length is ZERO"));
         //return 0;
@@ -600,6 +604,7 @@ boolean mPubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) { //
 // Serial.println(WiFi.localIP());
 // Serial.println(static_cast<uint32_t>(WiFi.localIP()));
 
+    DEBUG_LINE;
     if ((WL_CONNECTED != WiFi.status()) || (static_cast<uint32_t>(WiFi.localIP()) == 0)) {
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early"));
         return false;
@@ -607,6 +612,7 @@ boolean mPubSubClient::write(uint8_t header, uint8_t* buf, uint16_t length) { //
         //AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
     }
 
+    DEBUG_LINE;
 // Serial.print(__LINE__);
 // Serial.flush();
 // delay(1000);

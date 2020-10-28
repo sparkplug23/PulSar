@@ -292,7 +292,7 @@ void ConstructRoot_JSON_Table(JsonObject root);
       struct SENSOR instant;
       struct SENSOR smooth_1m;
       struct SENSOR smooth_1hr;
-      struct SENSOR smooth_1hr_from_1m;
+      // struct SENSOR smooth_1hr_from_1m;
       struct SENSOR* ptr;
     }oiltank; //caled averaged in ultra
 

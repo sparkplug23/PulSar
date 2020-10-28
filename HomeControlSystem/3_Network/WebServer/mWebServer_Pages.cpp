@@ -910,11 +910,11 @@ void mWebServer::WebAppend_Page_InformationTable(){
   // #ifdef USE_DISCOVERY
   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network.mdns_enabled) ? D_ENABLED : D_DISABLED);
   //   if (pCONT_set->Settings.flag_network.mdns_enabled) {
-  // #ifdef WEBSERVER_ADVERTISE
+  // #ifdef USE_NETWORK_MDNS
   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_WEB_SERVER));
   // #else
   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_DISABLED));
-  // #endif // WEBSERVER_ADVERTISE
+  // #endif // USE_NETWORK_MDNS
   //   }
   // #else
   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2" D_DISABLED));

@@ -269,10 +269,10 @@ return;
 void mOilFurnace::init_ultrasonic_sensor_parameters(){
 
 // #ifdef USE_MODULE_SENSORS_DS18B20
-  pCONT->mus->ultrasonic.settings.measure_rate_ms = 2000;
-  pCONT->mus->ultrasonic.settings.blocking_time_ms = 1000;
-  pCONT->mus->ultrasonic.settings.duration_limit_max = 10000;
-  pCONT->mus->ultrasonic.settings.duration_limit_min = 4000;
+  // pCONT->mus->ultrasonic.settings.measure_rate_ms = 2000;
+  // pCONT->mus->ultrasonic.settings.blocking_time_ms = 1000;
+  // pCONT->mus->ultrasonic.settings.duration_limit_max = 10000;
+  // pCONT->mus->ultrasonic.settings.duration_limit_min = 4000;
 // #endif
 
 }
@@ -424,10 +424,10 @@ int8_t mOilFurnace::Tasker(uint8_t function){
 int8_t mOilFurnace::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
-      //parsesub_CheckAll(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      //return CheckAndExecute_JSONCommands(obj);
+      return CheckAndExecute_JSONCommands(obj);
     break;
   }
 }

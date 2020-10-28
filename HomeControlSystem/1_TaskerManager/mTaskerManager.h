@@ -69,7 +69,9 @@ enum FUNCTION_RESULT_IDS{
 
 #ifdef ESP32
   #include <WiFi.h>
+  #ifdef USE_NETWORK_MDNS
   #include <ESPmDNS.h>
+  #endif // #ifdef USE_NETWORK_MDNS
   #include <WiFiUdp.h>
   #include <ArduinoOTA.h>
   #include "Ticker.h"
@@ -84,7 +86,9 @@ enum FUNCTION_RESULT_IDS{
 #ifdef ESP8266
   #include <ESP8266HTTPClient.h>
   #include <ESP8266httpUpdate.h>
+  #ifdef USE_NETWORK_MDNS
   #include <ESP8266mDNS.h>
+  #endif // #ifdef USE_NETWORK_MDNS
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
   #define WDT_RESET() ESP.wdtFeed()
@@ -763,7 +767,9 @@ class mTaskerManager{
     uint16_t execution_time_max_ms[CLASS_ID_MAX];
     #endif
     uint8_t count = 0;
-  }module_settings;
+  }module_settings; 
+
+  uint16_t last_function = 255; // 0 will be first
 
   uint8_t fExitTaskerWithCompletion = false;
 

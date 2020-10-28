@@ -33,6 +33,13 @@ DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_CTR)
 DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)  
   "{o1}%s'>%s{o2}";   
 
+
+DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)        D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR;
+DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)                      "RGB";
+DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)                      "BRG";
+DEFINE_PROGMEM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG";
+
+
 // struct RgbcctColor{
 //   uint8_t R;
 //   uint8_t G;
@@ -306,6 +313,7 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
     struct SETTINGS{
       SETTINGS_FLAGS flags;
+      uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
 
     }settings;
 
@@ -323,17 +331,18 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     struct { 
       // enable animations (pause)
       uint16_t fEnable_Animation : 1;
+      uint16_t ColourComponentsUpdatedButNotYetApplied : 1; // new colours, not yet applied
 
 
-      uint16_t fForceUpdate : 1;
+      uint16_t fForceUpdate : 1; 
       uint16_t fRunning : 1;//= false;
       uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
       
-        uint16_t ftime_use_map : 1;//= true;
-        uint16_t frate_use_map : 1;//= true;
+      uint16_t ftime_use_map : 1;//= true;
+      uint16_t frate_use_map : 1;//= true;
 
       // Reserved
-      uint16_t reserved : 12;
+      uint16_t reserved : 11;
     };
   } ANIMATION_FLAGS;
 
@@ -383,6 +392,9 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     
     uint32_t animation_changed_millis = 0;
 
+    const char* GetHardwareColourTypeName(char* buffer);
+    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer);
+    int8_t GetHardwareColourTypeIDbyName(const char* c);
 
     // Flags and states that are used during one transition and reset when completed
     struct ANIMATIONOVERRIDES{
@@ -433,6 +445,8 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
 
     void Settings_Default();  
 
+    void BootMessage();
+
     // RgbcctColor current_color_main;
 
     int     hue_test = 0;
@@ -444,36 +458,33 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       // uint32_t tSavedAutoOff = 0;
     uint32_t tSavedAutoOff = 0;
     
-    
 
-    enum MODE_SINGLECOLOUR_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
+    // enum MODE_SINGLECOLOUR_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
+
+
+    
+    typedef union {
+      uint8_t data; // allows full manipulating
+      struct { 
+        uint8_t running : 1;
+        uint8_t generate_new_colours : 1;
+        uint8_t colours_need_applied : 1;
+        uint8_t update_colour_on_input_command : 1;
+        // uint8_t running : 1;
+        
+        // Reserved
+        uint8_t reserved : 4;
+      };
+    } MODE_SINGLECOLOUR_CONFIG_FLAGS;
     struct MODE_SINGLECOLOUR_CONFIG{
       uint8_t name_id;
       RgbcctColor colour;
+      MODE_SINGLECOLOUR_CONFIG_FLAGS flag;
       uint8_t fActive = false; // isrunning
-      uint8_t parts = DONE; //parts aka index
+      uint8_t parts = 0;//DONE; //parts aka index
       uint32_t tStart;
       uint32_t tOnTime;
-
-      // struct TRANSITIONSETTINGS{
-      //   uint8_t order_id;
-      //   uint8_t method_id;
-
-      //   struct PIXELS_TO_UPDATE_AS_PERCENTAGE{
-      //     uint8_t val;
-      //     uint8_t map_id = 2;  
-      //   }pixels_to_update_as_percentage;
-      //   struct TIME{
-      //     uint16_t val = 5000;
-      //     uint8_t  map_id = 2;
-      //   }time_ms;
-      //   struct RATE{
-      //     uint16_t val = 5000;
-      //     uint8_t  map_id = 2;
-      //   }rate_ms;
-      
-      // }transition;
-
+      uint8_t update = true;  // to replace "NOCHANGE"
     };
     // hold current set scene
     struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour;
@@ -529,10 +540,12 @@ void Template_Load();
 
 int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+// void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     
-void parsesub_CheckAll(JsonObjectConst obj);
-void parsesub_Settings(JsonObjectConst obj);
+// void parsesub_CheckAll(JsonObjectConst obj);
+// void parsesub_Settings(JsonObjectConst obj);
+void parse_JSONCommand(JsonObjectConst obj);
+
 
 
 
@@ -545,7 +558,7 @@ void parsesub_Settings(JsonObjectConst obj);
     void Init(void);
 
     void parse_JSONCommand(void);
-    void parsesub_ModeManual(JsonObjectConst obj);
+    // void parsesub_ModeManual(JsonObjectConst obj);
     
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
   bool     _ct_rgb_linked = true;
@@ -624,7 +637,7 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     **************/ 
    // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
     enum SCENES{
-      MODE_SINGLECOLOUR_NOCHANGE_ID=0,
+      //MODE_SINGLECOLOUR_NOCHANGE_ID=0,    // REMOVING mode, as I dont want to change it, but add "nochange" within existing modes
       // MODE_SINGLECOLOUR_DAYON_ID=1,
       // MODE_SINGLECOLOUR_DAYOFF_ID,
       // MODE_SINGLECOLOUR_EVENINGON_ID,
@@ -648,17 +661,24 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
 
 
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
-    void parsesub_ModeScene(JsonObjectConst obj);
+    // void parsesub_ModeScene(JsonObjectConst obj);
     
     void SubTask_SingleColour();
     void init_Scenes();
 
 
 
-  uint8_t entry_color[LST_MAX];
   uint8_t current_color[LST_MAX]; // r,r,b,cw,ww
+  uint8_t last_colour[LST_MAX];
+
+
+
+
+  uint8_t entry_color[LST_MAX];
+
+
+
   uint8_t new_color[LST_MAX];
-  uint8_t last_color[LST_MAX];
   uint8_t color_remap[LST_MAX];
 
   
@@ -942,7 +962,7 @@ HsbColor GetHSBColour();
 
 
 
-void parsesub_ModeAnimation(JsonObjectConst obj);
+// void parsesub_ModeAnimation(JsonObjectConst obj);
 
 void SetHSBColour();
 void SetColour_HSB(HsbColor hsb);
