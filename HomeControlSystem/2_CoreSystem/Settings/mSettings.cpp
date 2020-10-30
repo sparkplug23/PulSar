@@ -291,7 +291,7 @@ void mSettings::Function_Template_Load(){
   }
   JsonObjectConst obj = doc.as<JsonObject>();
 
-  json_object_const = obj;
+ // json_object_const = obj;
 
   // clear old buffer
   pCONT_set->ClearAllDeviceName();

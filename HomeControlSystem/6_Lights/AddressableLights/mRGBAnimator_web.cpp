@@ -94,7 +94,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
             GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
           );
         break;
-        case 4: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
+        case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer)); break;
         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
         case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
         case 7: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
@@ -2022,12 +2022,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");
         for (uint8_t row_id = 0; row_id < TRANSITION_ORDER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR, 
-            GetTransitionOrderNameByID(row_id, buffer), 
-            GetTransitionOrderNameByID(row_id, buffer2)
+            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer), 
+            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer2)
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",GetTransitionOrderName(buffer));
+      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionOrderName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
   
@@ -2070,12 +2070,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < TRANSITION_METHOD_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
-            GetTransitionMethodNameByID(row_id, buffer),
-            GetTransitionMethodNameByID(row_id, buffer2)
+            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer),
+            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer2)
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",GetTransitionMethodName(buffer));
+      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionMethodName(buffer));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 

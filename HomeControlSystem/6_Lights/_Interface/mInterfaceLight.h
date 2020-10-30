@@ -81,7 +81,37 @@ enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
   PIXEL_HARDWARE_COLOR_LENGTH_ID
 };
 
+/**************
+ * BLEND - Move between colours with delay
+ * INSTANT   - no delay
+ * TWINKLE1 - random bulbs flash
+ * GLIMMER - random bulbs blend (flash with blend) - could use progress in animation random(progress)
+**************/ 
+enum TRANSITION_METHOD{
+  TRANSITION_METHOD_NONE_ID,
+  TRANSITION_METHOD_BLEND_ID,
+  TRANSITION_METHOD_INSTANT_ID,
+  TRANSITION_METHOD_TWINKLE_ID,
+  TRANSITION_METHOD_GLIMMER_ID, //should be an animation only, on brightness #Idea#105
+  TRANSITION_METHOD_LENGTH_ID
+};   
 
+    /**************
+     * RANDOM - LED pixel indexing chosen at random
+     * CENTRE_OUT   - Chosen from center out, showing same pixel on outward pairs (update together)
+     * INORDER - first to last pixel index
+     * ROTATE - rotate pixel colours along index
+    **************/ 
+    enum TRANSITION_ORDER{
+      TRANSITION_ORDER_NONE_ID=0,
+      TRANSITION_ORDER_RANDOM_ID,
+      TRANSITION_ORDER_CENTRE_OUT_ID, //mirror image fill from center
+      TRANSITION_ORDER_INORDER_ID,
+      TRANSITION_ORDER_ROTATE_ID,
+      TRANSITION_ORDER_FIXED_ID, //use fMapIDs_Are_Position_HSB_Pairs
+      TRANSITION_ORDER_LENGTH_ID
+    }; // rotate should really be a flasher animation only
+    
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "3_Network/MQTT/mMQTT.h"
@@ -658,6 +688,13 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     const char* GetSceneName(char* buffer, uint8_t buflen);
     const char* GetSceneNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
+    int8_t GetTransitionMethodIDbyName(const char* c);     
+    const char* GetTransitionMethodName(char* buffer);
+    const char* GetTransitionMethodNameByID(uint8_t id, char* buffer);
+
+    int8_t GetTransitionOrderIDbyName(const char* c);     
+    const char* GetTransitionOrderName(char* buffer);
+    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer);
 
 
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);

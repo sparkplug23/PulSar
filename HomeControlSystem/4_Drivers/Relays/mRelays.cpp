@@ -14,20 +14,10 @@
 
 
 add table (optional flag to turn this on/off)
-Relay Name:    ontime, offtime, timeon, last controlled by
-
-
-
-*/
-
-
-
-
-
-//
+Relay Name:    ontime, offtime, timeon, last controlled by//
   // I should add a relay "type" ie, external power, internal power, light
 
-
+*/
 
 
 
@@ -40,59 +30,6 @@ void mRelays::init(void){
   
   SetPowerOnState();
 }
-
-
-//overload fix when only one parameter is called
-// int8_t mRelays::Tasker2(uint8_t function, uint8_t param1){  
-//   JsonObjectConst dummy; return Tasker(function, dummy);
-// }
-// template<typename T>
-// int8_t mRelays::Tasker2(uint8_t function, T param1){  
-
-
-// }
-
-// template<typename T>
-// void f()
-// {
-//     // BARK;
-// }
-
-// template void f<int>();
-
-// template<typename T>
-// void mRelays::ftest()
-// {
-//     // BARK;
-//     Serial.println("bark\n\rbark\n\rbark\n\rbark\n\rbark\n\rbark\n\rbark\n\r");
-// }
-
-// template<typename T>
-// void mRelays::ftest2(T value)
-// {
-//     // BARK;
-//     Serial.print("bark\n\rbark\n\rbark\n\rbark\n\rbark\n\rbark\n\rbark\n\r");
-// }
-
-
-
-// int8_t mRelays::Tasker2(uint8_t function, uint8_t param1){  
-//   JsonObjectConst dummy; return Tasker(function, dummy);
-// }
-// template <typename T>
-// int8_t mRelays::Tasker2(uint8_t function, T param1){
-
-//   switch(function){
-//     case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
-//       //parsesub_TopicCheck_JSONCommand(param1);
-//     break;
-//     case FUNC_INIT:
-//       init();
-//     break;
-//   }
-
-// }
-
 
 // Used for timed on or off events
 int8_t mRelays::Tasker(uint8_t function){
@@ -150,9 +87,6 @@ int8_t mRelays::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    case FUNC_WEB_COMMAND:
-      WebCommand_Parse();
-    break;  
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Draw_PageTable();
     break;
@@ -182,60 +116,33 @@ void mRelays::MQTTConnected(){
 }
 
 void mRelays::WebAppend_Root_Add_Buttons(){
-  DEBUG_LINE;
-  char relay_handle_ctr[10]; 
-  char buffer[30];
 
-Serial.println("WebAppend_Root_Add_Buttons");
+  char button_text_ctr[30];
+  char relay_name_ctr[30];
+  char dlist_json_template[100];
+  
+  BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Relay Controls"),"");
 
-
-  #ifndef ENABLE_DEVFEATURE_RELAY_CONTROLS
-  JsonBuilderI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-  for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
-    memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
-    sprintf(relay_handle_ctr,"reltog%02d",relay_id);
-    JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
-                                  100/relays_connected, 
-                                  "buttonh ""reltog",
-                                  relay_handle_ctr, 
-                                  DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
-                                  GetRelayNamebyIDCtr(relay_id, buffer, sizeof(buffer)), ""
-                                );
-  }
-  JsonBuilderI->Append_P("%s",PSTR("</tr>{t2}"));
-  #endif
-
-  #ifdef ENABLE_DEVFEATURE_RELAY_CONTROLS
-
-    char button_key_ctr[30];
-    char button_text_ctr[30];
-    char relay_name_ctr[30];
-    char dlist_json_template[100];
-    
-    BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Relay Controls"),"");
-
-    BufferWriterI->Append_P(PSTR("{t}<tr>"));
-      for(uint8_t button_id=0;button_id<relays_connected;button_id++){
-        // Create json template
-        snprintf(dlist_json_template, sizeof(dlist_json_template), 
-          "{\\\"" D_JSON_POWERNAME "\\\":\\\"%s\\\",\\\"" D_JSON_ONOFF "\\\":\\\"%s\\\"}",
-          GetRelayNamebyIDCtr(button_id, relay_name_ctr, sizeof(relay_name_ctr)),
-          "%s"
-        );
-        // Build button
-        BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
-                                  100/relays_connected,
-                                  "", 
-                                  "buttonh " "reltog",
-                                  dlist_json_template, 
-                                  D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR, //button_value_ctr
-                                  GetRelayNameWithStateLongbyIDCtr(button_id, button_text_ctr, sizeof(button_text_ctr)),
-                                  ""
-                                );
-      }
-    BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-
-  #endif
+  BufferWriterI->Append_P(PSTR("{t}<tr>"));
+    for(uint8_t button_id=0;button_id<relays_connected;button_id++){
+      // Create json template
+      snprintf(dlist_json_template, sizeof(dlist_json_template), 
+        "{\\\"" D_JSON_POWERNAME "\\\":\\\"%s\\\",\\\"" D_JSON_ONOFF "\\\":\\\"%s\\\"}",
+        GetRelayNamebyIDCtr(button_id, relay_name_ctr, sizeof(relay_name_ctr)),
+        "%s"
+      );
+      // Build button
+      BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
+                                100/relays_connected,
+                                "", 
+                                "buttonh " "reltog",
+                                dlist_json_template, 
+                                D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR, //button_value_ctr
+                                GetRelayNameWithStateLongbyIDCtr(button_id, button_text_ctr, sizeof(button_text_ctr)),
+                                ""
+                              );
+    }
+  BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
 }
 
@@ -261,153 +168,31 @@ void mRelays::WebAppend_Root_Draw_PageTable(){
 //append to internal buffer if any root messages table
 void mRelays::WebAppend_Root_Status_Table(){
   
+  char buffer[20]; memset(buffer,0,sizeof(buffer));
+
   if(settings.fShowTable){
-    // pCONT_web->AppendBuffer_PI2(PSTR("\"%s\":["),PSTR("relpow_tab")); 
-    
-  JsonBuilderI->Array_Start("relpow_tab");// Class name
-
-    for(int row=0;row<relays_connected;row++){
-      
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-
-      switch(row){
-        default:
+    JsonBuilderI->Array_Start("relpow_tab");// Class name
+    for(int row=0;row<relays_connected;row++){  
+      JsonBuilderI->Level_Start();
+        JsonBuilderI->Add("id",row);
         JsonBuilderI->Add("ih",GetRelay(row) ? PSTR("ON") : PSTR("Off"));
-          // pCONT_web->AppendBuffer_PI2(PSTR("{\"id\":%d,\"ih\":\"%s\"},"),row,
-          //   GetRelay(row) ? PSTR("ON") : PSTR("Off")
-          // );
-        break;
-      }
+      JsonBuilderI->Level_End();
     }
-    // *pCONT_web->buffer_writer_internal = (*pCONT_web->buffer_writer_internal) - 1;// remove extra comma
-    // pCONT_web->AppendBuffer_PI2(PSTR("]")); 
-    // pCONT_web->AppendBuffer_PI2(PSTR(","));
-    
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Array_End();  
   }
 
   JsonBuilderI->Array_Start("reltog");// Class name
-
-  // pCONT_web->AppendBuffer_PI2(PSTR("\"%s\":["),PSTR("reltog")); 
-  for(int row=0;row<relays_connected;row++){
-    
+  for(int row=0;row<relays_connected;row++){  
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",row);
-
-    switch(row){
-      default:
-        char buffer[20]; memset(buffer,0,sizeof(buffer));
-        JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
-        JsonBuilderI->Add("bc",GetRelay(row) ? "#00ff00" : "#ee2200");
-        
-        // pCONT_web->AppendBuffer_PI2(PSTR("{\"id\":%d,\"bc\":\"%s\",\"ih\":\"%s\"},"),row,
-        //   GetRelay(row) ? "#00ff00" : "#ee2200",
-        //   GetRelayNameWithStateLongbyIDCtr(row, buffer)       
-        // );
-      break;
-    }
-    
+      JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("bc",GetRelay(row) ? "#00ff00" : "#ee2200");    
     JsonBuilderI->Level_End();
-  }
-  // *pCONT_web->buffer_writer_internal = (*pCONT_web->buffer_writer_internal) - 1;// remove extra comma
-  // pCONT_web->AppendBuffer_PI2(PSTR("]")); 
-  // pCONT_web->AppendBuffer_PI2(PSTR(","));
-  
+  }  
   JsonBuilderI->Array_End();
-  
 
 }
 
-
-void mRelays::WebPage_Root_SendStatus(){
-
-  /****
-   *  Show LED power 
-   * ****/
-  // uint8_t onoff = fAnyLEDsOnOffCount;
-  // uint8_t fsize = 32;
-  // char onoff_ctr[30];
-  // if(onoff){
-  //   sprintf(onoff_ctr,PSTR("Lights ON (%d)"),fAnyLEDsOnOffCount);
-  // }else{
-  //   sprintf(onoff_ctr,PSTR("Lights OFF"));
-  // }
-  // pCONT_web->WSBufferAppend_PI2(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  // pCONT_web->WSBufferAppend_PI2(HTTP_DEVICE_STATE, 
-  //   100 / 1, //FULL WIDTH 1 item for length
-  //   onoff ? "bold" : "normal", 
-  //   fsize, 
-  //   onoff_ctr
-  // );
-  // pCONT_web->WSBufferAppend_PI2(PM_WEBAPPEND_TABLE_ROW_END_0V);
-
-  // // Animation info
-  // memset(onoff_ctr,0,sizeof(onoff_ctr));
-  // fsize = 20;
-      
-}
-
-
-void mRelays::WebCommand_Parse(void)
-{
-  
-  #ifndef ENABLE_DEVFEATURE_RELAY_CONTROLS
-  if(pCONT_web->request_web_command == nullptr){ return; }
-
-  char tmp[100];
-
-  uint8_t  arg_value = 0;
-  char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
-
-  for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
-    
-    sprintf(arg_ctr,"%s%02d","reltog",relay_id);
-
-    if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-      pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-      arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-      // animation.brightness = BrtN2F(arg_value);
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-      // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-      // SetRefreshLEDs();
-
-      ExecuteCommandPower(relay_id,POWER_TOGGLE,SRC_MQTT);
-    }
-
-  }
-  #endif
-}
-
-
-
-/*********************************************************************************************
-* MQTT ******************************************************************
-*************************************************************************************************/
-
-
-//relay:1,[1,2],"all",["fountain,bulbs,led"]
-// void mRelays::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
-  
-//   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/relays")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
-//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//   }else{
-//     return; // not meant for here
-//   }
-
-//   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::parse_JSONCommand()");
-
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer2.payload.ctr);
-
-//   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-//   JsonObjectConst obj = doc.as<JsonObject>();
-
-//   parsesub_TopicCheck_JSONCommand(obj);
-
-// }
 
 
 int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){ //parsesub_TopicCheck_JSONCommand
@@ -416,7 +201,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){ //parsesub_To
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/relays")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -424,7 +209,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){ //parsesub_To
 
 }
 
-void mRelays::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mRelays::parse_JSONCommand(JsonObjectConst obj){
 
   AddLog_P(LOG_LEVEL_INFO,PSTR("mRelays::parsesub_TopicCheck_JSONCommand"));
 
@@ -556,7 +341,7 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
   char buffer_internal[50];
   sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal, sizeof(buffer_internal)), onoffctr);
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
 
   return buffer;
 }
@@ -569,7 +354,7 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   int8_t device_id;
   int8_t class_id = D_MODULE_DRIVERS_RELAY_ID;
 
-  int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+  int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,device_id,class_id);
   AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
   // show options
@@ -815,17 +600,6 @@ void mRelays::SetPowerOnState(void)
     // }
   //}
 
-  // Issue #526 and #909
-  // for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
-  //   if (!pCONT_set->Settings.flag_network.no_power_feedback) {  // SetOption63 - Don't scan relay pCONT_set->power state at restart - #5594 and #5663
-  //     if ((i < MAX_RELAYS) && (pCONT_set->pin[GPIO_REL1 +i] < 99)) {
-  //       bitWrite(pCONT_set->power, i, digitalRead(pCONT_set->pin[GPIO_REL1 +i]) ^ bitRead(pCONT_set->rel_inverted, i));
-  //     }
-  //   }
-  //   if ((i < MAX_PULSETIMERS) && (bitRead(pCONT_set->power, i) || (POWER_ALL_OFF_PULSETIME_ON == pCONT_set->Settings.poweronstate))) {
-  //     pCONT_sup->SetPulseTimer(i, pCONT_set->Settings.pulse_timer[i]);
-  //   }
-  // }
   blink_powersave = pCONT_set->power;
 }
 

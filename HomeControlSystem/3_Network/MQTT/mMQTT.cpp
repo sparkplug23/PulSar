@@ -222,7 +222,7 @@ void mMQTT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -740,57 +740,48 @@ void mMQTT::MQTTHandler_Set_fSendNow(){
 
 
 //move system sender INTO telemetry class, remove intermediatery functions
-void mMQTT::MQQTHandler_System_Sender(uint8_t status_id_requested){
+void mMQTT::MQQTHandler_System_Sender(uint8_t mqtt_handler_id){
 
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
   #endif
-
-  uint8_t status_id = 0;
-  uint8_t flag_run_once = false;
   
-  // If we target a status, only send it then exit
-  if(status_id_requested!=MQTT_HANDLER_SYSTEM_ALL_ID){
-    status_id = status_id_requested;
-    flag_run_once = true;
-  }
-
-  do{
-
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SYSTEM_HEALTH_ID,
+    MQTT_HANDLER_SYSTEM_SETTINGS_ID,
+    MQTT_HANDLER_SYSTEM_LOG_ID,
+    MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
+    MQTT_HANDLER_SYSTEM_MEMORY_ID,
+    MQTT_HANDLER_SYSTEM_NETWORK_ID,
+    MQTT_HANDLER_SYSTEM_MQTT_ID,
+    MQTT_HANDLER_SYSTEM_TIME_ID,
+    MQTT_HANDLER_SYSTEM_DEVICES_ID,
+    MQTT_HANDLER_SYSTEM_REBOOT_ID,
+    MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID
     #endif
-
-    switch(status_id){
-      case MQTT_HANDLER_SYSTEM_HEALTH_ID:           mqtthandler_ptr = &mqtthandler_health;  break;
-      case MQTT_HANDLER_SYSTEM_SETTINGS_ID:            mqtthandler_ptr = &mqtthandler_settings;  break;
-      // case MQTT_HANDLER_SYSTEM_PARAMETERS_ID:       mqtthandler_ptr = &mqtthandler_parameters; break;
-      case MQTT_HANDLER_SYSTEM_LOG_ID:              mqtthandler_ptr = &mqtthandler_log; break;
-      case MQTT_HANDLER_SYSTEM_FIRMWARE_ID:         mqtthandler_ptr = &mqtthandler_firmware; break;
-      case MQTT_HANDLER_SYSTEM_MEMORY_ID:           mqtthandler_ptr = &mqtthandler_memory; break;
-      case MQTT_HANDLER_SYSTEM_NETWORK_ID:          mqtthandler_ptr = &mqtthandler_network; break;
-      case MQTT_HANDLER_SYSTEM_MQTT_ID:             mqtthandler_ptr = &mqtthandler_mqtt; break;
-      case MQTT_HANDLER_SYSTEM_TIME_ID:             mqtthandler_ptr = &mqtthandler_time; break;
-      case MQTT_HANDLER_SYSTEM_DEVICES_ID:          mqtthandler_ptr = &mqtthandler_devices; break;
-      case MQTT_HANDLER_SYSTEM_REBOOT_ID:           mqtthandler_ptr = &mqtthandler_reboot; break;
-      case MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID:     mqtthandler_ptr = &mqtthandler_reboot_event; break;
-      #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      case MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID:       mqtthandler_ptr = &mqtthandler_debug_pins; break;
-      case MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID:   mqtthandler_ptr = &mqtthandler_debug_template; break;
-      case MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID:   mqtthandler_ptr = &mqtthandler_debug_moduleinterface; break;
-      case MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID:   mqtthandler_ptr = &mqtthandler_debug_minimal; break;
-      #endif
-    }
-
-    #ifdef DEBUG_MQTT_HANDLER
-      mqtthandler_ptr->tRateSecs = 1;
+  };
+  
+  struct handler<mMQTT>* mqtthandler_list_ptr[] = {
+    &mqtthandler_health, &mqtthandler_settings,
+    &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
+    &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
+    &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      &mqtthandler_debug_pins, &mqtthandler_debug_template,
+      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
     #endif
-    
-    MQTTHandler_Command(*this,D_MODULE_CORE_TELEMETRY_ID,mqtthandler_ptr);
-    
-  }while(
-    (++status_id<MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID)&&
-    (!flag_run_once)
+  };
+
+  pCONT_mqtt->MQTTHandler_Command_Group(
+    *this, D_MODULE_NETWORK_MQTT_ID,
+    mqtthandler_list_ptr, sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+    mqtt_handler_id
   );
 
 }

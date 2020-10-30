@@ -195,6 +195,39 @@ class mMQTT{
 
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
 
+
+    template<typename T, typename U> //sizeof()=uint16_t for U
+    void MQTTHandler_Command_Group(
+      T& class_ptr, uint8_t class_id,
+      handler<T>** handler_ptr,     U handler_ptr_length,//pointer to array of pointers
+      uint8_t* handler_id_list_ptr, U handler_id_list_length,
+      uint8_t optional_desired_id = 0
+    )
+    {
+
+      // Serial.println("MQTTHandler_Command_Group");
+
+      // for(uint8_t id=0;id<handler_ptr_length;id++){    
+      //   if(handler_ptr[id]->handler_id == handler_id_list_ptr[id]){ 
+      //     MQTTHandler_Command(class_ptr, class_id, handler_ptr[id]);
+      //     //if(optional_desired_id == MQTT_HANDLER_ALL_ID){ break; } //stop if it was to only send this one// should be != ?
+      //   }
+      // }
+
+      for(uint8_t id=0;id<handler_ptr_length;id++){    
+
+        // if(handler_ptr[id]->handler_id == handler_id_list_ptr[id]){ 
+
+
+          MQTTHandler_Command(class_ptr, class_id, handler_ptr[id]);
+
+
+          //if(optional_desired_id == MQTT_HANDLER_ALL_ID){ break; } //stop if it was to only send this one// should be != ?
+        // }
+      }
+
+    }
+
     /****
      * "class-less" Pointer Member function that takes the struct handler which contains if/when a mqtt payload should
      * be sent. If a payload should sent, the formatted publish function is called.

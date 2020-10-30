@@ -9,6 +9,8 @@
 // What this could be merged into: sensor controlled, threshold high and low (hysteresis), output (any driver)
 // Actions/Rule
 
+//Relay mode to use temp sensor to control state
+
 
 void mRadiatorFan::init(void){
 
@@ -41,39 +43,41 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
 
 
   #ifdef USE_MODULE_SENSORS_DS18B20
-    if(abs(millis()-tCheckForMaxTemp)>=300000){tCheckForMaxTemp=millis();
+    if(abs(millis()-tCheckForMaxTemp)>=60000*10){tCheckForMaxTemp=millis();
 
-      int tempsensorid;
-      if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
+      pCONT->mry->SetRelay(RAD_FAN_RELAY_ON);
 
-        //check slower, short term fix... need hysterisies
-        if((pCONT_msdb18->sensor[tempsensorid].reading.val>25)&&(pCONT_msdb18->sensor[tempsensorid].reading.isvalid)){
-           //FAN_ON(); 
-           #ifdef USE_MODULE_DRIVERS_RELAY
-            pCONT->mry->SetRelay(RAD_FAN_RELAY_ON);
-           #endif
-           fan.ischanged = true;
-        }else{
-           //FAN_OFF(); 
-           #ifdef USE_MODULE_DRIVERS_RELAY
-           pCONT->mry->SetRelay(RAD_FAN_RELAY_OFF);
-           #endif
-           fan.ischanged = true;
-           fan.secs = 0;
-        }
+      // int tempsensorid;
+      // if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
 
-      }
-      Serial.print("tempsensorid"); Serial.println(tempsensorid);
+      //   //check slower, short term fix... need hysterisies
+      //   if((pCONT_msdb18->sensor[tempsensorid].reading.val>25)&&(pCONT_msdb18->sensor[tempsensorid].reading.isvalid)){
+      //      //FAN_ON(); 
+      //      #ifdef USE_MODULE_DRIVERS_RELAY
+      //       pCONT->mry->SetRelay(RAD_FAN_RELAY_ON);
+      //      #endif
+      //      fan.ischanged = true;
+      //   }else{
+      //      //FAN_OFF(); 
+      //      #ifdef USE_MODULE_DRIVERS_RELAY
+      //      pCONT->mry->SetRelay(RAD_FAN_RELAY_OFF);
+      //      #endif
+      //      fan.ischanged = true;
+      //      fan.secs = 0;
+      //   }
+
+      // }
+      // Serial.print("tempsensorid"); Serial.println(tempsensorid);
 
     } // tCheckForMaxTemp
   #endif
 
     break;
     case FUNC_MQTT_SENDER:
-      SubTasker_MQTTSender();
+     // SubTasker_MQTTSender();
     break;
     case FUNC_JSON_COMMAND:
-      parse_JSONCommand();
+     // parse_JSONCommand();
     break;
   }
 
@@ -82,53 +86,53 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
 
 void mRadiatorFan::SubTasker_MQTTSender(){
 
-  if(abs(millis()-tSaved)>20000){tSaved=millis();
-    MQQTSendFanStatus();
-  }
+  // if(abs(millis()-tSaved)>20000){tSaved=millis();
+  //   MQQTSendFanStatus();
+  // }
 
 }
 
 
 //#ifdef DEVICE_RADIATORFAN
 void mRadiatorFan::MQQTSendFanStatus(void){
-    ConstructJSON_FanStatus();
-    if(data_buffer2.payload.len){ // if something to send
-      pCONT->mqt->ppublish("status/fan", data_buffer2.payload.ctr,false);
-    }
+    // ConstructJSON_FanStatus();
+    // if(data_buffer2.payload.len){ // if something to send
+    //   pCONT->mqt->ppublish("status/fan", data_buffer2.payload.ctr,false);
+    // }
 }
 void mRadiatorFan::ConstructJSON_FanStatus(){
 
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  JsonObject root = doc.to<JsonObject>();
+  // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  // JsonObject root = doc.to<JsonObject>();
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
 
-  int tempsensorid;
-  //root["onoff"] = (int)FAN_ACTIVE(); // instead of boolean
-  root["ontime"] = fan.secs;
+  // int tempsensorid;
+  // //root["onoff"] = (int)FAN_ACTIVE(); // instead of boolean
+  // root["ontime"] = fan.secs;
 
-  JsonObject programobj = root.createNestedObject("program");
-  //programobj["mode"] = FanModeCtr();
+  // JsonObject programobj = root.createNestedObject("program");
+  // //programobj["mode"] = FanModeCtr();
 
-  // #ifdef USE_MODULE_SENSORS_DS18B20
-  //   if(fan_mode == AUTO_TEMP){
-  //     JsonObject tempobj = programobj.createNestedObject("temp");
-  //     if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
-  //       tempobj["current"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
-  //     }
-  //     tempobj["threshold"] = 25;
-  //   }
+  // // #ifdef USE_MODULE_SENSORS_DS18B20
+  // //   if(fan_mode == AUTO_TEMP){
+  // //     JsonObject tempobj = programobj.createNestedObject("temp");
+  // //     if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
+  // //       tempobj["current"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
+  // //     }
+  // //     tempobj["threshold"] = 25;
+  // //   }
 
-  //   if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
-  //     root["inside"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
-  //   }
-  //   if((tempsensorid=pCONT_msdb18->getIDbyName("outside"))>=0){
-  //     root["outside"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
-  //   }
-  // #endif
+  // //   if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
+  // //     root["inside"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
+  // //   }
+  // //   if((tempsensorid=pCONT_msdb18->getIDbyName("outside"))>=0){
+  // //     root["outside"] = pCONT_msdb18->sensor[tempsensorid].reading.val;
+  // //   }
+  // // #endif
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
 
 
 }
@@ -143,11 +147,11 @@ void mRadiatorFan::parse_JSONCommand(){
     return; // not meant for here
   }
 
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
-  JsonObject root = doc.as<JsonObject>();
+  // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  // JsonObject root = doc.as<JsonObject>();
 
-  uint8_t onoff = root["onoff"];
+  // uint8_t onoff = root["onoff"];
 
   // switch(onoff){
   //   case 1: FAN_ON(); break;
@@ -183,16 +187,16 @@ void mRadiatorFan::Append_Hardware_Status_Message(){
 
   // if(numpixels>55){numpixels=55;}
 
-  int8_t fan_state = -1;
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    fan_state = pCONT->mry->GetRelay(0);
-  #endif
+//   int8_t fan_state = -1;
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//     fan_state = pCONT->mry->GetRelay(0);
+//   #endif
 
-//  if(fan_state){
-    sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"Fan %s",fan_state?"ON":"OFF");
-    pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-    pCONT_tel->hardwarestatus.importance++;
-  //}
+// //  if(fan_state){
+//     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"Fan %s",fan_state?"ON":"OFF");
+//     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+//     pCONT_tel->hardwarestatus.importance++;
+//   //}
 
 }
 
@@ -229,30 +233,30 @@ const char* mRadiatorFan::FanModeCtr(void){
 
 uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  root["tbd"] = 0;
+  // root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
-return 0;
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
+  return 0;
 }
 
 uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
 
-  uint8_t ischanged=false;
+  // uint8_t ischanged=false;
 
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  root["tbd"] = 0;
+  // root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer2.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer2.payload.ctr);
 
   return 0;
 

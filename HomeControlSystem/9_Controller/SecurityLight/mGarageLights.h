@@ -35,7 +35,7 @@ class mGarageLights{
     
 int8_t Tasker(uint8_t function, JsonObjectConst obj);
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+void parse_JSONCommand(JsonObjectConst obj);
 
 
 

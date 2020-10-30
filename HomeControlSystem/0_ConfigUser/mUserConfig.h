@@ -133,6 +133,8 @@
 #endif
 
 
+
+
 #define D_MQTT_COMMAND        "set"
 #define D_MQTT_SYNC           "sync"
 
@@ -252,6 +254,10 @@
 #define PRESSURE_RESOLUTION    1                 // [PressRes] Maximum number of decimals (0 - 3) showing sensor Pressure
 #define ENERGY_RESOLUTION      3                 // [EnergyRes] Maximum number of decimals (0 - 5) showing energy usage in kWh
 #define CALC_RESOLUTION        3                 // [CalcRes] Maximum number of decimals (0 - 7) used in commands ADD, SUB, MULT and SCALE
+
+
+#define FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES   false
+
 
 /*********************************************************************************************\
  * END OF SECTION 1

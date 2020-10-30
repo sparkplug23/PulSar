@@ -116,7 +116,7 @@ int8_t mGarageLights::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/garagelights")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -124,7 +124,7 @@ int8_t mGarageLights::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-void mGarageLights::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mGarageLights::parse_JSONCommand(JsonObjectConst obj){
 
   int8_t device_id = -1;
   int8_t isserviced=-1;
@@ -239,7 +239,7 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
   if(mSupport::TimeReached(&tSavedSeconds,1000)){
     if(light_control_driveway.seconds_on>0){ 
       light_control_driveway.seconds_on--;
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
       SetLight(LIGHT_DRIVEWAY_ID,ON);
       //fForceMQTTUpdate = true;
     }else if(light_control_driveway.seconds_on==0){
@@ -251,7 +251,7 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 
     if(light_control_garden.seconds_on>0){
       light_control_garden.seconds_on--;
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
       SetLight(LIGHT_GARDEN_ID,ON);
       // fForceMQTTUpdate = true;
     }else if(light_control_garden.seconds_on==0){

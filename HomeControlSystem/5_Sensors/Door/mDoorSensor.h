@@ -8,32 +8,28 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
+DEFINE_PGM_CTR(PM_EVENT_DOOR_OPENED_CTR) D_JSON_OPENED;
+DEFINE_PGM_CTR(PM_EVENT_DOOR_CLOSED_CTR) D_JSON_CLOSED;
+
+
 class mDoorSensor{
   public:
 	  mDoorSensor(){};
 
-    // Reed switch active high (low when magnet is near)
-    // #define DOOROPEN() digitalRead(REED_SWITCH_PIN) //opened when high
-    // #define REED_SWITCH_INIT() pinMode(REED_SWITCH_PIN,INPUT_PULLUP)
-    // #define DOOROPENCTR DOOROPEN() ? "Open" : "Closed"
-
     void init(void);
     void pre_init(void);
 
-    int8_t pin_open = -1;
-    int8_t pin_lock = -1;
-
     struct SETTINGS{
       uint8_t fEnableSensor = false;
-
     }settings;
 
     uint8_t     IsDoorOpen();
     const char* IsDoorOpen_Ctr(char* buffer, uint8_t buflen);
-
+    
     struct DOOR_DETECT{
       uint8_t state = false;
       uint8_t isactive = false;
+      uint8_t wasactive = false; //last state
       uint8_t ischanged = false;
       struct datetime changedtime;
       uint32_t tSaved;

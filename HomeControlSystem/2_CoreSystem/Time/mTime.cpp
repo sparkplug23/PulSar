@@ -53,7 +53,7 @@ int8_t mTime::Tasker(uint8_t function){
 
       //I need another for stable boot
       //if(mtime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);}
-      
+
       if(mtime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
       if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
@@ -88,7 +88,7 @@ void mTime::init(void){
   memset(&uptime,0,sizeof(uptime));
 
   //timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
-  timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, (fEnabled_DayLightSavings*60*60), NTP_INTERVAL);
+  timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, (fEnabled_DayLightSavings?NTP_OFFSET:0), NTP_INTERVAL);
 
   timeClient->begin();
 
@@ -105,12 +105,16 @@ void mTime::init(void){
   kDaysInMonth[10] = 30;
   kDaysInMonth[11] = 31;
 
-  memcpy(kMonthNamesEnglish,"JanFebMarAprMayJunJulAugSepOctNovDec",sizeof("JanFebMarAprMayJunJulAugSepOctNovDec")-1);// = ;
+  // memcpy(kMonthNamesEnglish,"JanFebMarAprMayJunJulAugSepOctNovDec",sizeof("JanFebMarAprMayJunJulAugSepOctNovDec")-1);// = ;
 
   // Serial.print("getEpochTime");
   // Serial.println(timeClient->getEpochTime());
 
-  if(timeClient->getEpochTime()>(NTP_OFFSET+2000)){
+  if(
+    timeClient->getEpochTime()>(
+      (fEnabled_DayLightSavings?NTP_OFFSET:0)+2000
+      )
+    ){
     fTimeSet = true;
     mtime.isvalid = true;
     //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = true"));

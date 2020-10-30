@@ -113,7 +113,7 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     uint32_t tSavedTick = millis(),tSavedForceUpdate;
     uint8_t toggle_bit = 0;
     void WebAppend_Root_Status_Table();
-    void parse_JSONCommand();
+    void parse_JSONCommand(JsonObjectConst obj);
 
     uint32_t tSavedTest = millis();
 
@@ -135,10 +135,6 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
       struct datetime offtime;
     }relay_status[RELAYS_CONNECTED];
 
-    
-
-    void WebCommand_Parse(void);
-
     void SetRelay(uint8_t state);
     uint8_t GetRelay(uint8_t num);
     void SetRelay(uint8_t num, uint8_t state);
@@ -148,7 +144,6 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     int8_t GetRelayIDbyName(const char* c);
 
     int8_t GetDeviceIDbyName(const char* c);
-    void WebPage_Root_SendStatus();
     void WebAppend_Root_Draw_PageTable();
 
 struct SETTINGS{

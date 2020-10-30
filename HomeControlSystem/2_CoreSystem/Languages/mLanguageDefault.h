@@ -821,9 +821,14 @@
 #define D_GPIO_FUNCTION_REL2_INV_CTR      "Relay 2 Inv"
 #define D_GPIO_FUNCTION_REL3_INV_CTR      "Relay 3 Inv"
 #define D_GPIO_FUNCTION_REL4_INV_CTR      "Relay 4 Inv"
+
+
+
 #define D_GPIO_FUNCTION_FAN_PWM1_CTR      "Fan PWM1"
 #define D_GPIO_FUNCTION_I2C_SCL_CTR       "I2C SCL"
 #define D_GPIO_FUNCTION_I2C_SDA_CTR       "I2C SDA"
+
+
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"
 #define D_GPIO_FUNCTION_PIR_3_CTR         "PIR 3"
@@ -833,6 +838,12 @@
 #define D_GPIO_FUNCTION_PIR_1_INV_CTR     "PIR 1 Inv"
 #define D_GPIO_FUNCTION_PIR_2_INV_CTR     "PIR 2 Inv"
 #define D_GPIO_FUNCTION_PIR_3_INV_CTR     "PIR 3 Inv"
+#define D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "PIR 1 NP Inv"
+#define D_GPIO_FUNCTION_PIR_2_NP_INV_CTR     "PIR 2 NP Inv"
+#define D_GPIO_FUNCTION_PIR_3_NP_INV_CTR     "PIR 3 NP Inv"
+
+
+
 #define D_GPIO_FUNCTION_DHT11_CTR         "DHT11"
 #define D_GPIO_FUNCTION_DHT11_1_CTR         "DHT11_1"
 #define D_GPIO_FUNCTION_DHT11_2_CTR         "DHT11_2"
@@ -1190,6 +1201,7 @@
 #define D_JSON_DRIVERS "Drivers"
 #define D_JSON_ECO2 "eCO2"
 #define D_JSON_EMPTY "Empty"
+#define D_JSON_EVENT "Event"
 #define D_JSON_MQTT_ENABLE_RESTART "MQTT Enable Restart"
 #define D_JSON_ENDDST "EndDST"           // End Daylight Savings Time
 #define D_JSON_ERASE "Erase"
@@ -1236,6 +1248,7 @@
 #define D_JSON_LOGLEVEL_SERIAL "LogLevel_Serial"
 #define D_JSON_LOGLEVELS "LogLevels"
 #define D_JSON_LOADAVERAGE "LoadAverage"
+#define D_JSON_LOCATION "Location"
 #define D_JSON_LOOPDELAY "LoopDelay"
 #define D_JSON_LOOPSSEC "LoopsSec"
 #define D_JSON_LOOPRATIO "LoopRatio"
@@ -1257,6 +1270,7 @@
 #define D_JSON_OR "or"
 #define D_JSON_OTAURL "OTAURL"
 #define D_JSON_OPEN "Open"
+#define D_JSON_OPENED "Opened"
 #define D_JSON_OUTSIDE "Outside"
 #define D_JSON_PERIOD "Period"
 #define D_JSON_PERCENTAGE "Percentage"
@@ -1488,6 +1502,9 @@
 #define D_JSON_TRANSITION "transition"
 #define D_JSON_TYPE "type"
 #define D_JSON_RELAY "relay"
+
+
+#define D_JSON_EXTERNAL_POWER_ONOFF "ExternalPowerOnOff"
 
 
 

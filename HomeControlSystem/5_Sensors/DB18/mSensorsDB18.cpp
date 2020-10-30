@@ -497,7 +497,7 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonObjectConst obj){
 }
 
 
-int8_t mSensorsDB18::JSONCommands_CheckTopic_ThisModule(JsonObjectConst obj){
+int8_t mSensorsDB18::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr, "set/" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
@@ -505,7 +505,7 @@ int8_t mSensorsDB18::JSONCommands_CheckTopic_ThisModule(JsonObjectConst obj){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      JSONCommands_CheckSubTopic_ThisModule(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -513,7 +513,7 @@ int8_t mSensorsDB18::JSONCommands_CheckTopic_ThisModule(JsonObjectConst obj){
 
 }
 
-void mSensorsDB18::JSONCommands_CheckSubTopic_ThisModule(JsonObjectConst obj){
+void mSensorsDB18::parse_JSONCommand(JsonObjectConst obj){
 
   // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -528,13 +528,13 @@ void mSensorsDB18::JSONCommands_CheckSubTopic_ThisModule(JsonObjectConst obj){
   //   parsesub_ModeAnimation(obj);
   // }else
 
-}
+// }
 
-void mSensorsDB18::JSONCommands_CheckAll(JsonObjectConst obj){
-  JSONCommands(obj);
-}
+// // void mSensorsDB18::JSONCommands_CheckAll(JsonObjectConst obj){
+// //   JSONCommands(obj);
+// // }
 
-void mSensorsDB18::JSONCommands(JsonObjectConst obj){
+// void mSensorsDB18::JSONCommands(JsonObjectConst obj){
 
 
   if(!obj[F(D_JSON_SENSORADDRESS)].isNull()){

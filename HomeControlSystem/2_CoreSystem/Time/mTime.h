@@ -119,13 +119,14 @@ class mTime{
     uint32_t ConvertHHMMSStoSOD(uint8_t hh, uint8_t mm, uint8_t ss);
     uint8_t CheckBetweenSOD(uint32_t start, uint32_t end);
 
-    #define DAYLIGHT_SAVINGS_ON
-    #ifdef DAYLIGHT_SAVINGS_ON
-      #define NTP_OFFSET 1 * 60 * 60 // In seconds
-    #else
-      #define NTP_OFFSET 0 * 60 * 60 // In seconds
-    #endif
-    bool fEnabled_DayLightSavings = 1;
+    // #define DAYLIGHT_SAVINGS_ON
+    // #ifdef DAYLIGHT_SAVINGS_ON
+    //   #define NTP_OFFSET_WITH_DLS 1 * 60 * 60 // In seconds
+    // #else
+    //   #define NTP_OFFSET_WITHOUT_DLS 0 * 60 * 60 // In seconds
+    #define NTP_OFFSET 60 * 60
+    // #endif?
+    bool fEnabled_DayLightSavings = false;
     #define NTP_INTERVAL 60 * 1000 // In miliseconds
     #define NTP_ADDRESS "0.pool.ntp.org" //US address
     //#define NTP_ADDRESS "0.europe.pool.ntp.org" //US address
@@ -182,7 +183,7 @@ class mTime{
     Ticker TickerRtc;
 
     uint8_t kDaysInMonth[12];// = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
-    char kMonthNamesEnglish[37];// = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    // char kMonthNamesEnglish[37];// = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
     uint32_t utc_time = 0;
     uint32_t local_time = 0;

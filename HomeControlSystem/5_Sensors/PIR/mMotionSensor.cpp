@@ -26,6 +26,12 @@ void mMotionSensor::Pre_Init(void){
           pin_isinverted[sensors_active] = true;
           pinMode(pin[sensors_active], INPUT_PULLUP);
         break;
+        case GPIO_PIR_1_NP_INV_ID:
+        case GPIO_PIR_2_NP_INV_ID:
+        case GPIO_PIR_3_NP_INV_ID:
+          pin_isinverted[sensors_active] = true;
+          pinMode(pin[sensors_active], INPUT);
+        break;
         case GPIO_PIR_1_NP_ID:
         case GPIO_PIR_2_NP_ID:
         case GPIO_PIR_3_NP_ID:
@@ -136,7 +142,7 @@ void mMotionSensor::EveryLoop(){
   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
     if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state){
       //if(pCONT->mt->mtime.seconds_nonreset<20){ break; }
-      pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
+      // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
       pir_detect[sensor_id].state = PIR_Detected(sensor_id);
       if(pir_detect[sensor_id].state){
         pir_detect[sensor_id].tDetectTime = millis(); 
@@ -159,9 +165,15 @@ void mMotionSensor::EveryLoop(){
 int8_t mMotionSensor::Tasker(uint8_t function){
 
   // Run even when sensor is disabled (Will set fEnableSensor)
+    /************
+     * INIT SECTION * 
+    *******************/
   switch(function){
     case FUNC_PRE_INIT:
       Pre_Init();
+    break;
+    case FUNC_INIT:
+      Init();
     break;
   }
   
@@ -172,28 +184,6 @@ int8_t mMotionSensor::Tasker(uint8_t function){
       //AddLog_P(LOG_LEVEL_DEBUG,PSTR("\n\r\r\nFUNC_WEB_ADD_ROOT_TABLE_ROWS"));
   switch(function){
     /************
-     * INIT SECTION * 
-    *******************/
-    case FUNC_INIT:
-      Init();
-    break;
-    /************
-     * SETTINGS SECTION * 
-    *******************/
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-      // Settings_Load();
-    break;
-    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-      // Settings_Save();
-    break;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-      // Settings_Default();
-    break;
-    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-      // Settings_Default();
-      // pCONT_set->SettingsSave(2);
-    break;
-    /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
@@ -201,26 +191,13 @@ int8_t mMotionSensor::Tasker(uint8_t function){
       EveryLoop();
     break;     
     /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_COMMAND:
-
-    break;
-    case FUNC_JSON_COMMAND:
-      //function_result = parse_JSONCommand();
-      // parse_JSONCommand();
-    break;
-    case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
-      // parsesub_TopicCheck_JSONCommand();
-    break;
-    /************
      * WEBPAGE SECTION * 
     *******************/
     // #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:{
       char sensor_ctr[50];
       char buffer[50];
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR("\n\r\r\nFUNC_WEB_ADD_ROOT_TABLE_ROWS"));
+      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("\n\r\r\nFUNC_WEB_ADD_ROOT_TABLE_ROWS"));
 
       for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
         memset(sensor_ctr,0,sizeof(sensor_ctr));
@@ -397,22 +374,29 @@ uint8_t mMotionSensor::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
   
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer2,0,sizeof(data_buffer2));
   char buffer[50];
 
+  JsonBuilderI->Start();
+
+  // this needs fixed for multiple events!!
+
+
   for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
-    if(pir_detect[sensor_id].ischanged){ pir_detect[sensor_id].ischanged = false;
-      sprintf(data_buffer2.payload.ctr,
-              PSTR("{\"location\":\"%s\",\"time\":\"%s\",\"event\":\"%s\"}"),
-              GetDeviceNamebyIDCtr(sensor_id, buffer, sizeof(buffer)),
-              // pir_detect[sensor_id].friendly_name_ctr,
-              pir_detect[sensor_id].detected_rtc_ctr,
-              pir_detect[sensor_id].isactive ? F("detected"): F("over")     
-      );
+    if(pir_detect[sensor_id].ischanged){ 
+      
+      pir_detect[sensor_id].ischanged = false;
+      JsonBuilderI->Add(D_JSON_LOCATION, GetDeviceNamebyIDCtr(sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_TIME, pir_detect[sensor_id].detected_rtc_ctr);
+      JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+
+      //if another is yet to send, then reset the mqtt_handler to fire immeditely again!
+      //if any mtion flag remains, then set mqtt again
+      
     }
   }
 
-  return strlen(data_buffer2.payload.ctr);
+  return JsonBuilderI->End();
 
 }
 
@@ -428,7 +412,7 @@ void mMotionSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

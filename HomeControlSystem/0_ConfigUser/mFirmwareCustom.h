@@ -22,92 +22,91 @@
 /*todo
 show/hide palette
 debug
-
 */
-
 
 //--------------------------------[Enable Device]-------------------------------------
 
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
-//#define DEVICE_RGBROOF                                 // BETA
-// #define DEVICE_RGBDELL
-// #define DEVICE_RGBCRYSTAL1
-// #define DEVICE_RGBCRYSTAL2
-// #define DEVICE_RGBSHELF
-// #define DEVICE_RGBMICRO1 //glass box
-// #define DEVICE_RGBMICRO2 //projector                   // BETA
-// #define DEVICE_RGBMICRO3 //bedroom string esp01
-// #define DEVICE_RGBMICRO4 //gazebo
-// #define DEVICE_RGBBEDLIGHT                             // BETA
-//#define DEVICE_RGBBEDLIGHT_TEST                             // BETA
-// #define DEVICE_RGBDESK
-// #define DEVICE_RGBCOOKER
-//  #define DEVICE_RGBUTILITY
-// #define DEVICE_RGBFRIDGE
-// #define DEVICE_RGBOUTSIDETREE                           // BETA
-// #define DEVICE_CHRISTMAS_HALLWAYTREE                           // BETA
-#define DEVICE_RGBBEDROOMFLOOR
-// #define DEVICE_H801_TESTER
+//#define DEVICE_RGBROOF                                
+//#define DEVICE_RGBDELL
+//#define DEVICE_RGBCRYSTAL1
+//#define DEVICE_RGBCRYSTAL2
+//#define DEVICE_RGBSHELF
+//#define DEVICE_RGBMICRO1 //glass box
+#define DEVICE_RGBMICRO2 //projector                  
+//#define DEVICE_RGBMICRO3 //bedroom string esp01
+//#define DEVICE_RGBMICRO4 //gazebo
+//#define DEVICE_RGBBEDLIGHT                            
+//#define DEVICE_RGBBEDLIGHT_TEST                            
+//#define DEVICE_RGBDESK
+//#define DEVICE_RGBCOOKER
+//#define DEVICE_RGBUTILITY
+//#define DEVICE_RGBFRIDGE
+//#define DEVICE_RGBOUTSIDETREE                          
+//#define DEVICE_CHRISTMAS_HALLWAYTREE                          
+//#define DEVICE_RGBBEDROOMFLOOR
+//#define DEVICE_H801_TESTER
 
 /**
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
 **/
 // #define DEVICE_GARAGELIGHT
-// #define DEVICE_GARAGELIGHT2
+//#define DEVICE_GARAGELIGHT2
 // #define DEVICE_SIDEDOORLIGHT
-// #define DEVICE_RADIATORFAN
-// #define DEVICE_BEDROOMBLINDS
-// #define DEVICE_DOORBELLWALLCHIME                  // BETA
-//  #define DEVICE_OILFURNACE
+//#define DEVICE_SHELLY1_TESTER
+//#define DEVICE_RADIATORFAN
+//#define DEVICE_BEDROOMBLINDS
+//#define DEVICE_DOORBELLWALLCHIME                 
+//#define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
-// #define DEVICE_HEATING
-// #define DEVICE_KITCHENPANEL
-// #define DEVICE_LANDINGPANEL
+//#define DEVICE_HEATING
+//#define DEVICE_KITCHENPANEL
+//#define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
-// #define DEVICE_BLACKDOORBELL
-// #define DEVICE_BEDROOM_CEILINGFAN
-// #define DEVICE_FLOORFAN1
-// #define DEVICE_DESKFAN
+//#define DEVICE_BLACKDOORBELL
+//#define DEVICE_BEDROOM_CEILINGFAN
+//#define DEVICE_FLOORFAN1
+//#define DEVICE_DESKFAN
 
 /**
  *  ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- 
 **/
-// #define DEVICE_CONSUMERUNIT 
+//#define DEVICE_CONSUMERUNIT 
 
 /**
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
 **/
-// #define DEVICE_ATTICSENSOR
-// #define DEVICE_BEDROOMSENSOR
-// #define DEVICE_KITCHENSENSOR
-//#define DEVICE_UTILITYSENSOR
-// #define DEVICE_LIVINGROOMSENSOR
-// #define DEVICE_ENSUITESENSOR
-// #define DEVICE_TESTSENSOR
+//#define DEVICE_ATTICSENSOR
+//#define DEVICE_BEDROOMSENSOR
+//#define DEVICE_KITCHENSENSOR
+// #define DEVICE_UTILITYSENSOR
+//#define DEVICE_LIVINGROOMSENSOR
+//#define DEVICE_ENSUITESENSOR
+//#define DEVICE_TESTSENSOR
 
 /**
  *  SONOFF and lighting  -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- 
 **/
-// #define DEVICE_SONOFFTESTER
-// #define DEVICE_DRESSERLIGHT
-// #define DEVICE_BEDSIDE_LAMP1
-// #define DEVICE_CANDLEWARMER
-// #define DEVICE_EXTRACTORFAN
-// #define DEVICE_EXTENTION1
-// #define DEVICE_SILVERLAMP1
-// #define DEVICE_SILVERLAMP2
-// #define DEVICE_HALLWAYMIRROR
+//#define DEVICE_SONOFFTESTER
+//#define DEVICE_DRESSERLIGHT
+//#define DEVICE_BEDSIDE_LAMP1
+//#define DEVICE_CANDLEWARMER
+//#define DEVICE_EXTRACTORFAN
+//#define DEVICE_EXTENTION1
+//#define DEVICE_SILVERLAMP1
+//#define DEVICE_SILVERLAMP2
+//#define DEVICE_HALLWAYMIRROR
 
 /**
  *  SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- 
 **/
-// #define DEVICE_KITCHENLIGHT1
-// #define DEVICE_KITCHENLIGHT2
-// #define DEVICE_KITCHENLIGHT3
-// #define DEVICE_KITCHENLIGHT4
-// #define DEVICE_KITCHENLIGHT5 //tester
+//#define DEVICE_KITCHENLIGHT1
+//#define DEVICE_KITCHENLIGHT2
+//#define DEVICE_KITCHENLIGHT3
+//#define DEVICE_KITCHENLIGHT4
+//#define DEVICE_KITCHENLIGHT5 //tester
 
 
 
@@ -373,8 +372,6 @@ debug
     "}";
 #endif
 
-//rgbmicro2/set/light/scene
-//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBMICRO2 //projector
   #define DEVICENAME_CTR          "rgbmicro2"
   #define DEVICENAME_FRIENDLY_CTR "Projector Micro Lights"
@@ -1327,19 +1324,19 @@ debug
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -1866,8 +1863,10 @@ debug
    
   #define USE_MODULE_SENSORS_MOTION
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
+
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLS
   
-  #define USE_MODULE_CUSTOM_SECURITY_LIGHT
+  // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
 
   #define USE_MODULE_DRIVERS_RELAY
     
@@ -1878,7 +1877,7 @@ debug
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"GPIOC\":{"
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_NP_CTR     "\","
+      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
@@ -1887,13 +1886,6 @@ debug
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
-  // DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"NAME\":\"" DEVICENAME_CTR "\","
-  //   "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"BASE\":\"" D_MODULE_NAME_SHELLY1_CTR "\""
-  // "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
   #define RELAYS_CONNECTED 1
@@ -1912,6 +1904,62 @@ debug
   "}";
 
 #endif
+
+
+
+
+
+#ifdef DEVICE_SHELLY1_TESTER
+  #define DEVICENAME_CTR          "shelly1_tester"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly1 Tester"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+   
+  #define USE_MODULE_SENSORS_MOTION
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
+
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLS
+  
+  // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
+
+  #define USE_MODULE_DRIVERS_RELAY
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "\","
+      #endif 
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      #endif
+      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
+  #define RELAYS_CONNECTED 1
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+        "],"
+        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+          "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+        "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 
@@ -2936,7 +2984,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights"
   
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
   
   #define USE_MODULE_SENSORS_SWITCHES
 
@@ -2947,7 +2995,7 @@ debug
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
   
-  #define USE_MODULE_CUSTOM_SECURITY_LIGHT
+  // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //remote controls for now
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 2

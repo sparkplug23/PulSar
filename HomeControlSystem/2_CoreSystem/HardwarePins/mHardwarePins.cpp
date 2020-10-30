@@ -1374,6 +1374,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_CTR)==0){  return GPIO_PIR_1_NP_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_CTR)==0){  return GPIO_PIR_2_NP_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_CTR)==0){  return GPIO_PIR_3_NP_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_NP_INV_CTR)==0){  return GPIO_PIR_1_NP_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_NP_INV_CTR)==0){  return GPIO_PIR_2_NP_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_NP_INV_CTR)==0){  return GPIO_PIR_3_NP_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_INV_CTR)==0){  return GPIO_PIR_1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_INV_CTR)==0){  return GPIO_PIR_2_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_3_INV_CTR)==0){  return GPIO_PIR_3_INV_ID; }

@@ -3,12 +3,19 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
 
+/**
+ * 
 
-//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
-//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
-//{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
-//{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
-//{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
+{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
+{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
+{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
+{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate":1},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate_ms":1000},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+
+
+ */
 
 
 
@@ -570,13 +577,13 @@ void mInterfaceLight::init_Animations(){
   
   // Set default values (ifdef below sets specific)
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  animation.transition.order_id = pCONT_ladd->TRANSITION_ORDER_INORDER_ID;
+  animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
   animation.palette_id = PALETTELIST_VARIABLE_USER_01_ID;
   animation.mode_id = ANIMATION_MODE_FLASHER_ID;
   // flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  animation.transition.method_id = pCONT_ladd->TRANSITION_METHOD_BLEND_ID;
+  animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
   animation.flags.fForceUpdate = true;
   // animation.brightness = 0.1;
@@ -726,6 +733,8 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   
+  int8_t tmp_id = 0;
+  char buffer[50];
   // Check all commands
   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "Checking all commands"));
@@ -765,8 +774,6 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     }
   }
 
-  int8_t tmp_id = 0;
-  char buffer[50];
 
   // if(!obj[D_JSON_ONOFF].isNull()){ 
   //   uint8_t value = obj[D_JSON_ONOFF];
@@ -782,7 +789,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     changeHSB_Hue(hue);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-    #endif//#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
@@ -793,7 +800,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     changeHSB_Sat(sat);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
 
@@ -804,69 +811,10 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     changeHSB_Brt(brt);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
   }
-
   
-  
-  // Includes special case of hue=361 which sets saturation to 0 for white
-  // if(!obj[D_JSON_HUE].isNull()){ 
-  //   uint16_t hue = obj[D_JSON_HUE];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-  //   #endif
-
-  //   changeHSB_Hue(hue);
-
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-  //   #endif
-    
-  //   animation.mode_id = ANIMATION_MODE_SCENE_ID;
-  //   mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-  //   mode_singlecolour.flag.running = true;
-
-  //   data_buffer2.isserviced++;
-  // }
-
-  // if(!obj[D_JSON_SAT].isNull()){ 
-  //   uint8_t sat = obj[D_JSON_SAT];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-  //   #endif
-
-  //   sat = sat > 100 ? 100 : sat;
-  //   sat = map(sat, 0,100, 0,255);
-  //   changeHSB_Sat(sat);
-  
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-  //   #endif
-    
-  //   animation.mode_id = ANIMATION_MODE_SCENE_ID;
-  //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-
-  //   data_buffer2.isserviced++;
-  // }
-
-  // if(!obj[D_JSON_BRT].isNull()){ 
-  //   uint8_t brt = obj[D_JSON_BRT];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-  //   #endif
-
-  //   brt = brt > 100 ? 100 : brt;
-  //   brt = map(brt, 0,100, 0,255);
-  //   changeHSB_Brt(brt);
-    
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-  //   #endif
-    
-  //   data_buffer2.isserviced++;
-  // }
-
 
   if(!obj[D_JSON_BRT_RGB].isNull()){    // Assume range 0-100
     uint8_t brt = obj[D_JSON_BRT_RGB];
@@ -879,7 +827,6 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     data_buffer2.isserviced++;
   }
 
-  // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   if(!obj[D_JSON_BRT_CCT].isNull()){    // Assume range 0-100
     uint8_t brt = obj[D_JSON_BRT_CCT];
     brt = brt > 100 ? 100 : brt;
@@ -917,43 +864,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_RGBCCT_LINKED,value);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer2.isserviced++;
-  }
-  // #endif // PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
-  
-
-
-  // if(!obj[D_JSON_BRT_RGB].isNull()){ 
-  //   uint8_t brt = obj[D_JSON_BRT_RGB];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
-  //   #endif
-
-  //   brt = brt > 100 ? 100 : brt;
-  //   brt = map(brt, 0,100, 0,255);
-  //   changeBriRGB(brt);
-    
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
-  //   #endif
-    
-  //   data_buffer2.isserviced++;
-  // }
-
-  // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-  // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-  // if(!obj[D_JSON_WHITE].isNull()){ 
-  //   uint8_t whitepixel = obj[D_JSON_WHITE];
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_WHITE,whitepixel);
-  //   #endif
-  //   scene.colourW = whitepixel;
-
-  //   // scene.colourW = whitepixel;
-  //   data_buffer2.isserviced++;
-  // }else{
-  //   scene.colourW  = 0; // default to off if not demanded
-  // }
-  // #endif
+  } 
 
   // if(!obj[D_JSON_RGB].isNull()){
   //   const char* rgbpacked = obj[D_JSON_RGB];
@@ -971,7 +882,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   //   #endif
   // }
 
-  if(obj.containsKey(D_JSON_SCENE_COLOUR)){
+  if(obj.containsKey(D_JSON_SCENE_COLOUR)){  //set hsb   D_JSON_HSB
     // Check HSB format
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     // AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR]"));
@@ -991,8 +902,6 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
         }
       }
     }
-
-
     // Check RGB format
 
     // Check known HSB index name
@@ -1011,7 +920,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
 
   // TIME with different units
-  if(!obj[D_JSON_TIME].isNull()){ //default to secs
+  if(!obj[D_JSON_TIME].isNull()){ //default to secs /// D_JSON_TRANSITIONTIME
     animation.transition.time_ms.val = obj[D_JSON_TIME];
     animation.transition.time_ms.val *= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -1053,10 +962,6 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
     #endif
   }
-
-// //temp fix
-// mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-    
 
     
   if(!obj[D_JSON_SCENENAME].isNull()){ 
@@ -1129,98 +1034,39 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       break;
     } // END switch
 
-    // }else{
-    //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-    //   #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    // }
-
   }
-
 
 
   if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
 
-    // if(obj[D_JSON_COLOUR_PALETTE].is<const char*>()){
-      
-        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        // AddLog_P(LOG_LEVEL_TEST, PSTR("GetPaletteIDbyName"));
-        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    const char* colour = obj[D_JSON_COLOUR_PALETTE];
+    if((tmp_id=GetPaletteIDbyName(colour))>=0){
+      animation.palette_id = tmp_id;
 
-      const char* colour = obj[D_JSON_COLOUR_PALETTE];
-      if((tmp_id=GetPaletteIDbyName(colour))>=0){
-        animation.palette_id = tmp_id;
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR("GetPaletteIDbyName=%d"),tmp_id);
+      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 
-        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR("GetPaletteIDbyName=%d"),tmp_id);
-        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-
-        #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-        if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
-          flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
-        }
-        #endif
-        #ifdef ENABLE_PALETTE_FORCED_MODE
-        //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
-        #endif
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
-        // if(animation_override.fRefreshAllPixels){
-        //   first_set = true; //refresh all
-        // }
-        data_buffer2.isserviced++;
-      // }
+      #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+      if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+        flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
+      }
+      #endif
+      #ifdef ENABLE_PALETTE_FORCED_MODE
+      //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+      #endif
+      data_buffer2.isserviced++;
     }else{
-
-    // }
-    // if(obj[D_JSON_COLOUR_PALETTE].is<int>()){
-
-
       uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
       animation.palette_id = colour < PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
-
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_NVALUE),D_JSON_COLOUR_PALETTE,animation.palette_id);
         AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteNameByID(animation.palette_id, buffer));
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      
-
     }
-//     else{
-// DEBUG_LINE;
-// // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-// //       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,colour);
-// //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    
-//     }
+
   }
 
-  // //temp method, roll into above when its a number
-  // if(obj.containsKey(D_JSON_COLOUR_PALETTE "_Number")){ 
-
-
-  // }
-
-
-
-    //{"colour_selector":{"red":"on"}}
-    //{"colour_selector":{"all":"on"}} 
-    //{"colour_selector":"reset"} //all off
-    //{"colour_selector":"all"} //all off
-    //what about colour order? on/off or number for index?
-  
-      // int randnum = random(0,selectorlist.amount); 
-      // desired_colour[ledsindex[ledout.index]].H = selectorlist.colour[randnum].H;
-      
-  // if(!obj["colour_selector"].isNull()){ 
-  //   const char* onoff = obj["colour_selector"];
-
-  // // if(!obj[D_JSON_ONOFF].isNull()){ 
-  // //   const char* onoff = obj[D_JSON_ONOFF];
-  // //   if(strstr(onoff,"ON")){ 
-  // //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-
-  // }
-    
     
   if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
     const char* mode = obj[D_JSON_ANIMATIONMODE];
@@ -1237,9 +1083,6 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
-
-
-
 
 
   if(!obj[D_JSON_RGB_COLOUR_ORDER].isNull()){ 
@@ -1332,58 +1175,46 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
 // DEBUG_LINE;
 
-//   // Rate in seconds as default or ms
-//   if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
-//     animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
-//     #endif
-//     animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
-//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
-//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     data_buffer2.isserviced++;
-//     //check that rate>animation time
-//     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
-//   }else
-//   if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
-//     animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,animation.transition.rate_ms.val);
-//     #endif
-//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
-//     data_buffer2.isserviced++;
-//     //check that rate>animation time
-//     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
-//   }
+  // Rate in seconds as default or ms
+  if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
+    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
+    #endif
+    animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    data_buffer2.isserviced++;
+    //check that rate>animation time
+    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+  }else
+  if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
+    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,animation.transition.rate_ms.val);
+    #endif
+    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
+    data_buffer2.isserviced++;
+    //check that rate>animation time
+    if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
+  }
 
-//   // probably bring transition_order into one command
-//   if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ 
-//     const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
-//     if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
-//       animation.transition.order_id = tmp_id;
-//       // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
-//       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
-//       data_buffer2.isserviced++;
-//     }else{
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
-//     #endif
-//     }
-//   }
-
-//   if(!obj[D_JSON_BRIGHTNESS].isNull()){
-//     uint8_t brt = obj[D_JSON_BRIGHTNESS];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRIGHTNESS,brt);
-//     #endif
-//     // animation.brightness = BrtN2F(brt);
-//     setBriRGB(brt);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRIGHTNESS,animation.brightness);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRIGHTNESS,animation.brightness);
-//     data_buffer2.isserviced++;
-//   }
+  // probably bring transition_order into one command
+  if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ // ie when also doing palette single, randomise the order
+    const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
+    if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
+      animation.transition.order_id = tmp_id;
+      // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
+      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
+      data_buffer2.isserviced++;
+    }else{
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
+    #endif
+    }
+  }
   
 
 //   if(!obj[D_JSON_PIXELSGROUPED].isNull()){
@@ -1401,51 +1232,13 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     #endif
 //   }
 
-  
-  
-//   // TIME on duration for autooff
-//   if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-//     auto_time_off_secs = obj[D_JSON_TIME_ON];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
-//     #endif
-//   }else
-//   if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-//     auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
-//     #endif
-//   }else
-//   if(!obj[D_JSON_TIME_ON_MS].isNull()){
-//     auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
-//     auto_time_off_secs /= 1000;
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
-//     #endif
-//   }
-
-  //animation_override.time_ms = 1000; // implement in 1 second 
-
-
-// #endif
-
-
-
-
-
   mode_singlecolour.flag.generate_new_colours = true;
-
-
   mqtthandler_debug_teleperiod.flags.SendNow = true;
-  
-
-
-
-
-
   animation.flags.fForceUpdate = true;
 
 }
+
+
 
 void mInterfaceLight::EveryLoop(){
       
@@ -1578,6 +1371,76 @@ void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
   colour->WC = mSupport::changeUIntScale(colour->WC, 0, 255, 0, _briCT);
 
 }
+
+
+
+const char* mInterfaceLight::GetTransitionMethodName(char* buffer){
+  return GetTransitionMethodNameByID(pCONT_iLight->animation.transition.method_id,buffer);
+}
+const char* mInterfaceLight::GetTransitionMethodNameByID(uint8_t id, char* buffer){
+  switch(id){ default:   
+    case TRANSITION_METHOD_NONE_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_NONE_NAME_CTR,sizeof(PM_TRANSITION_METHOD_NONE_NAME_CTR)); break; // smooth shift between them
+    case TRANSITION_METHOD_BLEND_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_BLEND_NAME_CTR,sizeof(PM_TRANSITION_METHOD_BLEND_NAME_CTR)); break; 
+    case TRANSITION_METHOD_INSTANT_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_INSTANT_NAME_CTR,sizeof(PM_TRANSITION_METHOD_INSTANT_NAME_CTR)); break;  // smooth shift between them
+    case TRANSITION_METHOD_TWINKLE_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_TWINKLE_NAME_CTR,sizeof(PM_TRANSITION_METHOD_TWINKLE_NAME_CTR));  break; // smooth shift between them
+    case TRANSITION_METHOD_GLIMMER_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_GLIMMER_NAME_CTR,sizeof(PM_TRANSITION_METHOD_GLIMMER_NAME_CTR));  break; // smooth shift between them
+  }
+  return buffer;
+}
+int8_t mInterfaceLight::GetTransitionMethodIDbyName(const char* c){
+  if(c=='\0'){
+    return -1;
+  }
+  // if(strstr(c,D_TRANSITION_METHOD_BLEND_NAME_CTR)){
+  //   return TRANSITION_METHOD_BLEND_ID;
+  // }else if(strstr(c,D_TRANSITION_METHOD_INSTANT_NAME_CTR)){
+  //   return TRANSITION_METHOD_INSTANT_ID;
+  // }else if(strstr(c,D_TRANSITION_METHOD_TWINKLE_NAME_CTR)){
+  //   return TRANSITION_METHOD_TWINKLE_ID;
+  // }else if(strstr(c,D_TRANSITION_METHOD_GLIMMER_NAME_CTR)){
+  //   return TRANSITION_METHOD_GLIMMER_ID;
+  // }
+  else{
+    return -1;
+  }
+}
+
+
+
+const char* mInterfaceLight::GetTransitionOrderName(char* buffer){
+  return GetTransitionOrderNameByID(pCONT_iLight->animation.transition.order_id, buffer);
+}
+const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer){
+  switch(id){  default:    
+    case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
+    case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
+    case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
+    case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
+    case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
+    case TRANSITION_ORDER_FIXED_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
+    }
+  return buffer;
+}
+int8_t mInterfaceLight::GetTransitionOrderIDbyName(const char* c){
+  if(c=='\0'){ return -1; }
+
+  // strcmp_P
+
+  if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
+    return TRANSITION_ORDER_RANDOM_ID;
+  }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
+    return TRANSITION_ORDER_INORDER_ID;
+  }
+
+  // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)){ return TRANSITION_ORDER_CENTRE_OUT_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER_INORDER_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_FIXED_NAME_CTR)){ return TRANSITION_ORDER_FIXED_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_ROTATE_NAME_CTR)){ return TRANSITION_ORDER_ROTATE_ID; }
+  return -1;
+}
+
+
 
 
 
@@ -1769,33 +1632,6 @@ int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Scene should be rolled into this?
 void mInterfaceLight::changeHSB_Hue(uint16_t hue_new){
   uint16_t hue = 0;
   uint8_t  sat = 0;
@@ -1935,7 +1771,7 @@ void mInterfaceLight::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -1977,39 +1813,30 @@ void mInterfaceLight::MQTTHandler_Set_fSendNow(){
 
 void mInterfaceLight::MQTTHandler_Set_TelePeriod(){
 
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   
 } //end "MQTTHandler_Set_TelePeriod"
 
 
 void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_not_found = true;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
+  };
+  
+  struct handler<mInterfaceLight>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
+  };
 
-  do{
-
-    //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "MQTTHandler_Sender %d"),mqtt_handler_id);
-
-    handler_not_found=false; // start as true, if none found, default clears to false
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID:    mqtthandler_ptr=&mqtthandler_scene_teleperiod; break;
-      case MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID:    mqtthandler_ptr=&mqtthandler_debug_teleperiod; break;
-      // case MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID:    mqtthandler_ptr=&mqtthandler_ambilight_teleperiod; break;
-      default: handler_not_found=true; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(!handler_not_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_LIGHTS_INTERFACE_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Group(
+    *this, D_MODULE_LIGHTS_INTERFACE_ID,
+    mqtthandler_list_ptr, sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+    mqtt_handler_id
+  );
 
 }
 
@@ -2363,6 +2190,7 @@ int8_t mInterfaceLight::GetColourMapIDbyName(const char* c){
 const char* mInterfaceLight::GetColourMapNamebyID(uint8_t id, char* buffer){
 
   return 0;
+  // turn this into a dlist?
 
   switch(id){
     // Red
@@ -3188,7 +3016,7 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
   if(ptr->id < PALETTELIST_VARIABLE_USER_LENGTH_ID){
     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }
-  // ptr
+  // progmem
   else{
     memcpy_P(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }
