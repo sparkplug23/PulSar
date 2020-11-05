@@ -297,11 +297,12 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
         //   table_row, colour_ctr
         // );
         
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add("ih",table_row);
-      JsonBuilderI->Add("fc",colour_ctr);
-    JsonBuilderI->Level_End();
+        JsonBuilderI->Level_Start();
+          JsonBuilderI->Add("id",row);
+          JsonBuilderI->Add("ih",table_row);
+          JsonBuilderI->Add("fc",colour_ctr);
+        JsonBuilderI->Level_End();
+
       }break;
       case 1:{      
 
@@ -325,11 +326,12 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
         //   table_row, colour_ctr
         // );
         
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add("ih",table_row);
-      JsonBuilderI->Add("fc",colour_ctr);
-    JsonBuilderI->Level_End();
+        JsonBuilderI->Level_Start();
+          JsonBuilderI->Add("id",row);
+          JsonBuilderI->Add("ih",table_row);
+          JsonBuilderI->Add("fc",colour_ctr);
+        JsonBuilderI->Level_End();
+        
         sensor_counter++;
       }break;
     }
@@ -358,7 +360,7 @@ void mSensorsDHT::WebPage_Root_AddHandlers(){
 
 uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
-  //   memset(&data_buffer2,0,sizeof(data_buffer2));
+  //   memset(&data_buffer,0,sizeof(data_buffer));
   //   StaticJsonDocument<400> doc;
   //   JsonObject root = doc.to<JsonObject>();
 
@@ -371,10 +373,10 @@ uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
   //   root["sett_tele_rate"] =mqtthandler_settings_teleperiod.tRateSecs;
 
 
-  //   data_buffer2.payload.len = measureJson(root)+1;
-  //   serializeJson(doc,data_buffer2.payload.ctr);
+  //   data_buffer.payload.len = measureJson(root)+1;
+  //   serializeJson(doc,data_buffer.payload.ctr);
     
-  // return (data_buffer2.payload.len>3?1:0);
+  // return (data_buffer.payload.len>3?1:0);
 
   return 0;
 
@@ -387,7 +389,7 @@ uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
   // clear entire mqtt packet
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint8_t ischanged=false;
 
@@ -434,10 +436,10 @@ for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
 
 }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
   
-  return (data_buffer2.payload.len>3?1:0);
+  return (data_buffer.payload.len>3?1:0);
 
 }
 

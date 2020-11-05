@@ -17,7 +17,7 @@ void mSAWMain::parse_JSONCommand(void){
 
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/rcswitch")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/rcswitch")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -26,7 +26,7 @@ void mSAWMain::parse_JSONCommand(void){
 
 
 
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/transmit",sizeof("/transmit")-1)>=0){Serial.println("\tSSF::transmit");
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/transmit",sizeof("/transmit")-1)>=0){Serial.println("\tSSF::transmit");
   //   parsesub_Transmit();
   // }
   // else{
@@ -38,7 +38,7 @@ void mSAWMain::parse_JSONCommand(void){
 void mSAWMain::parsesub_Transmit(void){
 
   DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(data_buffer2.payload.ctr);//json);
+  JsonObject& root = jsonBuffer.parseObject(data_buffer.payload.ctr);//json);
 
   uint32_t code = 0;
 
@@ -119,8 +119,8 @@ void mSAWMain::SubTasker_MQTTSender(){
 
 void mSAWMain::MQTTSendDecoded(){
   MQQTDataBuilder_Decoded();
-   if(data_buffer2.payload.len){
-     pCONT->mqt->ppublish("status/sawradios/received",data_buffer2.payload.ctr,false);
+   if(data_buffer.payload.len){
+     pCONT->mqt->ppublish("status/sawradios/received",data_buffer.payload.ctr,false);
    }
 }
 
@@ -156,8 +156,8 @@ void mSAWMain::MQQTDataBuilder_Decoded(void){
   //   blendstyleobj["rate"] = animation.blendstyle.rate_sec;
   //   blendstyleobj["amount"] = animation.amount;
 
-  data_buffer2.payload.len = root.measureLength()+1;
-  root.printTo((char*)data_buffer2.payload.ctr, data_buffer2.payload.len);
+  data_buffer.payload.len = root.measureLength()+1;
+  root.printTo((char*)data_buffer.payload.ctr, data_buffer.payload.len);
 
 }
 

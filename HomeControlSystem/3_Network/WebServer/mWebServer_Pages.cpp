@@ -31,7 +31,7 @@ void mWebServer::WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request){
     pCONT->Tasker_Interface(FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 }
 
@@ -44,7 +44,7 @@ void mWebServer::Web_Base_Page_Draw(AsyncWebServerRequest *request){
     WebAppend_Root_Draw_PageTitleFields();
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -66,12 +66,12 @@ char buffer[30];
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
-          int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
+          int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
           char colour_ctr[7];
-          if(wifi_perc<20){      sprintf(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
-          else if(wifi_perc<30){ sprintf(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
-          else{                  sprintf(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
+          if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
+          else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
+          else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);    
         }break;
         case 2:
@@ -97,7 +97,7 @@ char buffer[30];
   JsonBuilderI->End();
 
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } // end function
 
@@ -121,12 +121,12 @@ char buffer[30];
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
-          int8_t wifi_perc = pCONT_sup->GetRSSPercentage();
+          int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
           char colour_ctr[7];
           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_sup->GetRSSdBm());
+          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);   
           // JsonBuilderI->Add("fc", "red");    
         }break;
@@ -153,7 +153,7 @@ char buffer[30];
   JsonBuilderI->End();
 
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } // end function
 
@@ -242,7 +242,7 @@ void mWebServer::Web_Root_Draw(AsyncWebServerRequest *request){
     WebAppend_Root_Draw_PageButtons();
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -257,7 +257,7 @@ void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
   // if(
     JsonBuilderI->End();
     // ){
-    WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+    WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
   // }else{
   //   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,"ERROR");  
   // }
@@ -304,7 +304,7 @@ void mWebServer::Web_Root_UpdateURLs(AsyncWebServerRequest *request){
     JsonBuilderI->Level_End();
   JsonBuilderI->End();
 
-  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 }
 
@@ -374,7 +374,7 @@ bool mWebServer::HandleRootStatusRefresh(AsyncWebServerRequest *request)
     JsonBuilderI->AppendBuffer(PSTR("{t2")); //temp fix
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
   return true;
 
@@ -598,7 +598,7 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
     
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -644,7 +644,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
       pCONT->mso->GetLog(counter, &tmp, &len);
       if (len) { //if there is new log data
       // and is not larger than buffer
-        if (len > sizeof(data_buffer2.payload.ctr) -2) { len = sizeof(data_buffer2.payload.ctr); }
+        if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
         char stemp[len +1]; //leak!
         strlcpy(stemp, tmp, len);
         // add new line if not first, then text
@@ -663,7 +663,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
   BufferWriterI->Append_P(PSTR("}1"));
   
-  request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
+  request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
  
 }
 
@@ -695,7 +695,7 @@ void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
         
   JsonBuilderI->End();
 
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 
 
@@ -757,7 +757,7 @@ void mWebServer::HandleInformation(AsyncWebServerRequest *request)
         BufferWriterI->Append_P("</body>");
     BufferWriterI->Append_P("</html>");
 
-    WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
+    WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
 }
 
 
@@ -766,8 +766,8 @@ void mWebServer::WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request
 
   // // Serial.println(WEB_HANDLER_SCRIPT_INFROMATION_DATA_FETCHER_URLS_RATES_VAR); Serial.flush();      
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
-  // char *buf = data_buffer2.payload.ctr;
+  // memset(&data_buffer,0,sizeof(data_buffer));
+  // char *buf = data_buffer.payload.ctr;
   // char **iter = &buf;
   // buffer_writer_internal = iter;
 
@@ -803,7 +803,7 @@ void mWebServer::WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request
   // #ifdef DEBUG_WEBSERVER_MEMORY
   //   FreeMem_Usage_Before(&freemem_usage_js_fetcher_urls);
   // #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);
+  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
   // #ifdef DEBUG_WEBSERVER_MEMORY
   //   FreeMem_Usage_After(&freemem_usage_js_fetcher_urls);
   // #endif 
@@ -821,8 +821,8 @@ void mWebServer::HandleInformation_TableDraw(AsyncWebServerRequest *request){
   // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   // uint16_t freemem_start = ESP.getFreeHeap();  
   
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
-  // char *buf = data_buffer2.payload.ctr;
+  // memset(&data_buffer,0,sizeof(data_buffer));
+  // char *buf = data_buffer.payload.ctr;
   // char **buffer = &buf;
 
   // AppendBuffer_P2(buffer,PSTR("{"));
@@ -837,7 +837,7 @@ void mWebServer::HandleInformation_TableDraw(AsyncWebServerRequest *request){
   // #ifdef DEBUG_WEBSERVER_MEMORY
   //   FreeMem_Usage_Before(&freemem_usage_json_root_draw);
   // #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_TEXT_JAVASCRIPT_ID,data_buffer2.payload.ctr);  
+  // WebSend_Response(request,200,CONTENT_TYPE_TEXT_JAVASCRIPT_ID,data_buffer.payload.ctr);  
   // #ifdef DEBUG_WEBSERVER_MEMORY
   //   FreeMem_Usage_After(&freemem_usage_json_root_draw);
   // #endif 
@@ -1181,8 +1181,8 @@ void mWebServer::HandleOtherConfiguration(AsyncWebServerRequest *request)
 //   WSContentSendStyle(request);
 
 //   pCONT_sup->TemplateJson(); 
-//   char stemp[strlen(data_buffer2.payload.ctr) +1];
-//   strlcpy(stemp, data_buffer2.payload.ctr, sizeof(stemp));  // Get JSON template
+//   char stemp[strlen(data_buffer.payload.ctr) +1];
+//   strlcpy(stemp, data_buffer.payload.ctr, sizeof(stemp));  // Get JSON template
 //   WSBufferAppend_P(response, HTTP_FORM_OTHER, stemp, (USER_MODULE == pCONT_set->Settings.module) ? " checked disabled" : "", (pCONT_set->Settings.flag_system.mqtt_enabled) ? " checked" : "");
 
 //   uint8_t maxfn = (pCONT_set->devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : (!pCONT_set->devices_present) ? 1 : pCONT_set->devices_present;
@@ -1661,8 +1661,8 @@ void mWebServer::HandleSystemSettings(AsyncWebServerRequest *request)
   
   // AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_SYSTEM_SETTINGS);
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
-  // char *buf = data_buffer2.payload.ctr;
+  // memset(&data_buffer,0,sizeof(data_buffer));
+  // char *buf = data_buffer.payload.ctr;
   // char **buffer = &buf;
   // buffer_writer_len = 0;
 
@@ -1707,7 +1707,7 @@ void mWebServer::HandleSystemSettings(AsyncWebServerRequest *request)
   // // #ifdef DEBUG_WEBSERVER_MEMORY
   // //   FreeMem_Usage_Before(&freemem_usage_html_console);
   // // #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
+  // WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
   // #ifdef DEBUG_WEBSERVER_MEMORY
   //   FreeMem_Usage_After(&freemem_usage_html_console);
   // #endif 
@@ -2124,7 +2124,7 @@ void mWebServer::HandleNotFound(AsyncWebServerRequest *request)
   //   WSBufferAppend_P(response, PSTR(" %s: %s\n"), request->argName(i).c_str(), request->arg(i).c_str());
   // }
   char message[45];
-    sprintf(message,PSTR("Missing"));// too low - %d needed (%d free)"),memory_needed,ESP.getFreeHeap());
+    sprintf_P(message,PSTR("Missing"));// too low - %d needed (%d free)"),memory_needed,ESP.getFreeHeap());
     request->send(404, CONTENT_TYPE_TEXT_HTML_ID, message);
 
   // No subscriber handled the request, return a 404 with implicit "Connection: close"

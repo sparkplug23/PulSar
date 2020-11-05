@@ -136,7 +136,7 @@ const char* NTPClient::getFormattedTime(char* buffer) {
   // unsigned long minutes = (rawTime % 3600) / 60;
   // unsigned long seconds = rawTime % 60;
 
-  sprintf(buffer, "%02d:%02d:%02d", (rawTime % 86400L) / 3600, (rawTime % 3600) / 60, rawTime % 60);
+  sprintf_P(buffer, PSTR("%02d:%02d:%02d"), (rawTime % 86400L) / 3600, (rawTime % 3600) / 60, rawTime % 60);
   return buffer;
 
   // String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);

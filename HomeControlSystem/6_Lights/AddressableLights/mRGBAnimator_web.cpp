@@ -405,17 +405,17 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
   //   return;
   // }
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
-  // char *buf = data_buffer2.payload.ctr;
+  // memset(&data_buffer,0,sizeof(data_buffer));
+  // char *buf = data_buffer.payload.ctr;
   // char **buffer = &buf;
   // pCONT_web->buffer_writer_len = 0;
 
   // BuildPage_RGBPaletteEditor(buffer);
 
   // uint16_t freemem_start = ESP.getFreeHeap();  
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("WEB: url \"%s\" size [%d] FR %d"),"/",strlen(data_buffer2.payload.ctr),freemem_start);
+  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("WEB: url \"%s\" size [%d] FR %d"),"/",strlen(data_buffer.payload.ctr),freemem_start);
 
-  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
+  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
 
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_ASYNC "FreeRam %d"),freemem_start-ESP.getFreeHeap());
   
@@ -1491,7 +1491,7 @@ void mRGBAnimator::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *reques
     JsonBuilderI->Level_End();
   JsonBuilderI->End();
 
-  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 }
 
@@ -1501,7 +1501,7 @@ void mRGBAnimator::Web_RGBLightSettings_ListOptions(AsyncWebServerRequest *reque
     WebAppend_RGBLightSettings_FillOptions_Controls();
   JsonBuilderI->End();
 
-  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 }
 
@@ -1517,7 +1517,7 @@ void mRGBAnimator::Web_RGBLightSettings_Draw(AsyncWebServerRequest *request){
     WebAppend_RGBLightSettings_Draw_PageButtons();
   JsonBuilderI->End();
 
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -1625,7 +1625,7 @@ void mRGBAnimator::Web_PaletteEditor_Draw(AsyncWebServerRequest *request){
     WebAppend_PaletteEditor_Draw_Editor_Form();
   JsonBuilderI->End();
 
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -1802,7 +1802,7 @@ void mRGBAnimator::Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request){
     JsonBuilderI->Level_End();
   JsonBuilderI->End();
 
-  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 }
 
@@ -1813,7 +1813,7 @@ void mRGBAnimator::Web_PaletteEditor_ListOptions(AsyncWebServerRequest *request)
     WebAppend_PaletteEditor_FillOptions_Controls();
   JsonBuilderI->End();
 
-  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+  request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 }
 
@@ -2214,7 +2214,7 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
 
   // JsonBuilderI->End();
 
-  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 }
 

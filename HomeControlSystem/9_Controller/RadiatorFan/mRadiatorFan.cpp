@@ -96,8 +96,8 @@ void mRadiatorFan::SubTasker_MQTTSender(){
 //#ifdef DEVICE_RADIATORFAN
 void mRadiatorFan::MQQTSendFanStatus(void){
     // ConstructJSON_FanStatus();
-    // if(data_buffer2.payload.len){ // if something to send
-    //   pCONT->mqt->ppublish("status/fan", data_buffer2.payload.ctr,false);
+    // if(data_buffer.payload.len){ // if something to send
+    //   pCONT->mqt->ppublish("status/fan", data_buffer.payload.ctr,false);
     // }
 }
 void mRadiatorFan::ConstructJSON_FanStatus(){
@@ -105,7 +105,7 @@ void mRadiatorFan::ConstructJSON_FanStatus(){
   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   // JsonObject root = doc.to<JsonObject>();
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer,0,sizeof(data_buffer));
 
   // int tempsensorid;
   // //root["onoff"] = (int)FAN_ACTIVE(); // instead of boolean
@@ -131,8 +131,8 @@ void mRadiatorFan::ConstructJSON_FanStatus(){
   // //   }
   // // #endif
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
 
 }
@@ -140,7 +140,7 @@ void mRadiatorFan::ConstructJSON_FanStatus(){
 void mRadiatorFan::parse_JSONCommand(){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/radiatorfan")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/radiatorfan")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RADIATORFAN));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -148,7 +148,7 @@ void mRadiatorFan::parse_JSONCommand(){
   }
 
   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   // JsonObject root = doc.as<JsonObject>();
 
   // uint8_t onoff = root["onoff"];
@@ -233,20 +233,20 @@ const char* mRadiatorFan::FanModeCtr(void){
 
 uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_method){
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer,0,sizeof(data_buffer));
   // DynamicJsonDocument doc(250);
   // JsonObject root = doc.to<JsonObject>();
 
   // root["tbd"] = 0;
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
   return 0;
 }
 
 uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer,0,sizeof(data_buffer));
 
   // uint8_t ischanged=false;
 
@@ -255,8 +255,8 @@ uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
 
   // root["tbd"] = 0;
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
   return 0;
 

@@ -93,16 +93,15 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST");
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");    
 
-      pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER); // MOVE to be delayed start
-      // To prevent rush event of mqtt telemetry and webui building, add a small delay to all shared buffer to be used
-      flag_web_Add_handler_delayed_decounter = 5;
+      // Must add handlers BEFORE begin
+      pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
     }
     reset_web_log_flag = false;
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
     pWebServer->begin();
   }
   if(webserver_state != type){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_ACTIVE_ON " %s%s " D_WITH_IP_ADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
     pCONT_set->rules_flag.http_init = 1;
   }
   if(type){ webserver_state = type; }
@@ -445,7 +444,7 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
   #ifdef DEBUG_WEBSERVER_MEMORY
     FreeMem_Usage_Before(&freemem_usage_json_shared);
   #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
  
   // Check if there is enough RAM space, or else respond with 
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
@@ -551,12 +550,12 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)     // Content send snprintf_P char data
 {
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   va_list arg;
   va_start(arg, formatP);
-  vsnprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), formatP, arg);
+  vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
   va_end(arg);  
-  request->send_P(code, content_type, data_buffer2.payload.ctr);
+  request->send_P(code, content_type, data_buffer.payload.ctr);
 }
 
 // void mWebServer::WSContentSend_PD(AsyncWebServerRequest *request, const char* formatP, ...)    // Content send snprintf_P char data checked for decimal separator
@@ -565,13 +564,13 @@ void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t conte
 //   // This uses char strings. Be aware of sending %% if % is needed
 //   va_list arg;
 //   va_start(arg, formatP);
-//   int len = vsnprintf_P(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr), formatP, arg);
+//   int len = vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
 //   va_end(arg);
 
 //   if (D_DECIMAL_SEPARATOR[0] != '.') {
 //     for (int i = 0; i < len; i++) {
-//       if ('.' == data_buffer2.payload.ctr[i]) {
-//         data_buffer2.payload.ctr[i] = D_DECIMAL_SEPARATOR[0];
+//       if ('.' == data_buffer.payload.ctr[i]) {
+//         data_buffer.payload.ctr[i] = D_DECIMAL_SEPARATOR[0];
 //       }
 //     }
 //   }
@@ -625,7 +624,7 @@ uint32_t mWebServer::WebColor(uint8_t r, uint8_t g, uint8_t b){
 const char* mWebServer::WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffer){
   // P_PHASE_OUT();
   // char colour[8]; memset(colour,0,sizeof(colour));
-  sprintf(buffer,PSTR("#%02X%02X%02X"),r,g,b);
+  sprintf_P(buffer,PSTR("#%02X%02X%02X"),r,g,b);
   return buffer;
 }
 
@@ -633,7 +632,6 @@ const char* mWebServer::WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffe
 //   sprintf(buffer,PSTR("#%02X%02X%02X\0"),r,g,b);
 //   return buffer;
 // }
-
 
 
 
@@ -704,7 +702,7 @@ void mWebServer::HandleHttpCommand(AsyncWebServerRequest *request)
   //           char* JSON = (char*)memchr(tmp, '{', len);
   //           if (JSON) { // Is it a JSON message (and not only [15:26:08 MQT: stat/wemos5/POWER = O])
   //             size_t JSONlen = len - (JSON - tmp);
-  //             if (JSONlen > sizeof(data_buffer2.payload.ctr)) { JSONlen = sizeof(data_buffer2.payload.ctr); }
+  //             if (JSONlen > sizeof(data_buffer.payload.ctr)) { JSONlen = sizeof(data_buffer.payload.ctr); }
   //             char stemp[JSONlen];
   //             strlcpy(stemp, JSON +1, JSONlen -2);
   //             WSBufferAppend_P(response, PSTR("%s%s"), (cflg) ? "," : "", stemp);
@@ -866,11 +864,11 @@ String mWebServer::UrlEncode(const String& text)
 //           for (uint16_t i = 0; i < result.length(); i++) {
 //             char text = result.charAt(i);
 //             if (text > 31) {                  // Remove control characters like linefeed
-//               data_buffer2.payload.ctr[j++] = text;
-//               if (j == sizeof(data_buffer2.payload.ctr) -2) { break; }
+//               data_buffer.payload.ctr[j++] = text;
+//               if (j == sizeof(data_buffer.payload.ctr) -2) { break; }
 //             }
 //           }
-//           data_buffer2.payload.ctr[j] = '\0';
+//           data_buffer.payload.ctr[j] = '\0';
 //           MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_JSON_WEBSEND));
 // */
 //         }
@@ -1160,13 +1158,6 @@ int8_t mWebServer::Tasker(uint8_t function){
     break; 
     case FUNC_EVERY_SECOND:
 
-      // if(flag_web_Add_handler_delayed_decounter){
-      //   flag_web_Add_handler_delayed_decounter--;
-      //   AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_WEB_ADD_HANDLER delayed start = %d seconds"),flag_web_Add_handler_delayed_decounter);
-      // }else if (flag_web_Add_handler_delayed_decounter == 0){
-      //   pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
-      //   flag_web_Add_handler_delayed_decounter = -1;
-      // }
 
     break;
     case FUNC_WEB_ADD_HANDLER:

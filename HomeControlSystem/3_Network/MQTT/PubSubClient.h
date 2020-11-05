@@ -1,32 +1,16 @@
 /*
- mPubSubClient.h - A simple client for MQTT.
+ PubSubClient.h - A simple client for MQTT.
   Nick O'Leary
   http://knolleary.net
 */
 
-#ifndef mPubSubClientv1_h
-#define mPubSubClientv1_h 3.0
-// 1.1 - added packet version (not handled by callback)
-// 2.0 - removed callback legacy code
-// 2.1 - prefixed method passed in from the start, retain set to default off
-// 3.0 removing pkt
+#ifndef PubSubClient_h
+#define PubSubClient_h
 
 #include <Arduino.h>
 #include "IPAddress.h"
 #include "Client.h"
 #include "Stream.h"
-#include "stdint.h"
-
-#include "0_ConfigUser/mUserConfig.h"
-
-#include "0_ConfigUser/mUserConfig.h"
-#include "2_CoreSystem/Logging/mLogging.h"
-
-// #include "1_TaskerManager/mTaskerManager.h"
-// 
-
-
-#ifdef USE_PUBSUB_V1
 
 #define MQTT_VERSION_3_1      3
 #define MQTT_VERSION_3_1_1    4
@@ -39,16 +23,14 @@
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 #ifndef MQTT_MAX_PACKET_SIZE
-  #ifdef ENABLE_LOW_MEMORY_MODE
-    #define MQTT_MAX_PACKET_SIZE 800
-  #else
-    #define MQTT_MAX_PACKET_SIZE 1000
-  #endif
+#define MQTT_MAX_PACKET_SIZE 1000
 #endif
 
-// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+// MQTT_KEEPALIVE : keepAlive interval in Seconds
+// Keepalive timeout for default MQTT Broker is 10s
 #ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 10
+//#define MQTT_KEEPALIVE 10
+#define MQTT_KEEPALIVE 30  // Tasmota v6.5.0.14 enabling AWS-iot
 #endif
 
 // MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
@@ -93,14 +75,19 @@
 #define MQTTQOS1        (1 << 1)
 #define MQTTQOS2        (2 << 1)
 
-#ifdef ESP8266
+// Maximum size of fixed header and variable length size header
+#define MQTT_MAX_HEADER_SIZE 5
+
+#if defined(ESP8266) || defined(ESP32)
 #include <functional>
 #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
 #else
 #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*, uint8_t*, unsigned int)
 #endif
 
-class mPubSubClient {
+#define CHECK_STRING_LENGTH(l,s) if (l+2+strlen(s) > MQTT_MAX_PACKET_SIZE) {_client->stop();return false;}
+
+class mPubSubClient : public Print {
 private:
    Client* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
@@ -114,33 +101,19 @@ private:
    boolean readByte(uint8_t * result, uint16_t * index);
    boolean write(uint8_t header, uint8_t* buf, uint16_t length);
    uint16_t writeString(const char* string, uint8_t* buf, uint16_t pos);
+   // Build up the header ready to send
+   // Returns the size of the header
+   // Note: the header is built at the end of the first MQTT_MAX_HEADER_SIZE bytes, so will start
+   //       (MQTT_MAX_HEADER_SIZE - <returned size>) bytes into the buffer
+   size_t buildHeader(uint8_t header, uint8_t* buf, uint16_t length);
    IPAddress ip;
-   const char* domain;
+   String domain;
    uint16_t port;
    Stream* stream;
    int _state;
 public:
    mPubSubClient();
    mPubSubClient(Client& client);
-   
-    // General stats info on performance
-    // make this a debug flag, and private, with external function calls
-    struct STATS{
-      uint32_t packets_sent_counter = 0;
-      uint32_t packets_sent_per_minute = 0;
-      uint32_t packets_sent_per_minute_saved = 0;
-      uint32_t reconnects_counter = 0;
-      uint32_t tSavedPacketsSent = millis();
-      uint32_t connection_uptime = 0;
-      uint32_t connection_downtime = 0;
-      uint32_t tSavedUpDown = millis();
-    }stats;
-
-    const char* state_ctr(void);
-
-    // END OF CHANGES
-
-
    mPubSubClient(IPAddress, uint16_t, Client& client);
    mPubSubClient(IPAddress, uint16_t, Client& client, Stream&);
    mPubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
@@ -153,6 +126,7 @@ public:
    mPubSubClient(const char*, uint16_t, Client& client, Stream&);
    mPubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
    mPubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   virtual ~mPubSubClient() {}
 
    mPubSubClient& setServer(IPAddress ip, uint16_t port);
    mPubSubClient& setServer(uint8_t * ip, uint16_t port);
@@ -165,12 +139,31 @@ public:
    boolean connect(const char* id, const char* user, const char* pass);
    boolean connect(const char* id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
    boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
-   void disconnect();
+   boolean connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage, boolean cleanSession);
+   void disconnect(bool disconnect_package = false);
    boolean publish(const char* topic, const char* payload);
    boolean publish(const char* topic, const char* payload, boolean retained);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength);
    boolean publish(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   boolean publish_P(const char* topic, const char* payload, boolean retained);
    boolean publish_P(const char* topic, const uint8_t * payload, unsigned int plength, boolean retained);
+   // Start to publish a message.
+   // This API:
+   //   beginPublish(...)
+   //   one or more calls to write(...)
+   //   endPublish()
+   // Allows for arbitrarily large payloads to be sent without them having to be copied into
+   // a new buffer and held in memory at one time
+   // Returns 1 if the message was started successfully, 0 if there was an error
+   boolean beginPublish(const char* topic, unsigned int plength, boolean retained);
+   // Finish off this publish message (started with beginPublish)
+   // Returns 1 if the packet was sent successfully, 0 if there was an error
+   int endPublish();
+   // Write a single byte of payload (only to be used with beginPublish/endPublish)
+   virtual size_t write(uint8_t);
+   // Write size bytes from buffer into the payload (only to be used with beginPublish/endPublish)
+   // Returns the number of bytes written
+   virtual size_t write(const uint8_t *buffer, size_t size);
    boolean subscribe(const char* topic);
    boolean subscribe(const char* topic, uint8_t qos);
    boolean unsubscribe(const char* topic);
@@ -179,8 +172,5 @@ public:
    int state();
 };
 
-#endif // #ifdef USE_PUBSUB_V1
-
 
 #endif
-

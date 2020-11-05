@@ -31,14 +31,17 @@ class mDoorSensor{
       uint8_t isactive = false;
       uint8_t wasactive = false; //last state
       uint8_t ischanged = false;
-      struct datetime changedtime;
+      //struct datetime changedtime;
       uint32_t tSaved;
       uint32_t tDetectTimeforDebounce;
-      char friendly_name_ctr[15];
-      char detected_rtc_ctr[9];
+      //char friendly_name_ctr[15];
+      //char detected_rtc_ctr[9];
+      time_short_t detected_time;
       uint32_t tDetectTime;
       uint32_t tEndedTime;
     }door_detect;
+
+    void EveryLoop();
 
     #ifdef DOORLOCK_SWITCH_PIN
       #define LOCKOPEN() digitalRead(DOORLOCK_SWITCH_PIN) //opened when high

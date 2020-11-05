@@ -7,6 +7,19 @@
 
 // #define USE_DECLARE_AT_COMPILE_TO_DEBUG
 
+// #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+
+#ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+void hw_wdt_disable(){
+  *((volatile uint32_t*) 0x60000900) &= ~(1); // Hardware WDT OFF 
+}
+
+void hw_wdt_enable(){ 
+  *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
+}
+#endif
+
+
 #ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
     mHardwarePins mod;
     mSettings mset;
@@ -448,8 +461,8 @@ void setup(void)
   #endif
 
   // Init Json builder with memory address and size
-  JsonBuilderI->Start(data_buffer2.payload.ctr,&data_buffer2.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-  BufferWriterI->Start(data_buffer2.payload.ctr,&data_buffer2.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  JsonBuilderI->Start(data_buffer.payload.ctr,&data_buffer.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  BufferWriterI->Start(data_buffer.payload.ctr,&data_buffer.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
 
   // Configure WDT
   // msup.WDT_Begin();
@@ -545,32 +558,49 @@ void setup(void)
 void loop(void)
 {
 
+  DEBUG_LINE;
   pCONT_sup->activity.loop_counter++;
   pCONT_sup->loop_start_millis = millis();
+  WDT_RESET();
+
+  #ifdef DEVICE_SIDEDOORLIGHT
+  pinMode(5, INPUT);
+  #endif
+  
+  DEBUG_LINE;
   
   #ifdef USE_ARDUINO_OTA
     ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA
 
+  DEBUG_LINE;
   pCONT->Tasker_Interface(FUNC_LOOP); // EVERY_LOOP
 
+  DEBUG_LINE;
   if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
 
+  DEBUG_LINE;
   //move into support, or into time, to align with every_minute, hour, etc
-  if(mSupport::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }
-  if(mSupport::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }
-  if(mSupport::TimeReached(&pCONT_sup->tSavedLoop200mSec,200 )){ pCONT->Tasker_Interface(FUNC_EVERY_200_MSECOND); }
-  if(mSupport::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }
-  if(mSupport::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ 
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop200mSec,200 )){ pCONT->Tasker_Interface(FUNC_EVERY_200_MSECOND); }
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ 
+    
+  DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND);
 
+  DEBUG_LINE;
   // //pCONT->TaskerTest();
   
   pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
   // AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC2 = %d"), pCONT_sup->activity.loop_counter);
   pCONT_sup->activity.loop_counter=0;
 
+  DEBUG_LINE;
      }
+     
+  DEBUG_LINE;
      
   /********************************************************************************************************
   ******************************************************************************************************** 
@@ -580,6 +610,7 @@ void loop(void)
     
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 
+  DEBUG_LINE;
 
   //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
 
@@ -607,13 +638,15 @@ void loop(void)
   // }
   // #endif
 
-  if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
-  pCONT_sup->loop_delay = pCONT_set->sleep;
-  if (!pCONT_sup->loop_delay) { pCONT_sup->loop_delay++; }              // We cannot divide by 0
-  pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay;  // We need to keep track of this many loops per second
-  pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay;
-  pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
+  DEBUG_LINE;
+  // if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
+  // pCONT_sup->loop_delay = pCONT_set->sleep;
+  // if (!pCONT_sup->loop_delay) { pCONT_sup->loop_delay++; }              // We cannot divide by 0
+  // pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay;  // We need to keep track of this many loops per second
+  // pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay;
+  // pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
 
+  DEBUG_LINE;
   // Create a debug mqtt packet for timings, of main loop and interface loops
   // Serial.printf("%s=%d\r\n","tick",pCONT_sup->loop_runtime_millis);
   // Serial.printf("%s=%d\r\n","tick",pCONT_sup->activity.cycles_per_sec);
@@ -623,4 +656,5 @@ void loop(void)
 
   pCONT_set->fSystemRestarted = false; //phase out and use module flag instead
 
+  DEBUG_LINE;
 }

@@ -8,125 +8,375 @@ int8_t mTelemetry::Tasker(uint8_t function){
     case FUNC_INIT:
       Init();
     break;
+    
+    #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_HANDLER:
-
-  // /**
-  //  * 
-  //  *Add telemetry calls-- retrieve tele by http request and return as text 
-  //  * 
-  //  **/  
-  // pCONT_web->pWebServer->on("/status/telemetry/health.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Health_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/settings.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Settings_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/firmware.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Firmware_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/log.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Log_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/memory.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Memory_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/network.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Network_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/mqtt.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_MQTT_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/time.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Time_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/devices.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Devices_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/reboot.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Reboot_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/debug/minimal.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Debug_Minimal_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/debug/pins.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Debug_Pins_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/debug/template.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Debug_Template_JSON(request);
-  // });
-  // pCONT_web->pWebServer->on("/status/telemetry/debug/moduleinterface.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-  //   Web_Status_Telemetry_Debug_ModuleInterface_JSON(request);
-  // });
+      WebPage_Root_AddHandlers();
     break;
+    #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+      break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+      break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+      break;
+    #endif //USE_MQTT
   }
 
 }
 
 
-
 #ifdef USE_MODULE_CORE_WEBSERVER
-void mTelemetry::Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Health(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Settings(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Firmware(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Log_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Log(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Memory_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Memory(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Network_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Network(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_MQTT_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_MQTT(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Time_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Time(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Devices_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Devices(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Reboot_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Reboot(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Debug_Minimal_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Debug_Minimal(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Debug_Pins(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Debug_Template(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
-}
-void mTelemetry::Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request){
-  ConstructJSON_Debug_ModuleInterface(JSON_LEVEL_ALL);
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr); 
+void mTelemetry::WebPage_Root_AddHandlers(){
+
+  /**
+   *Add telemetry calls-- retrieve tele by http request and return as text 
+   **/ 
+  /* 
+  pCONT_web->pWebServer->on("/status/telemetry/health.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Health(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/settings.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+    ConstructJSON_Settings(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/firmware.json", HTTP_GET, [this](AsyncWebServerRequest *request){    
+    ConstructJSON_Firmware(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/log.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Log(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/memory.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Memory(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/network.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Network(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/mqtt.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_MQTT(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/time.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Time(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/devices.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Devices(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/reboot.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Reboot(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/debug/minimal.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Debug_Minimal(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/debug/pins.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Debug_Pins(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/debug/template.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Debug_Template(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });
+  pCONT_web->pWebServer->on("/status/telemetry/debug/moduleinterface.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
+    ConstructJSON_Debug_ModuleInterface(JSON_LEVEL_ALL);
+    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  });*/
+
 }
 #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
 
 
+
+
+#ifdef USE_MODULE_NETWORKS_MQTT
+
+
+
+void mTelemetry::MQTTHandler_Init(){
+
+  handler<mTelemetry>* mqtthandler_ptr;
+
+  mqtthandler_ptr = &mqtthandler_health;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Health;
+  
+  mqtthandler_ptr = &mqtthandler_settings;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings;
+  
+  mqtthandler_ptr = &mqtthandler_log;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Log;
+  
+  mqtthandler_ptr = &mqtthandler_firmware;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Firmware;
+  
+  mqtthandler_ptr = &mqtthandler_memory;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Memory;
+  
+  mqtthandler_ptr = &mqtthandler_network;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NETWORK_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Network;
+  
+  mqtthandler_ptr = &mqtthandler_mqtt;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MQTT_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_MQTT;
+  
+  mqtthandler_ptr = &mqtthandler_time;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Time;
+  
+  mqtthandler_ptr = &mqtthandler_devices;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Devices;
+  
+  mqtthandler_ptr = &mqtthandler_reboot;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
+  
+  mqtthandler_ptr = &mqtthandler_reboot_event;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR;  
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_ALL;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
+
+  #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+  mqtthandler_ptr = &mqtthandler_debug_pins;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins;
+
+  mqtthandler_ptr = &mqtthandler_debug_template;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_TEMPLATE_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Template;
+
+  mqtthandler_ptr = &mqtthandler_debug_moduleinterface;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_ModuleInterface;
+  #endif
+  
+  mqtthandler_ptr = &mqtthandler_debug_minimal;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
+  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;// MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Minimal;
+
+} //end "MQTTHandler_Init"
+
+
+
+void mTelemetry::MQTTHandler_Set_fSendNow(){
+  mqtthandler_health.flags.SendNow = true;
+  mqtthandler_settings.flags.SendNow = true;
+  // mqtthandler_parameters.flags.SendNow = true;
+  mqtthandler_log.flags.SendNow = true;
+  mqtthandler_firmware.flags.SendNow = true;
+  mqtthandler_memory.flags.SendNow = true;
+  mqtthandler_network.flags.SendNow = true;
+  mqtthandler_mqtt.flags.SendNow = true;
+  mqtthandler_time.flags.SendNow = true;
+  mqtthandler_devices.flags.SendNow = true;
+  mqtthandler_reboot.flags.SendNow = true;
+  mqtthandler_debug_pins.flags.SendNow = true;
+  mqtthandler_debug_template.flags.SendNow = true;
+  mqtthandler_debug_moduleinterface.flags.SendNow = true;
+  mqtthandler_debug_minimal.flags.SendNow = true;
+
+
+
+} //end "MQTTHandler_Init
+
+
+void mTelemetry::MQTTHandler_Set_TelePeriod(){
+
+  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  
+} //end "MQTTHandler_Set_TelePeriod"
+
+
+//move system sender INTO telemetry class, remove intermediatery functions
+void mTelemetry::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+
+  #ifdef ENABLE_ADVANCED_DEBUGGING
+    AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
+  #endif
+    // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
+  
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SYSTEM_HEALTH_ID,
+    MQTT_HANDLER_SYSTEM_SETTINGS_ID,
+    MQTT_HANDLER_SYSTEM_LOG_ID,
+    MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
+    MQTT_HANDLER_SYSTEM_MEMORY_ID,
+    MQTT_HANDLER_SYSTEM_NETWORK_ID,
+    MQTT_HANDLER_SYSTEM_MQTT_ID,
+    MQTT_HANDLER_SYSTEM_TIME_ID,
+    MQTT_HANDLER_SYSTEM_DEVICES_ID,
+    MQTT_HANDLER_SYSTEM_REBOOT_ID,
+    MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
+      MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID
+    #endif
+  };
+  
+  struct handler<mTelemetry>* mqtthandler_list_ptr[] = {
+    &mqtthandler_health, &mqtthandler_settings,
+    &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
+    &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
+    &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      &mqtthandler_debug_pins, &mqtthandler_debug_template,
+      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
+    #endif
+  };
+
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(
+    *this, D_MODULE_CORE_TELEMETRY_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids, 
+    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+    mqtt_handler_id
+  );
+
+}
+
+
+
+
+
+
+
+
+#endif // USE_MODULE_NETWORKS_MQTT
+
+
+
 void mTelemetry::Init(){
   memset(&hardwarestatus,0,sizeof(hardwarestatus));
-  hardwarestatus.len += sprintf(hardwarestatus.ctr,"Restarted");
+  hardwarestatus.len += 0;//sprintf(hardwarestatus.ctr,"Restarted");
 }
 
 
@@ -157,11 +407,11 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
       JsonBuilderI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
       JsonBuilderI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
     JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start(PM_JSON_MQTT);
-      JsonBuilderI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
-      JsonBuilderI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
-      JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
-    JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_Start(PM_JSON_MQTT);
+    //   JsonBuilderI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
+    //   JsonBuilderI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
+    //   JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
+    // JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start(PM_JSON_STATUS);
       JsonBuilderI->Add(PM_JSON_MESSAGE,         hardwarestatus.ctr); //this can be turned into a subadd method
       JsonBuilderI->Add(PM_JSON_LEVEL,           hardwarestatus.importance);
@@ -260,6 +510,7 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
   JsonBuilderI->Start();
     JsonBuilderI->Add_FP(PM_JSON_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JsonBuilderI->Add(PM_JSON_SSID, WiFi.SSID().c_str());
+    JsonBuilderI->Add(PM_JSON_SSID_NUMBERED, pCONT_set->Settings.sta_active); // Used to debug switching in grafana
     JsonBuilderI->Add(PM_JSON_RSSI, WiFi.RSSI());
     JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
     JsonBuilderI->Add(PM_JSON_HOSTNAME, pCONT_set->my_hostname);
@@ -279,16 +530,16 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
 uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Level_Start(PM_JSON_PACKETS);
-      JsonBuilderI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
-      JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
-    JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start(PM_JSON_CONNECTS);
-      JsonBuilderI->Add(PM_JSON_COUNT,          pCONT_mqtt->pubsub->stats.reconnects_counter);
-      JsonBuilderI->Add(PM_JSON_DOWNSECS,       pCONT_mqtt->pubsub->stats.connection_downtime);
-      JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_mqtt->pubsub->stats.connection_uptime);
-      JsonBuilderI->Add(PM_JSON_BROKERHOSTNAME, pCONT_mqtt->settings.hostname_ctr);
-    JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_Start(PM_JSON_PACKETS);
+    //   JsonBuilderI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
+    //   JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
+    // JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_Start(PM_JSON_CONNECTS);
+    //   JsonBuilderI->Add(PM_JSON_COUNT,          pCONT_mqtt->pubsub->stats.reconnects_counter);
+    //   JsonBuilderI->Add(PM_JSON_DOWNSECS,       pCONT_mqtt->pubsub->stats.connection_downtime);
+    //   JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_mqtt->pubsub->stats.connection_uptime);
+    //   JsonBuilderI->Add(PM_JSON_BROKERHOSTNAME, pCONT_set->Settings.mqtt.hostname_ctr);
+    // JsonBuilderI->Level_End();
     JsonBuilderI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
   return JsonBuilderI->End();
 
@@ -377,6 +628,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_FP(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay);
     JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
     JsonBuilderI->Add(PM_JSON_LOOPRATIO,      pCONT_sup->this_cycle_ratio);
@@ -386,7 +638,6 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
     JsonBuilderI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,    pCONT_set->firmware_version.current.name_ctr);
     JsonBuilderI->Add_FP(PM_JSON_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
-    JsonBuilderI->Add(PM_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,      pCONT_set->Settings.bootcount);
   return JsonBuilderI->End();
 
@@ -400,7 +651,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Level_Start(PM_JSON_GPIO);
     for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
       if(pCONT_pins->PinUsed(i)){ // skip pins not configured
-        sprintf(buffer, "FUNC_%d", i);
+        sprintf_P(buffer, PSTR("FUNC_%d"), i);
         JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
       }
     }
@@ -408,14 +659,14 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Level_Start(PM_JSON_GPIO);
     for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
       if(pCONT_pins->PinUsed(i)){ // skip pins not configured
-        sprintf_P(buffer, "FUNC_%s", pCONT_pins->GetGPIOFunctionNamebyID_P(i));
+        sprintf_P(buffer, PSTR("FUNC_%s"), pCONT_pins->GetGPIOFunctionNamebyID_P(i));
         JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
       }
     }
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start(D_JSON_GPIO "_map");
     for(uint16_t i=0;i<100;i++){ 
-      sprintf_P(buffer, "%d", i);
+      sprintf_P(buffer, PSTR("%d"), i);
       JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
     }
     JsonBuilderI->Level_End();
@@ -427,6 +678,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
 uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHealth
   char buffer[50];
   JsonBuilderI->Start();
+    JsonBuilderI->Add(PM_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
     JsonBuilderI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
     myio cmodule;
@@ -450,3 +702,14 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //B
     return 0;
   #endif
 }
+
+
+
+
+
+
+
+
+
+
+

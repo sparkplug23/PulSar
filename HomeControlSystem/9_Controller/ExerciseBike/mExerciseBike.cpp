@@ -190,7 +190,7 @@ void mExerciseBike::SubTask_Light(){
 
   // Seconds_on
   
-//   if(mSupport::TimeReached(&tSavedSeconds,1000)){
+//   if(mTime::TimeReached(&tSavedSeconds,1000)){
 //     if(light_control_driveway.seconds_on>0){ 
 //       light_control_driveway.seconds_on--;
 //       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
@@ -260,7 +260,7 @@ void mExerciseBike::SetLight(uint8_t light_id, uint8_t state){
 int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
   
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/garagelights")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/garagelights")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "/garagelights"));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -273,10 +273,10 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::parse_JSONCommand()");
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE "Command: " "\"%s\""),data_buffer2.payload.ctr);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE "Command: " "\"%s\""),data_buffer.payload.ctr);
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   if(error){
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_ERROR_JSON_DESERIALIZATION));
     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
@@ -348,20 +348,20 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
 uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
   root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 return 1;
 }
 
 uint8_t mExerciseBike::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint8_t ischanged=false;
 
@@ -370,8 +370,8 @@ uint8_t mExerciseBike::ConstructJSON_Sensor(uint8_t json_level){
 
   root["tbd"] = 0;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   return 1;
 
@@ -381,13 +381,13 @@ uint8_t mExerciseBike::ConstructJSON_Sensor(uint8_t json_level){
 
 // void mExerciseBike::MQTTSendLightStatesIfChanged(void){
 //   ConstructJSON_LightStates(); //create data
-//   if(data_buffer2.payload.len>3){
-//     pCONT->mqt->ppublish("status/lights/ifchanged/state",data_buffer2.payload.ctr,false);
+//   if(data_buffer.payload.len>3){
+//     pCONT->mqt->ppublish("status/lights/ifchanged/state",data_buffer.payload.ctr,false);
 //   }
 // }
 uint8_t mExerciseBike::ConstructJSON_LightStates(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   JsonObject root = doc.to<JsonObject>();

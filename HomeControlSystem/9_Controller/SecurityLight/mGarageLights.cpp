@@ -52,7 +52,10 @@ int8_t mGarageLights::Tasker(uint8_t function){
 
       // Import motion sense as light motion
       //[0] for driveway
-      memcpy(&pir_detect_copy,&pCONT->mms->pir_detect[0],sizeof(pCONT->mms->pir_detect[0]));
+      
+      
+  // PHASE OUT, BAD CODE
+      //memcpy(&pir_detect_copy,&pCONT->mms->pir_detect[0],sizeof(pCONT->mms->pir_detect[0]));
 
       //[1] for back garden
 
@@ -113,7 +116,7 @@ int8_t mGarageLights::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mGarageLights::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/garagelights")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/garagelights")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parse_JSONCommand(obj);
@@ -236,7 +239,7 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 
   // MOVE THIS IN TO RELAYS, NOT SECURITY LIGHTS, USE GETTERS AND SETTERS FOR RELAYS
   // no longer named structs, needs to be veriable, timed goes by relay
-  if(mSupport::TimeReached(&tSavedSeconds,1000)){
+  if(mTime::TimeReached(&tSavedSeconds,1000)){
     if(light_control_driveway.seconds_on>0){ 
       light_control_driveway.seconds_on--;
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
@@ -322,21 +325,21 @@ void mGarageLights::SetLight(uint8_t light_id, uint8_t state){
 
 uint8_t mGarageLights::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   // DynamicJsonDocument doc(250);
   // JsonObject root = doc.to<JsonObject>();
 
   // root["tbd"] = 0;
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
   return 0;
 
 }
 
 uint8_t mGarageLights::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   // uint8_t ischanged=false;
 
@@ -345,8 +348,8 @@ uint8_t mGarageLights::ConstructJSON_Sensor(uint8_t json_level){
 
   // root["tbd"] = 0;
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
   return 0;
 
@@ -356,13 +359,13 @@ uint8_t mGarageLights::ConstructJSON_Sensor(uint8_t json_level){
 
 // void mGarageLights::MQTTSendLightStatesIfChanged(void){
 //   ConstructJSON_LightStates(); //create data
-//   if(data_buffer2.payload.len>3){
-//     pCONT->mqt->ppublish("status/lights/ifchanged/state",data_buffer2.payload.ctr,false);
+//   if(data_buffer.payload.len>3){
+//     pCONT->mqt->ppublish("status/lights/ifchanged/state",data_buffer.payload.ctr,false);
 //   }
 // }
 uint8_t mGarageLights::ConstructJSON_LightStates(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   // JsonObject root = doc.to<JsonObject>();
@@ -400,9 +403,9 @@ uint8_t mGarageLights::ConstructJSON_LightStates(uint8_t json_level){
   //   }
   // }
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // if(data_buffer2.payload.len>3){
-  //   serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // if(data_buffer.payload.len>3){
+  //   serializeJson(doc,data_buffer.payload.ctr);
   //   return 1;
   // }
 

@@ -96,12 +96,14 @@ void mSensorsBME::Pre_Init(){
   settings.fSensorCount = 0;
 
   // in futre use array to store bme type found (BME_280_ID, BME_180_ID) etc
-  if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID)){
+  // if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-    Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
+  if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77)){
+
+    // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
     sensor[settings.fSensorCount].bme = new Adafruit_BME280();
-    if (sensor[settings.fSensorCount].bme->begin(Wire)) {
+    if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
       settings.fSensorCount++;
     }else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));

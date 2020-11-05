@@ -66,6 +66,9 @@ enum FUNCTION_RESULT_IDS{
 #include <ESPAsyncWebServer.h>
 #endif //USE_MODULE_CORE_WEBSERVER
 
+//#ifdef USE_I2C
+  #include <Wire.h>                         // I2C support library
+//#endif  // USE_I2C
 
 #ifdef ESP32
   #include <WiFi.h>
@@ -380,10 +383,18 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)              "db18s20";
   #define pCONT_msdb18        pCONT->msdb18
 #endif
+#ifdef USE_MODULE_SENSORS_INA219
+  #include "5_Sensors/INA219/mSensorsINA219.h"
+  class mSensorsINA219;
+  #define D_MODULE_SENSORS_INA219_ID 127
+  DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_INA219_CTR)              "mSensorsINA219";
+  DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_INA219_FRIENDLY_CTR)     "ina219";
+  #define pCONT_mina219        pCONT->msina219
+#endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   class mUltraSonicSensor;
-  #define D_MODULE_SENSORS_ULTRASONIC_ID 127
+  #define D_MODULE_SENSORS_ULTRASONIC_ID 128
   #define            pCONT_ult                               pCONT->mus
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_ULTRASONIC_CTR)           "mUltraSonicSensor";
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR)     "ultrasonic";
@@ -391,7 +402,7 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/Door/mDoorSensor.h"
   class mDoorSensor;
-  #define D_MODULE_SENSORS_DOOR_ID 128
+  #define D_MODULE_SENSORS_DOOR_ID 129
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_DOOR_CTR)                D_MODULE_SENSORS_DOOR_CTR;
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR)       D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
   #define pCONT_msdb18        pCONT->msdb18
@@ -399,21 +410,21 @@ DEFINE_PROGMEM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; /
 #ifdef USE_MODULE_SENSORS_MOTION
   #include "5_Sensors/PIR/mMotionSensor.h"
   class mMotionSensor;
-  #define D_MODULE_SENSORS_MOTION_ID 129 //new layout
+  #define D_MODULE_SENSORS_MOTION_ID 130 //new layout
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_MOTION_CTR)                D_MODULE_SENSORS_MOTION_CTR;
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)       D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
   class mMoistureSensor;
-  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID 130
+  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID 131
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR)              "mMoistureSensor";
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_RESISTIVE_MOISTURE_FRIENDLY_CTR)              "moisture";
 #endif
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   class mPulseCounter;
-  #define D_MODULE_SENSORS_PULSECOUNTER_ID 131
+  #define D_MODULE_SENSORS_PULSECOUNTER_ID 132
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_PULSECOUNTER_CTR)              "mPulseCounter";
   DEFINE_PROGMEM_CTR(PM_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR)              "pulsecounter";
 #endif
@@ -634,6 +645,9 @@ class mTaskerManager{
   #endif
   #ifdef USE_MODULE_SENSORS_DS18B20
     mSensorsDB18 *msdb18 = nullptr;
+  #endif
+  #ifdef USE_MODULE_SENSORS_INA219
+    mSensorsINA219 *msina219 = nullptr;
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     mUltraSonicSensor *mus = nullptr;

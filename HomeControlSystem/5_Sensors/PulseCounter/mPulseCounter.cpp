@@ -371,7 +371,7 @@ void mPulseCounter::WebPage_Root_AddHandlers(){
 
 uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_method){
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
     StaticJsonDocument<400> doc;
     JsonObject root = doc.to<JsonObject>();
 
@@ -384,10 +384,10 @@ uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_method){
     root["sett_tele_rate"] =mqtthandler_settings_teleperiod.tRateSecs;
 
 
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+    data_buffer.payload.len = measureJson(root)+1;
+    serializeJson(doc,data_buffer.payload.ctr);
     
-  return (data_buffer2.payload.len>3?1:0);
+  return (data_buffer.payload.len>3?1:0);
 
 }
 
@@ -398,7 +398,7 @@ uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mPulseCounter::ConstructJSON_Sensor(uint8_t json_level){
 
   // clear entire mqtt packet
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint8_t ischanged=false;
 
@@ -448,10 +448,10 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
 
 }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
   
-  return (data_buffer2.payload.len>3?1:0);
+  return (data_buffer.payload.len>3?1:0);
 
 }
 

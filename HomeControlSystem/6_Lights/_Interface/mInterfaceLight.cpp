@@ -717,7 +717,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mInterfaceLight::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/light")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/light")>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "mInterfaceLight"));
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -759,14 +759,14 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "RGBCCT_PWM");
       #endif
       pCONT_set->Settings.light_settings.type = LT_PWM5;
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else 
     if(strstr(onoff,D_JSON_WS2812)){
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "WS2812");
       #endif
       pCONT_set->Settings.light_settings.type = LT_WS2812;
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
@@ -781,7 +781,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_ONOFF,0);
   //   #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   data_buffer2.isserviced++;
+  //   data_buffer.isserviced++;
   // }
 
   if(!obj[D_JSON_HUE].isNull()){ 
@@ -790,7 +790,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_SAT].isNull()){    // Assume range 0-100
@@ -801,7 +801,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_BRT].isNull()){    // Assume range 0-100
@@ -812,7 +812,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
   
 
@@ -824,7 +824,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_BRT_CCT].isNull()){    // Assume range 0-100
@@ -836,7 +836,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_CCT,brt);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_CCT_PERCENTAGE].isNull()){    // Assume range 0-100
@@ -845,7 +845,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_PERCENTAGE,cct_value);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_CCT_TEMP].isNull()){    // Assume range 0-100
@@ -854,7 +854,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_TEMP,cct_value);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
 
   if(!obj[D_JSON_RGBCCT_LINKED].isNull()){    // Assume range 0-100
@@ -863,7 +863,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_RGBCCT_LINKED,value);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   } 
 
   // if(!obj[D_JSON_RGB].isNull()){
@@ -979,7 +979,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       char buffer[30];
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,GetSceneName(buffer, sizeof(buffer)));
       //#endif
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,mode_singlecolourctr);
@@ -1011,7 +1011,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
         light_power = true;
 
         //animation.mode_id = MODE_TURN_ON_ID;
-        data_buffer2.isserviced++;
+        data_buffer.isserviced++;
         
       break;
       case STATE_NUMBER_OFF_ID:
@@ -1029,7 +1029,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
         light_power = false;
 
         //animation.mode_id = MODE_TURN_OFF_ID;
-        data_buffer2.isserviced++;
+        data_buffer.isserviced++;
 
       break;
     } // END switch
@@ -1055,7 +1055,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       #ifdef ENABLE_PALETTE_FORCED_MODE
       //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
       #endif
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
       uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
       animation.palette_id = colour < PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
@@ -1076,7 +1076,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,GetAnimationModeName(buffer, sizeof(buffer)));
       #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
@@ -1093,7 +1093,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_RGB_COLOUR_ORDER,GetHardwareColourTypeName(buffer));
       #endif
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,mode);
@@ -1115,7 +1115,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     #endif
     #endif //    #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
   }
   
   
@@ -1131,7 +1131,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
 //     #endif
 //     // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-//     data_buffer2.isserviced++;
+//     data_buffer.isserviced++;
 //   }else
 //   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE].isNull()){ 
 //     int percentage = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE];
@@ -1141,7 +1141,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     #endif
 //     Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
 //     // Also convert to number equivalent
-//     data_buffer2.isserviced++;
+//     data_buffer.isserviced++;
 //   }
 
 // DEBUG_LINE;
@@ -1158,7 +1158,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val);
 //     #endif
 //     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
-//     data_buffer2.isserviced++;
+//     data_buffer.isserviced++;
 //     //check that rate>animation time
 //     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
 //   }else
@@ -1168,7 +1168,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,animation.transition.time_ms.val);
 //     #endif
 //     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
-//     data_buffer2.isserviced++;
+//     data_buffer.isserviced++;
 //     //check that rate>animation time
 //     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
 //   }
@@ -1186,7 +1186,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
     //check that rate>animation time
     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
   }else
@@ -1196,7 +1196,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,animation.transition.rate_ms.val);
     #endif
     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
-    data_buffer2.isserviced++;
+    data_buffer.isserviced++;
     //check that rate>animation time
     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
   }
@@ -1208,7 +1208,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       animation.transition.order_id = tmp_id;
       // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }else{
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
@@ -1330,7 +1330,7 @@ void mInterfaceLight::EveryLoop(){
 
 
 void mInterfaceLight::SubTask_AutoOff(){
-  if(mSupport::TimeReached(&tSavedAutoOff,1000)){
+  if(mTime::TimeReached(&tSavedAutoOff,1000)){
     //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "scene.tSavedAutoOff [%d]"),animation.auto_time_off_secs);
     if(auto_time_off_secs==1){ //if =1 then turn off and clear to 0
       // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF_ID;
@@ -1813,10 +1813,10 @@ void mInterfaceLight::MQTTHandler_Set_fSendNow(){
 
 void mInterfaceLight::MQTTHandler_Set_TelePeriod(){
 
-  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   
 } //end "MQTTHandler_Set_TelePeriod"
 
@@ -1831,10 +1831,9 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Group(
-    *this, D_MODULE_LIGHTS_INTERFACE_ID,
-    mqtthandler_list_ptr, sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_INTERFACE_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids, 
+    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
     mqtt_handler_id
   );
 
@@ -2737,7 +2736,7 @@ DEBUG_LINE;
   char name_ctr[100];
   for(uint8_t ii=0;ii<20;ii++){
     memset(name_ctr,0,sizeof(name_ctr));
-    sprintf(name_ctr,PSTR("%s %02d\0"),D_PALETTE_USER_NAME_CTR,ii);
+    sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_USER_NAME_CTR,ii);
     // Default names
     if(strstr(c,name_ctr)){
       return PALETTELIST_VARIABLE_USER_01_ID+ii;

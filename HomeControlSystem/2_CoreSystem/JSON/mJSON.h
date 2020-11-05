@@ -100,7 +100,7 @@ class JsonBuilder{
       
       if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
-      #ifdef DEBUG_writer.BUILDER
+      #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
       uint8_t id = getIdentifierID4(value);
       GetIndentifierNameByID(id, buffer_id);
@@ -133,7 +133,7 @@ class JsonBuilder{
       
       if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
-      #ifdef DEBUG_writer.BUILDER
+      #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
       uint8_t id = getIdentifierID4(value);
       GetIndentifierNameByID(id, buffer_id);
@@ -165,7 +165,7 @@ class JsonBuilder{
   
   if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
-  #ifdef DEBUG_writer.BUILDER
+  #ifdef DEBUG_JSON_BUILDER
   char buffer_id[50];
   uint8_t id = getIdentifierID4(value);
   GetIndentifierNameByID(id, buffer_id);

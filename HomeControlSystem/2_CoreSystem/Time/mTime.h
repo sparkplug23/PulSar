@@ -97,11 +97,18 @@ class mTime{
 
     uint32_t uptime_seconds_nonreset = 0; //test new uptime with comparison of breaktime
     uint32_t boottime_epoch;
+
+    
+    uint32_t GetTimeOfDay_Seconds(void);
+    static const char* ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds, char* buffer, uint8_t buflen);
+    static const char* ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen);
     
     // Used to keep the last midnight time, this stops multiple midnight runs at the same midnight
     uint16_t lastday_run = 0;
     
     const char* GetDateAndTime(uint8_t time_type);
+
+    time_short_t GetTimeShortNow();
 
     uint32_t tSavedUptime;
 

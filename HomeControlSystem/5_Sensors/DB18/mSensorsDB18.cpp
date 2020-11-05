@@ -500,7 +500,7 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mSensorsDB18::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr, "set/" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr, "set/" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -515,13 +515,13 @@ int8_t mSensorsDB18::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 void mSensorsDB18::parse_JSONCommand(JsonObjectConst obj){
 
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
   //   #endif
   //   parsesub_ModeManual(obj);
   // }else 
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/animation",sizeof("/animation")-1)>=0){
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/animation",sizeof("/animation")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
   //   #endif    
@@ -601,7 +601,7 @@ void mSensorsDB18::SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find)
 
 
 void mSensorsDB18::EveryLoop(){
-  if(mSupport::TimeReachedNonReset(&tSavedMeasureSensor,settings.rate_measure_ms)){
+  if(mTime::TimeReachedNonReset(&tSavedMeasureSensor,settings.rate_measure_ms)){
     
     // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
 

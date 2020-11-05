@@ -1125,14 +1125,15 @@ void mHardwarePins::GpioInit(void)
   }
 
 
-// #ifdef USE_I2C
-//   pCONT_set->i2c_flg = ((pCONT_set->pin[GPIO_I2C_SCL] < 99) && (pCONT_set->pin[GPIO_I2C_SDA] < 99));
-//   if (pCONT_set->i2c_flg) { Wire.begin(pCONT_set->pin[GPIO_I2C_SDA], pCONT_set->pin[GPIO_I2C_SCL]); }
-// #endif  // USE_I2C
-
-  DEBUG_LINE; 
-
-
+#ifdef USE_I2C
+  pCONT_set->i2c_flg = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
+  if (pCONT_set->i2c_flg) { 
+    if(pCONT_sup->wire == nullptr){
+      pCONT_sup->wire = new TwoWire();
+    }
+    pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
+  } // i2c_flg
+#endif  // USE_I2C
 
 
   /**

@@ -50,7 +50,7 @@ int8_t mRelays::Tasker(uint8_t function){
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
-      // if(mSupport::TimeReached(&tSavedTest,1000)){
+      // if(mTime::TimeReached(&tSavedTest,1000)){
       //   // SetAllPower(POWER_TOGGLE,SRC_IGNORE);
       // }
     break;     
@@ -198,7 +198,7 @@ void mRelays::WebAppend_Root_Status_Table(){
 int8_t mRelays::CheckAndExecute_JSONCommands(JsonObjectConst obj){ //parsesub_TopicCheck_JSONCommand
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/relays")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/relays")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parse_JSONCommand(obj);
@@ -735,15 +735,15 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
   // root["tbd"] = 0;
   root["relays_connected"] = relays_connected;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   return 1;
 }
@@ -751,7 +751,7 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint16_t length = 0;
   DEBUG_LINE;
@@ -768,7 +768,7 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
 
       AddLog_P(LOG_LEVEL_DEBUG,PSTR("relay_name=%s"),relay_name);
       
-      length += pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr+length,
+      length += pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr+length,
         PSTR(
           "%c"
             "\"%s\":{"
@@ -792,10 +792,10 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
   
   // things were written, close it
   if(length){ // relay before  
-    length += pCONT_sup->WriteBuffer_P(data_buffer2.payload.ctr+length, PSTR("}"));
+    length += pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr+length, PSTR("}"));
   }
 
-  return strlen(data_buffer2.payload.ctr)?1:0; // use strlen as indicator to send, this will have false positives until arduinojson is phased out
+  return strlen(data_buffer.payload.ctr)?1:0; // use strlen as indicator to send, this will have false positives until arduinojson is phased out
 
 }
 

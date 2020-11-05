@@ -738,17 +738,17 @@ void mPWMLight::WebCommand_Parse(void)
 //   //   return;
 //   // }
 
-//   // memset(&data_buffer2,0,sizeof(data_buffer2));
-//   // char *buf = data_buffer2.payload.ctr;
+//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // char *buf = data_buffer.payload.ctr;
 //   // char **buffer = &buf;
 //   // pCONT_web->buffer_writer_len = 0;
 
 //   // BuildPage_RGBPaletteEditor(buffer);
 
 //   // uint16_t freemem_start = ESP.getFreeHeap();  
-//   // AddLog_P(LOG_LEVEL_DEBUG,PSTR("WEB: url \"%s\" size [%d] FR %d"),"/",strlen(data_buffer2.payload.ctr),freemem_start);
+//   // AddLog_P(LOG_LEVEL_DEBUG,PSTR("WEB: url \"%s\" size [%d] FR %d"),"/",strlen(data_buffer.payload.ctr),freemem_start);
 
-//   // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer2.payload.ctr);
+//   // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
 
 //   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_ASYNC "FreeRam %d"),freemem_start-ESP.getFreeHeap());
   
@@ -1731,7 +1731,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_End();
 //   JsonBuilderI->End();
 
-//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 // }
 
@@ -1741,7 +1741,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     WebAppend_RGBLightSettings_FillOptions_Controls();
 //   JsonBuilderI->End();
 
-//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 // }
 
@@ -1757,7 +1757,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     WebAppend_RGBLightSettings_Draw_PageButtons();
 //   JsonBuilderI->End();
 
-//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 // } //end function
 
@@ -1839,7 +1839,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     WebAppend_PaletteEditor_Draw_Editor_Form();
 //   JsonBuilderI->End();
 
-//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 // } //end function
 
@@ -2016,7 +2016,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Level_End();
 //   JsonBuilderI->End();
 
-//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 // }
 
@@ -2027,7 +2027,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     WebAppend_PaletteEditor_FillOptions_Controls();
 //   JsonBuilderI->End();
 
-//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer2.payload.ctr);
+//   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
 // }
 
@@ -2373,7 +2373,7 @@ void mPWMLight::WebCommand_Parse(void)
 //     JsonBuilderI->Array_End();
 //   JsonBuilderI->End();
 
-//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 // } //end function
 
@@ -2517,7 +2517,7 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
   JsonBuilderI->Array_End();
   // JsonBuilderI->End();
 
-  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 }
 
@@ -2554,7 +2554,7 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 //   JsonBuilderI->Array_End();
 //   JsonBuilderI->End();
 
-//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+//   pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 // }
 

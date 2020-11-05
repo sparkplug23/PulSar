@@ -314,10 +314,10 @@ int8_t mPWMFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   // if(mSupport::CheckSetTopicIsModulebyID())
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/pwmfan")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/pwmfan")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parsesub_Commands(obj);
+    parse_JSONCommand(obj);
     return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -325,7 +325,7 @@ int8_t mPWMFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-void mPWMFan::parsesub_Commands(JsonObjectConst obj){
+void mPWMFan::parse_JSONCommand(JsonObjectConst obj){
 
   // Serial.println("mPWMFan::parsesub_Commands(JsonObjectConst obj)");
 

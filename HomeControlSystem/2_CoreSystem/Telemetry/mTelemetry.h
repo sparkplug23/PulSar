@@ -30,6 +30,8 @@
 
 #include "2_CoreSystem/JSON/mJSON.h"
 
+#include "3_Network/MQTT/mMQTT.h"
+
 
 #include "2_CoreSystem/Logging/mLogging.h"
 
@@ -73,6 +75,7 @@ class mTelemetry{
     
     int8_t Tasker(uint8_t function);
     void init(void);
+    void WebPage_Root_AddHandlers();
 
     uint8_t ConstructJSON_Health(uint8_t json_level);
     uint8_t ConstructJSON_Settings(uint8_t json_level);
@@ -129,6 +132,54 @@ class mTelemetry{
     uint32_t tSavedTest;
 
     uint32_t loop_delay = 100;
+
+    //use new syntax
+    enum STATUS_SYSTEM_IDS{
+      MQTT_HANDLER_SYSTEM_ALL_ID = 0,
+      MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
+      MQTT_HANDLER_SYSTEM_SETTINGS_ID,
+      MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
+      MQTT_HANDLER_SYSTEM_LOG_ID,
+      MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
+      MQTT_HANDLER_SYSTEM_MEMORY_ID,
+      MQTT_HANDLER_SYSTEM_NETWORK_ID,
+      MQTT_HANDLER_SYSTEM_MQTT_ID,
+      MQTT_HANDLER_SYSTEM_TIME_ID,
+      MQTT_HANDLER_SYSTEM_DEVICES_ID,
+      MQTT_HANDLER_SYSTEM_REBOOT_ID,
+      MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+      #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+        MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
+        MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
+        MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
+        MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
+      #endif
+      MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
+    };
+
+    
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Sender(uint8_t status_id = MQTT_HANDLER_SYSTEM_ALL_ID);
+
+    handler<mTelemetry> mqtthandler_health;
+    handler<mTelemetry> mqtthandler_settings;
+    handler<mTelemetry> mqtthandler_log;
+    handler<mTelemetry> mqtthandler_firmware;
+    handler<mTelemetry> mqtthandler_memory;
+    handler<mTelemetry> mqtthandler_network;
+    handler<mTelemetry> mqtthandler_mqtt;
+    handler<mTelemetry> mqtthandler_time;
+    handler<mTelemetry> mqtthandler_devices;
+    handler<mTelemetry> mqtthandler_reboot;
+    handler<mTelemetry> mqtthandler_reboot_event;
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      handler<mTelemetry> mqtthandler_debug_pins;
+      handler<mTelemetry> mqtthandler_debug_template;
+      handler<mTelemetry> mqtthandler_debug_moduleinterface;
+      handler<mTelemetry> mqtthandler_debug_minimal;
+    #endif
 
 
 

@@ -30,23 +30,23 @@ debug
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
 //#define DEVICE_RGBROOF                                
-//#define DEVICE_RGBDELL
-//#define DEVICE_RGBCRYSTAL1
+// #define DEVICE_RGBDELL
+// #define DEVICE_RGBCRYSTAL1
 //#define DEVICE_RGBCRYSTAL2
 //#define DEVICE_RGBSHELF
 //#define DEVICE_RGBMICRO1 //glass box
-#define DEVICE_RGBMICRO2 //projector                  
+//#define DEVICE_RGBMICRO2 //projector                  
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 //#define DEVICE_RGBMICRO4 //gazebo
 //#define DEVICE_RGBBEDLIGHT                            
 //#define DEVICE_RGBBEDLIGHT_TEST                            
-//#define DEVICE_RGBDESK
+// #define DEVICE_RGBDESK
 //#define DEVICE_RGBCOOKER
 //#define DEVICE_RGBUTILITY
 //#define DEVICE_RGBFRIDGE
-//#define DEVICE_RGBOUTSIDETREE                          
+// #define DEVICE_RGBOUTSIDETREE                          
 //#define DEVICE_CHRISTMAS_HALLWAYTREE                          
-//#define DEVICE_RGBBEDROOMFLOOR
+// #define DEVICE_RGBBEDROOMFLOOR
 //#define DEVICE_H801_TESTER
 
 /**
@@ -54,21 +54,21 @@ debug
 **/
 // #define DEVICE_GARAGELIGHT
 //#define DEVICE_GARAGELIGHT2
-// #define DEVICE_SIDEDOORLIGHT
+//#define DEVICE_SIDEDOORLIGHT
 //#define DEVICE_SHELLY1_TESTER
 //#define DEVICE_RADIATORFAN
 //#define DEVICE_BEDROOMBLINDS
-//#define DEVICE_DOORBELLWALLCHIME                 
+// #define DEVICE_DOORBELLWALLCHIME                 
 //#define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
-//#define DEVICE_HEATING
+#define DEVICE_HEATING
 //#define DEVICE_KITCHENPANEL
-//#define DEVICE_LANDINGPANEL
+// #define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 //#define DEVICE_BLACKDOORBELL
 //#define DEVICE_BEDROOM_CEILINGFAN
 //#define DEVICE_FLOORFAN1
-//#define DEVICE_DESKFAN
+// #define DEVICE_DESKFAN
 
 /**
  *  ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- 
@@ -80,10 +80,10 @@ debug
 **/
 //#define DEVICE_ATTICSENSOR
 //#define DEVICE_BEDROOMSENSOR
-//#define DEVICE_KITCHENSENSOR
+// #define DEVICE_KITCHENSENSOR
 // #define DEVICE_UTILITYSENSOR
 //#define DEVICE_LIVINGROOMSENSOR
-//#define DEVICE_ENSUITESENSOR
+// #define DEVICE_ENSUITESENSOR
 //#define DEVICE_TESTSENSOR
 
 /**
@@ -381,6 +381,10 @@ debug
 
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
+//  #define USE_PUBSUB_V1
+
+  //#define ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
+
   // #define ENABLE_BUG_TRACING
 
   // #define DISABLE_WEBSERVER
@@ -392,6 +396,9 @@ debug
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
   // #define USE_INTERFACE_NEW
+
+  // #define USE_MODULE_SENSORS_INA219
+  // #define USE_MODULE_SENSORS_BME
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -408,7 +415,11 @@ debug
   "{"
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"GPIOC\":{"
+    "\"GPIOC\":{"    
+      #if defined(USE_MODULE_SENSORS_INA219) || defined(USE_MODULE_SENSORS_BME)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -430,6 +441,18 @@ debug
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
     "\"" D_JSON_BRIGHTNESS       "\":0,"
     "\"" D_JSON_BRT_RGB          "\":0"
+  "}";
+
+  #define D_DEVICE_SENSOR_CURRENT "Module 1"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_INA219_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CURRENT "\""
+      "]"
+    "}"
   "}";
 
 #endif
@@ -553,7 +576,7 @@ debug
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define STRIP_SIZE_MAX 100//*15
+  #define STRIP_SIZE_MAX 800//*15
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -590,9 +613,10 @@ debug
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
-    "\"" D_JSON_BRIGHTNESS       "\":100"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
   "}";
 
 #endif
@@ -687,7 +711,7 @@ debug
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
 
-  #define ESP8266
+  // #define ESP8266
 
   // #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "Kitchen Test"
   
@@ -758,7 +782,7 @@ debug
       "\"" D_JSON_BRIGHTNESS     "\":0"
     "}";
     
-    #define ESP8266
+    // #define ESP8266
 
 #endif
 
@@ -805,8 +829,9 @@ debug
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
-    "\"" D_JSON_BRIGHTNESS     "\":0"
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
+    "\"" D_JSON_BRIGHTNESS     "\":10,"
+    "\"" D_JSON_BRT_RGB        "\":10"
   "}";
   
 #endif
@@ -859,7 +884,7 @@ debug
       "\"" D_JSON_BRIGHTNESS     "\":99"
     "}";
     
-    #define ESP8266
+    // #define ESP8266
 
 #endif
 
@@ -870,6 +895,7 @@ debug
   
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 10
+  #define STRIP_SIZE_MAX 150
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
@@ -897,9 +923,10 @@ debug
     #endif //STRIP_SIZE_MAX
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":4,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-      "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\"," //purple/pink/red (at sunset orange?)
-      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
-      "\"" D_JSON_BRIGHTNESS     "\":100"
+      "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
+      "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_BRIGHTNESS     "\":10,"
+      "\"" D_JSON_BRT_RGB        "\":10"
     "}";
 
 #endif
@@ -1222,7 +1249,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Doorbell Wall Chime"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
@@ -1258,9 +1285,10 @@ debug
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
     "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[180,100,0]" 
+          "\"" D_JSON_HSB    "\":[330,100,100]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -1489,6 +1517,12 @@ debug
           "\"" D_JSON_HSB    "\":[25,90,100]" 
           // "\"" D_JSON_RGBW    "\":[0,0,0,255]" 
         "},"
+        "\"AnimationMode\":\"Scene\","
+        "\"SceneName\":\"ColourSingle\","
+        "\"hue\":20,"
+        "\"sat\":90,"
+        "\"cct_temp\":600,"
+        "\"brt_rgb\":100,"
     "\"" D_JSON_BRIGHTNESS     "\":"    "100"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
@@ -1594,7 +1628,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
   
   // #define ENABLE_BUG_TRACING
 
@@ -1602,17 +1636,17 @@ debug
   // // #define USE_SENSOR_DOOR_LOCK
   // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  #define USE_MODULE_SENSORS_DS18B20
-  #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
+  // #define USE_MODULE_SENSORS_DS18B20
+  // #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
 
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define MOTIONALERT_PAYLOAD1_CTR "bedroom"
+  #define USE_MODULE_SENSORS_MOTION
+  #define MOTIONALERT_PAYLOAD1_CTR "Bedroom"
   
   // Test ultrasonic oilfurnace code
   // #define USE_BUILD_TYPE_CUSTOM
   // #define USE_MODULE_CUSTOM_OILFURNACE
-  #define USE_MODULE_SENSORS_ULTRASONICS  
-  #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define USE_MODULE_SENSORS_ULTRASONICS  
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
   // #define USE_MODULE_SENSORS_BME
 
@@ -1700,7 +1734,7 @@ debug
           "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
         "],"
         "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" "bedroom" "\""
+          "\"" MOTIONALERT_PAYLOAD1_CTR "\""
         "],"
         "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
           "\"" "Bedroom" "\""
@@ -1859,16 +1893,15 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Light"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
    
-  #define USE_MODULE_SENSORS_MOTION
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
+  // #define USE_MODULE_SENSORS_MOTION
 
-  #define ENABLE_DEVFEATURE_RELAY_CONTROLS
+  // #define ENABLE_DEVFEATURE_RELAY_CONTROLS
   
-  // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
+  // // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
 
-  #define USE_MODULE_DRIVERS_RELAY
+  // #define USE_MODULE_DRIVERS_RELAY
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
@@ -1882,13 +1915,16 @@ debug
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
       #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      // "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\""  "intentionally_blank" "\""
     "},"
     "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
   #define RELAYS_CONNECTED 1
+  
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
@@ -2118,10 +2154,10 @@ debug
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
     "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
     "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[25,90,0]" 
-          // "\"" D_JSON_RGBW    "\":[0,0,0,255]" 
+          "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -2133,12 +2169,12 @@ debug
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -2221,7 +2257,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
      
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_MOTION
@@ -2823,7 +2859,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 Virtual"
   
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
   
   // #define ENABLE_BUG_TRACING
 

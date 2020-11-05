@@ -445,7 +445,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
 
   if(presence_detect.ischanged){ presence_detect.ischanged=false;
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
 
     StaticJsonDocument<300> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -454,13 +454,13 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
     #endif
     root["time"] = pCONT->mt->mtime.hhmmss_ctr;
 
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+    data_buffer.payload.len = measureJson(root)+1;
+    serializeJson(doc,data_buffer.payload.ctr);
 
     if(presence_detect.isactive){
-      pCONT_mqtt->ppublish("status/presence/detected",data_buffer2.payload.ctr,false);
+      pCONT_mqtt->ppublish("status/presence/detected",data_buffer.payload.ctr,false);
     }else{
-      pCONT_mqtt->ppublish("status/presence/over",data_buffer2.payload.ctr,false);
+      pCONT_mqtt->ppublish("status/presence/over",data_buffer.payload.ctr,false);
     }
 
   }
@@ -581,7 +581,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
   
   #ifdef DEVICE_LIVINGROOMSENSOR
     //Alerts if sensor value changes from previous
-    if(mSupport::TimeReached(&object_detected_static.tSavedCheck,10000)){
+    if(mTime::TimeReached(&object_detected_static.tSavedCheck,10000)){
       float distancecm = GetDistanceCMReading();
       
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "distancecm=%d"),(int)distancecm);
@@ -645,7 +645,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
 void mUltraSonicSensor::parse_JSONCommand(){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/ultrasonic")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ultrasonic")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -735,14 +735,14 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
   JsonBuilderI->Start();  
   // Serial.println("ConstructJSON_SensorsAveraged");
 
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer,0,sizeof(data_buffer));
   // DynamicJsonDocument doc(200);
   // JsonObject root = doc.to<JsonObject>();
 
   // // root["json_teleperiod_level"] = "test";//pCONT_set->GetTelePeriodJsonLevelCtr();
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
   return JsonBuilderI->End();
 }

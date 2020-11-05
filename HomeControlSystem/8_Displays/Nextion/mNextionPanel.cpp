@@ -194,7 +194,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mNextionPanel::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/nextion")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
@@ -226,7 +226,7 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 // uint8_t mNextionPanel::parse_JSONCommand(){
 
   // Check if instruction is for me
-  // if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/nextion")>=0){
+  // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   //   fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
@@ -242,16 +242,16 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
 
 
-  // if(strstr(data_buffer2.topic.ctr,"/commands")){ 
+  // if(strstr(data_buffer.topic.ctr,"/commands")){ 
   // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/commands",sizeof("/commands")-1)>=0){
+  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/commands",sizeof("/commands")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
     #endif
     isserviced += parsesub_Commands(obj);
   }else 
    // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
-  if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
+  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
     #endif
@@ -261,10 +261,10 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   }  
   
   
-  // if(strstr(data_buffer2.topic.ctr,"/set_single")){
+  // if(strstr(data_buffer.topic.ctr,"/set_single")){
     
   //   StaticJsonDocument<300> doc;
-  //   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   //   JsonObject obj = doc.as<JsonObject>();
 
   //   if((!obj["attribute"].isNull())&&(!obj["value"].isNull())){ 
@@ -275,10 +275,10 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   // }else
   // // Get element (ask, no value)
-  // if(strstr(data_buffer2.topic.ctr,"/get_single")){
+  // if(strstr(data_buffer.topic.ctr,"/get_single")){
     
   //   StaticJsonDocument<300> doc;
-  //   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   //   JsonObject obj = doc.as<JsonObject>();
 
   //   if(!obj["attribute"].isNull()){ 
@@ -288,7 +288,7 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   // }else
   // // Get element (ask, no value)
-  // if(strstr(data_buffer2.topic.ctr,"/nextion/flash_message")){
+  // if(strstr(data_buffer.topic.ctr,"/nextion/flash_message")){
   //   isserviced += parsesub_FlashMessage();
   // }
 
@@ -311,7 +311,7 @@ int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   //   }
   // }
 
-  data_buffer2.isserviced += isserviced;
+  data_buffer.isserviced += isserviced;
  
 //  
 
@@ -459,7 +459,7 @@ void mNextionPanel::EveryLoop(){
 
   // Check if long press threshold reached
   if(screen_press.fEnableImmediateButtonTime){
-    if(mSupport::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
+    if(mTime::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
       screen_press.fEnableImmediateButtonTime=false;
       fEnableIgnoreNextOffEvent = true;
@@ -557,7 +557,7 @@ void mNextionPanel::mqttDisconnected(){
 
 void mNextionPanel::MQTTSend_PressEvent(){
 
-  // if(!mSupport::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
+  // if(!mTime::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
   //   // Debounce and only send once per event (ie ignore release trigger following immediate trigger)
   //   return;
   // }
@@ -577,13 +577,13 @@ void mNextionPanel::MQTTSend_PressEvent(){
   rootobj["value"] = (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS";
   rootobj["duration"] = tSavedTimeSincePressOn;
 
-  memset(&data_buffer2.topic.ctr,0,sizeof(data_buffer2.topic.ctr));
-  data_buffer2.payload.len = measureJson(rootobj)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  memset(&data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr));
+  data_buffer.payload.len = measureJson(rootobj)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   tSaved_MQTTSend_PressEvent = millis();
 
-  pCONT_mqtt->ppublish("status/nextion/event/press",data_buffer2.payload.ctr,0);
+  pCONT_mqtt->ppublish("status/nextion/event/press",data_buffer.payload.ctr,0);
 
 }
 
@@ -603,12 +603,12 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
   rootobj["value"] = "LONG_PRESS";
   rootobj["duration_threshold"] = LONG_PRESS_DURATION;
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
-  data_buffer2.payload.len = measureJson(rootobj)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  memset(&data_buffer,0,sizeof(data_buffer));
+  data_buffer.payload.len = measureJson(rootobj)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
-  pCONT_mqtt->ppublish("status/nextion/event",data_buffer2.payload.ctr,0);
-  pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer2.payload.ctr,0);
+  pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+  pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
 
 }
 
@@ -623,7 +623,7 @@ int8_t mNextionPanel::parsesub_FlashMessage(){
   #else
     DynamicJsonDocument doc(600);
   #endif
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   if(error){
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
@@ -812,12 +812,12 @@ void mNextionPanel::nextionProcessInput()
         rootobj["event"] = event_ctr;
         rootobj["value"] = D_JSON_ON;
 
-      memset(&data_buffer2,0,sizeof(data_buffer2));
-      data_buffer2.payload.len = measureJson(rootobj)+1;
-      serializeJson(doc,data_buffer2.payload.ctr);
+      memset(&data_buffer,0,sizeof(data_buffer));
+      data_buffer.payload.len = measureJson(rootobj)+1;
+      serializeJson(doc,data_buffer.payload.ctr);
 
-      pCONT_mqtt->ppublish("status/nextion/event",data_buffer2.payload.ctr,0);
-      pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer2.payload.ctr,0);
+      pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+      pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
 
     }
     if (nextionButtonAction == 0x00) // OFF - LET_GO
@@ -835,14 +835,14 @@ void mNextionPanel::nextionProcessInput()
       rootobj["value"] = D_JSON_OFF;
       rootobj["duration"] = screen_press.tSavedButtonONDurationEvent;
 
-      memset(&data_buffer2,0,sizeof(data_buffer2));
-      data_buffer2.payload.len = measureJson(rootobj)+1;
-      serializeJson(doc,data_buffer2.payload.ctr);
+      memset(&data_buffer,0,sizeof(data_buffer));
+      data_buffer.payload.len = measureJson(rootobj)+1;
+      serializeJson(doc,data_buffer.payload.ctr);
 
       if(!fEnableIgnoreNextOffEvent){
         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
-        pCONT_mqtt->ppublish("status/nextion/event",data_buffer2.payload.ctr,0);
-        pCONT_mqtt->ppublish("status/nextion/event/end",data_buffer2.payload.ctr,0);
+        pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+        pCONT_mqtt->ppublish("status/nextion/event/end",data_buffer.payload.ctr,0);
         MQTTSend_PressEvent();
       }else{
         fEnableIgnoreNextOffEvent = false;// reset to listen to next event
@@ -1927,7 +1927,7 @@ void mNextionPanel::configClearSaved()
 
 uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
@@ -1941,14 +1941,14 @@ uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
     root["heapFragmentation"] = ESP.getHeapFragmentation();
     root["heapFree"] = ESP.getCoreVersion();
   #endif
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 return 1;
 }
 
 uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint8_t ischanged=false;
 
@@ -1970,8 +1970,8 @@ uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
   
   // }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   return 1;
 
@@ -1980,7 +1980,7 @@ uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
 uint8_t mNextionPanel::ConstructJSON_EnergyStats(uint8_t json_level){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   uint8_t ischanged=false;
 
@@ -2002,8 +2002,8 @@ uint8_t mNextionPanel::ConstructJSON_EnergyStats(uint8_t json_level){
   
   // }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   return 1;
 

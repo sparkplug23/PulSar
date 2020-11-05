@@ -293,7 +293,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/ifan")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_Commands(obj);

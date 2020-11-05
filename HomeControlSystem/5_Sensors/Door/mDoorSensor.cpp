@@ -36,22 +36,16 @@ uint8_t mDoorSensor::IsDoorOpen(){
 
 void mDoorSensor::init(void){
 
-  sprintf(door_detect.detected_rtc_ctr,"--:--:--\0");
-
-  //record init state
   door_detect.state = IsDoorOpen();
-
-  #ifdef DOORALERT_PAYLOAD_CTR
-    sprintf(door_detect.friendly_name_ctr,DOORALERT_PAYLOAD_CTR);
-  #else
-    sprintf(door_detect.friendly_name_ctr,"undefined");
-  #endif
 
 }
 
 
 int8_t mDoorSensor::Tasker(uint8_t function){
 
+  /************
+   * INIT SECTION * 
+  *******************/
   switch(function){
     case FUNC_PRE_INIT:
       pre_init();
@@ -61,57 +55,15 @@ int8_t mDoorSensor::Tasker(uint8_t function){
     break;
   }
 
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR("mDoorSensor::Tasker"));
-  if(!settings.fEnableSensor){ return 0; }
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR("mDoorSensor::Tasker return"));
+  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
-  
-  // pin_open = D4;
-  // pinMode(pin_open,INPUT_PULLUP);
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR("mDoorSensor::Pin %s"),digitalRead(D4)?"ON":"OFF");
-  
   switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
     case FUNC_LOOP: 
-
-      if((IsDoorOpen()!=door_detect.state)&&(abs(millis()-door_detect.tDetectTimeforDebounce)>100)){
-        door_detect.state = IsDoorOpen(); //tDetectTime = millis();
-        if(door_detect.state){ 
-          //Serial.print("Active high door_detect");
-          door_detect.isactive = true;
-          door_detect.tDetectTimeforDebounce = millis();
-          memcpy(door_detect.detected_rtc_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr));
-          // pCONT->mqt->ppublish("status/motion/event",door_detect.isactive? "MOTION" : "NO_MOTION",false); //phase this out for the new flag method below
-          mqtthandler_sensor_ifchanged.flags.SendNow = true;
-        }else{ 
-          //Serial.print("Active low door_detect");
-          door_detect.isactive = false;
-        }
-        door_detect.ischanged = true;
-        mqtthandler_sensor_ifchanged.flags.SendNow = true;
-        door_detect.changedtime = pCONT->mt->mtime;
-        fUpdateSendDoorSensor = true;
-      }
-
-      // #ifdef DOORLOCK_SWITCH_PIN //set flasg if pin changes
-      //   if(LOCKOPEN()!=lock_detect.state){
-      //     lock_detect.state = LOCKOPEN();
-      //     //tDetectTime = millis();
-      //     if(lock_detect.state){ Serial.print("Active high door_detect");
-      //       lock_detect.isactive = true;
-      //     }else{ Serial.print("Active low door_detect");
-      //       lock_detect.isactive = false;
-      //     }
-      //     lock_detect.ischanged = true;
-      //     lock_detect.changedtime = pCONT->mt->mtime;
-      //     fUpdateSendDoorSensor = true;
-      //   }
-      // #endif
-
+      EveryLoop();
     break;
-    case FUNC_EVERY_SECOND:{
-      char buffer[30];
-      AddLog_P(LOG_LEVEL_INFO,PSTR("Door open sensor %s"),IsDoorOpen_Ctr(buffer, sizeof(buffer)));
-    }break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -145,11 +97,26 @@ int8_t mDoorSensor::Tasker(uint8_t function){
 
 } // END function
 
+void mDoorSensor::EveryLoop(){
+
+  if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
+    door_detect.state = IsDoorOpen();
+    door_detect.tDetectTimeforDebounce = millis();
+    if(door_detect.state){ 
+      door_detect.isactive = true;
+      door_detect.detected_time = pCONT_time->GetTimeShortNow();
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    }else{ 
+      door_detect.isactive = false;
+    }
+    door_detect.ischanged = true;
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  }
+
+}
 
 void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
 
-  char value_ctr[8];
-  uint8_t sensor_counter = 0;
   char buffer[10];
     
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
@@ -168,6 +135,7 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
   char colour_ctr[10];
   char inner_html[100];
   char door_pos_ctr[20];
+  char time_ctr[20];
 
   JsonBuilderI->Array_Start("tab_door");// Class name
   
@@ -180,7 +148,7 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
       uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
       // Motion in progress
       if(door_detect.isactive){
-        sprintf(colour_ctr,PSTR("#00ff00"));
+        sprintf_P(colour_ctr,PSTR("#00ff00"));
       }else
       // If movement event has just finished
       if(millis_elapsed<(1000*60)){
@@ -196,7 +164,8 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
         sprintf(colour_ctr,"#ffffff");
       }
 
-      sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),door_detect.detected_rtc_ctr);
+      sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
+        mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
     
       JsonBuilderI->Add("ih",inner_html);
       JsonBuilderI->Add("fc",colour_ctr);
@@ -209,62 +178,20 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
 }
 
 
-  const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
-
-    // if(door_detect.wasactive && !door_detect.isactive){
-    //   snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENING_CTR, sizeof(PM_EVENT_DOOR_OPENING_CTR));
-    // }else
-    // if(door_detect.wasactive && door_detect.isactive){
-    //   snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENING_CTR, sizeof(PM_EVENT_DOOR_OPENING_CTR));
-    // }
-    // else
-    // if(door_detect.wasactive && door_detect.isactive){
-    //   snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENING_CTR, sizeof(PM_EVENT_DOOR_OPENING_CTR));
-    // }else
-    // if(door_detect.wasactive && door_detect.isactive){
-    //   snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENING_CTR, sizeof(PM_EVENT_DOOR_OPENING_CTR));
-    // }
-
-    
-    if(door_detect.isactive){
-      snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENED_CTR, sizeof(PM_EVENT_DOOR_OPENED_CTR));
-    }else{
-      snprintf_P(buffer, buflen, PM_EVENT_DOOR_CLOSED_CTR, sizeof(PM_EVENT_DOOR_CLOSED_CTR));
-    }
-    return buffer;
-
+const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
+  if(door_detect.isactive){
+    snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENED_CTR, sizeof(PM_EVENT_DOOR_OPENED_CTR));
+  }else{
+    snprintf_P(buffer, buflen, PM_EVENT_DOOR_CLOSED_CTR, sizeof(PM_EVENT_DOOR_CLOSED_CTR));
   }
-
-
-
-// #ifdef DOORLOCK_SWITCH_PIN
-// void mDoorSensor::MQTTSendDoorLockIfChanged(){
-
-//   if(lock_detect.ischanged){ lock_detect.ischanged=false;
-
-//     memset(&data_buffer2,0,sizeof(data_buffer2));
-
-//     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-//     JsonObject root = doc.to<JsonObject>();
-//     root["location"] = LOCKOPENCTR;
-//     root["time"] = pCONT->mt->mtime.hhmmss_ctr;
-
-//     data_buffer2.payload.len = measureJson(root)+1;
-//     serializeJson(doc,data_buffer2.payload.ctr);
-
-//     pCONT->mqt->ppublish("status/door/lock",data_buffer2.payload.ctr,false);
-
-//   }
-
-// } // END function
-// #endif
-
+  return buffer;
+}
 
 
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
-    // JsonBuilderI->Add(D_JSON_SENSOR_COUNT, 0);
+    //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);
   return JsonBuilderI->End();
 
 }
@@ -279,38 +206,8 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
 
     JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
-    JsonBuilderI->Add(D_JSON_TIME, door_detect.detected_rtc_ctr);
-    
-    if(door_detect.ischanged){ door_detect.ischanged = false;
-      JsonBuilderI->Add(D_JSON_EVENT, door_detect.isactive ? "detected": "over");
-    }
-
-
-
-
-    // JsonObject doorobj = root.createNestedObject("door");
-    //   doorobj["position"] = IsDoorOpen() ? "Open" : "Closed";//IsDoorOpen_Ctr();
-    //   char timectr[12]; memset(timectr,0,sizeof(timectr));
-    //   sprintf(timectr,"%sT%02d:%02d:%02d",
-    //     pCONT->mt->GetDOWShortctr(door_detect.changedtime.Wday, buffer),
-    //     door_detect.changedtime.hour,
-    //     door_detect.changedtime.minute,
-    //     door_detect.changedtime.second
-    //   );
-    //   doorobj["changedtime"] = timectr;
-
-    // #ifdef DOORLOCK_SWITCH_PIN
-    // JsonObject lockobj = root.createNestedObject("lock");
-    //   lockobj["position"] = LOCKOPENCTR;
-    //   char timectr2[15]; memset(timectr2,0,sizeof(timectr2));
-    //   sprintf(timectr2,"%sT%02d:%02d:%02d",
-    //     pCONT->mt->GetDOWShortctr(lock_detect.changedtime.Wday),
-    //     lock_detect.changedtime.hour,
-    //     lock_detect.changedtime.minute,
-    //     lock_detect.changedtime.second
-    //   );
-    //   lockobj["changedtime"] = timectr2;
-    // #endif
+    JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
     return JsonBuilderI->End();
 
   }
@@ -322,9 +219,10 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
 ******** MQTT Stuff **************************************************************************************************************************************
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
 
 void mDoorSensor::MQTTHandler_Init(){
+
+  struct handler<mDoorSensor>* mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -378,33 +276,21 @@ void mDoorSensor::MQTTHandler_Set_TelePeriod(){
 
 void mDoorSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_SENSOR_IFCHANGED_ID, MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mDoorSensor>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
+  };
 
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      // No specialised needed
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_DOOR_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DOOR_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
-
-
-////////////////////// END OF MQTT /////////////////////////
-
-
 
 #endif
 

@@ -51,7 +51,7 @@ void mMoistureSensor::Tasker(uint8_t function){
 // NEW METHOD -- first senders then on internals
 void mMoistureSensor::SubTasker_MQTTSender(){
 
-  if(mSupport::TimeReached(&tSavedMeasure,rateMeasure*1000)){
+  if(mTime::TimeReached(&tSavedMeasure,rateMeasure*1000)){
     MQTTSendMoistureSensorIfChanged();
   }
 
@@ -61,7 +61,7 @@ void mMoistureSensor::SubTasker_MQTTSender(){
 //#ifdef USE_MODULE_SENSORS_MOTION // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
 void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   StaticJsonDocument<300> doc;
   JsonObject root = doc.to<JsonObject>();
@@ -84,10 +84,10 @@ void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
   root["adc_mapped"] = adc_mapped;
   root["percentage"] = adc_mapped_constrained;
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
-  pCONT->mqt->ppublish("status/moisture",data_buffer2.payload.ctr,false);
+  pCONT->mqt->ppublish("status/moisture",data_buffer.payload.ctr,false);
 
 }
 

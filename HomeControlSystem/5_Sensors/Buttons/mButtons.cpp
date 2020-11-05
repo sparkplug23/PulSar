@@ -253,7 +253,7 @@ void mButtons::ButtonLoop(void)
 {
   if (buttons_found) {
     // Listen quickly
-    if(mSupport::TimeReached(&tsaved_button_debounce, pCONT_set->Settings.button_debounce)){
+    if(mTime::TimeReached(&tsaved_button_debounce, pCONT_set->Settings.button_debounce)){
       ButtonHandler();
     }
     // Change slowly

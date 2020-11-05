@@ -343,16 +343,16 @@
 
 // uint8_t mPzem_AC::ConstructJSON_Settings(uint8_t json_method){
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 //   // StaticJsonDocument<400> doc;
 //   // JsonObject root = doc.to<JsonObject>();
 
 //   // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
 
-//   // data_buffer2.payload.len = measureJson(root)+1;
-//   // serializeJson(doc,data_buffer2.payload.ctr);
+//   // data_buffer.payload.len = measureJson(root)+1;
+//   // serializeJson(doc,data_buffer.payload.ctr);
   
-//   // return data_buffer2.payload.len>3?true:false;
+//   // return data_buffer.payload.len>3?true:false;
 
 //   return 0;
 
@@ -361,7 +361,7 @@
 
 // uint8_t mPzem_AC::ConstructJSON_Sensor(uint8_t json_method){
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 
 //   // DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
 //   // JsonObject root = doc.to<JsonObject>();
@@ -411,11 +411,11 @@
 
 
 
-//   // data_buffer2.payload.len = measureJson(root)+1;
-//   // serializeJson(doc,data_buffer2.payload.ctr);
+//   // data_buffer.payload.len = measureJson(root)+1;
+//   // serializeJson(doc,data_buffer.payload.ctr);
 
   
-//   //   return data_buffer2.payload.len>3?true:false;
+//   //   return data_buffer.payload.len>3?true:false;
     
 // }
 

@@ -179,7 +179,7 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
 // int8_t mHBridge::parse_JSONCommand(){//mpkt_t* mpt, char* topic, char* payload){
   
 //   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/motor")>=0){
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motor")>=0){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
@@ -189,7 +189,7 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
 //   int8_t device_id,user_id,schedule_id;
 //   uint8_t timeon,tempset;
 
-//   char* payload = data_buffer2.payload.ctr;
+//   char* payload = data_buffer.payload.ctr;
 
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   DeserializationError error = deserializeJson(doc, payload);

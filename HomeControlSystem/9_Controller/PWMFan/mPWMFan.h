@@ -47,7 +47,7 @@ bool ifan_restart_flag = true;
 
 
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parsesub_Commands(JsonObjectConst obj);
+void parse_JSONCommand(JsonObjectConst obj);
 
 void init();
 void pre_init();

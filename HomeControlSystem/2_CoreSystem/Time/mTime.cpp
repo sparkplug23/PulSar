@@ -67,9 +67,9 @@ int8_t mTime::Tasker(uint8_t function){
       //SubTasker_MQTTSender();
     break;
     case FUNC_MQTT_CONNECTED:{
-      char message[40];
+      char message[50];
       memset(message,0,sizeof(message));
-      sprintf(message,"{\"connected\":{\"time\":\"%s\"}}",pCONT->mt->uptime.hhmmss_ctr);
+      sprintf_P(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"),pCONT->mt->uptime.hhmmss_ctr);
       AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
       pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
     }
@@ -127,6 +127,41 @@ void mTime::init(void){
   mtime.isvalid = true;
 
 }
+
+uint32_t mTime::GetTimeOfDay_Seconds(void){
+  return mtime.Dseconds;
+}
+
+const char* mTime::ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds_tod, char* buffer, uint8_t buflen){
+  
+  seconds_tod = seconds_tod % (24 * 3600);
+  int hours = seconds_tod / 3600;
+
+  seconds_tod %= 3600;
+  int minutes = seconds_tod / 60;
+
+  seconds_tod %= 60;
+  int seconds = seconds_tod;
+
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              hours, minutes, seconds
+  );
+  return buffer;
+}
+
+// const char* mTime::ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds, char* buffer, uint8_t buflen){
+//   snprintf_P(buffer, buflen, 
+//               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              
+              
+//               //mtime.hour, mtime.minute, mtime.second
+//   );
+//   return buffer;
+// }
+
+
+
 
 
 // Time elapsed function that updates the time when true
@@ -278,9 +313,34 @@ void mTime::UpdateUpTime(){
 
   // change to function get
   memset(uptime.hhmmss_ctr,0,sizeof(uptime.hhmmss_ctr));
-  sprintf(uptime.hhmmss_ctr, PSTR("%02dT%02d:%02d:%02d"),uptime.Yday,uptime.hour,uptime.minute,uptime.second);
+  sprintf_P(uptime.hhmmss_ctr, PSTR("%02dT%02d:%02d:%02d"),uptime.Yday,uptime.hour,uptime.minute,uptime.second);
 
 }
+
+
+time_short_t mTime::GetTimeShortNow(){
+
+  time_short_t now;
+
+  now.Wday = mtime.Wday;
+  now.hour = mtime.hour;
+  now.minute = mtime.minute;
+  now.second = mtime.second;
+
+  return now;
+
+}
+
+const char* mTime::ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen){
+  
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              time->hour, time->minute, time->second
+  );
+  return buffer;
+}
+
+
 
 
 //"Tue Jan 21 12:40:24 2020";//GetTime(0).c_str(); 
@@ -586,7 +646,7 @@ void mTime::PrintDateTime(datetime_t* dt){
 
   //[Yxx-Mxx-Dxx-Wxx:H:M:S]
   char ctr[80];memset(ctr,0,sizeof(ctr));
-  sprintf(ctr, PSTR("%02d-%02d-%04d W%02d T%02d:%02d:%02d"), dt->Wday, dt->month, dt->year, dt->Wday, dt->hour, dt->minute, dt->second);
+  sprintf_P(ctr, PSTR("%02d-%02d-%04d W%02d T%02d:%02d:%02d"), dt->Wday, dt->month, dt->year, dt->Wday, dt->hour, dt->minute, dt->second);
   // pCONT->mso->MessagePrintln(ctr);
 
 }
@@ -689,12 +749,12 @@ uint8_t mTime::AddSecondsToDateTime(datetime_t* dt_t, uint32_t sec){
   int seconds = sec; //seconds should now be less than 60 because of minutes
   dt_t->second += seconds;
 
-  #ifdef SERIAL_DEBUG_LOW_LEVEL
-    char test[150];
-    memset(test,0,sizeof(test));
-    sprintf(test, "%u years, %u months, %u weeks, %u days, %u hours, %u minutes, %u seconds", years, months, weeks, days, hours, minutes, seconds);
-    pCONT->mso->MessagePrintln(test);
-  #endif
+  // #ifdef SERIAL_DEBUG_LOW_LEVEL
+  //   char test[150];
+  //   memset(test,0,sizeof(test));
+  //   sprintf(test, "%u years, %u months, %u weeks, %u days, %u hours, %u minutes, %u seconds", years, months, weeks, days, hours, minutes, seconds);
+  //   pCONT->mso->MessagePrintln(test);
+  // #endif
 
   return 0;
 }
@@ -721,7 +781,7 @@ datetime_t mTime::GetTimefromCtr(const char* c){
   datetime.second = ((c[6]-48)*10)+(c[7]-48);
 
   char ctr[80];memset(ctr,0,sizeof(ctr));
-  sprintf(ctr, PSTR("GetTimefromCtr = T%02d:%02d:%02d"),datetime.hour,datetime.minute,datetime.second);
+  sprintf_P(ctr, PSTR("GetTimefromCtr = T%02d:%02d:%02d"),datetime.hour,datetime.minute,datetime.second);
   // pCONT->mso->MessagePrintln(ctr);
 
   return datetime;
@@ -732,7 +792,7 @@ datetime_t mTime::GetTimefromCtr(const char* c){
 const char* mTime::getFormattedTime(datetime_t* dt_t, char* buffer){ //Serial.println("getFormattedTime");
   if(buffer == nullptr){ return 0; }
   // char time_ctr[40]; memset(time_ctr,'\0',sizeof(time_ctr));
-  sprintf(buffer, PSTR("%02d:%02d:%02d"), dt_t->hour, dt_t->minute, dt_t->second);
+  sprintf_P(buffer, PSTR("%02d:%02d:%02d"), dt_t->hour, dt_t->minute, dt_t->second);
   //sprintf(time_ctr,"%d%d",12,34);
   //Serial.println("time_ctr"); Serial.println(time_ctr);
   return buffer;
@@ -740,7 +800,7 @@ const char* mTime::getFormattedTime(datetime_t* dt_t, char* buffer){ //Serial.pr
 const char* mTime::getFormattedDateTime(datetime_t* dt_t, char* buffer) {
   if(buffer == nullptr){ return 0; }
   // char time_ctr[24]; memset(time_ctr,0,sizeof(time_ctr));
-  sprintf(buffer, PSTR("%02d:%02d:%02dT%02d:%02d:%02d"),dt_t->Mday,dt_t->month,dt_t->year,dt_t->hour,dt_t->minute,dt_t->second);
+  sprintf_P(buffer, PSTR("%02d:%02d:%02dT%02d:%02d:%02d"),dt_t->Mday,dt_t->month,dt_t->year,dt_t->hour,dt_t->minute,dt_t->second);
   return buffer;
 }
 
@@ -748,7 +808,7 @@ const char* mTime::getFormattedDateTime(datetime_t* dt_t, char* buffer) {
 const char* mTime::getFormattedUptime(char* buffer){ //Serial.println("getFormattedTime");
 if(buffer == nullptr){ return 0; }
   //char uptime_ctr[40]; memset(uptime_ctr,0,sizeof(uptime_ctr));
-  sprintf(buffer, PSTR("%02dT%02d:%02d:%02d"),
+  sprintf_P(buffer, PSTR("%02dT%02d:%02d:%02d"),
     (int)uptime.Yday,(int)uptime.hour,(int)uptime.minute,(int)uptime.second);
   return buffer;
 }
@@ -757,7 +817,7 @@ if(buffer == nullptr){ return 0; }
 const char* mTime::GetBuildDateAndTime(char* buffer)
 {
   if(buffer == nullptr){ return 0; }
-  sprintf(buffer,"%s","2017-03-07T11:08:02");
+  sprintf_P(buffer,PSTR("2017-03-07T11:08:02"));
 //   // "2017-03-07T11:08:02" - ISO8601:2004
   //  char bdt[40];
 //   char *p;

@@ -78,7 +78,7 @@ void mAnalog::WebAppend_Root_Status_Table(){
     uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
     // Motion in progress
     if(pir_detect[sensor_id].isactive){
-      sprintf(colour_ctr,PSTR("#00ff00"));
+      sprintf_P(colour_ctr,PSTR("#00ff00"));
     }else
     // If movement event has just finished
     if(millis_elapsed<(1000*60)){
@@ -245,7 +245,7 @@ int8_t mAnalog::Tasker(uint8_t function){
 void mAnalog::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
   
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/motion")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -254,10 +254,10 @@ void mAnalog::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/
 
   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::parse_JSONCommand()");
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer2.payload.ctr);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   JsonObject obj = doc.as<JsonObject>();
 
   //parsesub_JSONCommands(&obj);
@@ -299,14 +299,14 @@ void mAnalog::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/
 
 uint8_t mAnalog::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
-  sprintf(data_buffer2.payload.ctr,
+  sprintf(data_buffer.payload.ctr,
           PSTR("{\"sensors_active\":%d}"),
           sensors_active    
   );
 
-  return strlen(data_buffer2.payload.ctr);
+  return strlen(data_buffer.payload.ctr);
 
 }
 
@@ -316,11 +316,11 @@ uint8_t mAnalog::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mAnalog::ConstructJSON_Sensor(uint8_t json_level){
   
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
     if(pir_detect[sensor_id].ischanged){ pir_detect[sensor_id].ischanged = false;
-      sprintf(data_buffer2.payload.ctr,
+      sprintf(data_buffer.payload.ctr,
               PSTR("{\"location\":\"%s\",\"time\":\"%s\",\"event\":\"%s\"}"),
               pir_detect[sensor_id].friendly_name_ctr,
               pir_detect[sensor_id].detected_rtc_ctr,
@@ -329,7 +329,7 @@ uint8_t mAnalog::ConstructJSON_Sensor(uint8_t json_level){
     }
   }
 
-  return strlen(data_buffer2.payload.ctr);
+  return strlen(data_buffer.payload.ctr);
 
 }
 

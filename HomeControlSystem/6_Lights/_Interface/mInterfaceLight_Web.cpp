@@ -322,7 +322,7 @@ void mInterfaceLight::Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request
     JsonBuilderI->Array_End();
   JsonBuilderI->End();
 
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 } //end function
 
@@ -440,7 +440,7 @@ void mInterfaceLight::WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest
 
   JsonBuilderI->End();
 
-  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);  
+  pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
 }
 

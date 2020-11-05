@@ -114,7 +114,7 @@
 
 //       //if init failed, call it again here
     
-//       if(mSupport::TimeReached(&tSavedMillisOpenHABDataStreamActive,1000)){
+//       if(mTime::TimeReached(&tSavedMillisOpenHABDataStreamActive,1000)){
 //         if(fOpenHABDataStreamActive_last_secs){ //only if positive
 //           if(fOpenHABDataStreamActive_last_secs++>OPENHAB_DATA_STREAM_ACTIVITY_TIMEOUT_SECS){
 //             fOpenHABDataStreamActive_last_secs = -1;
@@ -123,7 +123,7 @@
 //         }
 //       }
 
-//       if(mSupport::TimeReached(&tSavedTest,10000)){
+//       if(mTime::TimeReached(&tSavedTest,10000)){
 
 //       }
 
@@ -672,7 +672,7 @@
 
 //   // Check if long press threshold reached
 //   if(screen_press.fEnableImmediateButtonTime){
-//     if(mSupport::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
+//     if(mTime::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
 //       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
 //       screen_press.fEnableImmediateButtonTime=false;
 //       fEnableIgnoreNextOffEvent = true;
@@ -1278,7 +1278,7 @@
 
 // void mNextionPanel::MQTTSend_PressEvent(){
 
-//   // if(!mSupport::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
+//   // if(!mTime::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
 //   //   // Debounce and only send once per event (ie ignore release trigger following immediate trigger)
 //   //   return;
 //   // }
@@ -1298,13 +1298,13 @@
 //   rootobj["value"] = (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS";
 //   rootobj["duration"] = tSavedTimeSincePressOn;
 
-//   memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
-//   mcl->mset->data_buffer.payload.len = measureJson(rootobj)+1;
-//   serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//   memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
+//   mcl->mset->data_buffer_old.payload.len = measureJson(rootobj)+1;
+//   serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
 //   tSaved_MQTTSend_PressEvent = millis();
 
-//   mcl->mqt->ppublish("status/nextion/event/press",mcl->mset->data_buffer.payload.ctr,0);
+//   mcl->mqt->ppublish("status/nextion/event/press",mcl->mset->data_buffer_old.payload.ctr,0);
 
 // }
 
@@ -1324,12 +1324,12 @@
 //   rootobj["value"] = "LONG_PRESS";
 //   rootobj["duration_threshold"] = LONG_PRESS_DURATION;
 
-//   memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
-//   mcl->mset->data_buffer.payload.len = measureJson(rootobj)+1;
-//   serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//   memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
+//   mcl->mset->data_buffer_old.payload.len = measureJson(rootobj)+1;
+//   serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
-//   mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer.payload.ctr,0);
-//   mcl->mqt->ppublish("status/nextion/event/start",mcl->mset->data_buffer.payload.ctr,0);
+//   mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer_old.payload.ctr,0);
+//   mcl->mqt->ppublish("status/nextion/event/start",mcl->mset->data_buffer_old.payload.ctr,0);
 
 // }
 
@@ -1349,7 +1349,7 @@
 // uint8_t mNextionPanel::parse_JSONCommand(){
 
 //   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(mcl->mset->data_buffer.topic.ctr,"set/nextion")>=0){
+//   if(mSupport::mSearchCtrIndexOf(mcl->mset->data_buffer_old.topic.ctr,"set/nextion")>=0){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 //     mcl->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
@@ -1361,11 +1361,11 @@
 //   
 //   char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
 
-//   if(strstr(mcl->mset->data_buffer.topic.ctr,"/commands")){ // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
+//   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/commands")){ // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
 
 //     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer.payload.ctr);
+//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //     JsonObject obj = doc.as<JsonObject>();
 
 //     if(!obj["page"].isNull()){ 
@@ -1412,15 +1412,15 @@
 
 //   }else
 //   // Group commands (many)
-//   if(strstr(mcl->mset->data_buffer.topic.ctr,"/set_multi")){  // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
+//   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/set_multi")){  // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED " set_multi"));     
-//     nextionParseJson(mcl->mset->data_buffer.payload.ctr);
+//     nextionParseJson(mcl->mset->data_buffer_old.payload.ctr);
 //   }else
 //   // Set element 
-//   if(strstr(mcl->mset->data_buffer.topic.ctr,"/set_single")){
+//   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/set_single")){
     
 //     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer.payload.ctr);
+//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //     JsonObject obj = doc.as<JsonObject>();
 
 //     if((!obj["attribute"].isNull())&&(!obj["value"].isNull())){ 
@@ -1431,10 +1431,10 @@
 
 //   }else
 //   // Get element (ask, no value)
-//   if(strstr(mcl->mset->data_buffer.topic.ctr,"/get_single")){
+//   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/get_single")){
     
 //     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer.payload.ctr);
+//     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //     JsonObject obj = doc.as<JsonObject>();
 
 //     if(!obj["attribute"].isNull()){ 
@@ -1444,7 +1444,7 @@
 
 //   }else
 //   // Get element (ask, no value)
-//   if(strstr(mcl->mset->data_buffer.topic.ctr,"/nextion/flash_message")){
+//   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/nextion/flash_message")){
 //     isserviced += parsesub_FlashMessage();
 //   }
 
@@ -1467,7 +1467,7 @@
 //   //   }
 //   // }
 
-//   mcl->mset->data_buffer.isserviced += isserviced;
+//   mcl->mset->data_buffer_old.isserviced += isserviced;
  
 //   
 
@@ -1482,7 +1482,7 @@
 //   #else
 //     DynamicJsonDocument doc(600);
 //   #endif
-//   DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer.payload.ctr);
+//   DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //   if(error){
 //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
 //     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
@@ -1671,12 +1671,12 @@
 //         rootobj["event"] = event_ctr;
 //         rootobj["value"] = D_JSON_ON;
 
-//       memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
-//       mcl->mset->data_buffer.payload.len = measureJson(rootobj)+1;
-//       serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//       memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
+//       mcl->mset->data_buffer_old.payload.len = measureJson(rootobj)+1;
+//       serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
-//       mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer.payload.ctr,0);
-//       mcl->mqt->ppublish("status/nextion/event/start",mcl->mset->data_buffer.payload.ctr,0);
+//       mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer_old.payload.ctr,0);
+//       mcl->mqt->ppublish("status/nextion/event/start",mcl->mset->data_buffer_old.payload.ctr,0);
 
 //     }
 //     if (nextionButtonAction == 0x00) // OFF - LET_GO
@@ -1694,14 +1694,14 @@
 //       rootobj["value"] = D_JSON_OFF;
 //       rootobj["duration"] = screen_press.tSavedButtonONDurationEvent;
 
-//       memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
-//       mcl->mset->data_buffer.payload.len = measureJson(rootobj)+1;
-//       serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//       memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
+//       mcl->mset->data_buffer_old.payload.len = measureJson(rootobj)+1;
+//       serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
 //       if(!fEnableIgnoreNextOffEvent){
 //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
-//         mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer.payload.ctr,0);
-//         mcl->mqt->ppublish("status/nextion/event/end",mcl->mset->data_buffer.payload.ctr,0);
+//         mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer_old.payload.ctr,0);
+//         mcl->mqt->ppublish("status/nextion/event/end",mcl->mset->data_buffer_old.payload.ctr,0);
 //         MQTTSend_PressEvent();
 //       }else{
 //         fEnableIgnoreNextOffEvent = false;// reset to listen to next event
@@ -1953,7 +1953,7 @@
 //   {
 //   //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!ajsonError %d"),nextionCommands.size());
 
-//     //deserializeJson(nextionCommands, mcl->mset->data_buffer.payload.ctr);//strPayload);
+//     //deserializeJson(nextionCommands, mcl->mset->data_buffer_old.payload.ctr);//strPayload);
     
 //   //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!bjsonError %d"),nextionCommands.size());
 
@@ -3590,7 +3590,7 @@
 
 // uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
-//   memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
+//   memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
 //   DynamicJsonDocument doc(250);
 //   JsonObject root = doc.to<JsonObject>();
 
@@ -3604,14 +3604,14 @@
 //     root["heapFragmentation"] = ESP.getHeapFragmentation();
 //     root["heapFree"] = ESP.getCoreVersion();
 //   #endif
-//   mcl->mset->data_buffer.payload.len = measureJson(root)+1;
-//   serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//   mcl->mset->data_buffer_old.payload.len = measureJson(root)+1;
+//   serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 // return 1;
 // }
 
 // uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
-//   memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
+//   memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
 
 //   uint8_t ischanged=false;
 
@@ -3633,8 +3633,8 @@
   
 //   // }
 
-//   mcl->mset->data_buffer.payload.len = measureJson(root)+1;
-//   serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//   mcl->mset->data_buffer_old.payload.len = measureJson(root)+1;
+//   serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
 //   return 1;
 
@@ -3643,7 +3643,7 @@
 
 // uint8_t mNextionPanel::ConstructJSON_EnergyStats(uint8_t json_level){
 
-//   memset(&mcl->mset->data_buffer,0,sizeof(mcl->mset->data_buffer));
+//   memset(&mcl->mset->data_buffer_old,0,sizeof(mcl->mset->data_buffer_old));
 
 //   uint8_t ischanged=false;
 
@@ -3665,8 +3665,8 @@
   
 //   // }
 
-//   mcl->mset->data_buffer.payload.len = measureJson(root)+1;
-//   serializeJson(doc,mcl->mset->data_buffer.payload.ctr);
+//   mcl->mset->data_buffer_old.payload.len = measureJson(root)+1;
+//   serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
 //   return 1;
 

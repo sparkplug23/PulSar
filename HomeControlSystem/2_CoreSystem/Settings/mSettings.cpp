@@ -19,15 +19,15 @@
 
 #include "2_CoreSystem/Settings/mSettings.h"
 
-struct DATA_BUFFER data_buffer2;
+struct DATA_BUFFER data_buffer;
 
-// /*********************struct DATA_BUFFER2 data_buffer2;***********************************************************************/
+// /*********************struct DATA_BUFFER2 data_buffer;***********************************************************************/
 //
 // CONSIDER combining driver/sensor into one module "AddSensor"
 
 void mSettings::ClearAllDeviceName(void){
 
-  data_buffer2.payload.ctr[0] = 0;
+  data_buffer.payload.ctr[0] = 0;
 
   memset(&Settings.device_name_buffer.name_buffer,0,sizeof(Settings.device_name_buffer.name_buffer));
   memset(&Settings.device_name_buffer.class_id,DEVICENAME_EMPTY_ID,sizeof(Settings.device_name_buffer.class_id));
@@ -103,9 +103,7 @@ const char* mSettings::GetDeviceName(int16_t module_id, int8_t device_id, char* 
       break;
     }
   }
-//future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
-
-
+  //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
 
   if(found_index == -1){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
@@ -159,7 +157,7 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
   int16_t position = -1;
 
   char name_tofind_with_delimeter[50];
-  sprintf(name_tofind_with_delimeter,"%s|",name_tofind);
+  snprintf(name_tofind_with_delimeter,sizeof(name_tofind_with_delimeter),"%s|",name_tofind);
 
   // Search for substring
   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
@@ -318,7 +316,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     break;
     case FUNC_LOOP:
 
-      // if(mSupport::TimeReached(&tSavedSavingTest,10000)){
+      // if(mTime::TimeReached(&tSavedSavingTest,10000)){
       //   // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
       //   // SettingsSave(1);
       //   // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
@@ -419,17 +417,17 @@ int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
 
 // //#ifdef ENABLE_BUFFER_STRUCT
 //   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/settings")>=0){
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/settings")>=0){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND " system"));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return; // not meant for here
 //   }
   
-//   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
+//   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer_old.payload.ctr);
 
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 //   JsonObject obj = doc.as<JsonObject>();
 
 //   parsesub_TopicCheck_JSONCommand(doc.as<JsonObject>());
@@ -438,19 +436,19 @@ int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
 
 //   //STILL NOT WORKING
   
-//   // if(strstr(data_buffer.topic.ctr,"/settings/system")){  DOES NOT WORK
+//   // if(strstr(data_buffer_old.topic.ctr,"/settings/system")){  DOES NOT WORK
 //   // if(mSupport::memsearch(
-//   //     data_buffer.topic.ctr,
-//   //     data_buffer.topic.len,
+//   //     data_buffer_old.topic.ctr,
+//   //     data_buffer_old.topic.len,
 //   //       "/system",sizeof("/system")-1)>=0
 //   //   ){
-//       // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/system",sizeof("/system")-1)>=0){
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"/system")>=0){
+//       // if(mSupport::memsearch(data_buffer_old.topic.ctr,data_buffer_old.topic.len,"/system",sizeof("/system")-1)>=0){
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"/system")>=0){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "system"));    
 //     // parsesub_SystemCommand(obj);
 //   }else
-//   // if(strstr(data_buffer.topic.ctr,"hacs_firmware/set/settings/firmware")){
-//   if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"hacs_firmware/set/settings/firmware",sizeof("hacs_firmware/set/settings/firmware")-1)>=0){
+//   // if(strstr(data_buffer_old.topic.ctr,"hacs_firmware/set/settings/firmware")){
+//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"hacs_firmware/set/settings/firmware",sizeof("hacs_firmware/set/settings/firmware")-1)>=0){
   
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "hacs_firmware/set/settings/firmware"));    
 //     // parsesub_FirmwareInformation(obj);
@@ -467,7 +465,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/settings")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/settings")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parse_JSONCommand(obj);
@@ -534,7 +532,7 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
   // #else
   //   DynamicJsonDocument doc(600);
   // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+  // DeserializationError error = deserializeJson(doc, data_buffer_old.payload.ctr);
   
   // if(error){
   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
@@ -548,14 +546,14 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
     if(strstr(command,PSTR("system_send_all"))){ 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
       //MQTTHandler_Set_fSendNow();
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }
     else
     if(strstr(command,PSTR("reset_bootcount"))){ 
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"reset_bootcount\""));
       Settings.bootcount = 0;
       SettingsSaveAll();
-      data_buffer2.isserviced++;
+      data_buffer.isserviced++;
     }
     else{
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_SETTINGS D_PARSING_NOMATCH));
@@ -574,9 +572,9 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
   // // #else
   //   DynamicJsonDocument doc(300);
   // // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+  // DeserializationError error = deserializeJson(doc, data_buffer_old.payload.ctr);
 
-  // //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_PARSING_MATCHED "\"parsesub_FirmwareInformation\"=\"%s\""),data_buffer.payload.ctr);
+  // //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_PARSING_MATCHED "\"parsesub_FirmwareInformation\"=\"%s\""),data_buffer_old.payload.ctr);
   
   // if(error){
   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
@@ -1347,8 +1345,6 @@ void mSettings::SettingsLoad_CheckSuccessful(){
   memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
   
   // Configure hostname 
-  // msup.Format(mqtt_client, Settings.mqtt_client, sizeof(mqtt_client));
-  // msup.Format(mqtt_topic, Settings.mqtt_topic, sizeof(mqtt_topic));
   memset(my_hostname,0,sizeof(my_hostname));
   sprintf(my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
 
@@ -1568,6 +1564,9 @@ void mSettings::SystemSettings_DefaultBody_MQTT(){
   strlcpy(Settings.mqtt.user, MQTT_USER, sizeof(Settings.mqtt.user));
   strlcpy(Settings.mqtt.pwd, MQTT_PASS, sizeof(Settings.mqtt.pwd));
   // strlcpy(Settings.mqtt_topic, MQTT_TOPIC, sizeof(Settings.mqtt_topic));
+
+  
+  Settings.flag_system.mqtt_enabled = true;
 
   // strlcpy(Settings.button_topic, MQTT_BUTTON_TOPIC, sizeof(Settings.button_topic));
   // strlcpy(Settings.switch_topic, MQTT_SWITCH_TOPIC, sizeof(Settings.switch_topic));
@@ -1933,8 +1932,8 @@ DEBUG_LINE;
   //Settings.flag_system.decimal_text = 0;
   
 
-  sprintf(my_hostname,"%s",D_NO_MATCH_CTR);//);//pCONT_set->Settings.user_template2.hardware.name);
-
+  sprintf(my_hostname,"%s",pCONT_set->Settings.system_name.device);
+  
 }
 
 

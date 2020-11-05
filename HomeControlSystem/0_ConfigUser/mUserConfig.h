@@ -21,7 +21,7 @@
  * these values are intended for advanced users to create defaults for flashing multiple devices for easier configuring.
 \*********************************************************************************************/
 
-#define ESP8266
+// #define ESP8266
 //#define USE_CONFIG_OVERRIDE                      // Uncomment to use mUserConfig_Override.h file. See README.md
 
 /*********************************************************************************************\
@@ -77,7 +77,7 @@
 #define SYS_LOG_PORT           514               // [LogPort] default syslog UDP port
 #define SYS_LOG_LEVEL          LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define SERIAL_LOG_LEVEL       LOG_LEVEL_DEBUG    // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-#define SERIAL_LOG_LEVEL_DURING_BOOT LOG_LEVEL_ALL //LOG_LEVEL_ALL LOG_LEVEL_TEST
+#define SERIAL_LOG_LEVEL_DURING_BOOT LOG_LEVEL_TEST //LOG_LEVEL_ALL LOG_LEVEL_TEST
 
 #define WEB_LOG_LEVEL          LOG_LEVEL_INFO    // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 

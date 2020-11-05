@@ -252,7 +252,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //             ResponseAppend_P(PSTR("%d,0,"), UINT16_MAX);
 //           }
 //           ResponseAppend_P(PSTR("%d"), usecs);
-//           if (strlen(data_buffer2.payload.ctr) > sizeof(data_buffer2.payload.ctr) - 40) { break; }  // Quit if char string becomes too long
+//           if (strlen(data_buffer.payload.ctr) > sizeof(data_buffer.payload.ctr) - 40) { break; }  // Quit if char string becomes too long
 //         }
 //         uint16_t extended_length = results.rawlen - 1;
 //         for (uint16_t j = 0; j < results.rawlen - 1; j++) {
@@ -400,7 +400,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //             } else {  // At least two raw data values
 //               // IRsend 0,896,876,900,888,894,876,1790,874,872,1810,1736,948,872,880,872,936,872,1792,900,888,1734
 //               count++;
-//               uint16_t raw_array[count];  // It's safe to use stack for up to 240 packets (limited by data_buffer2.payload.ctr length)
+//               uint16_t raw_array[count];  // It's safe to use stack for up to 240 packets (limited by data_buffer.payload.ctr length)
 //               for (uint16_t i = 0; i < count; i++) {
 //                 raw_array[i] = strtol(strtok_r(nullptr, ", ", &p), nullptr, 0);  // Allow decimal (20496) and hexadecimal (0x5010) input
 //               }

@@ -83,6 +83,11 @@ struct functionhandler {
 #include "2_CoreSystem/Time/mTime.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
+
+//#ifdef USE_I2C
+  #include <Wire.h>                         // I2C support library
+//#endif  // USE_I2C
+
 extern "C" {
 extern struct rst_info resetInfo;
 }
@@ -140,8 +145,8 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 // {
 
   
-//   char* buff = data_buffer2.payload.ctr;
-//   uint16_t* len = &data_buffer2.payload.len;
+//   char* buff = data_buffer.payload.ctr;
+//   uint16_t* len = &data_buffer.payload.len;
 
 //   *len = sprintf(&buff[*len],"%s","AppendJSON_Value");
 
@@ -203,6 +208,36 @@ class mSupport{
     // JsonObject& jsonobject_parsing = nullptr;
 
     float FastPrecisePowf(const float x, const float y);
+    const uint8_t I2C_RETRY_COUNTER = 3;
+
+uint32_t i2c_buffer = 0;
+
+bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size);
+
+
+
+TwoWire* wire = nullptr;
+
+
+bool I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg);
+bool I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg);
+bool I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg);
+bool I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg);
+bool I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg);
+bool I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg);
+uint8_t I2cRead8(uint8_t addr, uint8_t reg);
+uint16_t I2cRead16(uint8_t addr, uint8_t reg);
+int16_t I2cReadS16(uint8_t addr, uint8_t reg);
+uint16_t I2cRead16LE(uint8_t addr, uint8_t reg);
+int16_t I2cReadS16_LE(uint8_t addr, uint8_t reg);
+int32_t I2cRead24(uint8_t addr, uint8_t reg);
+bool I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size);
+bool I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val);
+bool I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val);
+int8_t I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
+int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
+void I2cScan(char *devs, unsigned int devs_len);
+bool I2cDevice(uint8_t addr);
 
     void parse_JSONCommand();
     IPAddress syslog_host_addr;      // Syslog host IP address
@@ -300,7 +335,6 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     uint8_t Shortcut(const char* str);
     bool ValidIpAddress(const char* str);
     bool ParseIp(uint32_t* addr, const char* str);
-    void MakeValidMqtt(uint8_t option, char* str);
     bool NewerVersion(char* version_str);
     char* GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option);
     char* GetPowerDevice(char* dest, uint8_t idx, size_t size);
@@ -317,7 +351,10 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     char* GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     
 int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
-    
+
+
+
+
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     int8_t GetStateNumber(const char *state_text);
     void SetSerialBaudrate(int baudrate);
@@ -330,17 +367,17 @@ int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, in
     void WriteBuffer_P(char* buffer, uint16_t* length, const char* formatP, ...);
 
     
-static uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
-                                       uint16_t ito_min, uint16_t ito_max) ;
+    static uint16_t changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
+                                          uint16_t ito_min, uint16_t ito_max) ;
 
 
 
 
-void CmndRestart(void);
+    void CmndRestart(void);
 
 
 
-char* GetVersionColour(char* buffer);
+    char* GetVersionColour(char* buffer);
 
     void CrashDump_AddJson();
     void CmndCrash(void);
@@ -350,11 +387,11 @@ char* GetVersionColour(char* buffer);
     bool CrashFlag(void);
     void CrashDump(void);
 
-void UpdateLedPowerAll();
-void SetLedPowerIdx(uint32_t led, uint32_t state);
-void SetLedPower(uint32_t state);
-void SetLedPowerAll(uint32_t state);
-void SetLedLink(uint32_t state);
+    void UpdateLedPowerAll();
+    void SetLedPowerIdx(uint32_t led, uint32_t state);
+    void SetLedPower(uint32_t state);
+    void SetLedPowerAll(uint32_t state);
+    void SetLedLink(uint32_t state);
 
 
 
@@ -363,8 +400,7 @@ void SetLedLink(uint32_t state);
     int Response_P(const char* format, ...);
     int ResponseAppend_P(const char* format, ...);
 
-    
-uint16_t WriteBuffer_P(const char* formatP, ...);
+    uint16_t WriteBuffer_P(const char* formatP, ...);
 
     // long TimeDifference(unsigned long prev, unsigned long next);
     // long TimePassedSince(unsigned long timestamp);
@@ -377,14 +413,8 @@ uint16_t WriteBuffer_P(const char* formatP, ...);
 
     void DebugFreeMem(void);
 
-    // void ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len);
-
-
-    char* Format(char* output, const char* input, int size);
     char* GetOtaUrl(char *otaurl, size_t otaurl_size);
     void PerformEverySecond(void);
-    void Every100mSeconds(void);
-    void Every250mSeconds(void);
 
 
     void MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len);
@@ -405,8 +435,6 @@ void UpdateStatusBlink();
     void MQTTCommand_Execute(const char* topic, const char* payload); // Write command into mpkt struct and set as waiting
 
 
-int8_t GetRSSdBm();
-uint8_t GetRSSPercentage();
 
     uint32_t ResetReason(void);
 
@@ -414,11 +442,11 @@ uint8_t GetRSSPercentage();
 
     uint32_t GetPulseTimer(uint32_t index);
 
-    
+    int ResponseJsonEnd(void);
+    int ResponseJsonEndEnd(void);
 
-int ResponseJsonEnd(void);
-int ResponseJsonEndEnd(void);
-
+    static bool SetTopicMatch(const char* toSearch, const char* set_topic_path);
+    static bool SetTopicMatch_P(const char* toSearch, const char* set_topic_path);
     static int mSearchCtrIndexOf(const char* toSearch, const char* toFind);
     static int mSearchNCtrIndexOf(const char* toSearch, int length,const char* toFind);
     static int NumDigits(int x);

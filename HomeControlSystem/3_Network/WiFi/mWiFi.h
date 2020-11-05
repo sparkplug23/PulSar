@@ -31,8 +31,13 @@ class mWiFi{
   public:
     mWiFi(){};
     
+    #define D_MAX_SSIDS 3
+
     int8_t Tasker(uint8_t function);
     void init(void);
+
+    int8_t GetRSSdBm();
+    uint8_t GetRSSPercentage();
 
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;
@@ -51,25 +56,30 @@ class mWiFi{
     const uint8_t WIFI_CHECK_SEC = 20;         // seconds
     const uint8_t WIFI_RETRY_OFFSET_SEC = 20;  // seconds
 
-    uint32_t wifi_last_event = 0;       // Last wifi connection event
-    uint32_t wifi_downtime = 0;         // Wifi down duration
-    uint16_t wifi_link_count = 0;       // Number of wifi re-connect
-    uint8_t wifi_counter;
-    uint8_t wifi_retry_init;
-    uint8_t wifi_retry;
-    uint8_t wifi_status;
-    uint8_t wps_result;
-    uint8_t wifi_config_type = 0;
-    uint8_t wifi_config_counter = 0;
-    uint8_t mdns_begun = 0;             // mDNS active
 
-    struct WIFI_CONNECTION_STATUS{
+    struct WIFI_CONNECTION{
+      uint32_t last_event = 0;       // Last wifi connection event
+      uint32_t downtime = 0;         // Wifi down duration
+      uint16_t link_count = 0;       // Number of wifi re-connect
+      uint8_t counter;
+      uint8_t retry_init;
+      uint8_t retry;
+      uint8_t status;
+      uint8_t config_type = 0;
+      uint8_t config_counter = 0;
+      uint8_t scan_state;
+      uint8_t bssid[6];
       uint8_t fConnected = false;
       uint8_t fReconnect = false;
-    }wifi_connection_status;
+    }connection;
 
-    uint8_t wifi_scan_state;
-    uint8_t wifi_bssid[6];
+
+
+
+    uint8_t mdns_begun = 0;             // mDNS active
+    uint8_t wps_result;
+
+
 
     void SplashWifiScan();
     void WifiConnectForced();
@@ -91,18 +101,18 @@ class mWiFi{
     void WifiCheck(uint8_t param);
     int WifiState(void);
     void WifiConnect(void);
-    void WifiDisconnect(void);
+    // void WifiDisconnect(void);
+    void WifiShutdown(bool option = false);
     void EspRestart(void);
-    void WifiAddDelayWhenDisconnected(void);
 
     const char* GetWiFiStatusCtr(void);
     const char* GetWiFiConfigTypeCtr(void);
 
-    enum WifiBegin_Flags{ 
-      WifiBegin_FLAG_SSID0_ID=0,
-      WifiBegin_FLAG_SSID1_ID,
-      WifiBegin_FLAG_SSID2_ID,
-      WifiBegin_FLAG_TOGGLE_SSIDS_ID
+    enum WIFIBEGIN_Flags{ 
+      WIFIBEGIN_FLAG_SSID0_ID=0,
+      WIFIBEGIN_FLAG_SSID1_ID,
+      WIFIBEGIN_FLAG_SSID2_ID,
+      WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID
     };
 
 };

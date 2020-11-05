@@ -60,7 +60,7 @@ uint8_t mDoorBell::RingDoorBellLoop(uint8_t reset){
   if(ringer.fIsRinging){ //not finished
 
     //calculate toggle as seconds/freq
-    if(mSupport::MillisReached(&ringer.toggle_millis)){
+    if(mTime::MillisReached(&ringer.toggle_millis)){
       BellChime_Toggle();
       if(BellSwitch_OnOff()){
         ringer.closed_millis_end = millis()+500;
@@ -70,14 +70,14 @@ uint8_t mDoorBell::RingDoorBellLoop(uint8_t reset){
     }
 
     //timeout/finished reset
-    if(mSupport::MillisReached(&ringer.end_millis)){
+    if(mTime::MillisReached(&ringer.end_millis)){
       BellChime_Set(BELLCHIME_OFF); // turn off
       ringer.fIsRinging = false;
       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.end_millis"));
     }
 
     //Only have relay on for short time
-    if(mSupport::TimeReached(&ringer.closed_millis_end,500)){
+    if(mTime::TimeReached(&ringer.closed_millis_end,500)){
       //BELLCHIME_SET(BELLCHIME_OFF); // turn off
       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.closed_millis_end"));
     }
@@ -142,7 +142,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 // int8_t mDoorBell::parse_JSONCommand(void){
 
 //   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/doorbell")>=0){
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/doorbell")>=0){
 //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
@@ -153,11 +153,11 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
     
 //   //new topic names must include pixels
   
-//   if(strstr(data_buffer2.topic.ctr,"/settings")){
+//   if(strstr(data_buffer.topic.ctr,"/settings")){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "settings"));    
 //     isserviced += parsesub_Settings();
 //   }else 
-//   if(strstr(data_buffer2.topic.ctr,"/command")){
+//   if(strstr(data_buffer.topic.ctr,"/command")){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "command"));    
 //     isserviced += parsesub_Command();
 //   }else 
@@ -176,7 +176,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //   #else
 //     DynamicJsonDocument doc(600);
 //   #endif
-//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 //   if(error){
 //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
 //     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
@@ -213,7 +213,7 @@ const char* mDoorBell::BellSwitch_OnOff_Ctr(){
 //   // #else
 //   //   DynamicJsonDocument doc(600);
 //   // #endif
-//   // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 //   // if(error){
 //   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
 //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
@@ -255,7 +255,7 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
 
   if(doorbell_switch.ischanged){doorbell_switch.ischanged=false;
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
 
     StaticJsonDocument<200> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -263,13 +263,13 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
     root["location"] = DOORALERT_PAYLOAD_CTR;
     root["time"] = pCONT->mt->mtime.hhmmss_ctr;
 
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+    data_buffer.payload.len = measureJson(root)+1;
+    serializeJson(doc,data_buffer.payload.ctr);
 
     if(doorbell_switch.isactive){
-      pCONT->mqt->ppublish("status/doorbell/detected",data_buffer2.payload.ctr,false);
+      pCONT->mqt->ppublish("status/doorbell/detected",data_buffer.payload.ctr,false);
     }else{
-      pCONT->mqt->ppublish("status/doorbell/over",data_buffer2.payload.ctr,false);
+      pCONT->mqt->ppublish("status/doorbell/over",data_buffer.payload.ctr,false);
     }
 
   }
@@ -281,7 +281,7 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
 
 void mDoorBell::MQQTSendDoorUpdate(void){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   //   JsonObject root = doc.to<JsonObject>();
@@ -310,10 +310,10 @@ void mDoorBell::MQQTSendDoorUpdate(void){
   //   lockobj["changedtime"] = timectr2;
   // #endif
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
-  // pCONT->mqt->ppublish("status/door/status",data_buffer2.payload.ctr,false);
+  // pCONT->mqt->ppublish("status/door/status",data_buffer.payload.ctr,false);
 
 }
 
@@ -333,7 +333,7 @@ int8_t mDoorBell::Tasker(uint8_t function){
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("Tasker::mDoorBell"));
 
       if((BellSwitch_OnOff()!=doorbell_switch.state)
-          &&mSupport::TimeReachedNonReset(&doorbell_switch.tDetectTimeforDebounce,100)
+          &&mTime::TimeReachedNonReset(&doorbell_switch.tDetectTimeforDebounce,100)
         ){
         doorbell_switch.state = BellSwitch_OnOff(); //tDetectTime = millis();
         
@@ -362,17 +362,6 @@ int8_t mDoorBell::Tasker(uint8_t function){
     break;
 
 
-
-    // case FUNC_JSON_COMMAND:
-    //   parse_JSONCommand();
-    // break;  
-
-
-
-
-    // case FUNC_WEB_COMMAND:
-    //   WebCommand_Parse();
-    // break;
 
     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
       // char relay_handle_ctr[20]; 
@@ -521,10 +510,10 @@ int8_t mDoorBell::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mDoorBell::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/doorbell")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/doorbell")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -532,9 +521,9 @@ int8_t mDoorBell::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-void mDoorBell::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mDoorBell::parse_JSONCommand(JsonObjectConst obj){
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR("mDoorBell::parsesub_TopicCheck_JSONCommand"));
+  AddLog_P(LOG_LEVEL_INFO,PSTR("mDoorBell::parse_JSONCommand"));
 
   uint8_t name_num=-1,state=-1;    
 

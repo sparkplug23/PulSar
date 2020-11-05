@@ -60,6 +60,18 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 
 // Can only be used when hardware serial is enabled
+// #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_CHECK_AND_PRINT_NULLPTR(X)    if(X==nullptr){ \
+                        SERIAL_DEBUG.printf("nullptr true"); }else{  SERIAL_DEBUG.printf("nullptr false"); }\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+// #else
+//   #define DEBUG_LINE   //nothing, no code
+// #endif
+
+
+// Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_PRINT_FUNCTION_NAME) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
                                       SERIAL_DEBUG.print("\t");\

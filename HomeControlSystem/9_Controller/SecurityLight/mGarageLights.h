@@ -63,7 +63,7 @@ void parse_JSONCommand(JsonObjectConst obj);
     //   uint32_t tDetectTime;
     // }pir_detect_copy;
 
-    pir_detect_t pir_detect_copy;
+    // pir_detect_t pir_detect_copy;
     // struct pir_detect pir_detect_copy;
 
     void parse_JSONCommand();

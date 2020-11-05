@@ -119,8 +119,13 @@ struct handler {
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
 };
 
+#ifdef USE_PUBSUB_V1
 #include "mPubSubClient.h"
 class mPubSubClient;
+#else
+#include "PubSubClient.h"
+class mPubSubClient;
+#endif
 
 #include "0_ConfigUser/mUserConfig.h"
 #include "2_CoreSystem/Support/mSupport.h"
@@ -157,21 +162,40 @@ class mMQTT{
     void DiscoverServer(void);
 
     struct CONNECTION_MAINTAINER_PARAMETERS{
+
+      #ifndef ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
       uint32_t tSavedLoop = millis();
+      #endif // ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
       uint32_t tSavedReconnectAttempt = millis()+30000;
       uint32_t rSavedReconnectAttempt = 0;
       uint8_t cConnectionAttempts = 0; 
+      uint8_t flag_require_reconnection = false;
     }connection_maintainer;
+
+    
+const char* state_ctr(void);
 
 
     // wasteful
     struct SETTINGS{
-      char lwt_topic[30];
-      char client_name[40]; 
-      char hostname_ctr[20];
-      char prefixtopic[50]; // "<devicename>/User extras?"
-    }settings;
+    }settings; 
+    struct MQTT {
+      uint16_t connect_count = 0;            // MQTT re-connect count
+      uint16_t retry_counter = 1;            // MQTT connection retry counter
+      uint8_t initial_connection_state = 2;  // MQTT connection messages state
+      bool connected = false;                // MQTT virtual connection status
+      bool allowed = false;                  // MQTT enabled and parameters valid
+      bool mqtt_tls = false;                 // MQTT TLS is enabled
+    } Mqtt; // to be settings
 
+    void EveryLoop();
+    void CheckConnection();
+    bool MqttIsConnected();
+    void MqttReconnect();    
+    void MqttDisconnected(int state);
+    void MqttConnected(void);
+    void MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len);
+  
     // Special formatted sending functions (pubsub functions to be moved in here)
     void publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
@@ -183,45 +207,25 @@ class mMQTT{
 
     void MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, const char* postfix_topic_ctr);
 
-    WiFiClient client;
-    mPubSubClient* pubsub;
-    void connect(void);
+    WiFiClient* client = nullptr;
+    mPubSubClient* pubsub = nullptr;
     
-    void HandleMqttConfiguration(void);
-    void MqttSaveSettings(void);
-
     void parse_JSONCommand();
     void parsesub_MQTTSettingsCommand();
 
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
 
-
-    template<typename T, typename U> //sizeof()=uint16_t for U
-    void MQTTHandler_Command_Group(
+    template<typename T>
+    void MQTTHandler_Command_Array_Group(
       T& class_ptr, uint8_t class_id,
-      handler<T>** handler_ptr,     U handler_ptr_length,//pointer to array of pointers
-      uint8_t* handler_id_list_ptr, U handler_id_list_length,
-      uint8_t optional_desired_id = 0
+      handler<T>** handler_ptr,  uint8_t* handler_id_list_ptr,
+      uint8_t handler_ptr_length, uint8_t optional_desired_id = 0
     )
     {
 
-      // Serial.println("MQTTHandler_Command_Group");
-
-      // for(uint8_t id=0;id<handler_ptr_length;id++){    
-      //   if(handler_ptr[id]->handler_id == handler_id_list_ptr[id]){ 
-      //     MQTTHandler_Command(class_ptr, class_id, handler_ptr[id]);
-      //     //if(optional_desired_id == MQTT_HANDLER_ALL_ID){ break; } //stop if it was to only send this one// should be != ?
-      //   }
-      // }
-
       for(uint8_t id=0;id<handler_ptr_length;id++){    
-
         // if(handler_ptr[id]->handler_id == handler_id_list_ptr[id]){ 
-
-
           MQTTHandler_Command(class_ptr, class_id, handler_ptr[id]);
-
-
           //if(optional_desired_id == MQTT_HANDLER_ALL_ID){ break; } //stop if it was to only send this one// should be != ?
         // }
       }
@@ -238,20 +242,19 @@ class mMQTT{
       if(handler_ptr == nullptr){
         return;
       }
-      // DEBUG_LINE_HERE;
-      // return;
-      
 
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      #ifndef DISABLE_SERIAL_LOGGING
-      // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
-      Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
-    #endif
-    #endif
+      #ifdef ENABLE_ADVANCED_DEBUGGING
+        #ifndef DISABLE_SERIAL_LOGGING
+        // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
+        Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
+        #endif
+      #endif
+      
+        // Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
 
       if(handler_ptr->flags.PeriodicEnabled){
-        if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ handler_ptr->tSavedLastSent=millis();
-          handler_ptr->flags.SendNow = true;
+        if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
+          handler_ptr->tSavedLastSent=millis();
           handler_ptr->flags.SendNow = true;
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;
           if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
@@ -263,8 +266,11 @@ class mMQTT{
           }
         }
       }
-      if(handler_ptr->flags.SendNow || handler_ptr->flags.SendNow){ handler_ptr->flags.SendNow = false;    handler_ptr->flags.SendNow = false;
+      if(handler_ptr->flags.SendNow){ 
+        handler_ptr->flags.SendNow = false;
         handler_ptr->tSavedLastSent = millis();    
+        
+
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);
@@ -275,104 +281,85 @@ class mMQTT{
         // Serial.printf("payload_length=%d\n\r",payload_length);
 
         // Send MQTT payload with structured output
-        if(fSendPayload){ MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); }
+        if(fSendPayload){ 
+          // Serial.printf("fSendPayload SendNow postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
+          MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
+        }
       }
       // Check if this needs reducing
       if(handler_ptr->flags.FrequencyRedunctionLevel){
 
       }
 
-
-
-
     };
 
 
-    // Functions to call the ConstructJson held within telemetry for the system.
-    uint8_t ConstructJSON_Health(uint8_t json_level);
-    uint8_t ConstructJSON_Settings(uint8_t json_level);
-    // uint8_t ConstructJSON_Parameters(uint8_t json_level);
-    uint8_t ConstructJSON_Firmware(uint8_t json_level);
-    uint8_t ConstructJSON_Log(uint8_t json_level);
-    uint8_t ConstructJSON_Memory(uint8_t json_level);
-    uint8_t ConstructJSON_Network(uint8_t json_level);
-    uint8_t ConstructJSON_Time(uint8_t json_level);
-    uint8_t ConstructJSON_Reboot(uint8_t json_level);
-    uint8_t ConstructJSON_Reboot_Event(uint8_t json_level);
-    uint8_t ConstructJSON_MQTT(uint8_t json_level);
-    uint8_t ConstructJSON_Devices(uint8_t json_level);
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      uint8_t ConstructJSON_Debug_Pins(uint8_t json_level);
-      uint8_t ConstructJSON_Debug_Template(uint8_t json_level);
-      uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_level);
-      uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
-    #endif
+    // // Functions to call the ConstructJson held within telemetry for the system.
+    // uint8_t ConstructJSON_Health(uint8_t json_level);
+    // uint8_t ConstructJSON_Settings(uint8_t json_level);
+    // uint8_t ConstructJSON_Firmware(uint8_t json_level);
+    // uint8_t ConstructJSON_Log(uint8_t json_level);
+    // uint8_t ConstructJSON_Memory(uint8_t json_level);
+    // uint8_t ConstructJSON_Network(uint8_t json_level);
+    // uint8_t ConstructJSON_Time(uint8_t json_level);
+    // uint8_t ConstructJSON_Reboot(uint8_t json_level);
+    // uint8_t ConstructJSON_Reboot_Event(uint8_t json_level);
+    // uint8_t ConstructJSON_MQTT(uint8_t json_level);
+    // uint8_t ConstructJSON_Devices(uint8_t json_level);
+    // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+    //   uint8_t ConstructJSON_Debug_Pins(uint8_t json_level);
+    //   uint8_t ConstructJSON_Debug_Template(uint8_t json_level);
+    //   uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_level);
+    //   uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
+    // #endif
 
-    //use new syntax
-    enum STATUS_SYSTEM_IDS{
-      MQTT_HANDLER_SYSTEM_ALL_ID = 0,
-      MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
-      MQTT_HANDLER_SYSTEM_SETTINGS_ID,
-      MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
-      MQTT_HANDLER_SYSTEM_LOG_ID,
-      MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
-      MQTT_HANDLER_SYSTEM_MEMORY_ID,
-      MQTT_HANDLER_SYSTEM_NETWORK_ID,
-      MQTT_HANDLER_SYSTEM_MQTT_ID,
-      MQTT_HANDLER_SYSTEM_TIME_ID,
-      MQTT_HANDLER_SYSTEM_DEVICES_ID,
-      MQTT_HANDLER_SYSTEM_REBOOT_ID,
-      MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
-      #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-        MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
-      #endif
-      MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
-    };
+    // //use new syntax
+    // enum STATUS_SYSTEM_IDS{
+    //   MQTT_HANDLER_SYSTEM_ALL_ID = 0,
+    //   MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
+    //   MQTT_HANDLER_SYSTEM_SETTINGS_ID,
+    //   MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
+    //   MQTT_HANDLER_SYSTEM_LOG_ID,
+    //   MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
+    //   MQTT_HANDLER_SYSTEM_MEMORY_ID,
+    //   MQTT_HANDLER_SYSTEM_NETWORK_ID,
+    //   MQTT_HANDLER_SYSTEM_MQTT_ID,
+    //   MQTT_HANDLER_SYSTEM_TIME_ID,
+    //   MQTT_HANDLER_SYSTEM_DEVICES_ID,
+    //   MQTT_HANDLER_SYSTEM_REBOOT_ID,
+    //   MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+    //   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+    //     MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
+    //     MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
+    //     MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
+    //     MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
+    //   #endif
+    //   MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
+    // };
 
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
-    // Root call
-    void MQQTHandler_System_Sender(uint8_t status_id = MQTT_HANDLER_SYSTEM_ALL_ID);
+    // void MQTTHandler_Init();
+    // void MQTTHandler_Set_fSendNow();
+    // void MQQTHandler_System_Sender(uint8_t 
+    //status_id = 
+    //MQTT_HANDLER_SYSTEM_ALL_ID);
 
-    handler<mMQTT>* mqtthandler_ptr;
-
-    // move into progmem!
-
-    // const char* postfix_topic_health = "health";
-    handler<mMQTT> mqtthandler_health;
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";    
-    handler<mMQTT> mqtthandler_settings; //ie modes, on, off, states
-    // const char* postfix_topic_log = "log";        
-    handler<mMQTT> mqtthandler_log;
-    // const char* postfix_topic_firmware = "firmware";        
-    handler<mMQTT> mqtthandler_firmware;
-    // const char* postfix_topic_memory = "memory";    
-    handler<mMQTT> mqtthandler_memory;
-    // const char* postfix_topic_network = "network";    
-    handler<mMQTT> mqtthandler_network;
-    // const char* postfix_topic_mqtt = "mqtt";    
-    handler<mMQTT> mqtthandler_mqtt;
-    // const char* postfix_topic_time = "time";    
-    handler<mMQTT> mqtthandler_time;
-    // const char* postfix_topic_devices = "devices";    
-    handler<mMQTT> mqtthandler_devices; // appended all ACTIVE sensors from all sensor modules
-    // const char* postfix_topic_reboot = "reboot";    
-    handler<mMQTT> mqtthandler_reboot;
-    // const char* postfix_topic_reboot_event = "reboot/event";    
-    handler<mMQTT> mqtthandler_reboot_event;
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      // const char* postfix_topic_debug_pins = "debug/pins";    
-      handler<mMQTT> mqtthandler_debug_pins;
-      // const char* postfix_topic_debug_template = "debug/template";    
-      handler<mMQTT> mqtthandler_debug_template;
-      // const char* postfix_topic_debug_moduleinterface = "debug/moduleinterface";    
-      handler<mMQTT> mqtthandler_debug_moduleinterface;
-      // const char* postfix_topic_debug_minimal = "debug/minimal";    
-      handler<mMQTT> mqtthandler_debug_minimal;
-    #endif
+    // handler<mMQTT> mqtthandler_health;
+    // handler<mMQTT> mqtthandler_settings;
+    // handler<mMQTT> mqtthandler_log;
+    // handler<mMQTT> mqtthandler_firmware;
+    // handler<mMQTT> mqtthandler_memory;
+    // handler<mMQTT> mqtthandler_network;
+    // handler<mMQTT> mqtthandler_mqtt;
+    // handler<mMQTT> mqtthandler_time;
+    // handler<mMQTT> mqtthandler_devices;
+    // handler<mMQTT> mqtthandler_reboot;
+    // handler<mMQTT> mqtthandler_reboot_event;
+    // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+    //   handler<mMQTT> mqtthandler_debug_pins;
+    //   handler<mMQTT> mqtthandler_debug_template;
+    //   handler<mMQTT> mqtthandler_debug_moduleinterface;
+    //   handler<mMQTT> mqtthandler_debug_minimal;
+    // #endif
 
 };
 #endif

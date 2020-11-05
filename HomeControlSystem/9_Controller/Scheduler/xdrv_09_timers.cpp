@@ -498,7 +498,7 @@
 //         jsflg = 0;
 //       }
 //     }
-//     data_buffer2.payload.ctr[0] = '\0';
+//     data_buffer.payload.ctr[0] = '\0';
 //   }
 // #ifdef USE_SUNRISE
 //   else if (CMND_LONGITUDE == command_code) {

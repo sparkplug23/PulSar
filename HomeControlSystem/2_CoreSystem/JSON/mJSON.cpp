@@ -148,8 +148,8 @@ void JsonBuilder::Level_End()
 // Use valist to populate the key
 void JsonBuilder::Add_FP(const char* key, const char* formatP_value, ...)
 {
-  char* buff = data_buffer2.payload.ctr;
-  uint16_t* len = &data_buffer2.payload.len;
+  char* buff = data_buffer.payload.ctr;
+  uint16_t* len = &data_buffer.payload.len;
   // Prefix comma if not first pair
   if((*len>1)&&(buff[*len-1]!='{')){ *len += sprintf_P(&buff[*len],","); }
   // Write key

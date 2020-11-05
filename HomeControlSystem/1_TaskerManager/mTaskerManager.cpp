@@ -55,6 +55,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(msdb18 == nullptr){ msdb18 = new mSensorsDB18(); }
   #endif
+  #ifdef USE_MODULE_SENSORS_INA219
+    if(msina219 == nullptr){ msina219 = new mSensorsINA219(); }
+  #endif
   #ifdef USE_MODULE_SENSORS_MOTION
     if(mms == nullptr){ mms = new mMotionSensor(); }
   #endif
@@ -234,6 +237,9 @@ DEBUG_LINE;
   #endif
   #ifdef D_MODULE_SENSORS_DB18S20_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DB18S20_ID;
+  #endif
+  #ifdef D_MODULE_SENSORS_INA219_ID
+    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_INA219_ID;
   #endif
   #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_ULTRASONIC_ID;
@@ -419,6 +425,9 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #endif
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(msdb18==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_SENSORS_INA219
+    if(msina219==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
     if(mois==nullptr){ return false; }
@@ -631,6 +640,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #ifdef D_MODULE_SENSORS_DB18S20_ID
         case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function); break;
       #endif
+      #ifdef D_MODULE_SENSORS_INA219_ID
+        case D_MODULE_SENSORS_INA219_ID:      result = msina219->Tasker(function); break;
+      #endif
       #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
         case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;
       #endif
@@ -770,6 +782,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
   } //end for
 
+  DEBUG_LINE;
   if(!mset->flag_boot_complete){
     char buffer_taskname[50];
     if(function != last_function){
@@ -894,6 +907,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1
       #endif
       #ifdef D_MODULE_SENSORS_DB18S20_ID
         case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function, param1); break;
+      #endif
+      #ifdef D_MODULE_SENSORS_INA219_ID
+        case D_MODULE_SENSORS_INA219_ID:      result = msina219->Tasker(function); break;
       #endif
       #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
         case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;
@@ -1285,6 +1301,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #endif    
     #ifdef D_MODULE_SENSORS_DB18S20_ID
       case D_MODULE_SENSORS_DB18S20_ID:         return PM_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;  break;
+    #endif
+    #ifdef D_MODULE_SENSORS_INA219_ID
+      case D_MODULE_SENSORS_INA219_ID:         return PM_MODULE_SENSORS_INA219_FRIENDLY_CTR;  break;
     #endif
     #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
       case D_MODULE_SENSORS_ULTRASONIC_ID:      return PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR; 

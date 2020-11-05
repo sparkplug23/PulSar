@@ -42,7 +42,7 @@
 #include <HardwareSerial.h>
 #endif
 
-#define ESP8266 //added by me
+// #define ESP8266 //added by me
 
 class TasmotaSerial : public Stream {
   public:

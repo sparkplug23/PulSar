@@ -1093,7 +1093,7 @@ void mEnergy::parse_JSONCommand(){
   return;// THIS IS WRONG!!
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/energy")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/energy")>=0){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
@@ -1110,7 +1110,7 @@ void mEnergy::parse_JSONCommand(){
   // #else
   //   DynamicJsonDocument doc(600);
   // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
   // if(error){
   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
@@ -1143,7 +1143,7 @@ void mEnergy::parse_JSONCommand(){
 
 uint8_t mEnergy::ConstructJSON_Settings(uint8_t json_method){
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
     // StaticJsonDocument<400> doc;
     // JsonObject root = doc.to<JsonObject>();
 
@@ -1153,17 +1153,17 @@ uint8_t mEnergy::ConstructJSON_Settings(uint8_t json_method){
 
     // // root["name_buffer"] = name_buffer;
 
-    // data_buffer2.payload.len = measureJson(root)+1;
-    // serializeJson(doc,data_buffer2.payload.ctr);
+    // data_buffer.payload.len = measureJson(root)+1;
+    // serializeJson(doc,data_buffer.payload.ctr);
 
-    return 0;//data_buffer2.payload.len>3?true:false;
+    return 0;//data_buffer.payload.len>3?true:false;
 
 }
 
 
 uint8_t mEnergy::ConstructJSON_EnergyStats(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
 
   // StaticJsonDocument<1000> doc;
   // JsonObject root = doc.to<JsonObject>();
@@ -1193,9 +1193,9 @@ uint8_t mEnergy::ConstructJSON_EnergyStats(uint8_t json_method){
   // //   }
   // // }
 
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
-  // return data_buffer2.payload.len>3?true:false;
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
+  // return data_buffer.payload.len>3?true:false;
 
   return 0;
     
@@ -1209,7 +1209,7 @@ uint8_t mEnergy::ConstructJSON_EnergyStats(uint8_t json_method){
 uint8_t mTelemetry::ConstructJSON_PowerMonitor(uint8_t json_level){ 
 
   // // clear entire mqtt packet
-  // memset(&data_buffer2,0,sizeof(data_buffer2));
+  // memset(&data_buffer,0,sizeof(data_buffer));
 
 
   // root[F("tbd")] = 0;
@@ -1219,8 +1219,8 @@ uint8_t mTelemetry::ConstructJSON_PowerMonitor(uint8_t json_level){
   //                           Settings.energy_power_delta, Settings.energy_min_power, Settings.energy_max_power,
   //                           Settings.energy_min_voltage, Settings.energy_max_voltage, Settings.energy_min_current, Settings.energy_max_current);
  
-  // data_buffer2.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer2.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
   return 0;
 }

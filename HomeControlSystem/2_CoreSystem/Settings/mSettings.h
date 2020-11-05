@@ -36,7 +36,7 @@ struct DATA_BUFFER{
   uint8_t fWaiting = false;
   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 };
-extern struct DATA_BUFFER data_buffer2;
+extern struct DATA_BUFFER data_buffer;
 
 
 
@@ -265,7 +265,7 @@ const uint16_t CMDSZ = 2;                  // Max number of characters in comman
 const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
 // const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
 
-//const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
+const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
 
 // #ifdef USE_MQTT_TLS
 //   const uint16_t WEB_LOG_SIZE = 2000;       // Max number of characters in weblog
@@ -746,6 +746,23 @@ uint32_t GetSettingsCrc32(void);
     COL_LAST };
 
 
+
+typedef union {
+  uint8_t data;
+  struct {
+    uint8_t network_down : 1;
+    uint8_t mqtt_down : 1;
+    uint8_t wifi_down : 1;
+    uint8_t eth_down : 1;
+    uint8_t spare04 : 1;
+    uint8_t spare05 : 1;
+    uint8_t spare06 : 1;
+    uint8_t spare07 : 1;
+  };
+} StateBitfield;
+
+
+
 // /*********************************************************************************************\
 //  * RTC memory
 // \*********************************************************************************************/
@@ -1199,6 +1216,12 @@ struct SettingsMQTT{
   // uint8_t       fingerprint[2][20];   // 1AD
   uint16_t      retry;                // 396
   // char          fulltopic[100];       // 558
+  
+  char lwt_topic[30];
+  char client_name[40]; 
+  char hostname_ctr[20];
+  char prefixtopic[50]; // "<devicename>/User extras?"
+
 };
 
 
@@ -1251,6 +1274,8 @@ struct SYSCFG {
   char          hostname[33];              // 165
   char          syslog_host[33];           // 186
   uint32_t      ip_address[4];             // 544
+  uint8_t wifi_channel;
+  uint8_t       wifi_bssid[6];             // F0A
   SysBitfield_Network  flag_network;                     // 3A0
   // Webserver
   uint8_t       webserver;                 // 1AB
@@ -1262,6 +1287,15 @@ struct SYSCFG {
   // Time
   int8_t        timezone;                  // 016
   uint8_t       timezone_minutes;          // 66D
+
+  
+  uint8_t       ina219_mode;               // 531
+
+  StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
+
+uint16_t      mqtt_retry;                // 396
+  
+
   // Timer         timer[MAX_TIMERS];         // 670
   // uint16_t      pulse_timer[8]; // 532 //#define MAX_PULSETIMERS 8  
   // TimeRule      tflag[2];                  // 2E2
@@ -1273,14 +1307,13 @@ struct SYSCFG {
   // unsigned long weight_calibration;        // 7C4
   // unsigned long weight_item;               // 7B8 Weight of one item in gram * 10
   // Lighting
-  SysBitfield_Lighting flag_lighting;
+  SysBitfield_Lighting    flag_lighting;
   // ws82xx strips
-  SysBitfield_Animations flag_animations;
-  LightSettings light_settings;
-  AnimationSettings animation_settings;
+  SysBitfield_Animations  flag_animations;
+  LightSettings           light_settings;
+  AnimationSettings       animation_settings;
 
-
-  DeviceNameBuffer device_name_buffer;
+  DeviceNameBuffer        device_name_buffer;
   
   // Pulse Counter
   // unsigned long pulse_counter[MAX_COUNTERS];  // 5C0
@@ -1455,19 +1488,6 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   };
 } RulesBitfield;
 
-typedef union {
-  uint8_t data;
-  struct {
-    uint8_t wifi_down : 1;
-    uint8_t mqtt_down : 1;
-    uint8_t spare02 : 1;
-    uint8_t spare03 : 1;
-    uint8_t spare04 : 1;
-    uint8_t spare05 : 1;
-    uint8_t spare06 : 1;
-    uint8_t spare07 : 1;
-  };
-} StateBitfield;
 
 // See issue https://github.com/esp8266/Arduino/issues/2913
 // #ifdef USE_ADC_VCC
@@ -1610,7 +1630,7 @@ char my_hostname[33];                       // Composed Wifi hostname
 //   uint8_t fWaiting = false;
 //   uint8_t method = false; // For detailed, ifchanged, all
 //   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
-// }data_buffer;
+// }data_buffer_old;
 
 
 #define WEB_LOG_SIZE 400       // Max number of characters in weblog

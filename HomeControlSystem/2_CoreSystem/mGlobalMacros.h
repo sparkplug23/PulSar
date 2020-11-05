@@ -46,7 +46,7 @@
             X = Y; \
           }
 
-#define BUFFER_ISREADY() strlen(data_buffer2.payload.ctr)?1:0
+#define BUFFER_ISREADY() strlen(data_buffer.payload.ctr)?1:0
 
 
 #endif

@@ -224,7 +224,7 @@ void mOilFurnace::parse_JSONCommand(){
 
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/oilfurnace")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -241,7 +241,7 @@ return;
   // #else
   //   DynamicJsonDocument doc(600);
   // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
   // if(error){
   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
@@ -319,7 +319,7 @@ int8_t mOilFurnace::Tasker(uint8_t function){
       //   }
       // #endif
       
-      // if(mSupport::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
+      // if(mTime::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
       //   MQTTHandler_Set_fSendNow();
       //   // mqtthandler_.flags.SendNow = true;
       //   // mqtthandler_ifchanged_detailed.flags.SendNow = true;
@@ -441,7 +441,7 @@ void mOilFurnace::parsesub_CheckAll(JsonObjectConst obj){
 int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/oilfurnace")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
@@ -456,19 +456,19 @@ void mOilFurnace::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   
   int8_t isserviced = false;
   
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/manual",sizeof("/manual")-1)>=0){
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
   //   #endif
   //   isserviced += parsesub_ModeManual(obj);
   // }else
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
   //   #endif
   //   isserviced += parsesub_ProgramTimers(obj);
   // }else
-  // if(mSupport::memsearch(data_buffer2.topic.ctr,data_buffer2.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
+  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
   //   #endif
@@ -658,9 +658,9 @@ void mOilFurnace::WebSend_JSON_Table(AsyncWebServerRequest *request){
   
   ConstructRoot_JSON_Table(root);
   
-  memset(data_buffer2.payload.ctr,0,sizeof(data_buffer2.payload.ctr));
-  serializeJson(doc,data_buffer2.payload.ctr);
-  request->send(200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer2.payload.ctr);
+  memset(data_buffer.payload.ctr,0,sizeof(data_buffer.payload.ctr));
+  serializeJson(doc,data_buffer.payload.ctr);
+  request->send(200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
     
   uint16_t freemem_used = freemem_start - ESP.getFreeHeap();
   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_ASYNC WEB_HANLDE_JSON_WEB_TOP_BAR " Ef::%s=%d"),"freemem_used",freemem_used);
@@ -747,7 +747,7 @@ void mOilFurnace::ConstructRoot_JSON_Table(JsonObject root){
 // Send all litres calculations from all methods
 uint8_t mOilFurnace::ConstructJSON_Litres(uint8_t json_method){
 
-  memset(&data_buffer2,0,sizeof(data_buffer2));
+  memset(&data_buffer,0,sizeof(data_buffer));
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   JsonObject root = doc.to<JsonObject>();
 
@@ -800,8 +800,8 @@ uint8_t mOilFurnace::ConstructJSON_Litres(uint8_t json_method){
     }
   }
 
-  data_buffer2.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer2.payload.ctr);
+  data_buffer.payload.len = measureJson(root)+1;
+  serializeJson(doc,data_buffer.payload.ctr);
 
   return 1;
 }
@@ -810,14 +810,14 @@ uint8_t mOilFurnace::ConstructJSON_Litres(uint8_t json_method){
 
 uint8_t mOilFurnace::ConstructJSON_Settings(uint8_t json_method){
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
     StaticJsonDocument<400> doc;
     JsonObject root = doc.to<JsonObject>();
 
     // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
 
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+    data_buffer.payload.len = measureJson(root)+1;
+    serializeJson(doc,data_buffer.payload.ctr);
 
     return 1;
 
@@ -826,7 +826,7 @@ uint8_t mOilFurnace::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mOilFurnace::ConstructJSON_Furnace(uint8_t json_method){
 
-    memset(&data_buffer2,0,sizeof(data_buffer2));
+    memset(&data_buffer,0,sizeof(data_buffer));
     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
     JsonObject root = doc.to<JsonObject>();
 
@@ -847,13 +847,13 @@ uint8_t mOilFurnace::ConstructJSON_Furnace(uint8_t json_method){
 //   if(furnace_detect.ischanged||(pCONT->mqt->fSendSingleFunctionData)){ furnace_detect.ischanged = false;// TEMP FIX
     root["furnace_onoff"] = FURNACEACTIVECTR;//mdio_mqt->input_state_detect[0].isactive;
     root["furnace_state"] = FURNACEACTIVE()?1:0;//mdio_mqt->input_state_detect[0].isactive;
-    // data_buffer2.payload.json_pairs++;
+    // data_buffer.payload.json_pairs++;
   // }
   // #endif
 
-  //if(data_buffer2.payload.json_pairs>0){
-    data_buffer2.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer2.payload.ctr);
+  //if(data_buffer.payload.json_pairs>0){
+    data_buffer.payload.len = measureJson(root)+1;
+    serializeJson(doc,data_buffer.payload.ctr);
 
     return 1;
     

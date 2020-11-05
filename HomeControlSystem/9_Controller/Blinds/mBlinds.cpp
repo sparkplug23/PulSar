@@ -61,7 +61,7 @@ int8_t mBlinds::Tasker(uint8_t function, JsonObjectConst obj){
 int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/blinds")>=0){
+  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
@@ -74,20 +74,20 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
-  // for(int j=0;j<data_buffer2.payload.len;j++){
-  //   pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
+  // for(int j=0;j<data_buffer.payload.len;j++){
+  //   pCONT->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
   // }
 
   // pCONT->mso->println();
   // pCONT->mso->print("\tiTOPIC[len:");
-  // pCONT->mso->print(data_buffer2.topic.len);
+  // pCONT->mso->print(data_buffer.topic.len);
   // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer2.topic.ctr);
+  // pCONT->mso->print(data_buffer.topic.ctr);
   // pCONT->mso->println();
   // pCONT->mso->print("\tiPAYLOAD[len:");
-  // pCONT->mso->print(data_buffer2.payload.len);
+  // pCONT->mso->print(data_buffer.payload.len);
   // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer2.payload.ctr);  
+  // pCONT->mso->print(data_buffer.payload.ctr);  
   // pCONT->mso->println();
 
   // pCONT->mso->println();
@@ -100,7 +100,7 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   // pCONT->mso->print(payload);  
   // pCONT->mso->println();
 
-//  pCONT->mqt->ppublish("payload/mrelays",data_buffer2.payload.ctr,false);
+//  pCONT->mqt->ppublish("payload/mrelays",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
@@ -160,32 +160,32 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   Serial.println("mBlinds::parse_JSONCommand()");
 
   StaticJsonDocument<MQTT_MAX_PARSING_PACKET_SIZE> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   JsonObject obj = doc.as<JsonObject>();
 
-  Serial.print("data_buffer2.payload.len");
+  Serial.print("data_buffer.payload.len");
   Serial.println(mpt->payload.len);
 
-  for(int j=0;j<data_buffer2.payload.len;j++){
-    pCONT->mso->MessagePrintchar(data_buffer2.payload.ctr[j]);
+  for(int j=0;j<data_buffer.payload.len;j++){
+    pCONT->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
   }
 
-  pCONT->mqt->ppublish("results/topic",data_buffer2.topic.ctr,false);
-  pCONT->mqt->ppublish("results/payload",data_buffer2.payload.ctr,false);
+  pCONT->mqt->ppublish("results/topic",data_buffer.topic.ctr,false);
+  pCONT->mqt->ppublish("results/payload",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
 
   Serial.print("]> ");
-  Serial.print(data_buffer2.payload.ctr);
+  Serial.print(data_buffer.payload.ctr);
 
 
 // Serial.print("topic>> "); Serial.println(pCONT->mqt->mqqt_mqt->mpkt.topic.ctr);
-// Serial.print("Payload>> "); Serial.println(data_buffer2.payload.ctr);
+// Serial.print("Payload>> "); Serial.println(data_buffer.payload.ctr);
 
 
   //if(obj.containsKey("test1")){ 
-if(strstr(data_buffer2.payload.ctr,"test1")){
+if(strstr(data_buffer.payload.ctr,"test1")){
 Serial.println("obj[\"test1\"] int");
    // name_num  = obj["name"];
 
@@ -194,7 +194,7 @@ Serial.println("obj[\"test1\"] int");
     Serial.println("NOT obj[\"test1\"] int");
   }
 
-if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
+if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //  if(obj.containsKey("test2")){ 
   Serial.println("obj[\"test2\"] int");
     //name_num  = obj["name"];
@@ -346,8 +346,8 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 
 // void mBlinds::MQQTSendFanStatus(void){
 //     ConstructJSON_FanStatus();
-//     if(data_buffer2.payload.len){ // if something to send
-//       pCONT->mqt->ppublish("status/blinds", data_buffer2.payload.ctr,false);
+//     if(data_buffer.payload.len){ // if something to send
+//       pCONT->mqt->ppublish("status/blinds", data_buffer.payload.ctr,false);
 //     }
 // }
 // void mBlinds::ConstructJSON_FanStatus(){
@@ -355,7 +355,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 
 //   JsonObject posobj = root.createNestedObject("position");
 //     posobj["percentage"] = PositionPercentage();
@@ -377,8 +377,8 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //     rocobj["stored"] = adcreading.roc.stored;
 //     rocobj["lastupdate"] = abs(millis()-adcreading.roc.tSaved);
 
-//   data_buffer2.payload.len = measureJson(root)+1;
-//   serializeJson(doc,data_buffer2.payload.ctr);
+//   data_buffer.payload.len = measureJson(root)+1;
+//   serializeJson(doc,data_buffer.payload.ctr);
 
 // }
 
@@ -388,18 +388,18 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 
 //   root["roc_exceeded"] = adcreading.roc.val;
 //   root["A_PIN"] = digitalRead(BLINDS_MOTOR_IA_PIN);
 //   root["B_PIN"] = digitalRead(BLINDS_MOTOR_IA_PIN);
 //   root["motion"] = "Up"; //up/down/stopped
 
-//   data_buffer2.payload.len = measureJson(root)+1;
-//   serializeJson(doc,data_buffer2.payload.ctr);
+//   data_buffer.payload.len = measureJson(root)+1;
+//   serializeJson(doc,data_buffer.payload.ctr);
 
-//   if(data_buffer2.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/event/blinds", data_buffer2.payload.ctr,false);
+//   if(data_buffer.payload.len){ // if something to send
+//     pCONT->mqt->ppublish("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -411,15 +411,15 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 
 //   root[key] = pair;
 
-//   data_buffer2.payload.len = measureJson(root)+1;
-//   serializeJson(doc,data_buffer2.payload.ctr);
+//   data_buffer.payload.len = measureJson(root)+1;
+//   serializeJson(doc,data_buffer.payload.ctr);
 
-//   if(data_buffer2.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/event/blinds", data_buffer2.payload.ctr,false);
+//   if(data_buffer.payload.len){ // if something to send
+//     pCONT->mqt->ppublish("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -434,7 +434,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer2,0,sizeof(data_buffer2));
+//   memset(&data_buffer,0,sizeof(data_buffer));
 
 //   JsonObject posobj = root.createNestedObject("position");
 //     posobj["percentage"] = PositionPercentage();
@@ -455,11 +455,11 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //     rocobj["val"] = adcreading.roc.val;
 //     rocobj["stored"] = adcreading.roc.stored;
 //     rocobj["lastupdate"] = abs(millis()-adcreading.roc.tSaved);
-//   data_buffer2.payload.len = measureJson(root)+1;
-//   serializeJson(doc,data_buffer2.payload.ctr);
+//   data_buffer.payload.len = measureJson(root)+1;
+//   serializeJson(doc,data_buffer.payload.ctr);
 
-//   if(data_buffer2.payload.len){ // if something to send
-//     pCONT->mqt->ppublish("status/blinds", data_buffer2.payload.ctr,false);
+//   if(data_buffer.payload.len){ // if something to send
+//     pCONT->mqt->ppublish("status/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -595,7 +595,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   Serial.println("MBLINDS TEST");
   
 //   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer2.topic.ctr,"set/blinds")>=0){
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
 //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
@@ -605,10 +605,10 @@ if(mSupport::mSearchCtrIndexOf(data_buffer2.payload.ctr,"test2")>=0){
 //   int8_t device_id,user_id,schedule_id;
 //   uint8_t timeon,tempset;
 
-//   // char* payload = data_buffer2.payload.ctr;
+//   // char* payload = data_buffer.payload.ctr;
 
 //   DynamicJsonDocument doc(100);
-//   DeserializationError error = deserializeJson(doc, data_buffer2.payload.ctr);
+//   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 //   JsonObject obj = doc.as<JsonObject>();
 
 //   return 0;

@@ -484,9 +484,8 @@ void AddToHardwareMessage();
       PROGRAM timers;
       PROGRAM temps;
     }activeprograms[4];
-    const char* GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer);// = nullptr);
+    const char* GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen);
 
-    void parse_JSONCommand(void);
     void parse_VoiceMQTT(void);
 
     void WebAppend_Root_ControlUI();
@@ -503,7 +502,7 @@ void WebAppend_Root_Draw_Table();
 
     
     int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+    void parse_JSONCommand(JsonObjectConst obj);
     void parsesub_CheckAll(JsonObjectConst obj);
     void parsesub_ModeManual(JsonObjectConst obj);
     void parsesub_ProgramTimers(JsonObjectConst obj);
@@ -513,14 +512,11 @@ void WebAppend_Root_Draw_Table();
     void SubTasker_HeatingTemps(void);
     void SubTasker_ScheduledEvents(void);
 
-    uint32_t tTick = millis();
-    const char* GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen);// = nullptr);
-    const char* GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen);// = nullptr);
-    const char* GetDeviceNameUpperCaseCtrbyID(uint8_t device_id, char* buffer, uint8_t buflen);// = nullptr);
+    const char* GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen);
+    const char* GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen);
+    const char* GetDeviceNameUpperCaseCtrbyID(uint8_t device_id, char* buffer, uint8_t buflen);
 
     void SetHighestImportance(uint8_t* importanceset, int8_t thisvalue);
-
-    uint8_t fSendAllData = true;
 
     void SetHeater(uint8_t device_name, uint8_t state);
     int8_t GetHeater(uint8_t device);
@@ -536,18 +532,18 @@ void WebAppend_Root_Draw_Table();
 
     uint8_t rateSavedSendActive = 1;
 
-    const char* GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* buffer);// = nullptr);
-
+    const char* GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen);
+    
     uint32_t tSavedHeatingTemps,tSavedHeatingTemps2,tSavedHeatingTemps3;
 
-    enum USERID{USERID_MICHAEL=0,USERID_DEIRDRE,USERID_RAYMOND};
+    // enum USERID{USERID_MICHAEL=0,USERID_DEIRDRE,USERID_RAYMOND};
 
-    const char* GetDeviceNamebyIDCtr(uint8_t name, char* buffer, uint8_t buflen);// = nullptr);
+    const char* GetDeviceNamebyIDCtr(uint8_t name, char* buffer, uint8_t buflen);
     int8_t GetScheduleModeIDByCtr(const char* c);
     int8_t GetDeviceIDbyName(const char* c);
     int8_t GetUserIDbyName(const char* c);
 
-    const char* GetUserNameByID(int8_t id, char* buffer);// = nullptr);
+    // const char* GetUserNameByID(int8_t id, char* buffer);// = nullptr);
 
     struct FAILSAFES{
       uint32_t tSaved;
@@ -567,15 +563,15 @@ void WebAppend_Root_Draw_Table();
     uint32_t tSavedForceUpdate = millis();
     int cTicker;
     uint8_t fSendSingleFunctionData = false;
-    const char* GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen);// = nullptr);
+    const char* GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen);
 
     // *************** MQTT ****************************************************************************************************
 
     int8_t GetWaterSensorIDbyShortName(const char* c);
     float GetWaterTempsRawByID(uint8_t device_id);
 
-    const char* GetSensorNameByID(uint8_t sensor_id, char* buffer);// = nullptr);
-    const char* GetSensorNameLongbyID(uint8_t sensor_id, char* buffer);// = nullptr);
+    const char* GetSensorNameByID(uint8_t sensor_id, char* buffer, uint8_t buflen);
+    const char* GetSensorNameLongbyID(uint8_t sensor_id, char* buffer, uint8_t buflen);
 
     void MQQTSendHealth();
     uint8_t ConstructJSON_Health(uint8_t json_level = 0);
@@ -616,7 +612,7 @@ void WebAppend_Root_Draw_Table();
     int8_t GetVoiceRequestIDbyName(const char* c);
 
     int8_t GetClimateSensorIDbyShortName(const char* c);
-    const char* GetClimateSensorNameLongbyIDCtr(uint8_t sensor_id, char* buffer);// = nullptr);
+    const char* GetClimateSensorNameLongbyIDCtr(uint8_t sensor_id, char* buffer, uint8_t buflen);
     float GetClimateTempsRawByID(uint8_t sensor_id);
 
 uint8_t ConstructJSON_Settings(uint8_t json_method);
@@ -657,7 +653,6 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mHeating>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

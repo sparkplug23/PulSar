@@ -2140,12 +2140,12 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
   
   //   Serial.println("if(strstr(type,\"mrgbanimator_pixels_scene_hue\")){");
   //   // Fill mqtt with command, then set data waiting    
-  //   memset(&data_buffer2.payload,0,sizeof(data_buffer2.payload));
-  //   sprintf(data_buffer2.topic.ctr,"%s/set/pixels/scene",DEVICENAME_CTR);
-  //   sprintf(data_buffer2.payload.ctr,"{\"name\":\"COLOURSCENE\",\"hue\":%s}",dataBuf);
-  //   data_buffer2.topic.len = strlen(data_buffer2.topic.ctr);
-  //   data_buffer2.payload.len = strlen(data_buffer2.payload.ctr);
-  //   data_buffer2.fWaiting = true;
+  //   memset(&data_buffer.payload,0,sizeof(data_buffer.payload));
+  //   sprintf(data_buffer.topic.ctr,"%s/set/pixels/scene",DEVICENAME_CTR);
+  //   sprintf(data_buffer.payload.ctr,"{\"name\":\"COLOURSCENE\",\"hue\":%s}",dataBuf);
+  //   data_buffer.topic.len = strlen(data_buffer.topic.ctr);
+  //   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  //   data_buffer.fWaiting = true;
 
 
 
@@ -2191,7 +2191,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //           blcommand = strtok(nullptr, ";");
 //         }
 // //        Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_APPENDED);
-//         data_buffer2.payload.ctr[0] = '\0';
+//         data_buffer.payload.ctr[0] = '\0';
 //       } else {
 //         uint8_t blflag = (backlog_pointer == backlog_index);
 //         backlog_pointer = backlog_index;
@@ -2237,7 +2237,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //       return;
 //     }
 //     else if (CMND_STATE == command_code) {
-//       data_buffer2.payload.ctr[0] = '\0';
+//       data_buffer.payload.ctr[0] = '\0';
 //       MqttShowState();
 //       if (Settings.flag_network.hass_tele_on_power) {
 //         MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
@@ -2547,7 +2547,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //           lines++;
 //         }
 //       }
-//       data_buffer2.payload.ctr[0] = '\0';
+//       data_buffer.payload.ctr[0] = '\0';
 //     }
 // #ifndef USE_ADC_VCC
 //     else if (CMND_ADC == command_code) {
@@ -2623,7 +2623,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //           }
 //         }
 //       }
-//       data_buffer2.payload.ctr[0] = '\0';
+//       data_buffer.payload.ctr[0] = '\0';
 //     }
 //     else if (CMND_TEMPLATE == command_code) {
 //       // {"NAME":"Generic","GPIO":[17,254,29,254,7,254,254,254,138,254,139,254,254],"FLAG":1,"BASE":255}
@@ -3155,7 +3155,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 // #ifdef USE_I2C
 //     else if ((CMND_I2CSCAN == command_code) && i2c_flg) {
-//       I2cScan(data_buffer2.payload.ctr, sizeof(data_buffer2.payload.ctr));
+//       I2cScan(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 //     }
 // #endif  // USE_I2C
 //     else type = nullptr;  // Unknown command
@@ -3166,7 +3166,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
   //   Response_P(PSTR("{\"" D_JSON_COMMAND "\":\"" D_JSON_UNKNOWN "\"}"));
   //   type = (char*)topicBuf;
   // }
-  //if (data_buffer2.payload.ctr[0] != '\0') {
+  //if (data_buffer.payload.ctr[0] != '\0') {
     // MqttPublishPrefixTopic_P(RESULT_OR_STAT, type);
 #ifdef USE_SCRIPT
      XdrvRulesProcess();

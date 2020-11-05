@@ -1354,8 +1354,6 @@ void Web_Root_Draw_Modules(AsyncWebServerRequest *request);
 
 void Web_Console_Draw(AsyncWebServerRequest *request);
 
-    int8_t flag_web_Add_handler_delayed_decounter = 5;
-
     AsyncWebServerRequest *request_web_command = nullptr;
 
     void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);

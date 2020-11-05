@@ -45,7 +45,7 @@ class mSensorsBME{
     uint8_t fWithinLimit;
     unsigned long tWithinLimit;
 
-    TwoWire* Wire = nullptr;
+    // TwoWire* Wire = nullptr;
 
     #define REQUIRE_COMPLETE true
     #define DONTREQUIRE_COMPLETE false
