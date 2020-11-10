@@ -81,9 +81,20 @@
 #include <Ticker.h>
 
 
-extern uint8_t switch_state_buf[MAX_SWITCHES];// = { 0 };
-extern   uint8_t switch_virtual[MAX_SWITCHES];       // Virtual switch states
-extern Ticker* TickerSwitch;// = nullptr;
+// typedef struct switches_s{
+//   uint8_t  state     = false;
+//   uint8_t  isactive  = false;
+//   uint8_t  ischanged = false;
+//   // uint32_t tDetectTime;
+//   // uint32_t tEndedTime;
+//   // time_short_t detected_time;
+// }switches_t;
+
+
+
+// extern uint8_t switch_state_buf[MAX_SWITCHES];// = { 0 };
+// extern   uint8_t switch_virtual[MAX_SWITCHES];       // Virtual switch states
+// extern Ticker* TickerSwitch;// = nullptr;
 
 
 enum SwitchStates { PRESSED, NOT_PRESSED };
@@ -96,18 +107,48 @@ class mSwitches{
     void init(void);
 
 
+    struct SETTINGS{
+      uint8_t switches_found = 0;
 
-bool IsSwitchActive(uint8_t id);
+    }settings;
 
-void WebAppend_Root_Draw_Table();
-void WebAppend_Root_Status_Table();
 
-  uint32_t tSavedSwitchProbe = millis();
+    struct SWITCHES{
+      uint8_t  state     = false;
+      // uint8_t  isactive  = false;
+      uint8_t  ischanged = false;
+
+      uint8_t is_active_low = false; //defualt active high
+
+      uint8_t lastwallswitch;
+      uint8_t holdwallswitch;
+            
+      uint8_t switch_state_buf; //[MAX_SWITCHES] = { 0 };
+      uint8_t switch_virtual;   //[MAX_SWITCHES]; 
+
+      uint8_t is_linked_to_internal_relay = false;
+      int8_t linked_internal_relay_id = -1; // -1 inactive
+
+      // uint32_t tDetectTime;
+      // uint32_t tEndedTime;
+      // time_short_t detected_time;
+    }states[MAX_SWITCHES];
+
+    bool IsSwitchActive(uint8_t id);
+
+    
+Ticker* TickerSwitch = nullptr;
+
+    void WebAppend_Root_Draw_Table();
+    void WebAppend_Root_Status_Table();
+
+    uint32_t tSavedSwitchProbe = millis();
     uint32_t switch_debounce = 0;          // Switch debounce timer
     uint16_t switch_no_pullup = 0;              // Switch pull-up bitmask flags
-    uint8_t lastwallswitch[MAX_SWITCHES];       // Last wall switch states
-    uint8_t holdwallswitch[MAX_SWITCHES] = { 0 };  // Timer for wallswitch push button hold
-    uint8_t switches_found = 0;
+
+    // uint8_t lastwallswitch[MAX_SWITCHES];       // Last wall switch states
+    // uint8_t holdwallswitch[MAX_SWITCHES] = { 0 };  // Timer for wallswitch push button hold
+
     
     void SwitchPullupFlag(uint16 switch_bit);
     uint8_t SwitchLastState(uint8_t index);
@@ -115,17 +156,15 @@ void WebAppend_Root_Status_Table();
     uint8_t SwitchGetVirtual(uint8_t index);
 
 
-void SwitchHandler(uint8_t mode);
-void SwitchInit(void);
+    void SwitchHandler(uint8_t mode);
+    void SwitchInit(void);
     void SwitchLoop();
-static void SwitchProbe(void);
+    void SwitchProbe(void);
 
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
-
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
@@ -140,7 +179,6 @@ static void SwitchProbe(void);
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    
 
 };
 

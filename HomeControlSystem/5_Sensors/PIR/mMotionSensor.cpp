@@ -45,15 +45,9 @@ int8_t mMotionSensor::Tasker(uint8_t function){
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:{
-      char buffer[50];
-      for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){       
-        BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-          BufferWriterI->Append_P(PSTR("<td>PIR Motion %s</td>"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
-          BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_pir","?");   
-        BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-      }
-    }break;
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Draw_PageTable();
+    break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
@@ -73,7 +67,15 @@ int8_t mMotionSensor::Tasker(uint8_t function, JsonObjectConst obj){
   }
 }
 
-
+void mMotionSensor::WebAppend_Root_Draw_PageTable(){
+char buffer[50];
+for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){       
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+    BufferWriterI->Append_P(PSTR("<td>PIR Motion %s</td>"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_pir","?");   
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+}
+}
 
 void mMotionSensor::Pre_Init(void){
 
@@ -153,6 +155,8 @@ void mMotionSensor::WebPage_Root_AddHandlers(){
 //append to internal buffer if any root messages table
 void mMotionSensor::WebAppend_Root_Status_Table(){
 
+  char buffer[20];
+
   JsonBuilderI->Array_Start("tab_pir");// Class name
   for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
     JsonBuilderI->Level_Start();
@@ -173,7 +177,7 @@ void mMotionSensor::WebAppend_Root_Status_Table(){
                               );
                               //Serial.printf("colour_G=%d\n\r",colour_G);
           // sprintf(colour_ctr,"%s",
-          pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr);
+          pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
           //);
         }
         // no event show, just white
@@ -182,7 +186,10 @@ void mMotionSensor::WebAppend_Root_Status_Table(){
         }
 
 
-      JsonBuilderI->Add("ih","time");//pir_detect[sensor_id].detected_rtc_ctr);
+      JsonBuilderI->Add("ih",
+        pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      
+      //detected_rtc_ctr);
       JsonBuilderI->Add("fc",colour_ctr);    
     JsonBuilderI->Level_End();
   }
@@ -220,12 +227,12 @@ void mMotionSensor::EveryLoop(){
       //         );
 
       
-char buffer[20];
-      char buffer2[20];
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_PIR "pir_detect %d @ %s"),
-                                        pCONT_time->GetTimeOfDay_Seconds(),
-                                        mTime::ConvertTimeOfDay_Seconds_HHMMSS(pCONT_time->GetTimeOfDay_Seconds(), buffer2, sizeof(buffer2))                                                                          
-              );
+// char buffer[20];
+//       char buffer2[20];
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_PIR "pir_detect %d @ %s"),
+//                                         pCONT_time->GetTimeOfDay_Seconds(),
+//                                         mTime::ConvertTimeOfDay_Seconds_HHMMSS(pCONT_time->GetTimeOfDay_Seconds(), buffer2, sizeof(buffer2))                                                                          
+//               );
 
 
       pir_detect[sensor_id].ischanged = true;

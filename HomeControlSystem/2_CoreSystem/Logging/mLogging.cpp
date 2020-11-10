@@ -617,7 +617,7 @@ int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char 
 const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* _buffer){
   char* buffer;
   SET_BUFFER_AS_GLOBAL_OR_LOCAL(buffer, _buffer);
-  if(buffer == nullptr){ return 0;}
+  if(buffer == nullptr){ return D_NO_MATCH_CTR;}
   switch(id){ 
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;

@@ -161,7 +161,6 @@ uint8_t fShowTable = false;
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mRelays>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

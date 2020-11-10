@@ -536,146 +536,146 @@ void mInterfaceLight::GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g
 
 void mInterfaceLight::WebCommand_Parse(void)
 {
-  char tmp[100];
+//   char tmp[100];
 
-  uint16_t  arg_value = 0;
-  char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
+//   uint16_t  arg_value = 0;
+//   char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
 
-  for (int i=0;i<5;i++){
-    sprintf(arg_ctr,"pwm%02d\0",i);
-    if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-      pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-      arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//   for (int i=0;i<5;i++){
+//     sprintf(arg_ctr,"pwm%02d\0",i);
+//     if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 
-      // new_color[i] = arg_value;
+//       // new_color[i] = arg_value;
 
-      // // use current as start point
-      // memcpy(&fade_start_10,&current_color,sizeof(fade_start_10));
+//       // // use current as start point
+//       // memcpy(&fade_start_10,&current_color,sizeof(fade_start_10));
 
-        arg_value = map(arg_value,0,1023,0,255);
-      switch(i){//}==0){
-        default:
-        case 0:  setRGB(arg_value,mode_singlecolour.colour.G,mode_singlecolour.colour.B); break;
-        case 1:  setRGB(mode_singlecolour.colour.R,arg_value,mode_singlecolour.colour.B); break;
-        case 2:  setRGB(mode_singlecolour.colour.R,mode_singlecolour.colour.G,arg_value); break;
-      }
+//         arg_value = map(arg_value,0,1023,0,255);
+//       switch(i){//}==0){
+//         default:
+//         case 0:  setRGB(arg_value,mode_singlecolour.colour.G,mode_singlecolour.colour.B); break;
+//         case 1:  setRGB(mode_singlecolour.colour.R,arg_value,mode_singlecolour.colour.B); break;
+//         case 2:  setRGB(mode_singlecolour.colour.R,mode_singlecolour.colour.G,arg_value); break;
+//       }
 
-      UpdateFinalColourComponents();
+//       UpdateFinalColourComponents();
 
-      // memset(entry_color,0,sizeof(entry_color));
+//       // memset(entry_color,0,sizeof(entry_color));
 
-      // entry_color[0] = arg_value;
-
-
-      // changeChannels(entry_color);
-
-      // if (fade_running) {
-      //     // if fade is running, we take the curring value as the start for the next fade
-      //     memcpy(fade_start_10, fade_cur_10, sizeof(fade_start_10));
-      //   }
-      //   // memcpy(fade_end_10, cur_col_10, sizeof(fade_start_10));
-      //   fade_running = true;
-      //   fade_duration = 0;    // set the value to zero to force a recompute
-      //   fade_start = 0;
-
-      // // fade_start_10[i] = arg_value;
-      // // fade_running = 1;
-      // // UpdateSetOutputs();
-      // // RecalculateHsbfromRgb();
-
-      // pCONT_set->power = 1;
-
-    }
-  }
-
-  // HSB COLOURS
-  sprintf(arg_ctr,"pwm_hue0\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-   // SetColour_Hue(arg_value);
-changeHSB_Hue(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
-
-  sprintf(arg_ctr,"pwm_sat0\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//       // entry_color[0] = arg_value;
 
 
-arg_value = map(arg_value, 0,100, 0,255);
+//       // changeChannels(entry_color);
 
-    changeHSB_Sat(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
+//       // if (fade_running) {
+//       //     // if fade is running, we take the curring value as the start for the next fade
+//       //     memcpy(fade_start_10, fade_cur_10, sizeof(fade_start_10));
+//       //   }
+//       //   // memcpy(fade_end_10, cur_col_10, sizeof(fade_start_10));
+//       //   fade_running = true;
+//       //   fade_duration = 0;    // set the value to zero to force a recompute
+//       //   fade_start = 0;
 
-  sprintf(arg_ctr,"pwm_brt\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-arg_value = map(arg_value, 0,100, 0,255);
-    changeBriRGB(arg_value);
+//       // // fade_start_10[i] = arg_value;
+//       // // fade_running = 1;
+//       // // UpdateSetOutputs();
+//       // // RecalculateHsbfromRgb();
+
+//       // pCONT_set->power = 1;
+
+//     }
+//   }
+
+//   // HSB COLOURS
+//   sprintf(arg_ctr,"pwm_hue0\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//    // SetColour_Hue(arg_value);
+// changeHSB_Hue(arg_value);
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
+
+//   sprintf(arg_ctr,"pwm_sat0\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+
+
+// arg_value = map(arg_value, 0,100, 0,255);
+
+//     changeHSB_Sat(arg_value);
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
+
+//   sprintf(arg_ctr,"pwm_brt\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+// arg_value = map(arg_value, 0,100, 0,255);
+//     changeBriRGB(arg_value);
     
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
 
 
-  sprintf(arg_ctr,"pwm_cct\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-    LightSetColorTemp(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
+//   sprintf(arg_ctr,"pwm_cct\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     LightSetColorTemp(arg_value);
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
   
-  sprintf(arg_ctr,"pwm_cbrt\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-arg_value = map(arg_value, 0,100, 0,255);
-    changeBriCT(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
-
-  sprintf(arg_ctr,"pwm_light_toggle\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//   sprintf(arg_ctr,"pwm_cbrt\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // arg_value = map(arg_value, 0,100, 0,255);
 //     changeBriCT(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
+
+//   sprintf(arg_ctr,"pwm_light_toggle\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+// // arg_value = map(arg_value, 0,100, 0,255);
+// //     changeBriCT(arg_value);
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
 
 
-  sprintf(arg_ctr,"cct_rgb_linked\0");
-  if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-// arg_value = map(arg_value, 0,100, 0,255);
-    if(isCTRGBLinked()){
-        setCTRGBLinked(false);
-    }else{
-        setCTRGBLinked(true);
-    }
-    // changeBriCT(arg_value);
-    // UpdateSetOutputs();
-    // LightSetOutputs2();
-  }
+//   sprintf(arg_ctr,"cct_rgb_linked\0");
+//   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+// // arg_value = map(arg_value, 0,100, 0,255);
+//     if(isCTRGBLinked()){
+//         setCTRGBLinked(false);
+//     }else{
+//         setCTRGBLinked(true);
+//     }
+//     // changeBriCT(arg_value);
+//     // UpdateSetOutputs();
+//     // LightSetOutputs2();
+//   }
 
 }
 

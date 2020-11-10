@@ -919,7 +919,7 @@ void mHardwarePins::GpioInit(void)
    * Module changes
    * */
   if (pCONT_set->Settings.module != pCONT_set->Settings.last_module) {
-    pCONT_set->baudrate = APP_BAUDRATE;
+    //pCONT_set->baudrate = APP_BAUDRATE;
   }
 
   /**
@@ -1437,6 +1437,10 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SR04_TRIG_CTR)==0){  return GPIO_SR04_TRIG_ID; }
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
+
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
 
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }

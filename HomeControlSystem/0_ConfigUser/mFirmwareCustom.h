@@ -47,27 +47,27 @@ debug
 // #define DEVICE_RGBOUTSIDETREE                          
 //#define DEVICE_CHRISTMAS_HALLWAYTREE                          
 // #define DEVICE_RGBBEDROOMFLOOR
-//#define DEVICE_H801_TESTER
+// #define DEVICE_H801_TESTER
 
 /**
  *  CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- CUSTOM   -- 
 **/
 // #define DEVICE_GARAGELIGHT
 //#define DEVICE_GARAGELIGHT2
-//#define DEVICE_SIDEDOORLIGHT
-//#define DEVICE_SHELLY1_TESTER
+// #define DEVICE_SIDEDOORLIGHT
+// #define DEVICE_SHELLY1_TESTER
 //#define DEVICE_RADIATORFAN
 //#define DEVICE_BEDROOMBLINDS
 // #define DEVICE_DOORBELLWALLCHIME                 
-//#define DEVICE_OILFURNACE
+// #define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
-#define DEVICE_HEATING
+// #define DEVICE_HEATING
 //#define DEVICE_KITCHENPANEL
 // #define DEVICE_LANDINGPANEL
 //#define DEVICE_EXERCISE_BIKE
 //#define DEVICE_BLACKDOORBELL
-//#define DEVICE_BEDROOM_CEILINGFAN
-//#define DEVICE_FLOORFAN1
+// #define DEVICE_BEDROOM_CEILINGFAN
+// #define DEVICE_FLOORFAN1
 // #define DEVICE_DESKFAN
 
 /**
@@ -78,13 +78,15 @@ debug
 /**
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
 **/
-//#define DEVICE_ATTICSENSOR
-//#define DEVICE_BEDROOMSENSOR
+// #define DEVICE_ATTICSENSOR
+// #define DEVICE_BEDROOMSENSOR
+// #define DEVICE_IMMERSIONSENSOR
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_UTILITYSENSOR
-//#define DEVICE_LIVINGROOMSENSOR
+// #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_ENSUITESENSOR
-//#define DEVICE_TESTSENSOR
+// #define DEVICE_TESTSENSOR
+// #define DEVICE_NODEMCU_TESTER
 
 /**
  *  SONOFF and lighting  -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- SONOFF   -- 
@@ -641,17 +643,17 @@ debug
   "{"
     "\"NAME\":\"" DEVICENAME_CTR "\","
     "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"GPIOC\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
+    // "\"GPIOC\":{"
+    //   "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+    //   "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    // "},"
     "\"BASE\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
@@ -660,7 +662,7 @@ debug
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\"Scene\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
 
@@ -706,7 +708,7 @@ debug
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
     "\"" D_JSON_CCT_TEMP       "\":500,"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
@@ -747,13 +749,6 @@ debug
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_PWM
   
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define DISABLE_TEMPORARY_RGBANIMATOR
-  // #define USE_MODULE_LIGHTS_PWM
-  
-  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"  
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -768,22 +763,20 @@ debug
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
-    "{"
-      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE   "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
     #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_STRIP_SIZE      "\":" STR2(STRIP_SIZE_MAX) ","
     #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    "\"" D_JSON_STRIP_SIZE      "\":50,"
     #endif //STRIP_SIZE_MAX
-      "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-      "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-      "\"" D_JSON_COLOUR_PALETTE "\":\"USER_17\","
-      "\"" D_JSON_ANIMATIONMODE           "\":\"Flasher\","
-      "\"" D_JSON_BRIGHTNESS     "\":0"
-    "}";
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 17\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_BRIGHTNESS     "\":0"
+  "}";
     
-    // #define ESP8266
-
 #endif
 
 
@@ -820,7 +813,7 @@ debug
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","   //"\":\"WS2812\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
@@ -871,7 +864,7 @@ debug
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
     "{"
-      "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","   //"\":\"WS2812\","
+      "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","   //"\":\"WS2812\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
@@ -1376,21 +1369,23 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
 
-  #define DEVICE_LOCATION_OUTSIDE
+  // #define DEVICE_LOCATION_OUTSIDE
    
   //#define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
-  #define USE_BUILD_TYPE_CUSTOM
-  #define USE_MODULE_CUSTOM_OILFURNACE
+  // #define USE_BUILD_TYPE_CUSTOM
+  // #define USE_MODULE_CUSTOM_OILFURNACE
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define ENABLE_SWITCH_ACTIVE_LOW
   
-  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_SENSORS_BUTTONS
   
   #define USE_MODULE_SENSORS_DS18B20
   
-  #define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   //#define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
@@ -1406,8 +1401,8 @@ debug
       "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
       #endif    
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"D3\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
       #endif      
       "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
     "},"
@@ -1415,13 +1410,15 @@ debug
   "}";
 
   
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "inflow"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "outflow"
-  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "outside"
-  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "tank1"
-  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "speed_of_sound_ambient"
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "FurnaceInflow"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "FurnaceOutflow"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "BackUpTank"
   #define D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "Furnace Power"
   
+  #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
@@ -1433,8 +1430,11 @@ debug
         "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "\""
+      // "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
+      //   "\"" D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "\""
+      // "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_BUTTON_1_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -1450,24 +1450,76 @@ debug
 
 #endif
 
-//-----------------[User Defined Devices == USE_BUILD_TYPE_SENSORS == Sensing only] ----------------------------
 
+#ifdef DEVICE_IMMERSIONSENSOR
+  #define DEVICENAME_CTR          "immersionsensor"
+  #define DEVICENAME_FRIENDLY_CTR "Immersion Sensor"
 
-#ifdef DEVICE_MASTERBEDROOMSENSOR
-  #define DEVICENAME_CTR          "masterbedroomsensor"  
-  #define DEVICENAME_FRIENDLY_CTR "Master Bedroom Controller"
-  #define USE_MODULE_SENSORS_BME
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+     
+  #define USE_MODULE_SENSORS_DS18B20
   
-    pCONT_set->Settings.module = MODULE_NODEMCU_ID;
-    pCONT_set->Settings.module_pins.io[D1] = GPIO_I2C_SCL_ID;
-    pCONT_set->Settings.module_pins.io[D2] = GPIO_I2C_SDA_ID;
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "TankPosition100" //top
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "TankPosition80"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "TankPosition60"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "TankPosition40"
+  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "TankPosition20"
+  #define D_DEVICE_TEMP_6_FRIENDLY_NAME_LONG "TankPosition00" //bottom
+  #define D_DEVICE_TEMP_7_FRIENDLY_NAME_LONG "BoilerLoopTop"
+  #define D_DEVICE_TEMP_8_FRIENDLY_NAME_LONG "BoilerLoopBottom"
+  #define D_DEVICE_TEMP_9_FRIENDLY_NAME_LONG "ImmersionFeedIn"
+  #define D_DEVICE_TEMP_10_FRIENDLY_NAME_LONG "FeedRed" // not sure what this does, cold in it seems
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_6_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_7_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_8_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_9_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_10_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                   
+        "[40,0,32,23,59,71,5,141],"  
+        "[40,0,83,19,59,71,6,66],"  
+        "[40,0,108,65,59,71,4,202],"  
+        "[40,0,66,109,59,71,5,172],"   
+        "[40,0,114,20,59,71,5,19],"  
+        "[40,0,118,128,59,71,5,227],"
+        "[40,0,40,61,59,71,4,134],"
+        "[40,0,66,140,59,71,6,136]," // not calib
+        "[40,0,95,50,59,71,5,126]," // not calib
+        "[40,0,149,87,59,71,5,240]" // not calib
+      "]"  
+    "},"
+    "\"" D_JSON_SENSOR_MEASURERATE "\":{"
+      // 1 second
+    "}"
+  "}";
+
 #endif
 
-
-//-----------------[User Defined Devices == USE_BUILD_TYPE_DISPLAYS == Sensing only] ----------------------------
-
-
-//-----------------[User Defined Devices == TO SORT == ] ----------------------------
 
 #ifdef DEVICE_LANDINGPANEL
   #define DEVICENAME_CTR            "landingpanel"
@@ -1759,6 +1811,16 @@ debug
         "[40,255,100,29,194,124,254,111],"   //D6 group of 3                                           
         "[40,255,100,29,195,134,175,63],"                                             
         "[40,255,100,29,195,135,126,242]"  
+
+                            
+        // "[40,0,32,23,59,71,5,141],"  
+        // "[40,0,66,109,59,71,5,172],"  
+        // "[40,0,118,128,59,71,5,227],"  
+        // "[40,0,83,19,59,71,6,66],"  
+        // "[40,0,114,20,59,71,5,19],"  
+        // "[40,0,108,65,59,71,4,202],"  
+        // "[40,0,40,61,59,71,4,134]"       
+
       "]"  
     "}"
   "}";
@@ -1897,6 +1959,8 @@ debug
    
   // #define USE_MODULE_SENSORS_MOTION
 
+  #define ENABLE_DEVFEATURE_BLOCK_RESTART
+
   // #define ENABLE_DEVFEATURE_RELAY_CONTROLS
   
   // // #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
@@ -1985,12 +2049,12 @@ debug
   DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -2066,9 +2130,7 @@ debug
 
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
-   
-  // #define ENABLE_FLASH_ERASE_SECTOR_CURRENTLY_BUG
-  
+     
   #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_SENSORS_BME
@@ -2113,7 +2175,7 @@ debug
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
 
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define SETTINGS_HOLDER 2
      
   #define USE_MODULE_SENSORS_MOTION
 
@@ -2179,6 +2241,106 @@ debug
   "}";
 
 #endif
+
+#ifdef DEVICE_NODEMCU_TESTER
+  #define DEVICENAME_CTR          "nodemcu_tester"
+  #define DEVICENAME_FRIENDLY_CTR "NodeMCU Tester"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+     
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_BUTTONS
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  // #define USE_MODULE_SENSORS_BME
+
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      // #ifdef USE_MODULE_SENSORS_BUTTONS
+      // "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      // "\"D4\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      // #endif    
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"D3\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"D4\":\""  D_GPIO_FUNCTION_SWT2_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      #endif      
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_SCENE_COLOUR   "\":{"
+          "\"" D_JSON_HSB    "\":[15,95,0]" 
+        "},"
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRT_RGB          "\":0"
+  "}";
+  #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+  #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Ensuite"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Ensuite"
+
+  #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
+  #define D_DEVICE_BUTTON_2_CTR "Button2"
+  #define D_DEVICE_BUTTON_3_CTR "Button3"
+  #define D_DEVICE_BUTTON_4_CTR "Button4"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_BUTTON_1_CTR "\","
+        "\"" D_DEVICE_BUTTON_2_CTR "\","
+        "\"" D_DEVICE_BUTTON_3_CTR "\","
+        "\"" D_DEVICE_BUTTON_4_CTR "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_BUTTON_1_CTR "\","
+        "\"" D_DEVICE_BUTTON_2_CTR "\","
+        "\"" D_DEVICE_BUTTON_3_CTR "\","
+        "\"" D_DEVICE_BUTTON_4_CTR "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 #ifdef DEVICE_RGBUTILITY
   #define DEVICENAME_CTR          "rgbutility"
   #define DEVICENAME_FRIENDLY_CTR "RGB Utility H801"
@@ -2210,7 +2372,7 @@ debug
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
     "\"" D_JSON_CCT_TEMP       "\":500,"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
@@ -2246,7 +2408,7 @@ debug
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"RGBCCT_PWM\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
     "\"" D_JSON_CCT_TEMP       "\":500,"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";

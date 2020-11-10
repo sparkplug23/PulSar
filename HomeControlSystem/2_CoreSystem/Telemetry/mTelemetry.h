@@ -131,7 +131,7 @@ class mTelemetry{
 
     uint32_t tSavedTest;
 
-    uint32_t loop_delay = 100;
+    uint32_t loop_delay_temp = 100;
 
     //use new syntax
     enum STATUS_SYSTEM_IDS{

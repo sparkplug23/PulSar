@@ -35,21 +35,21 @@ bool mWebServer::WifiIsInManagerMode(){
   return (HTTP_MANAGER == webserver_state || HTTP_MANAGER_RESET_ONLY == webserver_state);
 }
 
-void mWebServer::ShowWebSource(int source)
-{
-  // if ((source > 0) && (source < SRC_MAX)) {
-  //   char stemp1[20];
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR("SRC: %s from %s"), 
-  //   pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
-  // }
-}
+// void mWebServer::ShowWebSource(int source)
+// {
+//   // if ((source > 0) && (source < SRC_MAX)) {
+//   //   char stemp1[20];
+//   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR("SRC: %s from %s"), 
+//   //   pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
+//   // }
+// }
 
-void mWebServer::ExecuteWebCommand(char* svalue, int source)
-{
-  ShowWebSource(source);
-  //AddLog_P(LOG_LEVEL_DEBUG, PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
-  ExecuteCommand(svalue, SRC_IGNORE);
-}
+// void mWebServer::ExecuteWebCommand(char* svalue, int source)
+// {
+//   ShowWebSource(source);
+//   //AddLog_P(LOG_LEVEL_DEBUG, PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
+//   ExecuteCommand(svalue, SRC_IGNORE);
+// }
 
 
 void mWebServer::handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
@@ -102,7 +102,7 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
   }
   if(webserver_state != type){
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
-    pCONT_set->rules_flag.http_init = 1;
+    // pCONT_set->rules_flag.http_init = 1;
   }
   if(type){ webserver_state = type; }
 }
@@ -582,49 +582,47 @@ void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t conte
 
 
 
-void mWebServer::WebHexCode(uint8_t i, const char* code)
-{
-  char scolor[10];
+// void mWebServer::WebHexCode(uint8_t i, const char* code)
+// {
+//   char scolor[10];
 
-  strlcpy(scolor, code, sizeof(scolor));
-  char* p = scolor;
-  if ('#' == p[0]) { p++; }  // Skip
+//   strlcpy(scolor, code, sizeof(scolor));
+//   char* p = scolor;
+//   if ('#' == p[0]) { p++; }  // Skip
 
-  if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
-    p[6] = p[3];  // \0
-    p[5] = p[2];  // 3
-    p[4] = p[2];  // 3
-    p[3] = p[1];  // 2
-    p[2] = p[1];  // 2
-    p[1] = p[0];  // 1
-  }
+//   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
+//     p[6] = p[3];  // \0
+//     p[5] = p[2];  // 3
+//     p[4] = p[2];  // 3
+//     p[3] = p[1];  // 2
+//     p[2] = p[1];  // 2
+//     p[1] = p[0];  // 1
+//   }
 
-  uint32_t color = strtol(p, nullptr, 16);
-/*
-  if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
-    uint32_t w = ((color & 0xF00) << 8) | ((color & 0x0F0) << 4) | (color & 0x00F);  // 00010203
-    color = w | (w << 4);                                                            // 00112233
-  }
-*/
+//   uint32_t color = strtol(p, nullptr, 16);
+// /*
+//   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
+//     uint32_t w = ((color & 0xF00) << 8) | ((color & 0x0F0) << 4) | (color & 0x00F);  // 00010203
+//     color = w | (w << 4);                                                            // 00112233
+//   }
+// */
 
-  pCONT_set->Settings.web_color[i][0] = (color >> 16) & 0xFF;  // Red
-  pCONT_set->Settings.web_color[i][1] = (color >> 8) & 0xFF;   // Green
-  pCONT_set->Settings.web_color[i][2] = color & 0xFF;          // Blue
-}
+//   pCONT_set->Settings.web_color[i][0] = (color >> 16) & 0xFF;  // Red
+//   pCONT_set->Settings.web_color[i][1] = (color >> 8) & 0xFF;   // Green
+//   pCONT_set->Settings.web_color[i][2] = color & 0xFF;          // Blue
+// }
 
-uint32_t mWebServer::WebColor(uint8_t i)
-{
-  return (pCONT_set->Settings.web_color[i][0] << 16) | (pCONT_set->Settings.web_color[i][1] << 8) | pCONT_set->Settings.web_color[i][2];
-}
+// uint32_t mWebServer::WebColor(uint8_t i)
+// {
+//   return (pCONT_set->Settings.web_color[i][0] << 16) | (pCONT_set->Settings.web_color[i][1] << 8) | pCONT_set->Settings.web_color[i][2];
+// }
 
 uint32_t mWebServer::WebColor(uint8_t r, uint8_t g, uint8_t b){
   return (r << 16) | (g << 8) | b;
 }
 
-const char* mWebServer::WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffer){
-  // P_PHASE_OUT();
-  // char colour[8]; memset(colour,0,sizeof(colour));
-  sprintf_P(buffer,PSTR("#%02X%02X%02X"),r,g,b);
+const char* mWebServer::WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffer, uint8_t buflen){
+  snprintf_P(buffer, buflen, PSTR("#%02X%02X%02X"), r, g, b);
   return buffer;
 }
 
@@ -654,16 +652,16 @@ void mWebServer::HandleFavicon(AsyncWebServerRequest *request){
 
 /*-------------------------------------------------------------------------------------------*/
 
-String mWebServer::htmlEscape(String s)
-{
-  s.replace("&", "&amp;");
-  s.replace("<", "&lt;");
-  s.replace(">", "&gt;");
-  s.replace("\"", "&quot;");
-  s.replace("'", "&#x27;");
-  s.replace("/", "&#x2F;");
-  return s;
-}
+// String mWebServer::htmlEscape(String s)
+// {
+//   s.replace("&", "&amp;");
+//   s.replace("<", "&lt;");
+//   s.replace(">", "&gt;");
+//   s.replace("\"", "&quot;");
+//   s.replace("'", "&#x27;");
+//   s.replace("/", "&#x2F;");
+//   return s;
+// }
 /*-------------------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------------------*/
@@ -770,42 +768,42 @@ bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 
 /*********************************************************************************************/
 
-String mWebServer::UrlEncode(const String& text)
-{
-  // #ifndef DISABLE_SERIAL_LOGGING
-  // P_PHASE_OUT();
-  // #endif
-  const char hex[] = "0123456789ABCDEF";
+// String mWebServer::UrlEncode(const String& text)
+// {
+//   // #ifndef DISABLE_SERIAL_LOGGING
+//   // P_PHASE_OUT();
+//   // #endif
+//   const char hex[] = "0123456789ABCDEF";
 
-	String encoded = "";
-	int len = text.length();
-	int i = 0;
-	while (i < len)	{
-		char decodedChar = text.charAt(i++);
+// 	String encoded = "";
+// 	int len = text.length();
+// 	int i = 0;
+// 	while (i < len)	{
+// 		char decodedChar = text.charAt(i++);
 
-/*
-    if (('a' <= decodedChar && decodedChar <= 'z') ||
-        ('A' <= decodedChar && decodedChar <= 'Z') ||
-        ('0' <= decodedChar && decodedChar <= '9') ||
-        ('=' == decodedChar)) {
-      encoded += decodedChar;
-		} else {
-      encoded += '%';
-			encoded += hex[decodedChar >> 4];
-			encoded += hex[decodedChar & 0xF];
-    }
-*/
-    if (' ' == decodedChar) {
-      encoded += '%';
-			encoded += hex[decodedChar >> 4];
-			encoded += hex[decodedChar & 0xF];
-    } else {
-      encoded += decodedChar;
-    }
+// /*
+//     if (('a' <= decodedChar && decodedChar <= 'z') ||
+//         ('A' <= decodedChar && decodedChar <= 'Z') ||
+//         ('0' <= decodedChar && decodedChar <= '9') ||
+//         ('=' == decodedChar)) {
+//       encoded += decodedChar;
+// 		} else {
+//       encoded += '%';
+// 			encoded += hex[decodedChar >> 4];
+// 			encoded += hex[decodedChar & 0xF];
+//     }
+// */
+//     if (' ' == decodedChar) {
+//       encoded += '%';
+// 			encoded += hex[decodedChar >> 4];
+// 			encoded += hex[decodedChar & 0xF];
+//     } else {
+//       encoded += decodedChar;
+//     }
 
-	}
-	return encoded;
-}
+// 	}
+// 	return encoded;
+// }
 
 // int mWebServer::WebSend(char *buffer)
 // {
@@ -886,259 +884,259 @@ String mWebServer::UrlEncode(const String& text)
 
 /*********************************************************************************************/
 
-bool mWebServer::JsonWebColor(const char* dataBuf)
-{
-  // Default (light)
-  // {"WebColor":["#000000","#ffffff","#f2f2f2","#000000","#ffffff","#000000","#ffffff","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
-  // Alternative (Dark)
-  // {"webcolor":["#eeeeee","#181818","#4f4f4f","#000000","#dddddd","#008000","#222222","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
+// bool mWebServer::JsonWebColor(const char* dataBuf)
+// {
+//   // Default (light)
+//   // {"WebColor":["#000000","#ffffff","#f2f2f2","#000000","#ffffff","#000000","#ffffff","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
+//   // Alternative (Dark)
+//   // {"webcolor":["#eeeeee","#181818","#4f4f4f","#000000","#dddddd","#008000","#222222","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
 
-  // char dataBufLc[strlen(dataBuf) +1];
-  // pCONT_sup->LowerCase(dataBufLc, dataBuf);
-  // pCONT_sup->RemoveSpace(dataBufLc);
-  // if (strlen(dataBufLc) < 9) { return false; }  // Workaround exception if empty JSON like {} - Needs checks
+//   // char dataBufLc[strlen(dataBuf) +1];
+//   // pCONT_sup->LowerCase(dataBufLc, dataBuf);
+//   // pCONT_sup->RemoveSpace(dataBufLc);
+//   // if (strlen(dataBufLc) < 9) { return false; }  // Workaround exception if empty JSON like {} - Needs checks
 
-  // StaticJsonDocument<450>  doc;
-  // DeserializationError error =  deserializeJson(doc, dataBuf);
-  // JsonObject obj = doc.to<JsonObject>();
-  // if (error) { return false; }
+//   // StaticJsonDocument<450>  doc;
+//   // DeserializationError error =  deserializeJson(doc, dataBuf);
+//   // JsonObject obj = doc.to<JsonObject>();
+//   // if (error) { return false; }
 
-  // // StaticJsonBuffer<450> jb;  // 421 from https://arduinojson.org/v5/assistant/
-  // // JsonObject& obj = jb.parseObject(dataBufLc);
-  // // if (!obj.success()) { return false; }
+//   // // StaticJsonBuffer<450> jb;  // 421 from https://arduinojson.org/v5/assistant/
+//   // // JsonObject& obj = jb.parseObject(dataBufLc);
+//   // // if (!obj.success()) { return false; }
 
-  // char parm_lc[10];
-  // if (obj[pCONT_sup->LowerCase(parm_lc, D_JSON_WEBCOLOR)].isNull()) {
-  //   for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
-  //     const char* color = obj[parm_lc][i];
-  //     if (color != nullptr) {
-  //       WebHexCode(i, color);
-  //     }
-  //   }
-  // }
-  return true;
-}
+//   // char parm_lc[10];
+//   // if (obj[pCONT_sup->LowerCase(parm_lc, D_JSON_WEBCOLOR)].isNull()) {
+//   //   for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
+//   //     const char* color = obj[parm_lc][i];
+//   //     if (color != nullptr) {
+//   //       WebHexCode(i, color);
+//   //     }
+//   //   }
+//   // }
+//   return true;
+// }
 
 enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRESH, CMND_WEBSEND, CMND_WEBCOLOR, CMND_EMULATION };
-const char kWebCommands[] PROGMEM = D_JSON_WEBSERVER "|" D_JSON_WEBPASSWORD "|" D_JSON_WEBLOG "|" D_JSON_WEBREFRESH "|" D_JSON_WEBSEND "|" D_JSON_WEBCOLOR "|" D_JSON_EMULATION ;
-const char kWebSendStatus[] PROGMEM = D_JSON_DONE "|" D_JSON_WRONG_PARAMETERS "|" D_JSON_CONNECT_FAILED "|" D_JSON_HOST_NOT_FOUND ;
+// const char kWebCommands[] PROGMEM = D_JSON_WEBSERVER "|" D_JSON_WEBPASSWORD "|" D_JSON_WEBLOG "|" D_JSON_WEBREFRESH "|" D_JSON_WEBSEND "|" D_JSON_WEBCOLOR "|" D_JSON_EMULATION ;
+// const char kWebSendStatus[] PROGMEM = D_JSON_DONE "|" D_JSON_WRONG_PARAMETERS "|" D_JSON_CONNECT_FAILED "|" D_JSON_HOST_NOT_FOUND ;
 
-bool mWebServer::WebCommand(void)
-{
-  char command[CMDSZ];
-  bool serviced = true;
+// bool mWebServer::WebCommand(void)
+// {
+//   char command[CMDSZ];
+//   bool serviced = true;
 
-//   int command_code = pCONT_sup->GetCommandCode(command, sizeof(command), pCONT_set->XdrvMailbox.topic, kWebCommands);
-//   if (-1 == command_code) {
-//     serviced = false;  // Unknown command
-//   }
-//   if (CMND_WEBSERVER == command_code) {
-//     if ((pCONT_set->XdrvMailbox.payload >= 0) && (pCONT_set->XdrvMailbox.payload <= 2)) { pCONT_set->Settings.webserver = pCONT_set->XdrvMailbox.payload; }
-//     if (pCONT_set->Settings.webserver) {
-//       pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBSERVER "\":\"" D_JSON_ACTIVE_FOR " %s " D_JSON_ON_DEVICE " %s " D_JSON_WITH_IP_ADDRESS " %s\"}"),
-//         (2 == pCONT_set->Settings.webserver) ? D_ADMIN : D_USER, pCONT_set->my_hostname, WiFi.localIP().toString().c_str());
-//     } else {
-//       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetStateText(0));
-//     }
-//   }
-//   else if (CMND_WEBPASSWORD == command_code) {
-//     if ((pCONT_set->XdrvMailbox.data_len > 0) && (pCONT_set->XdrvMailbox.data_len < sizeof(pCONT_set->Settings.web_password))) {
-//       strlcpy(pCONT_set->Settings.web_password, (SC_CLEAR == pCONT_sup->Shortcut(pCONT_set->XdrvMailbox.data)) ? "" : (SC_DEFAULT == pCONT_sup->Shortcut(pCONT_set->XdrvMailbox.data)) ? WEB_PASSWORD : pCONT_set->XdrvMailbox.data, sizeof(pCONT_set->Settings.web_password));
-//       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_set->Settings.web_password);
-//     } else {
-//       pCONT_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
-//     }
-//   }
-//   else if (CMND_WEBLOG == command_code) {
-//     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.weblog_level = pCONT_set->XdrvMailbox.payload; }
-//     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.weblog_level);
-//   }
-//   else if (CMND_WEBREFRESH == command_code) {
-//     if ((pCONT_set->XdrvMailbox.payload > 999) && (pCONT_set->XdrvMailbox.payload <= 10000)) { pCONT_set->Settings.web_refresh = pCONT_set->XdrvMailbox.payload; }
-//     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.web_refresh);
-//   }
-//   else if (CMND_WEBSEND == command_code) {
-//     if (pCONT_set->XdrvMailbox.data_len > 0) {
-//       uint8_t result = WebSend(request, pCONT_set->XdrvMailbox.data);
-//       char stemp1[20];
-//       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
-//     }
-//   }
-//   else if (CMND_WEBCOLOR == command_code) {
-//     if (pCONT_set->XdrvMailbox.data_len > 0) {
-//       if (strstr(pCONT_set->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
-//         if ((pCONT_set->XdrvMailbox.data_len > 3) && (pCONT_set->XdrvMailbox.index > 0) && (pCONT_set->XdrvMailbox.index <= pCONT_set->COL_LAST)) {
-//           pCONT_sup->WebHexCode(pCONT_set->XdrvMailbox.index -1, pCONT_set->XdrvMailbox.data);
-//         }
-//         else if (0 == pCONT_set->XdrvMailbox.payload) {
-//           pCONT_set->SettingsDefaultWebColor();
-//         }
-//       }
-//       else {
-//         JsonWebColor(pCONT_set->XdrvMailbox.data);
-//       }
-//     }
-//     pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBCOLOR "\":["));
-//     for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
-//       if (i) { pCONT_sup->ResponseAppend_P(PSTR(",")); }
-//       pCONT_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));
-//     }
-//     pCONT_sup->ResponseAppend_P(PSTR("]}"));
-//   }
-// #ifdef USE_EMULATION
-//   else if (CMND_EMULATION == command_code) {
-//     if ((XdrvMailbox.payload >= EMUL_NONE) && (XdrvMailbox.payload < EMUL_MAX)) {
-//       pCONT_set->Settings.flag_power.emulation = XdrvMailbox.payload;
-//       restart_flag = 2;
-//     }
-//     Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.flag_power.emulation);
-//   }
-// #endif  // USE_EMULATION
-//   else serviced = false;  // Unknown command
+// //   int command_code = pCONT_sup->GetCommandCode(command, sizeof(command), pCONT_set->XdrvMailbox.topic, kWebCommands);
+// //   if (-1 == command_code) {
+// //     serviced = false;  // Unknown command
+// //   }
+// //   if (CMND_WEBSERVER == command_code) {
+// //     if ((pCONT_set->XdrvMailbox.payload >= 0) && (pCONT_set->XdrvMailbox.payload <= 2)) { pCONT_set->Settings.webserver = pCONT_set->XdrvMailbox.payload; }
+// //     if (pCONT_set->Settings.webserver) {
+// //       pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBSERVER "\":\"" D_JSON_ACTIVE_FOR " %s " D_JSON_ON_DEVICE " %s " D_JSON_WITH_IP_ADDRESS " %s\"}"),
+// //         (2 == pCONT_set->Settings.webserver) ? D_ADMIN : D_USER, pCONT_set->my_hostname, WiFi.localIP().toString().c_str());
+// //     } else {
+// //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetStateText(0));
+// //     }
+// //   }
+// //   else if (CMND_WEBPASSWORD == command_code) {
+// //     if ((pCONT_set->XdrvMailbox.data_len > 0) && (pCONT_set->XdrvMailbox.data_len < sizeof(pCONT_set->Settings.web_password))) {
+// //       strlcpy(pCONT_set->Settings.web_password, (SC_CLEAR == pCONT_sup->Shortcut(pCONT_set->XdrvMailbox.data)) ? "" : (SC_DEFAULT == pCONT_sup->Shortcut(pCONT_set->XdrvMailbox.data)) ? WEB_PASSWORD : pCONT_set->XdrvMailbox.data, sizeof(pCONT_set->Settings.web_password));
+// //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_set->Settings.web_password);
+// //     } else {
+// //       pCONT_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
+// //     }
+// //   }
+// //   else if (CMND_WEBLOG == command_code) {
+// //     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.weblog_level = pCONT_set->XdrvMailbox.payload; }
+// //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.weblog_level);
+// //   }
+// //   else if (CMND_WEBREFRESH == command_code) {
+// //     if ((pCONT_set->XdrvMailbox.payload > 999) && (pCONT_set->XdrvMailbox.payload <= 10000)) { pCONT_set->Settings.web_refresh = pCONT_set->XdrvMailbox.payload; }
+// //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.web_refresh);
+// //   }
+// //   else if (CMND_WEBSEND == command_code) {
+// //     if (pCONT_set->XdrvMailbox.data_len > 0) {
+// //       uint8_t result = WebSend(request, pCONT_set->XdrvMailbox.data);
+// //       char stemp1[20];
+// //       pCONT_sup->Response_P(S_JSON_COMMAND_SVALUE, command, pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
+// //     }
+// //   }
+// //   else if (CMND_WEBCOLOR == command_code) {
+// //     if (pCONT_set->XdrvMailbox.data_len > 0) {
+// //       if (strstr(pCONT_set->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
+// //         if ((pCONT_set->XdrvMailbox.data_len > 3) && (pCONT_set->XdrvMailbox.index > 0) && (pCONT_set->XdrvMailbox.index <= pCONT_set->COL_LAST)) {
+// //           pCONT_sup->WebHexCode(pCONT_set->XdrvMailbox.index -1, pCONT_set->XdrvMailbox.data);
+// //         }
+// //         else if (0 == pCONT_set->XdrvMailbox.payload) {
+// //           pCONT_set->SettingsDefaultWebColor();
+// //         }
+// //       }
+// //       else {
+// //         JsonWebColor(pCONT_set->XdrvMailbox.data);
+// //       }
+// //     }
+// //     pCONT_sup->Response_P(PSTR("{\"" D_JSON_WEBCOLOR "\":["));
+// //     for (uint8_t i = 0; i < pCONT_set->COL_LAST; i++) {
+// //       if (i) { pCONT_sup->ResponseAppend_P(PSTR(",")); }
+// //       pCONT_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));
+// //     }
+// //     pCONT_sup->ResponseAppend_P(PSTR("]}"));
+// //   }
+// // #ifdef USE_EMULATION
+// //   else if (CMND_EMULATION == command_code) {
+// //     if ((XdrvMailbox.payload >= EMUL_NONE) && (XdrvMailbox.payload < EMUL_MAX)) {
+// //       pCONT_set->Settings.flag_power.emulation = XdrvMailbox.payload;
+// //       restart_flag = 2;
+// //     }
+// //     Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.flag_power.emulation);
+// //   }
+// // #endif  // USE_EMULATION
+// //   else serviced = false;  // Unknown command
 
-  return serviced;
-}
+//   return serviced;
+// }
 
 
 
-void mWebServer::ExecuteCommand(char *cmnd, int source)
-{
-//   char stopic[CMDSZ];
-//   char svalue[INPUT_BUFFER_SIZE];
-//   char *start;
-//   char *token;
+// void mWebServer::ExecuteCommand(char *cmnd, int source)
+// {
+// //   char stopic[CMDSZ];
+// //   char svalue[INPUT_BUFFER_SIZE];
+// //   char *start;
+// //   char *token;
 
-//  //ShowFreeMem(PSTR("ExecuteCommand"));
-//   pCONT_sup->ShowSource(source);
+// //  //ShowFreeMem(PSTR("ExecuteCommand"));
+// //   pCONT_sup->ShowSource(source);
 
-// //In the first call to the strtok() function for a given string1, the strtok() function searches for the first token in string1, 
-// //skipping over leading delimiters. A pointer to the first token is returned.
+// // //In the first call to the strtok() function for a given string1, the strtok() function searches for the first token in string1, 
+// // //skipping over leading delimiters. A pointer to the first token is returned.
 
-//   token = strtok(cmnd, " "); // split, on each call returns next split
-//   if (token != NULL) { //if end is not reached
-//     start = strrchr(token, '/');   // Skip possible cmnd/sonoff/ preamble
-//     if (start) { token = start +1; }
-//   }
-//   snprintf_P(stopic, sizeof(stopic), PSTR("%s"), (token == NULL) ? "" : token);
-//   token = strtok(NULL, "");
-// //  snprintf_P(svalue, sizeof(svalue), (token == NULL) ? "" : token);  // Fails with command FullTopic home/%prefix%/%topic% as it processes %p of %prefix%
-//   strlcpy(svalue, (token == NULL) ? "" : token, sizeof(svalue));       // Fixed 5.8.0b
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
+// //   token = strtok(cmnd, " "); // split, on each call returns next split
+// //   if (token != NULL) { //if end is not reached
+// //     start = strrchr(token, '/');   // Skip possible cmnd/sonoff/ preamble
+// //     if (start) { token = start +1; }
+// //   }
+// //   snprintf_P(stopic, sizeof(stopic), PSTR("%s"), (token == NULL) ? "" : token);
+// //   token = strtok(NULL, "");
+// // //  snprintf_P(svalue, sizeof(svalue), (token == NULL) ? "" : token);  // Fails with command FullTopic home/%prefix%/%topic% as it processes %p of %prefix%
+// //   strlcpy(svalue, (token == NULL) ? "" : token, sizeof(svalue));       // Fixed 5.8.0b
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
 
-//   //MqttDataHandler(stopic, (uint8_t*)svalue, strlen(svalue));
-//   ParseAndExecuteWebCommands(stopic, (uint8_t*)svalue, strlen(svalue));
+// //   //MqttDataHandler(stopic, (uint8_t*)svalue, strlen(svalue));
+// //   ParseAndExecuteWebCommands(stopic, (uint8_t*)svalue, strlen(svalue));
  
-}
+// }
 
 
 /**
  Commands have form: "<name><index> <value>" e.g."button2 1" or "slider3 123"
  <name> is in format classname::command but can contain NO numbers (ascii string only)
 */
-void mWebServer::ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len)
-{
+// void mWebServer::ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len)
+// {
 
-//   if (data_len > MQTT_MAX_PACKET_SIZE) { return; }  // Do not allow more data than would be feasable within stack space
+// //   if (data_len > MQTT_MAX_PACKET_SIZE) { return; }  // Do not allow more data than would be feasable within stack space
 
-//   char *str;
+// //   char *str;
 
-//   char topicBuf[TOPSZ];
-//   char dataBuf[data_len+1];
-//   char command [CMDSZ];
-//   char stemp1[TOPSZ];
-//   char *p;
-//   char *type = nullptr;
-//   uint8_t lines = 1;
-//   bool jsflg = false;
-//   bool grpflg = false;
-//   bool user_append_index = false;
-//   uint32_t i = 0;
-//   uint32_t index;
-//   uint32_t address;
+// //   char topicBuf[TOPSZ];
+// //   char dataBuf[data_len+1];
+// //   char command [CMDSZ];
+// //   char stemp1[TOPSZ];
+// //   char *p;
+// //   char *type = nullptr;
+// //   uint8_t lines = 1;
+// //   bool jsflg = false;
+// //   bool grpflg = false;
+// //   bool user_append_index = false;
+// //   uint32_t i = 0;
+// //   uint32_t index;
+// //   uint32_t address;
   
-//   // memset(&webcommand,0,sizeof(webcommand));
+// //   // memset(&webcommand,0,sizeof(webcommand));
 
-// /******************************************************************************************************
-//  *******Extract <name><index> as topicBuf, <value> as dataBuf using space delimeter ***********************************************************************************************
-//  ******************************************************************************************************/
+// // /******************************************************************************************************
+// //  *******Extract <name><index> as topicBuf, <value> as dataBuf using space delimeter ***********************************************************************************************
+// //  ******************************************************************************************************/
  
-//   // "string numbervalue" - split into topic and data buffers
-//   strlcpy(topicBuf, topic, sizeof(topicBuf));
-//   for (i = 0; i < data_len; i++) {
-//     if (!isspace(data[i])) { break; } 
-//   }
-//   data_len -= i;
-//   memcpy(dataBuf, data +i, sizeof(dataBuf));
-//   dataBuf[sizeof(dataBuf)-1] = 0;
+// //   // "string numbervalue" - split into topic and data buffers
+// //   strlcpy(topicBuf, topic, sizeof(topicBuf));
+// //   for (i = 0; i < data_len; i++) {
+// //     if (!isspace(data[i])) { break; } 
+// //   }
+// //   data_len -= i;
+// //   memcpy(dataBuf, data +i, sizeof(dataBuf));
+// //   dataBuf[sizeof(dataBuf)-1] = 0;
   
-//   //copy command value
-//   memcpy(&webcommand.command_value,dataBuf,sizeof(dataBuf));
+// //   //copy command value
+// //   memcpy(&webcommand.command_value,dataBuf,sizeof(dataBuf));
 
-//   //if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); } //?
+// //   //if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); } //?
 
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
  
-//   // Check classname exists
-//   if(strstr(topicBuf,"::")){
-//     // copy classname
-//     for (i = 0; i < strlen(topicBuf); i++) {
-//       if (topicBuf[i]==':') { break; } 
-//       webcommand.classname[i] = topicBuf[i];
-//     }
-//   }
+// //   // Check classname exists
+// //   if(strstr(topicBuf,"::")){
+// //     // copy classname
+// //     for (i = 0; i < strlen(topicBuf); i++) {
+// //       if (topicBuf[i]==':') { break; } 
+// //       webcommand.classname[i] = topicBuf[i];
+// //     }
+// //   }
 
-//   //from i, we have the command_key_short (skip :: values)
-//   memcpy(&webcommand.command_key_short,&topicBuf[i+2],sizeof(char)*(strlen(topicBuf)-i-2));
+// //   //from i, we have the command_key_short (skip :: values)
+// //   memcpy(&webcommand.command_key_short,&topicBuf[i+2],sizeof(char)*(strlen(topicBuf)-i-2));
 
-// /******************************************************************************************************
-//  *******Extract <index> from topicBuf with isdigit ***********************************************************************************************
-//  ******************************************************************************************************/
+// // /******************************************************************************************************
+// //  *******Extract <index> from topicBuf with isdigit ***********************************************************************************************
+// //  ******************************************************************************************************/
  
-//   //type = strrchr(topicBuf, '/');  // Last part of received topic is always the command (type)
-//   type = topicBuf;//, '/');  // Last part of received topic is always the command (type)
+// //   //type = strrchr(topicBuf, '/');  // Last part of received topic is always the command (type)
+// //   type = topicBuf;//, '/');  // Last part of received topic is always the command (type)
 
-//   index = 1;
-//   if (type != nullptr) {
-//     type++;
-//     // Convert everything to same case
-//     for (i = 0; i < strlen(type); i++) {
-//       //type[i] = toupper(type[i]);
-//     }
-//     // From end of array, move backwards checking for numbers (ie stops when it hits " " space)
-//     while (isdigit(type[i-1])) {
-//       i--;
-//     }
-//     // Move from start of number to end of array to get number
-//     if (i < strlen(type)) {
-//       index = atoi(type +i);
-//       user_append_index = true;
-//     }
-//     type[i] = '\0';
-//   }
+// //   index = 1;
+// //   if (type != nullptr) {
+// //     type++;
+// //     // Convert everything to same case
+// //     for (i = 0; i < strlen(type); i++) {
+// //       //type[i] = toupper(type[i]);
+// //     }
+// //     // From end of array, move backwards checking for numbers (ie stops when it hits " " space)
+// //     while (isdigit(type[i-1])) {
+// //       i--;
+// //     }
+// //     // Move from start of number to end of array to get number
+// //     if (i < strlen(type)) {
+// //       index = atoi(type +i);
+// //       user_append_index = true;
+// //     }
+// //     type[i] = '\0';
+// //   }
 
-//   // remove index from 
-//   if(user_append_index){
-//     webcommand.command_key_short[strlen(webcommand.command_key_short)-mSupport::NumDigits(index)] = 0;
-//   }
+// //   // remove index from 
+// //   if(user_append_index){
+// //     webcommand.command_key_short[strlen(webcommand.command_key_short)-mSupport::NumDigits(index)] = 0;
+// //   }
 
-//   //copy index
-//   webcommand.command_index = index;
+// //   //copy index
+// //   webcommand.command_index = index;
 
-//   webcommand.fWaiting = true;
+// //   webcommand.fWaiting = true;
   
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
-//     D_COMMAND " %s, " D_DATA " %s"),
-//    grpflg, index, type, dataBuf);
+// //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
+// //     D_COMMAND " %s, " D_DATA " %s"),
+// //    grpflg, index, type, dataBuf);
 
 
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
+// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
   
-//   pCONT->Tasker_Interface(FUNC_WEB_COMMAND);
+// //   pCONT->Tasker_Interface(FUNC_WEB_COMMAND);
 
-} // END function
+// } // END function
 
 
 

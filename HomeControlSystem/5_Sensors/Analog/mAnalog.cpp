@@ -388,7 +388,7 @@ void mAnalog::MQTTHandler_Set_TelePeriod(){
 
 void mAnalog::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
+  uint8_t flag_handle_all = false, handler_found = false
   if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
 
   do{

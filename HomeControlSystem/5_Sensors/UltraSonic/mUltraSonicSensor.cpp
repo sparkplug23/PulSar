@@ -200,7 +200,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
         #ifdef USE_MODULE_SENSORS_DS18B20
         int tempsensorid = -1;
         float ambient_temperature;
-        if((tempsensorid=pCONT_set->GetDeviceIDbyName("speed_of_sound_ambient",0,(int8_t)D_MODULE_SENSORS_DB18S20_ID))>=0){
+        if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)D_MODULE_SENSORS_DB18S20_ID))>=0){
             if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
             ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
             
@@ -827,29 +827,26 @@ void mUltraSonicSensor::MQTTHandler_Set_TelePeriod(){
 
 void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
+    MQTT_HANDLER_MODULE_AVERAGED_IFCHANGED_ID
+  };
+  
+  struct handler<mUltraSonicSensor>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod,
+    &mqtthandler_averaged_ifchanged
+  };
 
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod;  break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged;     break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod;    break;      
-      case MQTT_HANDLER_MODULE_AVERAGED_IFCHANGED_ID:      handler_found=true; mqtthandler_ptr=&mqtthandler_averaged_ifchanged;   break;
-      // No specialised needed
-      default: handler_found=false; mqtthandler_ptr = nullptr; break; // nothing 
-    } // switch
-
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT_mqtt->MQTTHandler_Command(*this,D_MODULE_SENSORS_ULTRASONIC_ID,mqtthandler_ptr);  }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
-
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_ULTRASONIC_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
+  
 }
 
 

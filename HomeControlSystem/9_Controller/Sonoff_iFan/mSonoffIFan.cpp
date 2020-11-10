@@ -75,9 +75,9 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
   //   }
     fans = kIFan03Speed[fanspeed];
   // }
-  for (uint32_t i = 2; i < 5; i++) {
+  for (uint32_t i = 1; i < 4; i++) {
     uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
-    pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
+    pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4 (index 1,2,3 skipping 0)
     fans >>= 1;
   }
 
@@ -296,14 +296,14 @@ int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_Commands(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
-int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
+void mSonoffIFan::parse_JSONCommand(JsonObjectConst obj){
 
   
 
@@ -316,7 +316,7 @@ int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
     }
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
     Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
-    isserviced++;  
+  
   }
 
 
@@ -330,7 +330,7 @@ int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-    isserviced++;
+  
   }
   
   
@@ -341,6 +341,7 @@ int8_t mSonoffIFan::parsesub_Commands(JsonObjectConst obj){
 
 
 int8_t mSonoffIFan::Tasker_Web(uint8_t function){
+
 
   switch(function){
     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
@@ -355,7 +356,7 @@ int8_t mSonoffIFan::Tasker_Web(uint8_t function){
 
       uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
           
-      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Ceiling Fan Controls"),"");
+      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Ceiling Fan Controls","");
 
       char button_value_ctr[10];
       char button_key_ctr[50];
@@ -363,7 +364,18 @@ int8_t mSonoffIFan::Tasker_Web(uint8_t function){
 
       BufferWriterI->Append_P(PSTR("{t}<tr>"));
         for(uint8_t button_id=0;button_id<5;button_id++){
-          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
+          /*
+          
+"<td{sw1}%d
+%%'{cs}%s
+'{bc}'%s
+'{djk}%s
+'{va}%s
+'>%s%s
+{bc2}";
+
+          */
+          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2, 
                                     100/(button_id==0?1:4),
                                     button_id==0?"4":"", 
                                     "buttonh",
@@ -410,6 +422,8 @@ uint8_t mSonoffIFan::ConstructJSON_Sensor(uint8_t json_method){
 ********************************************************************************************************************************************/
 
 void mSonoffIFan::MQTTHandler_Init(){
+
+  struct handler<mSonoffIFan>* mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -463,30 +477,24 @@ void mSonoffIFan::MQTTHandler_Set_TelePeriod(){
 
 void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mSonoffIFan>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
 
-  // change switch to use array of pointers?
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_DRIVERS_IFAN_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_SONOFF_IFAN_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
-
-////////////////////// END OF MQTT /////////////////////////
-
 
 #endif

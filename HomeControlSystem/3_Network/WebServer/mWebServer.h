@@ -1020,63 +1020,63 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 // ; //end of parsejson
 
   
-const char HTML_DRAW_TOP_CONTAINER[] PROGMEM =
-  "<div class='tb_gp'><span class='tb_it'></span><span class='tb_it'></span><span class='tb_it'></span></div>";
+// const char HTML_DRAW_TOP_CONTAINER[] PROGMEM =
+//   "<div class='tb_gp'><span class='tb_it'></span><span class='tb_it'></span><span class='tb_it'></span></div>";
 
-const char HTTP_MSG_SLIDER_HUE1[] PROGMEM =
-  "<div><span class='p'>Hue 0</span><span class='q'>360</span></div>"
-  "<div><input type='range' min='0' max='360' value='%d' onchange='lc(value)'></div>";
+// const char HTTP_MSG_SLIDER_HUE1[] PROGMEM =
+//   "<div><span class='p'>Hue 0</span><span class='q'>360</span></div>"
+//   "<div><input type='range' min='0' max='360' value='%d' onchange='lc(value)'></div>";
 
-const char HTTP_MSG_SLIDER_SAT1[] PROGMEM =
-  "<div><span class='p'>Saturation 0%</span><span class='q'>100%</span></div>"
-  "<div><input type='range' min='0' max='100' value='%d' onchange='lc(value)'></div>";
+// const char HTTP_MSG_SLIDER_SAT1[] PROGMEM =
+//   "<div><span class='p'>Saturation 0%</span><span class='q'>100%</span></div>"
+//   "<div><input type='range' min='0' max='100' value='%d' onchange='lc(value)'></div>";
 
-const char HTTP_MSG_SLIDER_BRIGHTNESS1[] PROGMEM =
-  "<div><span class='p'>Brightness 0%</span><span class='q'>100%</span></div>"
-  "<div><input type='range' min='0' max='100' value='%d' onchange='lc(value)'></div>";
+// const char HTTP_MSG_SLIDER_BRIGHTNESS1[] PROGMEM =
+//   "<div><span class='p'>Brightness 0%</span><span class='q'>100%</span></div>"
+//   "<div><input type='range' min='0' max='100' value='%d' onchange='lc(value)'></div>";
 
-const char HTTP_MSG_SLIDER1[] PROGMEM =
-  "<div><span class='p'>" D_COLDLIGHT "</span><span class='q'>" D_WARMLIGHT "</span></div>"
-  "<div><input type='range' min='153' max='500' value='%d' onchange='lc(value)'></div>";
-const char HTTP_MSG_SLIDER2[] PROGMEM =
-  "<div><span class='p'>" D_DARKLIGHT "</span><span class='q'>" D_BRIGHTLIGHT "</span></div>"
-  "<div><input type='range' min='1' max='100' value='%d' onchange='lb(value)'></div>";
-const char HTTP_MSG_RSTRT[] PROGMEM =
-  "<br/><div style='text-align:center;'>" D_DEVICE_WILL_RESTART "</div><br/>";
+// const char HTTP_MSG_SLIDER1[] PROGMEM =
+//   "<div><span class='p'>" D_COLDLIGHT "</span><span class='q'>" D_WARMLIGHT "</span></div>"
+//   "<div><input type='range' min='153' max='500' value='%d' onchange='lc(value)'></div>";
+// const char HTTP_MSG_SLIDER2[] PROGMEM =
+//   "<div><span class='p'>" D_DARKLIGHT "</span><span class='q'>" D_BRIGHTLIGHT "</span></div>"
+//   "<div><input type='range' min='1' max='100' value='%d' onchange='lb(value)'></div>";
+// const char HTTP_MSG_RSTRT[] PROGMEM =
+//   "<br/><div style='text-align:center;'>" D_DEVICE_WILL_RESTART "</div><br/>";
 
-const char HTTP_FORM_LOGIN[] PROGMEM =
-  "<fieldset>"
-  "<form method='post' action='/'>"
-  "<p><b>" D_USER "</b><br/><input name='USER1' placeholder='" D_USER "'></p>"
-  "<p><b>" D_PASSWORD "</b><br/><input name='PASS1' type='password' placeholder='" D_PASSWORD "'></p>"
-  "<br/>"
-  "<button>" D_OK "</button>"
-  "</form></fieldset>";
+// const char HTTP_FORM_LOGIN[] PROGMEM =
+//   "<fieldset>"
+//   "<form method='post' action='/'>"
+//   "<p><b>" D_USER "</b><br/><input name='USER1' placeholder='" D_USER "'></p>"
+//   "<p><b>" D_PASSWORD "</b><br/><input name='PASS1' type='password' placeholder='" D_PASSWORD "'></p>"
+//   "<br/>"
+//   "<button>" D_OK "</button>"
+//   "</form></fieldset>";
 
-const char HTTP_FORM_TEMPLATE[] PROGMEM =
-  "<fieldset><legend><b>&nbsp;" D_TEMPLATE_PARAMETERS "&nbsp;</b></legend>"
-  "<form method='get' action='tp'>";
-const char HTTP_FORM_TEMPLATE_FLAG[] PROGMEM =
-  "<p></p>"  // Keep close so do not use <br/>
-  "<fieldset><legend><b>&nbsp;" D_TEMPLATE_FLAGS "&nbsp;</b></legend><p>"
-  "<input id='c0' name='c0' type='checkbox'><b>" D_ALLOW_ADC0 "</b><br/>"
-  "<input id='c1' name='c1' type='checkbox'><b>" D_ALLOW_ADC0_TEMP "</b><br/>"
-  "</p></fieldset>";
+// const char HTTP_FORM_TEMPLATE[] PROGMEM =
+//   "<fieldset><legend><b>&nbsp;" D_TEMPLATE_PARAMETERS "&nbsp;</b></legend>"
+//   "<form method='get' action='tp'>";
+// const char HTTP_FORM_TEMPLATE_FLAG[] PROGMEM =
+//   "<p></p>"  // Keep close so do not use <br/>
+//   "<fieldset><legend><b>&nbsp;" D_TEMPLATE_FLAGS "&nbsp;</b></legend><p>"
+//   "<input id='c0' name='c0' type='checkbox'><b>" D_ALLOW_ADC0 "</b><br/>"
+//   "<input id='c1' name='c1' type='checkbox'><b>" D_ALLOW_ADC0_TEMP "</b><br/>"
+//   "</p></fieldset>";
 
-const char HTTP_FORM_MODULE[] PROGMEM =
-  "<fieldset><legend><b>&nbsp;" D_MODULE_PARAMETERS "&nbsp;</b></legend>"
-  "<form method='get' action='md'>"
-  "<p></p><b>" D_MODULE_TYPE "</b> (%s)<br/><select id='g99' name='g99'></select><br/>"
-  "<br/><table>";
+// const char HTTP_FORM_MODULE[] PROGMEM =
+//   "<fieldset><legend><b>&nbsp;" D_MODULE_PARAMETERS "&nbsp;</b></legend>"
+//   "<form method='get' action='md'>"
+//   "<p></p><b>" D_MODULE_TYPE "</b> (%s)<br/><select id='g99' name='g99'></select><br/>"
+//   "<br/><table>";
 
-const char HTTP_FORM_WIFI[] PROGMEM =
-  "<fieldset><legend><b>&nbsp;" D_WIFI_PARAMETERS "&nbsp;</b></legend>"
-  "<form method='get' action='wi'>"
-  "<p><b>" D_AP1_SSID "</b> (" STA_SSID1 ")<br/><input id='s1' name='s1' placeholder='" STA_SSID1 "' value='%s'></p>"
-  "<p><b>" D_AP1_PASSWORD "</b><br/><input id='p1' name='p1' type='password' placeholder='" D_AP1_PASSWORD "' value='" D_ASTERISK_PWD "'></p>"
-  "<p><b>" D_AP2_SSID "</b> (" STA_SSID2 ")<br/><input id='s2' name='s2' placeholder='" STA_SSID2 "' value='%s'></p>"
-  "<p><b>" D_AP2_PASSWORD "</b><br/><input id='p2' name='p2' type='password' placeholder='" D_AP2_PASSWORD "' value='" D_ASTERISK_PWD "'></p>"
-  "<p><b>" D_HOSTNAME "</b> (%s)<br/><input id='h' name='h' placeholder='%s' value='%s'></p>";
+// const char HTTP_FORM_WIFI[] PROGMEM =
+//   "<fieldset><legend><b>&nbsp;" D_WIFI_PARAMETERS "&nbsp;</b></legend>"
+//   "<form method='get' action='wi'>"
+//   "<p><b>" D_AP1_SSID "</b> (" STA_SSID1 ")<br/><input id='s1' name='s1' placeholder='" STA_SSID1 "' value='%s'></p>"
+//   "<p><b>" D_AP1_PASSWORD "</b><br/><input id='p1' name='p1' type='password' placeholder='" D_AP1_PASSWORD "' value='" D_ASTERISK_PWD "'></p>"
+//   "<p><b>" D_AP2_SSID "</b> (" STA_SSID2 ")<br/><input id='s2' name='s2' placeholder='" STA_SSID2 "' value='%s'></p>"
+//   "<p><b>" D_AP2_PASSWORD "</b><br/><input id='p2' name='p2' type='password' placeholder='" D_AP2_PASSWORD "' value='" D_ASTERISK_PWD "'></p>"
+//   "<p><b>" D_HOSTNAME "</b> (%s)<br/><input id='h' name='h' placeholder='%s' value='%s'></p>";
 
 // const char HTTP_FORM_LOG1[] PROGMEM =
 //   "<fieldset><legend><b>&nbsp;" D_LOGGING_PARAMETERS "&nbsp;</b>"
@@ -1203,34 +1203,34 @@ const char PM_HTTP_END_WITH_UPDATE_NOEND[] PROGMEM =
   ;
 
 
-#define D_WEB_HANDLER_STYLE_TOPBAR "/style/web_notif_bar.css"
-DEFINE_PGM_CTR(PM_WEB_HANDLER_STYLE_TOPBAR) D_WEB_HANDLER_STYLE_TOPBAR;
-DEFINE_PGM_CTR(PM_STYLE_TOPBAR)
-{
-  ".tb_con{"
-    "position:fixed;"
-    "top:0;"
-    "left:0;"
-    "right:0;"
-    "padding:0px;"
-  "}"
-  ".tb_gp{"
-    "width:100%;"
-    "background:#222;"
-    "display:flex;"
-    "justify-content:space-between;"
-    "height:auto;"
-  "}"
-  ".tb_it {"
-    "color: #fff;" //white text
-    //"background: green;"
-    "padding: 5px 10px;" //tb & lr
-    // "border-radius: 50%;"
-    "position: relative;"
-    // "top: -10px;"
-    "font-size:1em"
-  "}"
-};
+// #define D_WEB_HANDLER_STYLE_TOPBAR "/style/web_notif_bar.css"
+// DEFINE_PGM_CTR(PM_WEB_HANDLER_STYLE_TOPBAR) D_WEB_HANDLER_STYLE_TOPBAR;
+// DEFINE_PGM_CTR(PM_STYLE_TOPBAR)
+// {
+//   ".tb_con{"
+//     "position:fixed;"
+//     "top:0;"
+//     "left:0;"
+//     "right:0;"
+//     "padding:0px;"
+//   "}"
+//   ".tb_gp{"
+//     "width:100%;"
+//     "background:#222;"
+//     "display:flex;"
+//     "justify-content:space-between;"
+//     "height:auto;"
+//   "}"
+//   ".tb_it {"
+//     "color: #fff;" //white text
+//     //"background: green;"
+//     "padding: 5px 10px;" //tb & lr
+//     // "border-radius: 50%;"
+//     "position: relative;"
+//     // "top: -10px;"
+//     "font-size:1em"
+//   "}"
+// };
 
 
 
@@ -1240,11 +1240,14 @@ enum ButtonTitle {
   BUTTON_MODULE, BUTTON_WIFI, BUTTON_LOGGING, BUTTON_OTHER, BUTTON_TEMPLATE, BUTTON_BACKUP, 
   BUTTON_RESTORE
   };
+
+  //phase out
 const char kButtonTitle[] PROGMEM =
   D_RESTART "|" D_RESET_CONFIGURATION "|"
   D_MAIN_MENU "|" D_CONFIGURATION "|" D_INFORMATION "|" D_FIRMWARE_UPGRADE "|" D_CONSOLE "|" D_SYSTEM_SETTINGS "|"
   D_CONFIGURE_MODULE "|" D_CONFIGURE_WIFI"|" D_CONFIGURE_LOGGING "|" D_CONFIGURE_OTHER "|" D_CONFIGURE_TEMPLATE "|" D_BACKUP_CONFIGURATION "|" D_RESTORE_CONFIGURATION  "|"
   ;
+  //phase out
 const char kButtonAction[] PROGMEM =
   ".|rt|"
   ".|cn|in|up|"
@@ -1264,12 +1267,12 @@ enum CTypes { CT_HTML, CT_PLAIN, CT_XML, CT_JSON, CT_STREAM };
 
 // const char kEmulationOptions[] PROGMEM = D_NONE "|" D_BELKIN_WEMO "|" D_HUE_BRIDGE;
 
-const char kUploadErrors[] PROGMEM =
-  D_UPLOAD_ERR_1 "|" D_UPLOAD_ERR_2 "|" D_UPLOAD_ERR_3 "|" D_UPLOAD_ERR_4 "|" D_UPLOAD_ERR_5 "|" D_UPLOAD_ERR_6 "|" D_UPLOAD_ERR_7 "|" D_UPLOAD_ERR_8 "|" D_UPLOAD_ERR_9
-#ifdef USE_RF_FLASH
-  "|" D_UPLOAD_ERR_10 "|" D_UPLOAD_ERR_11 "|" D_UPLOAD_ERR_12 "|" D_UPLOAD_ERR_13
-#endif
-  ;
+// const char kUploadErrors[] PROGMEM =
+//   D_UPLOAD_ERR_1 "|" D_UPLOAD_ERR_2 "|" D_UPLOAD_ERR_3 "|" D_UPLOAD_ERR_4 "|" D_UPLOAD_ERR_5 "|" D_UPLOAD_ERR_6 "|" D_UPLOAD_ERR_7 "|" D_UPLOAD_ERR_8 "|" D_UPLOAD_ERR_9
+// #ifdef USE_RF_FLASH
+//   "|" D_UPLOAD_ERR_10 "|" D_UPLOAD_ERR_11 "|" D_UPLOAD_ERR_12 "|" D_UPLOAD_ERR_13
+// #endif
+//   ;
 
 const uint16_t DNS_PORT = 53;
 enum HttpOptions {HTTP_OFF, HTTP_USER, HTTP_ADMIN, HTTP_MANAGER, HTTP_MANAGER_RESET_ONLY};
@@ -1291,426 +1294,446 @@ class mWebServer : public AsyncWebHandler{
     int8_t Tasker(uint8_t function);
     void init(void);
 
-    
-  void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
-    size_t index, size_t total) override;
+    /***************
+     * 
+     * 
+     * CLEANED needed things START
+     * 
+     * *********/
 
-
-
-    
-    void WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles);
-
-void WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...);
-
-    // String chunk_buffer = "";                         // Could be max 2 * CHUNKED_BUFFER_SIZE
-    int minimum_signal_quality = -1;
-    bool remove_duplicate_access_points = true;
-    bool reset_web_log_flag = false;                  // Reset web console log
-    uint8_t upload_error = 0;
-    uint8_t upload_file_type;
-    uint8_t upload_progress_dot_count;
-    uint8_t config_block_count = 0;
-    uint8_t config_xor_on = 0;
-
-    uint16_t web_handle_load_delay = 1;
-    uint16_t GetWebLoadNextTimeSlot();
-
-    //const uint8_t CONFIG_FILE_XOR = 0x5A;       // Configuration file xor (0 = No Xor)
-    uint8_t config_xor_on_set = 0x5A;
-
-    #ifndef WEB_HANDLE_LOAD_DELAY 
-      #define WEB_HANDLE_LOAD_DELAY 110
-    #endif
-
+    // PARAMETERS
     DNSServer *DnsServer;
 
     #ifdef ESP8266
       AsyncWebServer *pWebServer;
-      // AsyncWebServer server(80);
     #endif
     #ifdef ESP32
     WebServer *pWebServer;
     #endif
-
-    #ifndef WIFI_SOFT_AP_CHANNEL
-      #define WIFI_SOFT_AP_CHANNEL                  1          // Soft Access Point Channel number between 1 and 11 as used by SmartConfig web GUI
-    #endif
-
-    const uint16_t CHUNKED_BUFFER_SIZE = 400;                // Chunk buffer size (should be smaller than half mqtt_date size)
-    #define HTTP_REFRESH_TIME 1000                // milliseconds
-
-    void WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request);    
-     
-     
-void Console_JSON_Data(AsyncWebServerRequest *request);
-
-
-void WebAppend_Root_Draw_PageTitleFields();
-    void WebAppend_Root_Draw_PageTable();
-void WebAppend_Root_Draw_ModuleTable();
-void WebAppend_Root_Draw_PageButtons();
-void Web_Root_Draw_Modules(AsyncWebServerRequest *request);
-
-
-void Web_Console_Draw(AsyncWebServerRequest *request);
-
-    AsyncWebServerRequest *request_web_command = nullptr;
-
-    void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
-    void HandleFavicon(AsyncWebServerRequest *request);
-    void WebSend_SendRuntimeURLs(AsyncWebServerRequest *request);
-
-    // void send_mP(AsyncWebServerRequest *request, int code, const char* content_type, const char* formatP, ...)  ;
-
-    void send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)  ;
-
-    // Held for other modules to use, must be set prior to calling
-    AsyncResponseStream *response_stream = NULL; //tbd
-    char* buffer_writer_ctr = NULL;
-    char* response_buffer = nullptr;
-    uint16_t buffer_writer_len = 0;
-
     
+    #ifdef DEBUG_WEBSERVER_MEMORY
+    void FreeMem_Usage_Before(freemem_usage_t* memory_location);
+    void FreeMem_Usage_After(freemem_usage_t* memory_location);
+    const char*     freemem_usage_name_json_shared = "json_shared";
+    freemem_usage_t freemem_usage_json_shared;
+    #endif // DEBUG_WEBSERVER_MEMORY
+    bool reset_web_log_flag = false;                  // Reset web console log
+    uint8_t fConsole_active = false;
+    uint8_t fConsole_history = false;
 
-
-
-    
-uint16_t sprintf_P2(char* buffer, const char* formatP, ...);
-
-    void WSButtonAppend2(char** buffer, uint8_t title_index);
-    void WSSpaceButtonAppend2(char** buffer, uint8_t title_index);
-
-    /**
-     * This pointer to a pointer is used outside of this function to write into the WSBufferAppend_P
-     * output buffer, it must be initialised before Tasker_Interface calls and recovered after? (maybe not)
-     * The length it can write to is defined below
-     * This method is temporary, since multiple simultaneous calls can overwrite this same pointer (same for large memory buffer)
-     * */
-    char** buffer_writer_internal = nullptr; 
-    uint16_t buffer_writer_internal_length = 0; 
-    #define BUFFER_WRITER_LENGTH DATA_BUFFER_PAYLOAD_MAX_LENGTH
-
-    uint16_t WSContentSend_PI(const char* formatP, ...);
-    uint16_t WSBufferAppend_PI2(const char* formatP, ...);
-    
-    void RemoveBufferSpaces_PI2(uint16_t bytes_to_remove);
-
-
-void SendDrawDiv_RootTableShowParameters(AsyncWebServerRequest *request);
-
-void SendDrawDiv_Information_Table(AsyncWebServerRequest *request);
-
-uint16_t AppendBuffer_P2(char** buffer, const char* formatP, ...);
-uint16_t AppendBuffer_PI2(const char* formatP, ...);
-
-
-    bool RespondWebSend_UnableToAllocateBuffer(AsyncWebServerRequest *request);
-
-   void WebSend_Root_Fetcher_URLs(AsyncWebServerRequest *request);
-   void WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request);
-   void WebSend_Root_ModuleButtons(AsyncWebServerRequest *request);
-
-   
-
-uint16_t AppendBuffer_nP2(char** buffer, uint16_t size, const char* formatP, ...);
-uint16_t AppendBuffer_nPI2(uint16_t size, const char* formatP, ...);
-void Web_All_LoadTime_Minimum_URLs(AsyncWebServerRequest *request);
-void Web_All_LoadTime_Minimum_URLs2(AsyncWebServerRequest *request);
-
-
-
-//append to internal buffer if any root messages table
-void WebAppend_Root_Draw_TopBar();
-void WebAppend_Root_Draw_ModuleButtons();
-void WebAppend_Page_InformationTable();
-
-
-void Web_Root_RunTime_URLs(AsyncWebServerRequest *request);
-void Web_Root_LoadTime_URLs(AsyncWebServerRequest *request);
-void Web_Root_LoadTime_URLs2(AsyncWebServerRequest *request);
-void Web_Root_Draw(AsyncWebServerRequest *request);
-void Web_Root_LoadScript(AsyncWebServerRequest *request);
-void Web_Info_LoadScript(AsyncWebServerRequest *request);
-void Web_Root_RunTimeScript(AsyncWebServerRequest *request);
-void Web_Root_FillOptions(AsyncWebServerRequest *request);
-void WebAppend_Root_FillOptions_Controls();
-void WebAppend_Root_FillOptions_Controls_Selected();
-void WebAppend_Root_Draw_Controls();
-
-
-void WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles);
-
-
-void Web_Root_UpdateURLs(AsyncWebServerRequest *request);
-
-    
-// For debugging only
-struct FREEMEM_USAGE{
-  uint16_t WebSend_JSON_WebServer_TopBar;
-  uint16_t WebSend_SendRuntimeURLs;
-  uint16_t Handle_Style_WebMinimalRoot;
-}freemem_usage;
-
-
-#ifdef DEBUG_WEBSERVER_MEMORY
-
-  
-  const char*     freemem_usage_name_json_shared = "json_shared";
-  freemem_usage_t freemem_usage_json_shared;
-
-
-
-  
-#endif
-
-void HandleReset(AsyncWebServerRequest *request);
-
-// void WebSend_Response(AsyncWebServerRequest *request, int code, const char* contentType, char* content_ptr);
-// void WebSend_Response_P(AsyncWebServerRequest *request, int code, const char* contentType, char* content_ptr);
-
-void WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
-void WebSend_Response_P(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
-
-#ifdef DEBUG_WEBSERVER_MEMORY
-void FreeMem_Usage_Before(freemem_usage_t* memory_location);
-void FreeMem_Usage_After(freemem_usage_t* memory_location);
-#endif
-
-
-// New async methods
-    void WSBufferAppend_SystemVersionBar(AsyncResponseStream *response);
-    void WSBufferAppend_SystemVersionBar(char** buffer);
-    void WRHeaderAdd(AsyncResponseStream *response);
-    // void WSContentSend_PI(const char* formatP, ...);
-
-// Old methods to phase out
+    // FUNCTIONS
+    void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override;
+    bool HttpCheckPriviledgedAccess();
     static bool WifiIsInManagerMode();
-    void ShowWebSource(int source);
-    void ExecuteWebCommand(char* svalue, int source);
-    void StartWebserver(int type, IPAddress ipweb);
+    bool WebAuthenticate(void);
     void StopWebserver(void);
+    void StartWebserver(int type, IPAddress ipweb);
     void WifiManagerBegin(bool reset_only);
     void PollDnsWebserver(void);
-    bool WebAuthenticate(void);
-    //bool HttpCheckPriviledgedAccess(bool autorequestauth = true);
-    bool HttpCheckPriviledgedAccess();
-    // void WSHeaderSend(AsyncWebServerRequest *request);
-    void WSSend(AsyncWebServerRequest *request, int code, int ctype, const String& content);
-    // void WSContentBegin(AsyncWebServerRequest *request, int code, int ctype);
-    void WSContentBegin_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, int code, int ctype);
-    
-    void WSBufferAppend_P(AsyncResponseStream *response, const char* formatP, ...);     // Content send snprintf_P char data;
-    // void _WSContentSend(AsyncWebServerRequest *request, const String& content);
-    // void WSContentFlush(AsyncWebServerRequest *request);
-    // void _WSContentSendBuffer(AsyncWebServerRequest *request);
-    void WSBufferAppend_P(AsyncWebServerRequest *request, const char* formatP, ...);
-    void WSContentSend_PD(AsyncWebServerRequest *request, const char* formatP, ...);
-    void WSStartAppend_P2(char** buffer, const char* title);
-    void WSStartAppend_P2(char** buffer, const char* title, bool auth);
-    // void WSStartAppend_P(AsyncWebServerRequest *request, const char* title);
-    void WSStartAppend_P_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, const char* title, bool auth);
-    void WSStartAppend_P_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, const char* title);
-    
-    void WSContentStop_Async(AsyncWebServerRequest *request, AsyncResponseStream *response);
-    
-    uint16_t WSContentButton_AsyncB(char *buffer, uint8_t title_index);
-    // void WSContentButton_AsyncB2(buffer_t* buffer, uint8_t title_index);
-    uint16_t WSContentSpaceButton_AsyncB(char *buffer, uint8_t title_index);
-    uint16_t WSContentSendStyle(char *buffer);
-    uint16_t WSContentSendStyle_P_NEW(char *buffer, const char* formatP, ...);
-
-    // void WSContentStop_AsyncB2(buffer_t* buffer);
-    // void WSContentSpaceButton_AsyncB2(buffer_t* buffer, uint8_t title_index);   
-    
-    void WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request);
-    void WebSend_JSON_WebServer_TopBar2(AsyncWebServerRequest *request);
-    
-
-void WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *request);
-    
+    void WebPage_Root_AddHandlers();
+    void WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...);
+    bool RespondWebSend_UnableToAllocateBuffer(AsyncWebServerRequest *request);
+    void WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
     void HandleSystemSettings(AsyncWebServerRequest *request);
-
-    void HandleUpgradeFirmwareStart(AsyncWebServerRequest *request);
-    void WSContentSendStyle_P(AsyncResponseStream *response,const char* formatP, ...);
-    void WSContentSendStyle_Pb(AsyncResponseStream *response,const char* formatP, ...);
-    void WSContentSendStyleb(AsyncResponseStream *response);
-    void WSContentButton(AsyncResponseStream *response,uint8_t title_index);
-    void WSContentSpaceButton(AsyncResponseStream *response,uint8_t title_index);
-    void WSContentEnd(AsyncWebServerRequest *request);
-    void WSContentEnd_Async(AsyncWebServerRequest *request, AsyncResponseStream *response);
-    void WSContentStop(AsyncWebServerRequest *request);
     void WebRestart(AsyncWebServerRequest *request,uint8_t type);
     void HandleWifiLogin(AsyncWebServerRequest *request);
-    void HandleRoot(AsyncWebServerRequest *request);
-
-    uint16_t SendPage_Root(char* buffer);
-    // void SendPage_Root2(buffer_t* buffer);
-
-
-    void HandleRoot_Top3(AsyncWebServerRequest *request);
-    void HandleRoot_Top4(AsyncWebServerRequest *request);
+    void WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request);
+    void WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *request);
     void HandlePage_Root(AsyncWebServerRequest *request);
-    
+    void Web_Root_Draw(AsyncWebServerRequest *request);
+    void Web_Root_Draw_Modules(AsyncWebServerRequest *request);
+    void Web_Root_UpdateURLs(AsyncWebServerRequest *request);
+    void Web_Base_Page_Draw(AsyncWebServerRequest *request);
+    void WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request);    
     void HandlePage_Console(AsyncWebServerRequest *request);
-
-
-
-    void Web_Root_LoadScript_Test(AsyncWebServerRequest *request);
-    
-    void BuildPage_Root_Test();
-
-    
-    void SendPage_Root3(AsyncResponseStream *response);
-
-
-    void BuildPage_Root(char** buffer);
-
-
-    void Handle_Style_TopBar(AsyncWebServerRequest *request);
-
-    // 0 means use default maximum
-    bool CheckWebSendFreeMemoryTooLow(uint16_t memory_needed = 0);
-
+    void Web_Console_Draw(AsyncWebServerRequest *request);
+    void Console_JSON_Data(AsyncWebServerRequest *request);
     bool RespondWebSendFreeMemoryTooLow(AsyncWebServerRequest *request, uint16_t memory_needed = 0);
-
-
-
-    void SendDrawDiv_Root2(AsyncWebServerRequest *request);
-
-    void Handle_Style_WebMinimalRoot(AsyncWebServerRequest *request);
-void WebPage_Root_AddHandlers();
-
-    void WebSend_JSON_RootPage_Parameters_TopBarContainer(AsyncWebServerRequest *request);
-
-    
-    // uint16_t WSBufferAppend_P(char** buffer, const char* formatP, ...);
-    uint16_t WSBufferAppend_P2(char** buffer, const char* formatP, ...);
-
-
-
-    void BufferWriter_Start();
-    void BufferWriter_Append_P(char** buffer, const char* formatP, ...);
-    
-    
-    
-    void WSContentSend_P_AsyncB_Internal(const char* formatP, ...);
-    uint16_t WSContentStop_AsyncB(char *buffer);
-    
-    // uint16_t AppendBuffer_P(buffer_t *buffer, const char* formatP, ...);
-
-    void WSContentSend_P_AsyncB_Internal2(const char* formatP, ...);     // Content send snprintf_P char data
-
-    // void WSContentSend_P_AsyncB2(buffer_t* buffer, const char* formatP, ...);
-
-    // uint8_t WSContentSendStyle2(buffer_t* buffer, uint8_t section_part = 255); //255 = all;
-    // void WSContentSendStyle_P_NEW2(buffer_t* buffer, const char* formatP, ...);
-
-uint16_t WSContentSend_Single_P2(char* buffer, const char* formatP, ...)   ;
-    
-    // void SetBufferBeforeTasker2(buffer_t* buffer);
-    // void GetBufferAfterTasker2(buffer_t* buffer);
-
-    void PrintToResponse_P(AsyncResponseStream *response, const char* formatP, ...);     // Content send snprintf_P char data
-
-
-    // Space to save current instance of buffer so Tasker_Interface can access it
-    // buffer_t buff_tasker;
-    
+    void HandleFavicon(AsyncWebServerRequest *request);
     void WebHexCode(uint8_t i, const char* code);
-    uint32_t WebColor(uint8_t i);
-uint32_t WebColor(uint8_t r,uint8_t g,uint8_t b);
-const char* WebColorCtr(uint8_t r,uint8_t g,uint8_t b, char* buffer);
-// const char* WebColorCtr(char* buffer, uint8_t r,uint8_t g,uint8_t b);
-
-    // uint8_t testarray[200];
-    void HandleRoot_Top(AsyncWebServerRequest *request);
-
-    void SetBufferBeforeTasker(char* buffer, uint16_t bytes_to_send);
-    uint16_t GetBufferAfterTasker();
-
-
-    uint8_t handleroot_section = 0;
-    
-    void handleQuery(AsyncWebServerRequest *request);
-    
-    uint16_t handleRoot_Sectioned(char* buf, uint16_t len);
-
-    bool HandleRootStatusRefresh(AsyncWebServerRequest *request);
-    void HandleConfiguration(AsyncWebServerRequest *request);
-    void HandleTemplateConfiguration(AsyncWebServerRequest *request);
-    void TemplateSaveSettings();
+    uint32_t WebColor(uint8_t r,uint8_t g,uint8_t b);
+    const char* WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffer, uint8_t buflen);
+    void HandleHttpCommand(AsyncWebServerRequest *request);
+    bool CaptivePortal(AsyncWebServerRequest *request);
+    void HandleReset(AsyncWebServerRequest *request);
+    void HandleNotFound(AsyncWebServerRequest *request);
+    bool CheckWebSendFreeMemoryTooLow(uint16_t memory_needed = 0);
+    void send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)  ;
+    void WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles);
+    void WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles);
+    void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
+    void WebAppend_Root_Draw_PageTitleFields();
+    void WebAppend_Root_Draw_PageTable();
+    void WebAppend_Root_Draw_ModuleTable();
+    void WebAppend_Root_Draw_PageButtons();
+    void WebAppend_Root_Draw_ModuleButtons();
+    void HandleConsole(AsyncWebServerRequest *request);
+    void HandleConsoleRefresh(AsyncWebServerRequest *request);
+    void HandleInformation(AsyncWebServerRequest *request);
+    void WebAppend_Start_Head_P(const char* title, bool auth);
+    void WebAppend_Start_Head_P(const char* title);
+    void WebAppend_Button_Spaced(uint8_t title_index);
+    void WebAppend_Button(uint8_t title_index);
+    void WebAppend_Button_Spaced(const char* button_title_ctr, const char* action_ctr, const char* confirm_message_ctr = nullptr, const char* confirm_action_ctr = nullptr);
+    void WebAppend_Button(const char* button_title_ctr, const char* action_ctr, const char* confirm_message_ctr = nullptr, const char* confirm_action_ctr = nullptr);
+    void WebAppend_Button2(const char* button_title_ctr, const char* action_ctr, const char* button_css_extra_style_ctr);
+    void HandleUpgradeFirmware(AsyncWebServerRequest *request);
+    void HandleUploadDone(AsyncWebServerRequest *request);
+    void HandleUploadLoop(AsyncWebServerRequest *request);
     void HandleModuleConfiguration(AsyncWebServerRequest *request);
     void ModuleSaveSettings(AsyncWebServerRequest *request);
-    String htmlEscape(String s);
+    void HandleTemplateConfiguration(AsyncWebServerRequest *request);
+    void TemplateSaveSettings();
     void HandleWifiConfiguration(AsyncWebServerRequest *request);
     void WifiSaveSettings(AsyncWebServerRequest *request);
     void HandleLoggingConfiguration(AsyncWebServerRequest *request);
     void LoggingSaveSettings(AsyncWebServerRequest *request);
     void HandleOtherConfiguration(AsyncWebServerRequest *request);
-    
     void OtherSaveSettings(AsyncWebServerRequest *request);
     void HandleBackupConfiguration(AsyncWebServerRequest *request);
     void HandleResetConfiguration(AsyncWebServerRequest *request);
     void HandleRestoreConfiguration(AsyncWebServerRequest *request);
+    void HandleConfiguration(AsyncWebServerRequest *request);
+    void HandleUpgradeFirmwareStart(AsyncWebServerRequest *request);
 
 
-    void HandleInformation(AsyncWebServerRequest *request);
-    
-    void WebAppend_Start_Head_P(const char* title, bool auth);
-    void WebAppend_Start_Head_P(const char* title);
-    void WebAppend_Minimal_Style();
-    void WebAppend_Title();
-    void WebAppend_Button_Spaced(uint8_t title_index);
-    void WebAppend_Button(uint8_t title_index);
-    void WebAppend_Button_Spaced(const char* button_title_ctr, const char* action_ctr, const char* confirm_message_ctr = nullptr, const char* confirm_action_ctr = nullptr);
-    void WebAppend_Button(const char* button_title_ctr, const char* action_ctr, const char* confirm_message_ctr = nullptr, const char* confirm_action_ctr = nullptr);
-
-
-    void WebAppend_Button2(const char* button_title_ctr, const char* action_ctr, const char* button_css_extra_style_ctr);
-
-    void WebAppend_SystemVersionBar();
-    void WebAppend_Script_P(PGM_P url);
-
-
-void HandleInformation_TableDraw(AsyncWebServerRequest *request);
-
-void Web_Base_Page_Draw(AsyncWebServerRequest *request);
-
-
-    void HandleUpgradeFirmware(AsyncWebServerRequest *request);
-    void HandleUploadDone(AsyncWebServerRequest *request);
-    void HandleUploadLoop(AsyncWebServerRequest *request);
-    void HandlePreflightRequest(AsyncWebServerRequest *request);
-    void HandleHttpCommand(AsyncWebServerRequest *request);
-    void HandleConsole(AsyncWebServerRequest *request);
-    void HandleConsoleRefresh(AsyncWebServerRequest *request);
-    void HandleNotFound(AsyncWebServerRequest *request);
-    bool CaptivePortal(AsyncWebServerRequest *request);
-    String UrlEncode(const String& text);
-    // int WebSend(char *buffer);
-    bool JsonWebColor(const char* dataBuf);
-    bool WebCommand(void);
+    /***************
+     * 
+     * 
+     * CLEANED needed things END
+     * 
+     * *********/
 
     
-  void ExecuteCommand(char *cmnd, int source);
-
-  void ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len);
-
-  // struct WEBCOMMANDS{
-  //   char classname[30];
-  //   char command_key_short[30]; //short hand command to match against, 
-  //   uint8_t command_index = 0; //short hand command to match against, 
-  //   char command_value[30];
-  //   uint8_t fWaiting = false;
-  // }webcommand;
-
-  uint8_t fConsole_active = false;
-  uint8_t fConsole_history = false;
-
-  uint32_t tSavedLoop;
-
-
 };
 
 #endif
 #endif
+
+
+
+
+
+
+
+
+
+
+    
+
+//     // String chunk_buffer = "";                         // Could be max 2 * CHUNKED_BUFFER_SIZE
+//     int minimum_signal_quality = -1;
+//     bool remove_duplicate_access_points = true;
+//     
+//     uint8_t upload_error = 0;
+//     uint8_t upload_file_type;
+//     uint8_t upload_progress_dot_count;
+//     uint8_t config_block_count = 0;
+//     uint8_t config_xor_on = 0;
+
+//     uint16_t web_handle_load_delay = 1;
+//     uint16_t GetWebLoadNextTimeSlot();
+
+//     //const uint8_t CONFIG_FILE_XOR = 0x5A;       // Configuration file xor (0 = No Xor)
+//     uint8_t config_xor_on_set = 0x5A;
+
+//     #ifndef WEB_HANDLE_LOAD_DELAY 
+//       #define WEB_HANDLE_LOAD_DELAY 110
+//     #endif
+
+//     // const uint16_t CHUNKED_BUFFER_SIZE = 400;                // Chunk buffer size (should be smaller than half mqtt_date size)
+//     // #define HTTP_REFRESH_TIME 1000                // milliseconds
+
+//     AsyncWebServerRequest *request_web_command = nullptr;
+
+//     
+//     
+//     void WebSend_SendRuntimeURLs(AsyncWebServerRequest *request);
+
+//     // void send_mP(AsyncWebServerRequest *request, int code, const char* content_type, const char* formatP, ...)  ;
+
+//     
+
+//     // Held for other modules to use, must be set prior to calling
+//     AsyncResponseStream *response_stream = NULL; //tbd
+//     char* buffer_writer_ctr = NULL;
+//     char* response_buffer = nullptr;
+//     uint16_t buffer_writer_len = 0;
+
+    
+
+
+
+    
+// uint16_t sprintf_P2(char* buffer, const char* formatP, ...);
+
+//     void WSButtonAppend2(char** buffer, uint8_t title_index);
+//     void WSSpaceButtonAppend2(char** buffer, uint8_t title_index);
+
+//     /**
+//      * This pointer to a pointer is used outside of this function to write into the WSBufferAppend_P
+//      * output buffer, it must be initialised before Tasker_Interface calls and recovered after? (maybe not)
+//      * The length it can write to is defined below
+//      * This method is temporary, since multiple simultaneous calls can overwrite this same pointer (same for large memory buffer)
+//      * */
+//     char** buffer_writer_internal = nullptr; 
+//     uint16_t buffer_writer_internal_length = 0; 
+//     #define BUFFER_WRITER_LENGTH DATA_BUFFER_PAYLOAD_MAX_LENGTH
+
+//     uint16_t WSContentSend_PI(const char* formatP, ...);
+//     uint16_t WSBufferAppend_PI2(const char* formatP, ...);
+    
+//     void RemoveBufferSpaces_PI2(uint16_t bytes_to_remove);
+
+
+// void SendDrawDiv_RootTableShowParameters(AsyncWebServerRequest *request);
+
+// void SendDrawDiv_Information_Table(AsyncWebServerRequest *request);
+
+// uint16_t AppendBuffer_P2(char** buffer, const char* formatP, ...);
+// uint16_t AppendBuffer_PI2(const char* formatP, ...);
+
+//    void WebSend_Root_Fetcher_URLs(AsyncWebServerRequest *request);
+//    void WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request);
+//    void WebSend_Root_ModuleButtons(AsyncWebServerRequest *request);
+
+   
+
+// uint16_t AppendBuffer_nP2(char** buffer, uint16_t size, const char* formatP, ...);
+// uint16_t AppendBuffer_nPI2(uint16_t size, const char* formatP, ...);
+// void Web_All_LoadTime_Minimum_URLs(AsyncWebServerRequest *request);
+// void Web_All_LoadTime_Minimum_URLs2(AsyncWebServerRequest *request);
+
+
+
+// //append to internal buffer if any root messages table
+// void WebAppend_Root_Draw_TopBar();
+// 
+// void WebAppend_Page_InformationTable();
+
+
+// void Web_Root_RunTime_URLs(AsyncWebServerRequest *request);
+// void Web_Root_LoadTime_URLs(AsyncWebServerRequest *request);
+// void Web_Root_LoadTime_URLs2(AsyncWebServerRequest *request);
+// void Web_Root_LoadScript(AsyncWebServerRequest *request);
+// void Web_Info_LoadScript(AsyncWebServerRequest *request);
+// void Web_Root_RunTimeScript(AsyncWebServerRequest *request);
+// void Web_Root_FillOptions(AsyncWebServerRequest *request);
+// void WebAppend_Root_FillOptions_Controls();
+// void WebAppend_Root_FillOptions_Controls_Selected();
+// void WebAppend_Root_Draw_Controls();
+
+    
+// // For debugging only
+// // struct FREEMEM_USAGE{
+// //   uint16_t WebSend_JSON_WebServer_TopBar;
+// //   uint16_t WebSend_SendRuntimeURLs;
+// //   uint16_t Handle_Style_WebMinimalRoot;
+// // }freemem_usage;
+
+
+// #ifdef DEBUG_WEBSERVER_MEMORY
+
+  
+
+
+
+  
+// #endif
+
+// 
+
+// 
+// void WebSend_Response_P(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
+
+
+
+// // // New async methods
+// //     void WSBufferAppend_SystemVersionBar(AsyncResponseStream *response);
+// //     void WSBufferAppend_SystemVersionBar(char** buffer);
+// //     void WRHeaderAdd(AsyncResponseStream *response);
+// //     // void WSContentSend_PI(const char* formatP, ...);
+
+// // // Old methods to phase out
+// //     void ShowWebSource(int source);
+// //     void ExecuteWebCommand(char* svalue, int source);
+// //     
+// //     
+// //     
+// //     
+// //     //bool HttpCheckPriviledgedAccess(bool autorequestauth = true);
+// //     // void WSHeaderSend(AsyncWebServerRequest *request);
+// //     void WSSend(AsyncWebServerRequest *request, int code, int ctype, const String& content);
+// //     // void WSContentBegin(AsyncWebServerRequest *request, int code, int ctype);
+// //     void WSContentBegin_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, int code, int ctype);
+    
+// //     void WSBufferAppend_P(AsyncResponseStream *response, const char* formatP, ...);     // Content send snprintf_P char data;
+// //     // void _WSContentSend(AsyncWebServerRequest *request, const String& content);
+// //     // void WSContentFlush(AsyncWebServerRequest *request);
+// //     // void _WSContentSendBuffer(AsyncWebServerRequest *request);
+// //     void WSBufferAppend_P(AsyncWebServerRequest *request, const char* formatP, ...);
+// //     void WSContentSend_PD(AsyncWebServerRequest *request, const char* formatP, ...);
+// //     void WSStartAppend_P2(char** buffer, const char* title);
+// //     void WSStartAppend_P2(char** buffer, const char* title, bool auth);
+// //     // void WSStartAppend_P(AsyncWebServerRequest *request, const char* title);
+// //     void WSStartAppend_P_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, const char* title, bool auth);
+// //     void WSStartAppend_P_Async(AsyncWebServerRequest *request, AsyncResponseStream *response, const char* title);
+    
+// //     void WSContentStop_Async(AsyncWebServerRequest *request, AsyncResponseStream *response);
+    
+// //     uint16_t WSContentButton_AsyncB(char *buffer, uint8_t title_index);
+// //     // void WSContentButton_AsyncB2(buffer_t* buffer, uint8_t title_index);
+// //     uint16_t WSContentSpaceButton_AsyncB(char *buffer, uint8_t title_index);
+// //     uint16_t WSContentSendStyle(char *buffer);
+// //     uint16_t WSContentSendStyle_P_NEW(char *buffer, const char* formatP, ...);
+
+// //     // void WSContentStop_AsyncB2(buffer_t* buffer);
+// //     // void WSContentSpaceButton_AsyncB2(buffer_t* buffer, uint8_t title_index);   
+    
+// //     void WebSend_JSON_WebServer_TopBar2(AsyncWebServerRequest *request);
+    
+
+// // 
+    
+// //     
+
+// //     
+// //     void WSContentSendStyle_P(AsyncResponseStream *response,const char* formatP, ...);
+// //     void WSContentSendStyle_Pb(AsyncResponseStream *response,const char* formatP, ...);
+// //     void WSContentSendStyleb(AsyncResponseStream *response);
+// //     void WSContentButton(AsyncResponseStream *response,uint8_t title_index);
+// //     void WSContentSpaceButton(AsyncResponseStream *response,uint8_t title_index);
+// //     void WSContentEnd(AsyncWebServerRequest *request);
+// //     void WSContentEnd_Async(AsyncWebServerRequest *request, AsyncResponseStream *response);
+// //     void WSContentStop(AsyncWebServerRequest *request);
+// //     
+// //     
+// //     void HandleRoot(AsyncWebServerRequest *request);
+
+// //     uint16_t SendPage_Root(char* buffer);
+// //     // void SendPage_Root2(buffer_t* buffer);
+
+// //     
+    
+// //     
+
+
+
+// //     void Web_Root_LoadScript_Test(AsyncWebServerRequest *request);
+    
+// //     void BuildPage_Root_Test();
+
+    
+// //     void SendPage_Root3(AsyncResponseStream *response);
+
+
+// //     void BuildPage_Root(char** buffer);
+
+
+// //     void Handle_Style_TopBar(AsyncWebServerRequest *request);
+
+// //     // 0 means use default maximum
+// //     
+
+// //     
+
+
+
+// //     void SendDrawDiv_Root2(AsyncWebServerRequest *request);
+
+// //     void Handle_Style_WebMinimalRoot(AsyncWebServerRequest *request);
+
+// //     void WebSend_JSON_RootPage_Parameters_TopBarContainer(AsyncWebServerRequest *request);
+
+    
+// //     // uint16_t WSBufferAppend_P(char** buffer, const char* formatP, ...);
+// //     uint16_t WSBufferAppend_P2(char** buffer, const char* formatP, ...);
+
+
+
+// //     void BufferWriter_Start();
+// //     void BufferWriter_Append_P(char** buffer, const char* formatP, ...);
+    
+    
+    
+// //     void WSContentSend_P_AsyncB_Internal(const char* formatP, ...);
+// //     uint16_t WSContentStop_AsyncB(char *buffer);
+    
+// //     // uint16_t AppendBuffer_P(buffer_t *buffer, const char* formatP, ...);
+
+// //     void WSContentSend_P_AsyncB_Internal2(const char* formatP, ...);     // Content send snprintf_P char data
+
+//     // void WSContentSend_P_AsyncB2(buffer_t* buffer, const char* formatP, ...);
+
+//     // uint8_t WSContentSendStyle2(buffer_t* buffer, uint8_t section_part = 255); //255 = all;
+//     // void WSContentSendStyle_P_NEW2(buffer_t* buffer, const char* formatP, ...);
+
+    
+//     //TO DELETE
+//     // void SetBufferBeforeTasker2(buffer_t* buffer);
+//     // void GetBufferAfterTasker2(buffer_t* buffer);
+//     // void SetBufferBeforeTasker(char* buffer, uint16_t bytes_to_send);
+//     // uint16_t GetBufferAfterTasker();
+//     // void PrintToResponse_P(AsyncResponseStream *response, const char* formatP, ...);     // Content send snprintf_P char data
+//     // Space to save current instance of buffer so Tasker_Interface can access it
+//     // buffer_t buff_tasker;
+//     uint16_t WSContentSend_Single_P2(char* buffer, const char* formatP, ...)   ;
+    
+
+
+
+
+
+//     uint8_t handleroot_section = 0;
+    
+//     void handleQuery(AsyncWebServerRequest *request);
+    
+//     uint16_t handleRoot_Sectioned(char* buf, uint16_t len);
+
+//     bool HandleRootStatusRefresh(AsyncWebServerRequest *request);
+//     
+
+
+//     String htmlEscape(String s);
+
+//     void WebAppend_Minimal_Style();
+//     void WebAppend_Title();
+//     
+//     
+
+//     void WebAppend_SystemVersionBar();
+//     void WebAppend_Script_P(PGM_P url);
+
+
+// void HandleInformation_TableDraw(AsyncWebServerRequest *request);
+
+// 
+
+
+
+//     void HandlePreflightRequest(AsyncWebServerRequest *request);
+//     
+
+//     
+//     
+//     String UrlEncode(const String& text);
+//     // int WebSend(char *buffer);
+//     bool JsonWebColor(const char* dataBuf);
+//     bool WebCommand(void);
+
+    
+//   void ExecuteCommand(char *cmnd, int source);
+
+//   void ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len);
+
+//   // struct WEBCOMMANDS{
+//   //   char classname[30];
+//   //   char command_key_short[30]; //short hand command to match against, 
+//   //   uint8_t command_index = 0; //short hand command to match against, 
+//   //   char command_value[30];
+//   //   uint8_t fWaiting = false;
+//   // }webcommand;
+
+
+//   uint32_t tSavedLoop;
+

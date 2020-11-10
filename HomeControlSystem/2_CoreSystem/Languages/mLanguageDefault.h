@@ -934,6 +934,8 @@
 
 #define D_GPIO_FUNCTION_KEY1_CTR        "Key1"
 #define D_GPIO_FUNCTION_KEY1_INV_CTR        "Key1 Inv"
+#define D_GPIO_FUNCTION_KEY2_CTR        "Key2"
+#define D_GPIO_FUNCTION_KEY2_INV_CTR        "Key1 2nv"
 
 #define D_SENSOR_SDM120_TX_CTR     "SDMx20 Tx"
 #define D_SENSOR_SDM120_RX_CTR     "SDMx20 Rx"
@@ -1451,7 +1453,7 @@
 #define D_JSON_ONOFF "onoff"
 #define D_JSON_OFF "Off"
 #define D_JSON_OFFTIME "offtime"
-#define D_JSON_ORDER "order"
+#define D_JSON_ORDER "Order"
 #define D_JSON_OUTLIERS "Outliers"
 #define D_JSON_PACKETS "Packets"
 #define D_JSON_PIXELSGROUPED "pixels_grouped"
@@ -1465,7 +1467,7 @@
 #define D_JSON_PIXELNUM "pixelnum"
 #define D_JSON_PULSER "pulser"
 #define D_JSON_REFRESH_ALLPIXELS "refresh_allpixels"
-#define D_JSON_RATE "rate"
+#define D_JSON_RATE "Rate"
 #define D_JSON_RATE_MS "rate_ms"
 #define D_JSON_RECEIVEDCOUNT "ReceivedCount"
 #define D_JSON_RATIO "Ratio"
@@ -1483,6 +1485,8 @@
 #define D_JSON_SIGNIFICANTLY "significantly"
 #define D_JSON_STEP "step"
 #define D_JSON_STATUS "Status"
+
+#define D_JSON_SENSOR_MEASURERATE "Sensor_MeasureRate"
 
 #define D_JSON_SCENE "Scene"
 #define D_JSON_SCENE_COLOUR "Scene Colour"
@@ -1523,6 +1527,10 @@
 
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "GRB"
+#define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
+
+
+#define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 
 
 #define D_JSON_HARDWARE_TYPE "hardware_type"
@@ -1626,6 +1634,8 @@
   #define D_WCFG_7_WIFIMANAGER_RESET_ONLY "ManagerRst"
   
 #define D_JSON_WIFIPOWER "WifiPower"
+
+#define D_JSON_WIFI_AP "WifiAP"
 
 #define D_JSON_FRIENDLYNAME "FriendlyName"
 #define D_JSON_SWITCHMODE "SwitchMode"

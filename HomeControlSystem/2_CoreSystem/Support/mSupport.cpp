@@ -6,7 +6,7 @@ int8_t mSupport::Tasker(uint8_t function){
 
   switch(function){
     case FUNC_INIT:
-      fSendTemplatesOnce = true;
+      // fSendTemplatesOnce = true;
     break;
     case FUNC_LOOP: 
 
@@ -739,13 +739,13 @@ uint32_t mSupport::GetPulseTimer(uint32_t index)
 String mSupport::GetResetReason(void)
 {
   #ifdef ESP8266
-  char buff[32];
-  if (oswatch_blocked_loop) {
-    strncpy_P(buff, PSTR(D_JSON_BLOCKED_LOOP), sizeof(buff));
-    return String(buff);
-  } else {
+  // char buff[32];
+  // if (oswatch_blocked_loop) {
+  //   strncpy_P(buff, PSTR(D_JSON_BLOCKED_LOOP), sizeof(buff));
+  //   return String(buff);
+  // } else {
     return ESP.getResetReason();
-  }
+  // }
   #else
     return PSTR("Unsupported");
   #endif
@@ -754,11 +754,11 @@ String mSupport::GetResetReason(void)
 const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
 {
   #ifdef ESP8266
-  if (oswatch_blocked_loop) {
-    strncpy_P(buffer, PSTR(D_JSON_BLOCKED_LOOP), buflen);
-  } else {
+  // if (oswatch_blocked_loop) {
+  //   strncpy_P(buffer, PSTR(D_JSON_BLOCKED_LOOP), buflen);
+  // } else {
     sprintf(buffer, "%s", ESP.getResetReason().c_str());
-  }
+  // }
   #else
     sprintf(buffer, "%s", "Unsupported");
   #endif
@@ -1208,22 +1208,22 @@ bool mSupport::NewerVersion(char* version_str)
   return (version > PROJECT_VERSION);
 }
 
-char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option)
-{
-  // char sidx[8];
+// char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option)
+// {
+//   // char sidx[8];
 
-  // strncpy_P(dest, S_RSLT_POWER, size);                // POWER
-  // if ((devices_present + option) > 1) {
-  //   snprintf_P(sidx, sizeof(sidx), PSTR("%d"), idx);  // x
-  //   strncat(dest, sidx, size - strlen(dest) -1);      // POWERx
-  // }
-  // return dest;
-}
+//   // strncpy_P(dest, S_RSLT_POWER, size);                // POWER
+//   // if ((devices_present + option) > 1) {
+//   //   snprintf_P(sidx, sizeof(sidx), PSTR("%d"), idx);  // x
+//   //   strncat(dest, sidx, size - strlen(dest) -1);      // POWERx
+//   // }
+//   // return dest;
+// }
 
-char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size)
-{
-  // return GetPowerDevice(dest, idx, size, 0);
-}
+// char* mSupport::GetPowerDevice(char* dest, uint8_t idx, size_t size)
+// {
+//   // return GetPowerDevice(dest, idx, size, 0);
+// }
 
 float mSupport::ConvertTemp(float c)
 {
@@ -1622,13 +1622,25 @@ char* mSupport::GetOtaUrl(char *otaurl, size_t otaurl_size)
   return 0;//otaurl;
 }
 
+
+
+void mSupport::SleepDelay(uint32_t mseconds) {
+  if (mseconds) {
+    for (uint32_t wait = 0; wait < mseconds; wait++) {
+      delay(1);
+      if (Serial.available()) { break; }  // We need to service serial buffer ASAP as otherwise we get uart buffer overrun
+    }
+  } else {
+    delay(0);
+  }
+}
+
+
+
 // /********************************************************************************************
 
 void mSupport::PerformEverySecond(void)
 {
-  // pCONT_set->uptime++;
-
-
   // pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
   // pCONT_sup->activity.loop_counter=0;
   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
@@ -3090,7 +3102,7 @@ void mSupport::CrashDumpClear(void)
 bool mSupport::CrashFlag(void)
 {
   DEBUG_PRINT_FUNCTION_NAME;
-  return ((ResetReason() == REASON_EXCEPTION_RST) || (ResetReason() == REASON_SOFT_WDT_RST) || oswatch_blocked_loop);
+  return ((ResetReason() == REASON_EXCEPTION_RST) || (ResetReason() == REASON_SOFT_WDT_RST));// || oswatch_blocked_loop);
 }
 
 void mSupport::CrashDump_AddJson(void)

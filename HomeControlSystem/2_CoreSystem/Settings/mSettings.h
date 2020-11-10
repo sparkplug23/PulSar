@@ -323,7 +323,17 @@ enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_RESTART, DT_ENERGY };
 
 enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 
-enum SwitchModeOptions {TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE, MAX_SWITCH_OPTION};
+enum SwitchModeOptions_IDS {
+  TOGGLE, 
+  FOLLOW, 
+  FOLLOW_INV, 
+  PUSHBUTTON, 
+  PUSHBUTTON_INV, 
+  PUSHBUTTONHOLD, 
+  PUSHBUTTONHOLD_INV, 
+  PUSHBUTTON_TOGGLE, 
+  MAX_SWITCH_OPTION
+};
 
 enum LedStateOptions {LED_OFF, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT, MAX_LED_OPTION};
 
@@ -732,18 +742,19 @@ uint32_t GetSettingsCrc32(void);
 
   void SettingsResetStd(void) ;
   void SettingsResetDst(void);
-  void SettingsDefaultSet_5_13_1c(void);
-  void SettingsDefaultWebColor(void)  ; 
-  void SettingsDelta(void);
-  void SettingsMichael_Echo(void);
 
-  enum WebColors {
-    COL_TEXT, COL_BACKGROUND, COL_FORM,
-    COL_INPUT_TEXT, COL_INPUT, COL_CONSOLE_TEXT, COL_CONSOLE,
-    COL_TEXT_WARNING, COL_TEXT_SUCCESS,
-    COL_BUTTON_TEXT, COL_BUTTON, COL_BUTTON_HOVER, COL_BUTTON2, COL_BUTTON2_HOVER, COL_BUTTON_RESET, COL_BUTTON_RESET_HOVER, COL_BUTTON_SAVE, COL_BUTTON_SAVE_HOVER,
-    COL_TIMER_TAB_TEXT, COL_TIMER_TAB_BACKGROUND, COL_TEXT_MODULE_TITLE,
-    COL_LAST };
+  // void SettingsDefaultSet_5_13_1c(void);
+  // void SettingsDefaultWebColor(void)  ; 
+  // void SettingsDelta(void);
+  // void SettingsMichael_Echo(void);
+
+  // enum WebColors {
+  //   COL_TEXT, COL_BACKGROUND, COL_FORM,
+  //   COL_INPUT_TEXT, COL_INPUT, COL_CONSOLE_TEXT, COL_CONSOLE,
+  //   COL_TEXT_WARNING, COL_TEXT_SUCCESS,
+  //   COL_BUTTON_TEXT, COL_BUTTON, COL_BUTTON_HOVER, COL_BUTTON2, COL_BUTTON2_HOVER, COL_BUTTON_RESET, COL_BUTTON_RESET_HOVER, COL_BUTTON_SAVE, COL_BUTTON_SAVE_HOVER,
+  //   COL_TIMER_TAB_TEXT, COL_TIMER_TAB_BACKGROUND, COL_TEXT_MODULE_TITLE,
+  //   COL_LAST };
 
 
 
@@ -1107,6 +1118,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   struct {                                 // SetOption0 .. SetOption31
     uint8_t module_template_used : 1;               // bit 0              - SetOption0  - Save power state and use after restart
     uint8_t module_template_parse_success : 1;          // bit 1              - SetOption1  - Control button multipress
+    uint8_t function_template_parse_success : 2;          // bit 1              - SetOption1  - Control button multipress
     uint8_t decimal_precision : 2;        // bit 2,3   4 levels [0,1,2,3]
     uint8_t mdns_started_succesfully: 1;
   };
@@ -1281,7 +1293,7 @@ struct SYSCFG {
   uint8_t       webserver;                 // 1AB
   char          web_password[33];          // 4A9
   uint16_t      web_refresh;               // 7CC
-  uint8_t       web_color[25][3];          // 73E   //UNSURE OF LENGTH
+  // uint8_t       web_color[25][3];          // 73E   //UNSURE OF LENGTH
   // MQTT
   SettingsMQTT  mqtt;
   // Time
@@ -1519,7 +1531,7 @@ SerialConfig serial_config = SERIAL_8N1;    // Serial interface configuration 8 
 //bit packed and used outside relays for lights too
 power_t power = 0;                          // Current copy of Settings.power
 
-int baudrate = APP_BAUDRATE;                // Serial interface baud rate
+// int baudrate = APP_BAUDRATE;                // Serial interface baud rate
 // int serial_in_byte_counter = 0;             // Index in receive buffer
 int ota_state_flag = 0;                     // OTA state flag
 int ota_result = 0;                         // OTA result
@@ -1538,13 +1550,19 @@ char *ota_url;                              // OTA url string pointer
 // uint16_t seriallog_timer = 0;               // Timer to disable Seriallog
 // uint16_t syslog_timer = 0;                  // Timer to re-enable syslog_level
 int16_t save_data_counter;                  // Counter and flag for config save to Flash
-RulesBitfield rules_flag;                   // Rule state flags (16 bits)
-uint8_t state_250mS = 0;                    // State 250msecond per second flag
+// RulesBitfield rules_flag;                   // Rule state flags (16 bits)
+// uint8_t state_250mS = 0;                    // State 250msecond per second flag
 uint8_t latching_relay_pulse = 0;           // Latching relay pulse timer
 uint8_t backlog_index = 0;                  // Command backlog index
 uint8_t backlog_pointer = 0;                // Command backlog pointer
-uint8_t sleep;                              // Current copy of Settings.sleep
 uint8_t blinkspeed = 1;                     // LED blink rate
+
+
+// These are used only at runtime, and not saved
+struct RUNTIME_VALUES{
+  uint8_t sleep;                              // Current copy of Settings.sleep
+  uint32_t tSavedUpdateLoopStatistics;
+}runtime_value;
 
 
 // phased out, new tas method only records used pins, otherwise returns 99 for not set

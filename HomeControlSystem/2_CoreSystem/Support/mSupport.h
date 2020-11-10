@@ -208,42 +208,37 @@ class mSupport{
     // JsonObject& jsonobject_parsing = nullptr;
 
     float FastPrecisePowf(const float x, const float y);
+
+
     const uint8_t I2C_RETRY_COUNTER = 3;
-
-uint32_t i2c_buffer = 0;
-
-bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size);
-
-
-
-TwoWire* wire = nullptr;
-
-
-bool I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg);
-bool I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg);
-bool I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg);
-bool I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg);
-bool I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg);
-bool I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg);
-uint8_t I2cRead8(uint8_t addr, uint8_t reg);
-uint16_t I2cRead16(uint8_t addr, uint8_t reg);
-int16_t I2cReadS16(uint8_t addr, uint8_t reg);
-uint16_t I2cRead16LE(uint8_t addr, uint8_t reg);
-int16_t I2cReadS16_LE(uint8_t addr, uint8_t reg);
-int32_t I2cRead24(uint8_t addr, uint8_t reg);
-bool I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size);
-bool I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val);
-bool I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val);
-int8_t I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
-int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
-void I2cScan(char *devs, unsigned int devs_len);
-bool I2cDevice(uint8_t addr);
+    uint32_t i2c_buffer = 0;
+    TwoWire* wire = nullptr;
+    bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size);
+    bool I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg);
+    bool I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg);
+    bool I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg);
+    bool I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg);
+    bool I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg);
+    bool I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg);
+    uint8_t I2cRead8(uint8_t addr, uint8_t reg);
+    uint16_t I2cRead16(uint8_t addr, uint8_t reg);
+    int16_t I2cReadS16(uint8_t addr, uint8_t reg);
+    uint16_t I2cRead16LE(uint8_t addr, uint8_t reg);
+    int16_t I2cReadS16_LE(uint8_t addr, uint8_t reg);
+    int32_t I2cRead24(uint8_t addr, uint8_t reg);
+    bool I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size);
+    bool I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val);
+    bool I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val);
+    int8_t I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
+    int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
+    void I2cScan(char *devs, unsigned int devs_len);
+    bool I2cDevice(uint8_t addr);
 
     void parse_JSONCommand();
     IPAddress syslog_host_addr;      // Syslog host IP address
     uint32_t syslog_host_hash = 0;   // Syslog host name hash
 
-    uint32_t state_100msecond,state_250msecond;
+    // uint32_t state_100msecond,state_250msecond;
 
     Ticker tickerOSWatch;
 
@@ -290,27 +285,28 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     }activity;
 
     // A shared temporary/one-use buffer used as conversion helpers
-    char global_buffer[100];
+    #define GLOBAL_BUFFER_LENGTH 100
+    char global_buffer[GLOBAL_BUFFER_LENGTH];
 
 
-    const uint32_t OSWATCH_RESET_TIME = 30;
+    // const uint32_t OSWATCH_RESET_TIME = 30;
 
-    // static unsigned long oswatch_last_loop_time;
-    uint32_t tSaved_OSWatchLoop = millis();
-    uint8_t oswatch_blocked_loop = 0;
+    // // static unsigned long oswatch_last_loop_time;
+    // uint32_t tSaved_OSWatchLoop = millis();
+    // uint8_t oswatch_blocked_loop = 0;
 
-    #ifndef USE_WS2812_DMA  // Collides with Neopixelbus but solves exception
-    //void OsWatchTicker() ICACHE_RAM_ATTR;
-    #endif  // USE_WS2812_DMA
+    // #ifndef USE_WS2812_DMA  // Collides with Neopixelbus but solves exception
+    // //void OsWatchTicker() ICACHE_RAM_ATTR;
+    // #endif  // USE_WS2812_DMA
 
-    #ifdef USE_KNX
-    bool knx_started = false;
-    #endif  // USE_KNX
+    // #ifdef USE_KNX
+    // bool knx_started = false;
+    // #endif  // USE_KNX
 
     char* p_snprintf(char* buffer, uint16_t buflen, const char* formatP, ...);
     
 
-    uint8_t fSendTemplatesOnce = true;
+    // uint8_t fSendTemplatesOnce = true;
 
     // void OsWatchInit(void);
     // void OsWatchLoop(void);
@@ -336,8 +332,8 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     bool ValidIpAddress(const char* str);
     bool ParseIp(uint32_t* addr, const char* str);
     bool NewerVersion(char* version_str);
-    char* GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option);
-    char* GetPowerDevice(char* dest, uint8_t idx, size_t size);
+    // char* GetPowerDevice(char* dest, uint8_t idx, size_t size, uint8_t option);
+    // char* GetPowerDevice(char* dest, uint8_t idx, size_t size);
     float ConvertTemp(float c);
     char TempUnit(void);
     float ConvertPressure(float p);
@@ -350,7 +346,7 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     char* GetTextIndexed_P(char* destination, size_t destination_size, uint16_t index, const char* haystack);
     
-int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
+    int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
 
 
 
@@ -429,6 +425,7 @@ void UpdateStatusBlink();
     char* GetStateText(uint8_t state);
 
 
+void SleepDelay(uint32_t mseconds);
 
     // Add command to 
     void MQTTCommand_Add(const char* topic, const char* payload); // Write command into mpkt struct and set as waiting
@@ -467,7 +464,7 @@ uint32_t tSavedLoop200mSec = millis();
 uint32_t tSavedLoop250mSec = millis();
 uint32_t loop_runtime_millis;
 uint32_t loop_start_millis = millis();
-uint32_t loop_delay = millis();
+uint32_t loop_delay_temp = millis();
 uint32_t loops_per_second = millis();
 uint32_t this_cycle_ratio = millis();
 

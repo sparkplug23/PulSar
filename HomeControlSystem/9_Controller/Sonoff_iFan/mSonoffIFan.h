@@ -13,12 +13,18 @@
 #include <string.h>
 #include <strings.h>
 
+
+      const char TEST_DLIST[] PROGMEM = {D_JSON_LIGHTPOWER "|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED};
+
+
 // #define D_TASKNAME_CEILINGFAN "ceilingfan" //Used as part of mqtt command
 
 const uint8_t MAX_FAN_SPEED = 4;            // Max number of iFan02 fan speeds (0 .. 3)
 
 const uint8_t kIFan02Speed[MAX_FAN_SPEED] = { 0x00, 0x01, 0x03, 0x05 };
 const uint8_t kIFan03Speed[MAX_FAN_SPEED +2] = { 0x00, 0x01, 0x03, 0x04, 0x05, 0x06 };
+
+// for increasing speed? or slow starts?
 const uint8_t kIFan03Sequence[MAX_FAN_SPEED][MAX_FAN_SPEED] = {{0, 2, 2, 2}, {0, 1, 2, 4}, {1, 1, 2, 5}, {4, 4, 5, 3}};
 
 
@@ -47,7 +53,7 @@ bool ifan_restart_flag = true;
 
 
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parsesub_Commands(JsonObjectConst obj);
+void parse_JSONCommand(JsonObjectConst obj);
 
 void init();
 
@@ -63,20 +69,6 @@ void SonoffIfanReceived(void);
 bool SonoffIfanSerialInput(void);
 void CmndFanspeed(void);
 void SonoffIfanUpdate(void);
-
-
-    // #define CEILINGFAN_TOGGLE  0xA55595
-    // #define CEILINGFAN_DIMM    0xA55955
-    // #define CEILINGFAN_SPEED0  0xA55655
-    // #define CEILINGFAN_SPEED1  0xA55557
-    // #define CEILINGFAN_SPEED2  0xA55565
-    // #define CEILINGFAN_SPEED3  0xA5655B
-    // #define ONE_BIT_TIME 1252 //+- 30 std
-    // #define ZERO_BIT_TIME 439 //+- 30 std
-
-    void parse_JSONCommand();
-    //void AddToJsonObject_AddHardware(JsonObject root);
-    void AddToHardwareMessage();
 
     
 void WebCommand_Parse(void);
@@ -96,7 +88,6 @@ void WebAppend_Root_Status_Table();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mSonoffIFan>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

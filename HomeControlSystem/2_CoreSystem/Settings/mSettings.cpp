@@ -266,8 +266,10 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
 void mSettings::Function_Template_Load(){
 
   #ifndef DISABLE_SERIAL_LOGGING
-  //Serial.printf("mSettings::Function_Template_Load"); Serial.flush();
+  Serial.printf("mSettings::Function_Template_Load"); Serial.flush();
   #endif
+
+  boot_status.function_template_parse_success = 0;
 
   #ifdef USE_FUNCTION_TEMPLATE
   // load from progmem
@@ -278,13 +280,35 @@ void mSettings::Function_Template_Load(){
   // Read into local
   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR("FUNCTION_TEMPLATE READ = \"%s\""), buffer);
+  AddLog_P(LOG_LEVEL_TEST, PSTR("FUNCTION_TEMPLATE READ = \"%s\""), buffer);
 
-  DynamicJsonDocument doc(1500);
+  StaticJsonDocument<2000> doc;//(1500);
   DeserializationError error = deserializeJson(doc, buffer);
 
   if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+    boot_status.function_template_parse_success = 2;
+    // Serial.println(error.c_str());
+
+    switch (error.code()) {
+    case DeserializationError::Ok:
+        Serial.print(F("Deserialization succeeded"));
+        break;
+    case DeserializationError::InvalidInput:
+        Serial.print(F("Invalid input!"));
+        break;
+    case DeserializationError::NoMemory:
+        Serial.print(F("Not enough memory"));
+        break;
+    default:
+        Serial.print(F("Deserialization failed"));
+        break;
+}
+
+
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
+    
+    // delay(3000);
+    
     return;
   }
   JsonObjectConst obj = doc.as<JsonObject>();
@@ -296,11 +320,14 @@ void mSettings::Function_Template_Load(){
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
 
+  boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
   
 }
 
 
+
+// Settings will contain all jsoncommands for "CoreSystem"
 
 //overload fix when only one parameter is called
 int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){  
@@ -374,7 +401,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
         #ifdef DEBUG_SERIAL_TESTING
           Settings.seriallog_level = LOG_LEVEL_INFO_PARSING;
         #else
-          Settings.seriallog_level = LOG_LEVEL_INFO;
+          Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
         #endif
         Settings.weblog_level = LOG_LEVEL_INFO;
         //Settings.telnetlog_level = LOG_LEVEL_INFO;
@@ -466,7 +493,7 @@ int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/settings")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "settings"));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
@@ -519,6 +546,14 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
       }
 
     }
+  }
+
+  
+  if(!obj[D_JSON_WIFI_AP].isNull()){
+    uint8_t ap = obj[D_JSON_WIFI_AP];    
+    AddLog_P(LOG_LEVEL_INFO, PSTR("MATCHED D_JSON_WIFI_AP %d"),ap); 
+        
+    pCONT_wif->WifiBegin(ap);
   }
 
 
@@ -1495,10 +1530,11 @@ void mSettings::SystemSettings_DefaultBody_System(void)
   // strlcpy(Settings.system_name.friendly[1], FRIENDLY_NAME "2", sizeof(Settings.system_name.friendly[1]));
   // strlcpy(Settings.system_name.friendly[2], FRIENDLY_NAME "3", sizeof(Settings.system_name.friendly[2]));
   // strlcpy(Settings.system_name.friendly[3], FRIENDLY_NAME "4", sizeof(Settings.system_name.friendly[3]));
-  Settings.enable_sleep = 1; //on
+  Settings.enable_sleep = true; //on
   Settings.serial_delimiter = 0xff;
   Settings.sbaudrate = SOFT_BAUDRATE / 1200;
-  Settings.sleep = 20;//APP_SLEEP;
+  Settings.sleep = DEFAULT_LOOP_SLEEP;
+
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
   
   // strlcpy(Settings.state_text[0], MQTT_STATUS_OFF, sizeof(Settings.state_text[0]));
@@ -1551,7 +1587,7 @@ void mSettings::SystemSettings_DefaultBody_WebServer(){
   Settings.webserver = WEB_SERVER;
   strlcpy(Settings.web_password, WEB_PASSWORD, sizeof(Settings.web_password));
   // uint16_t      web_refresh;               // 7CC
-  SettingsDefaultWebColor(); // web_color[18][3];          // 73E
+  // SettingsDefaultWebColor(); // web_color[18][3];          // 73E
 
 }
 
@@ -1900,7 +1936,7 @@ DEBUG_LINE;
   // Settings.flag_system.stop_flash_rotate = true;
   // stop_flash_rotate = true;//Settings.flag_system.stop_flash_rotate;
   // save_data_counter = Settings.save_data; 
-  sleep = Settings.sleep;
+  runtime_value.sleep = Settings.sleep;
 //  Settings.flag_system.value_units = 0;
 //  Settings.flag_system.stop_flash_rotate = 0;
 //  Settings.flag_system.interlock = 0;
@@ -1959,16 +1995,16 @@ void mSettings::SettingsResetDst(void)
 }
 
 
-void mSettings::SettingsDefaultWebColor(void)
-{
+// void mSettings::SettingsDefaultWebColor(void)
+// {
   
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  char scolor[10];
-  for (uint8_t i = 0; i < COL_LAST; i++) {
-    pCONT_web->WebHexCode(i, pCONT_sup->GetTextIndexed_P(scolor, sizeof(scolor), i, kWebColors));
-  }
-  #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
-}
+//   #ifdef USE_MODULE_CORE_WEBSERVER
+//   char scolor[10];
+//   for (uint8_t i = 0; i < COL_LAST; i++) {
+//     pCONT_web->WebHexCode(i, pCONT_sup->GetTextIndexed_P(scolor, sizeof(scolor), i, kWebColors));
+//   }
+//   #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
+// }
 
 // /********************************************************************************************/
 

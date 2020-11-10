@@ -220,51 +220,51 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 
 
 
-void mOilFurnace::parse_JSONCommand(){
+// void mOilFurnace::parse_JSONCommand(){
 
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   }else{
+//     return; // not meant for here
+//   }
 
 
-return;
-  // u
-  // int8_t tmp_id = 0;
+// return;
+//   // u
+//   // int8_t tmp_id = 0;
 
-  // #ifdef JSONDOCUMENT_STATIC
-  //   StaticJsonDocument<800> doc;
-  // #else
-  //   DynamicJsonDocument doc(600);
-  // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+//   // #ifdef JSONDOCUMENT_STATIC
+//   //   StaticJsonDocument<800> doc;
+//   // #else
+//   //   DynamicJsonDocument doc(600);
+//   // #endif
+//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-  //   return 0;
-  // }
-  // JsonObject obj = doc.as<JsonObject>();
+//   // if(error){
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+//   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+//   //   return 0;
+//   // }
+//   // JsonObject obj = doc.as<JsonObject>();
   
-  // if(!obj["command"].isNull()){ 
-  //   const char* command = obj["command"];
-  //   if(strstr(command,"system_send_all")){ 
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-  //     MQTTHandler_Set_fSendNow();
-  //     isserviced++;
-  //   }
-  //   else{
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-  //   }
-  // }
+//   // if(!obj["command"].isNull()){ 
+//   //   const char* command = obj["command"];
+//   //   if(strstr(command,"system_send_all")){ 
+//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+//   //     MQTTHandler_Set_fSendNow();
+//   //     isserviced++;
+//   //   }
+//   //   else{
+//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+//   //   }
+//   // }
 
-  // 
+//   // 
 
-} // END FUNCTION
+// } // END FUNCTION
 
 void mOilFurnace::init_ultrasonic_sensor_parameters(){
 
@@ -335,9 +335,9 @@ int8_t mOilFurnace::Tasker(uint8_t function){
     break;
 
 
-    case FUNC_JSON_COMMAND:
-      parse_JSONCommand();
-    break;  
+    // case FUNC_JSON_COMMAND:
+    //   parse_JSONCommand();
+    // break;  
 
     /************
      * MQTT SECTION * 
@@ -444,7 +444,7 @@ int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
+      parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -452,7 +452,7 @@ int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 }
 
-void mOilFurnace::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
+void mOilFurnace::parse_JSONCommand(JsonObjectConst obj){
   
   int8_t isserviced = false;
   
@@ -947,27 +947,27 @@ void mOilFurnace::MQTTHandler_Set_TelePeriod(){
 
 void mOilFurnace::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_MODULE_LITRES_IFCHANGED_ID, 
+    MQTT_HANDLER_MODULE_LITRES_TELEPERIOD_ID,
+    MQTT_HANDLER_MODULE_FURNACE_IFCHANGED_ID,
+    MQTT_HANDLER_MODULE_FURNACE_TELEPERIOD_ID
+  };
+  
+  struct handler<mOilFurnace>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_litres_ifchanged,
+    &mqtthandler_litres_teleperiod,
+    &mqtthandler_furnace_ifchanged,
+    &mqtthandler_furnace_teleperiod
+  };
 
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_MODULE_LITRES_IFCHANGED_ID:        handler_found=true; mqtthandler_ptr=&mqtthandler_litres_ifchanged; break;
-      case MQTT_HANDLER_MODULE_LITRES_TELEPERIOD_ID:       handler_found=true; mqtthandler_ptr=&mqtthandler_litres_teleperiod; break;
-      case MQTT_HANDLER_MODULE_FURNACE_IFCHANGED_ID:       handler_found=true; mqtthandler_ptr=&mqtthandler_furnace_ifchanged; break;
-      case MQTT_HANDLER_MODULE_FURNACE_TELEPERIOD_ID:      handler_found=true; mqtthandler_ptr=&mqtthandler_furnace_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_OILFURNACE_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_OILFURNACE_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
 

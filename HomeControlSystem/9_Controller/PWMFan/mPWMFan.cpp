@@ -586,7 +586,24 @@ void mPWMFan::MQTTHandler_Set_TelePeriod(){
 
 void mPWMFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
+
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
+  uint8_t flag_handle_all = false, handler_found = false
   if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
 
   // change switch to use array of pointers?

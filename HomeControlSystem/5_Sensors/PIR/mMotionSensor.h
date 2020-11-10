@@ -46,8 +46,7 @@ class mMotionSensor{
     
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
-    void WebSend_JSON_Root_Table(AsyncWebServerRequest *request);
-
+    void WebAppend_Root_Draw_PageTable();
     uint8_t PIR_Detected(uint8_t sensor_id);
 
     const char* PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uint8_t buflen);

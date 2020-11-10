@@ -1552,7 +1552,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
               JsonBuilderI->AppendBuffer(PSTR("<td style='width:200px'><b>%s</b></td>"),title_ctr);
               JsonBuilderI->AppendBuffer(PSTR("<td style='width:216px'><select id='g%d' name='%s'></select></td>"),
                 row_id_selected[row_id],
-                pCONT_sup->GetTextIndexed_P(dlist_result, sizeof(dlist_result), row_id, dlist)
+                pCONT_sup->GetTextIndexed_P(dlist_result, sizeof(dlist_result), row_id, dlist)  // should this be _P?
               );
             JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
           }

@@ -389,14 +389,27 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
   pCONT->Tasker_Interface(FUNC_STATUS_MESSAGE_APPEND);
 
   JsonBuilderI->Start();
+  
+    // //test devices
+    // JsonBuilderI->Level_Start("Test");
+    //   JsonBuilderI->Add("activity.loop_counter", pCONT_sup->activity.loop_counter);
+    // //   JsonBuilderI->Add("sleep", pCONT_set->sleep);
+    // //   JsonBuilderI->Add("loop_runtime_millis", pCONT_sup->loop_runtime_millis);
+    // //   JsonBuilderI->Add("loops_per_second", pCONT_sup->loops_per_second);
+    // //   JsonBuilderI->Add("this_cycle_ratio", pCONT_sup->this_cycle_ratio);
+    // //   JsonBuilderI->Add("loop_load_avg", pCONT_set->loop_load_avg);
+    // //   JsonBuilderI->Add("enable_sleep", pCONT_set->Settings.enable_sleep);
+    // JsonBuilderI->Level_End();
+    // // test end
+
     JsonBuilderI->Add(PM_JSON_TIME,           pCONT_time->mtime.hhmmss_ctr);
     JsonBuilderI->Add_FP(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
-    JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->sleep ? "Dynamic" : "Unknown");
-    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay);
-    JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
-    JsonBuilderI->Add(PM_JSON_LOOPDELAY,      pCONT_sup->loop_delay);
-    JsonBuilderI->Add(PM_JSON_LOADAVERAGE,    pCONT_set->loop_load_avg);
+    JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime_value.sleep ? "Dynamic" : "Unknown");
+    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_set->runtime_value.sleep); // typ. 20
+    JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec); // typ. 50hz
+    // JsonBuilderI->Add(PM_JSON_LOOPDELAY,      pCONT_sup->loop_delay_temp);
+    JsonBuilderI->Add(PM_JSON_LOADAVERAGE,    pCONT_set->loop_load_avg); // average loops_per_second
     JsonBuilderI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JsonBuilderI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
     JsonBuilderI->Level_Start(PM_JSON_NETWORK);
@@ -629,7 +642,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
   JsonBuilderI->Start();
     JsonBuilderI->Add_FP(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
-    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay);
+    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
     JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
     JsonBuilderI->Add(PM_JSON_LOOPRATIO,      pCONT_sup->this_cycle_ratio);
     #ifdef USE_NETWORK_MDNS
@@ -678,7 +691,10 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
 uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHealth
   char buffer[50];
   JsonBuilderI->Start();
-    JsonBuilderI->Add(PM_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
+    JsonBuilderI->Add("Module" D_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
+    JsonBuilderI->Add("Function" D_JSON_TEMPLATE,       pCONT_set->boot_status.function_template_parse_success);//?"Default":"Saved");
+
+    
     JsonBuilderI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
     myio cmodule;

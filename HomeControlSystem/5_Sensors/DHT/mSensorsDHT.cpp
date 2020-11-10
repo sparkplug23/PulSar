@@ -331,7 +331,7 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
           JsonBuilderI->Add("ih",table_row);
           JsonBuilderI->Add("fc",colour_ctr);
         JsonBuilderI->Level_End();
-        
+
         sensor_counter++;
       }break;
     }
@@ -388,58 +388,24 @@ uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
-  // clear entire mqtt packet
-  memset(&data_buffer,0,sizeof(data_buffer));
+  char buffer[50];
 
-  uint8_t ischanged=false;
+  JsonBuilderI->Start();
+  for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
+    if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))&&(sensor[sensor_id].instant.isvalid)){
 
-  StaticJsonDocument<300> doc;
-  JsonObject root = doc.to<JsonObject>();
-
-
-for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
-
-  ischanged = sensor[sensor_id].instant.ischanged;
-
-  //if none changed, return early
-  // if(!ischanged){
-  //   return;
-  // }name_buffer
-  
-  if(ischanged || (json_level>JSON_LEVEL_IFCHANGED)){
-
-  
-  char name_buffer_tmp[25];
-  // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), sensor_id, name_buffer);
-
-      pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID, sensor_id, name_buffer_tmp, sizeof(name_buffer_tmp));
-
-
-
-  //if(ischanged||pCONT->mqt->fSendAllData||pCONT->mqt->fSendSingleFunctionData){
-    if(sensor[sensor_id].instant.isvalid){
-    JsonObject sens1 = root.createNestedObject(name_buffer_tmp);//sensor[sensor_id].name_ptr);
-    sens1["temp"] = sensor[sensor_id].instant.temperature;
-    sens1["hum"] = sensor[sensor_id].instant.humidity;
+      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+        JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
+        JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
+        JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+          JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+          JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+        JsonBuilderI->Level_End();   
+      JsonBuilderI->Level_End(); 
     }
-  //}
-
-    JsonObject method = root.createNestedObject("ischangedmethod");
-    //method["type"] = "significantly"; //or "any"
-    method["value"] = 0.1;
-    method["tLast"] = round(abs(millis()-sensor[0].instant.ischangedtLast)/1000);
-
-}//if changed level
-
-
-
-
-}
-
-  data_buffer.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
+  }
   
-  return (data_buffer.payload.len>3?1:0);
+  return JsonBuilderI->End();
 
 }
 
@@ -451,6 +417,8 @@ for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
 
 void mSensorsDHT::MQTTHandler_Init(){
 
+  struct handler<mSensorsDHT>* mqtthandler_ptr;
+  
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
@@ -465,7 +433,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 120;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -475,7 +443,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs;
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -503,29 +471,24 @@ void mSensorsDHT::MQTTHandler_Set_TelePeriod(){
 
 void mSensorsDHT::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
 
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      // No specialised needed
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_DHT_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
-
-////////////////////// END OF MQTT /////////////////////////
 
 #endif

@@ -40,7 +40,7 @@ void mButtons::ButtonInvertFlag(uint8 button_bit)
 void mButtons::ButtonInit(void)
 {
   
-      AddLog_P(LOG_LEVEL_INFO, PSTR("ButtonInit"));
+  AddLog_P(LOG_LEVEL_INFO, PSTR("ButtonInit"));
 
   buttons_found = 0;
   for (uint8_t i = 0; i < MAX_KEYS; i++) {
@@ -53,7 +53,6 @@ void mButtons::ButtonInit(void)
       AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
       bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
       );
-
 
     }
   }
@@ -87,6 +86,8 @@ uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
 
 void mButtons::ButtonHandler(void)
 {
+
+  // Serial.println(digitalRead(D3));
   
   if (pCONT->mt->uptime.seconds_nonreset < 4) { return; } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 
@@ -96,12 +97,14 @@ void mButtons::ButtonHandler(void)
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.button_debounce;
   char scmnd[20];
 
+
  uint8_t maxdev = (pCONT_set->devices_present > MAX_KEYS) ? MAX_KEYS : pCONT_set->devices_present;
  for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
   // for (uint8_t button_index = 0; button_index < MAX_KEYS; button_index++) {
     button = NOT_PRESSED;
     button_present = 0;
 
+  // Serial.println("mButtons::ButtonHandler");
     // if (!button_index && ((MODULE_SONOFF_DUAL == my_module_type) || (MODULE_CH4 == my_module_type))) {
     //   button_present = 1;
     //   if (dual_button_code) {
@@ -119,6 +122,8 @@ void mButtons::ButtonHandler(void)
         button = (digitalRead(pCONT_set->pin[GPIO_KEY1_ID + button_index]) != bitRead(key_inverted, button_index));
       }
     // }
+
+    AddLog_P(LOG_LEVEL_TEST, PSTR("button=%d"),button);
 
     if (button_present) {
       // XdrvMailbox.index = button_index;
@@ -278,7 +283,6 @@ int8_t mButtons::Tasker(uint8_t function){
       ButtonLoop();
     break;
 
-
     /************
      * MQTT SECTION * 
     *******************/
@@ -303,15 +307,12 @@ int8_t mButtons::Tasker(uint8_t function){
     /************
      * WEB SECTION * 
     *******************/
-
-    
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break; 
-
 
   }
 
@@ -392,6 +393,8 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
 
 void mButtons::MQTTHandler_Init(){
 
+  struct handler<mButtons>* mqtthandler_ptr;
+
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
@@ -443,27 +446,24 @@ void mButtons::MQTTHandler_Set_TelePeriod(){
 
 
 void mButtons::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+  
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mButtons>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
 
-  uint8_t flag_handle_all = false, handler_found = false;
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      // No specialised needed
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_BUTTONS_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_BUTTONS_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
 

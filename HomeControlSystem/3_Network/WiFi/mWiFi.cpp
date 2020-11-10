@@ -95,6 +95,13 @@ void mWiFi::WifiConfig(uint8_t type)
 
 
 
+void mWiFi::WifiConnectAP(uint8_t ap_index){
+
+
+
+
+
+}
 
 
 
@@ -230,9 +237,9 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 
 
 //chcked
-void mWiFi::WifiBeginAfterScan()
+void mWiFi::ScanBestAndBeginWifi()
 {
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WifiBeginAfterScan"));
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
   
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
 
@@ -259,6 +266,13 @@ void mWiFi::WifiBeginAfterScan()
     best_network_db = WiFi.RSSI();                  // Get current rssi and add threshold
     if (best_network_db < -WIFI_RSSI_THRESHOLD) { best_network_db += WIFI_RSSI_THRESHOLD; }
     connection.scan_state = 3;
+
+
+    char buffer[100];
+    sprintf(buffer, "Scan is about to start %s", pCONT_time->mtime.hhmmss_ctr);
+    pCONT_mqtt->ppublish("alert/wifi_scan",buffer,false);
+
+
   }
   // Init scan
   if (3 == connection.scan_state) {
@@ -379,11 +393,11 @@ void mWiFi::WifiSetState(uint8_t state)
   //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"state",state);
   if (state == pCONT_set->global_state.wifi_down) {
     if (state) {
-      pCONT_set->rules_flag.wifi_connected = 1;
+      // pCONT_set->rules_flag.wifi_connected = 1;
       connection.link_count++;
       connection.downtime += pCONT->mt->UpTime() - connection.last_event;
     } else {
-      pCONT_set->rules_flag.wifi_disconnected = 1;
+      // pCONT_set->rules_flag.wifi_disconnected = 1;
       connection.last_event = pCONT->mt->UpTime();
     }
 
@@ -651,7 +665,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
         if (connection.scan_state) { 
           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"connection.scan_state",connection.scan_state);
-          WifiBeginAfterScan(); 
+          ScanBestAndBeginWifi(); 
         }
 
         if (connection.counter <= 0) {
@@ -816,6 +830,13 @@ void mWiFi::WifiShutdown(bool option)
 
 void mWiFi::EspRestart(void)
 {
+
+#ifdef ENABLE_DEVFEATURE_BLOCK_RESTART
+
+  AddLog_P(LOG_LEVEL_ERROR, PSTR("ENABLE_DEVFEATURE_BLOCK_RESTART"));
+
+#else
+
   //ResetPwm();
   WifiShutdown(true);
   // CrashDumpClear();           // Clear the stack dump in RTC
@@ -856,6 +877,7 @@ void mWiFi::EspRestart(void)
   //   ESP.reset();
   // #endif
 
+#endif // ENABLE_DEVFEATURE_BLOCK_RESTART
 
 }
 

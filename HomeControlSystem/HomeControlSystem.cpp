@@ -269,20 +269,11 @@ void init_class_instances(){
 bool arduino_ota_triggered = false;
 uint16_t arduino_ota_progress_dot_count = 0;
 
-// #define TEST_OTA_ISSUE
-
 void ArduinoOTAInit(void)
 {
-  #ifndef ESP32
-    //ArduinoOTA.setPort(8266);
-  #endif
-  // #ifdef ESP8266
   #ifndef TEST_OTA_ISSUE
     ArduinoOTA.setHostname(pCONT_set->my_hostname);
   #endif
-    //ArduinoOTA.setPort(8266);
-    //if (pCONT_set->Settings.web_password[0] !=0) { ArduinoOTA.setPassword(pCONT_set->Settings.web_password); }
-  // #endif
   ArduinoOTA.onStart([]()
   {
     // #ifdef ESP8266
@@ -306,28 +297,21 @@ void ArduinoOTAInit(void)
     // Stop server otherwise OTA can fail
     // pCONT_web->StopWebserver();
 
-    //LED_BLUE_INIT();
-    //delay(100);       // Allow time for message xfer
+    delay(100);       // Allow time for message xfer
   });
 
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
   {
-  //  if ((LOG_LEVEL_DEBUG <= pCONT_set->seriallog_level)) { // for when hardware serial is in use for modules
+    if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
 
       uint8_t progress_now = (progress/(total/100));
-
       if(arduino_ota_progress_dot_count != progress_now){
         Serial.println(progress_now);
         arduino_ota_progress_dot_count = progress_now;
       }
-      //if (!(arduino_ota_progress_dot_count % 80)) { Serial.println(); }
 
-      #ifdef ESP32
-        timerWrite(timerwdt, 0);
-      #else
-        ESP.wdtFeed();
-      #endif
-    // }
+      ESP.wdtFeed();
+    }
     
   });
 
@@ -340,43 +324,28 @@ void ArduinoOTAInit(void)
     char error_str[30];
     memset(error_str,0,sizeof(error_str));
 
-    //#ifdef ESP8266
-    //if ((LOG_LEVEL_DEBUG <= seriallog_level) && arduino_ota_progress_dot_count) { Serial.println(); }
     switch (error) {
-      case OTA_BEGIN_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
-      // case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
+      case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
+      case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
+      case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
       case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
-      case OTA_END_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
+      case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
       default:
         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
     }
     #ifdef ENABLE_LOG
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
     #endif
-    // #ifdef ESP8266
-      // pCONT_wif->EspRestart(); //try this first
-    // #else
-      ESP.restart(); //should only reach if the first failed
-    //#endif
-    //#endif
+    
+    ESP.restart(); //should only reach if the first failed
   });
 
   ArduinoOTA.onEnd([]()
   {
-    // Serial.println("end");
-    #ifdef ESP8266
-      // if ((LOG_LEVEL_DEBUG <= mso->seriallog_level)) { Serial.println(); }
-      #ifdef ENABLE_LOG
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
-      #endif
-      //LED_BLUE_OFF();
-    // #else
+    #ifdef ENABLE_LOG
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
     #endif
-  #ifndef TEST_OTA_ISSUE
-    pCONT_wif->EspRestart(); //try this first
-#endif
     ESP.restart();
-
 	});
 
   ArduinoOTA.begin();
@@ -384,20 +353,14 @@ void ArduinoOTAInit(void)
   #ifdef ENABLE_LOG
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
   #endif
-// #ifdef ESP8266
-//   AddLog_P2(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
-// #endif
 }
 
 void ArduinoOtaLoop(void)
 {
-  #ifdef USE_NETWORK_MDNS
-  MDNS.update();
-  #endif // #ifdef USE_NETWORK_MDNS
   ArduinoOTA.handle();
   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
   // Note async stuff can still occur, so I need to disable them
-  while (arduino_ota_triggered) { ArduinoOTA.handle(); }
+  while (arduino_ota_triggered){ ArduinoOTA.handle(); }
 }
 
 #endif  // USE_ARDUINO_OTA
@@ -413,9 +376,6 @@ void HandleFailedBootFailBack(){
   // if(ota_startup_period_ms){
   //   if(WiFi.status() != WL_CONNECTED){
   //     mwif.WifiConnectForced(); //only wifi connection in setup for OTA recovery
-  // #ifdef USE_NETWORK_MDNS
-  //     MDNS.begin(DEVICENAME_CTR);
-  //#endif //#ifdef USE_NETWORK_MDNS
   //   }
   //   Serial.print("[OTA ] Started ("); Serial.print(round(ota_startup_period_ms/1000)); Serial.println(" seconds)...");
   //   unsigned long tProgram = millis(), tFlash = millis();
@@ -515,11 +475,11 @@ void setup(void)
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
     #ifdef ENABLE_LOG
-    //AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
+    AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
     #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   // load
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);
+  // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
    // Set boot method
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
@@ -538,6 +498,8 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
+  // load
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);         //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
   // Configure sensor/drivers to values desired for modules
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
@@ -579,29 +541,14 @@ void loop(void)
   DEBUG_LINE;
   if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
 
-  DEBUG_LINE;
+ 
   //move into support, or into time, to align with every_minute, hour, etc
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop200mSec,200 )){ pCONT->Tasker_Interface(FUNC_EVERY_200_MSECOND); }
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ 
-    
-  DEBUG_LINE;
-    pCONT->Tasker_Interface(FUNC_EVERY_SECOND);
-
-  DEBUG_LINE;
-  // //pCONT->TaskerTest();
-  
-  pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC2 = %d"), pCONT_sup->activity.loop_counter);
-  pCONT_sup->activity.loop_counter=0;
-
-  DEBUG_LINE;
-     }
-     
-  DEBUG_LINE;
-     
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop200mSec,200 )){ pCONT->Tasker_Interface(FUNC_EVERY_200_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
+       
   /********************************************************************************************************
   ******************************************************************************************************** 
     End of loop, only calculate or sleep after this point
@@ -612,39 +559,45 @@ void loop(void)
 
   DEBUG_LINE;
 
+  if(mTime::TimeReached(&pCONT_set->runtime_value.tSavedUpdateLoopStatistics, 1000)){
+    pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    pCONT_sup->activity.loop_counter=0;
+  }
+
   //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
 
   // Change this to my own way
   // DO THIS NEXT
   //SmartLoopDelay()
-  // #ifndef DISABLE_SLEEP
-  // if(pCONT_set->Settings.enable_sleep){
-  //   if (pCONT_set->Settings.flag_network.sleep_normal) {
-  //     delay(pCONT_set->sleep);
-  //   } else {
+  #ifndef DISABLE_SLEEP
+  if(pCONT_set->Settings.enable_sleep){
+    if (pCONT_set->Settings.flag_network.sleep_normal) {
+      pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
+    } else {
 
-  //     // Loop time < sleep length of time
-  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->sleep) {
-  //       //delay by loop time
-  //       delay((uint32_t)pCONT_set->sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
-  //     } else {
+      // Loop time < sleep length of time
+      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
+        //delay by loop time
+        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+      } else {
 
-  //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
-  //       if (pCONT_set->global_state.wifi_down) {
-  //         delay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
-  //       }
-  //     }
-  //   }
-  // }
-  // #endif
+        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
+        if (pCONT_set->global_state.wifi_down) {
+          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
+        }
+      }
+    }
+  }
+  #endif
 
   DEBUG_LINE;
-  // if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
-  // pCONT_sup->loop_delay = pCONT_set->sleep;
-  // if (!pCONT_sup->loop_delay) { pCONT_sup->loop_delay++; }              // We cannot divide by 0
-  // pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay;  // We need to keep track of this many loops per second
-  // pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay;
-  // pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
+  if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
+  pCONT_sup->loop_delay_temp = pCONT_set->runtime_value.sleep; 
+  if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0
+  pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
+  pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay_temp;
+  pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
 
   DEBUG_LINE;
   // Create a debug mqtt packet for timings, of main loop and interface loops
@@ -658,3 +611,6 @@ void loop(void)
 
   DEBUG_LINE;
 }
+
+
+

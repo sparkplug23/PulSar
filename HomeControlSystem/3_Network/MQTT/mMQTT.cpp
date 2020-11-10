@@ -520,7 +520,7 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
   }
 
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
-  snprintf_P(topic_ctr, sizeof(topic_ctr), PSTR("%s/%s/%s%S"),D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix); 
+  snprintf_P(topic_ctr, sizeof(topic_ctr), PSTR("%s/%s/%s%S"),D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix);  //PSTR may broke this?
 
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "topic_ctr=\"%s\""),topic_ctr);
   

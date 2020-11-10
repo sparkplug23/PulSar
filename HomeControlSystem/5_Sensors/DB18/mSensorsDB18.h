@@ -107,7 +107,7 @@ class mSensorsDB18{
 
 
     #ifndef DB18_SENSOR_MAX
-      #define DB18_SENSOR_MAX 10
+      #define DB18_SENSOR_MAX 12
     #endif
     uint8_t db18_sensors_active = 0;// also used as "id"
     uint8_t anychanged=false; // doesnt work inside struct aray
@@ -117,7 +117,7 @@ class mSensorsDB18{
       DeviceAddress address = {0}; //phase out
       // uint8_t address_stored[8];
       int8_t sensor_group_id = -1; // which pin it comes from 
-      int8_t id = -1; //set this manually with template, else, as 0 (check for any -1, set incremented and name "sens01")
+      int8_t address_id = -1; //set this manually with template, else, as 0 (check for any -1, set incremented and name "sens01")
       struct READING{
         float val;
         uint8_t isvalid;
@@ -141,7 +141,9 @@ class mSensorsDB18{
     #define REQUIRE_COMPLETE true
     #define DONTREQUIRE_COMPLETE false
 
-    uint8_t GetCorrectedDeviceID(uint8_t id_desired);
+    // uint8_t GetCorrectedDeviceIDforGetDeviceName(uint8_t id_desired);
+    
+    // uint8_t GetCorrectedDeviceID(uint8_t id_desired);
 
     void ThermoPrintAddresses(void);
     void init_sensor(DallasTemperature* sensors);
@@ -161,7 +163,6 @@ class mSensorsDB18{
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mSensorsDB18>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

@@ -22,7 +22,6 @@
   ************************************************************************************************************************************************************************************
 */
 
-
 void mWebServer::WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request){
 
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
@@ -53,13 +52,13 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
     
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
 
-char buffer[30];
+  char buffer[30];
 
   JsonBuilderI->Start();
   JsonBuilderI->Array_Start("info_row");// Class name
     for(int row=0;row<4;row++){
     JsonBuilderI->Level_Start();
-          JsonBuilderI->Add("id",row);
+      JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
           JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
@@ -84,8 +83,8 @@ char buffer[30];
     
         break;
       } //end switch 
-    JsonBuilderI->Level_End();
-    } // end for
+   JsonBuilderI->Level_End();
+   } // end for
 
   JsonBuilderI->Array_End();
   
@@ -108,7 +107,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
     
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
 
-char buffer[30];
+  char buffer[30];
 
   JsonBuilderI->Start();
   JsonBuilderI->Array_Start("info_row");// Class name
@@ -133,11 +132,9 @@ char buffer[30];
         case 2:
           JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
           JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
-
         break;
         case 3:
             JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-    
         break;
       } //end switch 
     JsonBuilderI->Level_End();
@@ -182,12 +179,6 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
 
   // if (CaptivePortal(request)) { return; }  // If captive portal redirect instead of displaying the page.
 
-  // if (request->hasParam("rst")) {
-  //   AddLog_P(LOG_LEVEL_TEST,PSTR("hasParam rst"));
-  //   // WebRestart(request, 0);
-  //   // return;
-  // }
-  
   // if (WifiIsInManagerMode()) {
   //   #ifndef FIRMWARE_MINIMAL
   //     if (
@@ -207,28 +198,11 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
   //   #endif  // Not FIRMWARE_MINIMAL
   //   return;
   // }
-  
-  if (HandleRootStatusRefresh(request)) {
-    // AddLog_P(LOG_LEVEL_TEST,PSTR("HandleRootStatusRefresh(request) FOUND SO STOP"));
-    return;
-  }
-  // request->addInterestingHeader("root");
-
-  
-  // request->addHeader("Content-Encoding","gzip");
-
-
-  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
-
-  
+    
   AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
-
   response->addHeader("Content-Encoding","gzip");
-  
   request->send(response);
 
-
-  
 }
 
 
@@ -246,6 +220,7 @@ void mWebServer::Web_Root_Draw(AsyncWebServerRequest *request){
 
 } //end function
 
+
 void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
         
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
@@ -253,14 +228,9 @@ void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
   JsonBuilderI->Start();
    WebAppend_Root_Draw_ModuleTable();
     WebAppend_Root_Draw_ModuleButtons();
-
-  // if(
-    JsonBuilderI->End();
-    // ){
-    WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
-  // }else{
-  //   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,"ERROR");  
-  // }
+  JsonBuilderI->End();
+  
+  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
   
 } //end function
 
@@ -306,78 +276,6 @@ void mWebServer::Web_Root_UpdateURLs(AsyncWebServerRequest *request){
 
   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
-}
-
-
-bool mWebServer::HandleRootStatusRefresh(AsyncWebServerRequest *request)
-{
-  // if (!WebAuthenticate()) {
-  //   request->requestAuthentication();
-  //   return true;
-  // }
-
-  if (!request->hasParam("m")) {     // Status refresh requested
-    // AddLog_P(LOG_LEVEL_TEST,PSTR("!request->hasParam(\"m\")"));
-    return false; 
-  }else{
-    AddLog_P(LOG_LEVEL_TEST,PSTR("request->hasParam(\"m\")"));
-    // continue through root function
-  }
-
-  request_web_command = request;
-
-  char tmp[30];                       // WebGetArg numbers only
-  char svalue[32];                   // Command and number parameter
-
-  // WebGetArg(request, "o", tmp, sizeof(tmp));  // 1 - 16 Device number for button Toggle or Fanspeed
-  // if (strlen(tmp)) {
-  //   ShowWebSource(SRC_WEBGUI);
-  //   uint8_t device = atoi(tmp);
-  //   if (MODULE_SONOFF_IFAN02 == pCONT_set->my_module_type) {
-  //     if (device < 2) {
-  //       //ExecuteCommandPower(1, POWER_TOGGLE, SRC_IGNORE);
-  //     } else {
-  //       snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_FANSPEED " %d"), device -2);
-  //       //ExecuteCommand(svalue, SRC_WEBGUI);
-  //     }
-  //   } else {
-  //     //ExecuteCommandPower(device, POWER_TOGGLE, SRC_IGNORE);
-  //   }
-  // }
-  WebGetArg(request,"d", tmp, sizeof(tmp));  // 0 - 100 Dimmer value
-  if (strlen(tmp)) {
-    snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_DIMMER " %s"), tmp);
-    ExecuteWebCommand(svalue, SRC_WEBGUI);
-  }
-  // WebGetArg(request,"t", tmp, sizeof(tmp));  // 153 - 500 Color temperature
-  // if (strlen(tmp)) {
-  //   // Convert ?command to longer (t -> CT)
-  //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_COLORTEMPERATURE " %s"), tmp);
-  //   ExecuteWebCommand(svalue, SRC_WEBGUI);
-  // }
-  // WebGetArg(request,"k", tmp, sizeof(tmp));  // 1 - 16 Pre defined RF keys
-  // if (strlen(tmp)) {
-  //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_RFKEY "%s"), tmp);
-  //   ExecuteWebCommand(svalue, SRC_WEBGUI);
-  // }
-
-  pCONT->Tasker_Interface(FUNC_WEB_COMMAND); //parse any webcommands
-
-
-  if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return true;} 
-
-  JsonBuilderI->Start();
-    JsonBuilderI->AppendBuffer(PSTR("t}")); //temp fix
-    // all but phased out 
-    // REMOVE html part
-    // pCONT->Tasker_Interface(FUNC_WEB_SHOW_PARAMETERS);
-    JsonBuilderI->AppendBuffer(PSTR("{t2")); //temp fix
-  JsonBuilderI->End();
-
-  WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
-
-  return true;
-
 }
 
 
@@ -540,56 +438,6 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         JsonBuilderI->AppendBuffer(PSTR(
           "set_console_as_page();"
           "enable_get_console_data();"
-        //   "var x2=null,lt2='';"
-        //   "var sn2=0,id2=0;" //sn2 starts at top of page, web_log_index starts at 0
-        //   "function l(p){"
-        //     "var c,o='',t;"
-        //     "clearTimeout(lt2);"
-        //     "t=document.getElementById('t1');"
-        //     "if(p==1){"
-        //       "c=document.getElementById('c1');"
-        //       "o='&c1='+encodeURIComponent(c.value);"
-        //       "c.value='';"
-        //       "t.scrollTop=sn2;"
-        //     "}"
-        //     //scrolltop == 0 is top of textbox, larger number = bottom
-        //     "if(t.scrollTop>=sn2){" //if scrolled up at all, don't update
-        //       "if(x2!=null){ x2.abort(); }"
-        //       "x2=new XMLHttpRequest();"
-        //       "x2.onreadystatechange=function(){"
-        //         "if(x2.readyState==4&&x2.status==200){"
-        //           "var z,d;"
-        //           //[web_log_index][reset_web_log_flag][text]
-        //           "d=x2.responseText.split(/}1/);"
-        //           "id2=d.shift();"   //web_log_index //removes first to last element
-        //           "if(d.shift()==0){" //reset_web_log_flag == 0
-        //             "t.value='';" //clear value back to start
-        //           "}"
-        //           "z=d.shift();" //get the text
-        //           "if(z.length>0){" //if new text
-        //             "t.value+=z;"  //append text
-        //           "}"
-        //           "t.scrollTop=99999;" //force to the very bottom
-        //           "sn2=t.scrollTop;"   //get scroll of the bottom line now 
-        //         "}"
-        //       "};"
-        //       "x2.open('GET','" D_WEB_HANDLE_CONSOLE_PAGE "?c2='+id2+o,true);" //current weblog_index + any new commands
-        //       "x2.send();"
-        //     "}"
-        //   "lt2=setTimeout(l,200);"
-        //   "return false;"
-        // "}"
-        // "l(0);"
-        // "function jd(){"
-        //   "var t=0,i=document.querySelectorAll('input,button,textarea,select');"
-        //   "while(i.length>=t){"
-        //     "if(i[t]){"
-        //       "i[t]['name']=(i[t].hasAttribute('id')&&(!i[t].hasAttribute('name')))?i[t]['id']:i[t]['name'];"
-        //     "}"
-        //     "t++;"
-        //   "}"
-        // "}"
-        // "jd();"
         )
       );
       JsonBuilderI->AppendBuffer("\"");
@@ -656,9 +504,6 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
       if(counter>100) break;
     } while (counter != pCONT_set->web_log_index);
 
-
-
-
   }
 
   BufferWriterI->Append_P(PSTR("}1"));
@@ -668,7 +513,6 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 }
 
 void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
-
 
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
@@ -721,234 +565,6 @@ void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
   ************************************************************************************************************************************************************************************
   ************************************************************************************************************************************************************************************
 */
-
-
-void mWebServer::HandleInformation(AsyncWebServerRequest *request)
-{
-    if (!HttpCheckPriviledgedAccess()) { return; }
-
-    AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, PM_INFORMATION);
-
-    BufferWriterI->Start();
-
-    // Head
-    WebAppend_Start_Head_P(PM_INFORMATION); //<head>
-        WebAppend_Minimal_Style();
-        BufferWriterI->Append_P("</head>");
-
-        // Body
-        BufferWriterI->Append_P("<body>");
-            WebAppend_Title();
-
-            // Add information table position
-            BufferWriterI->Append_P(PSTR("<fieldset><legend><b>&nbsp;Information&nbsp;</b></legend>"));
-            BufferWriterI->Append_P(PSTR("<style>td{padding:0px 5px;}</style>"
-                                        "<div class='info_table_draw'></div>"));
-            BufferWriterI->Append_P(PSTR("</fieldset>"));
-
-            WebAppend_Button_Spaced(BUTTON_MAIN);
-        
-            WebAppend_SystemVersionBar();
-
-            BufferWriterI->Append_P(PSTR("</div>"));
-
-            WebAppend_Script_P(PM_WEBURL_PAGE_INFO_LOAD_SCRIPT);    
-
-        BufferWriterI->Append_P("</body>");
-    BufferWriterI->Append_P("</html>");
-
-    WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
-}
-
-
-
-void mWebServer::WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request){
-
-  // // Serial.println(WEB_HANDLER_SCRIPT_INFROMATION_DATA_FETCHER_URLS_RATES_VAR); Serial.flush();      
-
-  // memset(&data_buffer,0,sizeof(data_buffer));
-  // char *buf = data_buffer.payload.ctr;
-  // char **iter = &buf;
-  // buffer_writer_internal = iter;
-
-  // AppendBuffer_PI2(PSTR("const dfurls=["));
-
-  //     AppendBuffer_PI2(PSTR("\"%s\","),"/script/parse_jsondata.js");
-  //     AppendBuffer_PI2(PSTR("\"%s\","),WEB_HANDLER_SCRIPT_WEB_PARSE_ADDSCRIPTSTYLE_FUNCTION);
-  //     // AppendBuffer_PI2(PSTR("\"%s\","),"/style/web_notif_bar.css");
-  //     // AppendBuffer_PI2(PSTR("\"%s\","),"/div/web_drawdiv_root.json");
-
-
-      
-  //     AppendBuffer_PI2(PSTR("\"%s\","),"/div/web_info_table.json");
-  //     // AppendBuffer_PI2(PSTR("\"%s\","),WEB_HANDLER_SCRIPT_ROOT_MICHAEL);
-  //     // AppendBuffer_PI2(PSTR("\"%s\","),"/runtime/data_urls.json");
-    
-  //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_LOADTIME_ROOT_URLS);
-  //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
-  // AppendBuffer_PI2(PSTR("];var dfrates=["));
-
-
-
-  //     AppendBuffer_PI2(PSTR("%d,"),-1);
-  //     AppendBuffer_PI2(PSTR("%d,"),-50);
-  //     // AppendBuffer_PI2(PSTR("%d,"),-1000);
-  //     AppendBuffer_PI2(PSTR("%d,"),-100);
-  //     // AppendBuffer_PI2(PSTR("%d,"),-1500);
-  //     // AppendBuffer_PI2(PSTR("%d,"),-2500);
-  //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_LOADTIME_ROOT_RATES);
-  //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
-  // AppendBuffer_PI2(PSTR("];"));
-
-  // #ifdef DEBUG_WEBSERVER_MEMORY
-  //   FreeMem_Usage_Before(&freemem_usage_js_fetcher_urls);
-  // #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
-  // #ifdef DEBUG_WEBSERVER_MEMORY
-  //   FreeMem_Usage_After(&freemem_usage_js_fetcher_urls);
-  // #endif 
-
-}
-
-
-
-// this table exists on the root page and is there to take over tasmota m=1 duty
-// when drawn, each module is asked for its row that sends its title and unique number class name
-// when asked to update, each module will append their data to a shared sender here.
-void mWebServer::HandleInformation_TableDraw(AsyncWebServerRequest *request){
-    
-    return ;
-  // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
-  // uint16_t freemem_start = ESP.getFreeHeap();  
-  
-  // memset(&data_buffer,0,sizeof(data_buffer));
-  // char *buf = data_buffer.payload.ctr;
-  // char **buffer = &buf;
-
-  // AppendBuffer_P2(buffer,PSTR("{"));
-  //   buffer_writer_internal = buffer;
-  //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
-  //   // WebAppend_Root_Draw_TopBar();
-  //   WebAppend_Page_InformationTable();
-  //   // extra "," is automatically appending for repeated cases across modules, and should be removed
-  //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
-  // AppendBuffer_P2(buffer,PSTR("}"));
-
-  // #ifdef DEBUG_WEBSERVER_MEMORY
-  //   FreeMem_Usage_Before(&freemem_usage_json_root_draw);
-  // #endif
-  // WebSend_Response(request,200,CONTENT_TYPE_TEXT_JAVASCRIPT_ID,data_buffer.payload.ctr);  
-  // #ifdef DEBUG_WEBSERVER_MEMORY
-  //   FreeMem_Usage_After(&freemem_usage_json_root_draw);
-  // #endif 
-
-  // buffer_writer_internal = nullptr; // Anytime I use it, clear to back to null when finished
-}
-
-void mWebServer::WebAppend_Page_InformationTable(){
-
-  return ;
-
-  // AppendBuffer_PI2("\"%s\":[{\"ihr\":\"","info_table_draw");
-  // AppendBuffer_PI2("%s","{t}");
-
-  // AppendBuffer_PI2("<tr><th>");
-
-  // // move sections into progmem
-    
-  // AppendBuffer_PI2(PSTR(D_PROGRAM_VERSION "}2%s(%s)"), pCONT_set->my_version, "my_image");//pCONT_set->my_image
-  // // #ifdef ESP8266
-  // //   AppendBuffer_PI2(PSTR("}1" D_BUILD_DATE_AND_TIME "}2%s"), pCONT->mt->GetBuildDateAndTime(dd));
-  // //   AppendBuffer_PI2(PSTR("}1" D_CORE_AND_SDK_VERSION "}2" ARDUINO_ESP8266_RELEASE "/%s"), ESP.getSdkVersion());
-  // // #endif
-  // // AppendBuffer_PI2(PSTR("}1" D_UPTIME "}2%s"), pCONT->mt->getFormattedUptime());
-  // // #ifdef ESP8266
-  // //   AppendBuffer_PI2(PSTR("}1" D_FLASH_WRITE_COUNT "}2%d at 0x%X"), pCONT_set->Settings.save_flag, pCONT_set->GetSettingsAddress());
-  // // #endif
-  // AppendBuffer_PI2(PSTR("}1" D_BOOT_COUNT "}2%d"), pCONT_set->Settings.bootcount);
-  // #ifdef ESP8266
-  //   AppendBuffer_PI2(PSTR("}1" D_RESTART_REASON "}2%s"), pCONT_sup->GetResetReason().c_str());
-  // #endif
-  // // uint8_t maxfn = 1;//(pCONT_set->devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : pCONT_set->devices_present;
-  // // //if (SONOFF_IFAN02 == pCONT_set->my_module_type) { maxfn = 1; }
-  // // for (uint8_t i = 0; i < maxfn; i++) {
-  // //   AppendBuffer_PI2(PSTR("}1" D_FRIENDLY_NAME " %d}2%s"), i +1, pCONT_set->Settings.system_name.friendly[i]);
-  // // }
-  // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
-
-  // // Show SSID direct for testing
-  // AppendBuffer_PI2(PSTR("}1" "SSID (RSS)" "}2%s (%d dBm)"), WiFi.SSID().c_str(), WiFi.RSSI());
-    
-  // AppendBuffer_PI2(PSTR("}1" D_AP "%d " D_SSID " (" D_RSSI ")}2%s (%d%%)"), pCONT_set->Settings.sta_active +1, pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], pCONT_wif->WifiGetRssiAsQuality(WiFi.RSSI()));
-  // AppendBuffer_PI2(PSTR("}1" D_HOSTNAME "}2%s%s"), pCONT_set->my_hostname, (pCONT_wif->mdns_begun) ? ".local" : "");
-  // if (static_cast<uint32_t>(WiFi.localIP()) != 0) {
-  //   AppendBuffer_PI2(PSTR("}1" D_IP_ADDRESS "}2%s"), WiFi.localIP().toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_GATEWAY "}2%s"), IPAddress(pCONT_set->Settings.ip_address[1]).toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_SUBNET_MASK "}2%s"), IPAddress(pCONT_set->Settings.ip_address[2]).toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_DNS_SERVER "}2%s"), IPAddress(pCONT_set->Settings.ip_address[3]).toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFi.macAddress().c_str());
-  // }
-  // if (static_cast<uint32_t>(WiFi.softAPIP()) != 0) {
-  //   AppendBuffer_PI2(PSTR("}1" D_IP_ADDRESS "}2%s"), WiFi.softAPIP().toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_GATEWAY "}2%s"), WiFi.softAPIP().toString().c_str());
-  //   AppendBuffer_PI2(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFi.softAPmacAddress().c_str());
-  // }
-  // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
-
-  // // if (pCONT_set->Settings.flag_system.mqtt_enabled) {
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_HOST "}2%s"), pCONT_set->Settings.mqtt_host);
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_PORT "}2%d"), pCONT_set->Settings.mqtt_port);
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_USER "}2%s"), pCONT_set->Settings.mqtt_user);
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_CLIENT "}2%s"), pCONT_set->mqtt_client);
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_TOPIC "}2%s"), pCONT_set->Settings.mqtt_topic);
-  // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_GROUP_TOPIC "}2%s"), pCONT_set->Settings.mqtt_grptopic);
-  // // } else {
-  // //   //AppendBuffer_PI2(PSTR("}1" D_MQTT "}2%s"), D_DISABLED);
-  // // }
-  // // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
-
-  // #ifdef USE_DISCOVERY
-  //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network.mdns_enabled) ? D_ENABLED : D_DISABLED);
-  //   if (pCONT_set->Settings.flag_network.mdns_enabled) {
-  // #ifdef USE_NETWORK_MDNS
-  //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_WEB_SERVER));
-  // #else
-  //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_DISABLED));
-  // #endif // USE_NETWORK_MDNS
-  //   }
-  // #else
-  //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2" D_DISABLED));
-  // #endif // USE_DISCOVERY
-
-  // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
-  // AppendBuffer_PI2(PSTR("}1" "Module Config" "}2"));//,       ESP.getChipId());
-  // // Class/Tasks info
-  // // buffer_writer_internal = buffer;
-  // // pCONT->Tasker_Interface(FUNC_WEB_PAGEINFORMATION_SEND_MODULE);
-  // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
-
-  // #ifdef ESP8266
-  //   AppendBuffer_PI2(PSTR("}1" D_ESP_CHIP_ID "}2%d"),       ESP.getChipId());
-  //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_ID "}20x%06X"), ESP.getFlashChipId());
-  //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_SIZE "}2%dkB"), ESP.getFlashChipRealSize() / 1024);
-  // #endif
-  // #ifdef ESP32
-  //   AppendBuffer_PI2(PSTR("}1" D_ESP_CHIP_ID "}2%d"),       1);
-  //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_ID "}20x%06X"), 2);
-  //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_SIZE "}2%dkB"), 3);
-  // #endif
-  // AppendBuffer_PI2(PSTR("}1" D_PROGRAM_FLASH_SIZE "}2%dkB"), ESP.getFlashChipSize() / 1024);
-  // AppendBuffer_PI2(PSTR("}1" D_PROGRAM_SIZE "}2%dkB"),       ESP.getSketchSize() / 1024);
-  // AppendBuffer_PI2(PSTR("}1" D_FREE_PROGRAM_SPACE "}2%dkB"), ESP.getFreeSketchSpace() / 1024);
-  // AppendBuffer_PI2(PSTR("}1" D_FREE_MEMORY "}2%dkB"),        ESP.getFreeHeap() / 1024);
-  // AppendBuffer_PI2(PSTR("</td></tr>"));
-
-  // pCONT_web->AppendBuffer_PI2("%s","{t2}");
-  // pCONT_web->AppendBuffer_PI2("\"}]");  
-  // pCONT_web->AppendBuffer_PI2(PSTR(","));  
-
-} //end function
-
 
 
 /*************************************************************************************************************************************************************************************
@@ -2267,59 +1883,433 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 
 
 
-void mWebServer::WebAppend_SystemVersionBar(){  
 
-  uint32_t text_colour = WebColor(255,255,255);
-  if(pCONT_set->firmware_version.fNewVersionAvailable){
-    text_colour = WebColor(pCONT_set->COL_TEXT_SUCCESS);
-  }
-  if(pCONT_set->firmware_version.fCurrentVersionNotSupported){
-    text_colour = WebColor(pCONT_set->COL_TEXT_WARNING);
-  }
-
-  char message_version1[100];
-  sprintf(message_version1,PSTR("%s %s%s"),
-    PROJECT_NAME_CTR,
-    pCONT_set->firmware_version.current.name_ctr,
-    pCONT_set->firmware_version.fNewVersionAvailable ? " Update Available" : ""  
-  );
-
-  BufferWriterI->Append_P(PM_HTTP_END_WITH_UPDATE_NOEND,
-    "https://github.com/sparkplug23/HomeAutomationControlSystem",  // URL to open when clicked
-    text_colour,
-    message_version1
-  );
-
-}//end function
+/*****************************************************************************************************************************************************************************************************************
+ **************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ******** UNUSED FUNCTION BELOW ********************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************
+ ***************************************************************************************************************************************************************************************************************
+ *************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ ***************************************************************************************************************************************************************************************************************** 
+ *****************************************************************************************************************************************************************************************************************
+ ***************************************************************************************************************************************************************************************************************/
 
 
 
 
+// void mWebServer::HandleInformation(AsyncWebServerRequest *request)
+// {
+//     if (!HttpCheckPriviledgedAccess()) { return; }
 
-void mWebServer::WebAppend_Minimal_Style(){
+//     AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, PM_INFORMATION);
 
-  BufferWriterI->Append_P("<style>");
-  BufferWriterI->Append_P(PM_HTTP_HEAD_STYLE1_MINIMAL,
-    pCONT_web->WebColor(pCONT_set->COL_FORM), 
-    pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
-    pCONT_web->WebColor(pCONT_set->COL_BUTTON),  
-    pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
-  );
-  BufferWriterI->Append_P("</style>");
+//     BufferWriterI->Start();
 
-}
+//     // Head
+//     WebAppend_Start_Head_P(PM_INFORMATION); //<head>
+//         WebAppend_Minimal_Style();
+//         BufferWriterI->Append_P("</head>");
 
-void mWebServer::WebAppend_Title(){
-  BufferWriterI->Append_P(HTTP_STYLE_TITLE_CONTAINER_HEAD, 
-    WebColor(pCONT_set->COL_TEXT),
-    WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
-    pCONT_set->Settings.system_name.friendly
-  );
-}
+//         // Body
+//         BufferWriterI->Append_P("<body>");
+//             WebAppend_Title();
 
-void mWebServer::WebAppend_Script_P(PGM_P url){
-    BufferWriterI->Append_P(PSTR("<script type='text/javascript' src='%s'></script>"), url);    
-}
+//             // Add information table position
+//             BufferWriterI->Append_P(PSTR("<fieldset><legend><b>&nbsp;Information&nbsp;</b></legend>"));
+//             BufferWriterI->Append_P(PSTR("<style>td{padding:0px 5px;}</style>"
+//                                         "<div class='info_table_draw'></div>"));
+//             BufferWriterI->Append_P(PSTR("</fieldset>"));
+
+//             WebAppend_Button_Spaced(BUTTON_MAIN);
+        
+//             WebAppend_SystemVersionBar();
+
+//             BufferWriterI->Append_P(PSTR("</div>"));
+
+//             WebAppend_Script_P(PM_WEBURL_PAGE_INFO_LOAD_SCRIPT);    
+
+//         BufferWriterI->Append_P("</body>");
+//     BufferWriterI->Append_P("</html>");
+
+//     WebSend_Response(request,200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
+// }
+
+
+
+// void mWebServer::WebSend_Information_Fetcher_URLs(AsyncWebServerRequest *request){
+
+//   // // Serial.println(WEB_HANDLER_SCRIPT_INFROMATION_DATA_FETCHER_URLS_RATES_VAR); Serial.flush();      
+
+//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // char *buf = data_buffer.payload.ctr;
+//   // char **iter = &buf;
+//   // buffer_writer_internal = iter;
+
+//   // AppendBuffer_PI2(PSTR("const dfurls=["));
+
+//   //     AppendBuffer_PI2(PSTR("\"%s\","),"/script/parse_jsondata.js");
+//   //     AppendBuffer_PI2(PSTR("\"%s\","),WEB_HANDLER_SCRIPT_WEB_PARSE_ADDSCRIPTSTYLE_FUNCTION);
+//   //     // AppendBuffer_PI2(PSTR("\"%s\","),"/style/web_notif_bar.css");
+//   //     // AppendBuffer_PI2(PSTR("\"%s\","),"/div/web_drawdiv_root.json");
+
+
+      
+//   //     AppendBuffer_PI2(PSTR("\"%s\","),"/div/web_info_table.json");
+//   //     // AppendBuffer_PI2(PSTR("\"%s\","),WEB_HANDLER_SCRIPT_ROOT_MICHAEL);
+//   //     // AppendBuffer_PI2(PSTR("\"%s\","),"/runtime/data_urls.json");
+    
+//   //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_LOADTIME_ROOT_URLS);
+//   //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
+//   // AppendBuffer_PI2(PSTR("];var dfrates=["));
+
+
+
+//   //     AppendBuffer_PI2(PSTR("%d,"),-1);
+//   //     AppendBuffer_PI2(PSTR("%d,"),-50);
+//   //     // AppendBuffer_PI2(PSTR("%d,"),-1000);
+//   //     AppendBuffer_PI2(PSTR("%d,"),-100);
+//   //     // AppendBuffer_PI2(PSTR("%d,"),-1500);
+//   //     // AppendBuffer_PI2(PSTR("%d,"),-2500);
+//   //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_LOADTIME_ROOT_RATES);
+//   //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
+//   // AppendBuffer_PI2(PSTR("];"));
+
+//   // #ifdef DEBUG_WEBSERVER_MEMORY
+//   //   FreeMem_Usage_Before(&freemem_usage_js_fetcher_urls);
+//   // #endif
+//   // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
+//   // #ifdef DEBUG_WEBSERVER_MEMORY
+//   //   FreeMem_Usage_After(&freemem_usage_js_fetcher_urls);
+//   // #endif 
+
+// }
+
+
+
+// // this table exists on the root page and is there to take over tasmota m=1 duty
+// // when drawn, each module is asked for its row that sends its title and unique number class name
+// // when asked to update, each module will append their data to a shared sender here.
+// void mWebServer::HandleInformation_TableDraw(AsyncWebServerRequest *request){
+    
+//     return ;
+//   // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
+//   // uint16_t freemem_start = ESP.getFreeHeap();  
+  
+//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // char *buf = data_buffer.payload.ctr;
+//   // char **buffer = &buf;
+
+//   // AppendBuffer_P2(buffer,PSTR("{"));
+//   //   buffer_writer_internal = buffer;
+//   //   // pCONT->Tasker_Interface(FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
+//   //   // WebAppend_Root_Draw_TopBar();
+//   //   WebAppend_Page_InformationTable();
+//   //   // extra "," is automatically appending for repeated cases across modules, and should be removed
+//   //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
+//   // AppendBuffer_P2(buffer,PSTR("}"));
+
+//   // #ifdef DEBUG_WEBSERVER_MEMORY
+//   //   FreeMem_Usage_Before(&freemem_usage_json_root_draw);
+//   // #endif
+//   // WebSend_Response(request,200,CONTENT_TYPE_TEXT_JAVASCRIPT_ID,data_buffer.payload.ctr);  
+//   // #ifdef DEBUG_WEBSERVER_MEMORY
+//   //   FreeMem_Usage_After(&freemem_usage_json_root_draw);
+//   // #endif 
+
+//   // buffer_writer_internal = nullptr; // Anytime I use it, clear to back to null when finished
+// }
+
+// void mWebServer::WebAppend_Page_InformationTable(){
+
+//   return ;
+
+//   // AppendBuffer_PI2("\"%s\":[{\"ihr\":\"","info_table_draw");
+//   // AppendBuffer_PI2("%s","{t}");
+
+//   // AppendBuffer_PI2("<tr><th>");
+
+//   // // move sections into progmem
+    
+//   // AppendBuffer_PI2(PSTR(D_PROGRAM_VERSION "}2%s(%s)"), pCONT_set->my_version, "my_image");//pCONT_set->my_image
+//   // // #ifdef ESP8266
+//   // //   AppendBuffer_PI2(PSTR("}1" D_BUILD_DATE_AND_TIME "}2%s"), pCONT->mt->GetBuildDateAndTime(dd));
+//   // //   AppendBuffer_PI2(PSTR("}1" D_CORE_AND_SDK_VERSION "}2" ARDUINO_ESP8266_RELEASE "/%s"), ESP.getSdkVersion());
+//   // // #endif
+//   // // AppendBuffer_PI2(PSTR("}1" D_UPTIME "}2%s"), pCONT->mt->getFormattedUptime());
+//   // // #ifdef ESP8266
+//   // //   AppendBuffer_PI2(PSTR("}1" D_FLASH_WRITE_COUNT "}2%d at 0x%X"), pCONT_set->Settings.save_flag, pCONT_set->GetSettingsAddress());
+//   // // #endif
+//   // AppendBuffer_PI2(PSTR("}1" D_BOOT_COUNT "}2%d"), pCONT_set->Settings.bootcount);
+//   // #ifdef ESP8266
+//   //   AppendBuffer_PI2(PSTR("}1" D_RESTART_REASON "}2%s"), pCONT_sup->GetResetReason().c_str());
+//   // #endif
+//   // // uint8_t maxfn = 1;//(pCONT_set->devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : pCONT_set->devices_present;
+//   // // //if (SONOFF_IFAN02 == pCONT_set->my_module_type) { maxfn = 1; }
+//   // // for (uint8_t i = 0; i < maxfn; i++) {
+//   // //   AppendBuffer_PI2(PSTR("}1" D_FRIENDLY_NAME " %d}2%s"), i +1, pCONT_set->Settings.system_name.friendly[i]);
+//   // // }
+//   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
+
+//   // // Show SSID direct for testing
+//   // AppendBuffer_PI2(PSTR("}1" "SSID (RSS)" "}2%s (%d dBm)"), WiFi.SSID().c_str(), WiFi.RSSI());
+    
+//   // AppendBuffer_PI2(PSTR("}1" D_AP "%d " D_SSID " (" D_RSSI ")}2%s (%d%%)"), pCONT_set->Settings.sta_active +1, pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active], pCONT_wif->WifiGetRssiAsQuality(WiFi.RSSI()));
+//   // AppendBuffer_PI2(PSTR("}1" D_HOSTNAME "}2%s%s"), pCONT_set->my_hostname, (pCONT_wif->mdns_begun) ? ".local" : "");
+//   // if (static_cast<uint32_t>(WiFi.localIP()) != 0) {
+//   //   AppendBuffer_PI2(PSTR("}1" D_IP_ADDRESS "}2%s"), WiFi.localIP().toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_GATEWAY "}2%s"), IPAddress(pCONT_set->Settings.ip_address[1]).toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_SUBNET_MASK "}2%s"), IPAddress(pCONT_set->Settings.ip_address[2]).toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_DNS_SERVER "}2%s"), IPAddress(pCONT_set->Settings.ip_address[3]).toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFi.macAddress().c_str());
+//   // }
+//   // if (static_cast<uint32_t>(WiFi.softAPIP()) != 0) {
+//   //   AppendBuffer_PI2(PSTR("}1" D_IP_ADDRESS "}2%s"), WiFi.softAPIP().toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_GATEWAY "}2%s"), WiFi.softAPIP().toString().c_str());
+//   //   AppendBuffer_PI2(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFi.softAPmacAddress().c_str());
+//   // }
+//   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
+
+//   // // if (pCONT_set->Settings.flag_system.mqtt_enabled) {
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_HOST "}2%s"), pCONT_set->Settings.mqtt_host);
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_PORT "}2%d"), pCONT_set->Settings.mqtt_port);
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_USER "}2%s"), pCONT_set->Settings.mqtt_user);
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_CLIENT "}2%s"), pCONT_set->mqtt_client);
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_TOPIC "}2%s"), pCONT_set->Settings.mqtt_topic);
+//   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_GROUP_TOPIC "}2%s"), pCONT_set->Settings.mqtt_grptopic);
+//   // // } else {
+//   // //   //AppendBuffer_PI2(PSTR("}1" D_MQTT "}2%s"), D_DISABLED);
+//   // // }
+//   // // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
+
+//   // #ifdef USE_DISCOVERY
+//   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network.mdns_enabled) ? D_ENABLED : D_DISABLED);
+//   //   if (pCONT_set->Settings.flag_network.mdns_enabled) {
+//   // #ifdef USE_NETWORK_MDNS
+//   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_WEB_SERVER));
+//   // #else
+//   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_DISABLED));
+//   // #endif // USE_NETWORK_MDNS
+//   //   }
+//   // #else
+//   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2" D_DISABLED));
+//   // #endif // USE_DISCOVERY
+
+//   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
+//   // AppendBuffer_PI2(PSTR("}1" "Module Config" "}2"));//,       ESP.getChipId());
+//   // // Class/Tasks info
+//   // // buffer_writer_internal = buffer;
+//   // // pCONT->Tasker_Interface(FUNC_WEB_PAGEINFORMATION_SEND_MODULE);
+//   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
+
+//   // #ifdef ESP8266
+//   //   AppendBuffer_PI2(PSTR("}1" D_ESP_CHIP_ID "}2%d"),       ESP.getChipId());
+//   //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_ID "}20x%06X"), ESP.getFlashChipId());
+//   //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_SIZE "}2%dkB"), ESP.getFlashChipRealSize() / 1024);
+//   // #endif
+//   // #ifdef ESP32
+//   //   AppendBuffer_PI2(PSTR("}1" D_ESP_CHIP_ID "}2%d"),       1);
+//   //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_ID "}20x%06X"), 2);
+//   //   AppendBuffer_PI2(PSTR("}1" D_FLASH_CHIP_SIZE "}2%dkB"), 3);
+//   // #endif
+//   // AppendBuffer_PI2(PSTR("}1" D_PROGRAM_FLASH_SIZE "}2%dkB"), ESP.getFlashChipSize() / 1024);
+//   // AppendBuffer_PI2(PSTR("}1" D_PROGRAM_SIZE "}2%dkB"),       ESP.getSketchSize() / 1024);
+//   // AppendBuffer_PI2(PSTR("}1" D_FREE_PROGRAM_SPACE "}2%dkB"), ESP.getFreeSketchSpace() / 1024);
+//   // AppendBuffer_PI2(PSTR("}1" D_FREE_MEMORY "}2%dkB"),        ESP.getFreeHeap() / 1024);
+//   // AppendBuffer_PI2(PSTR("</td></tr>"));
+
+//   // pCONT_web->AppendBuffer_PI2("%s","{t2}");
+//   // pCONT_web->AppendBuffer_PI2("\"}]");  
+//   // pCONT_web->AppendBuffer_PI2(PSTR(","));  
+
+// } //end function
+
+
+
+
+        //   "var x2=null,lt2='';"
+        //   "var sn2=0,id2=0;" //sn2 starts at top of page, web_log_index starts at 0
+        //   "function l(p){"
+        //     "var c,o='',t;"
+        //     "clearTimeout(lt2);"
+        //     "t=document.getElementById('t1');"
+        //     "if(p==1){"
+        //       "c=document.getElementById('c1');"
+        //       "o='&c1='+encodeURIComponent(c.value);"
+        //       "c.value='';"
+        //       "t.scrollTop=sn2;"
+        //     "}"
+        //     //scrolltop == 0 is top of textbox, larger number = bottom
+        //     "if(t.scrollTop>=sn2){" //if scrolled up at all, don't update
+        //       "if(x2!=null){ x2.abort(); }"
+        //       "x2=new XMLHttpRequest();"
+        //       "x2.onreadystatechange=function(){"
+        //         "if(x2.readyState==4&&x2.status==200){"
+        //           "var z,d;"
+        //           //[web_log_index][reset_web_log_flag][text]
+        //           "d=x2.responseText.split(/}1/);"
+        //           "id2=d.shift();"   //web_log_index //removes first to last element
+        //           "if(d.shift()==0){" //reset_web_log_flag == 0
+        //             "t.value='';" //clear value back to start
+        //           "}"
+        //           "z=d.shift();" //get the text
+        //           "if(z.length>0){" //if new text
+        //             "t.value+=z;"  //append text
+        //           "}"
+        //           "t.scrollTop=99999;" //force to the very bottom
+        //           "sn2=t.scrollTop;"   //get scroll of the bottom line now 
+        //         "}"
+        //       "};"
+        //       "x2.open('GET','" D_WEB_HANDLE_CONSOLE_PAGE "?c2='+id2+o,true);" //current weblog_index + any new commands
+        //       "x2.send();"
+        //     "}"
+        //   "lt2=setTimeout(l,200);"
+        //   "return false;"
+        // "}"
+        // "l(0);"
+        // "function jd(){"
+        //   "var t=0,i=document.querySelectorAll('input,button,textarea,select');"
+        //   "while(i.length>=t){"
+        //     "if(i[t]){"
+        //       "i[t]['name']=(i[t].hasAttribute('id')&&(!i[t].hasAttribute('name')))?i[t]['id']:i[t]['name'];"
+        //     "}"
+        //     "t++;"
+        //   "}"
+        // "}"
+        // "jd();"
+
+// bool mWebServer::HandleRootStatusRefresh(AsyncWebServerRequest *request)
+// {
+//   // if (!WebAuthenticate()) {
+//   //   request->requestAuthentication();
+//   //   return true;
+//   // }
+
+//   if (!request->hasParam("m")) {     // Status refresh requested
+//     // AddLog_P(LOG_LEVEL_TEST,PSTR("!request->hasParam(\"m\")"));
+//     return false; 
+//   }else{
+//     AddLog_P(LOG_LEVEL_TEST,PSTR("request->hasParam(\"m\")"));
+//     // continue through root function
+//   }
+
+//   request_web_command = request;
+
+//   char tmp[30];                       // WebGetArg numbers only
+//   char svalue[32];                   // Command and number parameter
+
+//   // WebGetArg(request, "o", tmp, sizeof(tmp));  // 1 - 16 Device number for button Toggle or Fanspeed
+//   // if (strlen(tmp)) {
+//   //   ShowWebSource(SRC_WEBGUI);
+//   //   uint8_t device = atoi(tmp);
+//   //   if (MODULE_SONOFF_IFAN02 == pCONT_set->my_module_type) {
+//   //     if (device < 2) {
+//   //       //ExecuteCommandPower(1, POWER_TOGGLE, SRC_IGNORE);
+//   //     } else {
+//   //       snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_FANSPEED " %d"), device -2);
+//   //       //ExecuteCommand(svalue, SRC_WEBGUI);
+//   //     }
+//   //   } else {
+//   //     //ExecuteCommandPower(device, POWER_TOGGLE, SRC_IGNORE);
+//   //   }
+//   // }
+//   WebGetArg(request,"d", tmp, sizeof(tmp));  // 0 - 100 Dimmer value
+//   if (strlen(tmp)) {
+//     snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_DIMMER " %s"), tmp);
+//     ExecuteWebCommand(svalue, SRC_WEBGUI);
+//   }
+//   // WebGetArg(request,"t", tmp, sizeof(tmp));  // 153 - 500 Color temperature
+//   // if (strlen(tmp)) {
+//   //   // Convert ?command to longer (t -> CT)
+//   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_COLORTEMPERATURE " %s"), tmp);
+//   //   ExecuteWebCommand(svalue, SRC_WEBGUI);
+//   // }
+//   // WebGetArg(request,"k", tmp, sizeof(tmp));  // 1 - 16 Pre defined RF keys
+//   // if (strlen(tmp)) {
+//   //   snprintf_P(svalue, sizeof(svalue), PSTR(D_JSON_RFKEY "%s"), tmp);
+//   //   ExecuteWebCommand(svalue, SRC_WEBGUI);
+//   // }
+
+//   pCONT->Tasker_Interface(FUNC_WEB_COMMAND); //parse any webcommands
+
+
+//   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return true;} 
+
+//   JsonBuilderI->Start();
+//     JsonBuilderI->AppendBuffer(PSTR("t}")); //temp fix
+//     // all but phased out 
+//     // REMOVE html part
+//     // pCONT->Tasker_Interface(FUNC_WEB_SHOW_PARAMETERS);
+//     JsonBuilderI->AppendBuffer(PSTR("{t2")); //temp fix
+//   JsonBuilderI->End();
+
+//   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
+
+//   return true;
+
+// }
+
+
+// void mWebServer::WebAppend_SystemVersionBar(){  
+
+//   uint32_t text_colour = WebColor(255,255,255);
+//   if(pCONT_set->firmware_version.fNewVersionAvailable){
+//     text_colour = WebColor(pCONT_set->COL_TEXT_SUCCESS);
+//   }
+//   if(pCONT_set->firmware_version.fCurrentVersionNotSupported){
+//     text_colour = WebColor(pCONT_set->COL_TEXT_WARNING);
+//   }
+
+//   char message_version1[100];
+//   sprintf(message_version1,PSTR("%s %s%s"),
+//     PROJECT_NAME_CTR,
+//     pCONT_set->firmware_version.current.name_ctr,
+//     pCONT_set->firmware_version.fNewVersionAvailable ? " Update Available" : ""  
+//   );
+
+//   BufferWriterI->Append_P(PM_HTTP_END_WITH_UPDATE_NOEND,
+//     "https://github.com/sparkplug23/HomeAutomationControlSystem",  // URL to open when clicked
+//     text_colour,
+//     message_version1
+//   );
+
+// }//end function
+
+
+
+
+
+// void mWebServer::WebAppend_Minimal_Style(){
+
+//   BufferWriterI->Append_P("<style>");
+//   BufferWriterI->Append_P(PM_HTTP_HEAD_STYLE1_MINIMAL,
+//     pCONT_web->WebColor(pCONT_set->COL_FORM), 
+//     pCONT_web->WebColor(pCONT_set->COL_BACKGROUND),
+//     pCONT_web->WebColor(pCONT_set->COL_BUTTON),  
+//     pCONT_web->WebColor(pCONT_set->COL_BUTTON_TEXT)
+//   );
+//   BufferWriterI->Append_P("</style>");
+
+// }
+
+// void mWebServer::WebAppend_Title(){
+//   BufferWriterI->Append_P(HTTP_STYLE_TITLE_CONTAINER_HEAD, 
+//     WebColor(pCONT_set->COL_TEXT),
+//     WebColor(pCONT_set->COL_TEXT_MODULE_TITLE), 
+//     pCONT_set->Settings.system_name.friendly
+//   );
+// }
+
+// void mWebServer::WebAppend_Script_P(PGM_P url){
+//     BufferWriterI->Append_P(PSTR("<script type='text/javascript' src='%s'></script>"), url);    
+// }
 
 
 #endif //   #ifdef USE_MODULE_CORE_WEBSERVER

@@ -962,18 +962,11 @@ int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
     *******************/
     #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      // WebAppend_Root_Status_Table_Draw();
+      WebAppend_Root_Draw_PageTable();
     break;
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      WebAppend_Root_Draw_Table();
-    break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
-      // case FUNC_WEB_SHOW_PARAMETERS:
-      //   AddLog_P(LOG_LEVEL_TEST,PSTR("mEnergy::Tasker::FUNC_WEB_SHOW_PARAMETERS:"));
-        // EnergyShow(false);
-      // break;
     #endif //USE_MODULE_CORE_WEBSERVER
     /************
      * MQTT SECTION * 
@@ -1330,7 +1323,24 @@ void mEnergy::MQTTHandler_Set_TelePeriod(){
 
 void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t flag_handle_all = false, handler_found = false;
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
+
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
+  uint8_t flag_handle_all = false, handler_found = false
   if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
 
   do{
