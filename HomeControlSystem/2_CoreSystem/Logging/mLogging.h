@@ -71,7 +71,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 // #endif
 
 
-// Can only be used when hardware serial is enabled
+// DEEP DEBUG, added throughout code
 #if defined(USE_DEBUG_PRINT_FUNCTION_NAME) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
                                       SERIAL_DEBUG.print("\t");\
@@ -81,6 +81,17 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                                       SERIAL_DEBUG.flush();
 #else
   #define DEBUG_PRINT_FUNCTION_NAME   //nothing, no code
+#endif
+// TEST VERSION, to be used once (not left in code) for development
+#if defined(USE_DEBUG_PRINT_FUNCTION_NAME_TEST) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_PRINT_FUNCTION_NAME_TEST   SERIAL_DEBUG.print(__FILE__);\
+                                      SERIAL_DEBUG.print("\t");\
+                                      SERIAL_DEBUG.println(__FUNCTION__);\
+                                      SERIAL_DEBUG.print("\t");\
+                                      SERIAL_DEBUG.println(__LINE__);\
+                                      SERIAL_DEBUG.flush();
+#else
+  #define DEBUG_PRINT_FUNCTION_NAME_TEST   //nothing, no code
 #endif
 
 
@@ -124,10 +135,15 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 #include "2_CoreSystem/Time/mTime.h"
 class mTime;
+
+#ifdef ESP8266
 extern "C" {
 #include <cont.h>
   extern cont_t* g_pcont;
 }
+#endif // ESP8266
+
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 
@@ -140,6 +156,7 @@ extern "C" {
   #define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
   #define D_LOG_LEVEL_INFO_SHORT_CTR            "INF"
+  #define D_LOG_LEVEL_INFO_PARSING_SHORT_CTR    "INP"
   #define D_LOG_LEVEL_DEBUG_SHORT_CTR           "DBG"
   #define D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR      "DBM"
   #define D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR  "DBL"
@@ -150,6 +167,7 @@ extern "C" {
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_SHORT_CTR)            D_LOG_LEVEL_INFO_SHORT_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_PARSING_SHORT_CTR)    D_LOG_LEVEL_INFO_PARSING_SHORT_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_SHORT_CTR)           D_LOG_LEVEL_DEBUG_SHORT_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)      D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR;
@@ -160,6 +178,7 @@ extern "C" {
   #define D_LOG_LEVEL_WARN_LONG_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_LONG_CTR            "TST"
   #define D_LOG_LEVEL_INFO_LONG_CTR            "INF"
+  #define D_LOG_LEVEL_INFO_PARSING_LONG_CTR    "INP"
   #define D_LOG_LEVEL_DEBUG_LONG_CTR           "DBG"
   #define D_LOG_LEVEL_DEBUG_MORE_LONG_CTR      "DBM"
   #define D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR  "DBL"
@@ -170,6 +189,7 @@ extern "C" {
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_WARN_LONG_CTR)            D_LOG_LEVEL_WARN_LONG_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_TEST_LONG_CTR)            D_LOG_LEVEL_TEST_LONG_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_LONG_CTR)            D_LOG_LEVEL_INFO_LONG_CTR;
+  DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_INFO_PARSING_LONG_CTR)    D_LOG_LEVEL_INFO_PARSING_LONG_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LONG_CTR)           D_LOG_LEVEL_DEBUG_LONG_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)      D_LOG_LEVEL_DEBUG_MORE_LONG_CTR;
   DEFINE_PROGMEM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR;

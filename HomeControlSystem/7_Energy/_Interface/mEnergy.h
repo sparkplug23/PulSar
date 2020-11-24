@@ -42,7 +42,11 @@ class mEnergy{
     
     char* name_buffer = nullptr;//[200]; //use single 1D klist array in memory
 
-    int8_t Tasker(uint8_t function, uint8_t optional_id = 0);
+    int8_t Tasker(uint8_t function);//, uint8_t optional_id = 0);
+    
+int8_t Tasker(uint8_t function, JsonObjectConst obj);
+
+
     void WebCommand_Parse();
     
 void WebAppend_Root_Draw_Table();

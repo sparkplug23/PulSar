@@ -19,7 +19,11 @@ void mPzem_AC::Init(void)
     if (2 == result) { pCONT_sup->ClaimSerial(); }   // If serial0 is used, disable logging
     #ifdef DEVICE_CONSUMERUNIT
       pCONT_iEnergy->Energy.phase_count = 8;  // Start off with three phases
+    #endif 
+    #ifdef DEVICE_PZEM_TESTER
+      pCONT_iEnergy->Energy.phase_count = 2;  // Start off with three phases
     #endif
+
     PzemAc.phase = 0;
     // AddLog_P(LOG_LEVEL_TEST,"mPzem_AC::init");
   } else {
@@ -372,36 +376,17 @@ void mPzem_AC::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+  struct handler<mPzem_AC>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_PZEM004T_MODBUS_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
   );
-  uint8_t flag_handle_all = false, handler_found = false
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_SENSORS_PZEM004T_MODBUS_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
 
 }
 

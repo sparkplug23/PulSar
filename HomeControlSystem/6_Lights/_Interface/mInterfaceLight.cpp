@@ -14,6 +14,17 @@
 {"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate":1},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
 {"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate_ms":1000},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
 
+{
+  "AnimationMode": "Flasher",
+  "flasher": {
+    "function": 1
+  },
+  "Transition":{"Order":"Random","PixelUpdatePerc":1,"rate_ms":1000},
+  "ColourPalette": 0,
+  "brt_rgb": 10,
+  "brt_cct": 1,
+  "time_ms": 1000
+}
 
  */
 
@@ -81,15 +92,6 @@ void mInterfaceLight::init_Scenes(){
 
   changeHSB(120,100,0);
   
-  // #ifdef DONT_USE_OLD_PRESETS
-  // mode_singlecolour_preset_dayon.colour       = preset_colour_map[COLOUR_MAP_PINK_ID]; 
-  // mode_singlecolour_preset_dayoff.colour      = preset_colour_map[COLOUR_MAP_PINK_ID];
-  // mode_singlecolour_preset_eveningon.colour   = preset_colour_map[COLOUR_MAP_PINK_ID];
-  // mode_singlecolour_preset_eveningoff.colour  = preset_colour_map[COLOUR_MAP_PINK_ID];
-  // mode_singlecolour_preset_nighton.colour     = preset_colour_map[COLOUR_MAP_PINK_ID];
-  // mode_singlecolour_preset_nightoff.colour    = preset_colour_map[COLOUR_MAP_PINK_ID];
-  // #endif
-
 } //end "init_Scenes"
 
 
@@ -102,7 +104,7 @@ void mInterfaceLight::StartFadeToNewColour(RgbcctColor targetColor, uint16_t _ti
   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
   #ifdef USE_MODULE_LIGHTS_PWM
   pCONT_lPWM->FadeToNewColour(targetColor, _time_to_newcolour);
-  #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+  #endif // USE_MODULE_LIGHTS_PWM
 
 }
 
@@ -281,10 +283,10 @@ int8_t mInterfaceLight::GetSceneIDbyName(const char* c){
   // }else if(strstr(c,D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR)){
   //   return MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
   // }else 
-  if(strstr_P(c,PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)){
+  if(strcmp_P(c,PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)==0){
     return MODE_SINGLECOLOUR_COLOURSCENE_ID;
   }
-  if(strstr_P(c,PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR)){
+  if(strcmp_P(c,PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR)==0){
     return MODE_SINGLECOLOUR_PALETTE_SINGLE_ID;
   }
   //else if(strstr(c,D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR)){
@@ -312,6 +314,10 @@ RgbTypeColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
   return rgb;
 }
 
+uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
+  return (rgb.R << 16) | (rgb.G << 8) | rgb.B;
+}
+
 
 
 uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
@@ -319,12 +325,12 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
   char buffer[30];
   
   JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SCENENAME, GetSceneName(buffer, sizeof(buffer)));
-    JsonBuilderI->Add(D_JSON_HUE, getHue());
-    JsonBuilderI->Add(D_JSON_SAT, getSat());
-    JsonBuilderI->Add(D_JSON_BRT, getBriRGB());
-    JsonBuilderI->Add(D_JSON_TIME, (uint16_t)round(animation.transition.time_ms.val/1000));
-    JsonBuilderI->Add(D_JSON_TIME_MS, animation.transition.time_ms.val);
+    JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));
+    JsonBuilderI->Add_P(PM_JSON_HUE, getHue());
+    JsonBuilderI->Add_P(PM_JSON_SAT, getSat());
+    JsonBuilderI->Add_P(PM_JSON_BRT, getBriRGB());
+    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(animation.transition.time_ms.val/1000));
+    JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms.val);
   return JsonBuilderI->End();
 
 }
@@ -343,48 +349,17 @@ bool mInterfaceLight::LightModuleInit(void)
     for (uint32_t i = 0; i < MAX_PWMS; i++) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) { 
         pCONT_set->Settings.light_settings.type++; 
-        AddLog_P(LOG_LEVEL_DEBUG,PSTR("LightModuleInit PWM%d"),i);
-        // delay(1000);
-        
+        AddLog_P(LOG_LEVEL_DEBUG,PSTR("LightModuleInit PWM%d"),i);        
       }  // Use Dimmer/Color control for all PWM as SetOption15 = 1
     }
   }
 
-  //light_flg = 0;
-  // Create another array index that holds group of module (lights, drivers ID) and then make fucntion to check it
-  // if (XlgtCall(FUNC_MODULE_INIT)) {
-  //   // serviced
-  // }
-
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
-    
     // AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
+    pCONT_set->Settings.light_settings.type = LT_WS2812; 
+  }
 
-
-    pCONT_set->Settings.light_settings.type = LT_WS2812; }
-
-
-// #ifdef ESP8266
-//   else if (SONOFF_BN == my_module_type) {   // PWM Single color led (White)
-//     Settings.light_settings.type = LT_PWM1;
-//   }
-//   else if (SONOFF_LED == my_module_type) {  // PWM Dual color led (White warm and cold)
-//     if (!my_module.io[4]) {                 // Fix Sonoff Led instabilities
-//       pinMode(4, OUTPUT);                   // Stop floating outputs
-//       digitalWrite(4, LOW);
-//     }
-//     if (!my_module.io[5]) {
-//       pinMode(5, OUTPUT);                   // Stop floating outputs
-//       digitalWrite(5, LOW);
-//     }
-//     if (!my_module.io[14]) {
-//       pinMode(14, OUTPUT);                  // Stop floating outputs
-//       digitalWrite(14, LOW);
-//     }
-//     Settings.light_settings.type = LT_PWM2;
-//   }
-// #endif  // ESP8266
 
   if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
     pCONT_set->devices_present++;
@@ -409,6 +384,8 @@ void mInterfaceLight::Template_Load(){
   // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
   // #endif
+
+// return;
 
   // load from progmem
   uint16_t progmem_size = sizeof(LIGHTING_TEMPLATE);
@@ -469,8 +446,6 @@ void mInterfaceLight::Init(void) //LightInit(void)
     settings.flags.enable_cct_channel_sliders = false;
   #endif // USE_MODULE_LIGHTS_PWM
 
-
-
   //new_color[0] = 255;
   // LightApplyPower(new_color, 1);
 
@@ -505,7 +480,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
 
   if (LST_SINGLE == subtype) {
-    pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
+    //pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
   }
   // if (Settings.light_settings.type < LT_PWM6) {           // PWM
   //   for (uint32_t i = 0; i < Settings.light_settings.type; i++) {
@@ -751,19 +726,19 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
 
 
-  if(!obj[D_JSON_HARDWARE_TYPE].isNull()){ 
-    const char* onoff = obj[D_JSON_HARDWARE_TYPE];
+  if(!obj[CFLASH(PM_JSON_HARDWARE_TYPE)].isNull()){ 
+    const char* onoff = obj[CFLASH(PM_JSON_HARDWARE_TYPE)];
     //make function
-    if(strstr(onoff,"RGBCCT_PWM")){ 
+    if(strcmp_P(onoff,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ 
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "RGBCCT_PWM");
+        // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR);
       #endif
       pCONT_set->Settings.light_settings.type = LT_PWM5;
       data_buffer.isserviced++;
     }else 
-    if(strstr(onoff,D_JSON_WS2812)){
+    if(strcmp_P(onoff,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_HARDWARE_TYPE, "WS2812");
+        // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), D_PIXEL_HARDWARE_TYPE_WS28XX_CTR);
       #endif
       pCONT_set->Settings.light_settings.type = LT_WS2812;
       data_buffer.isserviced++;
@@ -775,8 +750,8 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   }
 
 
-  // if(!obj[D_JSON_ONOFF].isNull()){ 
-  //   uint8_t value = obj[D_JSON_ONOFF];
+  // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
+  //   uint8_t value = obj[CFLASH(PM_JSON_ONOFF];
   //   setBri(value ? 255 : 0);
   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_ONOFF,0);
@@ -784,90 +759,90 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   //   data_buffer.isserviced++;
   // }
 
-  if(!obj[D_JSON_HUE].isNull()){ 
-    uint16_t hue = obj[D_JSON_HUE];
+  if(!obj[CFLASH(PM_JSON_HUE)].isNull()){ 
+    uint16_t hue = obj[CFLASH(PM_JSON_HUE)];
     changeHSB_Hue(hue);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), hue);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_SAT].isNull()){    // Assume range 0-100
-    uint8_t sat = obj[D_JSON_SAT];
+  if(!obj[CFLASH(PM_JSON_SAT)].isNull()){    // Assume range 0-100
+    uint8_t sat = obj[CFLASH(PM_JSON_SAT)];
     sat = sat > 100 ? 100 : sat;
     sat = map(sat, 0,100, 0,255);
     changeHSB_Sat(sat);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), sat);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_BRT].isNull()){    // Assume range 0-100
-    uint8_t brt = obj[D_JSON_BRT];
+  if(!obj[CFLASH(PM_JSON_BRT)].isNull()){    // Assume range 0-100
+    uint8_t brt = obj[CFLASH(PM_JSON_BRT)];
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     changeHSB_Brt(brt);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRT)), brt);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
   
 
-  if(!obj[D_JSON_BRT_RGB].isNull()){    // Assume range 0-100
-    uint8_t brt = obj[D_JSON_BRT_RGB];
+  if(!obj[CFLASH(PM_JSON_BRIGHTNESS_RGB)].isNull()){    // Assume range 0-100
+    uint8_t brt = obj[CFLASH(PM_JSON_BRIGHTNESS_RGB)];
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     changeBriRGB(brt);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_RGB,brt);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K()),D_JSON_BRIGHTNESS_RGB,brt);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_BRT_CCT].isNull()){    // Assume range 0-100
-    uint8_t brt = obj[D_JSON_BRT_CCT];
+  if(!obj[CFLASH(PM_JSON_BRIGHTNESS_CCT)].isNull()){    // Assume range 0-100
+    uint8_t brt = obj[CFLASH(PM_JSON_BRIGHTNESS_CCT)];
     brt = brt > 100 ? 100 : brt;
     brt = map(brt, 0,100, 0,255);
     // setBriCT(brt);
     changeBriCT(brt);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT_CCT,brt);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), brt);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_CCT_PERCENTAGE].isNull()){    // Assume range 0-100
-    uint16_t cct_value = obj[D_JSON_CCT_PERCENTAGE];
+  if(!obj[CFLASH(PM_JSON_CCT_PERCENTAGE)].isNull()){    // Assume range 0-100
+    uint16_t cct_value = obj[CFLASH(PM_JSON_CCT_PERCENTAGE)];
     LightSetColorTemp(cct_value);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_PERCENTAGE,cct_value);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_PERCENTAGE)), cct_value);
     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_CCT_TEMP].isNull()){    // Assume range 0-100
-    uint16_t cct_value = obj[D_JSON_CCT_TEMP];
+  if(!obj[CFLASH(PM_JSON_CCT_TEMP)].isNull()){    // Assume range 0-100
+    uint16_t cct_value = obj[CFLASH(PM_JSON_CCT_TEMP)];
     LightSetColorTemp(cct_value);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_CCT_TEMP,cct_value);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), cct_value);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   }
 
-  if(!obj[D_JSON_RGBCCT_LINKED].isNull()){    // Assume range 0-100
-    uint8_t value = obj[D_JSON_RGBCCT_LINKED];
+  if(!obj[CFLASH(PM_JSON_RGBCCT_LINKED)].isNull()){    // Assume range 0-100
+    uint8_t value = obj[CFLASH(PM_JSON_RGBCCT_LINKED)];
     setCTRGBLinked(value);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_RGBCCT_LINKED,value);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
   } 
 
-  // if(!obj[D_JSON_RGB].isNull()){
-  //   const char* rgbpacked = obj[D_JSON_RGB];
+  // if(!obj[CFLASH(PM_JSON_RGB].isNull()){
+  //   const char* rgbpacked = obj[CFLASH(PM_JSON_RGB];
   //   uint32_t colour32bit = 0;
   //   if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
   //   }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
@@ -885,15 +860,15 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   if(obj.containsKey(D_JSON_SCENE_COLOUR)){  //set hsb   D_JSON_HSB
     // Check HSB format
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    // AddLog_P(LOG_LEVEL_INFO, PSTR("[D_JSON_SCENE_COLOUR]"));
+    // AddLog_P(LOG_LEVEL_INFO, PSTR("[CFLASH(PM_JSON_SCENE_COLOUR]"));
     #endif
-    if(!obj[D_JSON_SCENE_COLOUR][D_JSON_HSB].isNull()){
-      JsonArrayConst colourarray = obj[D_JSON_SCENE_COLOUR][D_JSON_HSB];
+    if(!obj[CFLASH(PM_JSON_SCENE_COLOUR)][CFLASH(PM_JSON_HSB)].isNull()){
+      JsonArrayConst colourarray = obj[CFLASH(PM_JSON_SCENE_COLOUR)][CFLASH(PM_JSON_HSB)];
       uint8_t index = 0;
       for(JsonVariantConst v : colourarray) {
         int val = v.as<int>();
         #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR("[D_JSON_SCENE_COLOUR][D_JSON_HSB]=%d"),val);
+        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR("[CFLASH(PM_JSON_SCENE_COLOUR][CFLASH(PM_JSON_HSB]=%d"),val);
         #endif
         switch(index++){
           case 0: changeHSB_Hue(val); break;
@@ -920,22 +895,22 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
 
   // TIME with different units
-  if(!obj[D_JSON_TIME].isNull()){ //default to secs /// D_JSON_TRANSITIONTIME
-    animation.transition.time_ms.val = obj[D_JSON_TIME];
+  if(!obj[CFLASH(PM_JSON_TIME)].isNull()){ //default to secs /// D_JSON_TRANSITIONTIME
+    animation.transition.time_ms.val = obj[CFLASH(PM_JSON_TIME)];
     animation.transition.time_ms.val *= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
   }else
-  if(!obj[D_JSON_TIME_SECS].isNull()){
-    animation.transition.time_ms.val = obj[D_JSON_TIME_SECS];
+  if(!obj[CFLASH(PM_JSON_TIME_SECS)].isNull()){
+    animation.transition.time_ms.val = obj[CFLASH(PM_JSON_TIME_SECS)];
     animation.transition.time_ms.val *= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
   }else
-  if(!obj[D_JSON_TIME_MS].isNull()){
-    animation.transition.time_ms.val = obj[D_JSON_TIME_MS];
+  if(!obj[CFLASH(PM_JSON_TIME_MS)].isNull()){
+    animation.transition.time_ms.val = obj[CFLASH(PM_JSON_TIME_MS)];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),animation.transition.time_ms.val);  
     #endif
@@ -943,29 +918,29 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
 
   // TIME on duration for autooff
-  if(!obj[D_JSON_TIME_ON].isNull()){ //default to secs
-    auto_time_off_secs = obj[D_JSON_TIME_ON];
+  if(!obj[CFLASH(PM_JSON_TIME_ON)].isNull()){ //default to secs
+    auto_time_off_secs = obj[CFLASH(PM_JSON_TIME_ON)];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND), auto_time_off_secs);  
     #endif
   }else
-  if(!obj[D_JSON_TIME_ON_SECS].isNull()){
-    auto_time_off_secs = obj[D_JSON_TIME_ON_SECS];
+  if(!obj[CFLASH(PM_JSON_TIME_ON_SECS)].isNull()){
+    auto_time_off_secs = obj[CFLASH(PM_JSON_TIME_ON_SECS)];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND), auto_time_off_secs);  
     #endif
   }else
-  if(!obj[D_JSON_TIME_ON_MS].isNull()){
-    auto_time_off_secs = obj[D_JSON_TIME_ON_MS];
+  if(!obj[CFLASH(PM_JSON_TIME_ON_MS)].isNull()){
+    auto_time_off_secs = obj[CFLASH(PM_JSON_TIME_ON_MS)];
     auto_time_off_secs /= 1000;
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND),auto_time_off_secs);  
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_TIME "%d" D_UNIT_MILLISECOND), auto_time_off_secs);  
     #endif
   }
 
     
-  if(!obj[D_JSON_SCENENAME].isNull()){ 
-    const char* mode_singlecolourctr = obj[D_JSON_SCENENAME];
+  if(!obj[CFLASH(PM_JSON_SCENE_NAME)].isNull()){ 
+    const char* mode_singlecolourctr = obj[CFLASH(PM_JSON_SCENE_NAME)];
     if((tmp_id=GetSceneIDbyName(mode_singlecolourctr))>=0){
       mode_singlecolour.name_id = tmp_id;
       animation.mode_id = ANIMATION_MODE_SCENE_ID; //#Idea. make optional
@@ -977,22 +952,23 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
       //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
       char buffer[30];
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,GetSceneName(buffer, sizeof(buffer)));
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_SCENE_NAME)), GetSceneName(buffer, sizeof(buffer)));
       //#endif
       data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_SCENENAME,mode_singlecolourctr);
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_SCENE_NAME)), mode_singlecolourctr);
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
 
 
-  if(!obj[D_JSON_LIGHTPOWER].isNull()){ 
-    const char* state_ctr = obj[D_JSON_LIGHTPOWER];
+  if(!obj[CFLASH(PM_JSON_LIGHTPOWER)].isNull()){ 
+    const char* state_ctr = obj[CFLASH(PM_JSON_LIGHTPOWER)];
 
     int8_t state = pCONT_sup->GetStateNumber(state_ctr);
-    state = pCONT_sup->ConvertStateNumberIfToggled(state, light_power);
+    // state = ConvertStateNumberIfToggled(state, &light_power);
+    // NEED TO FIX
     
     switch(state){
       case STATE_NUMBER_ON_ID:
@@ -1039,7 +1015,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
   if(obj.containsKey(D_JSON_COLOUR_PALETTE)){ 
 
-    const char* colour = obj[D_JSON_COLOUR_PALETTE];
+    const char* colour = obj[CFLASH(PM_JSON_COLOUR_PALETTE)];
     if((tmp_id=GetPaletteIDbyName(colour))>=0){
       animation.palette_id = tmp_id;
 
@@ -1049,7 +1025,7 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
       #ifdef ENABLE_PIXEL_FUNCTION_MIXER
       if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
-        flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
+        pCONT_ladd->flashersettings.region = pCONT_ladd->FLASHER_REGION_COLOUR_SELECT_ID; //update colours in use
       }
       #endif
       #ifdef ENABLE_PALETTE_FORCED_MODE
@@ -1057,42 +1033,42 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
       #endif
       data_buffer.isserviced++;
     }else{
-      uint8_t colour = obj[D_JSON_COLOUR_PALETTE];
+      uint8_t colour = obj[CFLASH(PM_JSON_COLOUR_PALETTE)];
       animation.palette_id = colour < PALETTELIST_STATIC_LENGTH_ID ? colour : 0;
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_NVALUE),D_JSON_COLOUR_PALETTE,animation.palette_id);
-        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteNameByID(animation.palette_id, buffer));
+        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette_id);
+        AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
 
   }
 
     
-  if(!obj[D_JSON_ANIMATIONMODE].isNull()){ 
-    const char* mode = obj[D_JSON_ANIMATIONMODE];
+  if(!obj[CFLASH(PM_JSON_ANIMATIONMODE)].isNull()){ 
+    const char* mode = obj[CFLASH(PM_JSON_ANIMATIONMODE)];
     if((tmp_id=GetAnimationModeIDbyName(mode))>=0){
       animation.mode_id = tmp_id;
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,GetAnimationModeName(buffer, sizeof(buffer)));
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
       #endif
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
+      // //Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ANIMATIONMODE,GetAnimationModeName());
       data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ANIMATIONMODE,mode);
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), mode);
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     }
   }
 
 
-  if(!obj[D_JSON_RGB_COLOUR_ORDER].isNull()){ 
-    const char* mode = obj[D_JSON_RGB_COLOUR_ORDER];
+  if(!obj[CFLASH(PM_JSON_RGB_COLOUR_ORDER)].isNull()){ 
+    const char* mode = obj[CFLASH(PM_JSON_RGB_COLOUR_ORDER)];
     if((tmp_id=GetHardwareColourTypeIDbyName(mode))>=0){
       settings.pixel_hardware_color_order_id = tmp_id;
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_RGB_COLOUR_ORDER,GetHardwareColourTypeName(buffer));
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
       #endif
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
+      // //Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_MODE,GetAnimationModeName());
       data_buffer.isserviced++;
     }else{
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
@@ -1102,8 +1078,8 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
   }
 
 
-  if(!obj[D_JSON_STRIP_SIZE].isNull()){ 
-    int amount = obj[D_JSON_STRIP_SIZE];
+  if(!obj[CFLASH(PM_JSON_STRIP_SIZE)].isNull()){ 
+    int amount = obj[CFLASH(PM_JSON_STRIP_SIZE)];
     // Also convert to percentage equivalent
     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     pCONT_ladd->strip_size = amount;
@@ -1111,10 +1087,10 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
     pCONT_iLight->light_count = amount;
     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_STRIP_SIZE,pCONT_ladd->strip_size);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), pCONT_ladd->strip_size);
     #endif
     #endif //    #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    // //Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
     data_buffer.isserviced++;
   }
   
@@ -1123,33 +1099,33 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 
 //   // struct TRANSITIONSETTINGS
 
-//   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER].isNull()){ 
-//     int amount = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_NUMBER];
-//     // Also convert to percentage equivalent
-//     animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(amount);
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-//     #endif
-//     // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-//     data_buffer.isserviced++;
-//   }else
-//   if(!obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE].isNull()){ 
-//     int percentage = obj[D_JSON_TRANSITION][D_JSON_PIXELS_UPDATE_PERCENTAGE];
-//     animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-//     #endif
-//     Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
-//     // Also convert to number equivalent
-//     data_buffer.isserviced++;
-//   }
+  if(!obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_PIXELS_UPDATE_NUMBER)].isNull()){ 
+    int amount = obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_PIXELS_UPDATE_NUMBER)];
+    // Also convert to percentage equivalent
+    animation.transition.pixels_to_update_as_percentage.val = pCONT_ladd->GetPixelsToUpdateAsPercentageFromNumber(amount);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
+    #endif
+    // //Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    data_buffer.isserviced++;
+  }else
+  if(!obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_PIXELS_UPDATE_PERCENTAGE)].isNull()){ 
+    int percentage = obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_PIXELS_UPDATE_PERCENTAGE)];
+    animation.transition.pixels_to_update_as_percentage.val = constrain(percentage,0,100);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
+    #endif
+    //Response_mP(S_JSON_COMMAND_SVALUE_NVALUE,D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage.val);
+    // Also convert to number equivalent
+    data_buffer.isserviced++;
+  }
 
 // DEBUG_LINE;
 
   
 //   // Transition time in seconds or ms
-//   if(!obj[D_JSON_TRANSITION][D_JSON_TIME].isNull()){ 
-//     animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME];
+//   if(!obj[CFLASH(PM_JSON_TRANSITION][CFLASH(PM_JSON_TIME].isNull()){ 
+//     animation.transition.time_ms.val = obj[CFLASH(PM_JSON_TRANSITION][CFLASH(PM_JSON_TIME];
 //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val);   
 //     #endif
@@ -1157,17 +1133,17 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms.val);
 //     #endif
-//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
+//     //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
 //     data_buffer.isserviced++;
 //     //check that rate>animation time
 //     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
 //   }else
-//   if(!obj[D_JSON_TRANSITION][D_JSON_TIME_MS].isNull()){ 
-//     animation.transition.time_ms.val = obj[D_JSON_TRANSITION][D_JSON_TIME_MS];
+//   if(!obj[CFLASH(PM_JSON_TRANSITION][CFLASH(PM_JSON_TIME_MS].isNull()){ 
+//     animation.transition.time_ms.val = obj[CFLASH(PM_JSON_TRANSITION][CFLASH(PM_JSON_TIME_MS];
 //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 //     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME_MS,animation.transition.time_ms.val);
 //     #endif
-//     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
+//     //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.time_ms.val);
 //     data_buffer.isserviced++;
 //     //check that rate>animation time
 //     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
@@ -1176,57 +1152,60 @@ void mInterfaceLight::parse_JSONCommand(JsonObjectConst obj){
 // DEBUG_LINE;
 
   // Rate in seconds as default or ms
-  if(!obj[D_JSON_TRANSITION][D_JSON_RATE].isNull()){ 
-    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE];
+  if(!obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_RATE)].isNull()){ 
+    animation.transition.rate_ms.val = obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_RATE)];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_RATE)), animation.transition.time_ms.val);
     #endif
     animation.transition.rate_ms.val *= 1000; //seconds to milliseconds
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.time_ms.val);
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_RATE)), animation.transition.time_ms.val);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     data_buffer.isserviced++;
     //check that rate>animation time
     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
   }else
-  if(!obj[D_JSON_TRANSITION][D_JSON_RATE_MS].isNull()){ 
-    animation.transition.rate_ms.val = obj[D_JSON_TRANSITION][D_JSON_RATE_MS];
+  if(!obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_RATE_MS)].isNull()){ 
+    animation.transition.rate_ms.val = obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_RATE_MS)];
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE_MS,animation.transition.rate_ms.val);
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_RATE_MS)), animation.transition.rate_ms.val);
     #endif
-    Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
+    //Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_MS,animation.transition.rate_ms.val);
     data_buffer.isserviced++;
     //check that rate>animation time
     if(animation.transition.rate_ms.val<animation.transition.time_ms.val){ animation.transition.time_ms.val = animation.transition.rate_ms.val;}
   }
 
+// Serial.println("here trans");
+
   // probably bring transition_order into one command
-  if(!obj[D_JSON_TRANSITION][D_JSON_ORDER].isNull()){ // ie when also doing palette single, randomise the order
-    const char* order = obj[D_JSON_TRANSITION][D_JSON_ORDER];
+  if(!obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_ORDER)].isNull()){ // ie when also doing palette single, randomise the order
+    const char* order = obj[CFLASH(PM_JSON_TRANSITION)][CFLASH(PM_JSON_ORDER)];
     if((tmp_id=GetTransitionOrderIDbyName(order))>=0){
       animation.transition.order_id = tmp_id;
-      // AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
-      // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ORDER,GetTransitionOrderName());
+      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
       data_buffer.isserviced++;
     }else{
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
+      //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_NOMATCH D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,order);
     #endif
     }
-  }
-  
+  } 
 
-//   if(!obj[D_JSON_PIXELSGROUPED].isNull()){
-//     animation.pixelgrouped = obj[D_JSON_PIXELSGROUPED];
+// Serial.println("here trans2");
+
+
+//   if(!obj[CFLASH(PM_JSON_PIXELSGROUPED].isNull()){
+//     animation.pixelgrouped = obj[CFLASH(PM_JSON_PIXELSGROUPED];
 //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,animation.pixelgrouped);
 //     #endif
 //   }
 
 //   //override commands that run for one animation cycle then are cleared to 0
-//   if(!obj[D_JSON_REFRESH_ALLPIXELS].isNull()){
-//     animation_override.fRefreshAllPixels = obj[D_JSON_REFRESH_ALLPIXELS];
+//   if(!obj[CFLASH(PM_JSON_REFRESH_ALLPIXELS].isNull()){
+//     animation_override.fRefreshAllPixels = obj[CFLASH(PM_JSON_REFRESH_ALLPIXELS];
 //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
 //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,animation_override.fRefreshAllPixels);
 //     #endif
@@ -1299,11 +1278,13 @@ void mInterfaceLight::EveryLoop(){
     
     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
     switch(animation.mode_id){
+      #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
       case ANIMATION_MODE_FLASHER_ID:
         // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "ANIMATION_MODE_FLASHER_ID"));
         pCONT_ladd->SubTask_Flasher_Main();
         light_power = true;
       break;
+      #endif
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID:
         SubTask_NotificationPanel();
@@ -1364,20 +1345,20 @@ void mInterfaceLight::SubTask_AutoOff(){
 
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
-  colour->R  = mSupport::changeUIntScale(colour->R,  0, 255, 0, _briRGB);
-  colour->G  = mSupport::changeUIntScale(colour->G,  0, 255, 0, _briRGB);
-  colour->B  = mSupport::changeUIntScale(colour->B,  0, 255, 0, _briRGB);
-  colour->WW = mSupport::changeUIntScale(colour->WW, 0, 255, 0, _briCT);
-  colour->WC = mSupport::changeUIntScale(colour->WC, 0, 255, 0, _briCT);
+  colour->R  = mapvalue(colour->R,  0, 255, 0, _briRGB);
+  colour->G  = mapvalue(colour->G,  0, 255, 0, _briRGB);
+  colour->B  = mapvalue(colour->B,  0, 255, 0, _briRGB);
+  colour->WW = mapvalue(colour->WW, 0, 255, 0, _briCT);
+  colour->WC = mapvalue(colour->WC, 0, 255, 0, _briCT);
 
 }
 
 
 
-const char* mInterfaceLight::GetTransitionMethodName(char* buffer){
-  return GetTransitionMethodNameByID(pCONT_iLight->animation.transition.method_id,buffer);
+const char* mInterfaceLight::GetTransitionMethodName(char* buffer, uint8_t buflen){
+  return GetTransitionMethodNameByID(pCONT_iLight->animation.transition.method_id, buffer, buflen);
 }
-const char* mInterfaceLight::GetTransitionMethodNameByID(uint8_t id, char* buffer){
+const char* mInterfaceLight::GetTransitionMethodNameByID(uint8_t id, char* buffer, uint8_t buflen){
   switch(id){ default:   
     case TRANSITION_METHOD_NONE_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_NONE_NAME_CTR,sizeof(PM_TRANSITION_METHOD_NONE_NAME_CTR)); break; // smooth shift between them
     case TRANSITION_METHOD_BLEND_ID: memcpy_P(buffer,PM_TRANSITION_METHOD_BLEND_NAME_CTR,sizeof(PM_TRANSITION_METHOD_BLEND_NAME_CTR)); break; 
@@ -1407,17 +1388,17 @@ int8_t mInterfaceLight::GetTransitionMethodIDbyName(const char* c){
 
 
 
-const char* mInterfaceLight::GetTransitionOrderName(char* buffer){
-  return GetTransitionOrderNameByID(pCONT_iLight->animation.transition.order_id, buffer);
+const char* mInterfaceLight::GetTransitionOrderName(char* buffer, uint8_t buflen){
+  return GetTransitionOrderNameByID(pCONT_iLight->animation.transition.order_id, buffer, buflen);
 }
-const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer){
+const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen){
   switch(id){  default:    
     case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
     case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
     case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
-    case TRANSITION_ORDER_FIXED_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
+    case TRANSITION_ORDER_FIXED_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
     }
   return buffer;
 }
@@ -1529,10 +1510,10 @@ void mInterfaceLight::SetAnimationProfile(uint8_t profile_id){
 
 
 
-const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer){
-  return GetHardwareColourTypeNameByID(pCONT_iLight->animation.mode_id, buffer);
+const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen){
+  return GetHardwareColourTypeNameByID(pCONT_iLight->animation.mode_id, buffer, buflen);
 }
-const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer){
+const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen){
   switch(id){
     default:
     case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
@@ -1661,13 +1642,13 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
   
   JsonBuilderI->Start();
 
-  JsonBuilderI->Add(D_JSON_TYPE, pCONT_set->Settings.light_settings.type);
+  JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
-  JsonBuilderI->Add(D_JSON_HUE, getHue());
-  JsonBuilderI->Add(D_JSON_SAT, getSat());
+  JsonBuilderI->Add_P(PM_JSON_HUE, getHue());
+  JsonBuilderI->Add_P(PM_JSON_SAT, getSat());
 
-  JsonBuilderI->Add("briRGB", getBriRGB());
-  JsonBuilderI->Add("briCT", getBriCT());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, getBriRGB());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, getBriCT());
   
   //   _subtype,
   //   _ct,
@@ -1697,30 +1678,30 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
   
   JsonBuilderI->Start();
 
-  JsonBuilderI->Level_Start("singlecolour");
-    JsonBuilderI->Add("R", mode_singlecolour.colour.R);
-    JsonBuilderI->Add("G", mode_singlecolour.colour.G);
-    JsonBuilderI->Add("B", mode_singlecolour.colour.B);
-    JsonBuilderI->Add("WW", mode_singlecolour.colour.WW);
-    JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
-    JsonBuilderI->Add("WC", mode_singlecolour.colour.WC);
-  JsonBuilderI->Level_End();
-  JsonBuilderI->Level_Start("tasint_colour");
-    JsonBuilderI->Add("R", tasint_colour.R);
-    JsonBuilderI->Add("G", tasint_colour.G);
-    JsonBuilderI->Add("B", tasint_colour.B);
-    JsonBuilderI->Add("WW", tasint_colour.WW);
-    JsonBuilderI->Add("WC", tasint_colour.WC);
-    JsonBuilderI->Add("WC", tasint_colour.WC);
-  JsonBuilderI->Level_End();
+  // JsonBuilderI->Level_Start("singlecolour");
+  //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);
+  //   JsonBuilderI->Add_P(PM_G", mode_singlecolour.colour.G);
+  //   JsonBuilderI->Add_P(PM_B", mode_singlecolour.colour.B);
+  //   JsonBuilderI->Add_P(PM_WW", mode_singlecolour.colour.WW);
+  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
+  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
+  // JsonBuilderI->Level_End();
+  // JsonBuilderI->Level_Start("tasint_colour");
+  //   JsonBuilderI->Add_P(PM_R", tasint_colour.R);
+  //   JsonBuilderI->Add_P(PM_G", tasint_colour.G);
+  //   JsonBuilderI->Add_P(PM_B", tasint_colour.B);
+  //   JsonBuilderI->Add_P(PM_WW", tasint_colour.WW);
+  //   JsonBuilderI->Add_P(PM_WC", tasint_colour.WC);
+  //   JsonBuilderI->Add_P(PM_WC", tasint_colour.WC);
+  // JsonBuilderI->Level_End();
 
 
-  JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
+  // JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
 
 
-  JsonBuilderI->Level_Start("fade");
-    JsonBuilderI->Add("running", fade.running);
-  JsonBuilderI->Level_End();
+  // JsonBuilderI->Level_Start("fade");
+  //   JsonBuilderI->Add("running", fade.running);
+  // JsonBuilderI->Level_End();
   
   //   _sat,
   //   _briRGB,
@@ -2029,8 +2010,8 @@ void mInterfaceLight::LightState(uint8_t append)
 //         uint16_t hue;
 //         uint8_t  sat, bri;
 //         light_state.getHSB(&hue, &sat, &bri);
-//         sat = mSupport::changeUIntScale(sat, 0, 255, 0, 100);
-//         bri = mSupport::changeUIntScale(bri, 0, 255, 0, 100);
+//         sat = mapvalue(sat, 0, 255, 0, 100);
+//         bri = mapvalue(bri, 0, 255, 0, 100);
 
 //         ResponseAppend_P(PSTR(",\"" D_JSON_HSBCOLOR "\":\"%d,%d,%d\""), hue,sat,bri);
 //       }
@@ -2046,7 +2027,7 @@ void mInterfaceLight::LightState(uint8_t append)
 //       ResponseAppend_P(PSTR(",\"" D_JSON_CHANNEL "\":[" ));
 //       for (uint32_t i = 0; i < subtype; i++) {
 //         uint8_t channel_raw = current_color[i];
-//         uint8_t channel = mSupport::changeUIntScale(channel_raw,0,255,0,100);
+//         uint8_t channel = mapvalue(channel_raw,0,255,0,100);
 //         // if non null, force to be at least 1
 //         if ((0 == channel) && (channel_raw > 0)) { channel = 1; }
 //         ResponseAppend_P(PSTR("%s%d" ), (i > 0 ? "," : ""), channel);
@@ -2070,7 +2051,7 @@ void mInterfaceLight::LightState(uint8_t append)
 //       uint32_t light_power_masked = power & (1 << i);    // the power value for this device
 //       light_power_masked = light_power_masked ? 1 : 0;                    // convert to on/off
 //       ResponseAppend_P(PSTR("\"%s\":\"%s\",\"" D_JSON_CHANNEL "%d\":%d,"), scommand, GetStateText(light_power_masked), device + i,
-//         mSupport::changeUIntScale(current_color[i], 0, 255, 0, 100));
+//         mapvalue(current_color[i], 0, 255, 0, 100));
 //     }
 //     ResponseAppend_P(PSTR("\"" D_JSON_COLOR "\":\"%s\""), LightGetColor(scolor));
 //   }   // pwm_multi_channels
@@ -2134,7 +2115,7 @@ int8_t mInterfaceLight::GetNearestColourMapIDFromColour(HsbColor hsb){
 
 }
 
-const char* mInterfaceLight::GetColourMapNameNearestbyColour(HsbColor c, char* buffer){
+const char* mInterfaceLight::GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen){
 
 // TOO MUCH MEMROY!!!
   return WARNING_NOTHANDLED_CTR;
@@ -2186,7 +2167,7 @@ int8_t mInterfaceLight::GetColourMapIDbyName(const char* c){
   
   return -1;
 }
-const char* mInterfaceLight::GetColourMapNamebyID(uint8_t id, char* buffer){
+const char* mInterfaceLight::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen){
 
   return 0;
   // turn this into a dlist?
@@ -2424,7 +2405,7 @@ void mInterfaceLight::init_PresetColourPalettes(){
   
   
   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog_P(LOG_LEVEL_WARN,PSTR("init_PresetColourPalettes"));
+  AddLog_P(LOG_LEVEL_TEST,PSTR("init_PresetColourPalettes"));
   #endif
   
 
@@ -2458,6 +2439,17 @@ void mInterfaceLight::init_PresetColourPalettes(){
   init_ColourPalettes_Pastel();
   init_ColourPalettes_Gradient_01();
   init_ColourPalettes_Gradient_02();
+  init_ColourPalettes_Berry_Green();
+  init_ColourPalettes_Christmas_01();
+  init_ColourPalettes_Christmas_02();
+  init_ColourPalettes_Christmas_03();
+  init_ColourPalettes_Christmas_04();
+  init_ColourPalettes_Christmas_05();
+  init_ColourPalettes_Christmas_06();
+  init_ColourPalettes_Christmas_07();
+  init_ColourPalettes_Christmas_08();
+  init_ColourPalettes_Christmas_09();
+  init_ColourPalettes_Christmas_10();
   init_ColourPalettes_Sunrise_01();
 
 }
@@ -2503,7 +2495,7 @@ void mInterfaceLight::init_ColourPalettes_Shelf_Hearts(){
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID;
   // Need a solution to remember these ie if shelf01, hearts are pink, else yellow
   
-    #ifdef DONT_USE_OLD_PRESETS
+  #ifdef DONT_USE_OLD_PRESETS
   preset_colour_map[COLOUR_MAP_SPECIAL_ONEINMANY_MANY_ID] = preset_colour_map[COLOUR_MAP_YELLOW_ID]; 
   preset_colour_map[COLOUR_MAP_SPECIAL_ONEINMANY_ONE_ID]  = preset_colour_map[COLOUR_MAP_HOTPINK_ID]; 
   #endif
@@ -2538,6 +2530,162 @@ void mInterfaceLight::init_ColourPalettes_Gradient_02(){
   //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
   #endif
 }
+void mInterfaceLight::init_ColourPalettes_Berry_Green(){
+  palettelist.ptr     = &palettelist.berry_green;  
+  palettelist.ptr->id = PALETTELIST_STATIC_BERRY_GREEN_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_BERRY_GREEN_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_BERRY_GREEN_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_BERRY_GREEN_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_01(){
+  palettelist.ptr     = &palettelist.christmas_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_01_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_02(){
+  palettelist.ptr     = &palettelist.christmas_02;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_02_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_02_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_02_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_02_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_03(){
+  palettelist.ptr     = &palettelist.christmas_03;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_03_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_03_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_03_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_03_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_04(){
+  palettelist.ptr     = &palettelist.christmas_04;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_04_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_04_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_04_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_04_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_05(){
+  palettelist.ptr     = &palettelist.christmas_05;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_05_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_05_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_05_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_05_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_06(){
+  palettelist.ptr     = &palettelist.christmas_06;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_06_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_06_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_06_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_06_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_07(){
+  palettelist.ptr     = &palettelist.christmas_07;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_07_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_07_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_07_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_08(){
+  palettelist.ptr     = &palettelist.christmas_08;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_08_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_08_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_08_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_08_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_09(){
+  palettelist.ptr     = &palettelist.christmas_09;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_09_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_09_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_09_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_09_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+void mInterfaceLight::init_ColourPalettes_Christmas_10(){
+  palettelist.ptr     = &palettelist.christmas_10;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_10_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_10_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_10_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_10_NAME_CTR;
+  palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+  
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_Array_P(LOG_LEVEL_TEST, "Grad02", palettelist.ptr->colour_map_id,palettelist.ptr->colour_map_size);
+  #endif
+}
+
+
 void mInterfaceLight::init_ColourPalettes_Sunrise_01(){
   palettelist.ptr     = &palettelist.sunrise_01;  
   palettelist.ptr->id = PALETTELIST_STATIC_SUNRISE_01_ID;
@@ -2652,7 +2800,7 @@ HsbColor mInterfaceLight::GetHsbColour(uint8_t id){
 
   // Get hue
   if(id>=COLOUR_MAP_RED_ID    && id<=COLOUR_MAP_RED_PASTEL0_ID){
-    colour.H = pgm_read_float(colour_float_map_values); // progmem here might not be useful
+    colour.H = pgm_read_float(&colour_float_map_values[0]); // progmem here might not be useful
   }else
   if(id>=COLOUR_MAP_ORANGE_ID && id<=COLOUR_MAP_ORANGE_PASTEL0_ID){
     colour.H = pgm_read_float(colour_float_map_values+1);
@@ -2787,6 +2935,17 @@ mInterfaceLight::PALETTELIST::PALETTE* mInterfaceLight::GetPalettePointerByID(ui
     case PALETTELIST_STATIC_OCEAN_01_ID:        return &palettelist.ocean_01;
     case PALETTELIST_STATIC_GRADIENT_01_ID:     return &palettelist.gradient_01;
     case PALETTELIST_STATIC_GRADIENT_02_ID:     return &palettelist.gradient_02;
+    case PALETTELIST_STATIC_BERRY_GREEN_ID:     return &palettelist.berry_green;
+    case PALETTELIST_STATIC_CHRISTMAS_01_ID:     return &palettelist.christmas_01;
+    case PALETTELIST_STATIC_CHRISTMAS_02_ID:     return &palettelist.christmas_02;
+    case PALETTELIST_STATIC_CHRISTMAS_03_ID:     return &palettelist.christmas_03;
+    case PALETTELIST_STATIC_CHRISTMAS_04_ID:     return &palettelist.christmas_04;
+    case PALETTELIST_STATIC_CHRISTMAS_05_ID:     return &palettelist.christmas_05;
+    case PALETTELIST_STATIC_CHRISTMAS_06_ID:     return &palettelist.christmas_06;
+    case PALETTELIST_STATIC_CHRISTMAS_07_ID:     return &palettelist.christmas_07;
+    case PALETTELIST_STATIC_CHRISTMAS_08_ID:     return &palettelist.christmas_08;
+    case PALETTELIST_STATIC_CHRISTMAS_09_ID:     return &palettelist.christmas_09;
+    case PALETTELIST_STATIC_CHRISTMAS_10_ID:     return &palettelist.christmas_10;
     case PALETTELIST_STATIC_SUNRISE_01_ID:      return &palettelist.sunrise_01;
   }
 }
@@ -2806,9 +2965,9 @@ int8_t mInterfaceLight::CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr){
 
 
 // Check for friendly names first
-const char* mInterfaceLight::GetPaletteFriendlyName(char* buffer){
+const char* mInterfaceLight::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  return GetPaletteFriendlyNameByID(animation.palette_id, buffer);
+  return GetPaletteFriendlyNameByID(animation.palette_id, buffer, buflen);
   #else
   return GetPaletteFriendlyNameByID(0, buffer);
 
@@ -2834,21 +2993,18 @@ const char* mInterfaceLight::GetPaletteFriendlyNameByID(uint8_t id, char* name, 
 
 
 
-const char* mInterfaceLight::GetPaletteName(char* buffer){
+const char* mInterfaceLight::GetPaletteName(char* buffer, uint8_t buflen){
   
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  return GetPaletteNameByID(animation.palette_id, buffer);
+  return GetPaletteNameByID(animation.palette_id, buffer, buflen);
   #else
   return GetPaletteNameByID(0, buffer);
 
   #endif
 } 
-const char* mInterfaceLight::GetPaletteNameByID(uint8_t id, char* buffer){  
+const char* mInterfaceLight::GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen){  
   PALETTELIST::PALETTE *ptr = GetPalettePointerByID(id);
-  return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;//"NULL";
-  
-  return WARNING_NOTHANDLED_CTR;
-  // return "Unknown";
+  return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;
 }
 
 
@@ -3007,7 +3163,7 @@ void mInterfaceLight::SetPaletteListPtrFromID(uint8_t id){
 RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
 
-  RgbcctColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor(0,255,0,0,0);
   uint8_t palette_elements[ptr->colour_map_size];
   uint16_t index_relative = 0; // get expected pixel position
   uint16_t expected_pixel_count = 0; // get expected pixel position
@@ -3021,7 +3177,7 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
   }
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
+  //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "fMapIDs_Type=%d"),ptr->flags.fMapIDs_Type);
   #endif
 
   switch(ptr->flags.fMapIDs_Type){
@@ -3092,6 +3248,13 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
     break;
   }
 
+  if(animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique){
+    HsbColor hsb = RgbColor(colour.R, colour.G, colour.B);
+    hsb.S = GetRandomSaturationVariation(100,8,92,100)/100.0f;
+    colour = hsb;
+    // add to keep ww/cw
+  }
+
   return colour;
 
 } // end function
@@ -3101,6 +3264,10 @@ RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uin
 ************ END OF PALETTE DEFINITIONS ********************************************************************************************
 ********************************************************************************************************************
 ********************************************************************************************************************/
+
+
+
+
 
 
 
@@ -3343,12 +3510,12 @@ void mInterfaceLight::getActualRGBCW(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t
      _briRGB,_briCT);
   #endif
   
-  if (r) { *r = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.R, 0, 255, 0, _briRGB) : 0; }
-  if (g) { *g = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.G, 0, 255, 0, _briRGB) : 0; }
-  if (b) { *b = rgb_channels_on ? mSupport::changeUIntScale(tasint_colour.B, 0, 255, 0, _briRGB) : 0; }
+  if (r) { *r = rgb_channels_on ? mapvalue(tasint_colour.R, 0, 255, 0, _briRGB) : 0; }
+  if (g) { *g = rgb_channels_on ? mapvalue(tasint_colour.G, 0, 255, 0, _briRGB) : 0; }
+  if (b) { *b = rgb_channels_on ? mapvalue(tasint_colour.B, 0, 255, 0, _briRGB) : 0; }
 
-  if (c) { *c = ct_channels_on  ? mSupport::changeUIntScale(tasint_colour.WC, 0, 255, 0, _briCT) : 0; }
-  if (w) { *w = ct_channels_on  ? mSupport::changeUIntScale(tasint_colour.WW, 0, 255, 0, _briCT) : 0; }
+  if (c) { *c = ct_channels_on  ? mapvalue(tasint_colour.WC, 0, 255, 0, _briCT) : 0; }
+  if (w) { *w = ct_channels_on  ? mapvalue(tasint_colour.WW, 0, 255, 0, _briCT) : 0; }
 
   #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("agetActualRGBCW result %d,%d,%d,%d,%d %d,%d"),*r,*g,*b,*w,*c,   _briRGB,_briCT);
@@ -3387,11 +3554,11 @@ uint8_t mInterfaceLight::getBriCT() {
 
 
 uint8_t mInterfaceLight::DimmerToBri(uint8_t dimmer) {
-  return mSupport::changeUIntScale(dimmer, 0, 100, 0, 255);  // 0..255
+  return mapvalue(dimmer, 0, 100, 0, 255);  // 0..255
 }
 
 uint8_t mInterfaceLight::BriToDimmer(uint8_t bri) {
-  uint8_t dimmer = mSupport::changeUIntScale(bri, 0, 255, 0, 100);
+  uint8_t dimmer = mapvalue(bri, 0, 255, 0, 100);
   // if brightness is non zero, force dimmer to be non-zero too
   if ((dimmer == 0) && (bri > 0)) { dimmer = 1; }
   return dimmer;
@@ -3420,7 +3587,7 @@ uint16_t mInterfaceLight::getCT(){
 
 // get the CT value within the range into a 10 bits 0..1023 value
 uint16_t mInterfaceLight::getCT10bits() {
-  return mSupport::changeUIntScale(_ct, _ct_min_range, _ct_max_range, 0, 1023);
+  return mapvalue(_ct, _ct_min_range, _ct_max_range, 0, 1023);
 }
 
 void mInterfaceLight::setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) {
@@ -3479,7 +3646,7 @@ void mInterfaceLight::setCT(uint16_t ct) {
     setColorMode(LCM_RGB);  // try deactivating CT mode, setColorMode() will check which is legal
   } else {
     ct = (ct < CT_MIN ? CT_MIN : (ct > CT_MAX ? CT_MAX : ct));
-    tasint_colour.WW = mSupport::changeUIntScale(ct, _ct_min_range, _ct_max_range, 0, 255);
+    tasint_colour.WW = mapvalue(ct, _ct_min_range, _ct_max_range, 0, 255);
     tasint_colour.WC = 255 - tasint_colour.WW;
     _ct = ct;
     addCTMode();
@@ -3515,13 +3682,13 @@ void mInterfaceLight::setCW(uint8_t c, uint8_t w, bool free_range) {
   } else {
     if (!free_range) {
       // we need to normalize to sum = 255
-      tasint_colour.WW = mSupport::changeUIntScale(w, 0, sum, 0, 255);
+      tasint_colour.WW = mapvalue(w, 0, sum, 0, 255);
       tasint_colour.WC = 255 - tasint_colour.WW;
     } else {  // we normalize to max = 255
-      tasint_colour.WW = mSupport::changeUIntScale(w, 0, max, 0, 255);
-      tasint_colour.WC = mSupport::changeUIntScale(c, 0, max, 0, 255);
+      tasint_colour.WW = mapvalue(w, 0, max, 0, 255);
+      tasint_colour.WC = mapvalue(c, 0, max, 0, 255);
     }
-    _ct = mSupport::changeUIntScale(w, 0, sum, _ct_min_range, _ct_max_range);
+    _ct = mapvalue(w, 0, sum, _ct_min_range, _ct_max_range);
     addCTMode();   // activate CT mode if needed
     if (_color_mode & LCM_CT) { _briCT = free_range ? max : (sum > 255 ? 255 : sum); }
   }
@@ -3546,9 +3713,9 @@ uint8_t mInterfaceLight::setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri) 
     setColorMode(LCM_CT);   // try deactivating RGB, setColorMode() will check if this is legal
   } else {
     if (255 > max) {        // we need to normalize rgb
-      r = mSupport::changeUIntScale(r, 0, max, 0, 255);
-      g = mSupport::changeUIntScale(g, 0, max, 0, 255);
-      b = mSupport::changeUIntScale(b, 0, max, 0, 255);
+      r = mapvalue(r, 0, max, 0, 255);
+      g = mapvalue(g, 0, max, 0, 255);
+      b = mapvalue(b, 0, max, 0, 255);
     }
     addRGBMode();
   }
@@ -3646,13 +3813,13 @@ void mInterfaceLight::RgbToHsb(uint8_t ir, uint8_t ig, uint8_t ib, uint16_t *r_h
   uint8_t bri = max;  // 0..255
 
   if (d != 0) {
-    sat = mSupport::changeUIntScale(d, 0, max, 0, 255);
+    sat = mapvalue(d, 0, max, 0, 255);
     if (r == max) {
-      hue = (g > b) ?       mSupport::changeUIntScale(g-b,0,d,0,60) : 360 - mSupport::changeUIntScale(b-g,0,d,0,60);
+      hue = (g > b) ?       mapvalue(g-b,0,d,0,60) : 360 - mapvalue(b-g,0,d,0,60);
     } else if (g == max) {
-      hue = (b > r) ? 120 + mSupport::changeUIntScale(b-r,0,d,0,60) : 120 - mSupport::changeUIntScale(r-b,0,d,0,60);
+      hue = (b > r) ? 120 + mapvalue(b-r,0,d,0,60) : 120 - mapvalue(r-b,0,d,0,60);
     } else {
-      hue = (r > g) ? 240 + mSupport::changeUIntScale(r-g,0,d,0,60) : 240 - mSupport::changeUIntScale(g-r,0,d,0,60);
+      hue = (r > g) ? 240 + mapvalue(r-g,0,d,0,60) : 240 - mapvalue(g-r,0,d,0,60);
     }
     hue = hue % 360;    // 0..359
   }
@@ -3674,9 +3841,9 @@ void mInterfaceLight::HsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *
   if (sat > 0) {
     uint8_t i = hue / 60;   // quadrant 0..5
     uint8_t f = hue % 60;   // 0..59
-    uint8_t q = 255 - mSupport::changeUIntScale(f, 0, 60, 0, sat);  // 0..59
+    uint8_t q = 255 - mapvalue(f, 0, 60, 0, sat);  // 0..59
     uint8_t p = 255 - sat;
-    uint8_t t = 255 - mSupport::changeUIntScale(60 - f, 0, 60, 0, sat);
+    uint8_t t = 255 - mapvalue(60 - f, 0, 60, 0, sat);
     switch (i) {
       case 0: g = t; b = p; break;
       case 1: r = q; b = p; break;
@@ -3837,7 +4004,7 @@ void mInterfaceLight::changeCTB(uint16_t new_ct, uint8_t briCT) {
 
 
 void mInterfaceLight::changeDimmer(uint8_t dimmer, uint32_t mode) {
-  uint8_t bri = mSupport::changeUIntScale(dimmer, 0, 100, 0, 255);
+  uint8_t bri = mapvalue(dimmer, 0, 100, 0, 255);
   switch (mode) {
     case 1:
       changeBriRGB(bri);
@@ -3927,7 +4094,7 @@ void mInterfaceLight::UpdateFinalColourComponents(uint8_t *_current_color) {
   briCT  = getBriCT();
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_INFO, "After1 brightness _current_color (%d %d %d %d %d -- rgb%d ct%d)",
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, "After1 brightness _current_color (%d %d %d %d %d -- rgb%d ct%d)",
     r,g,b,c,w,briRGB,briCT
   );
   #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
@@ -3970,7 +4137,7 @@ void mInterfaceLight::UpdateFinalColourComponents(uint8_t *_current_color) {
    
   // #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_INFO, "AFTER2 brightness _current_color (%d %d %d %d %d)",
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, "AFTER2 brightness _current_color (%d %d %d %d %d)",
     _current_color[0],_current_color[1],_current_color[2],_current_color[3],_current_color[4]
   );
   #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
@@ -4034,11 +4201,11 @@ HsbColor mInterfaceLight::GetColour_HSB(void){
 \*********************************************************************************************/
 // 8 to 10 to 8 is garanteed to give the same result
 uint16_t mInterfaceLight::change8to10(uint8_t v) {
-  return mSupport::changeUIntScale(v, 0, 255, 0, 1023);
+  return mapvalue(v, 0, 255, 0, 1023);
 }
 // change from 10 bits to 8 bits, but any non-zero input will be non-zero
 uint8_t mInterfaceLight::change10to8(uint16_t v) {
-  return (0 == v) ? 0 : mSupport::changeUIntScale(v, 4, 1023, 1, 255);
+  return (0 == v) ? 0 : mapvalue(v, 4, 1023, 1, 255);
 }
 
 /*********************************************************************************************\
@@ -4054,7 +4221,7 @@ uint16_t mInterfaceLight::ledGamma_internal(uint16_t v, const struct gamma_table
     uint16_t to_src = gt->to_src;
     uint16_t to_gamma = gt->to_gamma;
     if (v <= to_src) {
-      return mSupport::changeUIntScale(v, from_src, to_src, from_gamma, to_gamma);
+      return mapvalue(v, from_src, to_src, from_gamma, to_gamma);
     }
     from_src = to_src;
     from_gamma = to_gamma;
@@ -4069,7 +4236,7 @@ uint16_t mInterfaceLight::ledGammaReverse_internal(uint16_t vg, const struct gam
     uint16_t to_src = gt->to_src;
     uint16_t to_gamma = gt->to_gamma;
     if (vg <= to_gamma) {
-      return mSupport::changeUIntScale(vg, from_gamma, to_gamma, from_src, to_src);
+      return mapvalue(vg, from_gamma, to_gamma, from_src, to_src);
     }
     from_src = to_src;
     from_gamma = to_gamma;
@@ -4133,8 +4300,8 @@ void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
 //         // we calculate the gamma corrected sum of CW + WW
 //         uint16_t white_bri_gamma10 = ledGamma10_10(white_bri10_1023);
 //         // then we split the total energy among the cold and warm leds
-//         cur_col_10[cw0] = mSupport::changeUIntScale(cur_col_10[cw0], 0, white_bri10_1023, 0, white_bri_gamma10);
-//         cur_col_10[cw1] = mSupport::changeUIntScale(cur_col_10[cw1], 0, white_bri10_1023, 0, white_bri_gamma10);
+//         cur_col_10[cw0] = mapvalue(cur_col_10[cw0], 0, white_bri10_1023, 0, white_bri_gamma10);
+//         cur_col_10[cw1] = mapvalue(cur_col_10[cw1], 0, white_bri10_1023, 0, white_bri_gamma10);
 //       } else {
 //         cur_col_10[cw0] = ledGamma10_10(cur_col_10[cw0]);
 //         cur_col_10[cw1] = ledGamma10_10(cur_col_10[cw1]);
@@ -4207,8 +4374,8 @@ void mInterfaceLight::LightCalcPWMRange(void) {
   //   pwm_min = ledGamma10_10(pwm_min);       // apply gamma correction
   //   pwm_max = ledGamma10_10(pwm_max);       // 0..1023
   // }
-  // pwm_min = pwm_min > 0 ? mSupport::changeUIntScale(pwm_min, 1, 1023, 1, Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
-  // pwm_max = mSupport::changeUIntScale(pwm_max, 1, 1023, 1, Settings.pwm_range);  // pwm_max cannot be zero
+  // pwm_min = pwm_min > 0 ? mapvalue(pwm_min, 1, 1023, 1, Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
+  // pwm_max = mapvalue(pwm_max, 1, 1023, 1, Settings.pwm_range);  // pwm_max cannot be zero
 
   pwm_min = pwm_min;
   pwm_max = pwm_max;

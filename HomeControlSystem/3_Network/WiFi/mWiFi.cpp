@@ -1,19 +1,45 @@
 #include "mWiFi.h"
 
-// checked against tasmota october 2020
-
-// #ifdef ESP8266
-
 #ifdef ESP8266
 extern "C" {
  #include "user_interface.h"
 }
 #endif
 
-
-
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function){
+
+// if(wifi_counter_tester>180){
+//   // Serial.println("UpTime");
+
+//  if(WiFi.status() != WL_CONNECTED){
+//   Serial.println("WiFi.status()");
+
+
+//     WiFi.begin("Skynet2400", "af4d8bc9ab");
+
+//     while (WiFi.status() != WL_CONNECTED) {
+//         delay(500);
+//         Serial.print(".");
+//     }
+
+// //     Serial.println("");
+// //     Serial.println("WiFi connected.");
+// //     Serial.println("IP address: ");
+//     Serial.println(WiFi.localIP());
+
+//   }
+
+// }else
+// if(wifi_counter_tester>300){
+
+//   WiFi.disconnect(true);
+
+
+// }
+  #ifdef DISABLE_FOR_FAULTY_ESP32_FLICKERING
+    return 0;
+  #endif
 
 
   switch(function){
@@ -25,13 +51,18 @@ int8_t mWiFi::Tasker(uint8_t function){
     break;
     case FUNC_EVERY_SECOND:
       // AddLog_P(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
-      
-    //if (pCONT_set->Settings.flag4.network_wifi) {
-      WifiCheck(pCONT_set->wifi_state_flag);
-      pCONT_set->wifi_state_flag = WIFI_RESTART;
-    // }
-    //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
+
+      // #ifdef ESP32
+      AddLog_P(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
+      // #endif
+
+      if (pCONT_set->Settings.flag_network.network_wifi) {
+        WifiCheck(pCONT_set->wifi_state_flag);
+        pCONT_set->wifi_state_flag = WIFI_RESTART;
+      }
+            
+      //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
   }
@@ -72,12 +103,16 @@ void mWiFi::WifiConfig(uint8_t type)
       connection.config_type = WIFI_SERIAL; 
     }
     #endif  // USE_MODULE_CORE_WEBSERVER
- 
+//  DEBUG_LINE_HERE;
     connection.config_counter = WIFI_CONFIG_SEC;   // Allow up to WIFI_CONFIG_SECS seconds for phone to provide ssid/pswd
     connection.counter = connection.config_counter +5;
     // blinks = 1999;
     if (WIFI_RESTART == connection.config_type) {// connection.reconnects_counter++;
-    //  restart_flag = 2; restarts device, make this a user flag
+    
+//  DEBUG_LINE_HERE;
+//  #ifndef ESP8266
+//       pCONT_set->restart_flag = 2; //restarts device, make this a user flag
+//       #endif
     }
     else if (WIFI_SERIAL == connection.config_type) {
       AddLog_P(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
@@ -91,6 +126,10 @@ void mWiFi::WifiConfig(uint8_t type)
   }else{
     AddLog_P(LOG_LEVEL_INFO, PSTR("else connection.config_type"));
   }
+
+DEBUG_LINE_HERE;
+
+
 }
 
 
@@ -110,7 +149,9 @@ void mWiFi::WifiConnectAP(uint8_t ap_index){
 //checked
 void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 {
-// AddLog_P(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
+AddLog_P(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
+
+delay(2000);
 
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
 
@@ -239,9 +280,12 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 //chcked
 void mWiFi::ScanBestAndBeginWifi()
 {
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
+  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
   
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
+//   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
+
+
+// delay(2000);
 
   static int8_t best_network_db;
 
@@ -249,7 +293,6 @@ void mWiFi::ScanBestAndBeginWifi()
   if (0 == connection.scan_state) { 
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(0 == connection.scan_state)"));
     return;
-    //connection.scan_state = 2;   
   }
   // Init scan when not connected
   if (1 == connection.scan_state) {
@@ -268,9 +311,9 @@ void mWiFi::ScanBestAndBeginWifi()
     connection.scan_state = 3;
 
 
-    char buffer[100];
-    sprintf(buffer, "Scan is about to start %s", pCONT_time->mtime.hhmmss_ctr);
-    pCONT_mqtt->ppublish("alert/wifi_scan",buffer,false);
+    // char buffer[100];
+    // sprintf(buffer, "Scan is about to start %s", pCONT_time->mtime.hhmmss_ctr);
+    // pCONT_mqtt->ppublish("alert/wifi_scan",buffer,false);
 
 
   }
@@ -310,28 +353,59 @@ void mWiFi::ScanBestAndBeginWifi()
         uint8_t* bssid_scan;
         int32_t chan_scan;
         bool hidden_scan;
+/**
+ * loads all infos from a scanned wifi in to the ptr parameters
+ * @param networkItem uint8_t
+ * @param ssid  const char**
+ * @param encryptionType uint8_t *
+ * @param RSSI int32_t *
+ * @param BSSID uint8_t **
+ * @param channel int32_t *
+ * @return (true if ok)
+ */
 
+// DEBUG_LINE_HERE;
+// delay(2000);
         #ifdef ESP8266
           WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, bssid_scan, chan_scan, hidden_scan);
+        #else
+          WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, bssid_scan, chan_scan);
         #endif
+// DEBUG_LINE_HERE;
+// delay(2000);
         bool known = false;
-        uint8_t j;
-        for (j = 0; j < D_MAX_SSIDS; j++) {
+        uint8_t j;DEBUG_LINE_HERE;
+        for (j = 0; j < D_MAX_SSIDS; j++) {DEBUG_LINE_HERE;
           if (ssid_scan == pCONT_set->Settings.sta_ssid[j]) {  // SSID match
+          DEBUG_LINE_HERE;
+          // #ifdef 
+          //   AddLog_P(LOG_LEVEL_TEST, PSTR("%s"),ssid_scan);
+
             known = true;
             if (rssi_scan > best_network_db) {      // Best network
-              //  #ifdef ESP8266
+            AddLog_P(LOG_LEVEL_TEST, PSTR("rssi_scan > best_network_db"));
+               #ifdef ESP8266
                 if (sec_scan == ENC_TYPE_NONE || pCONT_set->Settings.sta_pwd[j]) {  // Check for passphrase if not open wlan
-              //  #else
-              //   if (pCONT_set->Settings.sta_pwd[j]) {  // Check for passphrase if not open wlan               
-              //  #endif
+               #else
+                if (pCONT_set->Settings.sta_pwd[j]) {  // Check for passphrase if not open wlan               
+               #endif
                 best_network_db = (int8_t)rssi_scan;
                 channel = chan_scan;
                 ap = j;                             // AP1 or AP2
                 memcpy((void*) &connection.bssid, (void*) bssid_scan, sizeof(connection.bssid));
+
+                
+            AddLog_Array(LOG_LEVEL_TEST, "break", connection.bssid, (uint8_t)6);
+
+            
               }
             }
+            AddLog_P(LOG_LEVEL_TEST, PSTR("break"));
             break;
+          }else{
+          
+            // AddLog_P(LOG_LEVEL_TEST, PSTR("ssid_scan[\"%s\"] != pCONT_set->Settings.sta_ssid[%d] \"%s\""),ssid_scan,j,pCONT_set->Settings.sta_ssid[j]);
+
           }
         }
         // AddLog_P(LOG_LEVEL_INFO, 
@@ -354,7 +428,7 @@ void mWiFi::ScanBestAndBeginWifi()
                     '-')));
           
             AddLog_P(LOG_LEVEL_INFO, 
-                        PSTR(D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, RSSI %d"), 
+                        PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_WIFI "Network %d, AP%c, SSId %s, Channel %d, RSSI %d"), 
                         i, known_c, ssid_scan.c_str(), chan_scan, rssi_scan
                       );
         }
@@ -364,6 +438,7 @@ void mWiFi::ScanBestAndBeginWifi()
       WiFi.scanDelete();                            // Clean up Ram
       delay(0);
     }
+    DEBUG_LINE_HERE;
     connection.scan_state = 0;
     // If bssid changed then (re)connect wifi
     for (uint8_t i = 0; i < sizeof(connection.bssid); i++) {
@@ -372,6 +447,9 @@ void mWiFi::ScanBestAndBeginWifi()
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
         WifiBegin(ap, channel);                     // 0 (AP1), 1 (AP2) or 3 (default AP)
         break;
+      }else{
+        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "last_bssid[i] ================= connection.bssid[i]"));
+
       }
     }
   }
@@ -390,7 +468,23 @@ uint16_t mWiFi::WifiLinkCount()
 // checked
 void mWiFi::WifiSetState(uint8_t state)
 {
-  //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"state",state);
+
+//check for change in state
+if(connection.fConnected != state){
+  if(state){ //new state 
+    pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
+  }else{
+    pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+  }
+}
+
+  connection.fConnected = state;
+
+  
+  if(state == 0){
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"WifiSetState",state);
+  }
+
   if (state == pCONT_set->global_state.wifi_down) {
     if (state) {
       // pCONT_set->rules_flag.wifi_connected = 1;
@@ -406,9 +500,15 @@ void mWiFi::WifiSetState(uint8_t state)
   //    AddLog_P(LOG_LEVEL_DEBUG_MORE, "pCONT->mt==NULL");
   // }
   pCONT_set->global_state.wifi_down = state ^1;
+  if (!pCONT_set->global_state.wifi_down) {
+    pCONT_set->global_state.network_down = 0;
+  }
+
+  
 }
 
 
+#ifdef ESP8266
 #if LWIP_IPV6
 bool WifiCheckIPv6(void)
 {
@@ -438,9 +538,16 @@ bool WifiCheckIPAddrStatus(void)	// Return false for 169.254.x.x or fe80::/64
   return ip_global;
 }
 #endif  // LWIP_IPV6=1
+#endif // ESP8266
 
 // new for me?
 bool mWiFi::WifiCheckIpConnected(){
+
+  // return false;
+  
+
+
+
   if ((WL_CONNECTED == WiFi.status()) && 
       (static_cast<uint32_t>(WiFi.localIP()) != 0) &&
       (WiFi.localIP().toString()!="(IP unset)")
@@ -451,19 +558,24 @@ bool mWiFi::WifiCheckIpConnected(){
 }
 
 
+
 //checked
 void mWiFi::WifiCheckIp(void)
 {
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
 
-#if LWIP_IPV6
-  if(WifiCheckIPAddrStatus()) {
-    Wifi.status = WL_CONNECTED;
-#else
+
+  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG DEBUG_INSERT_PAGE_BREAK "mWiFi::WifiCheckIp"));
+
+  // return;
+
+// #if defined(LWIP_IPV6) && defined(ESP8266)
+//   if(WifiCheckIPAddrStatus()) {
+//     Wifi.status = WL_CONNECTED;
+// #else
   if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0)) {
-#endif  // LWIP_IPV6=1
+// #endif  // LWIP_IPV6=1
     
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DEBUG "WiFi.status() = WL_CONNECTED"));
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "WiFi.status() = WL_CONNECTED"));
 
     WifiSetState(1);
     connection.counter = WIFI_CHECK_SEC; //20 secs
@@ -607,7 +719,7 @@ void mWiFi::WifiCheckIp(void)
       connection.retry--;
     } else {
       
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
       WifiConfig(wifi_config_tool);
       connection.counter = 1;
       connection.retry = connection.retry_init;
@@ -619,13 +731,24 @@ void mWiFi::WifiCheckIp(void)
 // Primary health checker
 void mWiFi::WifiCheck(uint8_t param)
 {
+
+  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+    // return;
+  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
   
   #ifdef ENABLE_WIFI_DEVELOPMENT
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
   #endif
 
-  //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"connection.counter",connection.counter,"param",param);
-  //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"connection.config_counter",connection.config_counter,"connection.counter",connection.counter);
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("connection.config_counter=%d"),connection.config_counter);
+
+  // if(WifiCheckIpConnected()){
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR("RETURNING NOW ITS CONNECTED F::%s"),__FUNCTION__);
+  //   return;
+  // }
+
+  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"connection.counter",connection.counter,"param",param);
+  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE ", " D_JSON_COMMAND_NVALUE),"config_counter",connection.config_counter,"counter",connection.counter);
 
   // if ((WL_CONNECTED != WiFi.status()) || (static_cast<uint32_t>(WiFi.localIP()) == 0)) {
   //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s=%d,%s=%d,%s=%d"),"connection.+_counter",connection.config_counter,"connection.counter",connection.counter,"connection.+_state",connection.scan_state);
@@ -638,14 +761,21 @@ void mWiFi::WifiCheck(uint8_t param)
     case WIFI_MANAGER:
       WifiConfig(param);
       break;
-    case WIFI_RESTART:
+    // case WIFI_RESTART:
     default: 
 
+      /**
+       * config_counter updates config
+       * */
       if (connection.config_counter) {
+        
+        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_WIFI "WifiCheck " "config_counter=%d"), connection.config_counter);
+
         connection.config_counter--;
         connection.counter = connection.config_counter +5;
         if (connection.config_counter) {
           
+          // If we reach ZERO, then retry connection on default
           if (!connection.config_counter) {
             if (strlen(WiFi.SSID().c_str())) {
               strlcpy(pCONT_set->Settings.sta_ssid[0], WiFi.SSID().c_str(), sizeof(pCONT_set->Settings.sta_ssid[0]));
@@ -654,22 +784,25 @@ void mWiFi::WifiCheck(uint8_t param)
               strlcpy(pCONT_set->Settings.sta_pwd[0], WiFi.psk().c_str(), sizeof(pCONT_set->Settings.sta_pwd[0]));
             }
             pCONT_set->Settings.sta_active = 0;
-            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WCFG_1_SMARTCONFIG D_JSON_SSID "1 %s"), pCONT_set->Settings.sta_ssid[0]);
+            AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_JSON_SSID "Retrying original config \"%s\""), pCONT_set->Settings.sta_ssid[0]);
           }
 
         }
-        // if (!connection.config_counter) {        
-        //   pCONT_set->restart_flag = 2;
-        // }
+        // Delayed by the above code by 5 seconds
+        if (!connection.config_counter) {        
+          // pCONT_set->restart_flag = 2;
+          AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WifiCheck " "restart_flag = 2"));
+        }
+
       } else {
 
         if (connection.scan_state) { 
-          AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"connection.scan_state",connection.scan_state);
+          AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"scan_state",connection.scan_state);
           ScanBestAndBeginWifi(); 
         }
 
         if (connection.counter <= 0) {
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION "%s=%d"),"connection.counter LESS THAN 0",connection.counter);
+          AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
           connection.counter = WIFI_CHECK_SEC;
           WifiCheckIp();
         }
@@ -687,57 +820,71 @@ void mWiFi::WifiCheck(uint8_t param)
 
 
       // Still connected
-      if ((WL_CONNECTED == WiFi.status()) && 
-          (static_cast<uint32_t>(WiFi.localIP()) != 0) 
-          // && !(WiFi.localIP()!="")
-          ){//} && !connection.config_type) {
+      // if (WifiCheckIpConnected() && !connection.config_type){
+          
+      //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"Connected, Restarted, Begin services");
 
-        // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"Connected, Restarted, Begin services");
-
-        WifiSetState(1);
+      //   WifiSetState(1);
         
-        pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
+      //   pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
 
-        //if (pCONT_set->Settings.flag_network.use_wifi_rescan) {
-          if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
-            connection.scan_state = 2;
-            // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"WIFI_RESCAN_MINUTES occurred connection.scan_state = 2");
-          }
-        //}
+      //   //if (pCONT_set->Settings.flag_network.use_wifi_rescan) {
+      //     if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
+      //       connection.scan_state = 2;
+      //       // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"WIFI_RESCAN_MINUTES occurred connection.scan_state = 2");
+      //     }
+      //   //}
 
-/*
-#if LWIP_IPV6
-      if (WifiCheckIPAddrStatus()) {
-#else
-      if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0) && !Wifi.config_type) {
-#endif  // LWIP_IPV6=1
-        WifiSetState(1);
-        if (Settings.flag3.use_wifi_rescan) {  // SetOption57 - Scan wifi network every 44 minutes for configured AP's
-          if (!(uptime % (60 * WIFI_RESCAN_MINUTES))) {
-            Wifi.scan_state = 2;
-          }
-        }
-      } else {
-        WifiSetState(0);
-        Mdns.begun = 0;
-      }
-    }*/
-        #ifdef USE_MODULE_CORE_WEBSERVER
-          if (pCONT_set->Settings.webserver) {
-            pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
-          } else {
-            pCONT_web->StopWebserver();
-          }
-        #endif  // USE_MODULE_CORE_WEBSERVER
 
-      } else {
-
-        WifiSetState(0);
+    // #if LWIP_IPV6
+    //       if (WifiCheckIPAddrStatus()) {
+    // #else
+          if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0) && !connection.config_type) {
+    //#endif /// LWIP_IPV6=1
     
-        //pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+        // Serial.printf( " if ((WL_CONNECTED == WiFi.status())\n\r");
 
-      }
-    } //if discovery
+        //resting state, connected and healthy
+
+
+            WifiSetState(1);
+
+//needs to check if state changed (do in wifisetstate?)
+            // 
+
+            if (pCONT_set->Settings.flag_network.use_wifi_rescan) {  // SetOption57 - Scan wifi network every 44 minutes for configured AP's
+              if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
+                connection.scan_state = 2;
+              }
+            }
+
+            
+            #ifdef USE_MODULE_CORE_WEBSERVER
+              if (pCONT_set->Settings.webserver) {
+                pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
+              } else {
+                pCONT_web->StopWebserver();
+              }
+            #endif  // USE_MODULE_CORE_WEBSERVER
+
+
+          } else {
+            
+        Serial.printf( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
+            WifiSetState(0);
+            // Mdns.begun = 0;
+          }
+        }//END else
+
+
+      // } else {
+
+      //   WifiSetState(0);
+    
+      //   //pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+
+      // }
+    //} //if discovery
   }
 }
 
@@ -762,8 +909,8 @@ void mWiFi::WifiConnect(void)
   WiFi.persistent(false);     // Solve possible wifi init errors
   connection.status = 0;
   
-  connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((ESP.getChipId() & 0xF) * 2); //ESP_getChipId function to allow esp8266/esp32
-
+  connection.retry_init = WIFI_RETRY_OFFSET_SEC + ((mSupportHardware::ESP_getChipId() & 0xF) * 2); //ESP_getChipId function to allow esp8266/esp32
+  
   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "connection.retry_init=%d"),connection.retry_init);
 
   connection.retry = connection.retry_init;
@@ -817,7 +964,15 @@ void mWiFi::WifiShutdown(bool option)
     // Courtesy of EspEasy
     // WiFi.persistent(true);    // use SDK storage of SSID/WPA parameters
     ETS_UART_INTR_DISABLE();
+
+  //tmp fix
+#ifdef ESP8266
     wifi_station_disconnect();  // this will store empty ssid/wpa into sdk storage
+    #else
+
+    // erase ap: empty ssid, ...
+    WiFi.disconnect(true, true); //inside compat
+    #endif
     ETS_UART_INTR_ENABLE();
     // WiFi.persistent(false);   // Do not use SDK storage of SSID/WPA parameters
   // }

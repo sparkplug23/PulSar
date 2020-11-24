@@ -575,8 +575,13 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
           // #ifdef USE_INTERFACE_NEW
           //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
           // #else
-            result = mwif->Tasker(function); 
           // #endif
+
+          //#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+
+            result = mwif->Tasker(function); 
+
+          //#endif
         
         
         
@@ -595,25 +600,64 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
         break;
       #endif
       #ifdef D_MODULE_CORE_SUPPORT_ID
-        case D_MODULE_CORE_SUPPORT_ID:    result = msup->Tasker(function);  break;
+        case D_MODULE_CORE_SUPPORT_ID:    
+        
+          // #ifdef DISBALE_TEST_SECTION
+          result = msup->Tasker(function);  
+          // #endif
+          
+          break;
       #endif
       #ifdef D_MODULE_CORE_LOGGING_ID
-        case D_MODULE_CORE_LOGGING_ID:  result = msup->Tasker(function);  break;
+        case D_MODULE_CORE_LOGGING_ID:  
+        
+          // #ifdef DISBALE_TEST_SECTION
+          
+          result = msup->Tasker(function); 
+          // #endif
+           break;
       #endif
       #ifdef D_MODULE_CORE_TIME_ID
-        case D_MODULE_CORE_TIME_ID:       result = mt->Tasker(function);  break;
+        case D_MODULE_CORE_TIME_ID:       
+        
+          
+          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          result = mt->Tasker(function); 
+          
+          #endif
+          
+           break;
       #endif
       #ifdef D_MODULE_NETWORK_MQTT_ID
-        case D_MODULE_NETWORK_MQTT_ID:       result = mqt->Tasker(function);  break;
+        case D_MODULE_NETWORK_MQTT_ID:    
+          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+           result = mqt->Tasker(function);  
+           #endif
+           
+           break;
       #endif
       #ifdef D_MODULE_NETWORK_WEBSERVER_ID
         case D_MODULE_NETWORK_WEBSERVER_ID:  result = mweb->Tasker(function); break;
       #endif
       #ifdef D_MODULE_CORE_TELEMETRY_ID
-      case D_MODULE_CORE_TELEMETRY_ID:    result = mtel->Tasker(function); break;
+      case D_MODULE_CORE_TELEMETRY_ID:    
+      
+          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          
+          result = mtel->Tasker(function); 
+          #endif
+          
+          break;
       #endif
       #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-        case D_MODULE_CORE_HARDWAREPINS_ID:  result = mod->Tasker(function); break;
+        case D_MODULE_CORE_HARDWAREPINS_ID:  
+        
+          // #ifdef DISBALE_TEST_SECTION
+          result = mod->Tasker(function); 
+          
+          
+          // #endif
+          break;
       #endif
       //Sensors
       #ifdef D_MODULE_SENSORS_DOOR_ID

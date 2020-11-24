@@ -387,6 +387,8 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     case FUNC_EVERY_MINUTE:
     // Change to saving using counter later, Settings.save_data
       // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+
+      Serial.println("FUNC_EVERY_MINUTE");
       
 // #ifdef DISABLE_SETTINGS_SAVING_BUG
       pCONT_set->SettingsSave(1);
@@ -397,25 +399,25 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
 
           
-      #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
-        #ifdef DEBUG_SERIAL_TESTING
-          Settings.seriallog_level = LOG_LEVEL_INFO_PARSING;
-        #else
-          Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
-        #endif
-        Settings.weblog_level = LOG_LEVEL_INFO;
-        //Settings.telnetlog_level = LOG_LEVEL_INFO;
-        Settings.seriallog_level = LOG_LEVEL_DEBUG;
-        #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
-          enable_serial_logging_filtering = true;
-          Settings.seriallog_level = LOG_LEVEL_TEST;
-        #endif
-        //enable_web_logging_filtering = true;
-        //Settings.flog_time_short = true;
-        #ifdef DEBUG_FOR_FAULT
-          Settings.seriallog_level = LOG_LEVEL_ALL;
-        #endif
-      #endif
+      // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
+      //   #ifdef DEBUG_SERIAL_TESTING
+      //     Settings.seriallog_level = LOG_LEVEL_INFO_PARSING;
+      //   #else
+      //     Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
+      //   #endif
+      //   Settings.weblog_level = LOG_LEVEL_INFO;
+      //   //Settings.telnetlog_level = LOG_LEVEL_INFO;
+      //   Settings.seriallog_level = LOG_LEVEL_DEBUG;
+      //   #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
+      //     enable_serial_logging_filtering = true;
+      //     Settings.seriallog_level = LOG_LEVEL_TEST;
+      //   #endif
+      //   //enable_web_logging_filtering = true;
+      //   //Settings.flog_time_short = true;
+      //   #ifdef DEBUG_FOR_FAULT
+      //     Settings.seriallog_level = LOG_LEVEL_ALL;
+      //   #endif
+      // #endif
 
 
 
@@ -780,6 +782,7 @@ void mSettings::SetFlashModeDout(void)
   uint8_t *_buffer;
   uint32_t address;
 
+    #ifdef ESP8266
   eboot_command ebcmd;
   eboot_command_read(&ebcmd);
   address = ebcmd.args[0];
@@ -792,24 +795,30 @@ void mSettings::SetFlashModeDout(void)
     }
   }
   delete[] _buffer;
+  
+    #endif // ESP8266
 }
 
 void mSettings::SettingsBufferFree(void)
 {
+    #ifdef ESP8266
   if (settings_buffer != nullptr) {
     free(settings_buffer);
     settings_buffer = nullptr;
   }
+    #endif // ESP8266
 }
 
 bool mSettings::SettingsBufferAlloc(void)
 {
+    #ifdef ESP8266
   SettingsBufferFree();
   if (!(settings_buffer = (uint8_t *)malloc(sizeof(Settings)))) {
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_UPLOAD_ERR_2));  // Not enough (memory) space
     return false;
   }
   return true;
+    #endif // ESP8266
 }
 
 void mSettings::SettingsSaveAll(void)
@@ -866,7 +875,7 @@ void mSettings::SettingsLoad(void) {
   
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD));
 
-// #ifdef ESP8266
+#ifdef ESP8266
   // Load configuration from eeprom or one of 7 slots below if first valid load does not stop_flash_rotate
   // Activated with version 8.4.0.2 - Fails to read any config before version 6.6.0.11
   settings_location = 0;
@@ -918,6 +927,8 @@ void mSettings::SettingsLoad(void) {
 #endif  // FIRMWARE_MINIMAL
 
   RtcSettingsLoad();
+
+  #endif //  ESP8266
 }
 
 
@@ -961,6 +972,8 @@ uint32_t mSettings::GetSettingsCrc32(void)
 
 void mSettings::SettingsSave(uint8_t rotate)
 {
+  
+    #ifdef ESP8266
 /* Save configuration in eeprom or one of 7 slots below
  *
  * rotate 0 = Save in next flash slot
@@ -1022,6 +1035,7 @@ void mSettings::SettingsSave(uint8_t rotate)
   }
 // #endif  // FIRMWARE_MINIMAL
   RtcSettingsSave();
+  #endif //  ESP8266
 }
 
 
@@ -1383,7 +1397,7 @@ void mSettings::SettingsLoad_CheckSuccessful(){
   memset(my_hostname,0,sizeof(my_hostname));
   sprintf(my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
+  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_PROJECT " %s %s " D_VERSION " %s%s-" ARDUINO_ESP8266_RELEASE), pCONT_set->Settings.system_name.device, Settings.system_name.friendly, my_version, my_image);
   
 
 }
@@ -1409,15 +1423,20 @@ uint32_t mSettings::GetRtcSettingsCrc(void)
 
 void mSettings::RtcSettingsSave(void)
 {
+  
+    #ifdef ESP8266
   if (GetRtcSettingsCrc() != rtc_settings_crc) {
     RtcSettings.valid = RTC_MEM_VALID;
     ESP.rtcUserMemoryWrite(100, (uint32_t*)&RtcSettings, sizeof(RTCMEM));
     rtc_settings_crc = GetRtcSettingsCrc();
   }
+  
+    #endif// ESP8266
 }
 
 void mSettings::RtcSettingsLoad(void)
 {
+    #ifdef ESP8266
   ESP.rtcUserMemoryRead(100, (uint32_t*)&RtcSettings, sizeof(RTCMEM));  // 0x290
   if (RtcSettings.valid != RTC_MEM_VALID) {
     memset(&RtcSettings, 0, sizeof(RTCMEM));
@@ -1435,6 +1454,7 @@ void mSettings::RtcSettingsLoad(void)
     RtcSettingsSave();
   }
   rtc_settings_crc = GetRtcSettingsCrc();
+    #endif // ESP8266
 }
 
 bool mSettings::RtcSettingsValid(void)
@@ -1469,7 +1489,7 @@ void mSettings::SettingsDefault(void)
    //Serial.println("SettingsDefault");
    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
    SystemSettings_DefaultHeader();
-  //  Serial.println("SystemSettings_DefaultBody");
+   Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
 
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
@@ -1518,7 +1538,7 @@ void mSettings::SystemSettings_DefaultBody_System(void)
   Settings.seriallog_level = seriallog_level_during_boot;
   
 
-  // Settings.seriallog_level = SERIAL_LOG_LEVEL;
+  Settings.seriallog_level = SERIAL_LOG_LEVEL;
 
 
   Settings.syslog_port = SYS_LOG_PORT;
@@ -1576,6 +1596,8 @@ void mSettings::SystemSettings_DefaultBody_Network(){
   pCONT_sup->ParseIp(&Settings.ip_address[1], WIFI_GATEWAY);
   pCONT_sup->ParseIp(&Settings.ip_address[2], WIFI_SUBNETMASK);
   pCONT_sup->ParseIp(&Settings.ip_address[3], WIFI_DNS); 
+
+  Settings.flag_network.network_wifi = 1;
 
   // Serial.println("DONE"); Serial.flush();
 
@@ -1705,7 +1727,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   
   Settings.light_settings.type = 0;//LT_WS2812; //default for now
   for (uint8_t i = 0; i < MAX_PWMS; i++) {
-    Settings.light_settings.light_color[i] = 0;
+    // Settings.light_settings.light_color[i] = 0;
     Settings.pwm_value[i] = 0;
   }
   Settings.light_settings.light_correction = 0;
@@ -1724,9 +1746,9 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   // Settings.light_settings.ws_color[WS_HOUR][WS_GREEN] = 0;
   // Settings.light_settings.ws_color[WS_HOUR][WS_BLUE] = 0;
   
-  for (uint8_t j = 0; j < 5; j++) {
-    Settings.light_settings.rgbwwTable[j] = 255;
-  }
+  // for (uint8_t j = 0; j < 5; j++) {
+  //   Settings.light_settings.rgbwwTable[j] = 255;
+  // }
 
 }
 
@@ -1839,7 +1861,7 @@ void mSettings::SystemSettings_DefaultBody_Drivers(){
   // memcpy_P(Settings.rf_code[0], kDefaultRfCode, 9);
 
   // uint32_t      drivers[3];                // 794
-  memset(&Settings.drivers, 0xFF, 32);  // Enable all possible monitors, displays, drivers and sensors
+  //memset(&Settings.drivers, 0xFF, 32);  // Enable all possible monitors, displays, drivers and sensors
 
   ClearAllDeviceName();
 
@@ -1862,8 +1884,8 @@ void mSettings::SystemSettings_DefaultBody_Displays(){
   Settings.display.mode = 1;
   Settings.display.refresh = 2;
   Settings.display.rows = 2;
-  Settings.display.cols[0] = 16;
-  Settings.display.cols[1] = 8;
+  // Settings.display.cols[0] = 16;
+  // Settings.display.cols[1] = 8;
   Settings.display.dimmer = 1;
   Settings.display.size = 1;
   Settings.display.font = 1;
@@ -1981,7 +2003,7 @@ void mSettings::SettingsResetStd(void)
   // Settings.tflag[0].dow = TIME_STD_DAY;
   // Settings.tflag[0].month = TIME_STD_MONTH;
   // Settings.tflag[0].hour = TIME_STD_HOUR;
-  Settings.toffset[0] = TIME_STD_OFFSET;
+  // Settings.toffset[0] = TIME_STD_OFFSET;
 }
 
 void mSettings::SettingsResetDst(void)
@@ -1991,7 +2013,7 @@ void mSettings::SettingsResetDst(void)
   // Settings.tflag[1].dow = TIME_DST_DAY;
   // Settings.tflag[1].month = TIME_DST_MONTH;
   // Settings.tflag[1].hour = TIME_DST_HOUR;
-  Settings.toffset[1] = TIME_DST_OFFSET;
+  // Settings.toffset[1] = TIME_DST_OFFSET;
 }
 
 

@@ -15,10 +15,14 @@
 
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
+#ifdef ESP8266
 #include "AsyncJson.h"
+#endif //ESP8266
+
+
 #include "ArduinoJson.h"
 
-#define ENABLE_PIXEL_FUNCTION_FLASHER
+// #define ENABLE_PIXEL_FUNCTION_FLASHER
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
@@ -78,10 +82,11 @@
     const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
       {0,5,10,15,20,30,40,50,60,70,80,90,100};
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR) "ambilight";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR) "animation";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR)     "ambilight";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR)     "animation";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR) "notifications";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR) "flasher";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR)       "flasher";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)         "mixer";
 
 
     
@@ -117,6 +122,10 @@ DEFINE_PROGMEM_CTR(PM_FLASHER_REGION_TWINKLE_FLASH_NAME_CTR)                    
 DEFINE_PGM_CTR(PM_FLASHER_REGION_COLOUR_SELECT_NAME_CTR) D_FLASHER_REGION_COLOUR_SELECT_NAME_CTR;
 DEFINE_PGM_CTR(PM_FLASHER_REGION_ANIMATE_NAME_CTR) D_FLASHER_REGION_ANIMATE_NAME_CTR;
 
+#include <functional>
+// #define ANIM_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
+// #define ANIM_CALLBACK_SIGNATURE std::function<void(const AnimationParam& param)> callback
+#define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
 
 class mRGBAnimator{
   private:
@@ -137,6 +146,8 @@ class mRGBAnimator{
 
     void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     RgbTypeColor GetPixelColor(uint16_t indexPixel);
+
+    uint8_t counter_test = 0;
     
 
     #ifdef PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -149,24 +160,58 @@ class mRGBAnimator{
       NeoPixelBus<DotStarBgrFeature, DotStarMethod> *stripbus = nullptr; 
     #else 
     // SET Method
+      // #ifdef USE_WS28XX_METHOD_800KBPS
+      //   typedef Neo800KbpsMethod selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_BITBANG
+      //   typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_UART800KBPS
+      //   typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_I2S1_800KBPS_ESP32
+      //   typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
+      //   typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType;        
+      // #else
+      //   //   typedef Neo800KbpsMethod selectedNeoSpeedType;
+      //   #ifdef ENABLE_DEBUG_ESP_DECODER
+      //   typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
+      //   #else
+      //   typedef Neo800KbpsMethod selectedNeoSpeedType;
+      //   #endif
+      // #endif  
       #ifdef USE_WS28XX_METHOD_800KBPS
         typedef Neo800KbpsMethod selectedNeoSpeedType;
-      #elif USE_WS28XX_METHOD_BITBANG
+      #elif defined(USE_WS28XX_METHOD_BITBANG)
         typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-      #elif USE_WS28XX_METHOD_UART800KBPS
-        typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;
-      #elif USE_WS28XX_METHOD_I2S1_800KBPS_ESP32
-        typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
-      #elif USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
-        //typedef NeoEsp32Rmt0Ws2811Method selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_UART800KBPS
+      //   typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;
+      // #elif USE_WS28XX_METHOD_I2S1_800KBPS_ESP32
+      //   typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+      // #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
+      //  // typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType;    
+      //  typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;    
       #else
         //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-        #ifdef ENABLE_DEBUG_ESP_DECODER
-        typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-        #else
-        typedef Neo800KbpsMethod selectedNeoSpeedType;
-        #endif
+        // #ifdef ENABLE_DEBUG_ESP_DECODER
+        // typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
+        // #else
+        // typedef Neo800KbpsMethod selectedNeoSpeedType;
+
+        // NeoEsp32I2s1800KbpsMethod
+
+        // working, no wifi
+        //typedef NeoEsp32Rmt6800KbpsMethod selectedNeoSpeedType;
+        //test 2
+        typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType;
+        //  typedef NeoEsp32I2s1800KbpsMethod selectedNeoSpeedType;
+        // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+        // typedef NeoWs2811Method  selectedNeoSpeedType;
+        // typedef Neo800KbpsMethod selectedNeoSpeedType;
+
+        // #endif
       #endif  
+
+
+
       // Configure
         NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
       #endif
@@ -175,6 +220,8 @@ class mRGBAnimator{
     // #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
     // NeoPixelAnimator* animator_controller = nullptr;
     // #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+
+    uint8_t test_flag = false;
 
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
@@ -206,6 +253,7 @@ class mRGBAnimator{
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
+    uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;
     uint16_t animator_strip_size = ANIMATOR_SIZE_MAX; //allow variable control of size
 
     // what is stored for state is specific to the need, in this case, the colors.
@@ -218,8 +266,70 @@ class mRGBAnimator{
     AnimationColours animation_colours[STRIP_SIZE_MAX];
 
     void BlendAnimUpdate(const AnimationParam& param);
+    void AnimUpdate_ShowStartingThenDesiredColors(const AnimationParam& param);
 
- 
+    void StartAnimation_AsAnimUpdateMemberFunction();
+    void AnimUpdateMemberFunction(const AnimationParam& param);
+    void AnimUpdateMemberFunction_TraditionalChasing(const AnimationParam& param);
+    void AnimUpdateMemberFunction_TraditionalChasing2(const AnimationParam& param);
+    void AnimUpdateMemberFunction_BlendStartingToDesiredColour(const AnimationParam& param);
+    void AnimUpdateMemberFunction_TwinkleSingleColourRandom(const AnimationParam& param);
+    void AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(const AnimationParam& param);
+    
+    void AnimUpdateMemberFunction_Sequential(const AnimationParam& param);
+    void LoadMixerGroupByID(uint8_t id);
+
+    // void (mRGBAnimator::*AnimUpdateMemberFunction_Ptr)(const AnimationParam& param) = nullptr; // member-function to sender with one args
+
+    // #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 20
+    // // uint8_t mapped_array_data_array[15] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+    // uint8_t mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
+    //  = {
+    //   20,19, //39
+    //   15,16, //70
+    //   13,9, //92
+    //   7,1  //100
+    // };
+    
+
+  #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 20
+  uint8_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
+  
+  typedef union {
+    uint16_t data; // allows full manipulating
+    struct { 
+      // enable animations (pause)
+      uint16_t fEnabled : 1;
+      /**
+       * 0 - None
+       * 1 - Basic multiplier
+       * 2 - Using mapped index array 
+      */
+      uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+      uint16_t mapped_array_editable_or_progmem : 1;
+    };
+  } PIXEL_GROUPED_FLAGS;
+  
+  struct PIXEL_GROUPED{
+    uint8_t method_id = 0;
+    uint8_t multiplier = 5; // nearby pixels repeat colours
+    struct MAPPED_ARRAY_DATA{
+      uint8_t* values = nullptr;
+      uint8_t  index = 0;
+      uint8_t  length = 0;
+    }mapped_array_data;
+    PIXEL_GROUPED_FLAGS flags;
+  }pixel_group;
+  
+
+
+    // void (mRGBAnimator::*AnimUpdateMemberFunction_Ptr2)() = nullptr; // member-function to sender with one args
+
+    ANIM_FUNCTION_SIGNATURE;
+    mRGBAnimator& setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE);
+
+    bool OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+
     #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL_AMBILIGHT
     /**************
      * Ambilight is light patterns around screens or pictures
@@ -269,9 +379,16 @@ class mRGBAnimator{
     
     #endif
 
-    /*******USER LIGHTS & FLASHER*********************************************************************************************/
+    /*******USER LIGHTS & FLASHER**
+     * 
+  *******************************************************************************************/
 
-  // #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+    void RotateDesiredColour(uint8_t pixels, uint8_t direction = 0);
+    void UpdateStartingColourWithGetPixel();
+    
+
+
+  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   const char* GetFlasherFunctionName(char* buffer);
   const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer);
   int8_t      GetFlasherFunctionIDbyName(const char* c);
@@ -283,29 +400,72 @@ class mRGBAnimator{
     FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID, // change ALL, 0 - 100%
-    FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
-    FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
+    FLASHER_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
+    FLASHER_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,
+
+    // FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
     FLASHER_FUNCTION_FADE_GRADIENT_ID, //single pixels: static, twinkle, pick from palette
     //another flash to "off" or simple set flash colour to off??
     FLASHER_FUNCTION_FLASH_GLIMMER_RANDOM_ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
+    
+FLASHER_FUNCTION_TESTER_ID,
+    
+    // The one when applybrightness was broke
+    // done by applying new cl/brightness to some, then each call reducing the colour crushing it
+    //do with percent to show on at one time
+    FLASHER_FUNCTION_PULSE_RANDOM_ON, 
+    FLASHER_FUNCTION_PULSE_RANDOM_ON_TWO_ID,
+
+    // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
+    FLASHER_FUNCTION_PULSE_SINE_WAVE_BRIGHTNESS,
+
+    // Instead of just applying new colours, also randomise the brightness levels between range
+    FLASHER_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID,
+    
     FLASHER_FUNCTION_LENGTH_ID
   };                                   
   //https://www.youtube.com/watch?v=D2IBGlDJ3lg @2.50
+
+  
+// const uint16_t PixelCount = 16; // make sure to set this to the number of pixels in your strip
+// const uint16_t PixelPin = 2;  // make sure to set this to the correct pin, ignored for Esp8266
+// const uint16_t AnimCount = 1; // we only need one
+// const uint16_t TailLength = 6; // length of the tail, must be shorter than PixelCount
+// const float MaxLightness = 0.4f; // max lightness at the head of the tail (0.5f is full bright)
+
+// NeoGamma<NeoGammaTableMethod> colorGamma; // for any fade animations, best to correct gamma
+// void DrawTailPixels();
+
+
 
   int8_t GetFlasherRegionIDbyName(const char* c);
   const char* GetFlasherRegionName(char* buffer);
   const char* GetFlasherRegionNamebyID(uint8_t id, char* buffer); 
   enum FLASHERREGION{FLASHER_REGION_COLOUR_SELECT_ID=1,
-                     FLASHER_REGION_ANIMATE_ID};                    
+                     FLASHER_REGION_ANIMATE_ID};           
+
+  void UpdateStartingColourWithSingleColour(RgbcctColor colour);      
+void UpdateDesiredColourWithSingleColour(RgbcctColor colour);   
 
   typedef union {
-    uint16_t data; // allows full manipulating
+    uint16_t data;
     struct { 
       // enable animations (pause)
       uint16_t enable_random_rate : 1;
+      // used when internal timers or modes change and both need to execute the one time
+      uint16_t force_finish_flasher_pair_once : 1;
+      /* direction of animation
+      / 00(0) - clockwise
+      / 01(1) - anticlockwise
+      / 10(2) - edges towards center (flipped image)
+      / 11(3) - center towards edges (flipped image) */
+      uint16_t movement_direction : 2;
 
+      uint16_t enable_startcolour_as_alternate : 1;
+      uint16_t enable_endingcolour_as_alternate : 1;
+    
       // Reserved
-      uint16_t reserved : 15;
+      uint16_t reserved : 12;
     };
   } FLASHERSETTINGS_FLAGS;
 
@@ -337,19 +497,37 @@ class mRGBAnimator{
       uint32_t tSavedNewSpeedUpdate = millis();
     }random_transitions;
 
+    
 
-    // Timed numbers
+    struct UPDATE_COLOUR_GENERATION_REGION{
+      // 0 is not active, 
+      // 1 is everytime
+      // 2+ is seconds
+      uint16_t refresh_secs = 0; 
+      uint16_t refresh_decounter_secs = 10; 
+      uint32_t tSaved = millis();
+    }update_colour_region;
+
+    
+      uint8_t brightness_max = 255;
+      uint8_t brightness_min = 0;
+
+
+    // Shared timers
     struct TSAVED{
       uint32_t Update = millis();
+      // uint32_t tSavedChange_animation_something;
       //uint32_t Update2 = millis();
     }tSaved;
+    
+    
     // Function specific animations
     struct FUNCTION_SEQUENTIAL{
       //uint32_t tSavedNewSpeedUpdate = millis();
       uint8_t rate_index = 0;
     }function_seq;
     struct FUNCTION_SLO_GLO{
-      uint32_t tSavedNewSpeedUpdate = millis();
+      // uint32_t tSavedNewSpeedUpdate = millis();
       uint8_t rate_index = 0;
     }function_slo_glo;
     struct FUNCTION_SLOW_FADE{
@@ -363,64 +541,156 @@ class mRGBAnimator{
       uint8_t rate_index = 0;
     }function_flash_twinkle;
 
+    // struct FLASHER_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS{
+    //   //uint32_t tSavedNewSpeedUpdate = millis();
+    //   // // uint8_t rate_index = 0;
+    //   // uint8_t bri
+    // }function_flash_twinkle;
+
   }flashersettings;
+
+
+
   void SubTask_Flasher_Main();
   void SubTask_Flasher_Animate();
   void SubTask_Flasher_Animate_Mixer();
   
+  // Functions
   void SubTask_Flasher_Animate_Function_Slow_Glow();
   void SubTask_Flasher_Animate_Function_Sequential();
-  void SubTask_Flasher_Animate_Function_Twinkle_Random();
-  void SubTask_Flasher_Animate_Function_Twinkle_Sequential();
+  void SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+  void SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
   void SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
   void SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
   void SubTask_Flasher_Animate_Function_Fade_Gradient();
+  void SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+
+
+  void SubTask_Flasher_Animate_Function_Tester();
+  void AnimUpdateMemberFunction_Tester(const AnimationParam& param);
+
+  void SubTask_Flasher_Animate_Function_Pulse_Random_On();
+  void AnimUpdateMemberFunction_Pulse_Random_On(const AnimationParam& param);
+
+
+  void SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+  void AnimUpdateMemberFunction_Pulse_Random_On_2(const AnimationParam& param);
+
+
+
+
+  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
+  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
+  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
+
+
+#endif // ENABLE_PIXEL_FUNCTION_FLASHER
+
+  struct SHARED_FLASHER_PARAMETERS{
+    // uint8_t alternate_brightness;
+    uint8_t alternate_brightness_min = 0; //set min and max to same to not use a range
+    uint8_t alternate_brightness_max = 255;
+    //flag use single bringhtess or range
+    uint8_t alternate_random_amount_as_percentage = 2;
+
+
+  }shared_flasher_parameters;
+
+
+  uint16_t setpixel_variable_index_counter = 0;
+
+
+
 
   void parsesub_Flasher(JsonObjectConst obj);
   void init_flasher_settings();
+
+  uint16_t SetLEDOutAmountByPercentage(uint8_t percentage);
   
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  #define FLASHER_FUNCTION_MIXER_MAX 10
   enum FLASHER_FUNCTION_MIXER{
-    FLASHER_FUNCTION_MIXER_0_ID=0,
-    FLASHER_FUNCTION_MIXER_1_ID,
+    FLASHER_FUNCTION_MIXER_1_ID=0,
     FLASHER_FUNCTION_MIXER_2_ID,
     FLASHER_FUNCTION_MIXER_3_ID,
     FLASHER_FUNCTION_MIXER_4_ID,
     FLASHER_FUNCTION_MIXER_5_ID,
     FLASHER_FUNCTION_MIXER_6_ID,
-    FLASHER_FUNCTION_MIXER_NONE_ID
+    FLASHER_FUNCTION_MIXER_7_ID,
+    FLASHER_FUNCTION_MIXER_8_ID,
+    FLASHER_FUNCTION_MIXER_9_ID,
+    FLASHER_FUNCTION_MIXER_10_ID,
+    FLASHER_FUNCTION_MIXER_11_ID,
+    FLASHER_FUNCTION_MIXER_12_ID,
+    FLASHER_FUNCTION_MIXER_LENGTH_ID
   };
-  #define MIXER_GROUP_MAX 7
+  #define FLASHER_FUNCTION_MIXER_MAX FLASHER_FUNCTION_MIXER_LENGTH_ID
+  // #define MIXER_GROUP_MAX 7
+
+  
+  typedef union {
+    uint16_t data; // allows full manipulating
+    struct { 
+      // enable animations (pause)
+      uint16_t Enabled : 1;
+      /**
+       * 0 - None
+       * 1 - Basic multiplier
+       * 2 - Using mapped index array 
+      */
+      // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+      // uint16_t mapped_array_editable_or_progmem : 1;
+    };
+  } MIXER_SETTINGS_FLAGS;
+
+   typedef union {
+    uint16_t data; // allows full manipulating
+    struct { 
+      // enable animations (pause)
+      uint16_t Enabled : 1;
+      /**
+       * 0 - None
+       * 1 - Basic multiplier
+       * 2 - Using mapped index array 
+      */
+      // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+      // uint16_t mapped_array_editable_or_progmem : 1;
+      
+      uint16_t enable_force_preset_brightness_scaler : 1; // to allow manual brightness leveling
+    };
+  } MIXER_SETTINGS_GROUP_FLAGS;
+  
+
   struct MIXER_SETTINGS{
    // #ifdef DEVICE_OUTSIDETREE
     struct MODE{
-      uint8_t running_id = FLASHER_FUNCTION_MIXER_0_ID;
+      uint8_t running_id = FLASHER_FUNCTION_MIXER_1_ID;
       uint16_t time_on_secs[FLASHER_FUNCTION_MIXER_MAX]; // stores which to use
       int16_t time_on_secs_active = 10; //signed
       // char running_friendly_name_ctr[40];
-      uint8_t list_len = 0; // 10 max
       struct TIMES{
        // uint16_t enable_skip_restricted_by_time[FLASHER_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
-        struct datetime flashing_starttime;
-        struct datetime flashing_endtime;
+        struct time_short flashing_starttime; //shortime
+        struct time_short flashing_endtime;
         uint8_t skip_restricted_by_time_isactive = 0;
       }times;
     }mode; //active 
     // #endif
     
-    uint32_t tSavedMillisToChangeAt = 0;
+    // uint32_t tSavedMillisToChangeAt = 0;
     uint32_t tSavedTrigger = millis();
-    uint32_t tSavedRestart = millis();
+    // uint32_t tSavedRestart = millis();
     uint8_t enabled = false;
     uint8_t time_scaler = 6;
-    uint32_t tSavedSendData;
+    // uint32_t tSavedSendData;
+      uint8_t enabled_mixer_count = 0; // 10 max
+
+    MIXER_SETTINGS_FLAGS flags;
 
 
     //int16_t time_on_secs_active = 10; //signed
     // char running_friendly_name_ctr[100];
-    uint8_t running_id = FLASHER_FUNCTION_MIXER_0_ID;
-    uint8_t run_time_duration_scaler_as_percentage = 6;
+    uint8_t running_id = FLASHER_FUNCTION_MIXER_1_ID;
+    uint8_t run_time_duration_scaler_as_percentage = 100; // for debugging, running faster
       
     struct GROUPS_SETTINGS{
       int16_t time_on_secs_decounter = -1;
@@ -428,13 +698,27 @@ class mRGBAnimator{
       struct time_short endtime;
       uint8_t enable_skip_restricted_by_time = 0;
       uint8_t isenabled = true;
-      uint8_t transition_time_sec = 1;
-      uint8_t transition_rate_sec = 1;
+
+      uint8_t ifenabled_forced_brightness_level_percentage = 100;
+      int8_t pixels_to_update_as_percentage = 10;//-1; // -1 disables, ie ALL
+
+      struct TRANSITION{
+        uint16_t time = 0;
+        uint16_t rate = 0;
+        uint8_t  time_unit_id = 0; // secs vs ms
+      }transition;
+
       uint8_t animation_transition_order = TRANSITION_ORDER_INORDER_ID;
       uint8_t flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-      uint16_t run_time_duration_sec = 60;
-      uint8_t animation_palette = 0;
-    }group[MIXER_GROUP_MAX];
+      uint16_t run_time_duration_sec = 120;
+      uint8_t palette_id = 0;
+
+      uint8_t pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
+      uint8_t pixel_multiplier_enabled = false;
+
+      MIXER_SETTINGS_GROUP_FLAGS flags;
+
+    }group[FLASHER_FUNCTION_MIXER_MAX];
 
   }mixer;
 
@@ -443,16 +727,16 @@ class mRGBAnimator{
 
 
   //flasher structs for each
-  struct FLASH_TWINKLE_RANDOM{
-    uint8_t white_on_index;
-    uint8_t white_total_index = 0;
-    uint8_t white_pixel_amount = 0;
-    // #ifdef ENABLE_ADVANCED_MODE_TWINKLE // creating this to reduce "white_leds_index" size
-    //   uint16_t white_leds_index[STRIP_SIZE_MAX];
-    // #endif
-    //HsbColor stored_colours_index[STRIP_SIZE_MAX];///4]; // THIS DOESNT NEED TO BE THIS LONG
-    HsbColor flash_colour;
-  }flash_twinkle_random;
+  // struct FLASH_TWINKLE_RANDOM{
+  //   uint8_t white_on_index;
+  //   uint8_t white_total_index = 0;
+  //   uint8_t white_pixel_amount = 0;
+  //   // #ifdef ENABLE_ADVANCED_MODE_TWINKLE // creating this to reduce "white_leds_index" size
+  //   //   uint16_t white_leds_index[STRIP_SIZE_MAX];
+  //   // #endif
+  //   //HsbColor stored_colours_index[STRIP_SIZE_MAX];///4]; // THIS DOESNT NEED TO BE THIS LONG
+  //   HsbColor flash_colour;
+  // }flash_twinkle_random;
 
 // #endif
 
@@ -524,9 +808,10 @@ void parse_JSONCommand(JsonObjectConst obj);
     // totally random, or random but not repeating
     enum TRANSITION_ORDER_RANDOM_METHOD_IDS{
       TRANSITION_ORDER_RANDOM_METHOD_REPEATING = 0,
+      TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE,
       TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING
     };
-    uint8_t transition_order_random_type = TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING;
+    uint8_t transition_order_random_type = TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE;
     
   
   uint32_t tSavedUpdateRGBString;
@@ -561,9 +846,13 @@ void Settings_Load();
 void Settings_Save();
 void Settings_Default();
 void Settings_Reset();
-void ConfigureLEDTransitionAnimation(void);
+
+void StartAnimationAsBlendFromStartingColorToDesiredColor(void);
+void StartAnimationAsSwitchingFromStartingColorToDesiredColor();
+
+
 // void UpdateLEDs2(void);
-void RefreshLED_Presets(void);
+void UpdateDesiredColourFromPaletteSelected(void);
 // void parsesub_CheckAll(JsonObjectConst obj);
 void TurnLEDsOff();
 // void AddToJsonObject_AddHardware(JsonObject root);
@@ -600,6 +889,7 @@ void WebAppend_JSON_RootPage_LiveviewPixels();
 // void Web_RGBLightSettings_LoadTime_URLs(AsyncWebServerRequest *request);
 
 
+#ifndef DISABLE_WEBSERVER
 
 void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
 // void Web_RGBLightSettings_LoadScript(AsyncWebServerRequest *request);
@@ -634,14 +924,13 @@ void WebAppend_Root_ControlUI();
 // void WebSend_JSON_RootPage_Parameters_Liveview(AsyncWebServerRequest *request);
 // void WebSend_JSON_RGBTable(AsyncWebServerRequest *request);
 // void WebSend_JSON_Empty_Response();
-void RefreshLEDIndexPattern();
-void RefreshLEDOutputStream();
-void StripUpdate();
-// void SetMode_UpdateColour(uint8_t colour);
+
 void HandlePage_PaletteEditor(AsyncWebServerRequest *request);
 // void HandleMixerEditor();
 void HandleParameters_RGBLightSettings(AsyncWebServerRequest *request);
 void HandlePage_RGBLightSettings(AsyncWebServerRequest *request);
+
+// void SetMode_UpdateColour(uint8_t colour);
 // void HandleTimerConfiguration();
 // void TimerSaveSettings();
 // void WebSend_JSON_RootPage_Parameters();
@@ -653,6 +942,19 @@ void HandlePage_RGBLightSettings(AsyncWebServerRequest *request);
 // void WebCommand_Parse(void);
 void WebAppend_Root_Status_Table();
 
+#endif //DISABLE_WEBSERVER
+
+
+void RefreshLEDIndexPattern();
+// void UpdateDesiredColourFromPaletteSelected();
+
+
+
+
+RgbcctColor ApplyBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightness);
+
+
+void StripUpdate();
 
 
   struct POWER_RATING{

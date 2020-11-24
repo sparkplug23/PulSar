@@ -8,9 +8,23 @@ int8_t mSupport::Tasker(uint8_t function){
     case FUNC_INIT:
       // fSendTemplatesOnce = true;
     break;
-    case FUNC_LOOP: 
+    case FUNC_LOOP: {
 
-    break;
+       
+  // for(int n=0; n<10; ++n) {
+
+  
+  //   // Serial.printf("%d = %d\n\r",n, GetNormalDistributionRandom(100,2,90,100));
+  //   Serial.printf("%d = %d\n\r",n, GetRandomSaturationVariation(100,5,95,100));
+
+  //   // (100,10,90,100)
+
+  // }
+
+  // delay(3000);
+    
+
+    }break;
     case FUNC_EVERY_SECOND:
       PerformEverySecond();
     break;
@@ -20,6 +34,12 @@ int8_t mSupport::Tasker(uint8_t function){
     case FUNC_MQTT_COMMAND: 
       parse_JSONCommand();
     break;
+
+
+    case FUNC_WIFI_CONNECTED:
+      ArduinoOTAInit();
+    break;
+
   }
   
 }
@@ -57,6 +77,119 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 }
 
 
+// #ifdef ENABLE_DEVFEATURE_OTA_METHOD
+
+#ifdef USE_ARDUINO_OTA
+/*********************************************************************************************\
+ * Allow updating via the Arduino OTA-protocol.
+ *
+ * - Once started disables current wifi clients and udp
+ * - Perform restart when done to re-init wifi clients
+\*********************************************************************************************/
+
+void mSupport::ArduinoOTAInit(void)
+{
+
+  // add flag to only proceed if not set
+  if(ota_init_success){ return; }
+
+  #ifndef TEST_OTA_ISSUE
+    ArduinoOTA.setHostname(pCONT_set->my_hostname);
+  #endif
+  ArduinoOTA.onStart([this]()
+  {
+    // #ifdef ESP8266
+      //pCONT_set->SettingsSave(1);  // Free flash for OTA update
+      //#ifdef USE_MODULE_CORE_WEBSERVER
+        // if (pCONT_set->Settings.webserver) { 
+          //pCONT_web->StopWebserver(); 
+          // /}
+      // #endif  // USE_MODULE_CORE_WEBSERVER
+      //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+    // #endif
+    arduino_ota_triggered = true;
+    arduino_ota_progress_dot_count = 0;
+    
+    // #ifdef ESP32
+    //   pinMode(2,OUTPUT);
+    //   // timerWrite(timerwdt, 0); //reset timer (feed watchdog)
+    // #endif
+
+    // Stop server otherwise OTA can fail
+    // pCONT_web->StopWebserver();
+
+    delay(100);       // Allow time for message xfer
+  });
+
+  ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
+  {
+    if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
+
+      uint8_t progress_now = (progress/(total/100));
+      if(arduino_ota_progress_dot_count != progress_now){
+        Serial.println(progress_now);
+        arduino_ota_progress_dot_count = progress_now;
+      }
+      #ifdef ESP8266
+      ESP.wdtFeed();
+      #endif // ESP8266
+    }
+    
+  });
+
+  ArduinoOTA.onError([this](ota_error_t error)
+  {
+    /*
+    From ArduinoOTA.h:
+    typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
+    */
+    char error_str[30];
+    memset(error_str,0,sizeof(error_str));
+
+    switch (error) {
+      case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
+      case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
+      case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
+      case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
+      case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
+      default:
+        snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
+    }
+    #ifdef ENABLE_LOG
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
+    #endif
+    
+    ESP.restart(); //should only reach if the first failed
+  });
+
+  ArduinoOTA.onEnd([this]()
+  {
+    #ifdef ENABLE_LOG
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    #endif
+    ESP.restart();
+	});
+
+  ArduinoOTA.begin();
+  ota_init_success = true;
+  
+  #ifdef ENABLE_LOG
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
+  #endif
+}
+
+void mSupport::ArduinoOtaLoop(void)
+{
+  ArduinoOTA.handle();
+  // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
+  // Note async stuff can still occur, so I need to disable them
+  while (arduino_ota_triggered){ ArduinoOTA.handle(); }
+}
+
+// #endif // ENABLE_DEVFEATURE_OTA_METHOD
+#endif  // USE_ARDUINO_OTA
+
 
 bool mSupport::JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint8_t ischanged){
 
@@ -85,6 +218,37 @@ char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
 }
 
 
+//make template later
+uint8_t mSupport::GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min, uint8_t constrained_max){
+
+  std::random_device rd{};
+  std::mt19937 gen{rd()};
+  uint8_t result = 0;
+
+  // values near the mean are the most likely
+  // standard deviation affects the dispersion of generated values from the mean
+  std::normal_distribution<> d{mean,standard_deviation};
+
+  // std::map<int, int> hist{};
+  // uint32_t array[10] = {0};
+  // for(int n=0; n<10000; ++n) {
+  //     array[round(d(gen))]++;
+  // }
+
+  result = round(d(gen));
+
+  // If these are not equal, then apply contraint
+  if(constrained_min != constrained_max){
+    result = constrain(result, constrained_min, constrained_max);
+  }
+
+  return result; 
+
+}
+
+
+
+
 
 const char* mSupport::GetVersionBranchTypeNameByID(uint8_t id){
   return 0;
@@ -108,12 +272,12 @@ char mSupport::GetVersionBranchTypeCharNameByID(uint8_t id){
 void mSupport::init_FirmwareVersion(){
 
   // Parse version for printing
-  snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%d.%d.%d"), PROJECT_VERSION >> 24 & 0xff, PROJECT_VERSION >> 16 & 0xff, PROJECT_VERSION >> 8 & 0xff);  // Release version 6.3.0
-  if (PROJECT_VERSION & 0xff) {  // Development or patched version 6.3.0.10
-    snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%s.%d"), pCONT_set->my_version, PROJECT_VERSION & 0xff);
-  }
+  // snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%d.%d.%d"), PROJECT_VERSION >> 24 & 0xff, PROJECT_VERSION >> 16 & 0xff, PROJECT_VERSION >> 8 & 0xff);  // Release version 6.3.0
+  // if (PROJECT_VERSION & 0xff) {  // Development or patched version 6.3.0.10
+  //   snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%s.%d"), pCONT_set->my_version, PROJECT_VERSION & 0xff);
+  // }
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
 //Serial.printf("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
 
   // Version Current
@@ -154,12 +318,12 @@ void mSupport::init_FirmwareVersion(){
   //Serial.printf("firmware_version.current = %s\n\r",firmware_current);
   // AddLog_P(LOG_LEVEL_INFO,PSTR("firmware_version.current = %s"),firmware_current);
 
-  char code_image[20];
-  snprintf_P(pCONT_set->my_image, sizeof(pCONT_set->my_image), PSTR("(%s)"), 
-    GetTextIndexed_P(code_image, sizeof(code_image), CODE_IMAGE, kCodeImage));
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
+  // char code_image[20];
+  // snprintf_P(pCONT_set->my_image, sizeof(pCONT_set->my_image), PSTR("(%s)"), 
+  //   GetTextIndexed_P(code_image, sizeof(code_image), CODE_IMAGE, kCodeImage));
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
 
-  Serial.flush();
+  // Serial.flush();
 
 }
 
@@ -718,7 +882,13 @@ uint32_t mSupport::ResetReason(void)
     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
   */
+ 
+#ifdef ESP8266
   return resetInfo.reason;
+#else
+  return 0;
+
+#endif// ESP8266
 }
 
 void mSupport::SetPulseTimer(uint32_t index, uint32_t time)
@@ -1524,18 +1694,7 @@ int8_t mSupport::GetStateNumber(const char *state_text)
 
 
 
-uint8_t mSupport::ConvertStateNumberIfToggled(uint8_t command_state, uint8_t check_state){
-  
-  uint8_t result_state = 0;
-  if(command_state == STATE_NUMBER_TOGGLE_ID){
-    if(check_state){
-      result_state = STATE_NUMBER_OFF_ID;
-    }else{
-      result_state = STATE_NUMBER_ON_ID;
-    }
-  }
-  return result_state;
-}
+
 
 
 
@@ -2143,9 +2302,11 @@ void mSupport::UpdateStatusBlink(){
 // }
 
 
+#ifdef ESP8266
 extern "C" {
 extern struct rst_info resetInfo;
 }
+#endif // ESP8266
 
 
 double mSupport::FastPrecisePow(double a, double b)
@@ -2607,9 +2768,13 @@ void mSupport::parse_JSONCommand(){
 
 
 
+// phase out
+// likely used so math.h was not needed for memory
+uint16_t mSupport::changeUIntScale(uint16_t inum, 
+                                   uint16_t ifrom_min, uint16_t ifrom_max,
+                                   uint16_t ito_min, uint16_t ito_max
+                                   ) {
 
-uint16_t mSupport::changeUIntScale(uint16_t inum, uint16_t ifrom_min, uint16_t ifrom_max,
-                                       uint16_t ito_min, uint16_t ito_max) {
   // guard-rails
   if (ifrom_min >= ifrom_max) {
     if (ito_min > ito_max) {
@@ -2676,11 +2841,15 @@ void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
     uint16_t pwm = 0;
     if (bitRead(pCONT_set->Settings.ledpwm_mask, led)) {
 // #ifdef USE_LIGHT
-//       pwm = changeUIntScale(ledGamma10(state ? Settings.ledpwm_on : Settings.ledpwm_off), 0, 1023, 0, Settings.pwm_range); // gamma corrected
+//       pwm = mapvalue(ledGamma10(state ? Settings.ledpwm_on : Settings.ledpwm_off), 0, 1023, 0, Settings.pwm_range); // gamma corrected
 // #else //USE_LIGHT
-      pwm = changeUIntScale((uint16_t)(state ? pCONT_set->Settings.ledpwm_on : pCONT_set->Settings.ledpwm_off), 0, 255, 0, pCONT_set->Settings.pwm_range); // linear
+      pwm = mapvalue((uint16_t)(state ? pCONT_set->Settings.ledpwm_on : pCONT_set->Settings.ledpwm_off), 0, 255, 0, pCONT_set->Settings.pwm_range); // linear
 // #endif //USE_LIGHT
+
+#ifdef ESP8266
       analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->led_inverted, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
+      
+#endif // ESP8266
     } else {
       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
     }
@@ -2852,6 +3021,7 @@ void mSupport::SetLedLink(uint32_t state)
 // // https://github.com/esp8266/Arduino/pull/5018
 // // https://github.com/esp8266/Arduino/pull/4553
 
+#ifdef ESP8266
 extern "C" {
 #include <cont.h>
   extern cont_t* g_pcont;
@@ -2869,6 +3039,7 @@ void mSupport::DebugFreeMem(void)
 
 // #endif  // ARDUINO_ESP8266_RELEASE_2_x_x
 
+#endif // ESP8266
 
 
 // void mSupport::WDT_Begin(){}
@@ -3047,6 +3218,7 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
   uint32_t addr_written = 0;      // how many addresses have we already written in RTC
   uint32_t value;                 // 4 bytes buffer to write to RTC
 
+    #ifdef ESP8266
   for (uint32_t i = stack; i < stack_end; i += 4) {
     value = *((uint32_t*) i);     // load value from stack
     if ((value >= 0x40000000) && (value < 0x40300000)) {  // keep only addresses in code area
@@ -3057,6 +3229,7 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
   }
   value = crash_magic + addr_written;
   ESP.rtcUserMemoryWrite(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+  #endif // ESP8266
 }
 
 // Generate a crash to test the crash recorder
@@ -3089,8 +3262,10 @@ void mSupport::CrashDumpClear(void)
 {
   DEBUG_PRINT_FUNCTION_NAME;
   return;
+    #ifdef ESP8266
   uint32_t value = 0;
   ESP.rtcUserMemoryWrite(crash_rtc_offset + crash_dump_max_len, (uint32_t*)&value, sizeof(value));
+  #endif // ESP8266
 }
 
 
@@ -3101,12 +3276,19 @@ void mSupport::CrashDumpClear(void)
 
 bool mSupport::CrashFlag(void)
 {
+  
+#ifdef ESP8266
   DEBUG_PRINT_FUNCTION_NAME;
   return ((ResetReason() == REASON_EXCEPTION_RST) || (ResetReason() == REASON_SOFT_WDT_RST));// || oswatch_blocked_loop);
+  
+#endif // ESP8266
+
 }
 
 void mSupport::CrashDump_AddJson(void)
 {
+  
+#ifdef ESP8266
   char buffer[30];
 
   DEBUG_PRINT_FUNCTION_NAME;
@@ -3132,6 +3314,7 @@ void mSupport::CrashDump_AddJson(void)
     }
     pCONT_sup->WriteBuffer_P(PSTR("]"));
   }
+  #endif // ESP8266
   
 }
 

@@ -4,10 +4,10 @@
 
 void mIRtransceiver::pre_init(void){
 
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("pre_init pCONT_set->pin[GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_set->pin[GPIO_IRSEND]);
+  // AddLog_P(LOG_LEVEL_INFO,PSTR("pre_init pCONT_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_pins->GetPin(GPIO_IRSEND]);
 
-  if (pCONT_set->pin[GPIO_IRSEND_ID] < 99) {  // not set when 255
-    pin = pCONT_set->pin[GPIO_IRSEND_ID];
+  if (pCONT_pins->GetPin(GPIO_IRSEND_ID] < 99) {  // not set when 255
+    pin = pCONT_pins->GetPin(GPIO_IRSEND_ID];
     AddLog_P(LOG_LEVEL_INFO,PSTR("pin[GPIO_IRSEND] %d"),pin);
   }
   #ifdef CLIMATE_DHT1_PIN

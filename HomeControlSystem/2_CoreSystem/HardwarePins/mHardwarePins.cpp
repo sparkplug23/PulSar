@@ -4,7 +4,7 @@ void mHardwarePins::Template_Load(){
 
 
     ReadModuleTemplateFromProgmem();
-    ParseModuleTemplate(); //probably goes elsewhere
+    // ParseModuleTemplate(); //probably goes elsewhere
 
 
 }
@@ -43,49 +43,49 @@ void mHardwarePins::ModuleSettings_ShowTemplateLog()
   //     "BASE: %d"
   //   ),
 
-  char buffer[50];
+  // char buffer[50];
 
-  AddLog_P(LOG_LEVEL_TEST,
-    PSTR(
-      "\n\r"
-      //"Template: %s\n\r"
-      "(Friendly)Name: %s\n\r"
-      "MQTT Topic Prefix: %s\n\r"
-      "Gpio: \n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r" //5
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r" //10
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r" //12
-        "\t%d(%d):%d\n\r" //13
-      "BASE : %08X (%s)\n\r"
-    ),
-    pCONT_set->Settings.user_template2.full_ctr,
-    //pCONT_set->Settings.user_template2.hardware.name,
-    pCONT_set->Settings.system_name.device,
-    0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
-    1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
-    2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
-    3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
-    4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
-    5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
-    6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
-    7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
-    8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
-    9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
-    10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
-    11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
-    12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
-    pCONT_set->Settings.user_template2.base,
-    GetModuleNameByID(pCONT_set->Settings.user_template2.base, buffer)
-  );
+  // AddLog_P(LOG_LEVEL_TEST,
+  //   PSTR(
+  //     "\n\r"
+  //     //"Template: %s\n\r"
+  //     "(Friendly)Name: %s\n\r"
+  //     "MQTT Topic Prefix: %s\n\r"
+  //     "Gpio: \n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r" //5
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r" //10
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r" //12
+  //       "\t%d(%d):%d\n\r" //13
+  //     "BASE : %08X (%s)\n\r"
+  //   ),
+  //   pCONT_set->Settings.user_template2.full_ctr,
+  //   //pCONT_set->Settings.user_template2.hardware.name,
+  //   pCONT_set->Settings.system_name.device,
+  //   0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
+  //   1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
+  //   2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
+  //   3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
+  //   4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
+  //   5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
+  //   6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
+  //   7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
+  //   8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
+  //   9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
+  //   10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
+  //   11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
+  //   12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
+  //   pCONT_set->Settings.user_template2.base,
+  //   GetModuleNameByID(pCONT_set->Settings.user_template2.base, buffer)
+  // );
 
   DEBUG_LINE;
   
@@ -106,46 +106,46 @@ void mHardwarePins::ModuleSettings_ShowActiveTemplate()
   //   ),
   char buffer[50];
 
-  AddLog_P(LOG_LEVEL_TEST,
-    PSTR(
-      "\n\r"
-      //"Template: %s\n\r"
-      //"(Friendly)Name: %s\n\r"
-      "MQTT Topic Prefix: %s\n\r"
-      "Gpio: \n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-        "\t%d(%d):%d\n\r"
-      "Module : %s\n\r"
-    ),
-    //pCONT_set->Settings.user_template2.full_ctr,
-    //pCONT_set->Settings.user_template2.hardware.name,
-    pCONT_set->Settings.system_name.device,
-    0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
-    1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
-    2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
-    3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
-    4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
-    5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
-    6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
-    7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
-    8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
-    9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
-    10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
-    11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
-    12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
-    GetModuleNameByID(pCONT_set->Settings.module, buffer)
-  );
+  // AddLog_P(LOG_LEVEL_TEST,
+  //   PSTR(
+  //     "\n\r"
+  //     //"Template: %s\n\r"
+  //     //"(Friendly)Name: %s\n\r"
+  //     "MQTT Topic Prefix: %s\n\r"
+  //     "Gpio: \n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //       "\t%d(%d):%d\n\r"
+  //     "Module : %s\n\r"
+  //   ),
+  //   //pCONT_set->Settings.user_template2.full_ctr,
+  //   //pCONT_set->Settings.user_template2.hardware.name,
+  //   pCONT_set->Settings.system_name.device,
+  //   0,0,pCONT_set->Settings.user_template2.hardware.gp.io[0],
+  //   1,1,pCONT_set->Settings.user_template2.hardware.gp.io[1],
+  //   2,2,pCONT_set->Settings.user_template2.hardware.gp.io[2],
+  //   3,3,pCONT_set->Settings.user_template2.hardware.gp.io[3],
+  //   4,4,pCONT_set->Settings.user_template2.hardware.gp.io[4],
+  //   5,5,pCONT_set->Settings.user_template2.hardware.gp.io[5],
+  //   6,9,pCONT_set->Settings.user_template2.hardware.gp.io[6],
+  //   7,10,pCONT_set->Settings.user_template2.hardware.gp.io[7],
+  //   8,12,pCONT_set->Settings.user_template2.hardware.gp.io[8],
+  //   9,13,pCONT_set->Settings.user_template2.hardware.gp.io[9],
+  //   10,14,pCONT_set->Settings.user_template2.hardware.gp.io[10],
+  //   11,15,pCONT_set->Settings.user_template2.hardware.gp.io[11],
+  //   12,16,pCONT_set->Settings.user_template2.hardware.gp.io[12],
+  //   GetModuleNameByID(pCONT_set->Settings.module, buffer)
+  // );
 
 }
 
@@ -193,19 +193,54 @@ void mHardwarePins::ModuleSettings_FlashSerial()
 
 void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
-  uint16_t size_source = sizeof(MODULE_TEMPLATE);
-  uint16_t size_dest = sizeof(pCONT_set->Settings.user_template2.full_ctr);
+  // uint16_t size_source = sizeof(MODULE_TEMPLATE);
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("source=%d, dest=%d"),size_source,size_dest);
+  // uint16_t size_dest = sizeof(pCONT_set->Settings.user_template2.full_ctr);
 
-  size_source = size_source > size_dest ? size_source : size_dest;
-  memcpy_P(pCONT_set->Settings.user_template2.full_ctr,MODULE_TEMPLATE,size_source);
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("source=%d, dest=%d"),size_source,size_dest);
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("MODULE_TEMPLATE READ = \"%s\""),pCONT_set->Settings.user_template2.full_ctr);
+  // size_source = size_source > size_dest ? size_source : size_dest;
+  // memcpy_P(pCONT_set->Settings.user_template2.full_ctr,MODULE_TEMPLATE,size_source);
 
-  #ifdef ENABLE_DEBUG_BOOT_DELAYS
-    delay(1000);
-  #endif
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("MODULE_TEMPLATE READ = \"%s\""),pCONT_set->Settings.user_template2.full_ctr);
+
+  // #ifdef ENABLE_DEBUG_BOOT_DELAYS
+  //   delay(1000);
+  // #endif
+
+  // #ifdef USE_FUNCTION_TEMPLATE
+  // load from progmem
+  uint16_t progmem_size = sizeof(MODULE_TEMPLATE);
+  progmem_size = progmem_size>MODULE_TEMPLATE_MAX_SIZE?MODULE_TEMPLATE_MAX_SIZE:progmem_size;
+  // create parse buffer
+  char buffer[progmem_size];
+  // Read into local
+  memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
+
+  AddLog_P(LOG_LEVEL_TEST, PSTR("MODULE_TEMPLATE READ = \"%s\""), buffer);
+
+  DynamicJsonDocument doc(progmem_size);
+  DeserializationError error = deserializeJson(doc, buffer);
+
+  if(error){
+    // boot_status.function_template_parse_success = 2;
+    // Serial.println(error.c_str());
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
+    return;
+  }
+  JsonObjectConst obj = doc.as<JsonObject>();
+
+
+  // StaticJsonDocument<MODULE_TEMPLATE_SIZE> doc;
+  // DeserializationError error = deserializeJson(doc, pCONT_set->Settings.user_template2.full_ctr);
+  
+  // if(error){
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+  //   return;
+  // }
+  // JsonObject obj = doc.as<JsonObject>();
+
+  ParseModuleTemplate(obj);
 
 }
 
@@ -255,16 +290,16 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
 }
 
 
-void mHardwarePins::ParseModuleTemplate(){
+void mHardwarePins::ParseModuleTemplate(JsonObjectConst obj){
 
-  StaticJsonDocument<400> doc;
-  DeserializationError error = deserializeJson(doc, pCONT_set->Settings.user_template2.full_ctr);
+  // // StaticJsonDocument<MODULE_TEMPLATE_SIZE> doc;
+  // // DeserializationError error = deserializeJson(doc, pCONT_set->Settings.user_template2.full_ctr);
   
-  if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-    return;
-  }
-  JsonObject obj = doc.as<JsonObject>();
+  // if(error){
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+  //   return;
+  // }
+  // JsonObject obj = doc.as<JsonObject>();
   
   //DEVICENAME/TOPICNAME/MQTTNAME
   // Keep split for now, but work towards better solution
@@ -299,8 +334,8 @@ void mHardwarePins::ParseModuleTemplate(){
     
     // Array of numbers (0-255)
     uint8_t pin_num_count = 0;
-    JsonArray array = obj[F("GPIO")];
-    for(JsonVariant v : array){
+    JsonArrayConst array = obj[F("GPIO")];
+    for(JsonVariantConst v : array){
         int gpio_function_id = v.as<int>();
         // FULL pin list
         pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
@@ -322,7 +357,7 @@ void mHardwarePins::ParseModuleTemplate(){
   // if(!obj[F("GPIOC")].isNull()){ 
   if(obj.containsKey(F("GPIOC"))){ 
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GPIOC FOUND"));
-    JsonObject list = obj[F("GPIOC")];
+    JsonObjectConst list = obj[F("GPIOC")];
     // get key and value
     pCONT_set->boot_status.module_template_parse_success = true;
     // clear pins to none
@@ -333,7 +368,7 @@ void mHardwarePins::ParseModuleTemplate(){
     int8_t  pin_number = -1;
     int16_t gpio_number = -1;
 
-    for (JsonPair kv : list) {
+    for (JsonPairConst kv : list) {
       pin_number = GetGPIONumberFromName(kv.key().c_str());
 
       int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
@@ -1125,6 +1160,7 @@ void mHardwarePins::GpioInit(void)
   }
 
 
+#ifdef ESP8266
 #ifdef USE_I2C
   pCONT_set->i2c_flg = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
   if (pCONT_set->i2c_flg) { 
@@ -1134,6 +1170,8 @@ void mHardwarePins::GpioInit(void)
     pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
   } // i2c_flg
 #endif  // USE_I2C
+
+#endif // ESP8266
 
 
   /**
@@ -1195,13 +1233,17 @@ void mHardwarePins::GpioInit(void)
 //       analogWriteFreqRange(i,Settings.pwm_frequency,Settings.pwm_range);
 // #endif
 
+#ifdef ESP8266
       if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
       } else {
         pCONT_set->pwm_present = true;
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
       }
+   
+#endif // ESP8266
     }
+    
   }
   #endif
 
@@ -1274,8 +1316,12 @@ void mHardwarePins::GpioInit(void)
       if (PinUsed(GPIO_PWM1_ID,i)) {
         pCONT_set->pwm_present = true;
         pinMode(GetPin(GPIO_PWM1_ID,i), OUTPUT);
+        
+#ifdef ESP8266
         analogWrite(GetPin(GPIO_PWM1_ID,i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
         Serial.println(F("Setting analogWrite with basic light type"));
+        
+#endif // ESP8266
       }
     }
   }

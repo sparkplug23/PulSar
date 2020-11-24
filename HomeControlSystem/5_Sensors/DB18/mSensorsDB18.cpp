@@ -10,7 +10,7 @@ void mSensorsDB18::Pre_Init(){
   settings.nSensorsFound = 0;
 
   if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) {  // not set when 255
-    sensor_group[sensor_group_count].pin = pCONT_set->pin[GPIO_DSB_1OF2_ID];
+    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID];
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
@@ -30,7 +30,7 @@ void mSensorsDB18::Pre_Init(){
   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
   if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
-    sensor_group[sensor_group_count].pin = pCONT_set->pin[GPIO_DSB_2OF2_ID];
+    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID];
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
@@ -58,56 +58,6 @@ void mSensorsDB18::Pre_Init(){
 
 }
 
-// need new value for group count as it is reset
-
-// uint8_t mSensorsDB18::GetCorrectedDeviceID(uint8_t id_desired){
-
-
-
-
-//         // sensor[sensor_count].id = original_device_id;    /
-
-
-//   uint8_t sensor_count = 0; // reset
-//   // Address moved into struct, I need to rearrange now with ids
-//   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
-//     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
-//       // Check address has been set    
-//       if(sensor[sensor_count].address_id == id_desired){
-//         AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_DSB "sensor[sensor_count%d].id == id_desired %d"),sensor_count,id_desired); 
-//         return sensor_count;
-//       }
-//       sensor_count++;
-//     }
-//   }
-
-// }
-
-// uint8_t mSensorsDB18::GetCorrectedDeviceIDforGetDeviceName(uint8_t id_desired){
-
-
-
-
-//         // sensor[sensor_count].id = original_device_id;    /
-
-
-//   uint8_t sensor_count = 0; // reset
-//   // Address moved into struct, I need to rearrange now with ids
-//   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
-//     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
-//       // Check address has been set    
-//       if(sensor[sensor_count].address_id == id_desired){
-//         AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_DSB "sensor[sensor_count%d].id == id_desired %d"),sensor_count,id_desired); 
-        
-        
-        
-//         return sensor_count;
-//       }
-//       sensor_count++;
-//     }
-//   }
-
-// }
 
 
 

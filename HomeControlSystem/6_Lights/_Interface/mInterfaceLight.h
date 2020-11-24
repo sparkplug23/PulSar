@@ -20,6 +20,13 @@
   typedef RgbColor RgbTypeColor;
 #endif
 
+  enum PIXEL_MULTIPLIER_MODE_IDS{
+    PIXEL_MULTIPLIER_MODE_NONE_ID,
+    PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID,
+    PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
+    PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID
+  };
+
 // TRANSITION_METHOD
 DEFINE_PGM_CTR(PM_TRANSITION_METHOD_NONE_NAME_CTR)    "None";   
 DEFINE_PGM_CTR(PM_TRANSITION_METHOD_BLEND_NAME_CTR)    "Blend";      
@@ -56,6 +63,17 @@ DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)        D_PIXEL_HARDWARE_CO
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)                      "RGB";
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)                      "BRG";
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG";
+
+
+
+#define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
+#define D_PIXEL_HARDWARE_TYPE_WS28XX_CTR "WS28XX"
+
+
+DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)       D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR;
+DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)       D_PIXEL_HARDWARE_TYPE_WS28XX_CTR;
+
+
 
 
 // struct RgbcctColor{
@@ -389,20 +407,22 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       uint16_t ftime_use_map : 1;//= true;
       uint16_t frate_use_map : 1;//= true;
 
+      uint16_t brightness_applied_during_colour_generation : 1;
+      // This emulates aging of traditional lights, making them less uniform
+      uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
+
       // Reserved
       uint16_t reserved : 11;
     };
   } ANIMATION_FLAGS;
+
+
 
     struct ANIMATIONSETTINGS{
       //mode = turn on/off/scene/pallette
       uint8_t mode_id; //update mode
       //palette - stores colour patterns for single led setting
       uint8_t palette_id; 
-
-      uint8_t pixelgrouped=3; // nearby pixels repeat colours
-      
-      // float brightness = 1; // MOVE OUT OF ANIMATION?? move to "light class"
 
       ANIMATION_FLAGS flags;
 
@@ -440,8 +460,8 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     
     uint32_t animation_changed_millis = 0;
 
-    const char* GetHardwareColourTypeName(char* buffer);
-    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer);
+    const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
+    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
     int8_t GetHardwareColourTypeIDbyName(const char* c);
 
     // Flags and states that are used during one transition and reset when completed
@@ -505,6 +525,8 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       uint16_t auto_time_off_secs = 0;
       // uint32_t tSavedAutoOff = 0;
     uint32_t tSavedAutoOff = 0;
+    
+uint32_t RgbColorto32bit(RgbColor rgb);
     
 
     // enum MODE_SINGLECOLOUR_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
@@ -707,12 +729,12 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     const char* GetSceneNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
     int8_t GetTransitionMethodIDbyName(const char* c);     
-    const char* GetTransitionMethodName(char* buffer);
-    const char* GetTransitionMethodNameByID(uint8_t id, char* buffer);
+    const char* GetTransitionMethodName(char* buffer, uint8_t buflen);
+    const char* GetTransitionMethodNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
     int8_t GetTransitionOrderIDbyName(const char* c);     
-    const char* GetTransitionOrderName(char* buffer);
-    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer);
+    const char* GetTransitionOrderName(char* buffer, uint8_t buflen);
+    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
 
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
@@ -880,7 +902,7 @@ uint16_t getCT();// const {
 
 //     // get the CT value within the range into a 10 bits 0..1023 value
 //     uint16_t getCT10bits() const {
-//       return mSupport::changeUIntScale(_ct, _ct_min_range, _ct_max_range, 0, 1023);
+//       return mapvalue(_ct, _ct_min_range, _ct_max_range, 0, 1023);
 //     }
 
 //     inline void setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) {
@@ -1062,6 +1084,17 @@ uint8_t getColorMode();
     void init_ColourPalettes_Shelf_Hearts();
     void init_ColourPalettes_Gradient_01();
     void init_ColourPalettes_Gradient_02();
+    void init_ColourPalettes_Berry_Green();
+    void init_ColourPalettes_Christmas_01();
+    void init_ColourPalettes_Christmas_02();
+    void init_ColourPalettes_Christmas_03();
+    void init_ColourPalettes_Christmas_04();
+    void init_ColourPalettes_Christmas_05();
+    void init_ColourPalettes_Christmas_06();
+    void init_ColourPalettes_Christmas_07();
+    void init_ColourPalettes_Christmas_08();
+    void init_ColourPalettes_Christmas_09();
+    void init_ColourPalettes_Christmas_10();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1081,9 +1114,9 @@ uint8_t getColorMode();
      * PALETTE are different colours by pixel
     **************/                            
     int8_t GetPaletteIDbyName(const char* c);
-    const char* GetPaletteName(char* buffer);  
-    const char* GetPaletteNameByID(uint8_t id, char* buffer);
-    const char* GetPaletteFriendlyName(char* buffer);
+    const char* GetPaletteName(char* buffer, uint8_t buflen);  
+    const char* GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen);
+    const char* GetPaletteFriendlyName(char* buffer, uint8_t buflen);
 
   // #define D_PALETTE_USER_DEFAULT_NAME_CTR "User"
 
@@ -1125,6 +1158,17 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_AUTUMN_RED_ID,
     PALETTELIST_STATIC_GRADIENT_01_ID,
     PALETTELIST_STATIC_GRADIENT_02_ID,
+    PALETTELIST_STATIC_BERRY_GREEN_ID,
+    PALETTELIST_STATIC_CHRISTMAS_01_ID,
+    PALETTELIST_STATIC_CHRISTMAS_02_ID,
+    PALETTELIST_STATIC_CHRISTMAS_03_ID,
+    PALETTELIST_STATIC_CHRISTMAS_04_ID,
+    PALETTELIST_STATIC_CHRISTMAS_05_ID,
+    PALETTELIST_STATIC_CHRISTMAS_06_ID,
+    PALETTELIST_STATIC_CHRISTMAS_07_ID,
+    PALETTELIST_STATIC_CHRISTMAS_08_ID,
+    PALETTELIST_STATIC_CHRISTMAS_09_ID,
+    PALETTELIST_STATIC_CHRISTMAS_10_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
 
@@ -1206,18 +1250,29 @@ uint8_t getColorMode();
       PALETTE gradient_01;
       PALETTE gradient_02;
       PALETTE sunrise_01;
+      PALETTE berry_green;
+      PALETTE christmas_01;
+      PALETTE christmas_02;
+      PALETTE christmas_03;
+      PALETTE christmas_04;
+      PALETTE christmas_05;
+      PALETTE christmas_06;
+      PALETTE christmas_07;
+      PALETTE christmas_08;
+      PALETTE christmas_09;
+      PALETTE christmas_10;
     }palettelist;
 
 
-    const char* GetColourMapNamebyID(uint8_t id, char* buffer);
-    const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer);
+    const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
+    const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen);
     int8_t      GetColourMapIDbyName(const char* c);
     int8_t GetNearestColourMapIDFromColour(HsbColor hsb);
 
     void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, uint8_t* colour_ids, uint8_t colour_ids_len);
 
 
-  const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer);
+  const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetPaletteFriendlyNameByID(uint8_t id, char* name = nullptr, uint8_t name_size= 0);    
 
       uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr);

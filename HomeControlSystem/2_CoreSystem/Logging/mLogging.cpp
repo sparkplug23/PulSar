@@ -115,8 +115,9 @@ void AddLog_P(uint8_t loglevel, PGM_P formatP, ...)
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
-      SERIAL_DEBUG.printf(PSTR("R%05d %02d%02d %s %s\r\n"), 
+      SERIAL_DEBUG.printf(PSTR("R%05d%c %02d%02d %s %s\r\n"), 
         ESP.getFreeHeap(), //4 * (sp - g_pcont->stack), 
+        pCONT_wif->connection.fConnected ? 'Y' : 'N',
         pCONT_time->uptime.minute,pCONT_time->uptime.second,
         pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),
         pCONT_set->log_data
@@ -618,12 +619,14 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* _buffer){
   char* buffer;
   SET_BUFFER_AS_GLOBAL_OR_LOCAL(buffer, _buffer);
   if(buffer == nullptr){ return D_NO_MATCH_CTR;}
-  switch(id){ 
+  switch(id){
+    default: 
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
+    case LOG_LEVEL_INFO_PARSING:   memcpy_P(buffer, PM_LOG_LEVEL_INFO_PARSING_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_PARSING_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)); break;
@@ -634,11 +637,13 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* _buffer){
 const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer){ //"Name" assumes Long friendy name
   if(buffer == nullptr){ return 0;}
   switch(id){ 
+    default:
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_LONG_CTR, sizeof(PM_LOG_LEVEL_NONE_LONG_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_LONG_CTR, sizeof(PM_LOG_LEVEL_ERROR_LONG_CTR)); break;
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_LONG_CTR)); break;
+    case LOG_LEVEL_INFO_PARSING:   memcpy_P(buffer, PM_LOG_LEVEL_INFO_PARSING_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_PARSING_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)); break;

@@ -7,13 +7,13 @@ void mAnalog::Pre_Init(void){
   sensors_active = 0;
 
   // Using ++ means always the lowest index will be the active sensor, ie, PIR2 can be 0 when PIR1 is not defined
-  if (pCONT_set->pin[GPIO_PIR_1OF2_ID] < 99) {  // not set when 255
-    pin[sensors_active++] = pCONT_set->pin[GPIO_PIR_1OF2_ID];
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_set->pin[GPIO_PIR_1OF2_ID]);
+  if (pCONT_pins->GetPin(GPIO_PIR_1OF2_ID] < 99) {  // not set when 255
+    pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_1OF2_ID];
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_pins->GetPin(GPIO_PIR_1OF2_ID]);
   }
-  if (pCONT_set->pin[GPIO_PIR_2OF2_ID] < 99) {  // not set when 255
-    pin[sensors_active++] = pCONT_set->pin[GPIO_PIR_2OF2_ID];
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_set->pin[GPIO_PIR_2OF2_ID]);
+  if (pCONT_pins->GetPin(GPIO_PIR_2OF2_ID] < 99) {  // not set when 255
+    pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_2OF2_ID];
+      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_pins->GetPin(GPIO_PIR_2OF2_ID]);
   }
 
   fEnableSensor = false;

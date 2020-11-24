@@ -9,28 +9,28 @@ void mSensorsDHT::Pre_Init(void){
   settings.sensor_active_count = 0;
   
   if (pCONT_pins->PinUsed(GPIO_DHT11_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_set->pin[GPIO_DHT11_1OF2_ID];
+    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_1OF2_ID];
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT11_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_set->pin[GPIO_DHT11_2OF2_ID];
+    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_2OF2_ID];
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_set->pin[GPIO_DHT22_1OF2_ID];
+    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_1OF2_ID];
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = pCONT_set->pin[GPIO_DHT22_2OF2_ID];
+    pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_2OF2_ID];
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);

@@ -9,8 +9,8 @@ void mPulseCounter::Pre_Init(void){
 
   memset(&sensor,0,sizeof(sensor));
   
-  if (pCONT_set->pin[GPIO_PULSE_COUNTER] < 99) {  // not set when 255
-    pin[fSensorCount] = pCONT_set->pin[GPIO_PULSE_COUNTER];
+  if (pCONT_pins->GetPin(GPIO_PULSE_COUNTER] < 99) {  // not set when 255
+    pin[fSensorCount] = pCONT_pins->GetPin(GPIO_PULSE_COUNTER];
 
     pinMode(pin[fSensorCount],INPUT_PULLUP);
 

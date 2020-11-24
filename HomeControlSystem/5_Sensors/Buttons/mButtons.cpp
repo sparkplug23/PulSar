@@ -44,14 +44,14 @@ void mButtons::ButtonInit(void)
 
   buttons_found = 0;
   for (uint8_t i = 0; i < MAX_KEYS; i++) {
-    if (pCONT_set->pin[GPIO_KEY1_ID +i] < 99) {
+    if (pCONT_pins->GetPin(GPIO_KEY1_ID +i] < 99) {
       buttons_found++;
       AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
-      pinMode(pCONT_set->pin[GPIO_KEY1_ID +i], 
-        bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+      pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID +i], 
+        bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
         
       AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
-      bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_set->pin[GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
+      bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID +i]) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
       );
 
     }
@@ -119,7 +119,7 @@ void mButtons::ButtonHandler(void)
     // } else {
       if (pCONT_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
         button_present = 1;
-        button = (digitalRead(pCONT_set->pin[GPIO_KEY1_ID + button_index]) != bitRead(key_inverted, button_index));
+        button = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID + button_index]) != bitRead(key_inverted, button_index));
       }
     // }
 

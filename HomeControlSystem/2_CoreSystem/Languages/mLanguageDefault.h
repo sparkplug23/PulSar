@@ -20,6 +20,8 @@
 #ifndef mLanguageDefault_H
 #define mLanguageDefault_H
 
+#include "2_CoreSystem/mGlobalMacros.h"
+
 
 #define STR_HELPER2(x)  #x
 #ifndef STR2
@@ -1383,9 +1385,9 @@
 #define D_JSON_BRT "brt"
 #define D_JSON_CCT_PERCENTAGE "cct_per"
 #define D_JSON_CCT_TEMP "cct_temp"
+
 #define D_JSON_RGBCCT_LINKED "rgbcct_linked"
-#define D_JSON_BRT_RGB "brt_rgb"
-#define D_JSON_BRT_CCT "brt_cct"
+
 #define D_JSON_BRIGHTNESS "Brightness"
 #define D_JSON_BRIGHTNESS_PERCENTAGE "brightness_percentage"
 #define D_JSON_CLIMATE "climate"
@@ -1412,6 +1414,33 @@
 #define D_JSON_DURATION_RAW "DurationRaw"
 #define D_JSON_ERROR "Error"
 #define D_JSON_FLASHER "Flasher"
+#define D_JSON_FUNCTION "Function"
+
+#define D_JSON_ENABLED "Enabled"
+
+#define D_JSON_PIXELGROUPING "PixelGrouping"
+#define D_JSON_MULTIPLIER "Multiplier"
+
+#define D_JSON_BRIGHTNESS_MIN "BrightnessMin"
+#define D_JSON_BRIGHTNESS_MAX "BrightnessMax"
+#define D_JSON_BRIGHTNESS_RGB "BrightnessRGB"
+#define D_JSON_BRIGHTNESS_CCT  "BrightnessCCT"
+#define D_JSON_RANDOM_AMOUNT "RandomAmount"
+
+#define D_JSON_RUNNING_ID "RunningID"
+
+#define D_JSON_SEQUENTIAL "Sequential"
+#define D_JSON_DIRECTION "Direction"
+
+#define D_JSON_ALTERNATE "Alternate"
+#define D_JSON_ALTERNATE_AMOUNT "AlternateAmount"
+#define D_JSON_ALTERNATE_BRIGHTNESS_MIN "AlternateBrightnessMin"
+#define D_JSON_ALTERNATE_BRIGHTNESS_MAX "AlternateBrightnessMax"
+
+#define D_JSON_COLOUR_REFRESH_RATE "ColourRefreshRate"
+
+#define D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE "run_time_duration_scaler_as_percentage"
+
 #define D_JSON_FAILSAFE "failsafe"
 #define D_JSON_FUNCTIONS "functions"
 #define D_JSON_HUM "hum"
@@ -1433,6 +1462,7 @@
 #define D_JSON_MINUTES "minutes"
 #define D_JSON_MIN "min"
 #define D_JSON_MODE "Mode"
+#define D_JSON_MIXER "Mixer"
 #define D_JSON_MOTION "Motion"
 #define D_JSON_MODULENAME "ModuleName"
 #define D_JSON_MODULEID "ModuleID"
@@ -1442,11 +1472,14 @@
 #define D_JSON_SCENENAME "SceneName"
 #define D_JSON_ANIMATIONMODE "AnimationMode"
 
+#define D_JSON_MAPPED_MULTIPLIER_DATA "MappedMultiplierData"
+
 #define D_JSON_NOTIFICATIONS "Notifications"
 
 #define D_JSON_POWERNAME "PowerName"
 
 #define D_JSON_ANIMATIONENABLE "AnimationEnable"
+#define D_JSON_AGED_COLOURING "AgedColouring"
 
 #define D_JSON_ON "On"
 #define D_JSON_ONTIME "ontime"
@@ -1467,8 +1500,12 @@
 #define D_JSON_PIXELNUM "pixelnum"
 #define D_JSON_PULSER "pulser"
 #define D_JSON_REFRESH_ALLPIXELS "refresh_allpixels"
+
 #define D_JSON_RATE "Rate"
-#define D_JSON_RATE_MS "rate_ms"
+#define D_JSON_RATE_MS "RateMs"
+#define D_JSON_RATE_SECS "RateSecs"
+
+
 #define D_JSON_RECEIVEDCOUNT "ReceivedCount"
 #define D_JSON_RATIO "Ratio"
 
@@ -1489,7 +1526,8 @@
 #define D_JSON_SENSOR_MEASURERATE "Sensor_MeasureRate"
 
 #define D_JSON_SCENE "Scene"
-#define D_JSON_SCENE_COLOUR "Scene Colour"
+#define D_JSON_SCENE_COLOUR "SceneColour"
+#define D_JSON_SCENE_NAME   "SceneName"
 
 #define D_JSON_SCHEDULE "schedule"
 #define D_JSON_SCHEDULED_OFF D_OFF
@@ -1497,22 +1535,24 @@
 #define D_JSON_SCHEDULED_ON "scheduled_on"
 #define D_JSON_MANUAL_ON "manual_on"
 #define D_JSON_TIME "Time"
-#define D_JSON_TIME_MS "time_ms"
-#define D_JSON_TIME_SECS "time_secs"
-#define D_JSON_TIME_ON "time_on"
-#define D_JSON_TIME_ON_SECS "time_on_secs"
-#define D_JSON_TIME_ON_MS "time_on_ms"
-#define D_JSON_TIME_DELAYED "time_delayed"
-#define D_JSON_TIME_MAINTAINING "time_maintaining"
-#define D_JSON_TIME_RUNNING "time_running"
-#define D_JSON_TIME_TO_HEAT "time_to_heat"
+#define D_JSON_TIME_MS "TimeMs"
+#define D_JSON_TIME_SECS "TimeSecs"
+#define D_JSON_TIME_ON "TimeOn"
+#define D_JSON_TIME_ON_SECS "TimeOnSecs"
+#define D_JSON_TIME_ON_MS "TimeOnMs"
+#define D_JSON_TIME_DELAYED "TimeDelayed"
+#define D_JSON_TIME_MAINTAINING "TimeMaintaining"
+#define D_JSON_TIME_RUNNING "TimeRunning"
+#define D_JSON_TIME_TO_HEAT "TimeToHeat"
 #define D_JSON_TEMP "temp"
-#define D_JSON_TRANSITION "transition"
+#define D_JSON_TRANSITION "Transition"
 #define D_JSON_TYPE "type"
 #define D_JSON_RELAY "relay"
 
+#define D_JSON_TIME_SCALER_AS_PERCENTAGE "TimeMultiplierAsPerc"
 
-#define D_JSON_EXTERNAL_POWER_ONOFF "ExternalPowerOnOff"
+
+// #define D_JSON_EXTERNAL_POWER_ONOFF "ExternalPowerOnOff"
 
 
 
@@ -1527,7 +1567,7 @@
 
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "GRB"
-#define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
+
 
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
@@ -1895,16 +1935,33 @@ const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D
 
 const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
 #define    D_JSON_COMMAND_NVALUE                              "{\"%s\":%d}"
+#define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
+#define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY ":%d}"
 
 #define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
 const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
 const char S_JSON_COMMAND_FVALUE[] PROGMEM =                  "{\"%s\":%.1f}";
 const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
 #define    D_JSON_COMMAND_SVALUE                              "{\"%s\":\"%s\"}"
+#define    D_JSON_COMMAND_SVALUE_P                            "{\"%S\":\"%s\"}"
+
+
+#define    D_JSON_COMMAND_SVALUE_K(KEY)                       "{\"" KEY ":\"%s\"}"
+
+// #define    D_JSON_COMMAND_SVALUE_K1                       "{\""
+// #define    D_JSON_COMMAND_SVALUE_K2                       ":\"%s\"}"
+
+
 const char S_JSON_COMMAND_SVALUE_SVALUE[] PROGMEM =           "{\"%s\":{\"%s\":\"%s\"}}";
 #define    D_JSON_COMMAND_SVALUE_SVALUE                       "{\"%s\":{\"%s\":\"%s\"}}"
+#define    D_JSON_COMMAND_SVALUE_SVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":\"%s\"}}"
+
 const char S_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%s\":{\"%s\":%d}}";
 #define    D_JSON_COMMAND_SVALUE_NVALUE                       "{\"%s\":{\"%s\":%d}}"
+#define    D_JSON_COMMAND_SVALUE_NVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":%d}}"
+
+
+
 const char S_JSON_COMMAND_ASTERIX[] PROGMEM =                 "{\"%s\":\"" D_ASTERIX "\"}";
 const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  // %s must provide quotes on non-number
 
@@ -1991,7 +2048,7 @@ const char S_OFFLINE[] PROGMEM = D_OFFLINE;
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // */
 
-const char kCodeImage[] PROGMEM = "sonoff|minimal|classic|sensors|knx|basic|display";
+// const char kCodeImage[] PROGMEM = "sonoff|minimal|classic|sensors|knx|basic|display";
 
 // support.ino
 static const char kMonthNames[] PROGMEM = D_MONTH3LIST;

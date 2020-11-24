@@ -94,9 +94,11 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
             GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
           );
         break;
-        case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer)); break;
+        case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
+        #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
         case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
+        #endif
         case 7: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
     
@@ -1684,7 +1686,7 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   } // inactive colours set elsewhere   
 
   
-  JsonBuilderI->AppendBuffer(PSTR("<b>" "Select Palette" "</b> (Active: %s)<br/>"), pCONT_iLight->GetPaletteFriendlyName(buffer));
+  JsonBuilderI->AppendBuffer(PSTR("<b>" "Select Palette" "</b> (Active: %s)<br/>"), pCONT_iLight->GetPaletteFriendlyName(buffer, sizeof(buffer)));
   JsonBuilderI->AppendBuffer(PSTR("<select id='g99' name='g99'></select><br/>"));
   pCONT_web->WebAppend_Button2(PSTR("Load Palette"),"loadpixels","bora");
 
@@ -2022,12 +2024,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");
         for (uint8_t row_id = 0; row_id < TRANSITION_ORDER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR, 
-            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer), 
-            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer2)
+            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer, sizeof(buffer)), 
+            pCONT_iLight->GetTransitionOrderNameByID(row_id, buffer2, sizeof(buffer2))
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionOrderName(buffer));
+      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer)));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
   
@@ -2070,12 +2072,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < TRANSITION_METHOD_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
-            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer),
-            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer2)
+            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer, sizeof(buffer)),
+            pCONT_iLight->GetTransitionMethodNameByID(row_id, buffer2, sizeof(buffer))
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionMethodName(buffer));
+      JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionMethodName(buffer, sizeof(buffer)));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 
@@ -2107,7 +2109,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
           );
         }
         JsonBuilderI->AppendBuffer("\"");
-      JsonBuilderI->Add("evl",pCONT_iLight->GetPaletteFriendlyName(buffer));
+      JsonBuilderI->Add("evl",pCONT_iLight->GetPaletteFriendlyName(buffer, sizeof(buffer)));
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
 

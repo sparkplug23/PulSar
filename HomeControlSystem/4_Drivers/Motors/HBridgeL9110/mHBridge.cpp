@@ -8,17 +8,17 @@ void mHBridge::pre_init(void){
 
   // MOTOR SETTINGS (A)
   if(pCONT_pins->PinUsed(GPIO_HBRIDGE_L9110_IA_ID) && pCONT_pins->PinUsed(GPIO_HBRIDGE_L9110_OA_ID)){   
-    pin_A_IA = pCONT_set->pin[GPIO_HBRIDGE_L9110_IA_ID];
+    pin_A_IA = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_IA_ID];
     pinMode(pin_A_IA,OUTPUT);
     digitalWrite(pin_A_IA,LOW); //STOP THE MOTOR
-    pin_A_IB = pCONT_set->pin[GPIO_HBRIDGE_L9110_OA_ID];
+    pin_A_IB = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OA_ID];
     pinMode(pin_A_IB,OUTPUT);
   }else{
     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA Invalid %d"),pin_A_IA);
     init_success = false;
   }
 
-  // if(pCONT_set->pin[GPIO_HBRIDGE_L9110_OA_ID] < 99) {
+  // if(pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OA_ID] < 99) {
   // }else{
   //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_IB);
   //   init_success = false;
@@ -32,8 +32,8 @@ void mHBridge::pre_init(void){
 
   // MOTOR SETTINGS (B)
 
-  // if(pCONT_set->pin[GPIO_HBRIDGE_L9110_IB_ID] < 99) {
-  //   pin_IB = pCONT_set->pin[GPIO_HBRIDGE_L9110_IB_ID];
+  // if(pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_IB_ID] < 99) {
+  //   pin_IB = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_IB_ID];
   //   pinMode(pin_IB,OUTPUT);
   //   digitalWrite(pin_IB,LOW); //STOP THE MOTOR
   // }else{
@@ -41,8 +41,8 @@ void mHBridge::pre_init(void){
   //   init_success = false;
   // }
 
-  // if(pCONT_set->pin[GPIO_HBRIDGE_L9110_OB_ID] < 99) {
-  //   pin_A_IB = pCONT_set->pin[GPIO_HBRIDGE_L9110_OB_ID];
+  // if(pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OB_ID] < 99) {
+  //   pin_A_IB = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OB_ID];
   //   pinMode(pin_A_IB,OUTPUT);
   // }else{
   //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_A_IB);
@@ -55,8 +55,8 @@ void mHBridge::pre_init(void){
   //   motorB.fEnabled = false;
   // }
 
-  // if(pCONT_set->pin[GPIO_HBRIDGE_ANALOG_SENSE] < 99) {
-  //   pin_AnalogSense = pCONT_set->pin[GPIO_HBRIDGE_ANALOG_SENSE];
+  // if(pCONT_pins->GetPin(GPIO_HBRIDGE_ANALOG_SENSE] < 99) {
+  //   pin_AnalogSense = pCONT_pins->GetPin(GPIO_HBRIDGE_ANALOG_SENSE];
   //   pinMode(pin_AnalogSense,INPUT);
   // }else{
   //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_IB Invalid %d"),pin_IB);

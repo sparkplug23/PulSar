@@ -283,12 +283,12 @@
     #else
 
 
-    #define COLOUR_FLOAT_HUE_RED            0.0000f
-    #define COLOUR_FLOAT_HUE_ORANGE         0.0389f
-    #define COLOUR_FLOAT_HUE_LIGHTORANGE    0.0556f
-    #define COLOUR_FLOAT_HUE_WHITE          0.0833f
-    #define COLOUR_FLOAT_HUE_YELLOW         0.1389f
-    #define COLOUR_FLOAT_HUE_LIMEGREEN      0.2778f
+    #define COLOUR_FLOAT_HUE_RED            0.0000f //0
+    #define COLOUR_FLOAT_HUE_ORANGE         0.0389f //14
+    #define COLOUR_FLOAT_HUE_LIGHTORANGE    0.0556f //20
+    #define COLOUR_FLOAT_HUE_WHITE          0.0833f //30
+    #define COLOUR_FLOAT_HUE_YELLOW         0.1389f //50
+    #define COLOUR_FLOAT_HUE_LIMEGREEN      0.2778f //100
     #define COLOUR_FLOAT_HUE_GREEN          120.0f/360.0f
     #define COLOUR_FLOAT_HUE_CYAN           180.0f/360.0f
     #define COLOUR_FLOAT_HUE_BLUE           240.0f/360.0f
@@ -531,18 +531,33 @@
     COLOUR_MAP_PURPLE_ID, COLOUR_MAP_RED_ID, COLOUR_MAP_NONE_ID
   }; 
   const uint8_t DEFAULT_COLOUR_PALETTE_USER_08_IDS[] PROGMEM {
-    COLOUR_MAP_WHITE_PASTEL20_ID, COLOUR_MAP_WHITE_PASTEL80_ID, COLOUR_MAP_CYAN_ID, COLOUR_MAP_NONE_ID
+    
+    COLOUR_MAP_WHITE_PASTEL80_ID, COLOUR_MAP_NONE_ID
+    // COLOUR_MAP_WHITE_PASTEL20_ID, COLOUR_MAP_WHITE_PASTEL80_ID, COLOUR_MAP_CYAN_ID, COLOUR_MAP_NONE_ID
   }; 
   const uint8_t DEFAULT_COLOUR_PALETTE_USER_09_IDS[] PROGMEM {
     COLOUR_MAP_WHITE_PASTEL20_ID, COLOUR_MAP_WHITE_PASTEL20_ID, COLOUR_MAP_CYAN_PASTEL60_ID, COLOUR_MAP_WHITE_PASTEL20_ID, COLOUR_MAP_WHITE_PASTEL70_ID,
     COLOUR_MAP_BLUE_PASTEL60_ID, COLOUR_MAP_WHITE_PASTEL70_ID, COLOUR_MAP_CYAN_PASTEL40_ID, COLOUR_MAP_WHITE_PASTEL60_ID, COLOUR_MAP_CYAN_ID, COLOUR_MAP_NONE_ID
   }; 
-  const uint8_t DEFAULT_COLOUR_PALETTE_USER_10_IDS[] PROGMEM {
-    COLOUR_MAP_GREEN_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_ORANGE_ID, COLOUR_MAP_BLUE_ID, COLOUR_MAP_YELLOW_ID,
-    COLOUR_MAP_PURPLE_ID, COLOUR_MAP_RED_PASTEL90_ID, COLOUR_MAP_RED_PASTEL95_ID, COLOUR_MAP_NONE_ID
+  const uint8_t DEFAULT_COLOUR_PALETTE_USER_10_IDS[] PROGMEM { // Outside tree, "few"
+    
+    COLOUR_MAP_RED_ID, COLOUR_MAP_GREEN_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_BLUE_ID, COLOUR_MAP_ORANGE_ID, COLOUR_MAP_PURPLE_ID,
+    
+    
+    COLOUR_MAP_NONE_ID
+    // COLOUR_MAP_GREEN_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_ORANGE_ID, COLOUR_MAP_BLUE_ID, COLOUR_MAP_YELLOW_ID,
+    // COLOUR_MAP_PURPLE_ID, COLOUR_MAP_RED_PASTEL90_ID, COLOUR_MAP_RED_PASTEL95_ID, COLOUR_MAP_NONE_ID
   }; 
-  const uint8_t DEFAULT_COLOUR_PALETTE_USER_11_IDS[] PROGMEM {
-    COLOUR_MAP_WHITE_PASTEL80_ID, COLOUR_MAP_NONE_ID
+  const uint8_t DEFAULT_COLOUR_PALETTE_USER_11_IDS[] PROGMEM { // Outside tree, many (lean orange, pink and red)
+    // COLOUR_MAP_WHITE_PASTEL80_ID, 
+    
+    COLOUR_MAP_GREEN_ID, COLOUR_MAP_HOTPINK_PASTEL90_ID, COLOUR_MAP_BLUE_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_HOTPINK_PASTEL90_ID,
+    COLOUR_MAP_ORANGE_ID, COLOUR_MAP_HOTPINK_ID, COLOUR_MAP_YELLOW_ID, COLOUR_MAP_RED_PASTEL90_ID, COLOUR_MAP_PURPLE_ID,
+    COLOUR_MAP_PINK_ID, COLOUR_MAP_GREEN_PASTEL90_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_CYAN_ID, COLOUR_MAP_HOTPINK_ID,
+    COLOUR_MAP_YELLOW_PASTEL95_ID, COLOUR_MAP_PURPLE_PASTEL90_ID, COLOUR_MAP_RED_ID,
+    
+    
+    COLOUR_MAP_NONE_ID
   }; 
   const uint8_t DEFAULT_COLOUR_PALETTE_USER_12_IDS[] PROGMEM {
     COLOUR_MAP_GREEN_ID, COLOUR_MAP_HOTPINK_ID, COLOUR_MAP_BLUE_ID, COLOUR_MAP_PINK_ID, COLOUR_MAP_YELLOW_ID,
@@ -582,7 +597,7 @@
   // Style = deep purple, pinks and a little red
   const uint8_t DEFAULT_COLOUR_PALETTE_USER_19_IDS[] PROGMEM {
     COLOUR_MAP_HOTPINK_ID, COLOUR_MAP_PINK_PASTEL90_ID, COLOUR_MAP_PURPLE_ID, COLOUR_MAP_HOTPINK_PASTEL95_ID,
-    COLOUR_MAP_RED_PASTEL80_ID,
+    COLOUR_MAP_RED_PASTEL80_ID,COLOUR_MAP_RED_PASTEL90_ID,
     // END
     COLOUR_MAP_NONE_ID
   }; 
@@ -750,6 +765,278 @@
       249,  17,  1,  1,
       255,  17,  1,  1
     };
+
+    #ifndef D_PALETTE_BERRY_GREEN_NAME_CTR
+    #define D_PALETTE_BERRY_GREEN_NAME_CTR        "Berry Green"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_BERRY_GREEN_NAME_CTR)        D_PALETTE_BERRY_GREEN_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_BERRY_GREEN_COLOUR_MAP_IDS)
+    { // pos%,R,G,B
+      255, 0, 0,
+      0, 40, 0,
+      0, 40, 0,
+      // 0, 120, 0,
+      // 0, 120, 0,
+      0, 40, 0
+      
+    };
+
+/**
+ * Based on chrimstas light colours * 
+ * 
+ * */
+
+
+    #ifndef D_PALETTE_CHRISTMAS_01_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_01_NAME_CTR        "Christmas RGPBO - Traditional"   
+    #endif    
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_01_NAME_CTR)        D_PALETTE_CHRISTMAS_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_01_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 255, 0,
+      255, 0, 200,
+      0, 0, 255,
+      255, 60, 0     //COLOUR_FLOAT_HUE_ORANGE  
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_02_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_02_NAME_CTR        "Christmas RGPBY"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_02_NAME_CTR)        D_PALETTE_CHRISTMAS_02_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_02_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 255, 0,
+      255, 0, 200,
+      0, 0, 255,
+      255, 213, 0     //COLOUR_FLOAT_HUE_YELLOW  
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_03_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_03_NAME_CTR        "Christmas RGPBOY - C7 Bulbs"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_03_NAME_CTR)        D_PALETTE_CHRISTMAS_03_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_03_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 255, 0,
+      255, 0, 200,
+      0, 0, 255,
+      255, 213, 0,     //COLOUR_FLOAT_HUE_YELLOW       
+      255, 60, 0     //COLOUR_FLOAT_HUE_ORANGE   
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_04_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_04_NAME_CTR        "Christmas MiniBells GPYpBPp"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_04_NAME_CTR)        D_PALETTE_CHRISTMAS_04_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_04_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 255, 0,
+      255, 0, 200,
+      0, 0, 255,
+      255, 213, 0,     //COLOUR_FLOAT_HUE_YELLOW       
+      255, 60, 50     //COLOUR_FLOAT_HUE_ORANGE         
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_05_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_05_NAME_CTR        "few with some off"//"Christmas Multi with Warm White"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_05_NAME_CTR)        D_PALETTE_CHRISTMAS_05_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_05_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 150, 0,
+      255, 26, 64,
+      0, 0, 255,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 255, 0,
+      255, 26, 64,
+      0, 0, 150,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 155, 0,
+      255, 26, 64,
+      0, 0, 200,
+      255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      0,255,255, // cyan
+
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0
+
+
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_06_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_06_NAME_CTR        "Christmas Multi Aged Warmer"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_06_NAME_CTR)        D_PALETTE_CHRISTMAS_06_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_06_COLOUR_MAP_IDS)
+    { // R,G,B   
+      255, 0, 0,
+      203, 89, 89,
+      0, 255, 0,
+      255, 0, 200,
+      0, 0, 255,
+      0, 253, 255,
+      89, 117, 203,
+      255, 213, 0,     //COLOUR_FLOAT_HUE_YELLOW       
+      255, 60, 50     //COLOUR_FLOAT_HUE_ORANGE 
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_07_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_07_NAME_CTR        "Christmas Warm White"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_07_NAME_CTR)        D_PALETTE_CHRISTMAS_07_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 140, 26 // Warm White         
+    };
+
+    #ifndef D_PALETTE_CHRISTMAS_08_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_08_NAME_CTR        "Christmas Cold White"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_08_NAME_CTR)        D_PALETTE_CHRISTMAS_08_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_08_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 255, 255
+    };
+
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_09_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_09_NAME_CTR        "Christmas Outside Tree Few Multi"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_09_NAME_CTR)        D_PALETTE_CHRISTMAS_09_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_09_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 150, 0,
+      255, 26, 64,
+      0, 0, 255,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 255, 0,
+      255, 26, 64,
+      0, 0, 150,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 155, 0,
+      255, 26, 64,
+      0, 0, 200,
+      255, 67, 10     //COLOUR_FLOAT_HUE_ORANGE 
+
+      
+      
+
+
+
+
+//use my phone, take pictures of real christmas lights, then use colour picker in photo shop to get rgb!
+      
+    };
+
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_10_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_10_NAME_CTR        "Christmas Outside Tree Many Multi"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_10_NAME_CTR)        D_PALETTE_CHRISTMAS_10_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_10_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 150, 0,
+      255, 26, 64,
+      0, 0, 255,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 255, 0,
+      255, 26, 64,
+      0, 0, 150,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 155, 0,
+      255, 26, 64,
+      0, 0, 200,
+      255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE   
+  
+  
+      255, 5, 5,
+      255, 213, 0,
+      0, 100, 200,
+      157, 0, 255,
+      255, 0, 128,
+      
+      0, 255,255 // cyan
+  
+  
+    };
+
+
+
+
+/**
+ * 
+ * end of christmas ones
+ * 
+ * */
+
+
+
+
+
+
+
+
+
+
 
     #ifndef D_PALETTE_SUNRISE_01_NAME_CTR
     #define D_PALETTE_SUNRISE_01_NAME_CTR        "Sunrise 01"   

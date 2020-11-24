@@ -15,7 +15,12 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/mUserOptions.h"
+#ifdef ESP8266
 #include <avr/pgmspace.h>
+#endif // ESP8266
+#ifdef ESP32
+#define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
+#endif
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
@@ -35,7 +40,7 @@ debug
 //#define DEVICE_RGBCRYSTAL2
 //#define DEVICE_RGBSHELF
 //#define DEVICE_RGBMICRO1 //glass box
-//#define DEVICE_RGBMICRO2 //projector                  
+//  #define DEVICE_RGBMICRO2 //projector                  
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 //#define DEVICE_RGBMICRO4 //gazebo
 //#define DEVICE_RGBBEDLIGHT                            
@@ -44,8 +49,9 @@ debug
 //#define DEVICE_RGBCOOKER
 //#define DEVICE_RGBUTILITY
 //#define DEVICE_RGBFRIDGE
-// #define DEVICE_RGBOUTSIDETREE                          
-//#define DEVICE_CHRISTMAS_HALLWAYTREE                          
+// #define DEVICE_RGBOUTSIDETREE   
+// #define DEVICE_RGBOUTSIDETREE_TESTER                         
+// #define DEVICE_RGBHALLWAYTREE                          
 // #define DEVICE_RGBBEDROOMFLOOR
 // #define DEVICE_H801_TESTER
 
@@ -74,6 +80,7 @@ debug
  *  ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- ENERGY   -- 
 **/
 //#define DEVICE_CONSUMERUNIT 
+//#define DEVICE_PZEM_TESTER
 
 /**
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
@@ -180,6 +187,56 @@ debug
     "}"
   "}";
 #endif
+
+
+#ifdef DEVICE_PZEM_TESTER
+  #define DEVICENAME_CTR          "pzem_tester"
+  #define DEVICENAME_FRIENDLY_CTR "PZEM Tester"
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  #define USE_BUILD_TYPE_ENERGY
+  #define USE_MODULE_SENSORS_PZEM004T_MODBUS
+  #define MAX_ENERGY_SENSORS 2
+
+  // #define ENABLE_BUG_TRACING
+  
+  #define USE_SOFTWARE_SERIAL_DEBUG
+  #define DISABLE_SERIAL_LOGGING //temp measure
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+      "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
+      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Closed CT 100A"
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Open CT 100A"
+  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "Inline 100ohm 10A"
+  
+  // Drivers, Sensors and lights?
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\""
+      "]"
+    "}"
+  "}";
+#endif
+
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_LIGHTING == RGB Lighting] ----------------------------
@@ -314,7 +371,7 @@ debug
           "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";  
 
   
@@ -402,9 +459,9 @@ debug
   // #define USE_MODULE_SENSORS_INA219
   // #define USE_MODULE_SENSORS_BME
     
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   //#define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   //#define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
@@ -442,7 +499,7 @@ debug
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_SCENE "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
     "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
 
   #define D_DEVICE_SENSOR_CURRENT "Module 1"
@@ -567,26 +624,182 @@ debug
   #define DEVICENAME_CTR          "rgboutsidetree"
   #define DEVICENAME_FRIENDLY_CTR "Outside Tree"
 
+  
+#define ENABLE_DEVFEATURE_FLICKERING_TEST2
+
+// #define ENABLE_BUG_TRACING
+  //to do
+  /*
+    1) Only update % of count with random enabled
+    2) Enable basic mixer (switch case list of commands to set that is hardcoded)
+
+{
+  "AnimationMode": "Flasher",
+  "Flasher": {
+    "Function": 1,
+    "ColourRefreshRate":100,
+    "Direction":1,
+    "BrightnessMin":20
+  },
+  "Transition":{"Order":"Random","PixelUpdatePerc":100,"RateMs":1000},
+  "ColourPalette": 0,
+  "BrightnessRGB": 50,
+  "TimeMs":1
+}
+
+{
+  "AnimationMode": "Flasher",
+  "Flasher": {
+    "Function": 1,
+    "Direction":0,
+    "AlternateBrightnessMax":50,
+    "AlternateRandomAmount":3
+  },
+  "PixelGrouping":{
+    "Enabled":"On",
+    "MappedMultiplierData":[22,14,14,15,15,15,12,20,10,8,4,1],
+    "Mode":3
+  },
+  "Transition":{"Order":"InOrder","PixelUpdatePerc":4,"RateMs":1000},
+  "ColourPalette": 0,
+  "BrightnessRGB": 40,
+  "TimeMs":0
+}
+
+{
+  "AnimationMode": "Flasher",
+  "Flasher": {
+    "Function": 1,
+    "Direction":0,
+    "AlternateBrightnessMax":50,
+    "AlternateRandomAmount":3
+  },
+  "mixer":{
+    "enabled":1,
+    "run_time_duration_scaler_as_percentage":50
+  },
+  "PixelGrouping":{
+    "Enabled":"On",
+    "MappedMultiplierData":[22,14,14,15,15,15,12,20,10,8,4,1],
+    "Mode":3
+  },
+  "Transition":{"Order":"InOrder","PixelUpdatePerc":100,"RateMs":2000},
+  "ColourPalette": 0,
+  "BrightnessRGB": 30,
+  "TimeMs":0
+}
+
+{
+  "AnimationMode": "Flasher",
+  "Flasher": {
+    "Function": 1,
+    "Direction":0,
+    "AlternateBrightnessMax":50,
+    "AlternateRandomAmount":3,
+    "AgedColouring":0
+  },
+  "mixer":{
+    "enabled":0,
+    "running_id":1,
+    "run_time_duration_scaler_as_percentage":50
+  },
+  "PixelGrouping":{
+    "Enabled":"Off",
+    "MappedMultiplierData":[22,14,14,15,15,15,12,20,10,8,4,1],
+    "Mode":3
+  },
+  "Transition":{"Order":"InOrder","PixelUpdatePerc":10,"RateMs":2000},
+  "ColourPalette": 40,
+  "BrightnessRGB": 100,
+  "TimeMs":0
+}
+
+
+Add function that adds saturaiton variation flag on gett palette colours to make them less uniform like real lights
+
+  */
+
+// #define ENABLE_BUG_TRACING
+// #define ENABLE_DEVFEATURE_FLICKER_TESTING
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST2
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST3
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST5
+
+
+/*
+
+
+  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+
+  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
+
+  */
+
+#define USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
+DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
+{  // trans method, flasher, colours,   rate/time, mutlipler
+  "Static/InOrder, SlowGlow, Few Colour, %d/%d, Single" "|" // 1
+  "Medium/Random, SlowGlow, Few Colour, %d/%d, Single" "|" // 2
+  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Single" "|" // 3
+  "Slow/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 4
+  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 5
+  "Static/InOrder, SlowGlow, Few Colour 9, %d/%d, Rows" "|" // 6
+  "Rotate/InOrder, Sequential, Many Colour 10, %d/%d, Rows" "|" // 7
+  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Rows" "|" // 8
+  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Single" "|" // 9
+  "Fast/InOrder, TwinkleColour, Many Colour 10, %d/%d, Single" "|" // 10
+  "Slow/Random, SlowGlow, Partial Colours 5, %d/%d, Single" "|" // 11
+};
+
+
+
+#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+#define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
+
+
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   // #define ENABLE_BUG_TRACING
   #define DEBUG_PRINT_FUNCTION_NAME
 
-  // #define DISABLE_WEBSERVER
 
   //#define ENABLE_LOG_FILTERING_TEST_ONLY
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
+  
+  #define ENABLE_PIXEL_FUNCTION_MIXER
+  #define ENABLE_PIXEL_FUNCTION_FLASHER
 
-  #define STRIP_SIZE_MAX 800//*15
+  #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
+
+  #define DISABLE_WEBSERVER
+  #define DISABLE_NETWORK
+  #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
+
+
+  // Memory reduction techniques
+  // #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 10 
+  // #define WEB_LOG_SIZE 1
+  // #define LOG_BUFFER_SIZE 500
+
+  // #define DISABLE_SLEEP
+
+  // #define USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
+
+  // #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+
 
   #define USE_INTERFACE_NEW
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define DISBALE_TEST_SECTION
 
   // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
@@ -617,11 +830,265 @@ debug
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
     "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
-    "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    // "\"" D_JSON_BRIGHTNESS       "\":0,"
+    // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
+
+    // new commands I want to run during boot
+
+    "\"AnimationMode\":\"Flasher\","
+    // "\"Flasher\":{"
+    //   "\"Function\":11,"
+    //   "\"AgedColouring\":0"
+    // "},"
+    "\"Mixer\":{"
+      "\"Enabled\":1,"
+      // "\"" D_JSON_RUNNING_ID "\":7,"
+      "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
+    "},"
+    "\"PixelGrouping\":{"
+      // "\"Enabled\":\"Off\","
+      "\"Mode\":3"
+    "},"
+    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
+    "\"BrightnessRGB\":100"
+
+  "}";
+
+
+#endif
+
+
+//rgbmicro2/set/light/scene
+//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+#ifdef DEVICE_RGBOUTSIDETREE_TESTER
+  #define DEVICENAME_CTR          "rgboutsidetree_tester"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree Tester"
+
+// #define ENABLE_BUG_TRACING
+// #define ENABLE_DEVFEATURE_FLICKER_TESTING
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST2
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST3
+// #define ENABLE_DEVFEATURE_FLICKERING_TEST5
+
+
+/*
+
+
+  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+
+  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
+
+  */
+
+#define USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
+DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
+{  // trans method, flasher, colours,   rate/time, mutlipler
+  "Static/InOrder, SlowGlow, Few Colour, %d/%d, Single" "|" // 1
+  "Medium/Random, SlowGlow, Few Colour, %d/%d, Single" "|" // 2
+  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Single" "|" // 3
+  "Slow/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 4
+  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 5
+  "Static/InOrder, SlowGlow, Few Colour 9, %d/%d, Rows" "|" // 6
+  "Rotate/InOrder, Sequential, Many Colour 10, %d/%d, Rows" "|" // 7
+  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Rows" "|" // 8
+  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Single" "|" // 9
+  "Fast/InOrder, TwinkleColour, Many Colour 10, %d/%d, Single" "|" // 10
+  "Slow/Random, SlowGlow, Partial Colours 5, %d/%d, Single" "|" // 11
+};
+
+
+
+#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+#define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
+
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  // #define ENABLE_BUG_TRACING
+  #define DEBUG_PRINT_FUNCTION_NAME
+
+
+  //#define ENABLE_LOG_FILTERING_TEST_ONLY
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
+  
+  #define ENABLE_PIXEL_FUNCTION_MIXER
+  #define ENABLE_PIXEL_FUNCTION_FLASHER
+
+  #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
+
+  #define DISABLE_WEBSERVER
+  #define DISABLE_NETWORK
+  #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
+
+
+  // Memory reduction techniques
+  // #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 10 
+  // #define WEB_LOG_SIZE 1
+  // #define LOG_BUFFER_SIZE 500
+
+  // #define DISABLE_SLEEP
+
+  // #define USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
+
+  // #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
+  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
+  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+
+
+  #define USE_INTERFACE_NEW
+    
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define DISBALE_TEST_SECTION
+
+  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
+    // "\"" D_JSON_BRIGHTNESS       "\":0,"
+    // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
+
+    // new commands I want to run during boot
+
+    "\"AnimationMode\":\"Flasher\","
+    // "\"Flasher\":{"
+    //   "\"Function\":11,"
+    //   "\"AgedColouring\":0"
+    // "},"
+    "\"Mixer\":{"
+      "\"Enabled\":1,"
+      // "\"" D_JSON_RUNNING_ID "\":7,"
+      "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
+    "},"
+    "\"PixelGrouping\":{"
+      // "\"Enabled\":\"Off\","
+      "\"Mode\":3"
+    "},"
+    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
+    "\"BrightnessRGB\":100"
+
   "}";
 
 #endif
+
+
+#ifdef DEVICE_RGBHALLWAYTREE 
+  #define DEVICENAME_CTR          "rgbhallwaytree"
+  #define DEVICENAME_FRIENDLY_CTR "RGBFRONTHALLWAYTREE"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2//random(1,1000)
+
+  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+//  #define USE_PUBSUB_V1
+
+  //#define ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
+
+  #define ENABLE_DEVFEATURE_OTA_METHOD
+
+  // #define ENABLE_BUG_TRACING
+
+  #define DISABLE_WEBSERVER
+
+  //#define ENABLE_LOG_FILTERING_TEST_ONLY
+
+  #define STRIP_SIZE_MAX 100
+  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
+  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  // #define USE_INTERFACE_NEW
+
+  // #define USE_MODULE_SENSORS_INA219
+  // #define USE_MODULE_SENSORS_BME
+    
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  //#define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  //#define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
+  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
+  #define ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW    "v79.31.22+" 
+  #define ENABLE_DEVFEATURE_PIXEL_NEW_JSON_PALETTE_SELECT_ROOT
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PROGMEM_CTR(MODULE_TEMPLATE)   
+  "{"
+    "\"NAME\":\"" DEVICENAME_CTR "\","
+    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"GPIOC\":{"    
+      #if defined(USE_MODULE_SENSORS_INA219) || defined(USE_MODULE_SENSORS_BME)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
+    "},"
+    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PROGMEM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_SCENE "\","
+    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
+    "\"" D_JSON_BRIGHTNESS       "\":0,"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
+  "}";
+
+  #define D_DEVICE_SENSOR_CURRENT "Module 1"
+  
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PROGMEM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_SENSORS_INA219_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_CURRENT "\""
+  //     "]"
+  //   "}"
+  // "}";
+
+#endif
+
 
 
 #ifdef DEVICE_H801_TESTER // for PWM dev
@@ -824,7 +1291,7 @@ debug
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
     "\"" D_JSON_BRIGHTNESS     "\":10,"
-    "\"" D_JSON_BRT_RGB        "\":10"
+    "\"" D_JSON_BRIGHTNESS_RGB        "\":10"
   "}";
   
 #endif
@@ -919,7 +1386,7 @@ debug
       "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
       "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_FLASHER "\","
       "\"" D_JSON_BRIGHTNESS     "\":10,"
-      "\"" D_JSON_BRT_RGB        "\":10"
+      "\"" D_JSON_BRIGHTNESS_RGB        "\":10"
     "}";
 
 #endif
@@ -1281,7 +1748,7 @@ debug
           "\"" D_JSON_HSB    "\":[330,100,100]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -2219,7 +2686,7 @@ debug
           "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
@@ -2301,7 +2768,7 @@ debug
           "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRT_RGB          "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define PIXEL_LIGHTING_HARDWARE_SK6812_STRIP

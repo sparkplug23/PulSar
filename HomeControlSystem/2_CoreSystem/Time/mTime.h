@@ -66,6 +66,21 @@ typedef struct TIMEREACHED_HANDLER{
 #define SEC_IN_HOUR 3600
 #define SEC_IN_MIN 60
 
+enum TIME_UNITS_IDS{
+  TIME_UNIT_SECONDS_ID = 0,
+  TIME_UNIT_MILLISECONDS_ID
+};
+
+
+template <typename TIME, typename UNIT>
+uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
+  if(unit == TIME_UNIT_SECONDS_ID){
+    time_secs *= 1000;
+  }
+  return time_secs;
+}
+
+
 #include <EEPROM.h>
 #define EEPROM_ADDR_REBOOT_COUNTER 0
 
@@ -110,6 +125,7 @@ class mTime{
 
     time_short_t GetTimeShortNow();
 
+
     uint32_t tSavedUptime;
 
     uint8_t fTimeSet = false;
@@ -137,6 +153,13 @@ class mTime{
     #define NTP_INTERVAL 60 * 1000 // In miliseconds
     #define NTP_ADDRESS "0.pool.ntp.org" //US address
     //#define NTP_ADDRESS "0.europe.pool.ntp.org" //US address
+
+    struct SETTINGS{
+      uint8_t timeclient_is_started = false;
+    }settings;
+
+bool CheckOrStartNTPService();
+void TickRTCVariablesWithUptime();
 
     WiFiUDP ntpUDP;
     NTPClient* timeClient;//(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);

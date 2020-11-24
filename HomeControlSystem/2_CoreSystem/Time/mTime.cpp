@@ -3,12 +3,22 @@
 
 int8_t mTime::Tasker(uint8_t function){
 
+// return 0;
+
+  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+    return 0;
+  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
+
   switch(function){
     case FUNC_INIT:
       init();
       testtime.millis = millis();
       testtime.run = false;
     break;
+  }
+
+  switch(function){
+    
     case FUNC_LOOP: {
 
       uint8_t show_time_rate = 60; // default
@@ -26,19 +36,26 @@ int8_t mTime::Tasker(uint8_t function){
         
         #ifndef DISABLE_SERIAL_LOGGING
         if(ESP.getFreeHeap()<4000){
-          Serial.printf("WARNING FreeRam %d\n\r", ESP.getFreeHeap()); Serial.flush();
+          // Serial.printf("WARNING FreeRam %d\n\r", ESP.getFreeHeap()); Serial.flush();
         }
         #endif
       }
       
-    }
-    break;
+    }break;
     case FUNC_EVERY_SECOND:{
+      
+      if(CheckOrStartNTPService()){
+        UpdateStoredRTCVariables();
+        UpdateUpTime();
+        timeClient->update();
+        // tick forward anyway
+      }else{
+        UpdateUpTime();
+        TickRTCVariablesWithUptime();
+       // AddLog_P(LOG_LEVEL_INFO, PSTR("CheckOrStartNTPService disabled"));
+        //break;
+      }
 
-      UpdateStoredRTCVariables();
-      UpdateUpTime();
-      timeClient->update();
-          
       // Check for midnight
       if((mtime.hour==0)&&(mtime.minute==0)&&(mtime.second==0)&&(lastday_run != mtime.Yday)){
         lastday_run = mtime.Yday;
@@ -58,8 +75,7 @@ int8_t mTime::Tasker(uint8_t function){
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
       if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 
-    }
-    break;
+    }break;
     case FUNC_EVERY_MIDNIGHT:
     
     break;
@@ -87,11 +103,14 @@ void mTime::init(void){
   
   memset(&uptime,0,sizeof(uptime));
 
+DEBUG_LINE_HERE;
   //timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
   timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, (fEnabled_DayLightSavings?NTP_OFFSET:0), NTP_INTERVAL);
 
-  timeClient->begin();
+  DEBUG_LINE_HERE;
 
+
+  DEBUG_LINE_HERE;
   kDaysInMonth[0] = 31;
   kDaysInMonth[1] = 28;
   kDaysInMonth[2] = 31;
@@ -110,6 +129,38 @@ void mTime::init(void){
   // Serial.print("getEpochTime");
   // Serial.println(timeClient->getEpochTime());
 
+
+}
+
+
+bool mTime::CheckOrStartNTPService(){
+
+#ifndef DISABLE_FOR_FAULTY_ESP32_FLICKERING
+  if(pCONT_wif->WifiCheckIpConnected()){
+    // If just connected, and not already started
+    if(!settings.timeclient_is_started){ 
+      timeClient->begin();
+      Serial.println("CheckOrStartNTPService TRUE");
+      settings.timeclient_is_started = true;
+    }
+  }else{
+    
+    Serial.println("CheckOrStartNTPService False");
+  }
+#endif
+
+  if(!settings.timeclient_is_started){
+    fTimeSet = false;
+    mtime.isvalid = false;
+    return false; // failed to start
+  }
+
+
+// #ifdef ESP8266
+// #else
+//   settings.timeclient_is_started = false;
+// #endif
+
   if(
     timeClient->getEpochTime()>(
       (fEnabled_DayLightSavings?NTP_OFFSET:0)+2000
@@ -126,7 +177,11 @@ void mTime::init(void){
 
   mtime.isvalid = true;
 
+  return true;
+
 }
+
+
 
 uint32_t mTime::GetTimeOfDay_Seconds(void){
   return mtime.Dseconds;
@@ -249,6 +304,51 @@ void mTime::UpdateStoredRTCVariables(void){
 
   memset(mtime.hhmmss_ctr,0,sizeof(mtime.hhmmss_ctr));
   timeClient->getFormattedTime(mtime.hhmmss_ctr);
+  
+}
+
+
+void mTime::TickRTCVariablesWithUptime(void){
+
+  // setTime(timeClient->getEpochTime()); // Set to use conversion to units
+
+  // mtime.year = year();
+  // mtime.month = month();
+  // mtime.Wday = weekday();
+  // mtime.Mday = day();
+  // mtime.hour = hour();
+  // mtime.minute = minute();
+  // mtime.second = second();
+
+  // mtime.second++;
+  // if(mtime.second>59){
+  //   mtime.second = 0;
+  //   mtime.minute++;
+  // }
+  // if(mtime.minute>59){
+  //   mtime.minute = 0;
+  //   mtime.hour++;
+  // }
+  // if(mtime.hour>23){
+  //   mtime.hour = 0;
+  //   mtime.Yday++;
+  // }
+
+  mtime = uptime;
+
+  // mtime.Yseconds = timeClient->getEpochTime() - NTP_EPOCH_AT_START_OF_2019;
+  // mtime.Wseconds = (mtime.Wday*SEC2DAY)+(mtime.hour*SEC2HOUR)+(mtime.minute*SEC2MIN)+(mtime.second);
+  // mtime.Dseconds = (mtime.hour*SEC2HOUR)+(mtime.minute*SEC2MIN)+(mtime.second);
+
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,
+  //   PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
+  //   mtime.Mday,mtime.month,mtime.year,
+  //   mtime.Wday,mtime.hour,mtime.minute,mtime.second,
+  //   mtime.Dseconds,mtime.Wseconds,mtime.Yseconds
+  // ); 
+
+  // memset(mtime.hhmmss_ctr,0,sizeof(mtime.hhmmss_ctr));
+  // timeClient->getFormattedTime(mtime.hhmmss_ctr);
   
 }
 

@@ -5,6 +5,15 @@
 
 #include "0_ConfigUser/mUserConfig.h"
 
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <map>
+#include <random>
+#include <cmath>
+
+
 //move to time lib
 // typedef struct TIMEREACHED_SAVED{
 //   uint32_t millis_saved;
@@ -84,6 +93,8 @@ struct functionhandler {
 #include "2_CoreSystem/Settings/mSettings.h"
 
 
+
+
 //#ifdef USE_I2C
   #include <Wire.h>                         // I2C support library
 //#endif  // USE_I2C
@@ -122,6 +133,68 @@ bool SetAndKeepHighestNumber(T* current, T new_value){
   }
   return false;
 } 
+
+
+template<typename A,typename B,typename C,typename D,typename E>
+A mapvalue(A a, B b, C c, D d, E e){
+  return map(a,b,c,d,e);
+}
+
+template <typename T, typename U>
+T ArrayCountUntilNull(T* buffer, U buflen){
+  T count = 0;
+  while(buffer != 0){
+    count++;
+    if(count > buflen){
+      break;
+    }
+  }
+  return count;
+}
+
+template <typename T>
+T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min = 0, T constrained_max = 0){
+
+  // Get a value between (and inclusing zero) and the maximum range with SD as the centre point
+  T random_value = random(0,standard_deviation);
+
+  // Either add or subtract the value from the centre
+  T result = mean + (random(0,1)?1:-1)*(int)random_value; 
+
+  // If these are not equal, then apply contraint
+  if(constrained_min != constrained_max){
+    result = constrain(result, constrained_min, constrained_max);
+  }
+
+  // AddLog_P(LOG_LEVEL_INFO, PSTR("result=%d"),result);
+
+  return result; 
+
+}
+
+
+// Return new state
+template <typename T, typename U>
+T ConvertStateNumberIfToggled(T command_state, U check_state){
+
+  //Serial.printf("FLIP TO BE %d\n\r",command_state);
+  if(command_state == STATE_NUMBER_TOGGLE_ID){
+    if(check_state){
+      //Serial.println("FLIP TO BE OFF");
+      command_state = STATE_NUMBER_OFF_ID;
+      // check_state = STATE_NUMBER_OFF_ID;
+    }else{
+      //Serial.println("FLIP TO BE ON");
+      command_state = STATE_NUMBER_ON_ID;
+      // check_state = STATE_NUMBER_ON_ID;
+    }
+  }
+  // Serial.printf("NOW is %d\n\r",command_state);
+
+  return command_state; // return new state
+}
+
+
 
 
 extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack, uint32_t stack_end);
@@ -173,6 +246,26 @@ class mSupport{
     
     int8_t Tasker(uint8_t function);
     void init(void);
+
+      
+    // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
+    #ifdef USE_ARDUINO_OTA
+      /*********************************************************************************************\
+       * Allow updating via the Arduino OTA-protocol.
+       *
+       * - Once started disables current wifi clients and udp
+       * - Perform restart when done to re-init wifi clients
+      \*********************************************************************************************/
+
+      bool arduino_ota_triggered = false;
+      uint16_t arduino_ota_progress_dot_count = 0;
+      bool ota_init_success = false;
+
+      void ArduinoOTAInit(void);
+      void ArduinoOtaLoop(void);
+    #endif // USE_ARDUINO_OTA
+    // #endif // ENABLE_DEVFEATURE_OTA_METHOD
+
 
     /****
      * "class-less" Pointer Member function that takes the struct handler which contains if/when a mqtt payload should
@@ -238,11 +331,14 @@ class mSupport{
     IPAddress syslog_host_addr;      // Syslog host IP address
     uint32_t syslog_host_hash = 0;   // Syslog host name hash
 
+    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
+    // uint8_t GetRandomSaturationVariation(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
+
+
     // uint32_t state_100msecond,state_250msecond;
 
     Ticker tickerOSWatch;
 
-    uint8_t ConvertStateNumberIfToggled(uint8_t command_state, uint8_t check_state);
 
 
     // Randomise array (aka std lib)

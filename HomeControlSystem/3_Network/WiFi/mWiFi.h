@@ -5,6 +5,10 @@
 
 // #define ENABLE_WIFI_DEVELOPMENT
 
+#ifdef ESP32
+#include <esp8266toEsp32.h>
+#endif
+
 #ifdef ENABLE_USER_CONFIG_OVERRIDE 
   #include "0_ConfigUser/mUserConfigSecret.h"
 #endif
@@ -19,11 +23,32 @@
 
 #ifdef ESP32
   #include <WiFi.h>
+  #include "2_CoreSystem/Support/mSupport.h"
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
   // #include <ESP8266mDNS.h>
 #endif
+
+
+#ifdef ESP8266
+  #include "2_CoreSystem/Support/SupportESP8266.h"
+  #define SupportHardware SupportESP8266
+#endif
+#ifdef ESP32
+  #include "2_CoreSystem/Support/SupportESP32.h"
+  #define mSupportHardware SupportESP32
+#endif
+
+
+    const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
+    const uint8_t WIFI_CHECK_SEC = 20;         // seconds
+    const uint8_t WIFI_RETRY_OFFSET_SEC = 20;  // seconds
+
+    #define D_WIFI_CONFIG_SEC 180
+    #define D_WIFI_cONFIG_SEC_FIRST_CONNECT 5
+
+
 
 #include "2_CoreSystem/Time/mTime.h"
 
@@ -44,6 +69,8 @@ class mWiFi{
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;
     uint32_t tSavedWiFiReconnect;
+
+    uint16_t wifi_counter_tester = 0;
     
     bool WifiCheckIpConnected();
 
@@ -54,22 +81,19 @@ class mWiFi{
       #define WIFI_RESCAN_MINUTES     30         // Number of minutes between wifi network rescan
     #endif
 
-    const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
-    const uint8_t WIFI_CHECK_SEC = 20;         // seconds
-    const uint8_t WIFI_RETRY_OFFSET_SEC = 20;  // seconds
 
 
     struct WIFI_CONNECTION{
       uint32_t last_event = 0;       // Last wifi connection event
       uint32_t downtime = 0;         // Wifi down duration
       uint16_t link_count = 0;       // Number of wifi re-connect
-      uint8_t counter;
-      uint8_t retry_init;
-      uint8_t retry;
-      uint8_t status;
+      uint8_t counter = 0;
+      uint8_t retry_init = 0;
+      uint8_t retry = 0;
+      uint8_t status = 0;
       uint8_t config_type = 0;
-      uint8_t config_counter = 0;
-      uint8_t scan_state;
+      uint8_t config_counter = D_WIFI_cONFIG_SEC_FIRST_CONNECT; // IMPORTANT!!
+      uint8_t scan_state = 0;
       uint8_t bssid[6];
       uint8_t fConnected = false;
       uint8_t fReconnect = false;

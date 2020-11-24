@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-// #define USE_DECLARE_AT_COMPILE_TO_DEBUG
+//#define USE_DECLARE_AT_COMPILE_TO_DEBUG
 
 // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
 
@@ -18,6 +18,91 @@ void hw_wdt_enable(){
   *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
 }
 #endif
+
+/*
+
+/*********************************************************************************************
+ * Hardware related
+\*********************************************************************************************
+
+#ifdef ESP8266
+
+void HwWdtDisable(void) {
+  *((volatile uint32_t*) 0x60000900) &= ~(1);  // Hardware WDT OFF
+}
+
+void HwWdtEnable(void) {
+  *((volatile uint32_t*) 0x60000900) |= 1;     // Hardware WDT ON
+}
+
+void WdtDisable(void) {
+  ESP.wdtDisable();
+  HwWdtDisable();
+}
+
+void WdtEnable(void) {
+  HwWdtEnable();
+  ESP.wdtEnable(0);
+}
+
+#endif  // ESP8266*/
+
+/*
+without energyusage in rtc
+RAM:   [======    ]  64.7% (used 53000 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510748 bytes from 1023984 bytes)
+// with energy rtc
+RAM:   [======    ]  64.8% (used 53112 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510828 bytes from 1023984 bytes)
+//
+RAM:   [======    ]  64.2% (used 52576 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510764 bytes from 1023984 bytes)
+RAM:   [======    ]  63.1% (used 51680 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510224 bytes from 1023984 bytes)
+
+RAM:   [======    ]  63.1% (used 51656 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510224 bytes from 1023984 bytes)
+
+RAM:   [======    ]  63.0% (used 51640 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510224 bytes from 1023984 bytes)
+//
+RAM:   [======    ]  59.6% (used 48840 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510176 bytes from 1023984 bytes)
+
+
+RAM:   [======    ]  63.5% (used 52040 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510352 bytes from 1023984 bytes)
+
+RAM:   [======    ]  63.5% (used 52040 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510268 bytes from 1023984 bytes)
+
+RAM:   [======    ]  60.0% (used 49128 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510632 bytes from 1023984 bytes)
+
+RAM:   [======    ]  60.0% (used 49112 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510668 bytes from 1023984 bytes)
+
+RAM:   [======    ]  59.8% (used 48952 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510492 bytes from 1023984 bytes)
+
+RAM:   [======    ]  59.6% (used 48856 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510612 bytes from 1023984 bytes)
+
+RAM:   [======    ]  59.6% (used 48856 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510652 bytes from 1023984 bytes)
+
+RAM:   [======    ]  59.6% (used 48792 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510316 bytes from 1023984 bytes)
+
+RAM:   [======    ]  59.3% (used 48552 bytes from 81920 bytes)
+Flash: [=====     ]  49.9% (used 510620 bytes from 1023984 bytes)
+
+
+RAM:   [======    ]  58.9% (used 48248 bytes from 81920 bytes)
+Flash: [=====     ]  49.8% (used 510260 bytes from 1023984 bytes)
+
+=====================================================================
+*/
 
 
 #ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
@@ -257,149 +342,167 @@ void init_class_instances(){
 
 
 
+//   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
 
-#ifdef USE_ARDUINO_OTA
-/*********************************************************************************************\
- * Allow updating via the Arduino OTA-protocol.
- *
- * - Once started disables current wifi clients and udp
- * - Perform restart when done to re-init wifi clients
-\*********************************************************************************************/
+// #ifdef USE_ARDUINO_OTA
+// /*********************************************************************************************\
+//  * Allow updating via the Arduino OTA-protocol.
+//  *
+//  * - Once started disables current wifi clients and udp
+//  * - Perform restart when done to re-init wifi clients
+// \*********************************************************************************************/
 
-bool arduino_ota_triggered = false;
-uint16_t arduino_ota_progress_dot_count = 0;
+// bool arduino_ota_triggered = false;
+// uint16_t arduino_ota_progress_dot_count = 0;
 
-void ArduinoOTAInit(void)
-{
-  #ifndef TEST_OTA_ISSUE
-    ArduinoOTA.setHostname(pCONT_set->my_hostname);
-  #endif
-  ArduinoOTA.onStart([]()
-  {
-    // #ifdef ESP8266
-      //pCONT_set->SettingsSave(1);  // Free flash for OTA update
-      //#ifdef USE_MODULE_CORE_WEBSERVER
-        // if (pCONT_set->Settings.webserver) { 
-          //pCONT_web->StopWebserver(); 
-          // /}
-      // #endif  // USE_MODULE_CORE_WEBSERVER
-      //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
-    // #endif
-    arduino_ota_triggered = true;
-    arduino_ota_progress_dot_count = 0;
+// void ArduinoOTAInit(void)
+// {
+//   #ifndef TEST_OTA_ISSUE
+//     ArduinoOTA.setHostname(pCONT_set->my_hostname);
+//   #endif
+//   ArduinoOTA.onStart([]()
+//   {
+//     // #ifdef ESP8266
+//       //pCONT_set->SettingsSave(1);  // Free flash for OTA update
+//       //#ifdef USE_MODULE_CORE_WEBSERVER
+//         // if (pCONT_set->Settings.webserver) { 
+//           //pCONT_web->StopWebserver(); 
+//           // /}
+//       // #endif  // USE_MODULE_CORE_WEBSERVER
+//       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+//     // #endif
+//     arduino_ota_triggered = true;
+//     arduino_ota_progress_dot_count = 0;
     
-    #ifdef ESP32
-      pinMode(2,OUTPUT);
-      timerWrite(timerwdt, 0); //reset timer (feed watchdog)
-    #endif
+//     #ifdef ESP32
+//       pinMode(2,OUTPUT);
+//       // timerWrite(timerwdt, 0); //reset timer (feed watchdog)
+//     #endif
 
-    // Stop server otherwise OTA can fail
-    // pCONT_web->StopWebserver();
+//     // Stop server otherwise OTA can fail
+//     // pCONT_web->StopWebserver();
 
-    delay(100);       // Allow time for message xfer
-  });
+//     delay(100);       // Allow time for message xfer
+//   });
 
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-  {
-    if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
+//   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+//   {
+//     if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
 
-      uint8_t progress_now = (progress/(total/100));
-      if(arduino_ota_progress_dot_count != progress_now){
-        Serial.println(progress_now);
-        arduino_ota_progress_dot_count = progress_now;
-      }
-
-      ESP.wdtFeed();
-    }
+//       uint8_t progress_now = (progress/(total/100));
+//       if(arduino_ota_progress_dot_count != progress_now){
+//         Serial.println(progress_now);
+//         arduino_ota_progress_dot_count = progress_now;
+//       }
+//       #ifdef ESP8266
+//       ESP.wdtFeed();
+//       #endif // ESP8266
+//     }
     
-  });
+//   });
 
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-    /*
-    From ArduinoOTA.h:
-    typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
-    */
-    char error_str[30];
-    memset(error_str,0,sizeof(error_str));
+//   ArduinoOTA.onError([](ota_error_t error)
+//   {
+//     /*
+//     From ArduinoOTA.h:
+//     typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
+//     */
+//     char error_str[30];
+//     memset(error_str,0,sizeof(error_str));
 
-    switch (error) {
-      case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
-      case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
-      case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
-      case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
-      case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
-      default:
-        snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
-    }
-    #ifdef ENABLE_LOG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
-    #endif
+//     switch (error) {
+//       case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
+//       case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
+//       case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
+//       case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
+//       case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
+//       default:
+//         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
+//     }
+//     #ifdef ENABLE_LOG
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
+//     #endif
     
-    ESP.restart(); //should only reach if the first failed
-  });
+//     ESP.restart(); //should only reach if the first failed
+//   });
 
-  ArduinoOTA.onEnd([]()
-  {
-    #ifdef ENABLE_LOG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
-    #endif
-    ESP.restart();
-	});
+//   ArduinoOTA.onEnd([]()
+//   {
+//     #ifdef ENABLE_LOG
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
+//     #endif
+//     ESP.restart();
+// 	});
 
-  ArduinoOTA.begin();
+//   ArduinoOTA.begin();
   
-  #ifdef ENABLE_LOG
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
-  #endif
-}
+//   #ifdef ENABLE_LOG
+//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
+//   #endif
+// }
 
-void ArduinoOtaLoop(void)
-{
-  ArduinoOTA.handle();
-  // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
-  // Note async stuff can still occur, so I need to disable them
-  while (arduino_ota_triggered){ ArduinoOTA.handle(); }
-}
+// void ArduinoOtaLoop(void)
+// {
+//   ArduinoOTA.handle();
+//   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
+//   // Note async stuff can still occur, so I need to disable them
+//   while (arduino_ota_triggered){ ArduinoOTA.handle(); }
+// }
 
-#endif  // USE_ARDUINO_OTA
+// #endif  // USE_ARDUINO_OTA
 
 
-void HandleFailedBootFailBack(){
+// void HandleFailedBootFailBack(){
 
-  //ota_startup_period_ms = 5000;
-  //so.seriallog_level=LOG_LEVEL_ALL;
+//   //ota_startup_period_ms = 5000;
+//   //so.seriallog_level=LOG_LEVEL_ALL;
 
-  //#ifndef DEBUG_TESTCODE
-  // Connect first
-  // if(ota_startup_period_ms){
-  //   if(WiFi.status() != WL_CONNECTED){
-  //     mwif.WifiConnectForced(); //only wifi connection in setup for OTA recovery
-  //   }
-  //   Serial.print("[OTA ] Started ("); Serial.print(round(ota_startup_period_ms/1000)); Serial.println(" seconds)...");
-  //   unsigned long tProgram = millis(), tFlash = millis();
-  //   while(abs(millis()-tProgram)<ota_startup_period_ms){ //give me 10 seconds to reprogram from bad code
-  //     ArduinoOTA.handle(); while (arduino_ota_triggered) ArduinoOTA.handle();
-  //     #ifdef ESP32
-  //       timerWrite(timerwdt, 0);
-  //     #else
-  //       ESP.wdtFeed();
-  //     #endif
-  //     if(abs(millis()-tFlash)>=1000){ tFlash = millis();
-  //       Serial.print("[OTA ] Seconds remaining "); Serial.println(int((ota_startup_period_ms-abs(millis()-tProgram))/1000));
-  //     }
-  //   }
-  //   Serial.println("[OTA ] Ended");
-  //   }
-  // END OTA
-  //#endif
+//   //#ifndef DEBUG_TESTCODE
+//   // Connect first
+//   // if(ota_startup_period_ms){
+//   //   if(WiFi.status() != WL_CONNECTED){
+//   //     mwif.WifiConnectForced(); //only wifi connection in setup for OTA recovery
+//   //   }
+//   //   Serial.print("[OTA ] Started ("); Serial.print(round(ota_startup_period_ms/1000)); Serial.println(" seconds)...");
+//   //   unsigned long tProgram = millis(), tFlash = millis();
+//   //   while(abs(millis()-tProgram)<ota_startup_period_ms){ //give me 10 seconds to reprogram from bad code
+//   //     ArduinoOTA.handle(); while (arduino_ota_triggered) ArduinoOTA.handle();
+//   //     #ifdef ESP32
+//   //       timerWrite(timerwdt, 0);
+//   //     #else
+//   //       ESP.wdtFeed();
+//   //     #endif
+//   //     if(abs(millis()-tFlash)>=1000){ tFlash = millis();
+//   //       Serial.print("[OTA ] Seconds remaining "); Serial.println(int((ota_startup_period_ms-abs(millis()-tProgram))/1000));
+//   //     }
+//   //   }
+//   //   Serial.println("[OTA ] Ended");
+//   //   }
+//   // END OTA
+//   //#endif
 
-}
+// }
 
+// #endif //   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
 
 
 #define DISABLE
+
+#ifdef ESP32
+// TMP placement
+// ESP32 specific
+//
+
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+#define DISABLE_ESP32_BROWNOUT
+
+void DisableBrownout(void) {
+  // https://github.com/espressif/arduino-esp32/issues/863#issuecomment-347179737
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // Disable brownout detector
+}
+#endif // ESP32
 
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
@@ -407,6 +510,13 @@ void HandleFailedBootFailBack(){
 
 void setup(void)
 { 
+  
+#ifdef ESP32
+#ifdef DISABLE_ESP32_BROWNOUT
+  DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
+#endif
+#endif
+
   Serial.begin(115200);
 
   #ifdef USE_SERIAL_ALTERNATE_TX
@@ -455,18 +565,23 @@ void setup(void)
 
   pCONT_sup->init_FirmwareVersion();
   
-  #ifdef ENABLE_SETTINGS_STORAGE
-  // Load config from memory
+  // // Load config from memory
   pCONT_set->SettingsDefault(); //preload minimal required
-  // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
-  pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
-  // Check Load was successful
-  pCONT_set->SettingsLoad_CheckSuccessful();
+  #ifdef ENABLE_SETTINGS_STORAGE
+  // // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
+  // pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
+  // // Check Load was successful
+  // pCONT_set->SettingsLoad_CheckSuccessful();
   #endif
-  
-  #ifdef USE_ARDUINO_OTA
-    ArduinoOTAInit();
-  #endif // USE_ARDUINO_OTA
+   
+   
+  // #ifndef ENABLE_DEVFEATURE_OTA_METHOD
+  // #ifdef ESP8266  // ESP 32 can't start this process until a connection happens
+  // #ifdef USE_ARDUINO_OTA
+  //   ArduinoOTAInit();
+  // #endif // USE_ARDUINO_OTA
+  // #endif
+  // #endif //   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
 
   pCONT->Tasker_Interface(FUNC_POINTER_INIT); // confirgure any memory address needed as part of module init or templates
   
@@ -484,6 +599,8 @@ void setup(void)
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
   #endif
+
+// pCONT_wif->WifiConnect();
 
 
   // Init the GPIOs
@@ -511,6 +628,29 @@ void setup(void)
   // Used to show progress of boot in logs
   pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);
 
+
+// #ifdef ESP32
+//   // Must connect to wifi before contining on, later make this a flag
+//       //set faster until first connect
+//       pCONT_wif->connection.config_counter = 10;
+//     while(!pCONT_wif->WifiCheckIpConnected()){
+//       pCONT_wif->WifiCheck(pCONT_set->wifi_state_flag);
+//       pCONT_set->wifi_state_flag = WIFI_RESTART;
+//       Serial.println("HELD IN BOOT");
+//       delay(500);
+//     }    
+//     pCONT_wif->connection.config_counter = D_WIFI_CONFIG_SEC; //set to normal after connect success
+//     Serial.println("");
+//     Serial.println("WiFi connected.");
+//     Serial.println("IP address: ");
+//     Serial.println(WiFi.localIP());
+
+// #ifndef ENABLE_DEVFEATURE_OTA_METHOD
+//     ArduinoOTAInit();
+// #endif
+
+// #endif
+
 }
 
 // /********************************************************************************************/
@@ -531,9 +671,17 @@ void loop(void)
   
   DEBUG_LINE;
   
+  // #ifndef ENABLE_DEVFEATURE_OTA_METHOD
+  // #ifdef USE_ARDUINO_OTA
+  //   ArduinoOtaLoop();
+  // #endif  // USE_ARDUINO_OTA
+  // #endif // ENABLE_DEVFEATURE_OTA_METHOD
+
+  // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
   #ifdef USE_ARDUINO_OTA
-    ArduinoOtaLoop();
+    pCONT_sup->ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA
+  // #endif
 
   DEBUG_LINE;
   pCONT->Tasker_Interface(FUNC_LOOP); // EVERY_LOOP
@@ -547,7 +695,7 @@ void loop(void)
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop200mSec,200 )){ pCONT->Tasker_Interface(FUNC_EVERY_200_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);   };// DEBUG_LINE_HERE;   } 
        
   /********************************************************************************************************
   ******************************************************************************************************** 
@@ -565,31 +713,37 @@ void loop(void)
     pCONT_sup->activity.loop_counter=0;
   }
 
+  if(pCONT_sup->loop_runtime_millis > 40){
+    Serial.printf("loop_runtime_millis=%d\n\r", pCONT_sup->loop_runtime_millis);
+  }
+
   //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
 
   // Change this to my own way
   // DO THIS NEXT
   //SmartLoopDelay()
-  #ifndef DISABLE_SLEEP
-  if(pCONT_set->Settings.enable_sleep){
-    if (pCONT_set->Settings.flag_network.sleep_normal) {
-      pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
-    } else {
+  // #ifndef DISABLE_SLEEP
+  // if(pCONT_set->Settings.enable_sleep){
+  //   if (pCONT_set->Settings.flag_network.sleep_normal) {
+  //     pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
+  //   } else {
 
-      // Loop time < sleep length of time
-      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
-        //delay by loop time
-        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
-      } else {
+  //     // Loop time < sleep length of time
+  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
+  //       //delay by loop time
+  //       pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+  //     } else {
 
-        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
-        if (pCONT_set->global_state.wifi_down) {
-          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
-        }
-      }
-    }
-  }
-  #endif
+  //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
+  //       if (pCONT_set->global_state.wifi_down) {
+  //         pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
+  //       }
+  //     }
+  //   }
+  // }
+  // #endif
+
+  // delay(100);
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0

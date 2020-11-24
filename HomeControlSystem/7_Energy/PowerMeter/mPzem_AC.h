@@ -31,9 +31,10 @@ class mPzem_AC{
     }settings;
 
     #ifdef DEVICE_CONSUMERUNIT
+      // dec=16-23, 24,25,26
       const uint8_t PZEM_AC_DEVICE_ADDRESS = 0x10;  // PZEM default address
     #else
-      const uint8_t PZEM_AC_DEVICE_ADDRESS = 0x01;  // PZEM default address
+      const uint8_t PZEM_AC_DEVICE_ADDRESS = 24;  // PZEM default address
     #endif
 
     #ifndef MAX_ENERGY_SENSORS

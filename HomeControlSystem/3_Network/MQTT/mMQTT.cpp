@@ -2,16 +2,28 @@
 
 int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
 
+
+  #ifdef DISABLE_FOR_FAULTY_ESP32_FLICKERING
+    return 0;
+  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
+  #ifdef DISABLE_NETWORK
+    return 0;
+  #endif
+
+  switch(function){
+    case FUNC_INIT:
+      init();
+    break;
+  }
+
   if(pCONT_set->Settings.flag_system.mqtt_enabled){
 
-    switch(function){
-      case FUNC_INIT:
-        init();
-      break;
-    }
 
     switch(function){
       case FUNC_LOOP:
+
+// AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.connected=%d"),Mqtt.connected);
+
         if(Mqtt.connected){
           EveryLoop();
         }
@@ -22,7 +34,13 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
         }
       break;
       case FUNC_EVERY_SECOND:
-        CheckConnection();
+        if(pCONT_wif->WifiCheckIpConnected()){
+          // AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
+          CheckConnection();
+        }else{
+          // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
+
+        }
       break;
       case FUNC_EVERY_MINUTE:
         //DiscoverServer();
@@ -75,6 +93,8 @@ void mMQTT::init(void){
 
 
 void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
+
+// DEBUG_LINE_HERE;
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
@@ -382,6 +402,8 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
 
 void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
+
+// DEBUG_LINE_HERE;
 
   // Send mqtt from all modules
   pCONT->Tasker_Interface(FUNC_MQTT_SENDER);

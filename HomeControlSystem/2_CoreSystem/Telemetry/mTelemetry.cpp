@@ -471,10 +471,13 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer));
     JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
     JsonBuilderI->Add(PM_JSON_BUILDTIME,       __TIME__);
-    JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
+    // JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
     JsonBuilderI->Add(PM_JSON_VERSIONNUMBER,   PROJECT_VERSION);
     JsonBuilderI->Add(PM_JSON_COREVERSION,     ARDUINO_ESP8266_RELEASE); 
+    
+#ifdef ESP8266
     JsonBuilderI->Add(PM_JSON_BOOTVERSION,     ESP.getBootVersion());
+  #endif // ESP8266
     JsonBuilderI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
     JsonBuilderI->Add(PM_JSON_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
     JsonBuilderI->Add(PM_JSON_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
@@ -502,11 +505,13 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level){
 uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level){ // Debug info
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_PROGRAMSIZE,      ESP.getSketchSize()/1024);
+    #ifdef ESP8266
     JsonBuilderI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024);
     JsonBuilderI->Add(PM_JSON_HEAPSIZE,         ESP.getFreeHeap()/1024);
     JsonBuilderI->Add(PM_JSON_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
     JsonBuilderI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
     JsonBuilderI->Add(PM_JSON_FLASHCHIPID,      ESP.getFlashChipId());
+    #endif // ESP8266
     JsonBuilderI->Add(PM_JSON_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
   return JsonBuilderI->End();
 }

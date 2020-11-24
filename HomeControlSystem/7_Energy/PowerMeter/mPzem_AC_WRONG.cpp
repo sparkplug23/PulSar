@@ -12,7 +12,7 @@
 
 // void mPzem_AC::Init(void)
 // {
-//   // PzemAcModbus = new TasmotaModbus(pCONT_set->pin[GPIO_PZEM016_RX_ID], pCONT_set->pin[GPIO_PZEM0XX_TX_ID]);
+//   // PzemAcModbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM016_RX_ID], pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID]);
 //   // uint8_t result = PzemAcModbus->Begin(9600);
 //   // if (result) {
 //   //   //if (2 == result) { ClaimSerial(); }   // If serial0 is used, disable logging

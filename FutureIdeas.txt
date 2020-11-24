@@ -455,3 +455,28 @@ Fix multiple repos "git push -f origin master"
 
 //Idea 105
     Add into system settings page, and use the settings struct for each module and include tick boxes or number boxes to configure
+
+//#106
+    Add percentage of water tank full, ie 100% full is average of all water sensors is 45 or above. 
+    Shower with immersion, would look like probably 25%... while bath would be near 100%+ (map with no constrain)
+
+#Idea 107
+    Increase transition timebase to allow for up to hour long transition (ie sunset slow turn on)
+
+#Idea 108
+    "and to have them transition from a cooler white to warmer white later in the evening" - av
+
+#Idea 109
+    Adding a "LinearBlend" animation that uses X pixels repeated on a string, but then blends them (e.g., 10 red, 10 green, 10 blue.... but red/green linearblend together, green/blue linearblend together)
+
+    I might do this later as a standalone animation like the other ones
+    When you think about it, red/green/blue at equal distances on the string
+    linearblended completely, is... a rainbow lol
+    but I mean, using the palettes to generate those colours, but then not blending completely, so it has chunks of solid colours with then blended colour too
+    will look best on larger strings
+    the amount of blend between pixels, I can make as a percentage ratio (100% equal full linear blend, 50% with 10 red and 10 green, only the 5 green/red nearest blend)
+    by making that ratio change, as an animation, it could be a cool pulsing effect
+    and then.... I could linear blend the colour as saturated.... or brightness changed too
+
+#Idea 110
+    Add devicename on boot message

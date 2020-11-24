@@ -15,8 +15,8 @@ void mDoorSensor::pre_init(void){
     //disable pir code
   }
 
-  // if(pCONT_set->pin[GPIO_DOOR_LOCK_ID] < 99) {  // not set when 255
-  //   pin_lock = pCONT_set->pin[GPIO_DOOR_LOCK_ID];
+  // if(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID] < 99) {  // not set when 255
+  //   pin_lock = pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID];
   //   pinMode(pin_lock,INPUT_PULLUP);
   // }else{
   //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_lock);

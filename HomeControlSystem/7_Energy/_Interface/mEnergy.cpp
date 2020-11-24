@@ -876,19 +876,8 @@ void mEnergy::Settings_Save(){
 }
 
 
-    
-int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
-{
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-  // return 0;
 
+int8_t mEnergy::Tasker(uint8_t function){ 
   // testing without pzem hardware
   // pCONT_set->energy_flg = 5; //?
 
@@ -946,23 +935,11 @@ int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
     
     break;
     /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_COMMAND:
-
-    break;  
-    case FUNC_JSON_COMMAND:
-      //function_result = parse_JSONCommand();
-    break;      
-    case FUNC_SAVE_BEFORE_RESTART:
-      //EnergySaveState();
-    break;
-    /************
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Draw_PageTable();
+      WebAppend_Root_Draw_Table();
     break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
@@ -990,6 +967,16 @@ int8_t mEnergy::Tasker(uint8_t function, uint8_t optional_id)
   return function_result;
 
 }
+int8_t mEnergy::Tasker(uint8_t function, JsonObjectConst obj){
+  switch(function){
+    case FUNC_JSON_COMMAND_OBJECT:
+      // parse_JSONCommand(obj);
+    break;
+    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+      // return CheckAndExecute_JSONCommands(obj);
+    break;
+  }
+}
 
 void mEnergy::WebAppend_Root_Draw_Table(){
   char buffer[30];
@@ -997,7 +984,7 @@ void mEnergy::WebAppend_Root_Draw_Table(){
   // BufferWriterI->Append_P(PSTR("<table style='border: 1px solid white;border-collapse:collapse;'>"));
   //headers
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-  for(int col=0;col<9;col++){
+  for(int col=0;col<pCONT_iEnergy->Energy.phase_count+1;col++){
     if(col==0){ //first column blank
       // BufferWriterI->Append_P(PSTR("<th>    Parameter /\nDevice      </th>"));
       BufferWriterI->Append_P(PSTR("<th></th>"));
@@ -1010,7 +997,7 @@ void mEnergy::WebAppend_Root_Draw_Table(){
   //rows
   for(int row=0;row<7;row++){
     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    for(int col=0;col<9;col++){
+    for(int col=0;col<pCONT_iEnergy->Energy.phase_count+1;col++){
       if(col==0){ //row name
         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS));
         // BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceName(D_MODULE_DRIVERS_ENERGY_ID,row,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex
@@ -1031,7 +1018,7 @@ void mEnergy::WebAppend_Root_Status_Table(){
   
   JsonBuilderI->Array_Start("ener_tab");// Class name
   for(int row=0;row<6;row++){
-    for(int device=0;device<8;device++){//pCONT_iEnergy->Energy.phase_count;device++){
+    for(int device=0;device<pCONT_iEnergy->Energy.phase_count;device++){//pCONT_iEnergy->Energy.phase_count;device++){
       JsonBuilderI->Level_Start();
         JsonBuilderI->Add("id",count++);
         //add for flag, to highlight row where power is "in use"/high
@@ -1081,52 +1068,52 @@ void mEnergy::WebAppend_Root_Status_Table(){
 
 
 
-void mEnergy::parse_JSONCommand(){
+// void mEnergy::parse_JSONCommand(){
 
-  return;// THIS IS WRONG!!
+//   return;// THIS IS WRONG!!
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/energy")>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
-    // fOpenHABDataStreamActive = true;
-  }else{
-    return; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/energy")>=0){
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//     // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
+//     // fOpenHABDataStreamActive = true;
+//   }else{
+//     return; // not meant for here
+//   }
 
-  // u
-  // int8_t tmp_id = 0;
+//   // u
+//   // int8_t tmp_id = 0;
 
-  // #ifdef JSONDOCUMENT_STATIC
-  //   StaticJsonDocument<800> doc;
-  // #else
-  //   DynamicJsonDocument doc(600);
-  // #endif
-  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+//   // #ifdef JSONDOCUMENT_STATIC
+//   //   StaticJsonDocument<800> doc;
+//   // #else
+//   //   DynamicJsonDocument doc(600);
+//   // #endif
+//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
-  //   return 0;
-  // }
-  // JsonObject obj = doc.as<JsonObject>();
+//   // if(error){
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
+//   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+//   //   return 0;
+//   // }
+//   // JsonObject obj = doc.as<JsonObject>();
   
-  // if(!obj["command"].isNull()){ 
-  //   const char* command = obj["command"];
-  //   if(strstr(command,"system_send_all")){ 
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-  //     MQTTHandler_Set_fSendNow();
-  //     isserviced++;
-  //   }
-  //   else{
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-  //   }
-  // }
+//   // if(!obj["command"].isNull()){ 
+//   //   const char* command = obj["command"];
+//   //   if(strstr(command,"system_send_all")){ 
+//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+//   //     MQTTHandler_Set_fSendNow();
+//   //     isserviced++;
+//   //   }
+//   //   else{
+//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+//   //   }
+//   // }
 
-  // 
+//   // 
 
-} // END FUNCTION
+// } // END FUNCTION
 
 
 /*********************************************************************************************************************************************
@@ -1326,41 +1313,24 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
     MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
+    MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID,
+    MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+  struct handler<mEnergy>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+    &mqtthandler_sensor_teleperiod,
+    &mqtthandler_energystats_ifchanged,  
+    &mqtthandler_energystats_teleperiod  
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_ENERGY_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
   );
-  uint8_t flag_handle_all = false, handler_found = false
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      case MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID:   handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_ifchanged; break;
-      case MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID:  handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_DRIVERS_ENERGY_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
 
 }
 

@@ -74,7 +74,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     pCONT_iLight->HueF2N(hsb_current.H)
   ); 
 
-  uint8_t dcolor = mSupport::changeUIntScale(BrtF2N(hsb_current.B), 0, 100, 0, 255);
+  uint8_t dcolor = mapvalue(BrtF2N(hsb_current.B), 0, 100, 0, 255);
   snprintf_P(start_colour, sizeof(start_colour), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   //   uint8_t red, green, blue;
   //   LightHsToRgb(hue, 255, &red, &green, &blue);
@@ -98,7 +98,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     "col_sldr",
     PSTR("#000"), PSTR("#fff"), //fff should be calculated based on colour[5]
     "brt_sldr",              
-    D_JSON_BRT_RGB,
+    D_JSON_BRIGHTNESS_RGB,
     0, 100,  // Range 0/1 to 100% 
     getBriRGB()
   ); 
@@ -160,7 +160,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
         "col_sldr",
         PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
         "cct_brt",              
-        D_JSON_BRT_CCT,
+        D_JSON_BRIGHTNESS_CCT,
         0, 100,  // Range 0/1 to 100% 
         getBriCT()
       ); 

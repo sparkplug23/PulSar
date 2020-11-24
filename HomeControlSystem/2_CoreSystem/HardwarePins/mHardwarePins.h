@@ -25,7 +25,7 @@ class mHardwarePins{
     mHardwarePins(){}; //inline, no cpp needed
 
     void ModuleSettings_FlashSerial();
-    void ParseModuleTemplate();
+    void ParseModuleTemplate(JsonObjectConst obj);
     void ReadModuleTemplateFromProgmem();
 
     void ModuleSettings_ShowTemplateLog();

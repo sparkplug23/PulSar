@@ -680,14 +680,16 @@ const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses
 
 
 
+#ifdef ESP8266
 // Version 5.2 allow for more flash space
 const uint8_t CFG_ROTATES = 8;          // Number of flash sectors used (handles uploads)
 
 uint32_t settings_location = SETTINGS_LOCATION;
-uint32_t settings_crc = 0;
+// uint32_t settings_crc = 0;
 uint32_t settings_crc32 = 0;
 uint8_t *settings_buffer = nullptr;
 uint32_t rtc_reboot_crc = 0;
+#endif // ESP8266
 
 
 void SettingsLoad_CheckSuccessful();
@@ -740,7 +742,7 @@ uint32_t GetCfgCrc32(uint8_t *bytes, uint32_t size);
 uint32_t GetSettingsCrc32(void);
 
 
-  void SettingsResetStd(void) ;
+  void SettingsResetStd(void);
   void SettingsResetDst(void);
 
   // void SettingsDefaultSet_5_13_1c(void);
@@ -921,8 +923,12 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t slider_dimmer_stay_on : 1;    // bit 27 (v7.0.0.6)  - SetOption77 - Do not power off if slider moved to far left
     uint32_t compatibility_check : 1;      // bit 28 (v7.1.2.6)  - SetOption78 - Disable OTA compatibility check
     uint32_t counter_reset_on_tele : 1;    // bit 29 (v8.1.0.1)  - SetOption79 - Enable resetting of counters after telemetry was sent
-    uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
-    uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
+    // uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
+    // uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
+    uint32_t network_wifi : 1;             // bit 13 (v8.3.1.3)  - CMND_WIFI
+    uint32_t network_ethernet : 1;         // bit 14 (v8.3.1.3)  - CMND_ETHERNET
+
+
   };
 } SysBitfield_Network;
 
@@ -984,43 +990,43 @@ typedef union {
 // } SensorCfg1;
 
 // OLD LIST IN RTC, CREAT A NEW ONE IN SETTINGS
-struct EnergyUsage{
-  uint32_t usage1_kWhtotal;
-  uint32_t usage2_kWhtotal;
-  uint32_t return1_kWhtotal;
-  uint32_t return2_kWhtotal;
-  uint32_t last_return_kWhtotal;
-  uint32_t last_usage_kWhtotal;
+// struct EnergyUsage{
+//   uint32_t usage1_kWhtotal;
+//   uint32_t usage2_kWhtotal;
+//   uint32_t return1_kWhtotal;
+//   uint32_t return2_kWhtotal;
+//   uint32_t last_return_kWhtotal;
+//   uint32_t last_usage_kWhtotal;
   
   
-  uint8_t       energy_power_delta;        // 33F
-  unsigned long energy_power_calibration;  // 364
-  unsigned long energy_voltage_calibration;  // 368
-  unsigned long energy_current_calibration;  // 36C
-  unsigned long energy_kWhtoday;           // 370
-  unsigned long energy_kWhyesterday;       // 374
-  uint16_t      energy_kWhdoy;             // 378
-  uint16_t      energy_min_power;          // 37A
-  uint16_t      energy_max_power;          // 37C
-  uint16_t      energy_min_voltage;        // 37E
-  uint16_t      energy_max_voltage;        // 380
-  uint16_t      energy_min_current;        // 382
-  uint16_t      energy_max_current;        // 384
-  uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
-  uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
-  uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
-  uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
-  uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
-  uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
-  uint16_t      energy_max_energy;         // 392 MaxEnergy
-  uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
-  uint32_t      energy_kWhtotal_time;      // 7B4
-  unsigned long energy_frequency_calibration;  // 7C8
-  unsigned long energy_kWhtotal;           // 554
-  uint16_t      tariff[4][2];              // E30
+//   uint8_t       energy_power_delta;        // 33F
+//   unsigned long energy_power_calibration;  // 364
+//   unsigned long energy_voltage_calibration;  // 368
+//   unsigned long energy_current_calibration;  // 36C
+//   unsigned long energy_kWhtoday;           // 370
+//   unsigned long energy_kWhyesterday;       // 374
+//   uint16_t      energy_kWhdoy;             // 378
+//   uint16_t      energy_min_power;          // 37A
+//   uint16_t      energy_max_power;          // 37C
+//   uint16_t      energy_min_voltage;        // 37E
+//   uint16_t      energy_max_voltage;        // 380
+//   uint16_t      energy_min_current;        // 382
+//   uint16_t      energy_max_current;        // 384
+//   uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
+//   uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
+//   uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
+//   uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
+//   uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
+//   uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
+//   uint16_t      energy_max_energy;         // 392 MaxEnergy
+//   uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
+//   uint32_t      energy_kWhtotal_time;      // 7B4
+//   unsigned long energy_frequency_calibration;  // 7C8
+//   unsigned long energy_kWhtotal;           // 554
+//   uint16_t      tariff[4][2];              // E30
 
-  //char name_buffer[100]; // To hold the names of the sensor as list
-};// EnergyUsage;
+//   //char name_buffer[100]; // To hold the names of the sensor as list
+// };// EnergyUsage;
 // #endif
 
 struct EnergyUsageNew{
@@ -1087,13 +1093,13 @@ struct LightSettings{
   uint8_t light_width;         // 4A4
   uint16_t light_rotation;     // 39E
   uint16_t light_pixels;       // 496
-  uint8_t light_color[5];      // 498
+  // uint8_t light_color[5];      // 498
   uint8_t light_correction;    // 49D
   uint8_t light_dimmer;        // 49E
   uint16_t light_wakeup;       // 4A6
-  uint8_t ws_color[4][3];      // 475
-  uint8_t ws_width[3];         // 481
-  uint8_t       rgbwwTable[5];             // 71A
+  // uint8_t ws_color[4][3];      // 475
+  // uint8_t ws_width[3];         // 481
+  // uint8_t       rgbwwTable[5];             // 71A
   uint8_t type;
   uint16_t size;
 };
@@ -1150,8 +1156,8 @@ struct DisplaySettings{
   uint8_t       mode;              // 2D3
   uint8_t       refresh;           // 2D4
   uint8_t       rows;              // 2D5
-  uint8_t       cols[2];           // 2D6
-  uint8_t       address[8];        // 2D8
+  // uint8_t       cols[2];           // 2D6
+  // uint8_t       address[8];        // 2D8
   uint8_t       dimmer;            // 2E0
   uint8_t       size;              // 2E1
   uint8_t       font;              // 312
@@ -1188,7 +1194,9 @@ struct AnimationSettings{
 
 // Buffer that stores names of sensors as delimeter list
 #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  20
-#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400
+#ifndef DEVICENAMEBUFFER_NAME_BUFFER_LENGTH // Memory reduction
+#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400 
+#endif // DEVICENAMEBUFFER_NAME_BUFFER_LENGTH
 struct DeviceNameBuffer{ // size(230)
   // delimeter name list
   char name_buffer[DEVICENAMEBUFFER_NAME_BUFFER_LENGTH];
@@ -1199,12 +1207,12 @@ struct DeviceNameBuffer{ // size(230)
 
 
 
-#define MODULE_TEMPLATE_SIZE 300
+#define MODULE_TEMPLATE_MAX_SIZE 300
 struct Template_Config{
   uint8_t flags;
   uint8_t       base;        // 71F
   mytmplt       hardware;             // 720  29 bytes    parsed user template
-  char          full_ctr[MODULE_TEMPLATE_SIZE]; //for testing
+  // char          full_ctr[MODULE_TEMPLATE_SIZE]; //for testing
 
 };
 
@@ -1305,16 +1313,16 @@ struct SYSCFG {
 
   StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
 
-uint16_t      mqtt_retry;                // 396
+  uint16_t      mqtt_retry;                // 396
   
 
   // Timer         timer[MAX_TIMERS];         // 670
   // uint16_t      pulse_timer[8]; // 532 //#define MAX_PULSETIMERS 8  
   // TimeRule      tflag[2];                  // 2E2
   // char          ntp_server[3][33];         // 4CE
-  int16_t       toffset[2];                // 30E
+  // int16_t       toffset[2];                // 30E
   // Weight
-  uint16_t      weight_max;                // 7BE Total max weight in kilogram
+  // uint16_t      weight_max;                // 7BE Total max weight in kilogram
   // unsigned long weight_reference;          // 7C0 Reference weight in gram
   // unsigned long weight_calibration;        // 7C4
   // unsigned long weight_item;               // 7B8 Weight of one item in gram * 10
@@ -1352,7 +1360,7 @@ uint16_t      mqtt_retry;                // 396
 
   uint16_t      blinktime;                 // 39A
   uint16_t      blinkcount;                // 39C
-  uint32_t      drivers[3];                // 794
+  // uint32_t      drivers[3];                // 794
   uint32_t      monitors;                  // 7A0
   uint16_t      pwm_range;                 // 342
   uint16_t      pwm_frequency;             // 2E6
@@ -1360,7 +1368,7 @@ uint16_t      mqtt_retry;                // 396
   // uint8_t       rf_code[17][9];            // 5D4
 
   // Power
-  unsigned long power;//power_t       power;                     // 2E8
+  unsigned long power; //power_t       power;                     // 2E8
   uint8_t       poweronstate;              // 398
   // Energy
   EnergyUsageNew   energy_usage;              // 77C 
@@ -1401,7 +1409,7 @@ struct RTCMEM {
   unsigned long pulse_counter[MAX_COUNTERS];  // 29C
   power_t       power;                     // 2AC
   //#ifdef USE_ENERGY
-   EnergyUsage   energy_usage;              // 2B0    PHASE OUT
+  //  EnergyUsage   energy_usage;              // 2B0    PHASE OUT
   //#endif
   unsigned long nextwakeup;                // 2C8
   uint8_t       free_004[4];               // 2CC
@@ -1626,8 +1634,8 @@ bool ntp_force_sync = false;                // Force NTP sync
 myio my_module;                             // Active copy of Module GPIOs (17 x 8 bits)
 gpio_flag my_module_flag;                   // Active copy of Module GPIO flags
 StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
-char my_version[33];                        // Composed version string
-char my_image[33];                          // Code image and/or commit
+// char my_version[33];                        // Composed version string
+// char my_image[33];                          // Code image and/or commit
 char my_hostname[33];                       // Composed Wifi hostname
 // char mqtt_client[33];                       // Composed MQTT Clientname
 // char mqtt_topic[33];                        // Composed MQTT topic
@@ -1650,9 +1658,12 @@ char my_hostname[33];                       // Composed Wifi hostname
 //   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 // }data_buffer_old;
 
-
+#ifndef WEB_LOG_SIZE
 #define WEB_LOG_SIZE 400       // Max number of characters in weblog
+#endif // WEB_LOG_SIZE
+#ifndef LOG_BUFFER_SIZE
 #define LOG_BUFFER_SIZE 500
+#endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
 // char response_msg[100];
@@ -1669,7 +1680,7 @@ struct FIRMWARE_VERSION{
     uint8_t part_minor = 0;
     uint8_t part_system = 0;
     uint8_t part_module = 0;
-    char name_ctr[20];
+    char name_ctr[15];
   };
   struct type current;
   struct type latest;

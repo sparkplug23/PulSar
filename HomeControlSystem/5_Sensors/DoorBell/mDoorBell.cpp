@@ -8,16 +8,16 @@ void mDoorBell::pre_init(void){
 
 //These should configure the relay and switch input indirectly, never used pinmode studd here
 
-  if(pCONT_set->pin[GPIO_CHIME_INPUT_ID] < 99) {  // not set when 255
-    pin_doorbell_button = pCONT_set->pin[GPIO_CHIME_INPUT_ID];
+  if(pCONT_pins->GetPin(GPIO_CHIME_INPUT_ID] < 99) {  // not set when 255
+    pin_doorbell_button = pCONT_pins->GetPin(GPIO_CHIME_INPUT_ID];
     pinMode(pin_doorbell_button,INPUT_PULLUP);
   }else{
     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_doorbell_button);
     //disable pir code
   }
 
-  if(pCONT_set->pin[GPIO_CHIME_RINGER_ID] < 99) {  // not set when 255
-    pin_relay_chime = pCONT_set->pin[GPIO_CHIME_RINGER_ID];
+  if(pCONT_pins->GetPin(GPIO_CHIME_RINGER_ID] < 99) {  // not set when 255
+    pin_relay_chime = pCONT_pins->GetPin(GPIO_CHIME_RINGER_ID];
     pinMode(pin_relay_chime,OUTPUT);
     digitalWrite(pin_relay_chime,HIGH); //active low
   }else{

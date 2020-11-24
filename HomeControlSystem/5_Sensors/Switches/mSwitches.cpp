@@ -20,8 +20,8 @@ int8_t mSwitches::Tasker(uint8_t function){
       // pinMode(5,INPUT);
       // AddLog_P(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
       //   digitalRead(13),digitalRead(5),
-      //   pCONT_set->pin[GPIO_SWT1_NP_ID],pCONT_set->pin[GPIO_SWT2_NP_ID],
-      //   pCONT_set->pin[GPIO_SWT1_ID],pCONT_set->pin[GPIO_SWT2_ID]
+      //   pCONT_pins->GetPin(GPIO_SWT1_NP_ID],pCONT_pins->GetPin(GPIO_SWT2_NP_ID],
+      //   pCONT_pins->GetPin(GPIO_SWT1_ID],pCONT_pins->GetPin(GPIO_SWT2_ID]
       // );
       // AddLog_P(LOG_LEVEL_INFO,PSTR("Switches(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
       // settings.switches_found,
@@ -123,7 +123,7 @@ void mSwitches::SwitchProbe(void)
     if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)) {
 
       // Olimex user_switch2.c code to fix 50Hz induced pulses
-      if (1 == digitalRead(pCONT_set->pin[GPIO_SWT1_ID +i])) {
+      if (1 == digitalRead(pCONT_pins->GetPin(GPIO_SWT1_ID +i])) {
 
         if (force_high) {                               // Enabled with SwitchDebounce x1
           if (1 == states[i].switch_virtual) {
@@ -179,7 +179,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.switch_debounce;
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
-    if ((pCONT_set->pin[GPIO_SWT1_ID +i] < 99) || (mode)) {
+    if ((pCONT_pins->GetPin(GPIO_SWT1_ID +i] < 99) || (mode)) {
 
       if (states[i].holdwallswitch) {
         states[i].holdwallswitch--;
@@ -394,8 +394,6 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
     }
 
   }
-
-
 
   return JsonBuilderI->End();
 

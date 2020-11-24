@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <string.h>
+#include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "0_ConfigUser/mUserConfig.h"           //DEFAULTS
 #include "0_ConfigUser/mUserConfigSecret.h"            // Override previos declarations
@@ -26,6 +27,17 @@
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
 #endif
+
+
+#ifdef ESP8266
+  #include "2_CoreSystem/Support/SupportESP8266.h"
+  #define mSupportHardware SupportESP8266
+#endif
+#ifdef ESP32
+  #include "2_CoreSystem/Support/SupportESP32.h"
+  #define SupportHardware SupportESP32
+#endif
+
 
 
 // #include <variant>
@@ -61,10 +73,6 @@ enum FUNCTION_RESULT_IDS{
 // #include "3_Network/WebServer/mWebServer.h"
 #include "ArduinoJson.h"
 
-#ifdef USE_MODULE_CORE_WEBSERVER
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#endif //USE_MODULE_CORE_WEBSERVER
 
 //#ifdef USE_I2C
   #include <Wire.h>                         // I2C support library
@@ -82,9 +90,9 @@ enum FUNCTION_RESULT_IDS{
   #include "soc/soc.h"
   #include "soc/rtc_cntl_reg.h"
   const int wdtTimeout = 60000;  //time in ms to trigger the watchdog
-  hw_timer_t *timerwdt = NULL;
-  void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-  #define WDT_RESET() timerWrite(timerwdt, 0) //reset timerwdt (feed watchdog)
+  // hw_timer_t *timerwdt = NULL;
+  // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
+  #define WDT_RESET() //timerWrite(timerwdt, 0) //reset timerwdt (feed watchdog)
 #endif
 #ifdef ESP8266
   #include <ESP8266HTTPClient.h>
@@ -96,10 +104,10 @@ enum FUNCTION_RESULT_IDS{
   #include <WiFiUdp.h>
   #define WDT_RESET() ESP.wdtFeed()
   #include <ESP8266WiFi.h>
-#ifdef USE_MODULE_CORE_WEBSERVER
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#endif //USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_CORE_WEBSERVER
+    #include <ESPAsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  #endif //USE_MODULE_CORE_WEBSERVER
 #endif
 
 #include "2_CoreSystem/JSON/mJSON.h"

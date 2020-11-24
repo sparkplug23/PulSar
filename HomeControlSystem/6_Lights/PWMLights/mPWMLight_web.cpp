@@ -81,7 +81,7 @@ void mPWMLight::WebAppend_Root_ControlUI(){
   //   "pwm_hue", 0
   // );         // h0 - Value id
 
-  // uint8_t dcolor = mSupport::changeUIntScale(100, 0, 100, 0, 255);
+  // uint8_t dcolor = mapvalue(100, 0, 100, 0, 255);
   // snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
   // snprintf_P(stemp, sizeof(stemp), PSTR("#%02X%02X%02X"), rgb.R, rgb.G, rgb.B);  // Saturation end color
   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT2,  // Saturation
@@ -150,7 +150,7 @@ void mPWMLight::WebAppend_Root_ControlUI(){
 //   //   "scn_hue", 0
 //   // );         // h0 - Value id
 
-//   // uint8_t dcolor = changeUIntScale(BrtF2N(scene.colour.B), 0, 100, 0, 255);
+//   // uint8_t dcolor = mapvalue(BrtF2N(scene.colour.B), 0, 100, 0, 255);
 //   // snprintf_P(scolor, sizeof(scolor), PSTR("#%02X%02X%02X"), dcolor, dcolor, dcolor);  // Saturation start color from Black to White
 //   // //   uint8_t red, green, blue;
 //   // //   LightHsToRgb(hue, 255, &red, &green, &blue);
@@ -162,7 +162,7 @@ void mPWMLight::WebAppend_Root_ControlUI(){
 //   //   scolor, buffer,   // Brightness to max current color
 //   //   3,               // sl3 - Unique range HTML id - Not used
 //   //   0, 100,          // Range 0 to 100%
-//   //   changeUIntScale(SatF2N(scene.colour.S), 0, 255, 0, 100),
+//   //   mapvalue(SatF2N(scene.colour.S), 0, 255, 0, 100),
 //   //   "scn_sat", 0
 //   // );         // n0 - Value id
 
