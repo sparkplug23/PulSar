@@ -1019,6 +1019,101 @@
   
     };
 
+    #ifndef D_PALETTE_CHRISTMAS_11_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_11_NAME_CTR        "Christmas Outside Many Multi Very different colours"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_11_NAME_CTR)        D_PALETTE_CHRISTMAS_11_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_11_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 150, 0,
+      255, 26, 64,
+      0, 0, 255,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 255, 0,
+      255, 26, 64,
+      0, 0, 150,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 155, 0,
+      255, 26, 64,
+      0, 0, 200,
+      255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE   
+  
+  
+      255, 5, 5,
+      255, 213, 0,
+      0, 100, 200,
+      157, 0, 255,
+      255, 0, 128,
+      
+      0, 255,255 // cyan
+  
+  
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_12_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_12_NAME_CTR        "Christmas Hallway Tree"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_12_NAME_CTR)        D_PALETTE_CHRISTMAS_12_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_12_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,   // deep red
+      0, 150, 0,   // green
+      255, 26, 64, // christmas pink
+      0, 0, 200,   //dark blue, faded
+      255, 60, 0,   
+      25, 112, 25,
+      0, 100, 100, // cyan
+
+      255, 0, 72, //hot pink
+
+      236, 19, 19,   //pastel red
+      
+      252, 44, 3,
+
+      252, 157, 3 //warm yellow
+
+      // 39, 184, 39, //pastel green
+      // 34, 153, 34,
+
+      // 255, 255, 255 //mark colour for testing
+
+      //test with dimmer colours
+      // 255, 0, 0,
+      // 0, 255, 0,
+      // 255, 26, 64,
+      // 0, 0, 150,
+      // 255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      // //test with dimmer colours
+      // 255, 0, 0,
+      // 0, 155, 0,
+      // 255, 26, 64,
+      // 0, 0, 200,
+      // 255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE   
+  
+  
+      // 255, 5, 5,
+      // 255, 213, 0,
+      // 0, 100, 200,
+      // 157, 0, 255,
+      // 255, 0, 128,
+      
+
+      
+      // 255, 255, 255
+  
+  
+    };
+
 
 
 

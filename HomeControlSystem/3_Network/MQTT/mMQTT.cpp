@@ -100,11 +100,15 @@ void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
     if (!MqttIsConnected()) {
       pCONT_set->Settings.global_state.mqtt_down = 1;
       if (!Mqtt.retry_counter) {        
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d"),Mqtt.retry_counter);
+    #endif// ENABLE_LOG_LEVEL_INFO
         MqttReconnect();
       } else {
         Mqtt.retry_counter--;
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.retry_counter=%d"),Mqtt.retry_counter);
+    #endif// ENABLE_LOG_LEVEL_INFO
       }
     } else {
       pCONT_set->Settings.global_state.mqtt_down = 0;
@@ -164,7 +168,9 @@ DEBUG_LINE;
 DEBUG_LINE;
     connection_maintainer.cConnectionAttempts = 0; // reset
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
+    #endif// ENABLE_LOG_LEVEL_INFO
 DEBUG_LINE;
     // if succesful, clear flag
     connection_maintainer.flag_require_reconnection = false;
@@ -291,7 +297,9 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   //   return;
   // }
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   DEBUG_LINE;
   Mqtt.connected = false;
@@ -345,10 +353,12 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT->mt->uptime.hhmmss_ctr);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
 
+    #endif// ENABLE_LOG_LEVEL_INFO
   if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     MqttConnected();
   } else {
@@ -361,16 +371,19 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
 void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   // Do not allow more data than would be feasable within stack space
   if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
 
   // Save MQTT data ASAP as it's data is discarded by PubSubClient with next publish as used in MQTTlog
+  memset(&data_buffer,0,sizeof(data_buffer));
   data_buffer.topic.len = strlen(mqtt_topic)+1;
   strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.len);
-  data_buffer.payload.len = data_len+1;
-  memcpy(data_buffer.payload.ctr, mqtt_data, data_buffer.payload.len);
+  data_buffer.payload.len = data_len;
+  memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.len);
 
   if(data_len){
     data_buffer.fWaiting = true;
@@ -381,21 +394,101 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
   if(data_buffer.fWaiting){data_buffer.fWaiting = false;
     if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
+    #endif// ENABLE_LOG_LEVEL_INFO
     }
 
-    StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-    DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
+    // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+    // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 
-    if(!error){
-      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC, doc.as<JsonObjectConst>());
-    }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError")); Serial.flush();
-      return;
-    }
+    // if(!error){
+    //   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC, doc.as<JsonObjectConst>());
+    // }else{
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError")); Serial.flush();
+    // #endif// ENABLE_LOG_LEVEL_INFO
+    //   return;
+    // }
+    // #endif // ENABLE_DEVFEATURE_JSONPARSER
 
+
+    #ifdef ENABLE_DEVFEATURE_JSONPARSER
+    //  char parsing_buffer[data_buffer.payload.len];
+    //   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len);
+    //   JsonParser parser(parsing_buffer);
+
+      // JsonParser parser(data_buffer.payload.ctr);
+      // glob_parser = &parser;
+
+
+      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+    
+  // String jsonStr = data_buffer.payload.ctr;  // Move from stack to heap to fix watchdogs (20180626)
+
+  
+  //       AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError %s"),data_buffer.payload.ctr); Serial.flush();
+
+
+
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("Deserialization \"%s\""),data_buffer.payload.ctr);
+      // JsonParser parser(data_buffer.payload.ctr);
+      // JsonParserObject root = parser.getRootObject(); 
+      
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("Deserialization \"%s\""),data_buffer.payload.ctr);
+      // if (!root) { 
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError FIRST"));
+      // }else{
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess FIRST")); Serial.flush();
+      // }
+      
+      // JsonParser parser2(data_buffer.payload.ctr);
+      // JsonParserObject root2 = parser2.getRootObject(); 
+      
+      // if (!root2) { 
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError SECOND"));
+      // }else{
+      //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess SECOND")); Serial.flush();
+      // }
+      
+    //   else{
+  
+  
+    // pCONT_iLight->parse_JSONCommandJP(&parser);
+
+
+    //     AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError success")); Serial.flush();
+
+    //     JsonParserToken val = root[PSTR(D_JSON_NAME)].getObject()[PSTR("test")];
+    //     if (val) {
+    //       // SettingsUpdateText(SET_TEMPLATE_NAME, val.getStr());
+
+    //       AddLog_P(LOG_LEVEL_TEST, PSTR("JP Tested \"%s\""), val.getStr());
+
+    //     }
+
+
+
+    //   }
+
+      
+        
+
+
+
+
+
+
+
+    #endif // ENABLE_DEVFEATURE_JSONPARSER
+
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer.isserviced);
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 
 }
@@ -514,7 +607,9 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
 
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   publish_ft(module_ctr,
              topic_type,
@@ -544,7 +639,9 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   snprintf_P(topic_ctr, sizeof(topic_ctr), PSTR("%s/%s/%s%S"),D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix);  //PSTR may broke this?
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "topic_ctr=\"%s\""),topic_ctr);
+    #endif// ENABLE_LOG_LEVEL_INFO
   
   ppublish(topic_ctr,payload_ctr,retain_flag);
 
@@ -568,20 +665,26 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
 
   //// AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
     if (!pubsub->connected()) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
+    #endif// ENABLE_LOG_LEVEL_INFO
         connection_maintainer.flag_require_reconnection = true;
         return 0;
     }
 
     if(strlen(payload)<1){
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "strlen(payload)<1"));
+    #endif// ENABLE_LOG_LEVEL_INFO
     }
 
 // Serial.println(WiFi.localIP());
 // Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
 
     if (!pCONT_wif->WifiCheckIpConnected()) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
+    #endif// ENABLE_LOG_LEVEL_INFO
         return false;
     }else{
         //AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
@@ -596,7 +699,9 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
 DEBUG_LINE;
 
 if(WiFi.status() != WL_CONNECTED){ 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early"));
+    #endif// ENABLE_LOG_LEVEL_INFO
   return false;
 }
 
@@ -612,8 +717,10 @@ DEBUG_LINE;
     // Serial.println(convctr); Serial.flush();
 DEBUG_LINE;
 //TRACE();
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 DEBUG_LINE;
 // //TRACE();
@@ -639,7 +746,9 @@ boolean mMQTT::psubscribe(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
   sprintf(ttopic,PSTR("%s/%s"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("Subscribing to \"%s\""), ttopic);
+    #endif// ENABLE_LOG_LEVEL_INFO
   return pubsub->subscribe(ttopic, 0);
 }
 

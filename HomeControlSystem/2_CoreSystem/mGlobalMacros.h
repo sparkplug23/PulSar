@@ -3,14 +3,46 @@
 #define _GLOBAL_MACROS_H_ 1
 
 
-#define DEFINE_PROGMEM_CTR(X) \
-  const char X[] PROGMEM =
 #define DEFINE_PGM_CTR(X) \
   const char X[] PROGMEM =
-  
-
 #define DEFINE_PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
+
+/*
+ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
+
+If you use the F() macro as above, you don’t have to worry about it. However, if you use a char[] with the PROGMEM attribute, you must cast the pointer before passing it to ArduinoJson. Here is an example:
+
+const char myValue[] PROGMEM = "hello world";
+root["message"] = (const __FlashStringHelper*)myValue;
+This gotcha is not limited to ArduinoJson; many Arduino functions, like Serial.println(), need this cast too.
+//https://arduinojson.org/v6/api/config/enable_progmem/
+
+
+RAM:   [======    ]  56.2% (used 46040 bytes from 81920 bytes)
+Flash: [======    ]  56.4% (used 577724 bytes from 1023984 bytes)
+
+
+*/
+
+#define USE_DEVFEATURE_JSON_COMMANDS_IN_PROGMEM
+
+
+
+
+#ifdef USE_DEVFEATURE_JSON_COMMANDS_IN_PROGMEM
+  #define CFLASH  (const __FlashStringHelper*)    //cast flash needed for AJ type check
+  //to allow json testing along with cflash, turning off progme
+  #define DEFINE_PGMCF_CTR(X) \
+    const char X[] PROGMEM =
+#else
+  #define CFLASH  //(const __FlashStringHelper*)    //cast flash needed for AJ type check
+  //to allow json testing along with cflash, turning off progme
+ #define DEFINE_PGMCF_CTR(X) \
+  const char X[] =
+#endif // USE_DEVFEATURE_JSON_COMMANDS_IN_PROGMEM
+  
+
 
 #define PRINT_FLUSHED(X) Serial.printf(X); \
                         Serial.println(); \
@@ -33,17 +65,6 @@
 #endif
 
 
-/*
-ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
-
-If you use the F() macro as above, you don’t have to worry about it. However, if you use a char[] with the PROGMEM attribute, you must cast the pointer before passing it to ArduinoJson. Here is an example:
-
-const char myValue[] PROGMEM = "hello world";
-root["message"] = (const __FlashStringHelper*)myValue;
-This gotcha is not limited to ArduinoJson; many Arduino functions, like Serial.println(), need this cast too.
-//https://arduinojson.org/v6/api/config/enable_progmem/
-*/
-  #define CFLASH  (const __FlashStringHelper*)    //cast flash needed for AJ type check
 
 
 #define DEF_PGM_CTR(X) \

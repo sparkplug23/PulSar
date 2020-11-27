@@ -106,7 +106,9 @@ void mSupport::ArduinoOTAInit(void)
           // /}
       // #endif  // USE_MODULE_CORE_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
+    // #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+    // #endif// ENABLE_LOG_LEVEL_INFO
     // #endif
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
@@ -156,27 +158,27 @@ void mSupport::ArduinoOTAInit(void)
       default:
         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
     }
-    #ifdef ENABLE_LOG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
-    #endif
+    //#ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
+    //#endif
     
     ESP.restart(); //should only reach if the first failed
   });
 
   ArduinoOTA.onEnd([this]()
   {
-    #ifdef ENABLE_LOG
+    //#ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
-    #endif
+    //#endif
     ESP.restart();
 	});
 
   ArduinoOTA.begin();
   ota_init_success = true;
   
-  #ifdef ENABLE_LOG
+   // #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
-  #endif
+  //#endif
 }
 
 void mSupport::ArduinoOtaLoop(void)
@@ -717,74 +719,74 @@ void mSupport::MQTTCommand_Add(const char* topic, const char* payload){; // Writ
 
 void mSupport::SlowAllTemplatesOnSerial(){
 
-// User template
-  DynamicJsonDocument doc(300);
-  JsonObject root = doc.to<JsonObject>();
+// // User template
+//   DynamicJsonDocument doc(300);
+//   JsonObject root = doc.to<JsonObject>();
 
-  char buffer[50];
+//   char buffer[50];
 
-  root["name"] = pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer));
-  root["module_id"] = pCONT_set->Settings.module;
+//   root["name"] = pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer));
+//   root["module_id"] = pCONT_set->Settings.module;
 
-  myio cmodule;
-  pCONT_pins->ModuleGpios(&cmodule,pCONT_set->Settings.module);
+//   myio cmodule;
+//   pCONT_pins->ModuleGpios(&cmodule,pCONT_set->Settings.module);
 
-  JsonArray gpio_arr = root.createNestedArray("GPIO");
-    for(uint8_t i=0;i<sizeof(cmodule);i++){ 
-      gpio_arr.add(cmodule.io[i]); 
-    }
+//   JsonArray gpio_arr = root.createNestedArray("GPIO");
+//     for(uint8_t i=0;i<sizeof(cmodule);i++){ 
+//       gpio_arr.add(cmodule.io[i]); 
+//     }
   
-  memset(&data_buffer,0,sizeof(data_buffer));
-  serializeJson(doc,data_buffer.payload.ctr);
+//   memset(&data_buffer,0,sizeof(data_buffer));
+//   serializeJson(doc,data_buffer.payload.ctr);
 
-    char topic2[100];
-    sprintf_P(topic2,PSTR("status/templates/my_module"));
+//     char topic2[100];
+//     sprintf_P(topic2,PSTR("status/templates/my_module"));
     
-    pCONT_mqtt->ppublish(topic2,data_buffer.payload.ctr,false);
+//     pCONT_mqtt->ppublish(topic2,data_buffer.payload.ctr,false);
 
-  AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"), data_buffer.payload.ctr);
+//   AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"), data_buffer.payload.ctr);
 
 
-  for (uint8_t mod = 0; mod < sizeof(kModuleNiceList); mod++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//   for (uint8_t mod = 0; mod < sizeof(kModuleNiceList); mod++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
       
-    DynamicJsonDocument doc2(700);
-    JsonObject root2 = doc2.to<JsonObject>();
-    uint8_t midx = pgm_read_byte(kModuleNiceList + mod);
+//     DynamicJsonDocument doc2(700);
+//     JsonObject root2 = doc2.to<JsonObject>();
+//     uint8_t midx = pgm_read_byte(kModuleNiceList + mod);
 
-    myio cmodule;
-    pCONT_pins->ModuleGpios(&cmodule,midx);
+//     myio cmodule;
+//     pCONT_pins->ModuleGpios(&cmodule,midx);
   
-    JsonArray gpio_arr2 = root2.createNestedArray("GPIO");
-    for(int ii=0;ii<sizeof(cmodule);ii++){ 
-      gpio_arr2.add(cmodule.io[ii]); 
-    }
-    root2["name"] = pCONT_pins->AnyModuleName(midx, buffer, sizeof(buffer));
-    root2["mod"] = mod;
-    root2["midx"] = midx;
+//     JsonArray gpio_arr2 = root2.createNestedArray("GPIO");
+//     for(int ii=0;ii<sizeof(cmodule);ii++){ 
+//       gpio_arr2.add(cmodule.io[ii]); 
+//     }
+//     root2["name"] = pCONT_pins->AnyModuleName(midx, buffer, sizeof(buffer));
+//     root2["mod"] = mod;
+//     root2["midx"] = midx;
 
-      char stemp[20];
+//       char stemp[20];
 
-    // JsonArray gpio_named_arr = root2.createNestedArray("GPIO_named");
-    // for(int ii=0;ii<sizeof(cmodule);ii++){ 
-    //   char stemp2[20];
-    //   pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), cmodule.io[ii], kSensorNames);
-    //   memcpy(stemp2,stemp,sizeof(stemp));
-    //   gpio_named_arr.add(stemp2);
-    // }
+//     // JsonArray gpio_named_arr = root2.createNestedArray("GPIO_named");
+//     // for(int ii=0;ii<sizeof(cmodule);ii++){ 
+//     //   char stemp2[20];
+//     //   pCONT_sup->GetTextIndexed_P(stemp, sizeof(stemp), cmodule.io[ii], kSensorNames);
+//     //   memcpy(stemp2,stemp,sizeof(stemp));
+//     //   gpio_named_arr.add(stemp2);
+//     // }
   
-    memset(&data_buffer,0,sizeof(data_buffer));
-    serializeJson(doc2,data_buffer.payload.ctr);
+//     memset(&data_buffer,0,sizeof(data_buffer));
+//     serializeJson(doc2,data_buffer.payload.ctr);
 
-    char topic[100];
-    sprintf_P(topic,PSTR("status/templates/%02d"),mod);
+//     char topic[100];
+//     sprintf_P(topic,PSTR("status/templates/%02d"),mod);
     
-    pCONT->mqt->ppublish(topic,data_buffer.payload.ctr,false);
+//     pCONT->mqt->ppublish(topic,data_buffer.payload.ctr,false);
     
-    //delay(100);
+//     //delay(100);
 
-    AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"),data_buffer.payload.ctr);
+//     AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"),data_buffer.payload.ctr);
 
-  }
+  // }
 
 
 
@@ -1609,7 +1611,9 @@ int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* ha
     // Count delimeters
     if(*read == '|'){
       delimeter_count++;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO,PSTR("%s\n\r found %s %d"),haystack,read,delimeter_count);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
       //use this and check class ID, then use it to return device_id
 
@@ -1686,7 +1690,9 @@ int8_t mSupport::GetStateNumber(const char *state_text)
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   return state_number;
 
@@ -1753,7 +1759,9 @@ void mSupport::ShowSource(int source)
 {
   if ((source > 0) && (source < SRC_MAX)) {
     char stemp1[20];
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 }
 
@@ -1810,7 +1818,9 @@ void mSupport::PerformEverySecond(void)
     pCONT_set->RtcRebootSave();
     
     pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 
   // if ((4 == uptime) && (SONOFF_IFAN02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
@@ -2052,7 +2062,9 @@ void mSupport::PerformEverySecond(void)
       pCONT_set->SettingsSaveAll();
       pCONT_set->restart_flag--;
       if (pCONT_set->restart_flag <= 0) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
+    #endif// ENABLE_LOG_LEVEL_INFO
         pCONT_wif->EspRestart();
       }
     }
@@ -2198,7 +2210,9 @@ void mSupport::UpdateStatusBlink(){
   }
 
   DEBUG_LINE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 
@@ -2572,19 +2586,27 @@ bool mSupport::I2cDevice(uint8_t addr)
 {
 
   
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint8_t address = 1; address <= 127; address++) {
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=true"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
       return true;
     }else
     if (!wire->endTransmission() && (address != addr)){
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x) also found %x"),address,addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
     }
   }
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
   return false;
 }
 #endif  // USE_I2C
@@ -2598,13 +2620,16 @@ void mSupport::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSearchCtrIndexOf(data_buffer.topic.ctr,"set/system")>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_SYSTEM));
+    #endif// ENABLE_LOG_LEVEL_INFO
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return; // not meant for here
   }
 
   
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 
   StaticJsonDocument<300> doc;
   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
@@ -2626,6 +2651,8 @@ void mSupport::parse_JSONCommand(){
   else{
      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
   }
+  
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
   //USeful tasmota stuff
   // else if (CMND_STATUS == command_code) {
@@ -2863,7 +2890,9 @@ void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
 
 void mSupport::SetLedPower(uint32_t state)
 {
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
+    #endif// ENABLE_LOG_LEVEL_INFO
   if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
     SetLedPowerIdx(0, state);
   } else {
@@ -2885,7 +2914,9 @@ void mSupport::SetLedPowerAll(uint32_t state)
 
 void mSupport::SetLedLink(uint32_t state)
 {
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
   uint32_t led_inv = pCONT_set->ledlnk_inverted;
@@ -3033,8 +3064,10 @@ void mSupport::DebugFreeMem(void)
   //https://i.stack.imgur.com/waoHN.gif
   register uint32_t *sp asm("a1");
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d"), 
       ESP.getFreeHeap(), 4 * (sp - g_pcont->stack));
+    #endif// ENABLE_LOG_LEVEL_INFO
 }
 
 // #endif  // ARDUINO_ESP8266_RELEASE_2_x_x
@@ -3319,3 +3352,45 @@ void mSupport::CrashDump_AddJson(void)
 }
 
 // #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

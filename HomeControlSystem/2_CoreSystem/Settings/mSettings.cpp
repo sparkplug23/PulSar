@@ -43,11 +43,13 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
 
   char* buffer = Settings.device_name_buffer.name_buffer;
   uint16_t buffer_length = strlen(buffer);
-  AddLog_P(LOG_LEVEL_INFO,PSTR("mSettings::AddDeviceName len=%d"),buffer_length);
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  //AddLog_P(LOG_LEVEL_INFO,PSTR("mSettings::AddDeviceName len=%d"),buffer_length);
+    #endif// ENABLE_LOG_LEVEL_INFO
   buffer_length = buffer_length > DEVICENAMEBUFFER_NAME_BUFFER_LENGTH ? DEVICENAMEBUFFER_NAME_BUFFER_LENGTH : buffer_length;
   
   #ifdef USE_LOG
-  AddLog_P(LOG_LEVEL_INFO,PSTR("name_bufferB=%s"), buffer);
+  //AddLog_P(LOG_LEVEL_INFO,PSTR("name_bufferB=%s"), buffer);
   #endif
   // Check indexing
   uint8_t index = 0;
@@ -62,6 +64,7 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
 
   uint16_t new_buffer_length = buffer_length+strlen(name_ctr);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("AddDeviceName(%s,%d,%d) %d index=%d"), 
     name_ctr, 
     class_id, 
@@ -69,21 +72,26 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
     buffer_length, 
     index
   );
+    #endif// ENABLE_LOG_LEVEL_INFO
   //AddLog_P(LOG_LEVEL_INFO,PSTR("name_bufferB=%s"), buffer);
 
   // Write name to next slot
   if(new_buffer_length<DEVICENAMEBUFFER_NAME_BUFFER_LENGTH){
     buffer_length+=sprintf(buffer+buffer_length, "%s|", name_ctr); 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG,PSTR("AddDeviceName ADDED + \"%s\""),name_ctr); 
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
 
   // Add index to next slot
   Settings.device_name_buffer.class_id[index] = class_id;
   Settings.device_name_buffer.device_id[index] = device_id;
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("name_bufferE=%s"), buffer);
   AddLog_Array(LOG_LEVEL_DEBUG,PSTR("class_id"),Settings.device_name_buffer.class_id,(int16_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
   AddLog_Array(LOG_LEVEL_DEBUG,PSTR("device_id"),Settings.device_name_buffer.device_id,(int8_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 
@@ -99,7 +107,9 @@ const char* mSettings::GetDeviceName(int16_t module_id, int8_t device_id, char* 
   for(int i=0;i<DEVICENAMEBUFFER_NAME_INDEX_LENGTH;i++){
     if((Settings.device_name_buffer.class_id[i]==module_id)&&(Settings.device_name_buffer.device_id[i]==device_id)){
       found_index = i;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("mSettings::GetDeviceName found_index %d"),i);
+    #endif // ENABLE_LOG_LEVEL_INFO
       break;
     }
   }
@@ -107,20 +117,28 @@ const char* mSettings::GetDeviceName(int16_t module_id, int8_t device_id, char* 
 
   if(found_index == -1){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+    #endif // ENABLE_LOG_LEVEL_INFO
     return buffer;
   }
 
   char* name_buffer = Settings.device_name_buffer.name_buffer;
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceName len=%d"),strlen(buffer));
+    #endif // ENABLE_LOG_LEVEL_INFO
   // gets first index from the array, where we start at the position the desired name is the next name
   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer);
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceName=%s"),buffer);
+    #endif // ENABLE_LOG_LEVEL_INFO
   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceName &name_buffer[index]=%s"),&name_buffer[index]);
 
   if(buffer == nullptr){
     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_ERROR, PSTR("F::%s ERROR >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
 
   return buffer;
@@ -163,7 +181,9 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
 
   if(p_start_of_found == NULL){
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("p_start_of_found == NOT FOUND"));
+    #endif// ENABLE_LOG_LEVEL_INFO
     return -1;
   }
 
@@ -172,8 +192,11 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
   if(class_id == -1){
     limit_result_to_class_ids = false;
   }
+    #ifdef ENABLE_LOG_LEVEL_INFO
   
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("limit_result_to_class_ids = %s"),limit_result_to_class_ids?"YES":"NO");
+
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   uint8_t delimeter_count = 0;
   uint8_t delimeter_within_class_count = 0;
@@ -186,13 +209,19 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
       if(limit_result_to_class_ids){
         if(pCONT_set->Settings.device_name_buffer.class_id[delimeter_count] == class_id){
           delimeter_within_class_count++;
+    #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("%s found wclass_count %s %d %d"),haystack,read,delimeter_within_class_count,Settings.device_name_buffer.class_id[delimeter_count]);
-        }
+        
+        
+    #endif ENABLE_LOG_LEVEL_INFO
+    }
       }else{
         delimeter_within_class_count++;        
       }
       delimeter_count++;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("%s found %s %d"),haystack,read,delimeter_count);
+    #endif // ENABLE_LOG_LEVEL_INFO
     }
     read++; //move pointer along
   }
@@ -280,8 +309,11 @@ void mSettings::Function_Template_Load(){
   // Read into local
   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("FUNCTION_TEMPLATE READ = \"%s\""), buffer);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
   StaticJsonDocument<2000> doc;//(1500);
   DeserializationError error = deserializeJson(doc, buffer);
 
@@ -320,8 +352,10 @@ void mSettings::Function_Template_Load(){
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
 
+#endif// ENABLE_DEVFEATURE_ARDUINOJSON
   boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
+
   
 }
 
@@ -388,7 +422,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     // Change to saving using counter later, Settings.save_data
       // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
 
-      Serial.println("FUNC_EVERY_MINUTE");
+      // Serial.println("FUNC_EVERY_MINUTE");
       
 // #ifdef DISABLE_SETTINGS_SAVING_BUG
       pCONT_set->SettingsSave(1);
@@ -396,7 +430,9 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     break;
     case FUNC_ON_SUCCESSFUL_BOOT:
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
           
       // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
@@ -428,6 +464,9 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
   }
 
 } 
+
+
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
@@ -536,7 +575,7 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
 //NEED FIXED -- Doesnt 
 
         uint8_t device_count = pCONT_set->GetDeviceNameCount(module_id);
-        JsonArrayConst array = obj[F(D_JSON_DEVICENAME)][module_friendlyname_buffer];
+        JsonArrayConst array = obj[D_JSON_DEVICENAME][module_friendlyname_buffer];
         for(JsonVariantConst v : array) {
           const char* device_name_ctr = v.as<const char*>();
           pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
@@ -716,6 +755,9 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
 
 
 
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
+
+
 
 uint32_t mSettings::GetRtcRebootCrc(void)
 {
@@ -814,7 +856,9 @@ bool mSettings::SettingsBufferAlloc(void)
     #ifdef ESP8266
   SettingsBufferFree();
   if (!(settings_buffer = (uint8_t *)malloc(sizeof(Settings)))) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_UPLOAD_ERR_2));  // Not enough (memory) space
+    #endif // ENABLE_LOG_LEVEL_INFO
     return false;
   }
   return true;
@@ -873,7 +917,9 @@ void mSettings::SettingsSaveAll(void)
 
 void mSettings::SettingsLoad(void) {
   
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 #ifdef ESP8266
   // Load configuration from eeprom or one of 7 slots below if first valid load does not stop_flash_rotate
@@ -884,18 +930,27 @@ void mSettings::SettingsLoad(void) {
   for (uint32_t i = 0; i < CFG_ROTATES; i++) {              // Read all config pages in search of valid and latest
     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     if ((Settings.cfg_crc32 != 0xFFFFFFFF) && (Settings.cfg_crc32 != 0x00000000) && (Settings.cfg_crc32 == GetSettingsCrc32())) {
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc32()| %d==%d"),Settings.cfg_crc32,GetSettingsCrc32());
+      
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc32()| %d==%d"),Settings.cfg_crc32,GetSettingsCrc32());
+    #endif // ENABLE_LOG_LEVEL_INFO
       
       if (Settings.save_flag > save_flag) {                 // Find latest page based on incrementing save_flag
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
+    #endif // ENABLE_LOG_LEVEL_INFO
      
         save_flag = Settings.save_flag;
         settings_location = flash_location;
         if (Settings.flag_system.stop_flash_rotate && (0 == i)) {  // Stop if only eeprom area should be used and it is valid
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Settings.flag_system.stop_flash_rotate && (0 == i)"));
+    #endif // ENABLE_LOG_LEVEL_INFO
           break;
         }
       }
@@ -905,7 +960,9 @@ void mSettings::SettingsLoad(void) {
   }
   if (settings_location > 0) {
     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu " D_JSON_BOOTCOUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
 // #else  // ESP32
 //   SettingsRead(&Settings, sizeof(Settings));
@@ -917,11 +974,15 @@ void mSettings::SettingsLoad(void) {
     //Settings.seriallog_level = LOG_LEVEL_ALL;
     pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing"),Settings.cfg_holder,SETTINGS_HOLDER);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     SettingsDefault();
   }else{
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " " D_JSON_SUCCESSFUL ));
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
   settings_crc32 = GetSettingsCrc32();
 #endif  // FIRMWARE_MINIMAL
@@ -987,20 +1048,28 @@ void mSettings::SettingsSave(uint8_t rotate)
   if ((GetSettingsCrc32() != settings_crc32) || rotate) {
      if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
       stop_flash_rotate = 1;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
+    #endif// ENABLE_LOG_LEVEL_INFO
     }
     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
       settings_location = SETTINGS_LOCATION +1;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
+    #endif// ENABLE_LOG_LEVEL_INFO
     }
     if (stop_flash_rotate) {
       settings_location = SETTINGS_LOCATION;
     } else {
       settings_location--;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
+    #endif// ENABLE_LOG_LEVEL_INFO
       if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
         settings_location = SETTINGS_LOCATION;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
+    #endif // ENABLE_LOG_LEVEL_INFO
       }
     }
 
@@ -1025,7 +1094,9 @@ void mSettings::SettingsSave(uint8_t rotate)
         delay(1);
       }
     }
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(Settings));
+    #endif// ENABLE_LOG_LEVEL_INFO
 // #else  // ESP32
 //     SettingsWrite(&Settings, sizeof(Settings));
 //     AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "Saved, " D_COUNT " %d, " D_BYTES " %d"), Settings.save_flag, sizeof(Settings));
@@ -1316,7 +1387,9 @@ void mSettings::SettingsErase(uint8_t type)
 
   bool _serialoutput = (LOG_LEVEL_DEBUG_MORE <= seriallog_level);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " %d " D_UNIT_SECTORS), _sectorEnd - _sectorStart);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint32_t _sector = _sectorStart; _sector < _sectorEnd; _sector++) {
     result = ESP.flashEraseSector(_sector);
@@ -1386,7 +1459,9 @@ void mSettings::SettingsLoad_CheckSuccessful(){
       }
       //reset 7 times, then fail into safe boot awaiting OTA
       // HandleFailedBootFailBack();
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcReboot.fast_reboot_count);
+      #endif///   #ifdef ENABLE_LOG_LEVEL_INFO
     }
   }
 
@@ -1487,12 +1562,14 @@ void mSettings::SettingsDefault(void)
   stop_flash_rotate = true;
 
    //Serial.println("SettingsDefault");
-   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+  //  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
    SystemSettings_DefaultHeader();
-   Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
+  //  Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
     boot_status.module_template_used = true;
     DEBUG_LINE;
@@ -1501,7 +1578,9 @@ void mSettings::SettingsDefault(void)
     DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
     DEBUG_LINE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
+    #endif// ENABLE_LOG_LEVEL_INFO
     
 }
 
@@ -1573,7 +1652,9 @@ DEBUG_LINE;
   Settings.param[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
 
 DEBUG_LINE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("DefaultBody_System"));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 DEBUG_LINE;
 }
@@ -1901,20 +1982,20 @@ void mSettings::SystemSettings_DefaultBody(void)
 DEBUG_LINE;
   SystemSettings_DefaultBody_System();
 DEBUG_LINE;
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time1"));
+  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time1"));
   SystemSettings_DefaultBody_Network();
 DEBUG_LINE;
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Network"));
+  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Network"));
   SystemSettings_DefaultBody_WebServer();
 DEBUG_LINE;
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time2"));
+  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time2"));
   SystemSettings_DefaultBody_MQTT();
 DEBUG_LINE;
   SystemSettings_DefaultBody_TelePeriods();
 DEBUG_LINE;
   SystemSettings_DefaultBody_Time();
 DEBUG_LINE;
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time"));
+  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time"));
   SystemSettings_DefaultBody_Weight();
 DEBUG_LINE;
   SystemSettings_DefaultBody_Lighting();
@@ -1935,7 +2016,7 @@ DEBUG_LINE;
 DEBUG_LINE;
   SystemSettings_DefaultBody_Displays();
 DEBUG_LINE;
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Displays"));
+  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Displays"));
   
   //  Serial.println("SystemSettings_DefaultBody_DONE"); Serial.flush();
 

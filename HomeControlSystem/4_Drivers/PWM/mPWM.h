@@ -7,7 +7,9 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 #include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 #include <string.h>
 #include <strings.h>

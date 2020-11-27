@@ -131,7 +131,9 @@ class mPubSubClient;
 #include "2_CoreSystem/Support/mSupport.h"
 class mSupport;
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 #include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #ifdef ESP32
   #include <WiFi.h> //esp32
 #endif
@@ -157,17 +159,22 @@ class mMQTT{
 
     bool flag_uptime_reached_reduce_frequency = false;
 
-    // char lwt_message_ondisconnect_ctr[50];
+    // char lwt_message_ondisconnect_ctr[50];#
+  
+
+    // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+    // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+
 
     void DiscoverServer(void);
 
     struct CONNECTION_MAINTAINER_PARAMETERS{
 
-      #ifndef ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
-      uint32_t tSavedLoop = millis();
-      #endif // ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
-      uint32_t tSavedReconnectAttempt = millis()+30000;
-      uint32_t rSavedReconnectAttempt = 0;
+      // #ifndef ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
+      // uint32_t tSavedLoop = millis();
+      // #endif // ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
+      // uint32_t tSavedReconnectAttempt = millis()+30000;
+      // uint32_t rSavedReconnectAttempt = 0;
       uint8_t cConnectionAttempts = 0; 
       uint8_t flag_require_reconnection = false;
     }connection_maintainer;

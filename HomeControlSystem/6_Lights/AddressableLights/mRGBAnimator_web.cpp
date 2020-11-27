@@ -835,7 +835,9 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
 {
   // if (!HttpCheckPriviledgedAccess()) { return; }
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "HandlePage_RGBLightSettings"));
+    #endif// ENABLE_LOG_LEVEL_INFO
   
   // if (HandleParameters_RGBLightSettings(request)) {
   //   AddLog_P(LOG_LEVEL_TEST,PSTR("HandleParameters_RGBLightSettings(request) FOUND SO STOP"));
@@ -1428,6 +1430,8 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
     if ((request->url() == D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls") && //"/rest/api/v2/test") &&
         (request->method() == HTTP_POST))
     {
+      
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
         const size_t        JSON_DOC_SIZE   = 512U;
         DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
         
@@ -1435,7 +1439,9 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
         {
             JsonObject obj = jsonDoc.as<JsonObject>();
 
+    #ifndef ENABLE_DEVFEATURE_JSONPARSER
             pCONT_ladd->parse_JSONCommand(jsonDoc.as<JsonObjectConst>());
+    #endif // ENABLE_DEVFEATURE_JSONPARSER
 
             for (JsonPair keyValue : obj) {
               // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
@@ -1449,6 +1455,8 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
         }
         
         request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{ \"status\": 0 }");
+        
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
     }
   });
 
@@ -1691,16 +1699,16 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   pCONT_web->WebAppend_Button2(PSTR("Load Palette"),"loadpixels","bora");
 
 
-  if(pCONT_iLight->CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
-    JsonBuilderI->AppendBuffer(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
-                              PSTR("Edit Name"),
-                              pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
-                              WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
-                              WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
-                              PSTR("Enter New Palette Name (maximum 20 characters)"),
-                              pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
-                            );
-  }
+  // if(pCONT_iLight->CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
+  //   JsonBuilderI->AppendBuffer(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
+  //                             PSTR("Edit Name"),
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
+  //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
+  //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
+  //                             PSTR("Enter New Palette Name (maximum 20 characters)"),
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+  //                           );
+  // }
 
   JsonBuilderI->AppendBuffer(
     PSTR(

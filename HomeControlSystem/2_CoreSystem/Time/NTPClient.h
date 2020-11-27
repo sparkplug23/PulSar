@@ -10,7 +10,7 @@
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
   #ifdef USE_NETWORK_MDNS
-  #include <ESP8266mDNS.h>
+  // #include <ESP8266mDNS.h>//
   #endif // #ifdef USE_NETWORK_MDNS
 #endif
 

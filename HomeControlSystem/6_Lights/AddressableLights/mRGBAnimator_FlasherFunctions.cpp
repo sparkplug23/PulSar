@@ -274,6 +274,178 @@ void mRGBAnimator::AnimUpdateMemberFunction_Sequential(const AnimationParam& par
 
 
 
+/**************************************************************************************************************************************************************
+***************************************************************************************************************************************************************
+********* SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through *************************************************************************************************************************
+***************************************************************************************************************************************************************
+***************************************************************************************************************************************************************/
+
+
+/****
+ * Changes pixels randomly to new colour, with slow blending
+ * Requires new colour calculation each call
+ */
+void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through(){
+  // So colour region does not need to change each loop to prevent colour crushing
+  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+  // Pick new colours
+
+  switch(flashersettings.region){
+    case FLASHER_REGION_COLOUR_SELECT_ID:{ //set colours
+      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+
+      pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+      // UpdateDesiredColourFromPaletteSelected();
+      // UpdateStartingColourWithGetPixel();
+      flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+    // NO 
+
+        pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+        
+      int16_t pixel_position = -2;
+      uint8_t pixels_in_map = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+      
+      
+       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+
+
+      RgbTypeColor colour;
+      
+      desired_pixel = shared_flasher_parameters.indexes.active;
+      uint8_t pixels_map_upper_limit = shared_flasher_parameters.indexes.active+1;
+      uint8_t pixels_map_lower_limit = shared_flasher_parameters.indexes.active;
+
+      uint8_t index_1, index_2;
+
+      uint8_t counter = 0;
+
+          
+      //if last pixel, then include it and the first, else include it and the next
+      if(shared_flasher_parameters.indexes.active == pixels_in_map-1){ //wrap wround
+        index_1 = 0;
+        index_2 = shared_flasher_parameters.indexes.active;
+        counter = 0;
+      }else{
+        index_1 = shared_flasher_parameters.indexes.active;
+        index_2 = shared_flasher_parameters.indexes.active+1;
+        counter = 1;
+
+      }
+
+      shared_flasher_parameters.indexes.counter ^= 1;
+
+      
+      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"),shared_flasher_parameters.indexes.active,index_1,index_2);
+  
+      
+    
+
+      for(uint16_t index=0;index<strip_size;index++){
+
+
+          if(counter^=1){
+            //using %2 means alternate leds replace the previous position, not the current
+            desired_pixel = shared_flasher_parameters.indexes.counter ? index_2 : index_1;
+          }else{
+            desired_pixel = shared_flasher_parameters.indexes.counter ? index_1 : index_2;
+          }
+        
+
+        colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+
+        animation_colours[index].DesiredColour = colour;
+         
+        //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "desired_pixel= %d/%d/%d"),pixels_map_lower_limit,desired_pixel,pixels_map_upper_limit);
+  
+        // if(++desired_pixel>pixels_map_upper_limit){
+        //   desired_pixel = pixels_map_lower_limit;
+        // }
+
+      } 
+
+      //progress active index by 1 or reset
+      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "shared_flasher_parameters.indexes.active=%d"),shared_flasher_parameters.indexes.active);
+      if(++shared_flasher_parameters.indexes.active>pixels_in_map-1){
+        shared_flasher_parameters.indexes.active=0;
+      }
+      
+  
+    }break;
+    case FLASHER_REGION_ANIMATE_ID: //shift along
+      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+
+      // Check if output multiplying has been set, if so, change desiredcolour array
+      // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+      // Get starting positions already on show
+      UpdateStartingColourWithGetPixel();
+      // Call the animator to blend from previous to new
+      this->setAnimFunctionCallback(
+        [this](const AnimationParam& param){
+          this->AnimUpdateMemberFunction_BlendStartingToDesiredColour(param);
+        }
+      );
+
+      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
+
+
+      break;
+  }
+
+
+
+            // desired_colour[ledout.pattern[ledout.index]] = colour; 
+            // AddLog_P(LOG_LEVEL_TEST, PSTR("colour=%d,%d,%d"),
+            // colour.R,
+            // colour.G,
+            // colour.B);
+            
+            // animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
+              
+          //   if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+          //     animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
+          //   }
+
+          //   //   AddLog_P(LOG_LEVEL_TEST, PSTR("colou2=%d,%d,%d"),
+          //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.R,
+          //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.G,
+          //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.B);
+
+            
+          //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+          //   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
+          //   //   ledout.pattern[ledout.index],desired_pixel,
+          //   //   pCONT_iLight->HueF2N(desired_colour[ledout.pattern[ledout.index]].H),pCONT_iLight->SatF2N(desired_colour[ledout.pattern[ledout.index]].S),pCONT_iLight->BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
+          //   //   pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr),pixel_position
+          //   // );
+          //   #endif
+
+          //   if(++desired_pixel>=pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr)){desired_pixel=0;}
+          // } //end for
+
+
+
+
+  
+}
+
+
+// simple blend function
+void mRGBAnimator::AnimUpdateMemberFunction_Slow_Glow_Partial_Palette_Step_Through(const AnimationParam& param)
+{    
+
+  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);    
+    SetPixelColor(pixel, updatedColor);
+  } // END for
+
+}
+
+
+
+
 
 /**************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************
@@ -546,28 +718,31 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleSingleColourRandom(const Anim
   0-10    20-30   40-50   60-70    80-90      //coloured
       10-20   30-40   50-60   70-80   90-0    //white
   */
-  switch(progress_percentage){
-    case 10:
-    case 30:
-    case 50:
-    case 70:
-    case 90:
-      for (uint16_t ii = 0; ii < random_amount; ii++){
-        SetPixelColor(
-          random(0,strip_size), 
-          HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
-        );
-      }
-    break;
-    case 0:
-    case 20:
-    case 40:
-    case 60:
-    case 80: //go back to coloured
-      for (uint16_t pixel = 0; pixel < strip_size; pixel++){
-        SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
-      }
-    break;
+  if(progress_percentage != shared_flasher_parameters.progress_percentage_last_animated_on){
+    shared_flasher_parameters.progress_percentage_last_animated_on = progress_percentage; //update stored value
+    switch(progress_percentage){
+      case 10:
+      case 30:
+      case 50:
+      case 70:
+      case 90:
+        for (uint16_t ii = 0; ii < random_amount; ii++){
+          SetPixelColor(
+            random(0,strip_size), 
+            HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
+          );
+        }
+      break;
+      case 0:
+      case 20:
+      case 40:
+      case 60:
+      case 80: //go back to coloured
+        for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+          SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
+        }
+      break;
+    }
   }
 
 }
@@ -637,36 +812,37 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(cons
   0-10    20-30   40-50   60-70    80-90      //coloured
       10-20   30-40   50-60   70-80   90-0    //white
   */
-  switch(progress_percentage){
-    case 10:
-    case 30:
-    case 50:
-    case 70:
-    case 90:
-    
-
-      for (uint16_t ii = 0; ii < random_amount; ii++){
-        flashed_brightness = random(0,shared_flasher_parameters.alternate_brightness_max);        
-        // For random, desired pixel from map will also be random
-        desired_pixel = random(0,pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
-        // get colour from palette
-        flash_colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
-        flash_colour = ApplyBrightnesstoDesiredColour(flash_colour,flashed_brightness);
-        SetPixelColor(
-          random(0,strip_size), 
-          flash_colour
-        );
-      }
-    break;
-    case 0:
-    case 20:
-    case 40:
-    case 60:
-    case 80: //go back to coloured
-      for (uint16_t pixel = 0; pixel < strip_size; pixel++){
-        SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
-      }
-    break;
+  if(progress_percentage != shared_flasher_parameters.progress_percentage_last_animated_on){
+    shared_flasher_parameters.progress_percentage_last_animated_on = progress_percentage; //update stored value
+      switch(progress_percentage){
+      case 10:
+      case 30:
+      case 50:
+      case 70:
+      case 90:
+        for (uint16_t ii = 0; ii < random_amount; ii++){
+          flashed_brightness = random(0,shared_flasher_parameters.alternate_brightness_max);        
+          // For random, desired pixel from map will also be random
+          desired_pixel = random(0,pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+          // get colour from palette
+          flash_colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+          flash_colour = ApplyBrightnesstoDesiredColour(flash_colour,flashed_brightness);
+          SetPixelColor(
+            random(0,strip_size), 
+            flash_colour
+          );
+        }
+      break;
+      case 0:
+      case 20:
+      case 40:
+      case 60:
+      case 80: //go back to coloured
+        for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+          SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
+        }
+      break;
+    }
   }
 
 }

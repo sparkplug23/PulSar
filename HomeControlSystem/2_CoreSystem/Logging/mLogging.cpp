@@ -38,7 +38,11 @@ void AddLog_P(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P forma
   }
 }
 
-void AddLog_P(uint8_t loglevel, PGM_P formatP, ...)
+void AddLog_P(
+  #ifdef ENABLE_DEVFEATURE_BREAK_ADDLOG
+  uint8_t dummy,
+  #endif  
+  uint8_t loglevel, PGM_P formatP, ...)
 {
   //Block software stream for now
   // if(fDebugOutputMode==DEBUG_OUTPUT_SOFTWARE_ID){return;}

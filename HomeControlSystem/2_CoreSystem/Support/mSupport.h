@@ -84,7 +84,9 @@ struct functionhandler {
   #include <ESP8266httpUpdate.h>
 #endif
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 #include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"

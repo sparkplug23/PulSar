@@ -7,7 +7,6 @@
 #include "0_ConfigUser/mUserConfig.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
-#include <ArduinoJson.h>
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -25,7 +24,9 @@ class mHardwarePins{
     mHardwarePins(){}; //inline, no cpp needed
 
     void ModuleSettings_FlashSerial();
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
     void ParseModuleTemplate(JsonObjectConst obj);
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
     void ReadModuleTemplateFromProgmem();
 
     void ModuleSettings_ShowTemplateLog();

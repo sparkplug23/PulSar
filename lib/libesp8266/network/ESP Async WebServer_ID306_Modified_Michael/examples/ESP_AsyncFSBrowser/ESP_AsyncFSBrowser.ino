@@ -123,7 +123,8 @@ void setup(){
   ArduinoOTA.setHostname(hostName);
   ArduinoOTA.begin();
 
-  MDNS.addService("http","tcp",80);
+// #ifdef 
+//   MDNS.addService("http","tcp",80);
 
   SPIFFS.begin();
 
@@ -138,7 +139,7 @@ void setup(){
   server.addHandler(new SPIFFSEditor(http_username,http_password));
 
   server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", String(ESP.getFreeHeap()));
+    // request->send(200, "text/plain", String(ESP.getFreeHeap()));
   });
 
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");

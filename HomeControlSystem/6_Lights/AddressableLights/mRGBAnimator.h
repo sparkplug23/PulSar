@@ -16,11 +16,13 @@
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
 #ifdef ESP8266
-#include "AsyncJson.h"
+// #include "AsyncJson.h"
 #endif //ESP8266
 
 
-#include "ArduinoJson.h"
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
+#include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 // #define ENABLE_PIXEL_FUNCTION_FLASHER
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -100,21 +102,21 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)         "mixer";
 //     #define D_NOTIF_MODE_PULSING_ON_NAME_CTR    "Pulsing OFF"
 
 
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SLOW_GLOW_NAME_CTR)          "Slow Glow"    ;     
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SLOW_GLOW_NAME_CTR)          "Slow Glow"    ;     
 
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR)         "SEQUENTIAL"; 
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SEQUENTIAL_NAME_CTR)         "SEQUENTIAL"; 
 
 
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR)         "SLOW_FADE_BRIGHTNESS_ALL";
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR)         "SLOW_FADE_SATURATION_ALL";
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR)      "SLOW_FADE_BRIGHTNESS_RANDOM";
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR)      "SLOW_FADE_SATURATION_RANDOM";
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR)             "FLASH_TWINKLE_RANDOM";                   
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR)         "FLASH_TWINKLE_SEQUENTIAL";                          
-DEFINE_PROGMEM_CTR(PM_FLASHER_FUNCTION_FLASH_GLIMMER_RANDOM_NAME_CTR)             "FLASH_GLIMMER_RANDOM"; // sequential of another colour (white) every x bulbs. ie 20 bulbs total, every 4th part of sequential  
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR)         "SLOW_FADE_BRIGHTNESS_ALL";
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR)         "SLOW_FADE_SATURATION_ALL";
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR)      "SLOW_FADE_BRIGHTNESS_RANDOM";
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR)      "SLOW_FADE_SATURATION_RANDOM";
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR)             "FLASH_TWINKLE_RANDOM";                   
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR)         "FLASH_TWINKLE_SEQUENTIAL";                          
+DEFINE_PGM_CTR(PM_FLASHER_FUNCTION_FLASH_GLIMMER_RANDOM_NAME_CTR)             "FLASH_GLIMMER_RANDOM"; // sequential of another colour (white) every x bulbs. ie 20 bulbs total, every 4th part of sequential  
 
-DEFINE_PROGMEM_CTR(PM_FLASHER_REGION_SLOW_FADE_NAME_CTR)                          "SLOW_FADE";
-DEFINE_PROGMEM_CTR(PM_FLASHER_REGION_TWINKLE_FLASH_NAME_CTR)                      "TWINKLE_FLASH";
+DEFINE_PGM_CTR(PM_FLASHER_REGION_SLOW_FADE_NAME_CTR)                          "SLOW_FADE";
+DEFINE_PGM_CTR(PM_FLASHER_REGION_TWINKLE_FLASH_NAME_CTR)                      "TWINKLE_FLASH";
 
 #define D_FLASHER_REGION_COLOUR_SELECT_NAME_CTR "Colour Select"
 #define D_FLASHER_REGION_ANIMATE_NAME_CTR "Animate"
@@ -201,11 +203,15 @@ class mRGBAnimator{
         // working, no wifi
         //typedef NeoEsp32Rmt6800KbpsMethod selectedNeoSpeedType;
         //test 2
+        #ifdef ESP32
         typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType;
+        // typedef NeoEsp32Rmt7800KbpsMethod selectedNeoSpeedType;
+        #else
         //  typedef NeoEsp32I2s1800KbpsMethod selectedNeoSpeedType;
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
         // typedef NeoWs2811Method  selectedNeoSpeedType;
-        // typedef Neo800KbpsMethod selectedNeoSpeedType;
+        typedef Neo800KbpsMethod selectedNeoSpeedType; //default for all
+        #endif
 
         // #endif
       #endif  
@@ -408,13 +414,24 @@ class mRGBAnimator{
     //another flash to "off" or simple set flash colour to off??
     FLASHER_FUNCTION_FLASH_GLIMMER_RANDOM_ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
     
-FLASHER_FUNCTION_TESTER_ID,
+    FLASHER_FUNCTION_TESTER_ID,
     
     // The one when applybrightness was broke
     // done by applying new cl/brightness to some, then each call reducing the colour crushing it
     //do with percent to show on at one time
     FLASHER_FUNCTION_PULSE_RANDOM_ON, 
     FLASHER_FUNCTION_PULSE_RANDOM_ON_TWO_ID,
+
+    /**
+     * Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
+     * */
+    // FLASHER_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID,
+
+    /**
+     * Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
+     * Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
+     * */
+    FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID,
 
     // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
     FLASHER_FUNCTION_PULSE_SINE_WAVE_BRIGHTNESS,
@@ -435,6 +452,8 @@ FLASHER_FUNCTION_TESTER_ID,
 
 // NeoGamma<NeoGammaTableMethod> colorGamma; // for any fade animations, best to correct gamma
 // void DrawTailPixels();
+
+
 
 
 
@@ -577,6 +596,10 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
   void AnimUpdateMemberFunction_Pulse_Random_On_2(const AnimationParam& param);
 
 
+  void SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through();
+  void AnimUpdateMemberFunction_Slow_Glow_Partial_Palette_Step_Through(const AnimationParam& param);
+
+
 
 
   void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
@@ -592,6 +615,20 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
     uint8_t alternate_brightness_max = 255;
     //flag use single bringhtess or range
     uint8_t alternate_random_amount_as_percentage = 2;
+    /*
+    * Holds the last percentage animation was run on, to be checked in animupdates to make sure not to double change values
+    * ie anim.progress as float 0 to 1, in range 0 to 100 will repeat each integer value many times
+    * */
+    uint8_t progress_percentage_last_animated_on = 100;
+
+    struct INDEX_COUNTERS{
+      uint16_t lower_limit = 0;
+      uint16_t upper_limit = 0; 
+      uint16_t active = 0;
+      uint8_t counter = 0;
+
+
+    }indexes;
 
 
   }shared_flasher_parameters;
@@ -600,9 +637,9 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
   uint16_t setpixel_variable_index_counter = 0;
 
 
-
-
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
   void parsesub_Flasher(JsonObjectConst obj);
+#endif// ENABLE_DEVFEATURE_ARDUINOJSON
   void init_flasher_settings();
 
   uint16_t SetLEDOutAmountByPercentage(uint8_t percentage);
@@ -679,7 +716,7 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
     // uint32_t tSavedMillisToChangeAt = 0;
     uint32_t tSavedTrigger = millis();
     // uint32_t tSavedRestart = millis();
-    uint8_t enabled = false;
+    // uint8_t enabled = false;
     uint8_t time_scaler = 6;
     // uint32_t tSavedSendData;
       uint8_t enabled_mixer_count = 0; // 10 max
@@ -749,19 +786,30 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
     uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
     
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
     int8_t Tasker_Web(uint8_t function);
 
-    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+
+    // #ifdef ENABLE_DEVFEATURE_JSONPARSER
+    int8_t CheckAndExecute_JSONCommands(void);
+    void parse_JSONCommand(void);
+    // #endif
+    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
+    // int8_t Tasker(uint8_t function, JsonObjectConst obj);
+    // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    // void parse_JSONCommand(JsonObjectConst obj);
+    // #endif
+
+
     
     void SubTask_Presets();
     
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
     void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
     void parsesub_ModeManual(JsonObjectConst obj);
     void parsesub_ModeAnimation(JsonObjectConst obj);
     void parsesub_ModeAmbilight(JsonObjectConst obj);
+#endif //  ENABLE_DEVFEATURE_ARDUINOJSON
 
-void parse_JSONCommand(JsonObjectConst obj);
 
         // make number generator, random, with skewness
         // int Range0to100[20] = {0,10,20,30,40, // random(12,24)*10;
@@ -837,6 +885,11 @@ void parse_JSONCommand(JsonObjectConst obj);
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
     
+
+    /***
+     * Possible bit level packing of enabling or disabling palette colours allowed in a palette
+     * */
+    // uint32_t palette_pixel_enabled_32bitpacked = 0xFFFF;
 
     
 void ApplyBrightnesstoDesiredColour(uint8_t brightness);

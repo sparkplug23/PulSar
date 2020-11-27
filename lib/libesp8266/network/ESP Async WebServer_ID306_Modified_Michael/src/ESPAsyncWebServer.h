@@ -242,9 +242,9 @@ class AsyncWebServerRequest {
     // void send(int code, const char* contentType=nullptr, char* content_ptr = nullptr);
     void send_code(int code);
     void send(int code, uint8_t contentType_id = 0, char* content_ptr = nullptr);
-    void send(FS &fs, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
-    void send(File content, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
-    void send(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback=nullptr);
+    // void send(FS &fs, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
+    // void send(File content, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
+    // void send(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback=nullptr);
     void send(uint8_t contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
     void sendChunked(uint8_t contentType, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
     
@@ -256,9 +256,9 @@ class AsyncWebServerRequest {
     // AsyncWebServerResponse *beginResponse_serial(int code, const char* contentType, char* content=nullptr);
     // AsyncWebServerResponse *beginResponse(int code, const char* contentType=nullptr, char* content_ptr = nullptr, uint16_t content_len = 0);
     AsyncWebServerResponse *beginResponse(int code, uint8_t contentType_id = 0, char* content_ptr = nullptr, uint16_t content_len = 0);
-    AsyncWebServerResponse *beginResponse(FS &fs, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
-    AsyncWebServerResponse *beginResponse(File content, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
-    AsyncWebServerResponse *beginResponse(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback=nullptr);
+    // AsyncWebServerResponse *beginResponse(FS &fs, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
+    // AsyncWebServerResponse *beginResponse(File content, char* path, uint8_t contentType=0, bool download=false, AwsTemplateProcessor callback=nullptr);
+    // AsyncWebServerResponse *beginResponse(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback=nullptr);
     AsyncWebServerResponse *beginResponse(uint8_t contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
     AsyncWebServerResponse *beginChunkedResponse(uint8_t contentType, AwsResponseFiller callback, AwsTemplateProcessor templateCallback=nullptr);
     AsyncResponseStream    *beginResponseStream(uint8_t contentType, size_t bufferSize=1460);

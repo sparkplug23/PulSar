@@ -189,8 +189,8 @@
   #define D_MODULE_DRIVERS_PWM_FRIENDLY_CTR  "pwm"
 //#endif
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
-  // DEFINE_PROGMEM_CTR(MSAW_MODULE_CTR              "mSAWMain"
-  // DEFINE_PROGMEM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
+  // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
+  // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
 //#endif
 // Energy (Range 130-139
 //#ifdef USE_MODULE_DRIVERS_ENERGY
@@ -1936,7 +1936,7 @@ const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D
 const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
 #define    D_JSON_COMMAND_NVALUE                              "{\"%s\":%d}"
 #define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
-#define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY ":%d}"
+#define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY "\":%d}"
 
 #define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
 const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
@@ -1967,11 +1967,11 @@ const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  //
 
 
 #define    D_JSON_KEYVALUE_NVALUE                             "\"%s\":%d"
-DEFINE_PROGMEM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
 #define    D_JSON_KEYVALUE_SVALUE                             "\"%s\":\"%s\""
-DEFINE_PROGMEM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
 #define    D_JSON_KEYVALUE_FVALUE                             "\"%s\":%s"
-DEFINE_PROGMEM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
 
 
 
@@ -2053,11 +2053,11 @@ const char S_OFFLINE[] PROGMEM = D_OFFLINE;
 // support.ino
 static const char kMonthNames[] PROGMEM = D_MONTH3LIST;
 
-DEFINE_PROGMEM_CTR(kOptionOff)        "OFF|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
-DEFINE_PROGMEM_CTR(kOptionOn)         "ON|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
-DEFINE_PROGMEM_CTR(kOptionToggle)     "TOGGLE|" D_TOGGLE "|" D_ADMIN ;
-DEFINE_PROGMEM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
-DEFINE_PROGMEM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
+DEFINE_PGM_CTR(kOptionOff)        "OFF|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
+DEFINE_PGM_CTR(kOptionOn)         "ON|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
+DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" D_TOGGLE "|" D_ADMIN ;
+DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
+DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 
 // xdrv_02_webserver.ino
 // #ifdef USE_MODULE_CORE_WEBSERVER

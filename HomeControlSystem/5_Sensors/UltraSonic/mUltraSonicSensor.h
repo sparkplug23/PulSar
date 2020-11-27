@@ -9,7 +9,9 @@
 
 #include <math.h>
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 #include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "3_Network/WebServer/mWebServer.h"
 
 #include "1_TaskerManager/mTaskerManager.h"

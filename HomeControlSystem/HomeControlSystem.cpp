@@ -3,9 +3,10 @@
    All rights reserved.
 */
 
+#define NO_GLOBAL_MDNS
 #include "1_TaskerManager/mTaskerManager.h"
 
-//#define USE_DECLARE_AT_COMPILE_TO_DEBUG
+// #define USE_DECLARE_AT_COMPILE_TO_DEBUG
 
 // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
 
@@ -19,7 +20,15 @@ void hw_wdt_enable(){
 }
 #endif
 
+
+#ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
+//include file version
+
+#endif // USE_DECLARE_AT_COMPILE_TO_DEBUG
+
 /*
+
+
 
 /*********************************************************************************************
  * Hardware related
@@ -340,168 +349,19 @@ void init_class_instances(){
 #endif
 
 
-
-
-//   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-
-// #ifdef USE_ARDUINO_OTA
-// /*********************************************************************************************\
-//  * Allow updating via the Arduino OTA-protocol.
-//  *
-//  * - Once started disables current wifi clients and udp
-//  * - Perform restart when done to re-init wifi clients
-// \*********************************************************************************************/
-
-// bool arduino_ota_triggered = false;
-// uint16_t arduino_ota_progress_dot_count = 0;
-
-// void ArduinoOTAInit(void)
-// {
-//   #ifndef TEST_OTA_ISSUE
-//     ArduinoOTA.setHostname(pCONT_set->my_hostname);
-//   #endif
-//   ArduinoOTA.onStart([]()
-//   {
-//     // #ifdef ESP8266
-//       //pCONT_set->SettingsSave(1);  // Free flash for OTA update
-//       //#ifdef USE_MODULE_CORE_WEBSERVER
-//         // if (pCONT_set->Settings.webserver) { 
-//           //pCONT_web->StopWebserver(); 
-//           // /}
-//       // #endif  // USE_MODULE_CORE_WEBSERVER
-//       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
-//     // #endif
-//     arduino_ota_triggered = true;
-//     arduino_ota_progress_dot_count = 0;
-    
-//     #ifdef ESP32
-//       pinMode(2,OUTPUT);
-//       // timerWrite(timerwdt, 0); //reset timer (feed watchdog)
-//     #endif
-
-//     // Stop server otherwise OTA can fail
-//     // pCONT_web->StopWebserver();
-
-//     delay(100);       // Allow time for message xfer
-//   });
-
-//   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-//   {
-//     if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
-
-//       uint8_t progress_now = (progress/(total/100));
-//       if(arduino_ota_progress_dot_count != progress_now){
-//         Serial.println(progress_now);
-//         arduino_ota_progress_dot_count = progress_now;
-//       }
-//       #ifdef ESP8266
-//       ESP.wdtFeed();
-//       #endif // ESP8266
-//     }
-    
-//   });
-
-//   ArduinoOTA.onError([](ota_error_t error)
-//   {
-//     /*
-//     From ArduinoOTA.h:
-//     typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
-//     */
-//     char error_str[30];
-//     memset(error_str,0,sizeof(error_str));
-
-//     switch (error) {
-//       case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
-//       case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
-//       case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
-//       case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
-//       case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
-//       default:
-//         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
-//     }
-//     #ifdef ENABLE_LOG
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
-//     #endif
-    
-//     ESP.restart(); //should only reach if the first failed
-//   });
-
-//   ArduinoOTA.onEnd([]()
-//   {
-//     #ifdef ENABLE_LOG
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
-//     #endif
-//     ESP.restart();
-// 	});
-
-//   ArduinoOTA.begin();
-  
-//   #ifdef ENABLE_LOG
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
-//   #endif
-// }
-
-// void ArduinoOtaLoop(void)
-// {
-//   ArduinoOTA.handle();
-//   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
-//   // Note async stuff can still occur, so I need to disable them
-//   while (arduino_ota_triggered){ ArduinoOTA.handle(); }
-// }
-
-// #endif  // USE_ARDUINO_OTA
-
-
-// void HandleFailedBootFailBack(){
-
-//   //ota_startup_period_ms = 5000;
-//   //so.seriallog_level=LOG_LEVEL_ALL;
-
-//   //#ifndef DEBUG_TESTCODE
-//   // Connect first
-//   // if(ota_startup_period_ms){
-//   //   if(WiFi.status() != WL_CONNECTED){
-//   //     mwif.WifiConnectForced(); //only wifi connection in setup for OTA recovery
-//   //   }
-//   //   Serial.print("[OTA ] Started ("); Serial.print(round(ota_startup_period_ms/1000)); Serial.println(" seconds)...");
-//   //   unsigned long tProgram = millis(), tFlash = millis();
-//   //   while(abs(millis()-tProgram)<ota_startup_period_ms){ //give me 10 seconds to reprogram from bad code
-//   //     ArduinoOTA.handle(); while (arduino_ota_triggered) ArduinoOTA.handle();
-//   //     #ifdef ESP32
-//   //       timerWrite(timerwdt, 0);
-//   //     #else
-//   //       ESP.wdtFeed();
-//   //     #endif
-//   //     if(abs(millis()-tFlash)>=1000){ tFlash = millis();
-//   //       Serial.print("[OTA ] Seconds remaining "); Serial.println(int((ota_startup_period_ms-abs(millis()-tProgram))/1000));
-//   //     }
-//   //   }
-//   //   Serial.println("[OTA ] Ended");
-//   //   }
-//   // END OTA
-//   //#endif
-
-// }
-
-// #endif //   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-
-
-#define DISABLE
-
 #ifdef ESP32
-// TMP placement
-// ESP32 specific
-//
+  // TMP placement
+  // ESP32 specific
+  //
 
-#include "soc/soc.h"
-#include "soc/rtc_cntl_reg.h"
-#define DISABLE_ESP32_BROWNOUT
+  #include "soc/soc.h"
+  #include "soc/rtc_cntl_reg.h"
+  #define DISABLE_ESP32_BROWNOUT
 
-void DisableBrownout(void) {
-  // https://github.com/espressif/arduino-esp32/issues/863#issuecomment-347179737
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // Disable brownout detector
-}
+  void DisableBrownout(void) {
+    // https://github.com/espressif/arduino-esp32/issues/863#issuecomment-347179737
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // Disable brownout detector
+  }
 #endif // ESP32
 
 /********************************************************************************************/
@@ -511,16 +371,15 @@ void DisableBrownout(void) {
 void setup(void)
 { 
   
-#ifdef ESP32
-#ifdef DISABLE_ESP32_BROWNOUT
-  DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
-#endif
-#endif
+  #ifdef ESP32
+  #ifdef DISABLE_ESP32_BROWNOUT
+    DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
+  #endif
+  #endif
 
   Serial.begin(115200);
 
   #ifdef USE_SERIAL_ALTERNATE_TX
-  // #ifdef DISABLE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
   #endif
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
@@ -565,31 +424,28 @@ void setup(void)
 
   pCONT_sup->init_FirmwareVersion();
   
-  // // Load config from memory
+  // Load config from memory
   pCONT_set->SettingsDefault(); //preload minimal required
   #ifdef ENABLE_SETTINGS_STORAGE
-  // // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
-  // pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
-  // // Check Load was successful
-  // pCONT_set->SettingsLoad_CheckSuccessful();
+  // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
+  pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
+  // Check Load was successful
+  pCONT_set->SettingsLoad_CheckSuccessful();
+  #endif
+  
+  #ifdef ESP8266  // ESP 32 can't start this process until a connection happens
+  #ifdef USE_ARDUINO_OTA
+    pCONT_sup->ArduinoOTAInit();
+  #endif // USE_ARDUINO_OTA
   #endif
    
-   
-  // #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-  // #ifdef ESP8266  // ESP 32 can't start this process until a connection happens
-  // #ifdef USE_ARDUINO_OTA
-  //   ArduinoOTAInit();
-  // #endif // USE_ARDUINO_OTA
-  // #endif
-  // #endif //   #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-
   pCONT->Tasker_Interface(FUNC_POINTER_INIT); // confirgure any memory address needed as part of module init or templates
   
   #ifdef FORCE_TEMPLATE_LOADING
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
-    #ifdef ENABLE_LOG
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
     #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
@@ -599,9 +455,6 @@ void setup(void)
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
   #endif
-
-// pCONT_wif->WifiConnect();
-
 
   // Init the GPIOs
   pCONT_pins->GpioInit();
@@ -627,29 +480,6 @@ void setup(void)
   #endif
   // Used to show progress of boot in logs
   pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);
-
-
-// #ifdef ESP32
-//   // Must connect to wifi before contining on, later make this a flag
-//       //set faster until first connect
-//       pCONT_wif->connection.config_counter = 10;
-//     while(!pCONT_wif->WifiCheckIpConnected()){
-//       pCONT_wif->WifiCheck(pCONT_set->wifi_state_flag);
-//       pCONT_set->wifi_state_flag = WIFI_RESTART;
-//       Serial.println("HELD IN BOOT");
-//       delay(500);
-//     }    
-//     pCONT_wif->connection.config_counter = D_WIFI_CONFIG_SEC; //set to normal after connect success
-//     Serial.println("");
-//     Serial.println("WiFi connected.");
-//     Serial.println("IP address: ");
-//     Serial.println(WiFi.localIP());
-
-// #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-//     ArduinoOTAInit();
-// #endif
-
-// #endif
 
 }
 
@@ -709,7 +539,9 @@ void loop(void)
 
   if(mTime::TimeReached(&pCONT_set->runtime_value.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    #endif // ENABLE_LOG_LEVEL_INFO
     pCONT_sup->activity.loop_counter=0;
   }
 

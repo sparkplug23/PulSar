@@ -14,17 +14,31 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
   
   #ifdef ENABLE_DEVFEATURE_FLICKERING_TEST5
-  pCONT_iLight->_briRGB = 255;
-  flashersettings.function = 13;//FLASHER_FUNCTION_PULSE_RANDOM_ON
-  pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
-  // flashersettings.function = 1;
-  pCONT_iLight->animation.transition.rate_ms.val = 5000; // not sure if this will work? I probably have to force a check somewhere
-  pCONT_iLight->animation.transition.time_ms.val = 5000;
-  pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
-  // mixer.enabled = true;
-  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
+  // pCONT_iLight->_briRGB = 255;
+  // flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID;//FLASHER_FUNCTION_PULSE_RANDOM_ON
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
+  // pCONT_iLight->animation.transition.rate_ms.val = 400; // not sure if this will work? I probably have to force a check somewhere
+  // pCONT_iLight->animation.transition.time_ms.val = 2;
+  // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+  // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
+  // pCONT_iLight->animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
+  // pCONT_iLight->animation.palette_index_range_max_limit = 2;
+  // mixer.running_id = 10;
+  // mixer.flags.Enabled = false;
 
+
+  // pCONT_iLight->_briRGB = 255;
+  // flashersettings.function = FLASHER_FUNCTION_TESTER_ID;//FLASHER_FUNCTION_PULSE_RANDOM_ON
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
+  // pCONT_iLight->animation.transition.rate_ms.val = 400; // not sure if this will work? I probably have to force a check somewhere
+  // pCONT_iLight->animation.transition.time_ms.val = 350;
+  // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+  // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
+  // pCONT_iLight->animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
+  // pCONT_iLight->animation.palette_index_range_max_limit = 2;
+  // mixer.running_id = 10;
+  // mixer.flags.Enabled = false;
+  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
 
   /************
    * INIT SECTION * 
@@ -93,6 +107,17 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
       EveryLoop();
     break;    
     /************
+     * COMMANDS SECTION * 
+    *******************/
+    #ifdef ENABLE_DEVFEATURE_JSONPARSER
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
+    #endif // ENABLE_DEVFEATURE_JSONPARSER
+    /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MQTT
@@ -124,16 +149,553 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
   #endif // USE_MODULE_CORE_WEBSERVER
 
 } // END FUNCTION
-int8_t mRGBAnimator::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
+
+
+
+
+int8_t mRGBAnimator::CheckAndExecute_JSONCommands(){
+
+  // Check if instruction is for me
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
+
 }
+
+
+void mRGBAnimator::parse_JSONCommand(void){
+
+#ifdef ENABLE_DEVFEATURE_JSONPARSER
+  // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    #endif// ENABLE_LOG_LEVEL_INFO
+    return;
+  }  
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  char buffer[50];
+
+  if(jtok = obj[PM_JSON_ANIMATIONENABLE]){ 
+    const char* onoff = jtok.getStr();
+    uint8_t state = pCONT_sup->GetStateNumber(onoff);
+    pCONT_iLight->animation.flags.fEnable_Animation = ConvertStateNumberIfToggled(state, pCONT_iLight->animation.flags.fEnable_Animation);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+#ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  /**
+   *  Flasher function specific commands
+   * */
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_FUNCTION]){
+    if(jtok.isStr()){
+      const char* functionctr = jtok.getStr();
+      if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
+        flashersettings.function = tmp_id;      //make function "changeFlasherFunction" so then the region is automatically updated internally
+        flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
+        data_buffer.isserviced++;
+      }
+    }else
+    if(jtok.isNum()){
+      flashersettings.function = jtok.getInt();
+      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; 
+      data_buffer.isserviced++;
+    }
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer));
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_COLOUR_REFRESH_RATE]){ 
+    flashersettings.update_colour_region.refresh_secs = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_DIRECTION]){ 
+    flashersettings.flags.movement_direction = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+  
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_BRIGHTNESS_MIN]){ 
+    flashersettings.brightness_min = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MIN]){ 
+    shared_flasher_parameters.alternate_brightness_min = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MAX]){ 
+    shared_flasher_parameters.alternate_brightness_max = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_AMOUNT]){ 
+    shared_flasher_parameters.alternate_random_amount_as_percentage = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_AGED_COLOURING]){
+    pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+#endif // ENABLE_PIXEL_FUNCTION_FLASHER
+
+  /**
+   * Pixel output grouping settings
+   * */
+  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_AGED_COLOURING]){
+    uint8_t state = pCONT_sup->GetStateNumber(jtok.getStr());
+    pixel_group.flags.fEnabled = ConvertStateNumberIfToggled(state, pixel_group.flags.fEnabled);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MODE]){
+    pixel_group.flags.multiplier_mode_id = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MULTIPLIER]){ 
+    pixel_group.multiplier = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MULTIPLIER)), pixel_group.multiplier);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MAPPED_MULTIPLIER_DATA]){ 
+    if(jtok.isArray()){
+      uint8_t index = 0;
+      JsonParserArray array = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MAPPED_MULTIPLIER_DATA];
+      for(auto v : array) {
+        int val = v.getInt();
+        if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
+        editable_mapped_array_data_array[index++] = val;
+    #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
+    #endif// ENABLE_LOG_LEVEL_INFO          
+      }
+      pixel_group.mapped_array_data.length = index;
+      data_buffer.isserviced++;
+    }
+  }
+
+#ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
+    mixer.flags.Enabled = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+   
+  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
+    mixer.time_scaler = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
+    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
+    mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
+    uint8_t val = jtok.getInt();
+    LoadMixerGroupByID(val);
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+#endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+// CHANGE TO USE RELAYS INSTEAD
+  // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
+  //   const char* onoff = obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)];    
+  //   uint8_t relay_state_new = pCONT_sup->GetStateNumber(onoff);
+  //   uint8_t relay_state_current = 0;
+  //   if(relay_state_new==STATE_NUMBER_TOGGLE_ID){
+  //     // pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
+  //   }else{
+  //     // pCONT_iLight->animation.flags.fEnable_Animation = state;
+  //   }
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_EXTERNAL_POWER_ONOFF,relay_state_new);
+  //   #endif
+  //   data_buffer.isserviced++;
+  // }
+
+
+  // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
+  //   const char* onoff = obj[CFLASH(PM_JSON_ONOFF];
+  //   if(strstr(onoff,"ON")){ 
+      
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+  //     #endif
+      
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
+  //     #endif
+  //     // Add this as "SAVE" state then "LOAD" state
+  //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
+
+  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
+  //     pCONT_iLight->light_power = true;
+
+  //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
+  //     data_buffer.isserviced++;
+  //   }else if(strstr(onoff,"OFF")){
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
+  //     #endif
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
+  //     #endif
+  //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
+  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
+  //     pCONT_iLight->light_power = false;
+
+  //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
+  //     data_buffer.isserviced++;
+  //   }else{
+  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+  //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   }
+  // }
+
+  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  // parsesub_NotificationPanel(obj);
+  // #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+
+  //pCONT_iLight->animation.flags.fForceUpdate = true;
+  
+  if(data_buffer.isserviced){ //update string, move to shared place
+   
+   //add flag on this, so its not always forced
+   // SetRefreshLEDs(); // implement in 1 second 
+  }
+
+
+// #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST
+  // t_mqtthandler_status_animation.flags.SendNow = true; 
+
+
+#endif // ENABLE_DEVFEATURE_JSONPARSER
+
+}
+
+// #ifndef ENABLE_DEVFEATURE_JSONPARSER
+
+
+// int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+//   // Check if instruction is for me
+//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//     parse_JSONCommand(obj);
+//     return FUNCTION_RESULT_HANDLED_ID;
+//   }else{
+//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+//   }
+
+// }
+
+// void mRGBAnimator::parse_JSONCommand(JsonObjectConst obj){
+  
+// #ifndef USE_DEVFEATURE_DISABLE_PROGMEM_TEST
+//   int8_t tmp_id = 0;
+//   char buffer[50];
+  
+//   if(!obj[CFLASH(PM_JSON_ANIMATIONENABLE)].isNull()){ 
+//     const char* onoff = obj[CFLASH(PM_JSON_ANIMATIONENABLE)];
+//     uint8_t state = pCONT_sup->GetStateNumber(onoff);
+//     pCONT_iLight->animation.flags.fEnable_Animation = ConvertStateNumberIfToggled(state, pCONT_iLight->animation.flags.fEnable_Animation);
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//       #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+
+  
+
+
+// // RAM:   [======    ]  60.1% (used 49240 bytes from 81920 bytes)
+// // Flash: [=====     ]  49.9% (used 510528 bytes from 1023984 bytes)
+
+//   /**
+//    *  Flasher function specific commands
+//    * */
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)].isNull()){ 
+//     const char* functionctr = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
+//     if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
+//       flashersettings.function = tmp_id;      
+//       flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; // new function, then generate its 
+//       data_buffer.isserviced++;
+//     }else{
+//       flashersettings.function = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
+//       flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
+//     }
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer));
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)].isNull()){ 
+//     flashersettings.update_colour_region.refresh_secs = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)].isNull()){ 
+//     flashersettings.flags.movement_direction = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+  
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)].isNull()){ 
+//     flashersettings.brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)].isNull()){ 
+//     shared_flasher_parameters.alternate_brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)].isNull()){ 
+//     shared_flasher_parameters.alternate_brightness_max = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)].isNull()){ 
+//     shared_flasher_parameters.alternate_random_amount_as_percentage = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+// /**
+//  * 
+//  * random flags
+//  * 
+//  * **/
+
+
+//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)].isNull()){ 
+//     pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+
+//   #endif // ENABLE_PIXEL_FUNCTION_FLASHER
+
+//   /**
+//    * Pixel output grouping settings
+//    * */
+//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
+//     const char* onoff = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)];
+//     uint8_t state = pCONT_sup->GetStateNumber(onoff);
+//     pixel_group.flags.fEnabled = ConvertStateNumberIfToggled(state, pixel_group.flags.fEnabled);
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)].isNull()){ 
+//     pixel_group.flags.multiplier_mode_id = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)].isNull()){ 
+//     pixel_group.multiplier = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MULTIPLIER)), pixel_group.multiplier);
+//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].isNull()){
+//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
+//     if(obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].is<JsonArray>()){   
+//       uint8_t index = 0;
+//       JsonArrayConst array = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)];
+//       for(JsonVariantConst v : array) {
+//         int val = v.as<int>();
+//         if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
+//         editable_mapped_array_data_array[index++] = val;
+//         // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);          
+//       }
+//       pixel_group.mapped_array_data.length = index;
+//       data_buffer.isserviced++;
+//     }
+//   }
+
+//   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
+//     mixer.flags.Enabled = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
+//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+   
+//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)].isNull()){ 
+//     mixer.time_scaler = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
+//     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)].isNull()){ 
+//     mixer.run_time_duration_scaler_as_percentage = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)];
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
+//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)].isNull()){ 
+//     uint8_t val = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)];
+//     LoadMixerGroupByID(val);
+//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   }
+
+
+
+  
+//   #endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+// // CHANGE TO USE RELAYS INSTEAD
+//   // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
+//   //   const char* onoff = obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)];    
+//   //   uint8_t relay_state_new = pCONT_sup->GetStateNumber(onoff);
+//   //   uint8_t relay_state_current = 0;
+//   //   if(relay_state_new==STATE_NUMBER_TOGGLE_ID){
+//   //     // pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
+//   //   }else{
+//   //     // pCONT_iLight->animation.flags.fEnable_Animation = state;
+//   //   }
+//   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_EXTERNAL_POWER_ONOFF,relay_state_new);
+//   //   #endif
+//   //   data_buffer.isserviced++;
+//   // }
+
+
+//   // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
+//   //   const char* onoff = obj[CFLASH(PM_JSON_ONOFF];
+//   //   if(strstr(onoff,"ON")){ 
+      
+//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+//   //     #endif
+      
+//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
+//   //     #endif
+//   //     // Add this as "SAVE" state then "LOAD" state
+//   //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
+
+//   //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
+//   //     pCONT_iLight->light_power = true;
+
+//   //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
+//   //     data_buffer.isserviced++;
+//   //   }else if(strstr(onoff,"OFF")){
+//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
+//   //     #endif
+//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
+//   //     #endif
+//   //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
+//   //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
+//   //     pCONT_iLight->light_power = false;
+
+//   //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
+//   //     data_buffer.isserviced++;
+//   //   }else{
+//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+//   //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+//   //   }
+//   // }
+
+//   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+//   parsesub_NotificationPanel(obj);
+//   #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+
+//   //pCONT_iLight->animation.flags.fForceUpdate = true;
+  
+//   if(data_buffer.isserviced){ //update string, move to shared place
+   
+//    //add flag on this, so its not always forced
+//    // SetRefreshLEDs(); // implement in 1 second 
+//   }
+
+
+// #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST
+//   // t_mqtthandler_status_animation.flags.SendNow = true; 
+
+// }
+
+
+
+// #endif // ENABLE_DEVFEATURE_JSONPARSER
+
+
 
 
 /*******************************************************************************************************************
@@ -186,7 +748,8 @@ void mRGBAnimator::init(void){
 
   pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
 
-  pixel_group.flags.fEnabled = true;
+
+  pixel_group.flags.fEnabled = false;
   pixel_group.flags.multiplier_mode_id = PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
   pixel_group.multiplier = 2;
   pixel_group.mapped_array_data.values = editable_mapped_array_data_array;
@@ -1097,6 +1660,9 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
       case FLASHER_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
         SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
       break;
+      case FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID:
+        SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through();
+      break;
       case FLASHER_FUNCTION_SEQUENTIAL_ID:
         SubTask_Flasher_Animate_Function_Sequential();
       break;
@@ -1124,6 +1690,9 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
       case FLASHER_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
         SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
       break;
+      // case FLASHER_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID:
+      //   SubTask_Flasher_Animate_Function_Slow_Glow_Showing_Multiples_Of_Colours();
+      // break;
 
 //new pastel random ie change pixel colour 90-100% saturation with slow blend time and randomly
       // case FLASHER_FUNCTION_FADE_GRADIENT_ID:
@@ -2347,8 +2916,8 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
       uint16_t rotate_amount = 1;
       // Store last value
       uint16_t last_index = ledout.pattern[ledout.length-1];
-      Serial.println();
-      for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
+      // Serial.println();
+      // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
 
       // shift all values by 1
       for(ledout.index=0;ledout.index<ledout.length/2-1;ledout.index++){ 
@@ -2359,7 +2928,7 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
       }
       // Move into first
 
-      for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
+      // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
 
       // Use existing pattern and rotate it
       // for(ledout.index=0;ledout.index<length_local;ledout.index++){ 
@@ -2412,9 +2981,6 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
 
             // For random, desired pixel from map will also be random
             desired_pixel = random(0,pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
-
-            
-            // if(++desired_pixel>=pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr)){desired_pixel=0;}
             
             RgbTypeColor colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
 
@@ -2520,7 +3086,9 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
       // Get active pixels in map
       uint16_t active_pixels_in_map = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //width 2
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "active_pixels_in_map=%d"),active_pixels_in_map);
+    #endif// ENABLE_LOG_LEVEL_INFO
 
       // Move across map
       int16_t pixel_position = -2;
@@ -2542,7 +3110,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             #endif
           }else{
             colour.R = 1;colour.R = 2;colour.R = 3;
-            Serial.println("colour.R = 1;colour.R = 2;colour.R = 3;");
+            // Serial.println("colour.R = 1;colour.R = 2;colour.R = 3;");
             animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -2555,7 +3123,9 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
         }
 
       }
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "return; //end early %d"),pixel_position);
+    #endif// ENABLE_LOG_LEVEL_INFO
       break;
       // return;
     }
@@ -2643,7 +3213,9 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "FadeToNewColour"));
   #endif
   
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("RgbcctColor=%d,%d,%d,%d,%d"),targetColor.R,targetColor.G,targetColor.B,targetColor.WW,targetColor.WC);
+    #endif// ENABLE_LOG_LEVEL_INFO
   
   if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
     _time_to_newcolour /= 1000;// ms to seconds
@@ -3432,273 +4004,6 @@ void mRGBAnimator::EveryLoop(){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
-
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand(obj);
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-void mRGBAnimator::parse_JSONCommand(JsonObjectConst obj){
-  
-  int8_t tmp_id = 0;
-  char buffer[50];
-  
-  if(!obj[CFLASH(PM_JSON_ANIMATIONENABLE)].isNull()){ 
-    const char* onoff = obj[CFLASH(PM_JSON_ANIMATIONENABLE)];
-    uint8_t state = pCONT_sup->GetStateNumber(onoff);
-    pCONT_iLight->animation.flags.fEnable_Animation = ConvertStateNumberIfToggled(state, pCONT_iLight->animation.flags.fEnable_Animation);
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-      #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)].isNull()){ 
-    const char* functionctr = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
-    if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
-      flashersettings.function = tmp_id;      
-      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; // new function, then generate its 
-      data_buffer.isserviced++;
-    }else{
-      flashersettings.function = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
-      flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
-    }
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherRegionName(buffer));
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-
-// RAM:   [======    ]  60.1% (used 49240 bytes from 81920 bytes)
-// Flash: [=====     ]  49.9% (used 510528 bytes from 1023984 bytes)
-
-  /**
-   *  Flasher function specific commands
-   * */
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)].isNull()){ 
-    flashersettings.function = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_FUNCTION)), flashersettings.function);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)].isNull()){ 
-    flashersettings.update_colour_region.refresh_secs = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)].isNull()){ 
-    flashersettings.flags.movement_direction = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-  
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)].isNull()){ 
-    flashersettings.brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)].isNull()){ 
-    shared_flasher_parameters.alternate_brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)].isNull()){ 
-    shared_flasher_parameters.alternate_brightness_max = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)].isNull()){ 
-    shared_flasher_parameters.alternate_random_amount_as_percentage = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-/**
- * 
- * random flags
- * 
- * **/
-
-
-  if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)].isNull()){ 
-    pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-
-  #endif // ENABLE_PIXEL_FUNCTION_FLASHER
-
-  /**
-   * Pixel output grouping settings
-   * */
-  if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
-    const char* onoff = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)];
-    uint8_t state = pCONT_sup->GetStateNumber(onoff);
-    pixel_group.flags.fEnabled = ConvertStateNumberIfToggled(state, pixel_group.flags.fEnabled);
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-  if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)].isNull()){ 
-    pixel_group.flags.multiplier_mode_id = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-  if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)].isNull()){ 
-    pixel_group.multiplier = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MULTIPLIER)), pixel_group.multiplier);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].isNull()){
-    // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
-    if(obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].is<JsonArray>()){   
-      uint8_t index = 0;
-      JsonArrayConst array = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)];
-      for(JsonVariantConst v : array) {
-        int val = v.as<int>();
-        if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
-        editable_mapped_array_data_array[index++] = val;
-        // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);          
-      }
-      pixel_group.mapped_array_data.length = index;
-      data_buffer.isserviced++;
-    }
-  }
-
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
-    mixer.flags.Enabled = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-   
-  if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)].isNull()){ 
-    mixer.time_scaler = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)].isNull()){ 
-    mixer.run_time_duration_scaler_as_percentage = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)];
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-  if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)].isNull()){ 
-    uint8_t val = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)];
-    LoadMixerGroupByID(val);
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
-
-
-
-  
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
-
-// CHANGE TO USE RELAYS INSTEAD
-  // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
-  //   const char* onoff = obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)];    
-  //   uint8_t relay_state_new = pCONT_sup->GetStateNumber(onoff);
-  //   uint8_t relay_state_current = 0;
-  //   if(relay_state_new==STATE_NUMBER_TOGGLE_ID){
-  //     // pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
-  //   }else{
-  //     // pCONT_iLight->animation.flags.fEnable_Animation = state;
-  //   }
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_EXTERNAL_POWER_ONOFF,relay_state_new);
-  //   #endif
-  //   data_buffer.isserviced++;
-  // }
-
-
-  // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
-  //   const char* onoff = obj[CFLASH(PM_JSON_ONOFF];
-  //   if(strstr(onoff,"ON")){ 
-      
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-  //     #endif
-      
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
-  //     #endif
-  //     // Add this as "SAVE" state then "LOAD" state
-  //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
-
-  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
-  //     pCONT_iLight->light_power = true;
-
-  //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
-  //     data_buffer.isserviced++;
-  //   }else if(strstr(onoff,"OFF")){
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-  //     #endif
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
-  //     #endif
-  //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
-  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-  //     pCONT_iLight->light_power = false;
-
-  //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
-  //     data_buffer.isserviced++;
-  //   }else{
-  //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-  //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   }
-  // }
-
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  parsesub_NotificationPanel(obj);
-  #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
-
-  //pCONT_iLight->animation.flags.fForceUpdate = true;
-  
-  if(data_buffer.isserviced){ //update string, move to shared place
-   
-   //add flag on this, so its not always forced
-   // SetRefreshLEDs(); // implement in 1 second 
-  }
-
-  // t_mqtthandler_status_animation.flags.SendNow = true; 
-
-}
 
 
 

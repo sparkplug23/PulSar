@@ -28,7 +28,7 @@ const uint8_t kIFan03Speed[MAX_FAN_SPEED +2] = { 0x00, 0x01, 0x03, 0x04, 0x05, 0
 const uint8_t kIFan03Sequence[MAX_FAN_SPEED][MAX_FAN_SPEED] = {{0, 2, 2, 2}, {0, 1, 2, 4}, {1, 1, 2, 5}, {4, 4, 5, 3}};
 
 
-DEFINE_PROGMEM_CTR(kListFanControls) "Light|Off|Low|Medium|High";
+DEFINE_PGM_CTR(kListFanControls) "Light|Off|Low|Medium|High";
 
 class mSonoffIFan {
 

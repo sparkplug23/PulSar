@@ -22,7 +22,7 @@
 // const uint8_t kIFan03Sequence[MAX_FAN_SPEED][MAX_FAN_SPEED] = {{0, 2, 2, 2}, {0, 1, 2, 4}, {1, 1, 2, 5}, {4, 4, 5, 3}};
 
 
-DEFINE_PROGMEM_CTR(kListFanControls_pwm) "Off|Low|Medium|High";
+DEFINE_PGM_CTR(kListFanControls_pwm) "Off|Low|Medium|High";
 
 class mPWMFan {
 

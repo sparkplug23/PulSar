@@ -26,7 +26,9 @@ int8_t mTime::Tasker(uint8_t function){
       if(uptime.seconds_nonreset<10*60){ show_time_rate = 10; } // first 10 minutes
 
       if(mTime::TimeReached(&tSavedUptime,show_time_rate*1000)){ // 10 secs then 60 secs
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "%s"),uptime.hhmmss_ctr);    
+    #endif// ENABLE_LOG_LEVEL_INFO
       }
 
       if(mTime::TimeReached(&testtime,1)){ // 10 secs then 60 secs
@@ -86,7 +88,9 @@ int8_t mTime::Tasker(uint8_t function){
       char message[50];
       memset(message,0,sizeof(message));
       sprintf_P(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"),pCONT->mt->uptime.hhmmss_ctr);
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
+    #endif// ENABLE_LOG_LEVEL_INFO
       pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
     }
     break;
@@ -295,12 +299,14 @@ void mTime::UpdateStoredRTCVariables(void){
   mtime.Wseconds = (mtime.Wday*SEC2DAY)+(mtime.hour*SEC2HOUR)+(mtime.minute*SEC2MIN)+(mtime.second);
   mtime.Dseconds = (mtime.hour*SEC2HOUR)+(mtime.minute*SEC2MIN)+(mtime.second);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,
     PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
     mtime.Mday,mtime.month,mtime.year,
     mtime.Wday,mtime.hour,mtime.minute,mtime.second,
     mtime.Dseconds,mtime.Wseconds,mtime.Yseconds
   ); 
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   memset(mtime.hhmmss_ctr,0,sizeof(mtime.hhmmss_ctr));
   timeClient->getFormattedTime(mtime.hhmmss_ctr);
@@ -377,7 +383,9 @@ uint32_t mTime::UpTime(void)
 
 void mTime::ResetRebootCounter(){
   
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPTIME D_ERROR_UNSUPPORTED "\"rebootinfo\"" ));
+    #endif// ENABLE_LOG_LEVEL_INFO
   // rebootinfo.count = 0;
   
   //  Settings.rebootcounter_all = 0; //RESET
@@ -538,11 +546,13 @@ uint8_t mTime::CheckBetween_Week_DateTimes(datetime_t* start, datetime_t* end){
   int32_t time_until_start = start_sow-mtime.Wseconds;
   int32_t time_until_end = end_sow-mtime.Wseconds;
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Week_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
     start->hour,start->minute,start->second,time_until_start,
     mtime.Dseconds,
     time_until_end,end->hour,end->minute,end->second
   ); 
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   if((start_sow < mtime.Wseconds)&&(mtime.Wseconds < end_sow)){
     return 1;
@@ -564,6 +574,7 @@ uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
 
   // #ifdef SERIAL_DEBUG_HIGH_LEVEL
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
       start->hour,start->minute,start->second,time_until_start,
       mtime.Dseconds,
@@ -574,6 +585,7 @@ uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
       start_sod,mtime.Dseconds,(start_sod < mtime.Dseconds?1:0),
       mtime.Dseconds,end_sod,(mtime.Dseconds < end_sod)?1:0
     );
+    #endif// ENABLE_LOG_LEVEL_INFO
     
    if((start_sod < mtime.Dseconds)&&(mtime.Dseconds < end_sod)){ //now>start AND now<END
      return 1;
@@ -597,6 +609,7 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
 
   // #ifdef SERIAL_DEBUG_HIGH_LEVEL
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimesShort " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
       start->hour,start->minute,start->second,time_until_start,
       mtime.Dseconds,
@@ -607,6 +620,7 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
       start_sod,mtime.Dseconds,(start_sod < mtime.Dseconds?1:0),
       mtime.Dseconds,end_sod,(mtime.Dseconds < end_sod)?1:0
     );
+    #endif// ENABLE_LOG_LEVEL_INFO
     
    if((start_sod < mtime.Dseconds)&&(mtime.Dseconds < end_sod)){ //now>start AND now<END
      return 1;

@@ -240,7 +240,7 @@ void mRGBAnimator::init_mixer_defaults(){
   mixer.group[flasher_id].pixel_multiplier_enabled = true;
   mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
   mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
+  mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_11_ID;
 
   // Group 5 "Random, rows, faster"
   mixer.group[flasher_id].flags.enable_force_preset_brightness_scaler = true;
@@ -259,7 +259,7 @@ void mRGBAnimator::init_mixer_defaults(){
   mixer.group[flasher_id].pixel_multiplier_enabled = true;
   mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
   mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
+  mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_11_ID;
 
   // Group 6 "Static/Inorder, rows, few  colours"
   mixer.group[flasher_id].flags.enable_force_preset_brightness_scaler = true;
@@ -362,6 +362,27 @@ void mRGBAnimator::init_mixer_defaults(){
   mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
   mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
 
+  // Group 10 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
+  mixer.group[flasher_id].flags.enable_force_preset_brightness_scaler = true;
+  mixer.group[flasher_id].pixels_to_update_as_percentage = 100; 
+  mixer.group[flasher_id].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+  mixer.group[flasher_id].time_on_secs_decounter = -1;
+  mixer.group[flasher_id].starttime = {0, 17, 0, 0};
+  mixer.group[flasher_id].endtime   = {0, 18, 0, 0};
+  mixer.group[flasher_id].enable_skip_restricted_by_time = 0;
+  mixer.group[flasher_id].isenabled = false;
+  mixer.group[flasher_id].transition.time = 200;
+  mixer.group[flasher_id].transition.rate = 400;
+  mixer.group[flasher_id].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+  mixer.group[flasher_id].run_time_duration_sec = 60;
+  mixer.group[flasher_id].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+  mixer.group[flasher_id].pixel_multiplier_enabled = false;
+  mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+  mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID;
+  mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
+
+
+
   // Group 10 "where palette 5 has off colours too"
   mixer.group[flasher_id].flags.enable_force_preset_brightness_scaler = true;
   mixer.group[flasher_id].pixels_to_update_as_percentage = 30; 
@@ -382,54 +403,6 @@ void mRGBAnimator::init_mixer_defaults(){
   mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_05_ID;
 
 
-  // Group 1
-  // mixer.group[flasher_id].time_on_secs_decounter = -1;
-  // mixer.group[flasher_id].starttime = {0, 17, 0, 0};
-  // mixer.group[flasher_id].endtime   = {0, 18, 0, 0};
-  // mixer.group[flasher_id].enable_skip_restricted_by_time = 0;
-  // mixer.group[flasher_id].isenabled = true;
-  // mixer.group[flasher_id].transition.time = 509;
-  // mixer.group[flasher_id].transition.rate = 509;
-  // mixer.group[flasher_id].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  // mixer.group[flasher_id].run_time_duration_sec = 60;
-  // mixer.group[flasher_id].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  // mixer.group[flasher_id].pixel_multiplier_enabled = false;
-  // mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
-  // mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID;
-  // mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
-
-// Group 1
-  // mixer.group[flasher_id].time_on_secs_decounter = -1;
-  // mixer.group[flasher_id].starttime = {0, 17, 0, 0};
-  // mixer.group[flasher_id].endtime   = {0, 18, 0, 0};
-  // mixer.group[flasher_id].enable_skip_restricted_by_time = 0;
-  // mixer.group[flasher_id].isenabled = true;
-  // mixer.group[flasher_id].transition.time = 2010;
-  // mixer.group[flasher_id].transition.rate = 2010;
-  // mixer.group[flasher_id].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  // mixer.group[flasher_id].run_time_duration_sec = 60;
-  // mixer.group[flasher_id].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  // mixer.group[flasher_id].pixel_multiplier_enabled = false;
-  // mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
-  // mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID;
-  // mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_10_ID;
-
-
-  // Group 1
-  // mixer.group[flasher_id].time_on_secs_decounter = -1;
-  // mixer.group[flasher_id].starttime = {0, 17, 0, 0};
-  // mixer.group[flasher_id].endtime   = {0, 18, 0, 0};
-  // mixer.group[flasher_id].enable_skip_restricted_by_time = 0;
-  // mixer.group[flasher_id].isenabled = true;
-  // mixer.group[flasher_id].transition.time = 1011;
-  // mixer.group[flasher_id].transition.rate = 10011;
-  // mixer.group[flasher_id].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  // mixer.group[flasher_id].run_time_duration_sec = 60;
-  // mixer.group[flasher_id].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  // mixer.group[flasher_id].pixel_multiplier_enabled = false;
-  // mixer.group[flasher_id].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  // mixer.group[flasher_id].flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_ID;
-  // mixer.group[flasher_id++].palette_id = pCONT_iLight->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
   mixer.enabled_mixer_count = flasher_id-1;
   AddLog_P(LOG_LEVEL_INFO, PSTR("enabled_mixer_count=%d"),mixer.enabled_mixer_count);

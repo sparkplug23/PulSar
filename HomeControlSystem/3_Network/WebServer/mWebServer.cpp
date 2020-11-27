@@ -97,11 +97,16 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
       pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
     }
     reset_web_log_flag = false;
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
+    #endif// ENABLE_LOG_LEVEL_INFO
     pWebServer->begin();
   }
   if(webserver_state != type){
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
+    
+    #endif// ENABLE_LOG_LEVEL_INFO
     // pCONT_set->rules_flag.http_init = 1;
   }
   if(type){ webserver_state = type; }
@@ -264,6 +269,8 @@ void mWebServer::WebPage_Root_AddHandlers(){
     Serial.println("onRequestBody " "/json_command.json" );
     if ((request->url() == "/json_command.json") && (request->method() == HTTP_POST))
     {
+      
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
         const size_t        JSON_DOC_SIZE   = 512U;
         DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
         
@@ -285,6 +292,8 @@ void mWebServer::WebPage_Root_AddHandlers(){
         }
         
         request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
+        
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
     }
   });
 
@@ -479,22 +488,30 @@ void mWebServer::StopWebserver(void)
   //if(webserver_state) {
     pWebServer->reset(); // asyncedit
     webserver_state = HTTP_OFF;
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
+    #endif// ENABLE_LOG_LEVEL_INFO
   //}
 }
 
 void mWebServer::WifiManagerBegin(bool reset_only)
 {
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "mWebServer::WifiManagerBegin"));
+    #endif// ENABLE_LOG_LEVEL_INFO
 
   // setup AP
   if (!pCONT_set->global_state.wifi_down) {
     WiFi.mode(WIFI_AP_STA);
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
+    #endif// ENABLE_LOG_LEVEL_INFO
   } else {
     WiFi.mode(WIFI_AP);
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 
   StopWebserver();
@@ -750,7 +767,7 @@ bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 {
   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
   if ((WifiIsInManagerMode())){//} && !pCONT_sup->ValidIpAddress(request->hostHeader().c_str())) {
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
     // request->sendHeader(F("Location"), String("http://") + request->client().localIP().toString(), true);
 
 

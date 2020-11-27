@@ -12,6 +12,11 @@
 // #endif //  USE_MODULE_LIGHTS_ADDRESSABLE 
 
 
+#ifdef ENABLE_DEVFEATURE_JSONPARSER
+#include "JsonParser.h"
+#endif // ENABLE_DEVFEATURE_JSONPARSER
+
+
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef RgbColor RgbTypeColor;
 #elif defined(PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL)
@@ -423,6 +428,10 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       uint8_t mode_id; //update mode
       //palette - stores colour patterns for single led setting
       uint8_t palette_id; 
+      // flag that limits the range of the pixel colour map
+      // 0 = not to be used
+      uint8_t palette_index_range_max_limit = 0; 
+      uint8_t palette_index_range_as_percentage = 0;
 
       ANIMATION_FLAGS flags;
 
@@ -608,17 +617,17 @@ void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour, 
 void Template_Load();
 
 
-int8_t Tasker(uint8_t function, JsonObjectConst obj);
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-// void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
-    
-// void parsesub_CheckAll(JsonObjectConst obj);
-// void parsesub_Settings(JsonObjectConst obj);
-void parse_JSONCommand(JsonObjectConst obj);
+    // #ifdef ENABLE_DEVFEATURE_JSONPARSER
+    int8_t CheckAndExecute_JSONCommands(void);
+    void parse_JSONCommand(void);
+    // #endif
+    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
+    // int8_t Tasker(uint8_t function, JsonObjectConst obj);
+    // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    // void parse_JSONCommand(JsonObjectConst obj);
+    // #endif
 
-
-
-
+  
     int8_t Tasker_Web(uint8_t function);
     #include "6_Lights/_Interface/mInterfaceLight_Web.h"
 
@@ -627,8 +636,6 @@ void parse_JSONCommand(JsonObjectConst obj);
     int8_t Tasker(uint8_t function);
     void Init(void);
 
-    void parse_JSONCommand(void);
-    // void parsesub_ModeManual(JsonObjectConst obj);
     
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
   bool     _ct_rgb_linked = true;
@@ -772,14 +779,14 @@ void SubTask_AutoOff();
 
   uint16_t wakeup_counter = 0;
 
-  enum COLOUR_IDS{
-    COLOUR_RED_ID=0,
-    COLOUR_GREEN_ID,
-    COLOUR_BLUE_ID,
-    COLOUR_WHITE_ID,
-    COLOUR_WARM_WHITE_ID,
-    COLOUR_LENGTH_ID
-  };
+  // enum COLOUR_IDS{
+  //   COLOUR_RED_ID=0,
+  //   COLOUR_GREEN_ID,
+  //   COLOUR_BLUE_ID,
+  //   COLOUR_WHITE_ID,
+  //   COLOUR_WARM_WHITE_ID,
+  //   COLOUR_LENGTH_ID
+  // };
 
 uint32_t tSavedTest= 0;
 uint32_t tSavedTest2 = 0;
@@ -1095,6 +1102,8 @@ uint8_t getColorMode();
     void init_ColourPalettes_Christmas_08();
     void init_ColourPalettes_Christmas_09();
     void init_ColourPalettes_Christmas_10();
+    void init_ColourPalettes_Christmas_11();
+    void init_ColourPalettes_Christmas_12();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1169,6 +1178,8 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_CHRISTMAS_08_ID,
     PALETTELIST_STATIC_CHRISTMAS_09_ID,
     PALETTELIST_STATIC_CHRISTMAS_10_ID,
+    PALETTELIST_STATIC_CHRISTMAS_11_ID,
+    PALETTELIST_STATIC_CHRISTMAS_12_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
 
@@ -1261,6 +1272,8 @@ uint8_t getColorMode();
       PALETTE christmas_08;
       PALETTE christmas_09;
       PALETTE christmas_10;
+      PALETTE christmas_11;
+      PALETTE christmas_12;
     }palettelist;
 
 
@@ -1271,34 +1284,25 @@ uint8_t getColorMode();
 
     void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, uint8_t* colour_ids, uint8_t colour_ids_len);
 
-
-  const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer, uint8_t buflen);
+    const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetPaletteFriendlyNameByID(uint8_t id, char* name = nullptr, uint8_t name_size= 0);    
 
-      uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr);
-      HsbColor GetHsbColour(uint8_t id);
+    uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit = 0);
+    HsbColor GetHsbColour(uint8_t id);
+      
+    void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
 
-        // RgbTypeColor GetColourFromPalette(
-        //   PALETTELIST::PALETTE *ptr, 
-        //   uint16_t pixel_num, int16_t* pixel_position);//, 
-        //   // int32_t  *pixel_position);80
-        
-void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
+              
+    RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position = nullptr);
 
-          
-RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position = nullptr);
-
-          PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
-
+    PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
           
     void setdefault_PresetColourPalettes_UserFill(uint8_t id);
     void init_PresetColourPalettes_UserFill(uint8_t id);
     void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, const uint8_t* colour_ids, const uint8_t colour_ids_len); //declare
 
     int8_t CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr);
-  void SetPaletteListPtrFromID(uint8_t id);
-
-
+    void SetPaletteListPtrFromID(uint8_t id);
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
@@ -1625,3 +1629,15 @@ RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, 
 // // Note: you can query vaules from this singleton. But to change values,
 // //   use the LightController - changing this object will have no effect on actual 
 // //
+
+
+
+/**
+{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
+{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
+{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
+{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
+{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate":1},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate_ms":1000},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
+*/

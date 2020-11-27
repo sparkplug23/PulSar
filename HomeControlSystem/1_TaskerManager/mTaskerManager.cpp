@@ -514,7 +514,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
   // Serial.printf("Tasker_Interface %d %d\n\r", function, target_tasker); Serial.flush();
 
   if(target_tasker){
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 
   // Serial.printf("Tasker_Interface2 %d %d\n\r", function, target_tasker); Serial.flush();
@@ -523,16 +525,22 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
   if(function==FUNC_CHECK_POINTERS){
     // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%s"),GetTaskName(function));
     if(!CheckPointersPass()){
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "CheckPointers FAILED!!"));
+    #endif// ENABLE_LOG_LEVEL_INFO
       return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID;
     }else{
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "CheckPointers PASSED"));
+    #endif// ENABLE_LOG_LEVEL_INFO
       return FUNCTION_RESULT_SUCCESS_ID;
     }
   }else
   if(function==FUNC_PRE_INIT){
     InitClassList();
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "FUNC_PRE_INIT  GetClassCount %d"),module_settings.count);
+    #endif// ENABLE_LOG_LEVEL_INFO
   }
 
   DEBUG_LINE;
@@ -813,12 +821,16 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     // }
 
     if(target_tasker!=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+    #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
     // Special flag that can be set to end interface ie event handled, no need to check others
     if(fExitTaskerWithCompletion){fExitTaskerWithCompletion=false;
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+    #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
     
@@ -859,6 +871,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 }
 
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 // JsonObjectConst  basic 
 int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker){
 
@@ -1017,7 +1030,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1
         case D_MODULE_DRIVERS_HBRIDGE_ID:         result = mdhb->Tasker(function); break;
       #endif
       #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-        case D_MODULE_LIGHTS_ADDRESSABLE_ID:        result = mrgbani->Tasker(function, param1); 
+        case D_MODULE_LIGHTS_ADDRESSABLE_ID:        
+        
+    #ifndef ENABLE_DEVFEATURE_JSONPARSER
+    result = mrgbani->Tasker(function, param1); 
+    #endif // ENABLE_DEVFEATURE_JSONPARSER
         break;
       #endif
       #ifdef D_MODULE_LIGHTS_PWM_ID
@@ -1027,7 +1044,13 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1
 
 
       #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-        case D_MODULE_LIGHTS_INTERFACE_ID:  result = mil->Tasker(function, param1); break;
+        case D_MODULE_LIGHTS_INTERFACE_ID:  
+        
+    #ifndef ENABLE_DEVFEATURE_JSONPARSER
+    result = mil->Tasker(function, param1);
+     
+    #endif // ENABLE_DEVFEATURE_JSONPARSER
+     break;
       #endif
       #ifdef D_MODULE_DRIVERS_ENERGY_ID
         case D_MODULE_DRIVERS_ENERGY_ID:   result = mdenergy->Tasker(function); break;
@@ -1088,6 +1111,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1
 
 }
 
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 // Switch case should be faster than getext progmem
 // Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way

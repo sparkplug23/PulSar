@@ -217,8 +217,11 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
   // Read into local
   memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("MODULE_TEMPLATE READ = \"%s\""), buffer);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
   DynamicJsonDocument doc(progmem_size);
   DeserializationError error = deserializeJson(doc, buffer);
 
@@ -241,6 +244,8 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
   // JsonObject obj = doc.as<JsonObject>();
 
   ParseModuleTemplate(obj);
+  
+#endif // ENABLE_DEVFEATURE_JSONPARSER
 
 }
 
@@ -280,16 +285,21 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else if(strcmp(c,"16")==0){ pin = 16; }
   else{
     pin = -1;
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
   }
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
 
+    #endif // ENABLE_LOG_LEVEL_INFO
   return pin;
 
 }
 
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 void mHardwarePins::ParseModuleTemplate(JsonObjectConst obj){
 
   // // StaticJsonDocument<MODULE_TEMPLATE_SIZE> doc;
@@ -334,7 +344,7 @@ void mHardwarePins::ParseModuleTemplate(JsonObjectConst obj){
     
     // Array of numbers (0-255)
     uint8_t pin_num_count = 0;
-    JsonArrayConst array = obj[F("GPIO")];
+    JsonArrayConst array = obj["GPIO"];
     for(JsonVariantConst v : array){
         int gpio_function_id = v.as<int>();
         // FULL pin list
@@ -427,6 +437,7 @@ void mHardwarePins::ParseModuleTemplate(JsonObjectConst obj){
   DEBUG_LINE;
 
 }
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 // bool mHardwarePins::JsonTemplate(const char* dataBuf)
 // {
@@ -720,7 +731,9 @@ void mHardwarePins::ModuleGpios(myio *gp)
   uint8_t src[sizeof(mycfgio)];
   if (USER_MODULE == pCONT_set->Settings.module) {
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ModuleGpios memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   } else {
     memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
   }
@@ -758,7 +771,9 @@ DEBUG_LINE;
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
   } else {
 DEBUG_LINE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
 AddLog_P(LOG_LEVEL_DEBUG,PSTR("&kModules[module_id] %d"),module_id);
+    #endif // ENABLE_LOG_LEVEL_INFO
     memcpy_P(&src, &kModules[module_id].gp, sizeof(mycfgio));
   }
   // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
@@ -933,20 +948,27 @@ void mHardwarePins::GpioInit(void)
 
 // delay(2000);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MODULE "GpioInit"));
+  
+    #endif // ENABLE_LOG_LEVEL_INFO
   uint8_t mpin;
 
   /**
    * Correcting for invalid module
    * */
   if (!ValidModule(pCONT_set->Settings.module)) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_MODULE "!ValidModule"));
+    #endif ENABLE_LOG_LEVEL_INFO
     uint8_t module = MODULE;
     if (!ValidModule(MODULE)) { module = MODULE_NODEMCU_ID; }
     pCONT_set->Settings.module = module;
     pCONT_set->Settings.last_module = module;
   }else{
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule"));
+    #endif ENABLE_LOG_LEVEL_INFO
   }
   SetModuleType();
 
@@ -962,7 +984,9 @@ void mHardwarePins::GpioInit(void)
    * */
   for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template2.hardware.gp); i++) {
     if(!ValidUserGPIOFunction(pCONT_set->Settings.user_template2.hardware.gp.io,i)){
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
+    #endif // ENABLE_LOG_LEVEL_INFO
       pCONT_set->Settings.user_template2.hardware.gp.io[i] = GPIO_USER_ID;  // Fix not supported sensor ids in template    }
     }
   }
@@ -973,17 +997,23 @@ void mHardwarePins::GpioInit(void)
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(pCONT_set->Settings.module_pins.io,i)){
       pCONT_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+    #endif // ENABLE_LOG_LEVEL_INFO
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = Settings.module_pins.io[%d]"),i);
+    #endif // ENABLE_LOG_LEVEL_INFO
     }
     // Set any pins set in template
     if ((def_gp.io[i] > GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) {
       pCONT_set->my_module.io[i] = def_gp.io[i];
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
+    #endif // ENABLE_LOG_LEVEL_INFO
     }
     // else{
     //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "ELSE my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
@@ -1017,7 +1047,9 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
     mpin = ValidPin(i, pCONT_set->my_module.io[i]);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     if (mpin) {
 
@@ -1025,7 +1057,9 @@ void mHardwarePins::GpioInit(void)
       if ((mpin >= GPIO_SWT1_NP_ID) && (mpin < (GPIO_SWT1_NP_ID + MAX_SWITCHES))) {
         pCONT->mswh->SwitchPullupFlag(mpin - GPIO_SWT1_NP_ID);
         mpin -= (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
+    #endif // ENABLE_LOG_LEVEL_INFO
       }else
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
@@ -1079,7 +1113,9 @@ void mHardwarePins::GpioInit(void)
       if (mpin){ 
         pCONT_set->pin[mpin] = i;
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
       }
     #endif
@@ -1146,7 +1182,9 @@ void mHardwarePins::GpioInit(void)
     uint32_t mpin = ValidPin(i, pCONT_set->my_module.io[i]);
     
   DEBUG_LINE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mpin %d"), i, mpin);
+    #endif // ENABLE_LOG_LEVEL_INFO
     if (((i < 6) || (i > 11)) && (0 == mpin)) {  // Skip SPI flash interface
 
       // if((i == 2)&&(pCONT_set->))
@@ -1180,7 +1218,9 @@ void mHardwarePins::GpioInit(void)
   pCONT_set->devices_present = 0;
   pCONT_set->Settings.light_settings.type = 0;//LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
 
 

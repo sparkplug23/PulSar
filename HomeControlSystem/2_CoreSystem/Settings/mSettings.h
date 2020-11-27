@@ -44,7 +44,6 @@ extern struct DATA_BUFFER data_buffer;
 #include "2_CoreSystem/Support/mSupport.h"
 #include "2_CoreSystem/Logging/mLogging.h"
 
-#include <ArduinoJson.h>
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/Languages/mLanguage.h"
@@ -148,8 +147,8 @@ enum DATABUILDER_JSON_LEVEL{ //in order of importance
   JSON_LEVEL_DEBUG // Share extra info relating to the generation of the json
 };
 
-DEFINE_PROGMEM_CTR(PM_JSON_LEVEL_NONE_CTR)        "None";
-DEFINE_PROGMEM_CTR(PM_JSON_LEVEL_IFCHANGED_CTR)   "IfChanged";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_NONE_CTR)        "None";
+DEFINE_PGM_CTR(PM_JSON_LEVEL_IFCHANGED_CTR)   "IfChanged";
   
 
 enum SWITCH_SPLIT_TASK_IDS{
@@ -443,6 +442,8 @@ enum XsnsFunctions {
   // Commands
   FUNC_COMMAND, FUNC_COMMAND_SENSOR, FUNC_COMMAND_DRIVER, FUNC_JSON_COMMAND, FUNC_JSON_COMMAND_OBJECT, 
   FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
+  FUNC_JSON_COMMAND_CHECK_TOPIC_ID,
+  FUNC_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
   // Wifi 
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
@@ -580,8 +581,10 @@ class mSettings{
     // int8_t Tasker2(uint8_t function, T param1);
     
     
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 int8_t Tasker(uint8_t function, JsonObjectConst obj);  
 int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 
     void init(void);
@@ -1478,7 +1481,10 @@ typedef union {
 
 struct COMMAND_JSON{
   COMMAND_JSON_FLAG flag;
+  
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
   JsonObjectConst json;
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 }command;
 
@@ -1689,7 +1695,9 @@ struct FIRMWARE_VERSION{
   uint8_t fCurrentVersionNotSupported = false;
 }firmware_version;
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 void parse_JSONCommand(JsonObjectConst _obj);
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 // void parsesub_SystemCommand(JsonObjectConst _obj);
 // void parsesub_FirmwareInformation(JsonObjectConst _obj);

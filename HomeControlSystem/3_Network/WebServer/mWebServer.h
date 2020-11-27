@@ -21,7 +21,9 @@ typedef struct  FREEMEM_HANDLER{
 // #include "3_Network/WebServer/WebPages_Progmem.h"
 #include "html_ui.h"
 
+#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 #include <ArduinoJson.h>
+#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "1_TaskerManager/mTaskerManager.h"
 
 
@@ -134,22 +136,22 @@ const char HTTP_TABLE100[] PROGMEM =
 const char HTTP_TABLEEND[] PROGMEM =
   "</table>";
 
-const char HTTP_MSG_SLIDER_GRADIENT[] PROGMEM =
-  "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
-  "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc2(\\\"%c\\\",%d,value)'>"
-  "</div>";
-const char HTTP_MSG_SLIDER_GRADIENT2[] PROGMEM =
-  "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
-  "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc2(\\\"%s\\\",%d,value)'>"
-  "</div>";
-const char HTTP_MSG_SLIDER_GRADIENT3[] PROGMEM =
-  "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
-  "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc3(\\\"%s\\\",value)'>"
-  "</div>";
+// const char HTTP_MSG_SLIDER_GRADIENT[] PROGMEM =
+//   "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
+//   "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc2(\\\"%c\\\",%d,value)'>"
+//   "</div>";
+// const char HTTP_MSG_SLIDER_GRADIENT2[] PROGMEM =
+//   "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
+//   "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc2(\\\"%s\\\",%d,value)'>"
+//   "</div>";
+// const char HTTP_MSG_SLIDER_GRADIENT3[] PROGMEM =
+//   "<div id='%s' class='r' style='background-image:linear-gradient(to right,%s,%s);'>"
+//   "<input id='sl%d' type='range' min='%d' max='%d' value='%d' onchange='lc3(\\\"%s\\\",value)'>"
+//   "</div>";
 const char HTTP_MSG_SLIDER_TITLE_JUSTIFIED[] PROGMEM =
   "<div><span class='p'>%s</span><span class='q'>%s</span></div>";
-const char HTTP_BTN_MAIN_VARIABLE_ACTION_NAME[] PROGMEM =
-  "<p><form action='%s' method='get'><button>%s</button></form></p>";
+// const char HTTP_BTN_MAIN_VARIABLE_ACTION_NAME[] PROGMEM =
+//   "<p><form action='%s' method='get'><button>%s</button></form></p>";
 
 
 DEFINE_PGM_CTR(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY)
@@ -174,324 +176,324 @@ DEFINE_PGM_CTR(PM_WEBAPPEND_TABLE_ROW_END_0V) "</tr>";
 
 enum UploadTypes { UPL_TASMOTA, UPL_SETTINGS, UPL_EFM8BB1 };
 
-#ifdef ESP8266
-const char PM_HTTP_HEAD3[] PROGMEM =
-#elif ESP32
-const char HTTP_HEAD2[] PROGMEM =
-#endif
-  "<!DOCTYPE html><html lang=\"" D_HTML_LANGUAGE "\" class=\"\">"
-  "<head>"
-  "<meta charset='utf-8'>"
-  "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,user-scalable=no\"/>"
-  "<title>%s - %s</title>";
+// #ifdef ESP8266
+// const char PM_HTTP_HEAD3[] PROGMEM =
+// #elif ESP32
+// const char HTTP_HEAD2[] PROGMEM =
+// #endif
+//   "<!DOCTYPE html><html lang=\"" D_HTML_LANGUAGE "\" class=\"\">"
+//   "<head>"
+//   "<meta charset='utf-8'>"
+//   "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,user-scalable=no\"/>"
+//   "<title>%s - %s</title>";
 
   
-const char HTTP_SCRIPT_COUNTER[] PROGMEM =
-  "var cn=180;"                           // seconds
-  "function u(){"
-    "if(cn>=0){"
-      "eb('t').innerHTML='" D_RESTART_IN " '+cn+' " D_SECONDS "';"
-      "cn--;"
-      "setTimeout(u,1000);"
-    "}"
-  "}"
-  "window.onload=u;";
+// const char HTTP_SCRIPT_COUNTER[] PROGMEM =
+//   "var cn=180;"                           // seconds
+//   "function u(){"
+//     "if(cn>=0){"
+//       "eb('t').innerHTML='" D_RESTART_IN " '+cn+' " D_SECONDS "';"
+//       "cn--;"
+//       "setTimeout(u,1000);"
+//     "}"
+//   "}"
+//   "window.onload=u;";
   
-#define WEB_HANDLER_SCRIPT_ROOT_MICHAEL "/script/root_tas.js"
-const char HTTP_SCRIPT_ROOT_MICHAEL[] PROGMEM =
-  "var x=null,lt,to,tp,pc='';"            // x=null allow for abortion
-  "function eb(s){"
-    "return document.getElementById(s);"  // Save code space
-  "}"
-  // "function gcbid(s){"
-  //   "return document.getElementsByClassName(s);"  // Save code space
-  // "}"
-  "function wl(f){"                       // Execute multiple window.onload
-    "window.addEventListener('load',f);"
-  "}"
-  "function qs(s){"                       // Alias to save code space
-    "return document.querySelector(s);"
-  "}"
-  "function start(p){"   //runs just once on loading
-    "la(p);"
-  "}"
-  "function la(p){"
-    "var a=' ';"
-    "if(la.arguments.length==1){"
-      "a=p;"
-      "console.log(p);"
-      "clearTimeout(lt);"
-    "}"
-    "if(x!=null){x.abort();}"             // Abort if no response within 2 seconds (happens on restart 1)
-    "x=new XMLHttpRequest();"
-    "x.onreadystatechange=function(){"
-      "if(x.readyState==4&&x.status==200){"
-        "var s=x.responseText"
-          ".replace(/{t}/g,\"<table style='width:100%%'>\")"  // Main top table
-          ".replace(/{s}/g,\"<tr><th>\")"
-          ".replace(/{m}/g,\"</th><td>\")"
-          ".replace(/{e}/g,\"</td></tr>\")"
-          ".replace(/{t2}/g,\"</table>\")"
-          ".replace(/{c}/g,\"%%'><div style='text-align:center;font-weight:\");"
-        "eb('l1').innerHTML=s;"
-      "}"
-    "};"
-    "x.open('GET','./?m=1'+a,true);"       // ?m related to pWebServer->hasParam("m")
-    "x.send();"
-    "lt=setTimeout(la,%d);"               // Settings.web_refresh
-  "}"
-  "function lb(p){"
-    "la('&d='+p);"                        // &d related to WebGetArg(request,"d", tmp, sizeof(tmp));
-  "}"
-  "function lc(p){"
-    "la('&t='+p);"                        // &t related to WebGetArg(request,"t", tmp, sizeof(tmp));
-  "}"
-  // "wl(la);"
-  "window.onload=start();"
-;
-
-// #define WEB_HANDLER_HTTP_SCRIPT_SLIDERS "/script/root_sliders.js"
-// const char HTTP_SCRIPT_SLIDERS[] PROGMEM =
-// "function lc2(v,i,p){"
-//   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
-//     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
-//       "var sl=eb('sl4').value;"
-//       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
-//     "}"
+// #define WEB_HANDLER_SCRIPT_ROOT_MICHAEL "/script/root_tas.js"
+// const char HTTP_SCRIPT_ROOT_MICHAEL[] PROGMEM =
+//   "var x=null,lt,to,tp,pc='';"            // x=null allow for abortion
+//   "function eb(s){"
+//     "return document.getElementById(s);"  // Save code space
 //   "}"
-//   "la('&'+v+i+'='+p);"
-// "}"
-// "function lc3(v,p){"
-//   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
-//     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
-//       "var sl=eb('sl4').value;"
-//       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
-//     "}"
+//   // "function gcbid(s){"
+//   //   "return document.getElementsByClassName(s);"  // Save code space
+//   // "}"
+//   "function wl(f){"                       // Execute multiple window.onload
+//     "window.addEventListener('load',f);"
 //   "}"
-//   "la('&'+v+'='+p);"
-// "}"
+//   "function qs(s){"                       // Alias to save code space
+//     "return document.querySelector(s);"
+//   "}"
+//   "function start(p){"   //runs just once on loading
+//     "la(p);"
+//   "}"
+//   "function la(p){"
+//     "var a=' ';"
+//     "if(la.arguments.length==1){"
+//       "a=p;"
+//       "console.log(p);"
+//       "clearTimeout(lt);"
+//     "}"
+//     "if(x!=null){x.abort();}"             // Abort if no response within 2 seconds (happens on restart 1)
+//     "x=new XMLHttpRequest();"
+//     "x.onreadystatechange=function(){"
+//       "if(x.readyState==4&&x.status==200){"
+//         "var s=x.responseText"
+//           ".replace(/{t}/g,\"<table style='width:100%%'>\")"  // Main top table
+//           ".replace(/{s}/g,\"<tr><th>\")"
+//           ".replace(/{m}/g,\"</th><td>\")"
+//           ".replace(/{e}/g,\"</td></tr>\")"
+//           ".replace(/{t2}/g,\"</table>\")"
+//           ".replace(/{c}/g,\"%%'><div style='text-align:center;font-weight:\");"
+//         "eb('l1').innerHTML=s;"
+//       "}"
+//     "};"
+//     "x.open('GET','./?m=1'+a,true);"       // ?m related to pWebServer->hasParam("m")
+//     "x.send();"
+//     "lt=setTimeout(la,%d);"               // Settings.web_refresh
+//   "}"
+//   "function lb(p){"
+//     "la('&d='+p);"                        // &d related to WebGetArg(request,"d", tmp, sizeof(tmp));
+//   "}"
+//   "function lc(p){"
+//     "la('&t='+p);"                        // &t related to WebGetArg(request,"t", tmp, sizeof(tmp));
+//   "}"
+//   // "wl(la);"
+//   "window.onload=start();"
 // ;
 
-const char HTTP_SCRIPT_WIFI[] PROGMEM =
-  "function c(l){"
-    "eb('s1').value=l.innerText||l.textContent;"
-    "eb('p1').focus();"
-  "}";
-const char HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE[] PROGMEM =
-  "<p><b>%s</b> (%s)<br/><input id='%s' name='%s' placeholder='%s' value='%s'></p>";
+// // #define WEB_HANDLER_HTTP_SCRIPT_SLIDERS "/script/root_sliders.js"
+// // const char HTTP_SCRIPT_SLIDERS[] PROGMEM =
+// // "function lc2(v,i,p){"
+// //   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
+// //     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
+// //       "var sl=eb('sl4').value;"
+// //       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
+// //     "}"
+// //   "}"
+// //   "la('&'+v+i+'='+p);"
+// // "}"
+// // "function lc3(v,p){"
+// //   "if(eb('s')){"                        // Check if Saturation is in DOM otherwise javascript fails on la()
+// //     "if(v=='h'||v=='d'){"               // Hue or Brightness changed so change Saturation colors too
+// //       "var sl=eb('sl4').value;"
+// //       "eb('s').style.background='linear-gradient(to right,rgb('+sl+'%%,'+sl+'%%,'+sl+'%%),hsl('+eb('sl2').value+',100%%,50%%))';"
+// //     "}"
+// //   "}"
+// //   "la('&'+v+'='+p);"
+// // "}"
+// // ;
 
-#define STR_HELPER2(x) #x
-#ifndef STR2
-#define STR2(x) STR_HELPER2(x)
-#endif
+// const char HTTP_SCRIPT_WIFI[] PROGMEM =
+//   "function c(l){"
+//     "eb('s1').value=l.innerText||l.textContent;"
+//     "eb('p1').focus();"
+//   "}";
+// const char HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE[] PROGMEM =
+//   "<p><b>%s</b> (%s)<br/><input id='%s' name='%s' placeholder='%s' value='%s'></p>";
 
-// const char HTTP_SCRIPT_RELOAD[] PROGMEM =
-//   "setTimeout(function(){location.href='.';}," STR2(HTTP_RESTART_RECONNECT_TIME) ");";
-// // Local OTA upgrade requires more time to complete cp: before web ui should be reloaded
-// const char HTTP_SCRIPT_RELOAD_OTA[] PROGMEM =
-//   "setTimeout(function(){location.href='.';}," STR2(HTTP_OTA_RESTART_RECONNECT_TIME) ");";
+// #define STR_HELPER2(x) #x
+// #ifndef STR2
+// #define STR2(x) STR_HELPER2(x)
+// #endif
 
-const char HTTP_SCRIPT_CONSOL[] PROGMEM =
+// // const char HTTP_SCRIPT_RELOAD[] PROGMEM =
+// //   "setTimeout(function(){location.href='.';}," STR2(HTTP_RESTART_RECONNECT_TIME) ");";
+// // // Local OTA upgrade requires more time to complete cp: before web ui should be reloaded
+// // const char HTTP_SCRIPT_RELOAD_OTA[] PROGMEM =
+// //   "setTimeout(function(){location.href='.';}," STR2(HTTP_OTA_RESTART_RECONNECT_TIME) ");";
 
-//WARNING -- repeated code
-"var x=null,lt,to,tp,pc='';"            // x=null allow for abortion
-  "function eb(s){"
-    "return document.getElementById(s);"  // Save code space
-  "}"
-  "function wl(f){"                       // Execute multiple window.onload
-    "window.addEventListener('load',f);"
-  "}"
-  "function qs(s){"                       // Alias to save code space
-    "return document.querySelector(s);"
-  "}"
+// const char HTTP_SCRIPT_CONSOL[] PROGMEM =
 
-
-//WARNING -- repetaed code from tas, to be joined
-  "var sn=0;"                             // Scroll position
-  "var idsc=0;"                             // Get most of weblog initially
-  "function l(p){"                        // Console log and command service
-    "var c,o,t;"
-    "clearTimeout(lt);"
-    "o='';"
-    "t=eb('t1');"
-    "if(p==1){"
-      "c=eb('c1');"
-      "o='&c1='+encodeURIComponent(c.value);"
-      "c.value='';"
-      "t.scrollTop=sn;"
-    "}"
-    "if(t.scrollTop>=sn){"                // User scrolled back so no updates
-      "if(x!=null){x.abort();}"           // Abort if no response within 2 seconds (happens on restart 1)
-      "x=new XMLHttpRequest();"
-      "x.onreadystatechange=function(){"
-        "if(x.readyState==4&&x.status==200){"
-          "var z,d;"
-          "d=x.responseText.split(/}1/);"  // Field separator
-          "idsc=d.shift();"
-          "if(d.shift()==0){t.value='';}"
-          "z=d.shift();"
-          "if(z.length>0){t.value+=z;}"
-          "t.scrollTop=99999;"
-          "sn=t.scrollTop;"
-        "}"
-      "};"
-      "x.open('GET','cs?c2='+idsc+o,true);"  // Related to pWebServer->hasParam("c2") and WebGetArg(request,"c2", stmp, sizeof(stmp))
-      "x.send();"
-    "}"
-    "lt=setTimeout(l,%d);"
-    "return false;"
-  "}"
-  "window.onload=l;";
-
-const char HTTP_MODULE_TEMPLATE_REPLACE[] PROGMEM =
-  "}2%d'>%s (%d}3";                       // }2 and }3 are used in below os.replace
-
-const char HTTP_SCRIPT_MODULE_TEMPLATE[] PROGMEM =
-  "var os;"
-  "function sk(s,g){"                     // s = value, g = id and name
-    "var o=os.replace(/}2/g,\"<option value='\").replace(/}3/g,\")</option>\").replace(/}4/g,\"</option>\");"
-    "eb('g'+g).innerHTML=o;"
-    "eb('g'+g).value=s;"
-  "}"
-  "function ld(u,f){"
-    "var x=new XMLHttpRequest();"
-    "x.onreadystatechange=function(){"
-      "if(this.readyState==4&&this.status==200){"
-        "f(this);"
-      "}"
-    "};"
-    "x.open('GET',u,true);"
-    "x.send();"
-  "}";
-
-const char HTTP_SCRIPT_TEMPLATE[] PROGMEM =
-  "var c;"                                // Need a global for BASE
-  "function x1(b){"
-    "var i,j,g,k,o;"
-    "o=b.responseText.split(/}1/);"       // Field separator
-    "k=o.shift();"                        // Template name
-    "if(eb('s1').value==''){"
-      "eb('s1').value=k;"                 // Set NAME if not yet set
-    "}"
-    "os=o.shift();"                       // Complete GPIO sensor list
-    "g=o.shift().split(',');"             // Array separator
-    "j=0;"
-    "for(i=0;i<13;i++){"                  // Supports 13 GPIOs
-      "if(6==i){j=9;}"
-      "if(8==i){j=12;}"
-      "sk(g[i],j);"                       // Set GPIO
-      "j++;"
-    "}"
-    "g=o.shift();"
-    "for(i=0;i<" STR2(GPIO_FLAG_USED) ";i++){"
-      "p=(g>>i)&1;"
-      "eb('c'+i).checked=p;"              // Set FLAG checkboxes
-    "}"
-    "if(" STR2(USER_MODULE) "==c){"
-      "g=o.shift();"
-      "eb('g99').value=g;"                // Set BASE for initial select
-    "}"
-  "}"
-  "function st(t){"
-    "c=t;"                                // Needed for initial BASE select
-    "var a='tp?t='+t;"
-    "ld(a,x1);"                           // ?t related to WebGetArg(request,"t", stemp, sizeof(stemp));
-  "}"
-  "function x2(a){"
-    "os=a.responseText;"
-    "sk(17,99);"                          // 17 = WEMOS
-    "st(" STR2(USER_MODULE) ");"
-  "}"
-  "window.onload=ld('tp?m=1',x2);";       // ?m related to pWebServer->hasParam("m")
-
-const char HTTP_SCRIPT_MODULE1[] PROGMEM =
-  "function x1(a){"
-    "os=a.responseText;"
-    "sk(%d,99);"
-  "}"
-  "function x2(b){"
-    "os=b.responseText;";
-
-const char HTTP_SCRIPT_MODULE2[] PROGMEM =
-  "}"
-  "function sl(){"
-    "ld('md?m=1',x1);"                     // ?m related to pWebServer->hasParam("m")
-    "ld('md?g=1',x2);"                     // ?m related to pWebServer->hasParam("m")
-  "}"
-  "window.onload=sl;";
-
-//phase out, not using this method
-const char HTTP_SCRIPT_INFO_BEGIN[] PROGMEM =
-  "function i(){"
-    "var s,o=\"";
-const char HTTP_SCRIPT_INFO_END[] PROGMEM =
-    "\";"                                   // "}1" and "}2" means do not use "}x" in Information text
-    "s=o.replace(/}1/g,\"</td></tr><tr><th>\").replace(/}2/g,\"</th><td>\");"
-    "eb('i').innerHTML=s;"
-  "}"
-  "window.onload=i;";
+// //WARNING -- repeated code
+// "var x=null,lt,to,tp,pc='';"            // x=null allow for abortion
+//   "function eb(s){"
+//     "return document.getElementById(s);"  // Save code space
+//   "}"
+//   "function wl(f){"                       // Execute multiple window.onload
+//     "window.addEventListener('load',f);"
+//   "}"
+//   "function qs(s){"                       // Alias to save code space
+//     "return document.querySelector(s);"
+//   "}"
 
 
-const char HTTP_HEAD_STYLE1[] PROGMEM =
-  "div,fieldset,input,select{padding:5px;font-size:1em;}"
-  "fieldset{background:#%06x;}"  // COLOR_FORM, Also update HTTP_TIMER_STYLE
-  "p{margin:0.5em 0;}"
-  "input{width:100%%;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
-  "input[type=checkbox],input[type=radio]{width:1em;margin-right:6px;vertical-align:-1px;}"
-  "select{width:100%%;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
-  "textarea{resize:none;width:98%%;height:318px;padding:5px;overflow:auto;background:#%06x;color:#%06x;}"  // COLOR_CONSOLE, COLOR_CONSOLE_TEXT
-  "body{text-align:center;font-family:verdana;background:#%06x;}"  // COLOR_BACKGROUND
-  "td{padding:0px;}"
-//   ;
-// const char HTTP_HEAD_STYLE2[] PROGMEM =
-  "button{border:0;border-radius:0.3rem;background:#%06x;color:#%06x;line-height:2.4rem;font-size:1.2rem;width:100%%;-webkit-transition-duration:0.4s;transition-duration:0.4s;cursor:pointer;}"  // COLOR_BUTTON, COLOR_BUTTON_TEXT
-  "button:hover{background:#%06x;}"  // COLOR_BUTTON_HOVER
-  ".bred{background:#%06x;}"  // COLOR_BUTTON_RESET
-  ".bred:hover{background:#%06x;}"  // COLOR_BUTTON_RESET_HOVER
-  ".bgrn{background:#%06x;}"  // COLOR_BUTTON_SAVE
-  ".bgrn:hover{background:#%06x;}"  // COLOR_BUTTON_SAVE_HOVER
-  ".bora{background:#%06x;}"  // COLOR_BUTTON2
-  ".bora:hover{background:#%06x;}"  // COLOR_BUTTON2
-  ".bform1{width:33%%;line-height:1.7rem}"
-  "a{text-decoration:none;}"
-  ".p{float:left;text-align:left;}"
-  ".q{float:right;text-align:right;}"; 
+// //WARNING -- repetaed code from tas, to be joined
+//   "var sn=0;"                             // Scroll position
+//   "var idsc=0;"                             // Get most of weblog initially
+//   "function l(p){"                        // Console log and command service
+//     "var c,o,t;"
+//     "clearTimeout(lt);"
+//     "o='';"
+//     "t=eb('t1');"
+//     "if(p==1){"
+//       "c=eb('c1');"
+//       "o='&c1='+encodeURIComponent(c.value);"
+//       "c.value='';"
+//       "t.scrollTop=sn;"
+//     "}"
+//     "if(t.scrollTop>=sn){"                // User scrolled back so no updates
+//       "if(x!=null){x.abort();}"           // Abort if no response within 2 seconds (happens on restart 1)
+//       "x=new XMLHttpRequest();"
+//       "x.onreadystatechange=function(){"
+//         "if(x.readyState==4&&x.status==200){"
+//           "var z,d;"
+//           "d=x.responseText.split(/}1/);"  // Field separator
+//           "idsc=d.shift();"
+//           "if(d.shift()==0){t.value='';}"
+//           "z=d.shift();"
+//           "if(z.length>0){t.value+=z;}"
+//           "t.scrollTop=99999;"
+//           "sn=t.scrollTop;"
+//         "}"
+//       "};"
+//       "x.open('GET','cs?c2='+idsc+o,true);"  // Related to pWebServer->hasParam("c2") and WebGetArg(request,"c2", stmp, sizeof(stmp))
+//       "x.send();"
+//     "}"
+//     "lt=setTimeout(l,%d);"
+//     "return false;"
+//   "}"
+//   "window.onload=l;";
+
+// const char HTTP_MODULE_TEMPLATE_REPLACE[] PROGMEM =
+//   "}2%d'>%s (%d}3";                       // }2 and }3 are used in below os.replace
+
+// const char HTTP_SCRIPT_MODULE_TEMPLATE[] PROGMEM =
+//   "var os;"
+//   "function sk(s,g){"                     // s = value, g = id and name
+//     "var o=os.replace(/}2/g,\"<option value='\").replace(/}3/g,\")</option>\").replace(/}4/g,\"</option>\");"
+//     "eb('g'+g).innerHTML=o;"
+//     "eb('g'+g).value=s;"
+//   "}"
+//   "function ld(u,f){"
+//     "var x=new XMLHttpRequest();"
+//     "x.onreadystatechange=function(){"
+//       "if(this.readyState==4&&this.status==200){"
+//         "f(this);"
+//       "}"
+//     "};"
+//     "x.open('GET',u,true);"
+//     "x.send();"
+//   "}";
+
+// const char HTTP_SCRIPT_TEMPLATE[] PROGMEM =
+//   "var c;"                                // Need a global for BASE
+//   "function x1(b){"
+//     "var i,j,g,k,o;"
+//     "o=b.responseText.split(/}1/);"       // Field separator
+//     "k=o.shift();"                        // Template name
+//     "if(eb('s1').value==''){"
+//       "eb('s1').value=k;"                 // Set NAME if not yet set
+//     "}"
+//     "os=o.shift();"                       // Complete GPIO sensor list
+//     "g=o.shift().split(',');"             // Array separator
+//     "j=0;"
+//     "for(i=0;i<13;i++){"                  // Supports 13 GPIOs
+//       "if(6==i){j=9;}"
+//       "if(8==i){j=12;}"
+//       "sk(g[i],j);"                       // Set GPIO
+//       "j++;"
+//     "}"
+//     "g=o.shift();"
+//     "for(i=0;i<" STR2(GPIO_FLAG_USED) ";i++){"
+//       "p=(g>>i)&1;"
+//       "eb('c'+i).checked=p;"              // Set FLAG checkboxes
+//     "}"
+//     "if(" STR2(USER_MODULE) "==c){"
+//       "g=o.shift();"
+//       "eb('g99').value=g;"                // Set BASE for initial select
+//     "}"
+//   "}"
+//   "function st(t){"
+//     "c=t;"                                // Needed for initial BASE select
+//     "var a='tp?t='+t;"
+//     "ld(a,x1);"                           // ?t related to WebGetArg(request,"t", stemp, sizeof(stemp));
+//   "}"
+//   "function x2(a){"
+//     "os=a.responseText;"
+//     "sk(17,99);"                          // 17 = WEMOS
+//     "st(" STR2(USER_MODULE) ");"
+//   "}"
+//   "window.onload=ld('tp?m=1',x2);";       // ?m related to pWebServer->hasParam("m")
+
+// const char HTTP_SCRIPT_MODULE1[] PROGMEM =
+//   "function x1(a){"
+//     "os=a.responseText;"
+//     "sk(%d,99);"
+//   "}"
+//   "function x2(b){"
+//     "os=b.responseText;";
+
+// const char HTTP_SCRIPT_MODULE2[] PROGMEM =
+//   "}"
+//   "function sl(){"
+//     "ld('md?m=1',x1);"                     // ?m related to pWebServer->hasParam("m")
+//     "ld('md?g=1',x2);"                     // ?m related to pWebServer->hasParam("m")
+//   "}"
+//   "window.onload=sl;";
+
+// //phase out, not using this method
+// const char HTTP_SCRIPT_INFO_BEGIN[] PROGMEM =
+//   "function i(){"
+//     "var s,o=\"";
+// const char HTTP_SCRIPT_INFO_END[] PROGMEM =
+//     "\";"                                   // "}1" and "}2" means do not use "}x" in Information text
+//     "s=o.replace(/}1/g,\"</td></tr><tr><th>\").replace(/}2/g,\"</th><td>\");"
+//     "eb('i').innerHTML=s;"
+//   "}"
+//   "window.onload=i;";
+
+
+// const char HTTP_HEAD_STYLE1[] PROGMEM =
+//   "div,fieldset,input,select{padding:5px;font-size:1em;}"
+//   "fieldset{background:#%06x;}"  // COLOR_FORM, Also update HTTP_TIMER_STYLE
+//   "p{margin:0.5em 0;}"
+//   "input{width:100%%;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
+//   "input[type=checkbox],input[type=radio]{width:1em;margin-right:6px;vertical-align:-1px;}"
+//   "select{width:100%%;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
+//   "textarea{resize:none;width:98%%;height:318px;padding:5px;overflow:auto;background:#%06x;color:#%06x;}"  // COLOR_CONSOLE, COLOR_CONSOLE_TEXT
+//   "body{text-align:center;font-family:verdana;background:#%06x;}"  // COLOR_BACKGROUND
+//   "td{padding:0px;}"
+// //   ;
+// // const char HTTP_HEAD_STYLE2[] PROGMEM =
+//   "button{border:0;border-radius:0.3rem;background:#%06x;color:#%06x;line-height:2.4rem;font-size:1.2rem;width:100%%;-webkit-transition-duration:0.4s;transition-duration:0.4s;cursor:pointer;}"  // COLOR_BUTTON, COLOR_BUTTON_TEXT
+//   "button:hover{background:#%06x;}"  // COLOR_BUTTON_HOVER
+//   ".bred{background:#%06x;}"  // COLOR_BUTTON_RESET
+//   ".bred:hover{background:#%06x;}"  // COLOR_BUTTON_RESET_HOVER
+//   ".bgrn{background:#%06x;}"  // COLOR_BUTTON_SAVE
+//   ".bgrn:hover{background:#%06x;}"  // COLOR_BUTTON_SAVE_HOVER
+//   ".bora{background:#%06x;}"  // COLOR_BUTTON2
+//   ".bora:hover{background:#%06x;}"  // COLOR_BUTTON2
+//   ".bform1{width:33%%;line-height:1.7rem}"
+//   "a{text-decoration:none;}"
+//   ".p{float:left;text-align:left;}"
+//   ".q{float:right;text-align:right;}"; 
 
   
-const char PM_HTTP_HEAD_STYLE1_MINIMAL[] PROGMEM =
-  "div,fieldset,input,select{padding:5px;font-size:1em;}"
-  "fieldset{background:#%06x;}"  // COLOR_FORM, Also update HTTP_TIMER_STYLE
-  "p{margin:0.5em 0;}"
-  // "input{width:100%%;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
-  // "input[type=checkbox],input[type=radio]{width:1em;margin-right:6px;vertical-align:-1px;}"
-  // "select{width:100%%;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
-  // "textarea{resize:none;width:98%%;height:318px;padding:5px;overflow:auto;background:#%06x;color:#%06x;}"  // COLOR_CONSOLE, COLOR_CONSOLE_TEXT
-  "body{text-align:center;font-family:verdana;background:#%06x;}"  // COLOR_BACKGROUND
-  //"td{padding:0px;}"
-//   ;
-// const char HTTP_HEAD_STYLE2[] PROGMEM =
-  "button{border:0;border-radius:0.3rem;background:#%06x;color:#%06x;line-height:2.4rem;font-size:1.2rem;width:100%%;cursor:pointer;}"  // COLOR_BUTTON, COLOR_BUTTON_TEXT
-  //"button:hover{background:#%06x;}"  // COLOR_BUTTON_HOVER
-  // ".bred{background:#%06x;}"  // COLOR_BUTTON_RESET
-  // ".bred:hover{background:#%06x;}"  // COLOR_BUTTON_RESET_HOVER
-  // ".bgrn{background:#%06x;}"  // COLOR_BUTTON_SAVE
-  // ".bgrn:hover{background:#%06x;}"  // COLOR_BUTTON_SAVE_HOVER
-  // ".bora{background:#%06x;}"  // COLOR_BUTTON2
-  // ".bora:hover{background:#%06x;}"  // COLOR_BUTTON2
-  //"a{text-decoration:none;}"
-  ".p{float:left;text-align:left;}"
-  ".q{float:right;text-align:right;}"
-  ; 
-const char HTTP_STYLE_TITLE_CONTAINER_HEAD[] PROGMEM = 
-  "<div style='text-align:left;display:inline-block;color:#%06x;min-width:340px;padding-top:30px'>"  // COLOR_TEXT
-#ifdef FIRMWARE_MINIMAL
-  "<div style='text-align:center;color:#%06x;'><h3>" D_MINIMAL_FIRMWARE_PLEASE_UPGRADE "</h3></div>"  // COLOR_TEXT_WARNING
-#endif
-  "<div style='text-align:center;'><noscript>" D_NOSCRIPT "<br/></noscript>"
-  //"<h3><font color='#%06x'>%s</font></h3>"
-  "<h2><font color='#%06x'>%s</font></h2>"
-  //"<h2>%s</h2>"
-  "</div>"; 
+// const char PM_HTTP_HEAD_STYLE1_MINIMAL[] PROGMEM =
+//   "div,fieldset,input,select{padding:5px;font-size:1em;}"
+//   "fieldset{background:#%06x;}"  // COLOR_FORM, Also update HTTP_TIMER_STYLE
+//   "p{margin:0.5em 0;}"
+//   // "input{width:100%%;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
+//   // "input[type=checkbox],input[type=radio]{width:1em;margin-right:6px;vertical-align:-1px;}"
+//   // "select{width:100%%;background:#%06x;color:#%06x;}"  // COLOR_INPUT, COLOR_INPUT_TEXT
+//   // "textarea{resize:none;width:98%%;height:318px;padding:5px;overflow:auto;background:#%06x;color:#%06x;}"  // COLOR_CONSOLE, COLOR_CONSOLE_TEXT
+//   "body{text-align:center;font-family:verdana;background:#%06x;}"  // COLOR_BACKGROUND
+//   //"td{padding:0px;}"
+// //   ;
+// // const char HTTP_HEAD_STYLE2[] PROGMEM =
+//   "button{border:0;border-radius:0.3rem;background:#%06x;color:#%06x;line-height:2.4rem;font-size:1.2rem;width:100%%;cursor:pointer;}"  // COLOR_BUTTON, COLOR_BUTTON_TEXT
+//   //"button:hover{background:#%06x;}"  // COLOR_BUTTON_HOVER
+//   // ".bred{background:#%06x;}"  // COLOR_BUTTON_RESET
+//   // ".bred:hover{background:#%06x;}"  // COLOR_BUTTON_RESET_HOVER
+//   // ".bgrn{background:#%06x;}"  // COLOR_BUTTON_SAVE
+//   // ".bgrn:hover{background:#%06x;}"  // COLOR_BUTTON_SAVE_HOVER
+//   // ".bora{background:#%06x;}"  // COLOR_BUTTON2
+//   // ".bora:hover{background:#%06x;}"  // COLOR_BUTTON2
+//   //"a{text-decoration:none;}"
+//   ".p{float:left;text-align:left;}"
+//   ".q{float:right;text-align:right;}"
+//   ; 
+// const char HTTP_STYLE_TITLE_CONTAINER_HEAD[] PROGMEM = 
+//   "<div style='text-align:left;display:inline-block;color:#%06x;min-width:340px;padding-top:30px'>"  // COLOR_TEXT
+// #ifdef FIRMWARE_MINIMAL
+//   "<div style='text-align:center;color:#%06x;'><h3>" D_MINIMAL_FIRMWARE_PLEASE_UPGRADE "</h3></div>"  // COLOR_TEXT_WARNING
+// #endif
+//   "<div style='text-align:center;'><noscript>" D_NOSCRIPT "<br/></noscript>"
+//   //"<h3><font color='#%06x'>%s</font></h3>"
+//   "<h2><font color='#%06x'>%s</font></h2>"
+//   //"<h2>%s</h2>"
+//   "</div>"; 
 
 
 /**
@@ -1136,8 +1138,6 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON)
   "</form></fieldset>";
 
 
-#include "AsyncJson.h"
-#include "ArduinoJson.h"
 
 // const char HTTP_FORM_RST[] PROGMEM =
 //   "<div id='f1' name='f1' style='display:block;'>"
