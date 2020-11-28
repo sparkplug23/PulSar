@@ -31,7 +31,7 @@ class Pair {
   VariantRef _value;
 };
 
-class PairConst {
+class nowPairConst {
  public:
   PairConst(const VariantSlot* slot) {
     if (slot) {

@@ -393,12 +393,12 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   // if (XdrvCall(FUNC_MQTT_DATA)) { return; }
 
   if(data_buffer.fWaiting){data_buffer.fWaiting = false;
-    if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
       AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
-    }
+    // }
 
     // #ifndef ENABLE_DEVFEATURE_JSONPARSER
     // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;

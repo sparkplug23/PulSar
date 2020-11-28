@@ -448,7 +448,7 @@ debug
 
   #define NO_GLOBAL_MDNS
 
-  // #define ENABLE_DEVFEATURE_JSONPARSER
+  #define ENABLE_DEVFEATURE_JSONPARSER
   // #define ENABLE_DEVFEATURE_ARDUINOJSON
 
   // #define ENABLE_DEVFEATURE_BREAK_ADDLOG
@@ -509,17 +509,20 @@ Flash: [======    ]  55.6% (used 569028 bytes from 1023984 bytes)
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE)   
   "{"
-    "\"NAME\":\"" DEVICENAME_CTR "\","
-    "\"FRIENDLYNAME\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"GPIOC\":{"    
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"    
       #if defined(USE_MODULE_SENSORS_INA219) || defined(USE_MODULE_SENSORS_BME)
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
     "},"
-    "\"BASE\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE)   
+//  "{\"Na\":\"rgb\",\"FNa\":\"fname\",\"GC\":{\"pin1\":\"func1\",\"pin2\":\"func2\"}}";
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 

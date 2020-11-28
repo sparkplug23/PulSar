@@ -19,14 +19,18 @@
 #endif
   
 
+  #include "jsmn.h"
+
 class mHardwarePins{
   public:
     mHardwarePins(){}; //inline, no cpp needed
 
     void ModuleSettings_FlashSerial();
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-    void ParseModuleTemplate(JsonObjectConst obj);
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
+    
+int jsoneq(const char *json, jsmntok_t *tok, const char *s);
+    
+    void ParseModuleTemplate();
+
     void ReadModuleTemplateFromProgmem();
 
     void ModuleSettings_ShowTemplateLog();

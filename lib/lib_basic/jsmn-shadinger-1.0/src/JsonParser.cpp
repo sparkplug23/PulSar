@@ -201,6 +201,68 @@ JsonParserToken JsonParserArray::operator[](int32_t i) const {
   return JsonParserToken(&token_bad);
 }
 
+#ifdef ENABLE_DEVFEATURE_JSONPAIR
+/*********************************************************************************************\
+ * JsonPair
+\*********************************************************************************************/
+
+JsonPair::JsonPair(const jsmntok_t * token) : JsonParserToken(token) {
+  // Serial.println("const_iterator 6");
+  // if (t->type != JSMN_ARRAY) {
+  //   t = &token_bad;
+  // }
+}
+JsonPair::JsonPair(const JsonParserToken token) : JsonParserToken(token.t) {
+  // Serial.println("const_iterator 5");
+  // if (t->type != JSMN_ARRAY) {
+  //   t = &token_bad;
+  // }
+}
+
+JsonPair::const_iterator::const_iterator(const JsonPair t): tok(t), remaining(0) {
+  // Serial.println("const_iterator 1");
+  if (tok.t == &token_bad) { tok.t = nullptr; }
+  if (nullptr != tok.t) {
+    // ASSERT type == JSMN_ARRAY by constructor
+    remaining = tok.t->size*2;
+    tok.nextOne();    // skip array root token
+  }
+}
+
+JsonPair::const_iterator JsonPair::const_iterator::const_iterator::operator++() {
+  if (remaining <= 1) { tok.t = nullptr; }
+  else {
+    remaining--;
+    tok.skipToken();  // munch value
+    if (tok.t->type == JSMN_INVALID) { tok.t = nullptr; }   // unexpected end of stream
+    token_pair.key = tok;
+  }
+  // if (remaining <= 1) { tok.t = nullptr; }
+  // else {
+  //   remaining--;
+  //   tok.skipToken();  // munch value
+  //   if (tok.t->type == JSMN_INVALID) { tok.t = nullptr; }   // unexpected end of stream
+  //   token_pair.value = tok;
+  // }
+  return *this;
+}
+
+JsonParserToken JsonPair::operator[](int32_t i) const {
+  //Serial.println("const_iterator OP");
+  if ((i >= 0) && (i < t->size)) {
+    uint32_t index = 0;
+    for (const auto elt : *this) {
+      if (i == index) {
+        return elt;
+      }
+      index++;
+    }
+  }
+  // fallback
+  return JsonParserToken(&token_bad);
+}
+#endif// ENABLE_DEVFEATURE_JSONPAIR
+
 /*********************************************************************************************\
  * JsonParserObject
 \*********************************************************************************************/

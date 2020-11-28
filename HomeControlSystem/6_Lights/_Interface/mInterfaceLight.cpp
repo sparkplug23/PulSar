@@ -687,7 +687,7 @@ void mInterfaceLight::parse_JSONCommand(void){
 
 #ifdef ENABLE_DEVFEATURE_JSONPARSER
   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_TOPIC "Checking all commands"));
+  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_PARSING_MATCHED D_TOPIC "Checking all commands"));
   #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   // parsesub_CheckAll(obj); 
     

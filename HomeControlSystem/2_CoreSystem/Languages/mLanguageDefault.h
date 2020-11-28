@@ -1467,7 +1467,7 @@
 #define D_JSON_MODULENAME "ModuleName"
 #define D_JSON_MODULEID "ModuleID"
 #define D_JSON_MINUTES_ON "minutes_on"
-#define D_JSON_NAME "name"
+#define D_JSON_NAME "Name"
 
 #define D_JSON_SCENENAME "SceneName"
 #define D_JSON_ANIMATIONMODE "AnimationMode"
@@ -1634,7 +1634,6 @@
 #define D_JSON_WEIGHT_RESOLUTION "WeightRes"
 #define D_JSON_MODULE "Module"
 #define D_JSON_MODULES "Modules"
-#define D_JSON_GPIO "GPIO"
   #define D_JSON_NOT_SUPPORTED "Not supported"
 #define D_JSON_GPIOS "GPIOs"
 #define D_JSON_PWM "PWM"
@@ -1698,8 +1697,8 @@
 #define D_JSON_SERIALDELIMITER "SerialDelimiter"
 #define D_JSON_BAUDRATE "Baudrate"
 #define D_JSON_TEMPLATE "Template"
-  //#define D_JSON_NAME "NAME"
   #define D_JSON_GPIO "GPIO"
+  #define D_JSON_GPIOC "GPIOC"
   #define D_JSON_FLAG "FLAG"
   #define D_JSON_BASE "BASE"
 

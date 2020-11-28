@@ -32,6 +32,8 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
+// #define ENABLE_DEVFEATURE_JSONPAIR
+
 /*********************************************************************************************\
  * Utilities
 \*********************************************************************************************/
@@ -214,6 +216,66 @@ public:
   const_iterator begin() const { return const_iterator(*this); }      // start with 'head'
   const_iterator end() const { return const_iterator(JsonParserArray(&token_bad)); }        // end with null pointer
 };
+
+#ifdef ENABLE_DEVFEATURE_JSONPAIR
+/*********************************************************************************************\
+ * Subclass for JsonPair 
+\*********************************************************************************************/
+class JsonPair : public JsonParserToken {
+public:
+
+  
+  JsonPair(const jsmntok_t * token);
+  JsonPair(const JsonParserToken token);
+  // JsonPair() : JsonParserToken() { }
+
+  //
+  // const iterator
+  //
+  class const_iterator {
+    public:
+
+
+      struct TOKEN_PAIR{
+        JsonParserToken key;
+        JsonParserToken value;
+      }token_pair;
+
+      const_iterator(const JsonPair t);
+      const_iterator operator++();
+      bool operator!=(const_iterator & other) const { return tok.t != other.tok.t; }
+      const JsonParserToken operator*() const { return tok; }
+      
+      // const int operator*() const { return 1; }
+
+      // const struct TOKEN_PAIR operator*() const { return token_pair; }
+
+
+    private:
+      JsonParserToken tok;
+      JsonParserToken toktest;
+      size_t remaining;
+    };
+  const_iterator begin() const { return const_iterator(*this); }      // start with 'head'
+  const_iterator end() const { return const_iterator(JsonPair(&token_bad)); }        // end with null pointer
+
+  
+  // JsonPair(struct token_pair* pair);
+
+  // struct {
+  //       JsonParserToken key;
+  //       JsonParserToken value;
+  //     };
+
+  //     static struct token_pair2;
+
+  // get the element if index `i` from 0 to `size() - 1`
+  JsonParserToken operator[](int32_t i) const;
+
+
+
+};
+#endif // ENABLE_DEVFEATURE_JSONPAIR
 
 /*********************************************************************************************\
  * JSON Parser
