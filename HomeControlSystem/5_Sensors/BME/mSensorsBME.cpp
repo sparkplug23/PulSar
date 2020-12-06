@@ -45,16 +45,16 @@ int8_t mSensorsBME::Tasker(uint8_t function){
     *******************/
     case FUNC_LOOP: 
       EveryLoop();
-    break;  
+    break;   
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_COMMAND:
-
-    break;  
-    case FUNC_JSON_COMMAND:
-      //function_result = parse_JSONCommand();
-    break;      
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      // CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      // parse_JSONCommand();
+    break; 
     /************
      * WEBPAGE SECTION * 
     *******************/

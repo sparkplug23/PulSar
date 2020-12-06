@@ -299,7 +299,7 @@ void mAnalog::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/
 
 uint8_t mAnalog::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   sprintf(data_buffer.payload.ctr,
           PSTR("{\"sensors_active\":%d}"),
@@ -316,7 +316,7 @@ uint8_t mAnalog::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mAnalog::ConstructJSON_Sensor(uint8_t json_level){
   
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
     if(pir_detect[sensor_id].ischanged){ pir_detect[sensor_id].ischanged = false;

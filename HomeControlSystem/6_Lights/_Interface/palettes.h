@@ -1070,7 +1070,7 @@
       255, 26, 64, // christmas pink
       0, 0, 200,   //dark blue, faded
       255, 60, 0,   
-      25, 112, 25,
+      25, 112, 25, //pastel green
       0, 100, 100, // cyan
 
       255, 0, 72, //hot pink
@@ -1116,6 +1116,127 @@
 
 
 
+    #ifndef D_PALETTE_CHRISTMAS_13_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_13_NAME_CTR        "Christmas Outside Tree Step through"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_13_NAME_CTR)        D_PALETTE_CHRISTMAS_13_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_13_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,     // Red
+      0, 150, 0,     // Green
+      255, 26, 64,   // Pink
+      0, 0, 150,     // Blue
+      255, 60, 0,    // Orange
+      // 25, 112, 25, //pastel green 
+      0, 255,180,     // green-Cyan  **
+      0, 0, 255,     // Blue
+
+      255, 0, 0,     // Red
+      0, 150, 0,     // Green
+      255, 26, 64,   // Pink
+      0, 0, 150,     // Blue
+      255, 60, 0,    // Orange
+      // 25, 112, 25, //pastel green
+      0, 255,0,     // green-Cyan      ** 
+      0, 0, 255     // Blue
+    };
+
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_14_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_14_NAME_CTR        "Lots of darker colours, few bright"//"Christmas Multi with Warm White"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_14_NAME_CTR)        D_PALETTE_CHRISTMAS_14_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_14_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,
+      0, 150, 0,
+      255, 26, 64,
+      0, 0, 255,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 255, 0,
+      255, 26, 64,
+      0, 0, 150,
+      255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+
+      //test with dimmer colours
+      255, 0, 0,
+      0, 155, 0,
+      255, 26, 64,
+      0, 0, 200,
+      255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE 
+
+      0,255,255, // cyan
+
+
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0,
+      // 0,0,0
+
+
+    };
+
+
+
+    #ifndef D_PALETTE_CHRISTMAS_15_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_15_NAME_CTR        "Christmas Outside 13 with brightness matching colours"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_15_NAME_CTR)        D_PALETTE_CHRISTMAS_15_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_15_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,     // Red
+      0, 150, 0,     // Green
+      255, 26, 64,   // Pink
+      0, 0, 150,     // Blue
+      255, 60, 0,    // Orange
+      // 25, 112, 25, //pastel green 
+      0, 150,100,     // green-Cyan  **   30 digits less (cyan too bright, reduce it)
+      100,100,100, // dull white??
+      0, 0, 255,     // Blue
+
+      255, 0, 0,     // Red
+      0, 150, 0,     // Green
+      255, 26, 64,   // Pink
+      0, 0, 150,     // Blue
+      255, 60, 0,    // Orange
+      // 25, 112, 25, //pastel green
+      0, 200,0,     // green only      **       //less   
+      0, 0, 255     // Blue
+    };
+
+
+
+
+// small church pastels (maybe just use preset above, or, try new set led output directly from progmem)
+
+
+// crsytal, remove green and blue, use only the others from 43
+
+
+// straiten tree with string
+
+// wire 4 gang on directly, take single socket for tree
+
+// light box, use plug from outside... use vreg for small church inside it 
 
 /**
  * 

@@ -81,6 +81,8 @@
 
 
 
+#define ENABLE_DEVFEATURE_JSONPARSER
+
 //LOG_LEVEL_TEST //LOG_LEVEL_ALL LOG_LEVEL_TEST
 
 #define WEB_LOG_LEVEL          LOG_LEVEL_INFO    // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
@@ -281,7 +283,7 @@
 
 // -- HTTP ----------------------------------------
 #ifndef DISABLE_WEBSERVER
-#define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
+  #define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
   #define WEB_PORT             80                // Web server Port for User and Admin mode
   #define WEB_USERNAME         "admin"           // Web server Admin mode user name
 #endif

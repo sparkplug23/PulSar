@@ -105,7 +105,7 @@ void mRadiatorFan::ConstructJSON_FanStatus(){
   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   // JsonObject root = doc.to<JsonObject>();
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
 
   // int tempsensorid;
   // //root["onoff"] = (int)FAN_ACTIVE(); // instead of boolean
@@ -233,7 +233,7 @@ const char* mRadiatorFan::FanModeCtr(void){
 
 uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_method){
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
   // DynamicJsonDocument doc(250);
   // JsonObject root = doc.to<JsonObject>();
 
@@ -246,7 +246,7 @@ uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mRadiatorFan::ConstructJSON_Sensor(uint8_t json_level){
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
 
   // uint8_t ischanged=false;
 

@@ -306,7 +306,9 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_FLASHER_NAME_CTR  )         D_JSON_FLASHER;
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS       
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;      
 #endif   
-
+#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
+#endif ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
   
 //     #define D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
 //     #define D_MODE_SINGLECOLOUR_DAYON_NAME_CTR           "DAYON"    
@@ -408,6 +410,9 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       uint16_t fForceUpdate : 1; 
       uint16_t fRunning : 1;//= false;
       uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
+
+      
+      uint16_t NewAnimationRequiringCompleteRefresh : 1; 
       
       uint16_t ftime_use_map : 1;//= true;
       uint16_t frate_use_map : 1;//= true;
@@ -416,8 +421,13 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       // This emulates aging of traditional lights, making them less uniform
       uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
 
+      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
+      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+
+      uint8_t use_gamma_for_brightness : 1;
+
       // Reserved
-      uint16_t reserved : 11;
+      uint16_t reserved : 4;
     };
   } ANIMATION_FLAGS;
 
@@ -490,15 +500,22 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     **************/ 
     enum ANIMATION_MODE{
       ANIMATION_MODE_NONE_ID = 0,
-      ANIMATION_MODE_TURN_ON_ID,
+      ANIMATION_MODE_TURN_ON_ID,   //merge on/off into "SET_POWER"
       ANIMATION_MODE_TURN_OFF_ID,
-      ANIMATION_MODE_AMBILIGHT_ID,
       ANIMATION_MODE_SCENE_ID,
+      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      ANIMATION_MODE_AMBILIGHT_ID,
+      #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      //#ifdef ENABLE_PIXEL_FUNCTION_FLASHER
       ANIMATION_MODE_FLASHER_ID,
+      //#endif // ENABLE_PIXEL_FUNCTION_FLASHER
       //user option, cant comment out but can disable elsewhere
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
         ANIMATION_MODE_NOTIFICATIONS_ID,
       #endif
+      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      ANIMATION_MODE_MANUAL_SETPIXEL_ID,
+      #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       ANIMATION_MODE_LENGTH_ID
     };             
     int8_t GetAnimationModeIDbyName(const char* c);
@@ -617,16 +634,8 @@ void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour, 
 void Template_Load();
 
 
-    // #ifdef ENABLE_DEVFEATURE_JSONPARSER
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
-    // #endif
-    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    // void parse_JSONCommand(JsonObjectConst obj);
-    // #endif
-
   
     int8_t Tasker_Web(uint8_t function);
     #include "6_Lights/_Interface/mInterfaceLight_Web.h"
@@ -691,6 +700,15 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     uint16_t _hue = 0;  // 0..359
     uint8_t  _sat = 255;  // 0..255
     uint8_t  _briRGB = 255;  // 0..255
+
+    struct BRIGHTNESS_RGB_BOUNDARIES{
+      uint8_t  lower = 0;  // 0..255
+      uint8_t  upper = 255;  // 0..255
+    }brtRGB_limits;
+
+
+
+
     // dimmer is same as _bri but with a range of 0%-100%
     // uint8_t  _r = 255;  // 0..255
     // uint8_t  _g = 255;  // 0..255
@@ -749,7 +767,6 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
     
     void SubTask_SingleColour();
     void init_Scenes();
-
 
 
   uint8_t current_color[LST_MAX]; // r,r,b,cw,ww
@@ -925,6 +942,9 @@ uint16_t getCT();// const {
 void getXY(float *x, float *y);
 void setBri(uint8_t bri);
 uint8_t setBriRGB(uint8_t bri_rgb);
+uint8_t setBriRGB_As_Percentage(uint8_t bri_rgb);
+
+
 uint8_t setBriCT(uint8_t bri_ct);
 uint8_t getBriRGB();
 void setDimmer(uint8_t dimmer);
@@ -1104,6 +1124,9 @@ uint8_t getColorMode();
     void init_ColourPalettes_Christmas_10();
     void init_ColourPalettes_Christmas_11();
     void init_ColourPalettes_Christmas_12();
+    void init_ColourPalettes_Christmas_13();
+    void init_ColourPalettes_Christmas_14();
+    void init_ColourPalettes_Christmas_15();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1180,6 +1203,9 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_CHRISTMAS_10_ID,
     PALETTELIST_STATIC_CHRISTMAS_11_ID,
     PALETTELIST_STATIC_CHRISTMAS_12_ID,
+    PALETTELIST_STATIC_CHRISTMAS_13_ID,
+    PALETTELIST_STATIC_CHRISTMAS_14_ID,
+    PALETTELIST_STATIC_CHRISTMAS_15_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
 
@@ -1274,6 +1300,9 @@ uint8_t getColorMode();
       PALETTE christmas_10;
       PALETTE christmas_11;
       PALETTE christmas_12;
+      PALETTE christmas_13;
+      PALETTE christmas_14;
+      PALETTE christmas_15;
     }palettelist;
 
 

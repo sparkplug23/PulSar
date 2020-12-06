@@ -1,32 +1,5 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
-// Rename to "TaskerManager"
-// Move into its own folder path?
-
-
-// std::variant< int, std::string > mTaskerManager::GetClassObjectbyID(uint8_t id){
-
-//   switch(id){
-//     // CoreSystem
-//     #ifdef D_MODULE_NETWORK_WIFI_ID
-//       case D_MODULE_NETWORK_WIFI_ID:       return mwif;
-//     #endif
-//     #ifdef D_MODULE_CORE_SETTINGS_ID
-//       case D_MODULE_CORE_SETTINGS_ID:      return mset;
-//     #endif
-//   } //END switch
-
-// }
-
-// void mTaskerManager::TaskerTest(){
-
-//   auto obj = GetClassObjectbyID(D_MODULE_CORE_SETTINGS_ID);
-//   AddLog_P(LOG_LEVEL_DEBUG,PSTR(DEBUG_INSERT_PAGE_BREAK "TaskerTest"));
-//   obj->Tasker(FUNC_EVERY_SECOND);
-
-// }
-
-
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::Instance_Init(){
 
@@ -97,12 +70,9 @@ uint8_t mTaskerManager::Instance_Init(){
     if(mlights_pwm == nullptr){ mlights_pwm = new mPWMLight(); }
   #endif
 
-
-
-  // Drivers
-
-
-
+  /**
+   * Drivers
+   * */
   #if defined(USE_MODULE_CUSTOM_IRTRANSMITTER) || defined (USE_IR_RECEIVER)
     // #ifdef ESP32
   #endif
@@ -136,7 +106,7 @@ uint8_t mTaskerManager::Instance_Init(){
     if(mpwm == nullptr){ mpwm = new mPWM(); }
   #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    if(mrl == nullptr){ mrl = new mGarageLights(); }
+    if(slgt == nullptr){ slgt = new mSecurityLight(); }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mnext == nullptr){ mnext = new mNextionPanel(); }
@@ -356,37 +326,6 @@ mTaskerManager* mTaskerManager::GetInstance(){
   return instance;
 }
 
-
-
-// class Shared{
-
-//   private:
-//     /* Prevent others from being created */
-//     Shared(Shared const& other) = delete;
-//     Shared(Shared&& other) = delete;
-//     /* Private constructor to prevent instancing. */
-//     Shared(){};
-//     /* Here will be the instance stored. */
-//     static Shared* instance;
-//   public:
-//     // External function to get instance
-//     static Shared* GetInstance();
-    
-//  };
-// #include "class_shared.h"
-
-// Shared* Shared::instance = nullptr;
-
-// Shared* Shared::GetInstance(){
-//   if (instance == nullptr){
-//     instance = new Shared();
-//   }
-//   return instance;
-// }
-
-
-
-
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::CheckPointersPass(){
 
@@ -460,7 +399,7 @@ uint8_t mTaskerManager::CheckPointersPass(){
     if(mpwm==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    if(mrl==nullptr){ return false; }
+    if(slgt==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mnext==nullptr){ return false; }
@@ -499,7 +438,6 @@ uint8_t mTaskerManager::CheckPointersPass(){
  * */
 
 int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker){
-//   JsonObjectConst dummy; return Tasker_Interface(function, dummy, target_tasker);
 // }
 // template<typename T>
 // int8_t mTaskerManager::Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker = 0){
@@ -729,7 +667,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
          break;
       #endif
       #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function); break;
+        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = slgt->Tasker(function); break;
       #endif
 
 
@@ -871,248 +809,6 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 }
 
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-// JsonObjectConst  basic 
-int8_t mTaskerManager::Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker){
-
-  int8_t result = 0;
-  uint8_t fModule_present = false;
-  for(uint8_t i=0;i<module_settings.count;i++){
-    // If target_tasker != 0, then use it, else, use indexed array
-
-    DEBUG_LINE;
-    switch_index = target_tasker ? target_tasker : module_settings.list[i];
-    // // #ifdef ENABLE_ADVANCED_DEBUGGING
-    // char buffer_taskname[40];
-    //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-    //     switch_index, 
-    //     GetTaskName(function, buffer_taskname),
-    //     GetModuleFriendlyName(switch_index));
-    // #endif
-    DEBUG_LINE;
-
-    // Remember start millis
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)
-    uint32_t start_millis = millis();
-    #endif
-    fModule_present = true; //assume true
-    
-    switch(switch_index){
-      // CoreSystem
-      #ifdef D_MODULE_NETWORK_WIFI_ID
-        case D_MODULE_NETWORK_WIFI_ID:       result = mwif->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CORE_SETTINGS_ID
-        case D_MODULE_CORE_SETTINGS_ID:{
-
-// Serial.println("D_MODULE_CORE_SETTINGS_ID");
-          //  char test;
-          //uint8_t test;
-        
-         result = mset->Tasker(function, param1); 
-
-        // result = mrgbani->Tasker(function, param1); 
-
-        // mset->Tasker(function, test);
-        
-
-        }
-        break;
-      #endif
-      #ifdef D_MODULE_CORE_SUPPORT_ID
-        case D_MODULE_CORE_SUPPORT_ID:    result = msup->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_CORE_LOGGING_ID
-        case D_MODULE_CORE_LOGGING_ID:  result = msup->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_CORE_TIME_ID
-        case D_MODULE_CORE_TIME_ID:       result = mt->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_NETWORK_MQTT_ID
-        case D_MODULE_NETWORK_MQTT_ID:       result = mqt->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_NETWORK_WEBSERVER_ID
-        case D_MODULE_NETWORK_WEBSERVER_ID:  result = mweb->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CORE_TELEMETRY_ID
-      case D_MODULE_CORE_TELEMETRY_ID:    result = mtel->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-        case D_MODULE_CORE_HARDWAREPINS_ID:  result = mod->Tasker(function); break;
-      #endif
-      //Sensors
-      #ifdef D_MODULE_SENSORS_DOOR_ID
-        case D_MODULE_SENSORS_DOOR_ID:       result = mds->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DOORBELL_ID
-        case D_MODULE_SENSORS_DOORBELL_ID:   result = mdb->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_MOTION_ID
-        case D_MODULE_SENSORS_MOTION_ID:     result = mms->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
-        case D_MODULE_SENSORS_PZEM004T_MODBUS_ID: result = mspm->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
-        case D_MODULE_SENSORS_ULTRASONIC_ID: result = mus->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DHT_ID
-        case D_MODULE_SENSORS_DHT_ID:       result = msdht->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_BME_ID
-        case D_MODULE_SENSORS_BME_ID:       result = msbme->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DB18S20_ID
-        case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_INA219_ID
-        case D_MODULE_SENSORS_INA219_ID:      result = msina219->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
-        case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;
-      #endif
-      #ifdef USE_MODULE_CUSTOM_BLINDS
-        case D_MODULE_CUSTOM_BLINDS_ID:           result = mbbl->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-        case D_MODULE_CUSTOM_OILFURNACE_ID:       result = mof->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
-        case D_MODULE_CUSTOM_EXERCISEBIKE_ID:     result = meb->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_HEATING_ID
-        case D_MODULE_CUSTOM_HEATING_ID:          result = mh-> Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_RELAY_ID
-        case D_MODULE_DRIVERS_RELAY_ID:           result = mry->Tasker(function,param1);      break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_PWM_ID
-        case D_MODULE_DRIVERS_PWM_ID:           result = mpwm->Tasker(function,param1);      break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = mrl->Tasker(function, param1); break;
-      #endif
-      // #ifdef D_MODULE_DRIVERS_IFAN_ID
-      //   case D_MODULE_DRIVERS_IFAN_ID:      result = mifan->Tasker(function, param1); break;
-      // #endif
-
-      
-
-      // Customs
-      #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-        case D_MODULE_CUSTOM_SONOFF_IFAN_ID:      result = mifan->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-        case D_MODULE_CUSTOM_PWM_FAN_ID:      result = mpwmfan->Tasker(function, param1); break;
-      #endif
-
-
-      #ifdef D_MSAW_MODULE_ID
-        case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mnext->Tasker(function, param1); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_BUTTONS_ID
-        case D_MODULE_SENSORS_BUTTONS_ID:         result =  mbtn->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_SWITCHES_ID
-        case D_MODULE_SENSORS_SWITCHES_ID:        result = mswh->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
-        case D_MODULE_SENSORS_PULSECOUNTER_ID:    result = mpc->Tasker(function); break;
-      #endif
-      //Drivers
-      #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
-        case D_MODULE_DRIVERS_IRTRANSCEIVER_ID:   result = mir->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
-        case D_MODULE_DRIVERS_HBRIDGE_ID:         result = mdhb->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-        case D_MODULE_LIGHTS_ADDRESSABLE_ID:        
-        
-    #ifndef ENABLE_DEVFEATURE_JSONPARSER
-    result = mrgbani->Tasker(function, param1); 
-    #endif // ENABLE_DEVFEATURE_JSONPARSER
-        break;
-      #endif
-      #ifdef D_MODULE_LIGHTS_PWM_ID
-        case D_MODULE_LIGHTS_PWM_ID:     //result = mlights_pwm->Tasker(function, param1); 
-        break;
-      #endif  
-
-
-      #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-        case D_MODULE_LIGHTS_INTERFACE_ID:  
-        
-    #ifndef ENABLE_DEVFEATURE_JSONPARSER
-    result = mil->Tasker(function, param1);
-     
-    #endif // ENABLE_DEVFEATURE_JSONPARSER
-     break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_ENERGY_ID
-        case D_MODULE_DRIVERS_ENERGY_ID:   result = mdenergy->Tasker(function); break;
-      #endif
-      //default
-      default:
-        fModule_present = false;
-        // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "default"));
-      break;
-    } //end switch
-
-    #ifdef DEBUG_EXECUTION_TIME
-    // Remember start millis
-    uint32_t end_millis = millis();
-
-    // Get this execution time 
-    uint32_t this_millis = end_millis - start_millis;
-
-    // Get average
-    if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
-      module_settings.execution_time_average_ms[i] += this_millis;
-      module_settings.execution_time_average_ms[i] /= 2; //gets average
-
-      // Get max
-      if(this_millis > module_settings.execution_time_max_ms[i]){
-        module_settings.execution_time_max_ms[i] = this_millis; // remember max
-      }
-    }
-    #endif
-    
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms"),millis()-start_millis);
-    #endif
-
-    if(target_tasker!=0){
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
-      break; //only run for loop for the class set. if 0, rull all
-    }
-    // Special flag that can be set to end interface ie event handled, no need to check others
-    if(fExitTaskerWithCompletion){fExitTaskerWithCompletion=false;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
-      break; //only run for loop for the class set. if 0, rull all
-    }
-    
-  DEBUG_LINE;
-
-  } //end for
-
-  // yield();
-  
-  DEBUG_LINE;
-  #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
-  #endif
-
-  DEBUG_LINE;
-  return result;
-
-}
-
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
-
 // Switch case should be faster than getext progmem
 // Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way
 const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
@@ -1151,11 +847,11 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
     case FUNC_FUNCTION_LAMBDA_INIT:                   return PM_FUNC_FUNCTION_LAMBDA_INIT_CTR;
     case FUNC_FUNCTION_LAMBDA_LOOP:                   return PM_FUNC_FUNCTION_LAMBDA_LOOP_CTR;
-    case FUNC_COMMAND:                                return PM_FUNC_COMMAND_CTR;
-    case FUNC_COMMAND_SENSOR:                         return PM_FUNC_COMMAND_SENSOR_CTR;
-    case FUNC_COMMAND_DRIVER:                         return PM_FUNC_COMMAND_DRIVER_CTR;
-    case FUNC_JSON_COMMAND:                           return PM_FUNC_JSON_COMMAND_CTR;
-    case FUNC_JSON_COMMAND_OBJECT:                    return PM_FUNC_JSON_COMMAND_OBJECT_CTR;
+    // case FUNC_COMMAND:                                return PM_FUNC_COMMAND_CTR;
+    // case FUNC_COMMAND_SENSOR:                         return PM_FUNC_COMMAND_SENSOR_CTR;
+    // case FUNC_COMMAND_DRIVER:                         return PM_FUNC_COMMAND_DRIVER_CTR;
+    // case FUNC_JSON_COMMAND:                           return PM_FUNC_JSON_COMMAND_CTR;
+    // case FUNC_JSON_COMMAND_OBJECT:                    return PM_FUNC_JSON_COMMAND_OBJECT_CTR;
     case FUNC_WIFI_CONNECTED:                         return PM_FUNC_WIFI_CONNECTED_CTR;
     case FUNC_WIFI_DISCONNECTED:                      return PM_FUNC_WIFI_DISCONNECTED_CTR;
     case FUNC_MQTT_SUBSCRIBE:                         return PM_FUNC_MQTT_SUBSCRIBE_CTR;

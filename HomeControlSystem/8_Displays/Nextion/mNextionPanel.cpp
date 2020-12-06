@@ -603,7 +603,7 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
   rootobj["value"] = "LONG_PRESS";
   rootobj["duration_threshold"] = LONG_PRESS_DURATION;
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   data_buffer.payload.len = measureJson(rootobj)+1;
   serializeJson(doc,data_buffer.payload.ctr);
 
@@ -812,7 +812,7 @@ void mNextionPanel::nextionProcessInput()
         rootobj["event"] = event_ctr;
         rootobj["value"] = D_JSON_ON;
 
-      memset(&data_buffer,0,sizeof(data_buffer));
+      D_DATA_BUFFER_CLEAR();
       data_buffer.payload.len = measureJson(rootobj)+1;
       serializeJson(doc,data_buffer.payload.ctr);
 
@@ -835,7 +835,7 @@ void mNextionPanel::nextionProcessInput()
       rootobj["value"] = D_JSON_OFF;
       rootobj["duration"] = screen_press.tSavedButtonONDurationEvent;
 
-      memset(&data_buffer,0,sizeof(data_buffer));
+      D_DATA_BUFFER_CLEAR();
       data_buffer.payload.len = measureJson(rootobj)+1;
       serializeJson(doc,data_buffer.payload.ctr);
 
@@ -1927,7 +1927,7 @@ void mNextionPanel::configClearSaved()
 
 uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
@@ -1948,7 +1948,7 @@ return 1;
 
 uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   uint8_t ischanged=false;
 
@@ -1980,7 +1980,7 @@ uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
 uint8_t mNextionPanel::ConstructJSON_EnergyStats(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   uint8_t ischanged=false;
 

@@ -35,23 +35,32 @@
 
 #include "2_CoreSystem/Logging/mLogging.h"
 
-
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "1_TaskerManager/mTaskerManager.h"
 
 
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
-#ifdef ESP32
-  #include <WiFi.h>
-#endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
   #include <ESP8266httpUpdate.h>
 #endif
+
+#ifdef ESP32
+#include <WiFi.h>
+#ifndef DISABLE_NETWORK
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif
+
+
+
+
 
 #include "2_CoreSystem/Time/mTime.h"
 

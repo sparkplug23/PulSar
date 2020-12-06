@@ -213,9 +213,6 @@ class mSensorsINA219{
       float direct_power_mw;
       
     }sensor[MAX_SENSORS];
-
-
-    void AddToJsonObject_AddHardware(JsonObject root);
         
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

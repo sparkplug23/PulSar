@@ -1283,7 +1283,7 @@ void mWebServer::HandleSystemSettings(AsyncWebServerRequest *request)
   
   // AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_SYSTEM_SETTINGS);
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
   // char *buf = data_buffer.payload.ctr;
   // char **buffer = &buf;
   // buffer_writer_len = 0;
@@ -1958,7 +1958,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 
 //   // // Serial.println(WEB_HANDLER_SCRIPT_INFROMATION_DATA_FETCHER_URLS_RATES_VAR); Serial.flush();      
 
-//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // D_DATA_BUFFER_CLEAR();
 //   // char *buf = data_buffer.payload.ctr;
 //   // char **iter = &buf;
 //   // buffer_writer_internal = iter;
@@ -2013,7 +2013,7 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 //   // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
 //   // uint16_t freemem_start = ESP.getFreeHeap();  
   
-//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // D_DATA_BUFFER_CLEAR();
 //   // char *buf = data_buffer.payload.ctr;
 //   // char **buffer = &buf;
 

@@ -54,9 +54,9 @@ int8_t mWiFi::Tasker(uint8_t function){
 
 
       // #ifdef ESP32
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog_P(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
+    // #endif// ENABLE_LOG_LEVEL_INFO
       // #endif
 
       if (pCONT_set->Settings.flag_network.network_wifi) {
@@ -617,7 +617,7 @@ void mWiFi::WifiCheckIp(void)
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG DEBUG_INSERT_PAGE_BREAK "mWiFi::WifiCheckIp"));
+  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
 
     #endif// ENABLE_LOG_LEVEL_INFO
   // return;

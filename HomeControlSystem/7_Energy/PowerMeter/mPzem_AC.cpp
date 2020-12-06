@@ -232,7 +232,7 @@ int8_t mPzem_AC::Tasker(uint8_t function){
 
 uint8_t mPzem_AC::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   // StaticJsonDocument<400> doc;
   // JsonObject root = doc.to<JsonObject>();
 
@@ -250,7 +250,7 @@ uint8_t mPzem_AC::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mPzem_AC::ConstructJSON_Sensor(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   // DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
   // JsonObject root = doc.to<JsonObject>();

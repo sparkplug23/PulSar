@@ -480,3 +480,6 @@ Fix multiple repos "git push -f origin master"
 
 #Idea 110
     Add devicename on boot message
+
+#IDea 111
+    Add array that can store the segment the pixels are from. Ie pixels = 0,1,2,3,4,5,6,7 can be mapped into [0,1,2,3,0,1,2,3] that way I can set a segment (index) to be a set colour, should help with animations too. Also shelf hearts, where hearts are a different segment to the rest.

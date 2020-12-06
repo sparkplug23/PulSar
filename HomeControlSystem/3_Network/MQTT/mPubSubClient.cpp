@@ -407,7 +407,7 @@ boolean mPubSubClient::loop() {
             uint8_t *payload;
             if (len > 0) {
 
-                memset(&data_buffer,0,sizeof(data_buffer));
+                D_DATA_BUFFER_CLEAR();
 
                 lastInActivity = t;
                 uint8_t type = buffer[0]&0xF0;

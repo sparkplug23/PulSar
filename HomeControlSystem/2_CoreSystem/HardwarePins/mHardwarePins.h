@@ -27,7 +27,7 @@ class mHardwarePins{
 
     void ModuleSettings_FlashSerial();
     
-int jsoneq(const char *json, jsmntok_t *tok, const char *s);
+// int jsoneq(const char *json, jsmntok_t *tok, const char *s);
     
     void ParseModuleTemplate();
 
@@ -68,9 +68,10 @@ uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
     bool ValidTemplateModule(uint8_t index);
     bool ValidModule(uint8_t index);
     const char* AnyModuleName2(uint8_t index);
-    //String AnyModuleName(uint8_t index);
     
-const char* AnyModuleName(uint8_t index, char* buffer, uint8_t buflen);
+
+int jsoneq(const char *json, jsmntok_t *tok, const char *s) ;
+    const char* AnyModuleName(uint8_t index, char* buffer, uint8_t buflen);
 
     const char* ModuleName(char* buffer, uint8_t buflen);
     void GpioInit(void);
@@ -85,9 +86,6 @@ const char* AnyModuleName(uint8_t index, char* buffer, uint8_t buflen);
     bool JsonTemplate(const char* dataBuf);
     void TemplateJson();
 
-
-
-    
     int8_t Tasker(uint8_t function);
     void pre_init(void);
 

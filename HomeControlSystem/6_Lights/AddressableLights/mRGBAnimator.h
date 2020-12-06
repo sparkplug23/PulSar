@@ -6,6 +6,20 @@
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 
+
+#ifdef ESP32
+#include <WiFi.h>
+#ifndef DISABLE_NETWORK
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif
+
+
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "6_Lights/_Interface/palettes.h"
@@ -15,14 +29,11 @@
 
 #include "6_Lights/_Interface/mInterfaceLight.h"
 
-#ifdef ESP8266
-// #include "AsyncJson.h"
-#endif //ESP8266
+// Default enables, unless I add disable versions
+#ifndef DISABLE_PIXEL_FUNCTION_FLASHER 
+  #define ENABLE_PIXEL_FUNCTION_FLASHER
+#endif // DISABLE_PIXEL_FUNCTION_FLASHER
 
-
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 // #define ENABLE_PIXEL_FUNCTION_FLASHER
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -89,6 +100,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR)     "animation";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR) "notifications";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR)       "flasher";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)         "mixer";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR) "setpixel_manually";
 
 
     
@@ -298,8 +310,8 @@ class mRGBAnimator{
     // };
     
 
-  #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 20
-  uint8_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
+  #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
+  uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
   
   typedef union {
     uint16_t data; // allows full manipulating
@@ -320,7 +332,7 @@ class mRGBAnimator{
     uint8_t method_id = 0;
     uint8_t multiplier = 5; // nearby pixels repeat colours
     struct MAPPED_ARRAY_DATA{
-      uint8_t* values = nullptr;
+      uint16_t* values = nullptr;
       uint8_t  index = 0;
       uint8_t  length = 0;
     }mapped_array_data;
@@ -336,7 +348,7 @@ class mRGBAnimator{
 
     bool OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
 
-    #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL_AMBILIGHT
+    #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
     /**************
      * Ambilight is light patterns around screens or pictures
      * PRESETS - patterns
@@ -353,7 +365,7 @@ class mRGBAnimator{
 
     /*******AMBILIGHT*********************************************************************************************/
 
-    void SubTask_Ambilight();
+    void SubTask_Ambilight_Main();
     void Ambilight_Sides();
     void Ambilight_Presets();
     void Ambilight_InputStream();
@@ -408,6 +420,21 @@ class mRGBAnimator{
     FLASHER_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
     FLASHER_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,
+
+    /**
+     * Palette is first drawn with certain lower brightness level, then
+     * additional changes takes those colours and bumbs their brightness up to desired brightness
+     * Few change, random pixels bumped up
+     * Check if their brightness is <upper, before asserting them brighter (or convert to hsbcolour, flick up brightness if needed then change back to rgb)
+     * Goes from low to high then stops
+     * */
+    FLASHER_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY,
+
+
+    /**
+     * 0/100% animaiton progress is low brightness, 50% flips to upper brightness
+    */
+    FLASHER_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK,
 
     // FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
     FLASHER_FUNCTION_FADE_GRADIENT_ID, //single pixels: static, twinkle, pick from palette
@@ -600,6 +627,12 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
   void AnimUpdateMemberFunction_Slow_Glow_Partial_Palette_Step_Through(const AnimationParam& param);
 
 
+  void SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+
+
+void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+  void AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back(const AnimationParam& param);
+
 
 
   void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
@@ -637,27 +670,27 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
   uint16_t setpixel_variable_index_counter = 0;
 
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-  void parsesub_Flasher(JsonObjectConst obj);
-#endif// ENABLE_DEVFEATURE_ARDUINOJSON
   void init_flasher_settings();
 
   uint16_t SetLEDOutAmountByPercentage(uint8_t percentage);
   
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   enum FLASHER_FUNCTION_MIXER{
-    FLASHER_FUNCTION_MIXER_1_ID=0,
-    FLASHER_FUNCTION_MIXER_2_ID,
-    FLASHER_FUNCTION_MIXER_3_ID,
-    FLASHER_FUNCTION_MIXER_4_ID,
-    FLASHER_FUNCTION_MIXER_5_ID,
-    FLASHER_FUNCTION_MIXER_6_ID,
-    FLASHER_FUNCTION_MIXER_7_ID,
-    FLASHER_FUNCTION_MIXER_8_ID,
-    FLASHER_FUNCTION_MIXER_9_ID,
+    FLASHER_FUNCTION_MIXER_01_ID=0,
+    FLASHER_FUNCTION_MIXER_02_ID,
+    FLASHER_FUNCTION_MIXER_03_ID,
+    FLASHER_FUNCTION_MIXER_04_ID,
+    FLASHER_FUNCTION_MIXER_05_ID,
+    FLASHER_FUNCTION_MIXER_06_ID,
+    FLASHER_FUNCTION_MIXER_07_ID,
+    FLASHER_FUNCTION_MIXER_08_ID,
+    FLASHER_FUNCTION_MIXER_09_ID,
     FLASHER_FUNCTION_MIXER_10_ID,
     FLASHER_FUNCTION_MIXER_11_ID,
     FLASHER_FUNCTION_MIXER_12_ID,
+    // FLASHER_FUNCTION_MIXER_13_ID,
+    // FLASHER_FUNCTION_MIXER_14_ID, 
+    // FLASHER_FUNCTION_MIXER_15_ID, 
     FLASHER_FUNCTION_MIXER_LENGTH_ID
   };
   #define FLASHER_FUNCTION_MIXER_MAX FLASHER_FUNCTION_MIXER_LENGTH_ID
@@ -676,6 +709,10 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
       */
       // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
       // uint16_t mapped_array_editable_or_progmem : 1;
+
+      
+
+
     };
   } MIXER_SETTINGS_FLAGS;
 
@@ -693,6 +730,12 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
       // uint16_t mapped_array_editable_or_progmem : 1;
       
       uint16_t enable_force_preset_brightness_scaler : 1; // to allow manual brightness leveling
+
+      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
+      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+
+
+
     };
   } MIXER_SETTINGS_GROUP_FLAGS;
   
@@ -700,9 +743,9 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
   struct MIXER_SETTINGS{
    // #ifdef DEVICE_OUTSIDETREE
     struct MODE{
-      uint8_t running_id = FLASHER_FUNCTION_MIXER_1_ID;
+      uint8_t running_id = FLASHER_FUNCTION_MIXER_05_ID;
       uint16_t time_on_secs[FLASHER_FUNCTION_MIXER_MAX]; // stores which to use
-      int16_t time_on_secs_active = 10; //signed
+      int16_t time_on_secs_active = 60; //signed
       // char running_friendly_name_ctr[40];
       struct TIMES{
        // uint16_t enable_skip_restricted_by_time[FLASHER_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
@@ -717,16 +760,20 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
     uint32_t tSavedTrigger = millis();
     // uint32_t tSavedRestart = millis();
     // uint8_t enabled = false;
-    uint8_t time_scaler = 6;
+    // uint8_t time_scaler = 6;
     // uint32_t tSavedSendData;
-      uint8_t enabled_mixer_count = 0; // 10 max
+    uint8_t enabled_mixer_count = 0; // 10 max
+
+    // Shared loaded values to act on
+    uint8_t brightness_lower_255 = 0;
+    uint8_t brightness_higher_255 = 255;
 
     MIXER_SETTINGS_FLAGS flags;
 
 
     //int16_t time_on_secs_active = 10; //signed
     // char running_friendly_name_ctr[100];
-    uint8_t running_id = FLASHER_FUNCTION_MIXER_1_ID;
+    uint8_t running_id = FLASHER_FUNCTION_MIXER_01_ID;
     uint8_t run_time_duration_scaler_as_percentage = 100; // for debugging, running faster
       
     struct GROUPS_SETTINGS{
@@ -744,6 +791,9 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
         uint16_t rate = 0;
         uint8_t  time_unit_id = 0; // secs vs ms
       }transition;
+
+      uint8_t brightness_lower_255 = 0;
+      uint8_t brightness_higher_255 = 255;
 
       uint8_t animation_transition_order = TRANSITION_ORDER_INORDER_ID;
       uint8_t flashersettings_function = FLASHER_FUNCTION_SLOW_GLOW_ID;
@@ -788,27 +838,13 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
     int8_t Tasker(uint8_t function);
     int8_t Tasker_Web(uint8_t function);
 
-
-    // #ifdef ENABLE_DEVFEATURE_JSONPARSER
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
-    // #endif
-    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    // void parse_JSONCommand(JsonObjectConst obj);
-    // #endif
 
 
     
     void SubTask_Presets();
     
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
-    void parsesub_ModeManual(JsonObjectConst obj);
-    void parsesub_ModeAnimation(JsonObjectConst obj);
-    void parsesub_ModeAmbilight(JsonObjectConst obj);
-#endif //  ENABLE_DEVFEATURE_ARDUINOJSON
 
 
         // make number generator, random, with skewness
@@ -893,6 +929,9 @@ void UpdateDesiredColourWithSingleColour(RgbcctColor colour);
 
     
 void ApplyBrightnesstoDesiredColour(uint8_t brightness);
+
+RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
+
 
 
 void Settings_Load();
@@ -1029,6 +1068,21 @@ void StripUpdate();
 
   timereached_t tSavedCalculatePowerUsage;
 
+
+
+    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+    void SubTask_Manual_SetPixel();
+    #endif// ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+
+
+  #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
+  #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+
+void SetPixelColor_All(RgbcctColor colour);
+
   // #define WEB_HANDLE_ANIMATION_BRIGHTNESS_SLIDER "animation_brightness"
   // #define WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER "scn_sld_w"
   // #define USE_APPENDED_COLOUR_VALUES_TO_EDITOR_LIST
@@ -1078,23 +1132,25 @@ void StripUpdate();
       MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID,
+      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+        MQTT_HANDLER_MODULE_MANUAL_SETPIXEL_TELEPERIOD_ID,
+      #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    // const char* postfix_topic_animation = "animation";
-    struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;    
-    // const char* postfix_topic_ambilight = "ambilight";
+
+    struct handler<mRGBAnimator> mqtthandler_animation_teleperiod;  
     struct handler<mRGBAnimator> mqtthandler_ambilight_teleperiod;
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    // const char* postfix_topic_notifications = "notifications";
     struct handler<mRGBAnimator> mqtthandler_notifications_teleperiod;
     #endif
-    // const char* postfix_topic_state = "state";
     struct handler<mRGBAnimator> mqtthandler_state_teleperiod;
-    // const char* postfix_topic_flasher = "flasher/animator";
     struct handler<mRGBAnimator> mqtthandler_flasher_teleperiod;
-    // const char* postfix_topic_mixer = "flasher/mixer";
     struct handler<mRGBAnimator> mqtthandler_mixer_teleperiod;
+    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      struct handler<mRGBAnimator> mqtthandler_manual_setpixel;
+    #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
   #endif
   
   /*******NOTIFICATIONS*********************************************************************************************/

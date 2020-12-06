@@ -12,6 +12,13 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
   int8_t function_result = 0;
 
+  #ifdef DEVICE_RGBDELL
+
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_AMBILIGHT_ID;
+  // ambilightsettings.ambilight_mode = AMBILIGHT_SIDES_ID;
+  // pCONT_set->Settings.light_settings.type == LT_WS2812;
+
+  #endif
   
   #ifdef ENABLE_DEVFEATURE_FLICKERING_TEST5
   // pCONT_iLight->_briRGB = 255;
@@ -83,6 +90,16 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
       // pCONT_wif->wifi_counter_tester++;
       // AddLog_P(LOG_LEVEL_INFO,PSTR("wifi_counter_tester=%d"),pCONT_wif->wifi_counter_tester);
 
+//       Serial.println("HERE");
+//       for(int i=0;i<45;i++){
+
+// Serial.printf("%02d | %d\n\r",i,editable_mapped_array_data_array[i]);
+
+//       }
+
+// Serial.println();
+      
+
 
   //     SetPixelColor(0,RgbTypeColor(255,0,0));
   //     SetPixelColor(1,RgbTypeColor(0,255,0));
@@ -92,31 +109,34 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
   // stripbus->Show();
 
-  #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
-    char result[100];
-    pCONT_sup->GetTextIndexed_P(result, sizeof(result), mixer.running_id, PM_OUTSIDE_TREE_MIXER_DESCRIPTION);  // should this be _P?
-    AddLog_P(LOG_LEVEL_INFO, PSTR("Mixer routine \"%s\""), result);          
-  #endif // USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
+  // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
+  //   char result[100];
+  //   pCONT_sup->GetTextIndexed_P(result, sizeof(result), mixer.running_id, PM_OUTSIDE_TREE_MIXER_DESCRIPTION);  // should this be _P?
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR("Mixer routine \"%s\""), result);          
+  // #endif // USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
 
 
 
 
 
     }break;
+    case FUNC_EVERY_MINUTE:
+
+    // pCONT_iLight->animation.flags.use_gamma_for_brightness ^= 1;
+
+    break;
     case FUNC_LOOP: 
       EveryLoop();
     break;    
     /************
      * COMMANDS SECTION * 
     *******************/
-    #ifdef ENABLE_DEVFEATURE_JSONPARSER
     case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
       CheckAndExecute_JSONCommands();
     break;
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand();
     break;
-    #endif // ENABLE_DEVFEATURE_JSONPARSER
     /************
      * MQTT SECTION * 
     *******************/
@@ -172,9 +192,8 @@ int8_t mRGBAnimator::CheckAndExecute_JSONCommands(){
 
 void mRGBAnimator::parse_JSONCommand(void){
 
-#ifdef ENABLE_DEVFEATURE_JSONPARSER
   // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len];
+  char parsing_buffer[data_buffer.payload.len+1];
   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
@@ -238,6 +257,13 @@ void mRGBAnimator::parse_JSONCommand(void){
     flashersettings.brightness_min = jtok.getInt();
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+  }
+
+  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_BRIGHTNESS_MAX]){ 
+    flashersettings.brightness_max = jtok.getInt();
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
   }
 
@@ -321,12 +347,12 @@ void mRGBAnimator::parse_JSONCommand(void){
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   }
    
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
-    mixer.time_scaler = jtok.getInt();
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-    #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  }
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
+  //   mixer.time_scaler = jtok.getInt();
+  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
+  //   #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+  // }
 
   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
     mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
@@ -337,12 +363,126 @@ void mRGBAnimator::parse_JSONCommand(void){
 
   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
     uint8_t val = jtok.getInt();
+    mixer.running_id = val;
     LoadMixerGroupByID(val);
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
   }
 #endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+
+#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+
+  if(jtok = obj["Strip"].getObject()["ClearTo"]){ 
+
+
+    if(jtok.isArray()){
+
+
+      RgbcctColor colour = RgbcctColor(0);
+
+      uint8_t index = 0;
+      JsonParserArray array = obj["Strip"].getObject()["ClearTo"];
+      for(auto v : array) {
+        switch(index){
+          case 0: colour.R = v.getInt();
+          case 1: colour.G = v.getInt();
+          case 2: colour.B = v.getInt();
+          case 3: colour.WC = v.getInt();
+          case 4: colour.WW = v.getInt();
+        }
+        
+
+
+
+
+        int val = v.getInt();
+        // if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
+        // editable_mapped_array_data_array[index++] = val;
+        index++;
+
+        // pCONT_iLight->animation.mode_id =  pCONT_iLight->ANIMATION_MODE_MANUAL_SETPIXEL_ID;
+
+        // SetPixelColor(val, pCONT_iLight->mode_singlecolour.colour);
+
+        // animation_colours[val].DesiredColour = pCONT_iLight->mode_singlecolour.colour;
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
+    #endif// ENABLE_LOG_LEVEL_INFO          
+      }
+    
+
+
+
+
+      SetPixelColor_All(colour);
+    }
+
+  }
+
+  if(jtok = obj[PM_JSON_MANUAL_SETPIXEL_TO_SCENE]){ 
+    if(jtok.isArray()){
+
+
+//testing, froce it
+pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,255,255);
+
+
+      uint8_t index = 0;
+      JsonParserArray array = obj[PM_JSON_MANUAL_SETPIXEL_TO_SCENE];
+      for(auto v : array) {
+        int val = v.getInt();
+        // if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
+        // editable_mapped_array_data_array[index++] = val;
+        index++;
+
+        //Count active pixels
+        uint16_t pixels_on = 0;
+        for(uint16_t i=0;i<strip_size;i++){ 
+          if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
+            pixels_on++;
+          }      
+        }
+
+        if(pixels_on <= 5){
+          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,0,0);
+        }else
+        if(pixels_on <= 10){
+          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(0,255,0);
+        }else
+        if(pixels_on <= 15){
+          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(0,0,255);
+        }else
+        if(pixels_on <= 20){
+          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,0,255);
+        }else{
+          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,255,255);
+        }
+
+        pCONT_iLight->animation.mode_id =  pCONT_iLight->ANIMATION_MODE_MANUAL_SETPIXEL_ID;
+
+        SetPixelColor(val, pCONT_iLight->mode_singlecolour.colour);
+
+        animation_colours[val].DesiredColour = pCONT_iLight->mode_singlecolour.colour;
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
+    #endif// ENABLE_LOG_LEVEL_INFO          
+      }
+      // pixel_group.mapped_array_data.length = index;
+
+      stripbus->Show();
+
+      data_buffer.isserviced++;
+    }
+  }
+
+
+
+#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
 // CHANGE TO USE RELAYS INSTEAD
   // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
@@ -417,285 +557,7 @@ void mRGBAnimator::parse_JSONCommand(void){
 // #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST
   // t_mqtthandler_status_animation.flags.SendNow = true; 
 
-
-#endif // ENABLE_DEVFEATURE_JSONPARSER
-
 }
-
-// #ifndef ENABLE_DEVFEATURE_JSONPARSER
-
-
-// int8_t mRGBAnimator::CheckAndExecute_JSONCommands(JsonObjectConst obj){
-
-//   // Check if instruction is for me
-//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//     parse_JSONCommand(obj);
-//     return FUNCTION_RESULT_HANDLED_ID;
-//   }else{
-//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-//   }
-
-// }
-
-// void mRGBAnimator::parse_JSONCommand(JsonObjectConst obj){
-  
-// #ifndef USE_DEVFEATURE_DISABLE_PROGMEM_TEST
-//   int8_t tmp_id = 0;
-//   char buffer[50];
-  
-//   if(!obj[CFLASH(PM_JSON_ANIMATIONENABLE)].isNull()){ 
-//     const char* onoff = obj[CFLASH(PM_JSON_ANIMATIONENABLE)];
-//     uint8_t state = pCONT_sup->GetStateNumber(onoff);
-//     pCONT_iLight->animation.flags.fEnable_Animation = ConvertStateNumberIfToggled(state, pCONT_iLight->animation.flags.fEnable_Animation);
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//       #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-
-  
-
-
-// // RAM:   [======    ]  60.1% (used 49240 bytes from 81920 bytes)
-// // Flash: [=====     ]  49.9% (used 510528 bytes from 1023984 bytes)
-
-//   /**
-//    *  Flasher function specific commands
-//    * */
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)].isNull()){ 
-//     const char* functionctr = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
-//     if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
-//       flashersettings.function = tmp_id;      
-//       flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; // new function, then generate its 
-//       data_buffer.isserviced++;
-//     }else{
-//       flashersettings.function = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_FUNCTION)];
-//       flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
-//     }
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer));
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)].isNull()){ 
-//     flashersettings.update_colour_region.refresh_secs = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_COLOUR_REFRESH_RATE)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)].isNull()){ 
-//     flashersettings.flags.movement_direction = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_DIRECTION)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-  
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)].isNull()){ 
-//     flashersettings.brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_BRIGHTNESS_MIN)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)].isNull()){ 
-//     shared_flasher_parameters.alternate_brightness_min = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MIN)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)].isNull()){ 
-//     shared_flasher_parameters.alternate_brightness_max = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_BRIGHTNESS_MAX)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)].isNull()){ 
-//     shared_flasher_parameters.alternate_random_amount_as_percentage = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_ALTERNATE_AMOUNT)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-// /**
-//  * 
-//  * random flags
-//  * 
-//  * **/
-
-
-//   if(!obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)].isNull()){ 
-//     pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = obj[CFLASH(PM_JSON_FLASHER)][CFLASH(PM_JSON_AGED_COLOURING)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-
-//   #endif // ENABLE_PIXEL_FUNCTION_FLASHER
-
-//   /**
-//    * Pixel output grouping settings
-//    * */
-//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
-//     const char* onoff = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_ENABLED)];
-//     uint8_t state = pCONT_sup->GetStateNumber(onoff);
-//     pixel_group.flags.fEnabled = ConvertStateNumberIfToggled(state, pixel_group.flags.fEnabled);
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)].isNull()){ 
-//     pixel_group.flags.multiplier_mode_id = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MODE)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)].isNull()){ 
-//     pixel_group.multiplier = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MULTIPLIER)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MULTIPLIER)), pixel_group.multiplier);
-//     #endif // ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].isNull()){
-//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
-//     if(obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)].is<JsonArray>()){   
-//       uint8_t index = 0;
-//       JsonArrayConst array = obj[CFLASH(PM_JSON_PIXELGROUPING)][CFLASH(PM_JSON_MAPPED_MULTIPLIER_DATA)];
-//       for(JsonVariantConst v : array) {
-//         int val = v.as<int>();
-//         if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
-//         editable_mapped_array_data_array[index++] = val;
-//         // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);          
-//       }
-//       pixel_group.mapped_array_data.length = index;
-//       data_buffer.isserviced++;
-//     }
-//   }
-
-//   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)].isNull()){ 
-//     mixer.flags.Enabled = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_ENABLED)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-   
-//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)].isNull()){ 
-//     mixer.time_scaler = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_TIME_SCALER_AS_PERCENTAGE)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-//     #endif //#ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)].isNull()){ 
-//     mixer.run_time_duration_scaler_as_percentage = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)];
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-//   if(!obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)].isNull()){ 
-//     uint8_t val = obj[CFLASH(PM_JSON_MIXER)][CFLASH(PM_JSON_RUNNING_ID)];
-//     LoadMixerGroupByID(val);
-//     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-//     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   }
-
-
-
-  
-//   #endif //ENABLE_PIXEL_FUNCTION_MIXER
-
-// // CHANGE TO USE RELAYS INSTEAD
-//   // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
-//   //   const char* onoff = obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)];    
-//   //   uint8_t relay_state_new = pCONT_sup->GetStateNumber(onoff);
-//   //   uint8_t relay_state_current = 0;
-//   //   if(relay_state_new==STATE_NUMBER_TOGGLE_ID){
-//   //     // pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
-//   //   }else{
-//   //     // pCONT_iLight->animation.flags.fEnable_Animation = state;
-//   //   }
-//   //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_EXTERNAL_POWER_ONOFF,relay_state_new);
-//   //   #endif
-//   //   data_buffer.isserviced++;
-//   // }
-
-
-//   // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
-//   //   const char* onoff = obj[CFLASH(PM_JSON_ONOFF];
-//   //   if(strstr(onoff,"ON")){ 
-      
-//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-//   //     #endif
-      
-//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
-//   //     #endif
-//   //     // Add this as "SAVE" state then "LOAD" state
-//   //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
-
-//   //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
-//   //     pCONT_iLight->light_power = true;
-
-//   //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
-//   //     data_buffer.isserviced++;
-//   //   }else if(strstr(onoff,"OFF")){
-//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-//   //     #endif
-//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
-//   //     #endif
-//   //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
-//   //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-//   //     pCONT_iLight->light_power = false;
-
-//   //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
-//   //     data_buffer.isserviced++;
-//   //   }else{
-//   //     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-//   //     #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-//   //   }
-//   // }
-
-//   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-//   parsesub_NotificationPanel(obj);
-//   #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
-
-//   //pCONT_iLight->animation.flags.fForceUpdate = true;
-  
-//   if(data_buffer.isserviced){ //update string, move to shared place
-   
-//    //add flag on this, so its not always forced
-//    // SetRefreshLEDs(); // implement in 1 second 
-//   }
-
-
-// #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST
-//   // t_mqtthandler_status_animation.flags.SendNow = true; 
-
-// }
-
-
-
-// #endif // ENABLE_DEVFEATURE_JSONPARSER
-
-
 
 
 /*******************************************************************************************************************
@@ -758,8 +620,11 @@ void mRGBAnimator::init(void){
   // flashersettings.flags.enable_startcolour_as_alternate = true;
   // flashersettings.flags.enable_endingcolour_as_alternate = true;
   
-
+#ifdef ESP8266
   randomSeed(analogRead(0));
+#else
+  randomSeed(analogRead(34)); //esp32
+#endif
   
   for(ledout.index=0;
     ledout.index<STRIP_SIZE_MAX;
@@ -788,10 +653,10 @@ void mRGBAnimator::init(void){
     init_NotificationPanel();
   #endif
   
-  #ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+  #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
-  #endif
+  #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
   init_flasher_settings();
   #endif
@@ -899,6 +764,9 @@ DEBUG_LINE;
 
   }else{
     
+    pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
+
+
     // Check for user defined defaults
     #ifdef DEFAULT_LIGHTING_TRANSITION_ORDER_ID
       pCONT_iLight->animation.transition.order_id = 6;/*DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
@@ -973,15 +841,54 @@ DEBUG_LINE;
   
   memset(&editable_mapped_array_data_array,0,sizeof(editable_mapped_array_data_array));
 
-    uint8_t mapped_array_data_array_tree_test[] = {
-      // 20,19, //39
-      // 15,16, //70
-      // 13,9, //92
-      // 7,1  //100
-      22,14,14,15,15,15,12,20,10,8,4,1
-    };
+    // uint8_t mapped_array_data_array_tree_test[] = {
+    //   // 20,19, //39
+    //   // 15,16, //70
+    //   // 13,9, //92
+    //   // 7,1  //100
+    //   // 22,14,14,15,15,15,12,20,10,8,4,1
+    //   #ifdef DEVICE_RGBOUTSIDETREE
+    //   50,25,50,25
+    //   #else
+    //   2,3,4,5
+    //   #endif
 
-  memcpy(editable_mapped_array_data_array, mapped_array_data_array_tree_test, sizeof(mapped_array_data_array_tree_test));
+    // };
+
+    
+  // uint16_t single_row_count_array[] = {31,44,39,42,43,43,43,42,42,42,41,39,38,36,33,30,29,28,25,25,23,22,22,20,18,19,17,18,16,14,14,13,10,10,11,11,8,4,4,5,6,6,5,16,3};
+  
+  
+  uint16_t single_row_count_array[] = {
+    31,35,39,42,43,//31,44,39,42,43,
+    43,43,42,42,42,
+    41,39,38,36,33,
+    30,29,28,25,25,
+    23,22,22,20,18,
+    19,17,18,16,14,
+    14,13,10,10,11,
+    11,8,4,4,5,6,6,
+    5,5,5,5,5,
+    
+    
+    
+    0,3
+  }; // 0 is filled last
+  uint8_t single_row_count_array_size = 49;//sizeof(single_row_count_array)/single_row_count_array[0];
+
+  // Serial.println(single_row_count_array_size);
+  // delay(5000);
+  
+  uint16_t count = 0;
+  for(int i=0;i<single_row_count_array_size;i++){
+    count += single_row_count_array[i];
+  }
+  single_row_count_array[single_row_count_array_size-2] = 1050-count; // use 2nd last one as filler
+  
+
+  memcpy(editable_mapped_array_data_array, single_row_count_array, sizeof(single_row_count_array));
+
+
   pixel_group.mapped_array_data.length = ArrayCountUntilNull(editable_mapped_array_data_array, (uint8_t)D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH); //values before 0
 
 DEBUG_LINE;
@@ -1015,7 +922,7 @@ uint8_t mRGBAnimator::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
 
 
 
-#ifdef USE_PIXEL_ANIMATION_MODE_PIXEL
+#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -1036,15 +943,26 @@ void mRGBAnimator::init_Ambilight(){
   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
+  
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+
 }
 
-void mRGBAnimator::SubTask_Ambilight(){
+void mRGBAnimator::SubTask_Ambilight_Main(){
 
   // Add mode to allow orientations, for when screens rotate so they respect top/bottom
 
   // if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "ambilight"));
   // }
+
+  
+  // ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbColor(255,0,0);
+  // ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbColor(0,255,0); 
+  // ambilightsettings.screens[SCREEN_CENTRE].left.colour   = RgbColor(0,0,255);
+  // ambilightsettings.screens[SCREEN_CENTRE].right.colour  = RgbColor(255,0,255);
+
 
   //switch modes : USE presets
   switch(ambilightsettings.ambilight_mode){
@@ -1054,7 +972,7 @@ void mRGBAnimator::SubTask_Ambilight(){
     case AMBILIGHT_SIDES_ID: // IE DELL of dual tone from the past
       // not even splits, setting split point (ie bottom edge only 0%, 25% way up sides, half way 50%)
       if(abs(millis()-ambilightsettings.tSavedUpdate)>ambilightsettings.ratemsSavedUpdate){ambilightsettings.tSavedUpdate=millis();
-        //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "ambilight"));
+        AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "ambilight"));
         Ambilight_Sides();
         StartAnimationAsBlendFromStartingColorToDesiredColor();
       }
@@ -1078,7 +996,7 @@ void mRGBAnimator::Ambilight_Sides(){
   uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
   uint8_t bottom_start = 0;
   for(int bottom=0;bottom<bottom_size;bottom++){
-    desired_colour[bottom_start+bottom] = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
+    animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
   }
 
   uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
@@ -1090,13 +1008,13 @@ void mRGBAnimator::Ambilight_Sides(){
                                          RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
                                          progress);
     //}
-    desired_colour[left_start+left] = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].left.colour;
+    animation_colours[left_start+left].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].left.colour;
   }
 
   uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
   uint8_t top_start = 52;
   for(int top=0;top<top_size;top++){
-    desired_colour[top_start+top] = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
+    animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
   }
 
   uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
@@ -1106,422 +1024,420 @@ void mRGBAnimator::Ambilight_Sides(){
     colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
                                        RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
                                        progress);
-    desired_colour[right_start+right] = colour_tmp;
+    animation_colours[right_start+right].DesiredColour = colour_tmp;
   }
 
 }
 
 
+// void mRGBAnimator::parsesub_ModeAmbilight(){
 
-//previous heating panel
-void mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
+//    // Create local dereferenced variable
+//   // JsonObject obj = (*_obj); 
 
-   // Create local dereferenced variable
-  // JsonObject obj = (*_obj); 
-
-  int8_t tmp_id = 0;
+//   int8_t tmp_id = 0;
   
 
-  char buffer[50];
+//   char buffer[50];
 
-// // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// // // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
-//   if(!obj[D_JSON_NAME].isNull()){ 
-//     const char* scenectr = obj[D_JSON_NAME];
-//     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
-//       scene.name_id = tmp_id;
-//       pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
-//       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
-//       data_buffer.isserviced++;
-//     }else{
-//       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
-//     }
-//   }
+// //   if(!obj[D_JSON_NAME].isNull()){ 
+// //     const char* scenectr = obj[D_JSON_NAME];
+// //     if((tmp_id=GetSceneIDbyName(scenectr))>=0){
+// //       scene.name_id = tmp_id;
+// //       pCONT_iLight->animation.mode_id = ANIMATION_MODE_SCENE_ID;
+// //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetSceneName(buffer));
+// //       // Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_NAME,GetSceneName(buffer));
+// //       data_buffer.isserviced++;
+// //     }else{
+// //       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,scenectr);
+// //     }
+// //   }
 
-//   // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// //   // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
-//   // USe pointers
-//   //side
-//   // struct AMBILIGHT_SCREEN_SETTINGS.SCREENS[0]::
-//   // ambilightsettings.screens[SCREEN_CENTRE].top
-//   //screen
+// //   // USe pointers
+// //   //side
+// //   // struct AMBILIGHT_SCREEN_SETTINGS.SCREENS[0]::
+// //   // ambilightsettings.screens[SCREEN_CENTRE].top
+// //   //screen
   
-//   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
-//     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-//     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
-//     data_buffer.isserviced++;
-//   }
-//   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
-//     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-//     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
-//     data_buffer.isserviced++;
-//   }
-//   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
-//     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-//     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
-//     data_buffer.isserviced++;
-//   }
+// //   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
+// //     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
+// //     data_buffer.isserviced++;
+// //   }
+// //   if(!obj[F("top")][F(D_JSON_SAT)].isNull()){ 
+// //     uint8_t sat = obj[F("top")][F(D_JSON_SAT)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.S = pCONT_iLight->SatN2F(sat);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].top.colour.S);
+// //     data_buffer.isserviced++;
+// //   }
+// //   if(!obj[F("top")][F(D_JSON_BRT)].isNull()){ 
+// //     uint8_t brt = obj[F("top")][F(D_JSON_BRT)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+// //     data_buffer.isserviced++;
+// //   }
 
 
 
-//   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
-//     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-//     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
-//     data_buffer.isserviced++;
-//   }
-//   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
-//     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
-//     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
-//     data_buffer.isserviced++;
-//   }
-//   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
-//     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
-//     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
-//     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
-//     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
-//     data_buffer.isserviced++;
-//   }
+// //   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
+// //     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
+// //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
+// //     data_buffer.isserviced++;
+// //   }
+// //   if(!obj[F("bottom")][F(D_JSON_SAT)].isNull()){ 
+// //     uint8_t sat = obj[F("bottom")][F(D_JSON_SAT)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_SAT,sat);
+// //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S = pCONT_iLight->SatN2F(sat);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_SAT,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.S);
+// //     data_buffer.isserviced++;
+// //   }
+// //   if(!obj[F("bottom")][F(D_JSON_BRT)].isNull()){ 
+// //     uint8_t brt = obj[F("bottom")][F(D_JSON_BRT)];
+// //     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_BRT,brt);
+// //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.B = pCONT_iLight->animation.brightness = pCONT_iLight->BrtN2F(brt);
+// //     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_BRT,pCONT_iLight->animation.brightness);
+// //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_BRT,pCONT_iLight->animation.brightness);
+// //     data_buffer.isserviced++;
+// //   }
 
 
 
 
-//   if(!obj[D_JSON_RGB].isNull()){
-//     const char* rgbpacked = obj[D_JSON_RGB];
-//     uint32_t colour32bit = 0;
-//     if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
-//     }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
-//     RgbColor rgb;
-//     rgb.R = colour32bit >> 16; //RGB
-//     rgb.G = colour32bit >> 8 & 0xFF; //RGB
-//     rgb.B = colour32bit & 0xFF; //RGB
-//     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-//     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-//     // // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-//     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-//     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-//   }
+// //   if(!obj[D_JSON_RGB].isNull()){
+// //     const char* rgbpacked = obj[D_JSON_RGB];
+// //     uint32_t colour32bit = 0;
+// //     if(rgbpacked[0]=='#'){ colour32bit = (long) strtol( &rgbpacked[1], NULL, 16);
+// //     }else{ colour32bit = (long) strtol( &rgbpacked[0], NULL, 16); }
+// //     RgbColor rgb;
+// //     rgb.R = colour32bit >> 16; //RGB
+// //     rgb.G = colour32bit >> 8 & 0xFF; //RGB
+// //     rgb.B = colour32bit & 0xFF; //RGB
+// //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+// //     // // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+// //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
+// //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// //   }
 
-//   // TIME with different units
-//   if(!obj[D_JSON_TIME].isNull()){ //default to secs
-//     pCONT_iLight->animation.transition.time_ms.val = obj["time"];
-//     pCONT_iLight->animation.transition.time_ms.val *= 1000;
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-//   }else
-//   if(!obj[D_JSON_TIME].isNull()){
-//     pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
-//     pCONT_iLight->animation.transition.time_ms.val *= 1000;
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-//   }else
-//   if(!obj[D_JSON_TIME_MS].isNull()){
-//     pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
-//   }
+// //   // TIME with different units
+// //   if(!obj[D_JSON_TIME].isNull()){ //default to secs
+// //     pCONT_iLight->animation.transition.time_ms.val = obj["time"];
+// //     pCONT_iLight->animation.transition.time_ms.val *= 1000;
+// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+// //   }else
+// //   if(!obj[D_JSON_TIME].isNull()){
+// //     pCONT_iLight->animation.transition.time_ms.val = obj["time_secs"];
+// //     pCONT_iLight->animation.transition.time_ms.val *= 1000;
+// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+// //   }else
+// //   if(!obj[D_JSON_TIME_MS].isNull()){
+// //     pCONT_iLight->animation.transition.time_ms.val = obj["time_ms"];
+// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_TIME "%d" D_UNIT_MILLISECOND),pCONT_iLight->animation.transition.time_ms.val);  
+// //   }
 
   
-// Flash colour needs to NOT be a scene, but part of a manual direct mode
-// if(strstr(scenectr,"FLASHCOLOUR")){
-//       scene_reseting.name_id = scene.name_id; // remember scene to return to
-//       scene.name_id = MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
-//     }
-//     // Parse out flashcolour info if it exists
-//     if(scene.name_id == MODE_SINGLECOLOUR_FLASHCOLOUR_ID){
+// // Flash colour needs to NOT be a scene, but part of a manual direct mode
+// // if(strstr(scenectr,"FLASHCOLOUR")){
+// //       scene_reseting.name_id = scene.name_id; // remember scene to return to
+// //       scene.name_id = MODE_SINGLECOLOUR_FLASHCOLOUR_ID;
+// //     }
+// //     // Parse out flashcolour info if it exists
+// //     if(scene.name_id == MODE_SINGLECOLOUR_FLASHCOLOUR_ID){
 
-//       if(tempctr = obj["hue"]){
-//         scene_reseting.hue = obj["hue"];
-//       }
-//       if(tempctr = obj["sat"]){
-//         scene_reseting.sat = obj["sat"];
-//       }
-//       if(tempctr = obj["brt"]){
-//         scene_reseting.brt = obj["brt"];
-//       }
-//       if(tempctr = obj["time"]){
-//         scene_reseting.tOnTime = obj["time"];
-//       }
-//     }
+// //       if(tempctr = obj["hue"]){
+// //         scene_reseting.hue = obj["hue"];
+// //       }
+// //       if(tempctr = obj["sat"]){
+// //         scene_reseting.sat = obj["sat"];
+// //       }
+// //       if(tempctr = obj["brt"]){
+// //         scene_reseting.brt = obj["brt"];
+// //       }
+// //       if(tempctr = obj["time"]){
+// //         scene_reseting.tOnTime = obj["time"];
+// //       }
+// //     }
   
   
 
 
 
-//   // create easier names
-//   // char* topic_ctr = data_buffer.topic.ctr;
-//   // uint8_t topic_len = data_buffer.topic.len;
-//   // char* payload_ctr = data_buffer.payload.ctr;
-//   // uint8_t payload_len = data_buffer.payload.len;
+// //   // create easier names
+// //   // char* topic_ctr = data_buffer.topic.ctr;
+// //   // uint8_t topic_len = data_buffer.topic.len;
+// //   // char* payload_ctr = data_buffer.payload.ctr;
+// //   // uint8_t payload_len = data_buffer.payload.len;
 
-//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/center",sizeof("/center")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /center");
+// //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/center",sizeof("/center")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /center");
 
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+// //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
 
-//     uint16_t index = 0;
+// //     uint16_t index = 0;
 
-//     ambilightsettings.colour.found_idx = 0;
+// //     ambilightsettings.colour.found_idx = 0;
 
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
+// //     StaticJsonDocument<300> doc;
+// //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+// //     JsonObject root = doc.as<JsonObject>();
 
-//     if(root["RGB"].is<JsonArray>()){
+// //     if(root["RGB"].is<JsonArray>()){
 
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
+// //       JsonArray colourarray = root["RGB"];
+// //       int array_length = colourarray.size();
 
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
+// //       const char* pixelcolour;
+// //       for(JsonVariantConst v : colourarray) {
+// //         pixelcolour = v.as<const char*>();
 
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
 
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+// //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+// //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+// //           ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
 
 
-//         ambilightsettings.colour.found_idx++;
-//         index++;
-//       }
-//       pCONT->mso->MessagePrint("ENDambilightsettings.col.found_idx");
-//       pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//       pCONT->mso->MessagePrintln(index);
+// //         ambilightsettings.colour.found_idx++;
+// //         index++;
+// //       }
+// //       pCONT->mso->MessagePrint("ENDambilightsettings.col.found_idx");
+// //       pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+// //       pCONT->mso->MessagePrintln(index);
 
-//     }
-//     // else if(root["RGB"].is<const char*>()){ //one colour = string
-//     //
-//     //   const char* pixelcolour;
-//     //   pixelcolour = root["RGB"];
-//     //
-//     //   //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//     //   if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//     //   }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
-//     //
-//     //   ambilightsettings.colour.r[ambilightsettings.colour.found_idx] = colour32bit >> 16; //RGB
-//     //   ambilightsettings.colour.g[ambilightsettings.colour.found_idx] = colour32bit >> 8 & 0xFF; //RGB
-//     //   ambilightsettings.colour.b[ambilightsettings.colour.found_idx] = colour32bit & 0xFF; //RGB
-//     //
-//     //   // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//     //   // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//     //   // Serial.println(parsed.col.b[parsed.col.found_idx]);
-//     //
-//     //   ambilightsettings.colour.found_idx++;
-//     // }
+// //     }
+// //     // else if(root["RGB"].is<const char*>()){ //one colour = string
+// //     //
+// //     //   const char* pixelcolour;
+// //     //   pixelcolour = root["RGB"];
+// //     //
+// //     //   //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+// //     //   if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //     //   }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //     //
+// //     //   ambilightsettings.colour.r[ambilightsettings.colour.found_idx] = colour32bit >> 16; //RGB
+// //     //   ambilightsettings.colour.g[ambilightsettings.colour.found_idx] = colour32bit >> 8 & 0xFF; //RGB
+// //     //   ambilightsettings.colour.b[ambilightsettings.colour.found_idx] = colour32bit & 0xFF; //RGB
+// //     //
+// //     //   // Serial.println(parsed.col.r[parsed.col.found_idx]);
+// //     //   // Serial.println(parsed.col.g[parsed.col.found_idx]);
+// //     //   // Serial.println(parsed.col.b[parsed.col.found_idx]);
+// //     //
+// //     //   ambilightsettings.colour.found_idx++;
+// //     // }
 
-//     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     for(int i=0;i<index;i++){
-//         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
-//     }stripbus->Show();
+// //     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
+// //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+// //     //strip_size
+// //     //ambilightsettings.colour.found_idx
+// //     for(int i=0;i<index;i++){
+// //         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
+// //     }stripbus->Show();
 
 
-// } // END center
+// // } // END center
 
 
-// #ifdef DEVICE_RGBDELL
+// // #ifdef DEVICE_RGBDELL
 
-//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/left",sizeof("/left")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /left");
+// //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/left",sizeof("/left")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /left");
 
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+// //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
 
-//     ambilightsettings.colour.found_idx = 0;
+// //     ambilightsettings.colour.found_idx = 0;
 
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
+// //     StaticJsonDocument<300> doc;
+// //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+// //     JsonObject root = doc.as<JsonObject>();
 
-//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
+// //   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
 
-//     if(root["RGB"].is<JsonArray>()){
-//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
+// //     if(root["RGB"].is<JsonArray>()){
+// //       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
 
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
+// //       JsonArray colourarray = root["RGB"];
+// //       int array_length = colourarray.size();
 
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
+// //       const char* pixelcolour;
+// //       for(JsonVariantConst v : colourarray) {
+// //         pixelcolour = v.as<const char*>();
 
-//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
+// //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
 
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
 
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
 
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
+// //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
+// //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
+// //          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
 
-//         ambilightsettings.colour.found_idx++;
-//       }
+// //         ambilightsettings.colour.found_idx++;
+// //       }
 
-//     }else if(root["RGB"].is<const char*>()){ //one colour = string
+// //     }else if(root["RGB"].is<const char*>()){ //one colour = string
 
-//       const char* pixelcolour;
-//       pixelcolour = root["RGB"];
+// //       const char* pixelcolour;
+// //       pixelcolour = root["RGB"];
 
-//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+// //       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
 
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
 
-//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.r[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.g[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.b[parsed.col.found_idx]);
 
-//       ambilightsettings.colour.found_idx++;
-//     }
+// //       ambilightsettings.colour.found_idx++;
+// //     }
 
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-//     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-//     //  }
-//     // /stripbus->Show();
+// //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+// //     //strip_size
+// //     //ambilightsettings.colour.found_idx
+// //     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
+// //     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
+// //     //  }
+// //     // /stripbus->Show();
 
-//     uint32_t c; //colourrgb
-//     pinMode(RGB_DATA_LEFT_PIN,OUTPUT);
-//     pinMode(RGB_CLOCK_LEFT_PIN,OUTPUT);
+// //     uint32_t c; //colourrgb
+// //     pinMode(RGB_DATA_LEFT_PIN,OUTPUT);
+// //     pinMode(RGB_CLOCK_LEFT_PIN,OUTPUT);
 
-//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
-//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-//       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-//     }
-//     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
+// //     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
+// //     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
+// //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
+// //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
+// //       shiftOut(RGB_DATA_LEFT_PIN, RGB_CLOCK_LEFT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
+// //     }
+// //     digitalWrite(RGB_DATA_LEFT_PIN,LOW);digitalWrite(RGB_CLOCK_LEFT_PIN,LOW);
 
 
 
-// } // END left
+// // } // END left
 
 
 
-//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/right",sizeof("/right")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /right");
+// //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/right",sizeof("/right")-1)>=0){pCONT->mso->MessagePrintln("MATCHED /right");
 
-//     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
+// //     memset(&parsed,0,sizeof(parsed)); // clear parsing struct
 
-//     ambilightsettings.colour.found_idx = 0;
+// //     ambilightsettings.colour.found_idx = 0;
 
-//     StaticJsonDocument<300> doc;
-//     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-//     JsonObject root = doc.as<JsonObject>();
+// //     StaticJsonDocument<300> doc;
+// //     DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+// //     JsonObject root = doc.as<JsonObject>();
 
-//   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
+// //   // PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM - PARSE PIXEL NUM -
 
-//     if(root["RGB"].is<JsonArray>()){
-//       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
+// //     if(root["RGB"].is<JsonArray>()){
+// //       //pCONT->mso->MessagePrintln("colour arr ");//Serial.println(rgbname_ctr);
 
-//       JsonArray colourarray = root["RGB"];
-//       int array_length = colourarray.size();
+// //       JsonArray colourarray = root["RGB"];
+// //       int array_length = colourarray.size();
 
-//       const char* pixelcolour;
-//       for(JsonVariantConst v : colourarray) {
-//         pixelcolour = v.as<const char*>();
+// //       const char* pixelcolour;
+// //       for(JsonVariantConst v : colourarray) {
+// //         pixelcolour = v.as<const char*>();
 
-//         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
+// //         //pCONT->mso->MessagePrintln("pixelcolour"); //pCONT->mso->MessagePrintln(pixelcolour);
 
-//         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //         if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //         }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
 
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+// //         ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
 
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
-//          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
+// //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R);pCONT->mso->MessagePrint("-");
+// //          pCONT->mso->MessagePrint(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G);pCONT->mso->MessagePrint("-");
+// //          pCONT->mso->MessagePrintln(ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B);
 
-//         ambilightsettings.colour.found_idx++;
-//       }
+// //         ambilightsettings.colour.found_idx++;
+// //       }
 
-//     }else if(root["RGB"].is<const char*>()){ //one colour = string
+// //     }else if(root["RGB"].is<const char*>()){ //one colour = string
 
-//       const char* pixelcolour;
-//       pixelcolour = root["RGB"];
+// //       const char* pixelcolour;
+// //       pixelcolour = root["RGB"];
 
-//       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
-//       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
-//       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
+// //       //Serial.println("pixelcolour"); Serial.println(pixelcolour);
+// //       if(pixelcolour[0]=='#'){ colour32bit = (long) strtol( &pixelcolour[1], NULL, 16);
+// //       }else{ colour32bit = (long) strtol( &pixelcolour[0], NULL, 16); }
 
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
-//       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].R = colour32bit >> 16; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].G = colour32bit >> 8 & 0xFF; //RGB
+// //       ambilightsettings.colour.rgb[ambilightsettings.colour.found_idx].B = colour32bit & 0xFF; //RGB
 
-//       // Serial.println(parsed.col.r[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.g[parsed.col.found_idx]);
-//       // Serial.println(parsed.col.b[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.r[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.g[parsed.col.found_idx]);
+// //       // Serial.println(parsed.col.b[parsed.col.found_idx]);
 
-//       ambilightsettings.colour.found_idx++;
-//     }
+// //       ambilightsettings.colour.found_idx++;
+// //     }
 
-//     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-//     //strip_size
-//     //ambilightsettings.colour.found_idx
-//     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
-//     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
-//     // }
-//     // mrgbneo_ani->setBrightness(255);
-//     // mrgbneo_ani->show();
+// //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
+// //     //strip_size
+// //     //ambilightsettings.colour.found_idx
+// //     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
+// //     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
+// //     // }
+// //     // mrgbneo_ani->setBrightness(255);
+// //     // mrgbneo_ani->show();
 
-//     uint32_t c; //colourrgb
-//     pinMode(RGB_DATA_RIGHT_PIN,OUTPUT);
-//     pinMode(RGB_CLOCK_RIGHT_PIN,OUTPUT);
+// //     uint32_t c; //colourrgb
+// //     pinMode(RGB_DATA_RIGHT_PIN,OUTPUT);
+// //     pinMode(RGB_CLOCK_RIGHT_PIN,OUTPUT);
 
-//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
-//     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
-//       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
-//     }
-//     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
+// //     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
+// //     for(int ii=0;ii<ambilightsettings.colour.found_idx;ii++){
+// //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].R);
+// //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].G);
+// //       shiftOut(RGB_DATA_RIGHT_PIN, RGB_CLOCK_RIGHT_PIN, MSBFIRST, (uint8_t)ambilightsettings.colour.rgb[ii].B);
+// //     }
+// //     digitalWrite(RGB_DATA_RIGHT_PIN,LOW);digitalWrite(RGB_CLOCK_RIGHT_PIN,LOW);
 
 
 
-// } // END left
+// // } // END left
 
-//       //fShowPanelUpdate = true;
-//     //}
+// //       //fShowPanelUpdate = true;
+// //     //}
 
 
-// //  }
+// // //  }
 
-//   //switch modes : USE serial input stream
-//   //send as json array?
-//   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
-//   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
+// //   //switch modes : USE serial input stream
+// //   //send as json array?
+// //   //RGB = [[r,g,b],[r,g,b],[r,g,b]]
+// //   //SETTINGS = {pixel ratio, 17,10}{pixel direction, CW}{startposition, bottom right}{timeout,10}{minbrightness,10}{fade,0}
 
-//   pCONT_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
-//   fForcePanelUpdate = true;
+// //   pCONT_iLight->animation.mode_id = MODE_AMBILIGHT_ID;
+// //   fForcePanelUpdate = true;
 
-  return 0;
+//   // return 0;
 
-} // END FUNCTION
+// } // END FUNCTION
 
 
 /*******************************************************************************************************************
@@ -1530,7 +1446,7 @@ void mRGBAnimator::parsesub_ModeAmbilight(JsonObjectConst obj){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-#endif
+#endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
 
 #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
@@ -1690,6 +1606,14 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
       case FLASHER_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
         SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
       break;
+      case FLASHER_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+        SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+      break;
+      case FLASHER_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+        SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+      break;
+
+
       // case FLASHER_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID:
       //   SubTask_Flasher_Animate_Function_Slow_Glow_Showing_Multiples_Of_Colours();
       // break;
@@ -2603,7 +2527,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR;
@@ -2633,6 +2557,20 @@ void mRGBAnimator::MQTTHandler_Init(){
   //     &mqtthandler_flasher_teleperiod, &mqtthandler_mixer_teleperiod
   //   #endif
   // };
+
+
+#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  mqtthandler_ptr = &mqtthandler_manual_setpixel;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Manual_SetPixel;  
+#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
 
 
@@ -2672,7 +2610,7 @@ void mRGBAnimator::MQTTHandler_Set_TelePeriod(){
 void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID, MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
+    MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID, MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
     MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID,
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
@@ -2681,13 +2619,17 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
       MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID, 
     #endif
     #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-      MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID
+      MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID,
     #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      MQTT_HANDLER_MODULE_MANUAL_SETPIXEL_TELEPERIOD_ID,
+    #endif
+    MQTT_HANDLER_SETTINGS_ID // Always last, as always included
   };
   
   // Could this be put into a function? to allow me to set things to all in this, or by ID
   struct handler<mRGBAnimator>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod, &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
+    &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
     &mqtthandler_state_teleperiod,
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       &mqtthandler_notifications_teleperiod,
@@ -2696,8 +2638,12 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
       &mqtthandler_flasher_teleperiod, 
     #endif
     #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-      &mqtthandler_mixer_teleperiod
+      &mqtthandler_mixer_teleperiod,
     #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      &mqtthandler_manual_setpixel,
+    #endif
+    &mqtthandler_settings_teleperiod
   };
 
   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_ADDRESSABLE_ID,
@@ -2751,10 +2697,43 @@ RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColour(RgbcctColor full_range_
 }
 
 
+RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
+  
+  uint8_t new_brightness_255 = 0;
+
+// Create new function of ApplyBrightnesstoDesiredColour to do this if statement generically
+// if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+
+  if(pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice){
+    new_brightness_255 = random(pCONT_iLight->brtRGB_limits.lower, pCONT_iLight->brtRGB_limits.upper);
+  }
+  // Default: apply global brightness
+  else{
+    new_brightness_255 = brightness;
+  }
+
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("ledGamma=new_brightness_255=%d - >%d"), 
+  //   new_brightness_255, pCONT_iLight->ledGamma(new_brightness_255)
+  // );
+
+  #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
+  if(pCONT_iLight->animation.flags.use_gamma_for_brightness){
+    new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
+  }
+  #endif // ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
+
+  return ApplyBrightnesstoDesiredColour(full_range_colour, new_brightness_255);
+
+}
+
+
 
 uint16_t mRGBAnimator::SetLEDOutAmountByPercentage(uint8_t percentage){
 
   strip_size_requiring_update = mapvalue(percentage, 0,100, 0,strip_size);
+
+// AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
+
   return strip_size_requiring_update; // also return the count
 
 }
@@ -2775,11 +2754,13 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
   // Generate lighting pattern
   switch(pCONT_iLight->animation.transition.order_id){
     case TRANSITION_ORDER_INORDER_ID:
+
+      SetLEDOutAmountByPercentage(100);
+
       for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
         ledout.pattern[ledout.index] = ledout.index; 
       }
 
-      SetLEDOutAmountByPercentage(100);
 
         // Serial.println("TRANSITION_ORDER_INORDER_ID");
       //for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
@@ -2949,7 +2930,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
   // Update pointer of struct
   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 
-  //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
   // AddLog_P(LOG_LEVEL_DEBUG_MORE
   
   /**
@@ -2962,19 +2943,30 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
     //   #endif
     // case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
     default:
+    case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:{
     //get colour above
 
       //apply to positiion below
 
+     // SetLEDOutAmountByPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+
       //what is this?
       // does this only run if above did not? ie this is default?
+
+      //AddLog_P(LOG_LEVEL_TEST, PSTR("strip_size_requiring_update=%d"),strip_size_requiring_update);
       
       // Other types with random led patterns, or,
       
       switch(pCONT_iLight->animation.transition.order_id){
         case TRANSITION_ORDER_RANDOM_ID:{
+
+          // new transition, so force full update
+          if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
+            strip_size_requiring_update = STRIP_SIZE_MAX;
+          }
         
+
           RefreshLEDIndexPattern();
           int16_t pixel_position = -2;
           for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
@@ -2991,9 +2983,10 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             // colour.B);
 
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
-            
+
+          
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
+              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
             }
 
             // #ifdef ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
@@ -3004,20 +2997,14 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             //   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation
             // );
             // #endif 
-
-                
-            #ifdef ENABLE_LOG_LEVEL_DEBUG
-            // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
-            //   ledout.pattern[ledout.index],desired_pixel,
-            //   pCONT_iLight->HueF2N(desired_colour[ledout.pattern[ledout.index]].H),pCONT_iLight->SatF2N(desired_colour[ledout.pattern[ledout.index]].S),pCONT_iLight->BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
-            //   pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr),pixel_position
-            // );
-            #endif
-
           } //end for
 
         }break;
         case TRANSITION_ORDER_INORDER_ID:{
+          // new transition, so force full update
+          if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
+            strip_size_requiring_update = STRIP_SIZE_MAX;
+          }
           RefreshLEDIndexPattern();
           int16_t pixel_position = -2;
           desired_pixel=0;
@@ -3035,7 +3022,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
             
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
+              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
             }
 
             //   AddLog_P(LOG_LEVEL_TEST, PSTR("colou2=%d,%d,%d"),
@@ -3258,13 +3245,13 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
 // simple blend function
 void mRGBAnimator::BlendAnimUpdate(const AnimationParam& param)
 {    
-  // for (uint16_t pixel = 0; pixel < strip_size; pixel++){
-  //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-  //       animation_colours[pixel].StartingColor,
-  //       animation_colours[pixel].DesiredColour,
-  //       param.progress);
-  //   SetPixelColor(pixel, updatedColor);
-  // } // END for
+  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);
+    SetPixelColor(pixel, updatedColor);
+  } // END for
 }
 
 
@@ -3277,11 +3264,13 @@ void mRGBAnimator::StartAnimationAsBlendFromStartingColorToDesiredColor(){
   pCONT_iLight->animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
-  switch(pCONT_iLight->animation.transition.method_id){
-    default: 
-    case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
-    case TRANSITION_METHOD_BLEND_ID:   time_tmp = pCONT_iLight->animation.transition.time_ms.val; break;
-  }
+  // switch(pCONT_iLight->animation.transition.method_id){
+  //   default: 
+  //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
+  //   case TRANSITION_METHOD_BLEND_ID:   
+    time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+  //   break;
+  // }
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
@@ -3331,11 +3320,13 @@ void mRGBAnimator::StartAnimationAsSwitchingFromStartingColorToDesiredColor(){
   pCONT_iLight->animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
-  switch(pCONT_iLight->animation.transition.method_id){
-    default: 
-    case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
-    case TRANSITION_METHOD_BLEND_ID:   time_tmp = pCONT_iLight->animation.transition.time_ms.val; break;
-  }
+  // switch(pCONT_iLight->animation.transition.method_id){
+  //   default: 
+  //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
+    // case TRANSITION_METHOD_BLEND_ID:  
+     time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+  //    break;
+  // }
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
@@ -3393,17 +3384,31 @@ void mRGBAnimator::StartAnimation_AsAnimUpdateMemberFunction(){
   pCONT_iLight->animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
-  switch(pCONT_iLight->animation.transition.method_id){
-    default: 
-    case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
-    case TRANSITION_METHOD_BLEND_ID:   time_tmp = pCONT_iLight->animation.transition.time_ms.val; break;
-  }
+  // switch(pCONT_iLight->animation.transition.method_id){
+  //   default: 
+  //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0;
+
+  //   Serial.println("TRANSITION_METHOD_INSTANT_ID");
+    
+    
+    
+  //    break;
+    // case TRANSITION_METHOD_BLEND_ID:   
+    time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+  //   break;
+  // }
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
     time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
+  //clear forced once only flags
+  if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
+    pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh = false;    
+  }
+  
+    // Serial.printf("TRANSITION_METHOD_INSTANT_ID = %d\n\r",time_tmp);
 
   if(time_tmp>0){
     if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
@@ -3723,6 +3728,17 @@ void mRGBAnimator::TurnLEDsOff(){
   }
   stripbus->Show();
 }
+
+
+void mRGBAnimator::SetPixelColor_All(RgbcctColor colour){
+  //stripbus->ClearTo(0);
+  for(uint16_t pixel = 0; pixel < strip_size; pixel++){
+    SetPixelColor(pixel, colour);
+  }
+  stripbus->Show();
+}
+
+
 
 // void mRGBAnimator::SetRGBwithNeoPixel(){
 //   for(uint16_t pixel = 0; pixel < strip_size; pixel++){
@@ -4135,7 +4151,7 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 
 uint8_t mRGBAnimator::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr,
     PSTR("{"
       "\"" "ledout"       "\":%d,"

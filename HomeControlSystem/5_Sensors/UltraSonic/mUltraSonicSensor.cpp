@@ -445,7 +445,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
 
   if(presence_detect.ischanged){ presence_detect.ischanged=false;
 
-    memset(&data_buffer,0,sizeof(data_buffer));
+    D_DATA_BUFFER_CLEAR();
 
     StaticJsonDocument<300> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -735,7 +735,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
   JsonBuilderI->Start();  
   // Serial.println("ConstructJSON_SensorsAveraged");
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
   // DynamicJsonDocument doc(200);
   // JsonObject root = doc.to<JsonObject>();
 

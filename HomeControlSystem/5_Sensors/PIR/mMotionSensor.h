@@ -27,7 +27,6 @@ class mMotionSensor{
     void Pre_Init(void);
     // Tasker that is called on each loop
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
     // All SubTasks called by Tasker 
     void EveryLoop();
 
@@ -36,17 +35,20 @@ class mMotionSensor{
       uint8_t fEnableSensor = false;
     }settings;
 
-    void parse_JSONCommand(JsonObjectConst obj);
-    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    void parse_JSONCommand();
+    int8_t CheckAndExecute_JSONCommands();
     
     #define MAXIMUM_SENSORS 3
     int8_t pin[MAXIMUM_SENSORS] = {-1, -1, -1};
     uint8_t pin_isinverted[MAXIMUM_SENSORS] = {0, 0, 0};
     pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
     
+    #ifndef DISABLE_WEBSERVER
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
     void WebAppend_Root_Draw_PageTable();
+    #endif // DISABLE_WEBSERVER
+
     uint8_t PIR_Detected(uint8_t sensor_id);
 
     const char* PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uint8_t buflen);

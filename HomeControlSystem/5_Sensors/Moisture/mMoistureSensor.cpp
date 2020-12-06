@@ -61,7 +61,7 @@ void mMoistureSensor::SubTasker_MQTTSender(){
 //#ifdef USE_MODULE_SENSORS_MOTION // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
 void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   StaticJsonDocument<300> doc;
   JsonObject root = doc.to<JsonObject>();

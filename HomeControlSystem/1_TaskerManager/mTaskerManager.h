@@ -71,10 +71,6 @@ enum FUNCTION_RESULT_IDS{
 // Libraries
 #include <StreamString.h>                   // Webserver, Updater
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
-
 #define NO_GLOBAL_MDNS
 #ifdef USE_ARDUINO_OTA
   #include <ArduinoOTA.h>                   // Arduino OTA
@@ -157,7 +153,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 //   uint16_t      module_id = 0;
 //   uint8_t       module_subtype_id = 0; //lighting, energy, sensor, custom, core
 //   uint8_t       (Class::*Tasker)(uint8_t function); // member-function to sender with one args
-//   uint8_t       (Class::*Tasker_Json)(uint8_t function, JsonObjectConst obj); // member-function to sender with one args
 // };
 
 
@@ -462,12 +457,12 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_HEATING_FRIENDLY_CTR)              "heating";
 #endif
 #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-  #include "9_Controller/SecurityLight/mGarageLights.h"
-  class mGarageLights;
+  #include "9_Controller/SecurityLight/mSecurityLight.h"
+  class mSecurityLight;
   #define D_MODULE_CUSTOM_SECURITYLIGHT_ID 174
-  #define            pCONT_slgt                               pCONT->mrl
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_CTR)              "mGarageLights";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR)              "garagelights";
+  #define            pCONT_slgt                               pCONT->slgt
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_CTR)              "mSecurityLight";
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR)              "securitylight";
 #endif
 #ifdef USE_MODULE_CUSTOM_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"
@@ -714,7 +709,7 @@ class mTaskerManager{
     mPWM* mpwm = nullptr;
   #endif
   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    mGarageLights* mrl = nullptr;
+    mSecurityLight* slgt = nullptr;
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
     mMotionSensor *mms = nullptr;
@@ -774,11 +769,6 @@ class mTaskerManager{
   // Overload
   int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0);
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-  int8_t Tasker_Interface(uint8_t function, JsonObjectConst param1, uint8_t target_tasker = 0);
-  
-#endif// ENABLE_DEVFEATURE_ARDUINOJSON
-  
   // std::variant< int, std::string > GetClassObjectbyID(uint8_t id);
   // void TaskerTest();
 

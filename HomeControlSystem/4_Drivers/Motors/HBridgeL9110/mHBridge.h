@@ -6,10 +6,6 @@
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
 
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
-
 #include "1_TaskerManager/mTaskerManager.h"
 
 

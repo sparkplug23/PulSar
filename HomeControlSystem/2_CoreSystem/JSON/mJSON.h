@@ -98,7 +98,11 @@ class JsonBuilder{
       if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
         return;
       
-      if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+      if(
+        (*writer.length>1)&&
+        (writer.buffer[*writer.length-1]!='{')&&
+        (writer.buffer[*writer.length-1]!='[')      
+      ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
       #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
@@ -131,7 +135,11 @@ class JsonBuilder{
       if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
         return;
       
-      if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+      if(
+        (*writer.length>1)&&
+        (writer.buffer[*writer.length-1]!='{')&&
+        (writer.buffer[*writer.length-1]!='[')      
+      ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
       #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
@@ -163,7 +171,11 @@ class JsonBuilder{
   if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
     return;
   
-  if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+  if(
+    (*writer.length>1)&&
+    (writer.buffer[*writer.length-1]!='{')&&
+    (writer.buffer[*writer.length-1]!='[')      
+  ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
   #ifdef DEBUG_JSON_BUILDER
   char buffer_id[50];

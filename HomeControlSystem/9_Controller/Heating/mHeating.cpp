@@ -1036,7 +1036,7 @@ void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 
 uint8_t mHeating::ConstructJSON_ProgramTimers(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   uint8_t ischanged = 0;
   uint8_t fSendAll = false;
   char buffer[50];
@@ -1214,7 +1214,7 @@ uint8_t mHeating::ConstructJSON_PipeTempsROC10s(uint8_t json_level){
 return 0;
   // StaticJsonDocument<700> doc;
   // JsonObject obj = doc.to<JsonObject>();
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
 
   // for(uint8_t id=0;id<8;id++){
 
@@ -1254,7 +1254,7 @@ uint8_t mHeating::ConstructJSON_PipeTempsROC1m(uint8_t json_level){
 return 0;
 //   StaticJsonDocument<700> doc;
 //   JsonObject obj = doc.to<JsonObject>();
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 
 //   for(uint8_t id=0;id<8;id++){
 
@@ -1296,7 +1296,7 @@ uint8_t mHeating::ConstructJSON_PipeTempsROC10m(uint8_t json_level){
 
   // StaticJsonDocument<700> doc;
   // JsonObject obj = doc.to<JsonObject>();
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
 
   // for(uint8_t id=0;id<8;id++){
 
@@ -1332,7 +1332,7 @@ uint8_t mHeating::ConstructJSON_PipeTempsROC10m(uint8_t json_level){
 
 uint8_t mHeating::ConstructJSON_ClimateTemps(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   char namectr[3]; memset(&namectr,0,sizeof(namectr));
   uint8_t ischanged=false, isvalid = false;
 
@@ -1397,7 +1397,7 @@ uint8_t mHeating::ConstructJSON_ClimateTemps(uint8_t json_level){
 uint8_t mHeating::ConstructJSON_ClimateTempsROC1m(uint8_t json_level){
 
 // clear entire mqtt packet
-memset(&data_buffer,0,sizeof(data_buffer));
+D_DATA_BUFFER_CLEAR();
 
   // uint8_t ischanged=false;
   // StaticJsonDocument<400> doc;
@@ -1434,7 +1434,7 @@ memset(&data_buffer,0,sizeof(data_buffer));
 uint8_t mHeating::ConstructJSON_ClimateTempsROC10m(uint8_t json_level){
 
   // clear entire mqtt packet
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   // char namectr[3]; memset(&namectr,0,sizeof(namectr));
   // uint8_t ischanged=false;
@@ -1480,7 +1480,7 @@ uint8_t mHeating::ConstructJSON_ClimateTempsROC10m(uint8_t json_level){
 
 uint8_t mHeating::ConstructJSON_Settings(uint8_t json_method){
 
-    // memset(&data_buffer,0,sizeof(data_buffer));
+    // D_DATA_BUFFER_CLEAR();
     // StaticJsonDocument<400> doc;
     // JsonObject root = doc.to<JsonObject>();
 
@@ -1659,7 +1659,7 @@ uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
 
   // StaticJsonDocument<800> doc;
   // JsonObject obj = doc.to<JsonObject>();
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
 
   // uint8_t ischanged = false;
 

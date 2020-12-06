@@ -263,34 +263,6 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
 
 
 
-// JsonObjectConst mSettings::Function_Template_Parse_Only(){
-
-
-//   // load from progmem
-//   uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
-//   progmem_size = progmem_size>1500?1500:progmem_size;
-//   // create parse buffer
-//   char buffer[progmem_size];
-//   // Read into local
-//   memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
-
-//   AddLog_P(LOG_LEVEL_INFO, PSTR( "FUNCTION_TEMPLATE READ = \"%s\""), buffer);
-
-//   DynamicJsonDocument doc(1500);
-//   DeserializationError error = deserializeJson(doc, buffer);
-
-//   if(error){
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-//     return;
-//   }
-//   JsonObjectConst obj = doc.as<JsonObject>();
-//   return obj;
-
-
-// }
-
-
-
 // load in driver and sensor template settings
 void mSettings::Function_Template_Load(){
 
@@ -302,57 +274,73 @@ void mSettings::Function_Template_Load(){
 
   #ifdef USE_FUNCTION_TEMPLATE
   // load from progmem
-  uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
-  progmem_size = progmem_size>1500?1500:progmem_size;
+  // uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
+  // progmem_size = progmem_size>1500?1500:progmem_size;
   // create parse buffer
-  char buffer[progmem_size];
+  // char buffer[progmem_size];
   // Read into local
-  memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+  // memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+
+  
+  // Read into local
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR("FUNCTION_TEMPLATE READ = \"%s\""), buffer);
+  AddLog_P(LOG_LEVEL_TEST, PSTR("FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
     #endif // ENABLE_LOG_LEVEL_INFO
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-  StaticJsonDocument<2000> doc;//(1500);
-  DeserializationError error = deserializeJson(doc, buffer);
+// #ifdef ENABLE_DEVFEATURE_ARDUINOJSON
+//   StaticJsonDocument<2000> doc;//(1500);
+//   DeserializationError error = deserializeJson(doc, buffer);
 
-  if(error){
-    boot_status.function_template_parse_success = 2;
-    // Serial.println(error.c_str());
+//   if(error){
+//     boot_status.function_template_parse_success = 2;
+//     // Serial.println(error.c_str());
 
-    switch (error.code()) {
-    case DeserializationError::Ok:
-        Serial.print(F("Deserialization succeeded"));
-        break;
-    case DeserializationError::InvalidInput:
-        Serial.print(F("Invalid input!"));
-        break;
-    case DeserializationError::NoMemory:
-        Serial.print(F("Not enough memory"));
-        break;
-    default:
-        Serial.print(F("Deserialization failed"));
-        break;
-}
+//     switch (error.code()) {
+//     case DeserializationError::Ok:
+//         Serial.print(F("Deserialization succeeded"));
+//         break;
+//     case DeserializationError::InvalidInput:
+//         Serial.print(F("Invalid input!"));
+//         break;
+//     case DeserializationError::NoMemory:
+//         Serial.print(F("Not enough memory"));
+//         break;
+//     default:
+//         Serial.print(F("Deserialization failed"));
+//         break;
+// }
 
 
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
     
-    // delay(3000);
+//     // delay(3000);
     
-    return;
-  }
-  JsonObjectConst obj = doc.as<JsonObject>();
+//     return;
+//   }
+//   JsonObjectConst obj = doc.as<JsonObject>();
 
- // json_object_const = obj;
+//  // json_object_const = obj;
 
-  // clear old buffer
-  pCONT_set->ClearAllDeviceName();
+//   // clear old buffer
+//   pCONT_set->ClearAllDeviceName();
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
+//   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
 
-#endif// ENABLE_DEVFEATURE_ARDUINOJSON
+// #endif// ENABLE_DEVFEATURE_ARDUINOJSON
+
+
+  // pCONT_set->ClearAllDeviceName();
+
+   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);//_OBJECT, doc.as<JsonObjectConst>());
+
+//  parse_JSONCommand();
+
+
+
   boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
 
@@ -390,6 +378,8 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
     break;
     case FUNC_EVERY_SECOND:
+
+    // Function_Template_Load();
 
     
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
@@ -458,6 +448,18 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
 
     break;
+    
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
+
+
     case FUNC_TEMPLATE_DEVICE_LOAD:
       Function_Template_Load();
     break;
@@ -465,18 +467,6 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
 } 
 
-
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
 
 
 // //<devicename>/set/<function>/<subfunction>
@@ -530,13 +520,13 @@ int8_t mSettings::Tasker(uint8_t function, JsonObjectConst obj){
 
 
 
-int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mSettings::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/settings")>=0){
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "settings"));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
+      parse_JSONCommand();
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
@@ -545,13 +535,28 @@ int8_t mSettings::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 }
 
 
-void mSettings::parse_JSONCommand(JsonObjectConst obj){
+void mSettings::parse_JSONCommand(){
 
-  if(!obj[F(D_JSON_DEVICENAME)].isNull()){
-    
+  // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len+1];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_RELAYS D_PARSING_MATCHED "%s"), F(D_JSON_DEVICENAME)); 
-    #endif // LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError"));
+    #endif //ENABLE_LOG_LEVEL_INFO_PARSING
+    return;
+  } 
+
+  JsonParserToken jtok = 0; 
+
+  if(jtok = obj[PM_JSON_DEVICENAME]){ 
+    // const char* onoff = jtok.getStr();
+    
+    // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    // AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK D_PARSING_MATCHED "%s %s"), F(D_JSON_DEVICENAME),onoff); 
+    // #endif // LOG_LEVEL_INFO_PARSING
 
     char module_friendlyname_buffer[30];
     uint16_t module_id = 0;
@@ -563,39 +568,40 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));
       #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING    
   
-      if(!obj[F(D_JSON_DEVICENAME)][module_friendlyname_buffer].isNull()){
+      if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer]){ 
         #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+        AddLog_P(LOG_LEVEL_TEST, PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
         #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        //Get devices already present
-
-//NEED FIXED -- Doesnt 
-
-        uint8_t device_count = pCONT_set->GetDeviceNameCount(module_id);
-        JsonArrayConst array = obj[D_JSON_DEVICENAME][module_friendlyname_buffer];
-        for(JsonVariantConst v : array) {
-          const char* device_name_ctr = v.as<const char*>();
-          pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
-          #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
-          #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-        }
-      }
-
-    }
-  }
-
-  
-  if(!obj[D_JSON_WIFI_AP].isNull()){
-    uint8_t ap = obj[D_JSON_WIFI_AP];    
-    AddLog_P(LOG_LEVEL_INFO, PSTR("MATCHED D_JSON_WIFI_AP %d"),ap); 
         
-    pCONT_wif->WifiBegin(ap);
+        JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
+        if(arr){  
+          //Get devices already present
+          uint8_t device_count = pCONT_set->GetDeviceNameCount(module_id);
+          for(uint8_t id =0;id<arr.size();id++){
+            jtok = arr[id];
+            const char* device_name_ctr = jtok.getStr();
+            pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
+            #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+            AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+            AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+            #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+          } //if array
+        }//if array
+      }
+    } //for
+
+
   }
+  
+  // if(!obj[D_JSON_WIFI_AP].isNull()){
+  //   uint8_t ap = obj[D_JSON_WIFI_AP];    
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR("MATCHED D_JSON_WIFI_AP %d"),ap); 
+        
+  //   pCONT_wif->WifiBegin(ap);
+  // }
 
 
 
@@ -754,8 +760,6 @@ void mSettings::parse_JSONCommand(JsonObjectConst obj){
 }
 
 
-
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 
 

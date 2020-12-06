@@ -59,10 +59,7 @@ int8_t mSensorsINA219::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_COMMAND:
-
-    break;  
-    case FUNC_JSON_COMMAND:
+    case FUNC_JSON_COMMAND_ID:
       //function_result = parse_JSONCommand();
     break;      
     /************

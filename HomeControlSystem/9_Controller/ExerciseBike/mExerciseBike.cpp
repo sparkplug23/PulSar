@@ -348,7 +348,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
 uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   DynamicJsonDocument doc(250);
   JsonObject root = doc.to<JsonObject>();
 
@@ -361,7 +361,7 @@ return 1;
 
 uint8_t mExerciseBike::ConstructJSON_Sensor(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   uint8_t ischanged=false;
 
@@ -387,7 +387,7 @@ uint8_t mExerciseBike::ConstructJSON_Sensor(uint8_t json_level){
 // }
 uint8_t mExerciseBike::ConstructJSON_LightStates(uint8_t json_level){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   JsonObject root = doc.to<JsonObject>();

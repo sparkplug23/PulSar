@@ -738,7 +738,7 @@ void mPWMLight::WebCommand_Parse(void)
 //   //   return;
 //   // }
 
-//   // memset(&data_buffer,0,sizeof(data_buffer));
+//   // D_DATA_BUFFER_CLEAR();
 //   // char *buf = data_buffer.payload.ctr;
 //   // char **buffer = &buf;
 //   // pCONT_web->buffer_writer_len = 0;

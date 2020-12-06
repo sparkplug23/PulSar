@@ -255,7 +255,7 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
 
   if(doorbell_switch.ischanged){doorbell_switch.ischanged=false;
 
-    memset(&data_buffer,0,sizeof(data_buffer));
+    D_DATA_BUFFER_CLEAR();
 
     StaticJsonDocument<200> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -281,7 +281,7 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
 
 void mDoorBell::MQQTSendDoorUpdate(void){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   //   JsonObject root = doc.to<JsonObject>();

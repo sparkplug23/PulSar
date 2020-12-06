@@ -21,9 +21,6 @@ typedef struct  FREEMEM_HANDLER{
 // #include "3_Network/WebServer/WebPages_Progmem.h"
 #include "html_ui.h"
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "1_TaskerManager/mTaskerManager.h"
 
 
@@ -43,6 +40,19 @@ typedef struct  FREEMEM_HANDLER{
   #include <ESP8266HTTPClient.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
+#endif
+
+
+#ifdef ESP32
+#include <WiFi.h>
+#ifndef DISABLE_NETWORK
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #endif
 
 #include <DNSServer.h>

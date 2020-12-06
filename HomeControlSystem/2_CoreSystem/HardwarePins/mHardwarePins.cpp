@@ -193,61 +193,167 @@ void mHardwarePins::ModuleSettings_FlashSerial()
 
 void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
-  // uint16_t size_source = sizeof(MODULE_TEMPLATE);
+  uint16_t progmem_size = sizeof(MODULE_TEMPLATE);
+  progmem_size = progmem_size>MODULE_TEMPLATE_MAX_SIZE?MODULE_TEMPLATE_MAX_SIZE:progmem_size;
+  // create parse buffer
+  char buffer[progmem_size];
+  // Read into local
+  memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
 
-  // uint16_t size_dest = sizeof(pCONT_set->Settings.user_template2.full_ctr);
-
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("source=%d, dest=%d"),size_source,size_dest);
-
-  // size_source = size_source > size_dest ? size_source : size_dest;
-  // memcpy_P(pCONT_set->Settings.user_template2.full_ctr,MODULE_TEMPLATE,size_source);
-
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("MODULE_TEMPLATE READ = \"%s\""),pCONT_set->Settings.user_template2.full_ctr);
-
-  // #ifdef ENABLE_DEBUG_BOOT_DELAYS
-  //   delay(1000);
-  // #endif
-
-  // #ifdef USE_FUNCTION_TEMPLATE
-  // load from progmem
-  // uint16_t progmem_size = sizeof(MODULE_TEMPLATE);
-  // progmem_size = progmem_size>MODULE_TEMPLATE_MAX_SIZE?MODULE_TEMPLATE_MAX_SIZE:progmem_size;
-  // // create parse buffer
-  // char buffer[progmem_size];
-  // // Read into local
-  // memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
-
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("MODULE_TEMPLATE READ = \"%s\""), buffer);
-  //   #endif // ENABLE_LOG_LEVEL_INFO
-
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-  DynamicJsonDocument doc(progmem_size);
-  DeserializationError error = deserializeJson(doc, buffer);
-
-  if(error){
-    // boot_status.function_template_parse_success = 2;
-    // Serial.println(error.c_str());
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_TEST, PSTR("MODULE_TEMPLATE READ = \"%s\""), buffer);
+  #endif // ENABLE_LOG_LEVEL_INFO
+  
+  JsonParser parser(buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),buffer);
+    #endif// ENABLE_LOG_LEVEL_INFO
     return;
+  } else{
+    // AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess with \"%s\""),buffer);
   }
-  JsonObjectConst obj = doc.as<JsonObject>();
-
-
-  // StaticJsonDocument<MODULE_TEMPLATE_SIZE> doc;
-  // DeserializationError error = deserializeJson(doc, pCONT_set->Settings.user_template2.full_ctr);
+  JsonParserToken jtok = 0; 
   
-  // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   return;
+  //DEVICENAME/TOPICNAME/MQTTNAME
+  if(jtok = obj[PM_JSON_NAME]){
+    const char* name_ctr = jtok.getStr();
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "system_name %s"),name_ctr);
+    // snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr); 
+    snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s",name_ctr);  
+  }
+
+  // Name means friendly name (max 20 chars)
+  if(jtok = obj[PM_JSON_FRIENDLYNAME]){
+    const char* name_ctr = jtok.getStr();
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
+    snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
+    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
+  }
+
+  // if(jtok = obj[PM_JSON_GPIO]){ 
+  //   if(jtok.isArray()){
+  //     uint8_t pin_num_count = 0;
+  //     JsonParserArray array = obj[PM_JSON_GPIO];
+  //     for(auto v : array) {
+  //       int gpio_function_id = v.getInt();
+  //       // FULL pin list
+  //       pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
+  //       // Only existing pins
+  //       pCONT_set->Settings.user_template2.hardware.gp.io[pin_num_count] = gpio_function_id;
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "GPIO[%d] = %d"),pin_num_count,gpio_function_id);  
+  //       pin_num_count++;        
+  //   }
+  //   // Array of named functions "RGB_DATA"
+
+  //   // Future, only require the pins needed
+
+  //   // const char* name_ctr = obj[F("GPIO")];
+  //   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template FRIENDLYNAME %s"),name_ctr);
+  //   // snprintf(Settings.system_name.friendly,sizeof(Settings.system_name.friendly),"%s",name_ctr);
   // }
-  // JsonObject obj = doc.as<JsonObject>();
 
-  ParseModuleTemplate(obj);
-  
-#endif // ENABLE_DEVFEATURE_JSONPARSER
 
-ParseModuleTemplate();
+
+  if(jtok = obj[PM_JSON_GPIOC]){ 
+
+    pCONT_set->boot_status.module_template_parse_success = true;
+    // clear pins to none
+    for(int ii=0;ii<sizeof(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
+      pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
+    }
+    
+    int8_t  pin_number = -1;
+    int16_t gpio_number = -1;
+          AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
+
+          // delay(3000); 
+
+
+uint8_t jsonpair_count = jtok.size();
+
+    for(int pair_index = 0; pair_index < jsonpair_count; pair_index++){
+      jtok.nextOne(); //skip start of object
+      const char* key = jtok.getStr();
+      
+      pin_number = GetGPIONumberFromName(key);
+      // AddLog_P(LOG_LEVEL_INFO, PSTR("KEY%d %s\n\r"), pair_index, key);
+
+      int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
+      
+      if(pin_number_array_index>=0){
+      
+        jtok.nextOne();
+        const char* value = jtok.getStr();
+        gpio_number = GetGPIOFunctionIDbyName(value);
+      // AddLog_P(LOG_LEVEL_INFO, PSTR("VALUE%d %s\n\r"), pair_index, value);
+
+        if(gpio_number != -1){
+          // only template pins
+          pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index] = gpio_number; // non adjusted pin_number
+          // FULL pin list
+          // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
+          AddLog_P(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
+            pin_number, pin_number_array_index,
+            pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
+          );
+          // AddLog_P(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
+        }else{
+          AddLog_P(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\""),value);
+        }
+
+      }// end UsuableGPIOPin
+
+    }
+
+  }
+    
+
+    
+  if(jtok = obj[PM_JSON_BASE]){
+    
+    const char* base_ctr = jtok.getStr();
+    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
+
+    //GetBaseIDbyName();
+      // pin_number = ;
+
+    pCONT_set->Settings.module = GetModuleIDbyName(base_ctr);//USER_MODULE;
+
+    char buffer[40];
+
+    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
+
+    //snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
+
+  }else{
+    pCONT_set->Settings.module = USER_MODULE;
+  }
+
+
+
+
+
+
+  AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "ENDED"));
+  ModuleSettings_FlashSerial();
+
+
+  for(int i=0;i<20;i++){
+
+    Serial.printf("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
+
+
+  }
+
+  DEBUG_LINE;
+
+  // delay(5000);/
+
+// ParseModuleTemplate();
+
 
 
 }
@@ -311,515 +417,6 @@ int mHardwarePins::jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 
 
 void mHardwarePins::ParseModuleTemplate(){
-
- uint16_t progmem_size = sizeof(MODULE_TEMPLATE);
-  progmem_size = progmem_size>MODULE_TEMPLATE_MAX_SIZE?MODULE_TEMPLATE_MAX_SIZE:progmem_size;
-  // create parse buffer
-  char buffer[progmem_size];
-  // Read into local
-  memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MODULE_TEMPLATE READ = \"%s\""), buffer);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-
-
-// Need to parse on a copy
-  // char parsing_buffer[data_buffer.payload.len];
-  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),buffer);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    return;
-  } else{
-    // AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess with \"%s\""),buffer);
-  }
-  JsonParserToken jtok = 0; 
-  
-  //DEVICENAME/TOPICNAME/MQTTNAME
-  if(jtok = obj[PM_JSON_NAME]){
-    const char* name_ctr = jtok.getStr();
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "system_name %s"),name_ctr);
-    // snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr); 
-    snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s",name_ctr);  
-  }
-
-  // Name means friendly name (max 20 chars)
-  if(jtok = obj[PM_JSON_FRIENDLYNAME]){
-    const char* name_ctr = jtok.getStr();
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
-    snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
-    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
-  }
-
-  // if(jtok = obj[PM_JSON_GPIO]){ 
-  //   if(jtok.isArray()){
-  //     uint8_t pin_num_count = 0;
-  //     JsonParserArray array = obj[PM_JSON_GPIO];
-  //     for(auto v : array) {
-  //       int gpio_function_id = v.getInt();
-  //       // FULL pin list
-  //       pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
-  //       // Only existing pins
-  //       pCONT_set->Settings.user_template2.hardware.gp.io[pin_num_count] = gpio_function_id;
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "GPIO[%d] = %d"),pin_num_count,gpio_function_id);  
-  //       pin_num_count++;        
-  //   }
-  //   // Array of named functions "RGB_DATA"
-
-  //   // Future, only require the pins needed
-
-  //   // const char* name_ctr = obj[F("GPIO")];
-  //   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template FRIENDLYNAME %s"),name_ctr);
-  //   // snprintf(Settings.system_name.friendly,sizeof(Settings.system_name.friendly),"%s",name_ctr);
-  // }
-
-
-
-  if(jtok = obj[PM_JSON_GPIOC]){//PM_JSON_GPIOC]){
-
-
-  // JsonParserToken jtok = obj[PM_JSON_GPIOC];
-  
-
-
-pCONT_set->boot_status.module_template_parse_success = true;
-    // clear pins to none
-    for(int ii=0;ii<sizeof(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
-      pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
-    }
-    
-    int8_t  pin_number = -1;
-    int16_t gpio_number = -1;
-
-  for(int pair_index = 0; pair_index < jtok.size(); pair_index++){
-    jtok.nextOne(); //skip start of object
-    const char* key = jtok.getStr();
-    
-    pin_number = GetGPIONumberFromName(key);
-
-
-    Serial.printf("KEY1 %s\n\r", key);
-
-      int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
-      
-      if(pin_number_array_index>=0){
-      
-      jtok.nextOne();
-    const char* value = jtok.getStr();
-        gpio_number = GetGPIOFunctionIDbyName(value);
-      Serial.printf("VALUE1 %s\n\r", value);
-      
-        if(gpio_number != -1){
-          // only template pins
-          pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index] = gpio_number; // non adjusted pin_number
-          // FULL pin list
-          // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
-
-          AddLog_P(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
-            pin_number, pin_number_array_index,
-            pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
-          );
-          
-          // AddLog_P(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
-      
-        }else{
-          AddLog_P(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\""),value);
-        }
-
-        }// end UsuableGPIOPin
-
-
-
-  }
-
-  }
-
-
-
-
-
-
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "GPIOC FOUND b4"));
-  
-//     const char* test = jtok.getStr();
-
-//   // if(obj.containsKey(F("GPIOC"))){ 
-//     // AddLog_P(LOG_LEVEL_INFO, PSTR("GPIOC FOUND"));
-
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("GPIOC FOUND %s"),test);
-
-
-
-
-//     // JsonObjectConst list = obj[F("GPIOC")];
-//     // get key and value
-    
-//      if(jtok.isArray()){
-//       uint8_t index = 0;
-//       JsonParserArray array = obj[PM_JSON_GPIOC];
-//       for(auto v : array) {
-
-
-        
-//     // JsonParserToken value = v.getValue();
-    
-//     // printf("Key = %s, Val type = %s\n", parser.getStr(key), JSMNTypeName(value.t->type));
-
-
-
-
-//         const char* val = v.getStr();
-
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("GPIOC FOUND val=%s"), val);
-//       }
-//      }
-
-     
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("Assume the top-level element is an object"));
-
-
-// //   char JSON_STRING[progmem_size];
-// //   // Read into local
-// //   memcpy_P(JSON_STRING,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
-
-// //    int i;
-// // int r;
-// // jsmn_parser p;
-// // jsmntok_t t[128]; /* We expect no more than 128 tokens */
-
-// // jsmn_init(&p);
-// // r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
-// // if (r < 0) {
-// // 	AddLog_P(LOG_LEVEL_TEST,"Failed to parse JSON: %d\n", r);
-// // 	// return 1;
-// // }else{
-// // 	AddLog_P(LOG_LEVEL_TEST,"Sucess to parse JSON: %d\n", r);
-
-// // }
-
-// // /* Assume the top-level element is an object */
-// // if (r < 1 || t[0].type != JSMN_OBJECT) {
-// // 	AddLog_P(LOG_LEVEL_TEST,"Object expected\n");
-// // 	// return 1;
-// // }
-
-
-// // 	Serial.printf("JSON_STRING=%s\n\r", JSON_STRING);
-
-// // JsonParserToken obj2 = obj[PM_JSON_GPIOC];
-
-// // for (int j = 0; j < t[i+1].size; j++) {
-// // 	jsmntok_t *g = &t[i+j+2];
-
-// // jsmntok_t *token_next = &t[i+j+2+1];
-
-
-// // 	Serial.printf("Distance between tokens(%d) = %d %d, %s\n\r", token_next->start - g->start,  g->size,g->start, JSON_STRING + g->start);
-
-
-// // jsmntok_t *token_next2 = &t[i+j+2+2];
-
-
-// // 	Serial.printf("Distance between tokens(%d) = %d %d, %s\n\r", token_next2->start - g->start,  g->size,g->start, JSON_STRING + g->start);
-
-// // jsmntok_t *token_next3 = &t[i+j+2+3];
-
-
-// // 	Serial.printf("Distance between tokens(%d) = %d %d, %s\n\r", token_next3->start - g->start,  g->size,g->start, JSON_STRING + g->start);
-
-// // // jsmntok_t *token_next4 = &t[i];
-// // // 	Serial.printf("Distance between tokens(%d) = %d %d, %s\n\r", token_next3->start - g->start,  g->size,g->start, JSON_STRING + g->start);
-
-
-// //   // uint8_t* endpointer = 
-
-
-// // 	// Serial.printf("  * %.*s\n", g->size - g->start, JSON_STRING + g->start);
-// // 	Serial.printf("  * %d %d, %s\n\r", g->size,g->start, JSON_STRING + g->start);
-// // 	if(g->size == 1) {	//key has a value
-// // 		j++;	//jump to next token
-// // 		g = &t[i+j+2];	//you know the drill
-// // 		Serial.printf("  * %.*s\n\r", g->size - g->start, JSON_STRING + g->start);
-// // 	}
-// // }
-
-
-// // char buffer[100];
-// // char buffer_key[100];
-// // char buffer_value[100];
-// //   jsmntok_t *token_iter = nullptr;//&t[i+j];
-
-
-// // for (int j = 0; j < 10; j++) {
-// //   jsmntok_t *token = &t[i+j];
-// //   // jsmntok_t *token_next = &t[i+j+1];
-
-// //   memset(buffer,0,sizeof(buffer));
-// //   memcpy(buffer, JSON_STRING + token->start, token->len);
-
-// //   if (jsoneq(JSON_STRING, token, "GC") == 0) {
-
-// //      Serial.printf("jsoneq MATCHED\n\r"); 
-     
-// //      jsmntok_t *token_next = &t[i+j+1];
-// //      memset(buffer,0,sizeof(buffer));
-// //      memcpy(buffer, JSON_STRING + token_next->start, token_next->len);
-     
-// //      Serial.printf("token[%s|%d]\n\r",buffer, token_next->len);
-
-// //     //  token_iter = token_next; // start of jsonpair
-
-     
-// //       for (int k = 0; k < 4; k++) {
-// //         jsmntok_t *token_key = &t[i+j+1+k];
-// //         jsmntok_t *token_value = &t[i+j+1+k+1];
-
-        
-// //         memset(buffer_key,0,sizeof(buffer_key));
-// //         memcpy(buffer_key, JSON_STRING + token_key->start, token_key->len);
-// //         memset(buffer_value,0,sizeof(buffer_value));
-// //         memcpy(buffer_value, JSON_STRING + token_value->start, token_value->len);
-
-// //         Serial.printf("key  =%s\n\r",buffer_key);
-// //         Serial.printf("value=%s\n\r",buffer_value);
-
-
-// //         // Serial.printf("key1=%s\n\r",JSON_STRING + token_next->start);
-
-// //       }
-
-    
-
-// //   }
-
-// //   // char* token_str = JSON_STRING + token->start;
-// //   // char* token_value = token_str-1;
-
-// //   // Serial.printf("token[%s|%d]  i%d j%d len%d, size%d, str%d, %s\n\r",buffer, token->len,  i,j,token->len,  token->size, token->start, JSON_STRING + token->start);
-// //   // Serial.printf("token[%s|%d]\n\r",buffer, token->len);
-// //   // Serial.printf("%c\n\r", &token_value);
-
-// // // Serial.println(&JSON_STRING[token->start]);
-// // }
-
-// //   uint8_t counter = 0;
-
-
-
-// // char buffer_key[100];
-// // char buffer_value[100];
-
-//   // JsonPair jp ;
-
-
-      
-
-//       // jtok.nextOne();
-
-//       // Serial.printf("KEY2 %s\n\r", jtok.getStr());
-
-//       // jtok.nextOne();
-
-//       // Serial.printf("VALUE2 %s\n\r", jtok.getStr());
-
-// // for (JsonPairConst kv : list) {
-//     //   
-
-//     // }
-//   // obj.getr
-
-
-//   // jp.next
-
-
-
-
-
-
-
-//   // for(auto iter : jp){
-    
-//   //   if((counter++%2) == 0){  
-//   //     Serial.printf("KEY %s\n\r", iter.getStr());
-//   //   }else{
-//   //     Serial.printf("VALUE %s\n\r", iter.getStr());
-//   //   }
-//   // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Serial.println(obj2.getStr());
-
-
-// // for (auto key : obj2) {
-// //     // key is of type JsonParserKey
-// //     JsonParserToken valie = key.getValue();   // retrieve the value associated to key
-// // }
-
-
-// /* Loop over all keys of the root object */
-// // for (i = 1; i < r; i++) {
-// // 	if (jsoneq(JSON_STRING, &t[i], "user") == 0) {
-// // 		/* We may use strndup() to fetch string value */
-// // 		printf("- User: %.*s\n", t[i+1].end-t[i+1].start,
-// // 				JSON_STRING + t[i+1].start);
-// // 		i++;
-// // 	} else if (jsoneq(JSON_STRING, &t[i], "admin") == 0) {
-// // 		/* We may additionally check if the value is either "true" or "false" */
-// // 		printf("- Admin: %.*s\n", t[i+1].end-t[i+1].start,
-// // 				JSON_STRING + t[i+1].start);
-// // 		i++;
-// // 	} else if (jsoneq(JSON_STRING, &t[i], "uid") == 0) {
-// // 		/* We may want to do strtol() here to get numeric value */
-// // 		printf("- UID: %.*s\n", t[i+1].end-t[i+1].start,
-// // 				JSON_STRING + t[i+1].start);
-// // 		i++;
-// // 	} else if (jsoneq(JSON_STRING, &t[i], "groups") == 0) {
-// // 		int j;
-// // 		printf("- Groups:\n");
-// // 		if (t[i+1].type != JSMN_ARRAY) {
-// // 			continue; /* We expect groups to be an array of strings */
-// // 		}
-// //         printf("ARRAY group size=>t[i+1].size = %d\n", t[1+1].size);
-// // 		for (j = 0; j < t[i+1].size; j++) {
-// // 			jsmntok_t *g = &t[i+j+2];
-// // 			printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-// // 		}
-// // 		i += t[i+1].size + 1;
-// // 	} else if (jsoneq(JSON_STRING, &t[i], "plat_conf") == 0) {
-// // 		int j;
-// // 		printf("- Groups:\n");
-
-// // 		if (t[i+1].type != JSMN_OBJECT) {
-// // 			continue; // We expect groups to be an array of strings
-// // 		}
-
-// //         printf("KEY-VALUE group size=>t[i+1].size = %d\n", t[1+1].size);
-
-// // 		for (j = 0; j < t[i+1].size; j++) {
-			
-// //             jsmntok_t *g = &t[i+j+2];
-			
-// //             //printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-
-// // 			if(g->size == 1) {	//key has a value
-// // 				j++;	//jump to next token
-// // 				g = &t[i+j+2];	//you know the drill
-// // 				printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-// // 			}
-// // 		}
-
-// // 		//i += t[i+1].size + 1;
-// //         i++;
-// //         j = 1;
-// // 		//for (j = 0; j < t[i+1].size; j++) {
-			
-// //             jsmntok_t *g = &t[i+j+2];
-			
-// //             //printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-
-// // 			if(g->size == 1) {	//key has a value
-// // 				j++;	//jump to next token
-// // 				g = &t[i+j+2];	//you know the drill
-// // 				printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-// // 			}
-// // 		//}
-
-// // 		i += t[i+1].size + 1;
-// //         i += j + 1;
-
-// // 	}
-// //     else {
-// // 		printf("Unexpected key: %.*s\n", t[i].end-t[i].start,
-// // 				JSON_STRING + t[i].start);
-// // 	}
-// // }
-
-
-
-
-
-
-//     // for (JsonPairConst kv : list) {
-//     //   pin_number = GetGPIONumberFromName(kv.key().c_str());
-
-//     //   int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
-      
-//     //   if(pin_number_array_index>=0){
-//     //     gpio_number = GetGPIOFunctionIDbyName(kv.value());
-//     //     if(gpio_number != -1){
-//     //       // only template pins
-//     //       pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index] = gpio_number; // non adjusted pin_number
-//     //       // FULL pin list
-//     //       // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
-
-//     //       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
-//     //         pin_number, pin_number_array_index,
-
-//     //         pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
-//     //       );
-          
-//     //       // AddLog_P(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
-      
-//     //     }else{
-//     //       AddLog_P(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\""),kv.value());
-//     //     }
-
-//     //     }// end UsuableGPIOPin
-//     // }
-
-//     // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "hardware.gp.io", (uint8_t *)&pCONT_set->Settings.user_template2.hardware.gp.io, (uint8_t) sizeof(pCONT_set->Settings.user_template2.hardware.gp.io));
-
-//   } // end GPIOC
-//   else{
-
-    
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK " GPIOC missing"));
-
-//   }
-
-  
-  // if(!obj[F("BASE")].isNull()){ 
-  //   const char* base_ctr = obj[F("BASE")];
-  //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
-
-  //   //GetBaseIDbyName();
-  //     // pin_number = ;
-
-  //   pCONT_set->Settings.module = GetModuleIDbyName(base_ctr);//USER_MODULE;
-
-  //   char buffer[40];
-
-  //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
-
-  //   //snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
-
-  // }else{
-  //   pCONT_set->Settings.module = USER_MODULE;
-  // }
-
-
-    
-    AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "ENDED"));
-  // ModuleSettings_FlashSerial();
-
-  DEBUG_LINE;
 
 }
 
@@ -1431,9 +1028,9 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
     mpin = ValidPin(i, pCONT_set->my_module.io[i]);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
+    // #endif // ENABLE_LOG_LEVEL_INFO
 
     if (mpin) {
 
@@ -1595,6 +1192,10 @@ void mHardwarePins::GpioInit(void)
 
 #endif // ESP8266
 
+// AddLog_Array(LOG_LEVEL_TEST,"pin",pCONT_set->pin,(uint8_t)256);
+
+// pCONT_set->pin[real_gpio]
+
 
   /**
    *  Use pins to configure lights present
@@ -1719,9 +1320,12 @@ void mHardwarePins::GpioInit(void)
 
 //bring back, part of light types
 
-  if (!pCONT_set->Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))){  // RGB led
+  if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
     pCONT_set->devices_present++;
     pCONT_set->Settings.light_settings.type = LT_WS2812;
+    AddLog_P(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
+  }else{
+    AddLog_P(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }
 #endif  // USE_WS2812
 // #ifdef USE_SM16716

@@ -355,7 +355,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 
 //   JsonObject posobj = root.createNestedObject("position");
 //     posobj["percentage"] = PositionPercentage();
@@ -388,7 +388,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 
 //   root["roc_exceeded"] = adcreading.roc.val;
 //   root["A_PIN"] = digitalRead(BLINDS_MOTOR_IA_PIN);
@@ -411,7 +411,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 
 //   root[key] = pair;
 
@@ -434,7 +434,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   JsonObject root = doc.to<JsonObject>();
 
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 
 //   JsonObject posobj = root.createNestedObject("position");
 //     posobj["percentage"] = PositionPercentage();

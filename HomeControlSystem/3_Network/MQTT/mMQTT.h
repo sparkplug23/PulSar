@@ -206,7 +206,7 @@ const char* state_ctr(void);
     // Special formatted sending functions (pubsub functions to be moved in here)
     void publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
-    boolean ppublish(const char* topic, const char* payload, boolean retained);
+    boolean ppublish(const char* topic, const char* payload, boolean retained = false);
 
     void setprefixtopic(const char* _prefixtopic);
 

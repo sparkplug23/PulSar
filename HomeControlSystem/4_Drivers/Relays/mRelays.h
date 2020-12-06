@@ -26,25 +26,13 @@ class mRelays{
     #ifndef RELAYS_CONNECTED
       #define RELAYS_CONNECTED 4
     #endif
-
     
-    // template<typename T>
-    // void ftest();
+    struct SETTINGS{
+      uint8_t fShowTable = false;
+    }settings;
 
-    // template<typename T>
-    // void ftest2(T value);
-
-
-    // //overload
-    // int8_t Tasker2(uint8_t function, uint8_t param1);
-    // template<typename T = int>
-    // int8_t Tasker2(uint8_t function, T param1);
-    
-    
-
-
-
-    void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+    int8_t CheckAndExecute_JSONCommands();
+    void   parse_JSONCommand(void);
 
     #define RELAYS_MAX_COUNT 4
 
@@ -77,14 +65,9 @@ class mRelays{
     
 
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
-
-    
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
     void MQTTConnected();
 
-    void WebAppend_Root_Add_Buttons();
     
     
     void init(void);
@@ -112,8 +95,12 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 
     uint32_t tSavedTick = millis(),tSavedForceUpdate;
     uint8_t toggle_bit = 0;
+    
+#ifndef DISABLE_WEBSERVER
     void WebAppend_Root_Status_Table();
-    void parse_JSONCommand(JsonObjectConst obj);
+    void WebAppend_Root_Draw_PageTable();
+    void WebAppend_Root_Add_Buttons();
+#endif // DISABLE_WEBSERVER
 
     uint32_t tSavedTest = millis();
 
@@ -144,12 +131,6 @@ int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
     int8_t GetRelayIDbyName(const char* c);
 
     int8_t GetDeviceIDbyName(const char* c);
-    void WebAppend_Root_Draw_PageTable();
-
-struct SETTINGS{
-uint8_t fShowTable = false;
-}settings;
-
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
@@ -163,17 +144,11 @@ uint8_t fShowTable = false;
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mRelays> mqtthandler_settings_teleperiod;
-    
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mRelays> mqtthandler_sensor_ifchanged;
     struct handler<mRelays> mqtthandler_sensor_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
-  //#endif
-
 
 
 };

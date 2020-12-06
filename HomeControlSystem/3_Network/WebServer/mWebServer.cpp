@@ -197,64 +197,9 @@ void mWebServer::WebPage_Root_AddHandlers(){
     WebSend_JSON_RootStatus_Table(request);
   });
 
-  // pCONT_web->pWebServer->on("/michael", HTTP_POST, [this](AsyncWebServerRequest *request){
-  //   int params = request->params();
-  //   for(int i=0;i<params;i++){
-  //     AsyncWebParameter* p = request->getParam(i);
-  //     if(p->isFile()){
-  //       Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
-  //     } else if(p->isPost()){
-  //       Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-  //     } else {
-  //       Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-  //     }
-  //   }
-
-  //   request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
-
-  //   //  if (request->method() == HTTP_POST && request->url() == "/michael") {
-  //   //    Serial.println("HTTP_POST && request->url()");
-  //   //   // Shoudl be already handled by handleBody(..) at this point.
-  //   //   return;
-  //   // }
-  //   // Web_Base_Page_Draw(request);
-  // });
-
   pCONT_web->pWebServer->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
     Console_JSON_Data(request);
   });  
-
-
-// pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
-//     Serial.println("Running");
-//     if (request->url() == "/setmaster") {
-//       Serial.println();
-//       // DynamicJsonDocument jsonBuffer;
-//       Serial.printf("data=%s\n\r",data);
-//       // JsonObject root = jsonBuffer..parseObject((const char*)data);
-//       // if (root.success()) {
-//       //   if (root.containsKey("command")) {
-//       //     Serial.println(root["command"].asString()); // Hello
-//       //   }
-//       // }
-//       request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
-//     }
-//   });
-
-      // pCONT_web->pWebServer->on("/michael", HTTP_POST, 
-      // [](AsyncWebServerRequest *request)
-      // {
-      //   Serial.println("1");
-      // },
-      // [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final)
-      // {
-      //   Serial.println("2");
-      // },
-      // [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
-      // {
-      //   Serial.println("3");
-      //   Serial.println(String("data=") + (char*)data);
-      // });
       
   pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
     if(!index)
@@ -269,54 +214,18 @@ void mWebServer::WebPage_Root_AddHandlers(){
     Serial.println("onRequestBody " "/json_command.json" );
     if ((request->url() == "/json_command.json") && (request->method() == HTTP_POST))
     {
-      
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-        const size_t        JSON_DOC_SIZE   = 512U;
-        DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
-        
-        if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
-        {
-            pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, jsonDoc.as<JsonObjectConst>());
 
-            // Debug printing
-            JsonObject obj = jsonDoc.as<JsonObject>();
-            for (JsonPair keyValue : obj) {
-              // AddLog_P(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
-              if(keyValue.value().as<char*>()){
-                Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<char*>());
-              }else{
-                Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<int>());
-              }
-            }
+      //copy into buffer
+      D_DATA_BUFFER_CLEAR();
+      memcpy(data_buffer.payload.ctr,data,sizeof(char)*total);
+      data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
-        }
+      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);     
         
-        request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
-        
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
+      request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
+
     }
   });
-
-
-
-// pCONT_web->pWebServer->on("/generate", HTTP_POST, [](AsyncWebServerRequest *request){
-//     //nothing and dont remove it
-//   }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-//     // DynamicJsonBuffer jsonBuffer;
-//     // JsonObject& root = jsonBuffer.parseObject((const char*)data);
-//     // if (root.success()) {
-//     //   if (root.containsKey("cmd")) {
-//     //     Serial.println(root["cmd"].asString());
-//     //   }
-//     //   if (root.containsKey("cmd1")) {
-//     //     Serial.println(root["cmd1"].asString());
-//     //   }
-//     //   request->send(200, "text/plain", "");
-//     // } else {
-//       request->send(404, CONTENT_TYPE_TEXT_HTML_ID, "gernate");
-//     // }
-//   });
-
 
   /**
    * Root Page
@@ -567,7 +476,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)     // Content send snprintf_P char data
 {
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);

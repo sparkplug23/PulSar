@@ -1225,12 +1225,13 @@
 #define D_JSON_FLASHSIZE "FlashSize"
 #define D_JSON_FLOWRATE "FlowRate"
 #define D_JSON_FREEMEMORY "FreeMemory"
+#define D_JSON_FREESKETCHSPACE "FreeSketchSpace"
 #define D_JSON_FREEHEAP     "FreeHeap"
 #define D_JSON_FREQUENCY "Frequency"
 #define D_JSON_FROM "from"
 #define D_JSON_GAS "Gas"
 #define D_JSON_GATEWAY "Gateway"
-#define D_JSON_GROUPS "Groups"
+#define D_JSON_GROUP "Group"
 #define D_JSON_GROUPTOPIC "GroupTopic"
 #define D_JSON_HEAPSIZE "HeapSize"
 #define D_JSON_HIGH "High"
@@ -1549,6 +1550,8 @@
 #define D_JSON_TYPE "type"
 #define D_JSON_RELAY "relay"
 
+#define D_JSON_MANUAL_SETPIXEL_TO_SCENE "ManualSetPixelToScene"
+
 #define D_JSON_TIME_SCALER_AS_PERCENTAGE "TimeMultiplierAsPerc"
 
 
@@ -1700,7 +1703,7 @@
   #define D_JSON_GPIO "GPIO"
   #define D_JSON_GPIOC "GPIOC"
   #define D_JSON_FLAG "FLAG"
-  #define D_JSON_BASE "BASE"
+#define D_JSON_BASE "Base"
 
 // Commands xdrv_01_mqtt.ino
 #define D_JSON_MQTTHOST "MqttHost"
@@ -2052,37 +2055,37 @@ const char S_OFFLINE[] PROGMEM = D_OFFLINE;
 // support.ino
 static const char kMonthNames[] PROGMEM = D_MONTH3LIST;
 
-DEFINE_PGM_CTR(kOptionOff)        "OFF|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
-DEFINE_PGM_CTR(kOptionOn)         "ON|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
-DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" D_TOGGLE "|" D_ADMIN ;
+DEFINE_PGM_CTR(kOptionOff)        "OFF|" "0|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
+DEFINE_PGM_CTR(kOptionOn)         "ON|"  "1|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
+DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" D_ADMIN ;
 DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
 DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 
 // xdrv_02_webserver.ino
 // #ifdef USE_MODULE_CORE_WEBSERVER
-const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_SEAPRESSURE[] PROGMEM = "{s}%s " D_PRESSUREATSEALEVEL "{m}%s %s{e}";          // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_ANALOG[] PROGMEM = "{s}%s " D_ANALOG_INPUT "%d{m}%d{e}";                      // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_ILLUMINANCE[] PROGMEM = "{s}%s " D_ILLUMINANCE "{m}%d " D_UNIT_LUX "{e}";     // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_CO2[] PROGMEM = "{s}%s " D_CO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_CO2EAVG[] PROGMEM = "{s}%s " D_ECO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";  // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_GALLONS[] PROGMEM = "{s}%s " D_TOTAL_USAGE "{m}%s " D_UNIT_GALLONS " {e}";    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_GPM[] PROGMEM = "{s}%s " D_FLOW_RATE "{m}%s " D_UNIT_GALLONS_PER_MIN" {e}";   // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-const char HTTP_SNS_DISTANCE[] PROGMEM = "{s}%s " "Distance" "{m}%s%s{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_SEAPRESSURE[] PROGMEM = "{s}%s " D_PRESSUREATSEALEVEL "{m}%s %s{e}";          // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_ANALOG[] PROGMEM = "{s}%s " D_ANALOG_INPUT "%d{m}%d{e}";                      // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_ILLUMINANCE[] PROGMEM = "{s}%s " D_ILLUMINANCE "{m}%d " D_UNIT_LUX "{e}";     // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_CO2[] PROGMEM = "{s}%s " D_CO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_CO2EAVG[] PROGMEM = "{s}%s " D_ECO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";  // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_GALLONS[] PROGMEM = "{s}%s " D_TOTAL_USAGE "{m}%s " D_UNIT_GALLONS " {e}";    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_GPM[] PROGMEM = "{s}%s " D_FLOW_RATE "{m}%s " D_UNIT_GALLONS_PER_MIN" {e}";   // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_DISTANCE[] PROGMEM = "{s}%s " "Distance" "{m}%s%s{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 
-const char HTTP_SNS_GENERIC[] PROGMEM = "{s}%s{m}%s{e}";
-const char HTTP_SNS_GENERIC_NVALUE[] PROGMEM = "{s}%s{m}%d{e}";
-const char HTTP_SNS_GENERIC_SVALUE[] PROGMEM = "{s}%s{m}%s{e}";
-const char HTTP_SNS_GENERIC_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
-const char HTTP_SNS_GENERIC_NVALUE_UNIT[] PROGMEM = "{s}%s{m}%d %s{e}";
-const char HTTP_SNS_GENERIC_SVALUE_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
+// const char HTTP_SNS_GENERIC[] PROGMEM = "{s}%s{m}%s{e}";
+// const char HTTP_SNS_GENERIC_NVALUE[] PROGMEM = "{s}%s{m}%d{e}";
+// const char HTTP_SNS_GENERIC_SVALUE[] PROGMEM = "{s}%s{m}%s{e}";
+// const char HTTP_SNS_GENERIC_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
+// const char HTTP_SNS_GENERIC_NVALUE_UNIT[] PROGMEM = "{s}%s{m}%d %s{e}";
+// const char HTTP_SNS_GENERIC_SVALUE_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
  
-const char HTTP_SNS_VOLTAGE[] PROGMEM = "{s}" D_VOLTAGE "{m}%s " D_UNIT_VOLT "{e}";
-const char HTTP_SNS_CURRENT[] PROGMEM = "{s}" D_CURRENT "{m}%s " D_UNIT_AMPERE "{e}";
-const char HTTP_SNS_POWER[] PROGMEM = "{s}" D_POWERUSAGE "{m}%s " D_UNIT_WATT "{e}";
-const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
+// const char HTTP_SNS_VOLTAGE[] PROGMEM = "{s}" D_VOLTAGE "{m}%s " D_UNIT_VOLT "{e}";
+// const char HTTP_SNS_CURRENT[] PROGMEM = "{s}" D_CURRENT "{m}%s " D_UNIT_AMPERE "{e}";
+// const char HTTP_SNS_POWER[] PROGMEM = "{s}" D_POWERUSAGE "{m}%s " D_UNIT_WATT "{e}";
+// const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
 
 
 const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;

@@ -360,7 +360,7 @@ void mSensorsDHT::WebPage_Root_AddHandlers(){
 
 uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
-  //   memset(&data_buffer,0,sizeof(data_buffer));
+  //   D_DATA_BUFFER_CLEAR();
   //   StaticJsonDocument<400> doc;
   //   JsonObject root = doc.to<JsonObject>();
 

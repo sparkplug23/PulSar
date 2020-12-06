@@ -736,7 +736,7 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //       gpio_arr.add(cmodule.io[i]); 
 //     }
   
-//   memset(&data_buffer,0,sizeof(data_buffer));
+//   D_DATA_BUFFER_CLEAR();
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //     char topic2[100];
@@ -774,7 +774,7 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //     //   gpio_named_arr.add(stemp2);
 //     // }
   
-//     memset(&data_buffer,0,sizeof(data_buffer));
+//     D_DATA_BUFFER_CLEAR();
 //     serializeJson(doc2,data_buffer.payload.ctr);
 
 //     char topic[100];
@@ -846,7 +846,7 @@ uint16_t mSupport::WriteBuffer_P(const char* formatP, ...)     // Content send s
 int mSupport::Response_P(const char* format, ...)     // Content send snprintf_P char data
 {
   //BufferWriter
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
 
   // This uses char strings. Be aware of sending %% if % is needed
   va_list args;
@@ -2628,31 +2628,29 @@ void mSupport::parse_JSONCommand(){
     return; // not meant for here
   }
 
-  
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
 
-  StaticJsonDocument<300> doc;
-  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  JsonObject obj = doc.as<JsonObject>();
 
-  if(obj.containsKey("resetcounter")){
-    uint8_t val = obj["resetcounter"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
-    pCONT->mt->ResetRebootCounter();
-    data_buffer.isserviced++;
-  }else
-  if(obj.containsKey("loglevel")){
-    const char* name = obj["loglevel"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
-    pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
-    // Add save log here
-    data_buffer.isserviced++;
-  }
-  else{
-     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
-  }
+  // StaticJsonDocument<300> doc;
+  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+  // JsonObject obj = doc.as<JsonObject>();
+
+  // if(obj.containsKey("resetcounter")){
+  //   uint8_t val = obj["resetcounter"];
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
+  //   pCONT->mt->ResetRebootCounter();
+  //   data_buffer.isserviced++;
+  // }else
+  // if(obj.containsKey("loglevel")){
+  //   const char* name = obj["loglevel"];
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
+  //   pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
+  //   // Add save log here
+  //   data_buffer.isserviced++;
+  // }
+  // else{
+  //    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
+  // }
   
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
   //USeful tasmota stuff
   // else if (CMND_STATUS == command_code) {

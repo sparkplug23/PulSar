@@ -37,6 +37,7 @@ struct DATA_BUFFER{
   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
 };
 extern struct DATA_BUFFER data_buffer;
+#define D_DATA_BUFFER_CLEAR() memset(&data_buffer,0,sizeof(data_buffer))
 
 
 
@@ -440,8 +441,12 @@ enum XsnsFunctions {
   FUNC_LIGHT_UPDATE_OUTPUT,
 
   // Commands
-  FUNC_COMMAND, FUNC_COMMAND_SENSOR, FUNC_COMMAND_DRIVER, FUNC_JSON_COMMAND, FUNC_JSON_COMMAND_OBJECT, 
-  FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
+  // FUNC_COMMAND, 
+  // FUNC_COMMAND_SENSOR, 
+  // FUNC_COMMAND_DRIVER, 
+  // FUNC_JSON_COMMAND, 
+  // FUNC_JSON_COMMAND_OBJECT, 
+  // FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
   FUNC_JSON_COMMAND_CHECK_TOPIC_ID,
   FUNC_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
   // Wifi 
@@ -572,19 +577,7 @@ class mSettings{
     mSettings(){};
     
     //overload
-    int8_t Tasker(uint8_t function);//, uint8_t param1);
-    
-    // template<typename T>
-    // int8_t Tasker(uint8_t function, T param1);
-    
-    // template<typename T>
-    // int8_t Tasker2(uint8_t function, T param1);
-    
-    
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-int8_t Tasker(uint8_t function, JsonObjectConst obj);  
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
+    int8_t Tasker(uint8_t function);
 
 
     void init(void);
@@ -1482,9 +1475,6 @@ typedef union {
 struct COMMAND_JSON{
   COMMAND_JSON_FLAG flag;
   
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-  JsonObjectConst json;
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 
 }command;
 
@@ -1513,6 +1503,11 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint16_t spare15 : 1;
   };
 } RulesBitfield;
+
+
+
+int8_t CheckAndExecute_JSONCommands();
+void parse_JSONCommand();
 
 
 // See issue https://github.com/esp8266/Arduino/issues/2913
@@ -1694,13 +1689,6 @@ struct FIRMWARE_VERSION{
   uint8_t fNewVersionAvailable = false;
   uint8_t fCurrentVersionNotSupported = false;
 }firmware_version;
-
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-void parse_JSONCommand(JsonObjectConst _obj);
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
-
-// void parsesub_SystemCommand(JsonObjectConst _obj);
-// void parsesub_FirmwareInformation(JsonObjectConst _obj);
 
 };
 

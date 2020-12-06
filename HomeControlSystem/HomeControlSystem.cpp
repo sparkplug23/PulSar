@@ -446,7 +446,7 @@ void setup(void)
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD "Temporary loading any progmem templates"));
+    AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
     #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   // load
@@ -501,18 +501,10 @@ void loop(void)
   
   DEBUG_LINE;
   
-  // #ifndef ENABLE_DEVFEATURE_OTA_METHOD
-  // #ifdef USE_ARDUINO_OTA
-  //   ArduinoOtaLoop();
-  // #endif  // USE_ARDUINO_OTA
-  // #endif // ENABLE_DEVFEATURE_OTA_METHOD
-
-  // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA
-  // #endif
-
+  
   DEBUG_LINE;
   pCONT->Tasker_Interface(FUNC_LOOP); // EVERY_LOOP
 
@@ -554,26 +546,26 @@ void loop(void)
   // Change this to my own way
   // DO THIS NEXT
   //SmartLoopDelay()
-  // #ifndef DISABLE_SLEEP
-  // if(pCONT_set->Settings.enable_sleep){
-  //   if (pCONT_set->Settings.flag_network.sleep_normal) {
-  //     pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
-  //   } else {
+  #ifndef DISABLE_SLEEP
+  if(pCONT_set->Settings.enable_sleep){
+    if (pCONT_set->Settings.flag_network.sleep_normal) {
+      pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
+    } else {
 
-  //     // Loop time < sleep length of time
-  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
-  //       //delay by loop time
-  //       pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
-  //     } else {
+      // Loop time < sleep length of time
+      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
+        //delay by loop time
+        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+      } else {
 
-  //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
-  //       if (pCONT_set->global_state.wifi_down) {
-  //         pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
-  //       }
-  //     }
-  //   }
-  // }
-  // #endif
+        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
+        if (pCONT_set->global_state.wifi_down) {
+          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
+        }
+      }
+    }
+  }
+  #endif
 
   // delay(100);
 

@@ -10,6 +10,19 @@
 // int test = 0;
 
 
+#ifdef ESP32
+#include <WiFi.h>
+#ifndef DISABLE_NETWORK
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif
+
+
 
 void WebPage_Root_AddHandlers();
 void GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b,uint8_t* _w1, uint8_t* _w2);

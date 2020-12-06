@@ -747,7 +747,7 @@ void mOilFurnace::ConstructRoot_JSON_Table(JsonObject root){
 // Send all litres calculations from all methods
 uint8_t mOilFurnace::ConstructJSON_Litres(uint8_t json_method){
 
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   JsonObject root = doc.to<JsonObject>();
 
@@ -810,7 +810,7 @@ uint8_t mOilFurnace::ConstructJSON_Litres(uint8_t json_method){
 
 uint8_t mOilFurnace::ConstructJSON_Settings(uint8_t json_method){
 
-    memset(&data_buffer,0,sizeof(data_buffer));
+    D_DATA_BUFFER_CLEAR();
     StaticJsonDocument<400> doc;
     JsonObject root = doc.to<JsonObject>();
 
@@ -826,7 +826,7 @@ uint8_t mOilFurnace::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mOilFurnace::ConstructJSON_Furnace(uint8_t json_method){
 
-    memset(&data_buffer,0,sizeof(data_buffer));
+    D_DATA_BUFFER_CLEAR();
     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
     JsonObject root = doc.to<JsonObject>();
 

@@ -379,7 +379,7 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
 
   // Save MQTT data ASAP as it's data is discarded by PubSubClient with next publish as used in MQTTlog
-  memset(&data_buffer,0,sizeof(data_buffer));
+  D_DATA_BUFFER_CLEAR();
   data_buffer.topic.len = strlen(mqtt_topic)+1;
   strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.len);
   data_buffer.payload.len = data_len;
@@ -416,7 +416,7 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
 
     #ifdef ENABLE_DEVFEATURE_JSONPARSER
-    //  char parsing_buffer[data_buffer.payload.len];
+    //  char parsing_buffer[data_buffer.payload.len+1];
     //   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len);
     //   JsonParser parser(parsing_buffer);
 

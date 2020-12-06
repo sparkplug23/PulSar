@@ -38,7 +38,10 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
   BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
   uint8_t animation_mode_list_ids[] = {
-    pCONT_iLight->ANIMATION_MODE_FLASHER_ID, pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
+    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+    pCONT_iLight->ANIMATION_MODE_FLASHER_ID, 
+    #endif // ENABLE_PIXEL_FUNCTION_FLASHER
+    pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     ANIMATION_MODE_NOTIFICATIONS_ID,
     #endif    
@@ -407,7 +410,7 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
   //   return;
   // }
 
-  // memset(&data_buffer,0,sizeof(data_buffer));
+  // D_DATA_BUFFER_CLEAR();
   // char *buf = data_buffer.payload.ctr;
   // char **buffer = &buf;
   // pCONT_web->buffer_writer_len = 0;

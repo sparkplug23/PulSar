@@ -84,9 +84,6 @@ struct functionhandler {
   #include <ESP8266httpUpdate.h>
 #endif
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
@@ -138,7 +135,7 @@ bool SetAndKeepHighestNumber(T* current, T new_value){
 
 
 template<typename A,typename B,typename C,typename D,typename E>
-A mapvalue(A a, B b, C c, D d, E e){
+E mapvalue(A a, B b, C c, D d, E e){ //should be returning at largest, the size of E range
   return map(a,b,c,d,e);
 }
 
@@ -329,7 +326,6 @@ class mSupport{
     void I2cScan(char *devs, unsigned int devs_len);
     bool I2cDevice(uint8_t addr);
 
-    void parse_JSONCommand();
     IPAddress syslog_host_addr;      // Syslog host IP address
     uint32_t syslog_host_hash = 0;   // Syslog host name hash
 
@@ -340,6 +336,9 @@ class mSupport{
     // uint32_t state_100msecond,state_250msecond;
 
     Ticker tickerOSWatch;
+
+    int8_t CheckAndExecute_JSONCommands(void);
+    void parse_JSONCommand(void);
 
 
 

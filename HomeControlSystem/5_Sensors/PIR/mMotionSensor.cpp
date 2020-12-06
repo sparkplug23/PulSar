@@ -27,6 +27,15 @@ int8_t mMotionSensor::Tasker(uint8_t function){
       EveryLoop();
     break;    
     /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
+    /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MQTT
@@ -44,6 +53,7 @@ int8_t mMotionSensor::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
+    #ifndef DISABLE_WEBSERVER
     #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Draw_PageTable();
@@ -52,21 +62,13 @@ int8_t mMotionSensor::Tasker(uint8_t function){
       WebAppend_Root_Status_Table();
     break;
     #endif //USE_MODULE_CORE_WEBSERVER    
+    #endif // DISABLE_WEBSERVER
   }
 
 } // END function
 
-int8_t mMotionSensor::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
 
+#ifndef DISABLE_WEBSERVER
 void mMotionSensor::WebAppend_Root_Draw_PageTable(){
 char buffer[50];
 for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){       
@@ -76,6 +78,58 @@ for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 }
 }
+
+
+void mMotionSensor::WebPage_Root_AddHandlers(){
+  // Not needed
+}
+
+//append to internal buffer if any root messages table
+void mMotionSensor::WebAppend_Root_Status_Table(){
+
+  char buffer[20];
+
+  JsonBuilderI->Array_Start("tab_pir");// Class name
+  for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",sensor_id);
+
+        char colour_ctr[8];
+        uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
+        // Motion in progress
+        if(pir_detect[sensor_id].isactive){
+          sprintf_P(colour_ctr,PSTR("#00ff00"));
+        }else
+        // If movement event has just finished
+        if(millis_elapsed<(1000*60)){
+          // Show colour as fading back to white over X seconds SINCE EVENT OVER
+          uint8_t colour_G = constrain(
+                                map(millis_elapsed,0,(1000*60),0,255)
+                                ,0,255 //increases with time
+                              );
+                              //Serial.printf("colour_G=%d\n\r",colour_G);
+          // sprintf(colour_ctr,"%s",
+          pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
+          //);
+        }
+        // no event show, just white
+        else{
+          sprintf_P(colour_ctr,PSTR("#ffffff"));
+        }
+
+
+      JsonBuilderI->Add("ih",
+        pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      
+      //detected_rtc_ctr);
+      JsonBuilderI->Add("fc",colour_ctr);    
+    JsonBuilderI->Level_End();
+  }
+
+  JsonBuilderI->Array_End();
+
+}
+#endif // DISABLE_WEBSERVER
 
 void mMotionSensor::Pre_Init(void){
 
@@ -148,55 +202,6 @@ const char* mMotionSensor::PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uin
   return buffer;
 }
 
-void mMotionSensor::WebPage_Root_AddHandlers(){
-  // Not needed
-}
-
-//append to internal buffer if any root messages table
-void mMotionSensor::WebAppend_Root_Status_Table(){
-
-  char buffer[20];
-
-  JsonBuilderI->Array_Start("tab_pir");// Class name
-  for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",sensor_id);
-
-        char colour_ctr[8];
-        uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
-        // Motion in progress
-        if(pir_detect[sensor_id].isactive){
-          sprintf_P(colour_ctr,PSTR("#00ff00"));
-        }else
-        // If movement event has just finished
-        if(millis_elapsed<(1000*60)){
-          // Show colour as fading back to white over X seconds SINCE EVENT OVER
-          uint8_t colour_G = constrain(
-                                map(millis_elapsed,0,(1000*60),0,255)
-                                ,0,255 //increases with time
-                              );
-                              //Serial.printf("colour_G=%d\n\r",colour_G);
-          // sprintf(colour_ctr,"%s",
-          pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
-          //);
-        }
-        // no event show, just white
-        else{
-          sprintf_P(colour_ctr,PSTR("#ffffff"));
-        }
-
-
-      JsonBuilderI->Add("ih",
-        pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      
-      //detected_rtc_ctr);
-      JsonBuilderI->Add("fc",colour_ctr);    
-    JsonBuilderI->Level_End();
-  }
-
-  JsonBuilderI->Array_End();
-
-}
 
 void mMotionSensor::EveryLoop(){
   
@@ -246,13 +251,13 @@ void mMotionSensor::EveryLoop(){
 
 
 
-int8_t mMotionSensor::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mMotionSensor::CheckAndExecute_JSONCommands(){
 
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
@@ -260,8 +265,21 @@ int8_t mMotionSensor::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 }
 
 
-void mMotionSensor::parse_JSONCommand(JsonObjectConst obj){ //parse_Command() and pass packet (topic/len/payload/len structure)
-  // none
+void mMotionSensor::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
+  
+  // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len+1];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError"));
+    #endif //ENABLE_LOG_LEVEL_INFO_PARSING
+    return;
+  }  
+  JsonParserToken jtok = 0; 
+
 }
 
 
@@ -275,6 +293,20 @@ uint8_t mMotionSensor::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.sensors_active);
+    JsonBuilderI->Array_AddArray("pin", pin, 3);
+
+    //debug
+    // JsonBuilderI->Add_P("pin[0]", settings.sensors_active);
+    JsonBuilderI->Array_Start("pin_state");
+      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[0]));
+      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[1]));
+      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[2]));
+    JsonBuilderI->Array_End();
+    
+
+
+
+
   return JsonBuilderI->End();
 
 }
@@ -322,7 +354,7 @@ void mMotionSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

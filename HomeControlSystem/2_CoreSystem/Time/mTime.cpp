@@ -107,14 +107,14 @@ void mTime::init(void){
   
   memset(&uptime,0,sizeof(uptime));
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
   //timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
   timeClient = new NTPClient(ntpUDP, NTP_ADDRESS, (fEnabled_DayLightSavings?NTP_OFFSET:0), NTP_INTERVAL);
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   kDaysInMonth[0] = 31;
   kDaysInMonth[1] = 28;
   kDaysInMonth[2] = 31;
