@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
 #include "mFirmwareCustom.h"
+#include "0_ConfigUser/mUserConfigSecret.h"
 
 /*********************************************************************************************\
  * This file is one of two user configurable files
@@ -228,11 +229,14 @@
 #define TIME_STD_DAY           Sun               // Day of week (1 or Sun, 2 or Mon, 3 or Tue, 4 or Wed, 5 or Thu, 6 or Fri, 7 or Sat)
 #define TIME_STD_MONTH         Oct               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
 #define TIME_STD_HOUR          3                 // Hour (0 to 23)
-#define TIME_STD_OFFSET        +60               // Offset from UTC in minutes (-780 to +780)
+#define TIME_STD_OFFSET        0                 // Offset from UTC in minutes (-780 to +780)
 
 // -- Location ------------------------------------
+#ifndef LATITUDE
 #define LATITUDE               50.858360         // [Latitude] Your location to be used with sunrise and sunset
 #define LONGITUDE              5.294442          // [Longitude] Your location to be used with sunrise and sunset
+#endif
+
 
 // -- Application ---------------------------------
 #define APP_TIMEZONE           0                 // [Timezone] +1 hour (Amsterdam) (-13 .. 14 = hours from UTC, 99 = use TIME_DST/TIME_STD)
@@ -295,12 +299,14 @@
 // -- mDNS ----------------------------------------
 // #define USE_NETWORK_MDNS           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)
 
+
+
 // -- Time ----------------------------------------
 #define USE_RTC
 //#define USE_TIMERS                               // Add support for up to 16 timers (+2k2 code)
 //  #define USE_TIMERS_WEB                         // Add timer webpage support (+4k5 code)
   // #define USE_SUNRISE                            // Add support for Sunrise and sunset tools (+16k)
-  //   #define SUNRISE_DAWN_ANGLE DAWN_NORMAL       // Select desired Dawn Angle from (DAWN_NORMAL, DAWN_CIVIL, DAWN_NAUTIC, DAWN_ASTRONOMIC)
+    #define SUNRISE_DAWN_ANGLE DAWN_NORMAL       // Select desired Dawn Angle from (DAWN_NORMAL, DAWN_CIVIL, DAWN_NAUTIC, DAWN_ASTRONOMIC)
 
 // -- Rules ---------------------------------------
 #define USE_ACTIONS                                // Add support for rules (+4k4 code)

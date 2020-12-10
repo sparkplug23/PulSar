@@ -43,11 +43,11 @@ uint8_t mSonoffIFan::GetFanspeed(void)
 // Probably to be handled using "light_interface?"
 uint8_t mSonoffIFan::GetLightState(void)
 {
-  return pCONT_mry->GetRelay(0);
+  return pCONT_mry->CommandGet_Relay_Power(0);
 }
 void mSonoffIFan::SetLightState(uint8_t state)
 {
-  pCONT_mry->SetRelay(state);
+  pCONT_mry->CommandSet_Relay_Power(state);
 }
 
 /*********************************************************************************************/

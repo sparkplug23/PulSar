@@ -16,7 +16,7 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-#include "2_CoreSystem/Languages/mLanguage.h"
+//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
 #ifdef ESP32
@@ -30,6 +30,8 @@
 #include "2_CoreSystem/Time/mTime.h"
 
 enum ButtonStates { PRESSED, NOT_PRESSED };
+
+DEFINE_PGM_CTR(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR) "button_table";
 
 /*********************************************************************************************\
  * Watchdog extension (https://github.com/esp8266/Arduino/issues/1532)
@@ -74,6 +76,7 @@ uint8_t ButtonSerial(uint8_t serial_in_byte);
 void ButtonHandler(void);
 void ButtonLoop(void);
 
+char* IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen);
 
 
 void WebAppend_Root_Draw_Table();

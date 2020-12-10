@@ -21,6 +21,13 @@
 
 struct DATA_BUFFER data_buffer;
 
+// struct TIME_T RtcTime;
+// struct TIMERULES TimeRules;
+// union TimeRule TimeRuleTest;
+
+
+
+
 // /*********************struct DATA_BUFFER2 data_buffer;***********************************************************************/
 //
 // CONSIDER combining driver/sensor into one module "AddSensor"
@@ -1640,6 +1647,8 @@ void mSettings::SystemSettings_DefaultBody_System(void)
 
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
   
+  Settings.mqtt_retry = MQTT_RETRY_SECS;
+  
   // strlcpy(Settings.state_text[0], MQTT_STATUS_OFF, sizeof(Settings.state_text[0]));
   // strlcpy(Settings.state_text[1], MQTT_STATUS_ON, sizeof(Settings.state_text[1]));
   // strlcpy(Settings.state_text[2], MQTT_CMND_TOGGLE, sizeof(Settings.state_text[2]));
@@ -2083,22 +2092,22 @@ DEBUG_LINE;
 
 void mSettings::SettingsResetStd(void)
 {
-  // Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
-  // Settings.tflag[0].week = TIME_STD_WEEK;
-  // Settings.tflag[0].dow = TIME_STD_DAY;
-  // Settings.tflag[0].month = TIME_STD_MONTH;
-  // Settings.tflag[0].hour = TIME_STD_HOUR;
-  // Settings.toffset[0] = TIME_STD_OFFSET;
+  Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
+  Settings.tflag[0].week = TIME_STD_WEEK;
+  Settings.tflag[0].dow = TIME_STD_DAY;
+  Settings.tflag[0].month = TIME_STD_MONTH;
+  Settings.tflag[0].hour = TIME_STD_HOUR;
+  Settings.toffset[0] = TIME_STD_OFFSET;
 }
 
 void mSettings::SettingsResetDst(void)
 {
-  // Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
-  // Settings.tflag[1].week = TIME_DST_WEEK;
-  // Settings.tflag[1].dow = TIME_DST_DAY;
-  // Settings.tflag[1].month = TIME_DST_MONTH;
-  // Settings.tflag[1].hour = TIME_DST_HOUR;
-  // Settings.toffset[1] = TIME_DST_OFFSET;
+  Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
+  Settings.tflag[1].week = TIME_DST_WEEK;
+  Settings.tflag[1].dow = TIME_DST_DAY;
+  Settings.tflag[1].month = TIME_DST_MONTH;
+  Settings.tflag[1].hour = TIME_DST_HOUR;
+  Settings.toffset[1] = TIME_DST_OFFSET;
 }
 
 

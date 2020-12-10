@@ -32,12 +32,8 @@ class mSensorsDB18{
       uint8_t  group_count = 0;
     }settings;
 
-
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    // void JSONCommands_CheckSubTopic_ThisModule(JsonObjectConst obj);
-    // void JSONCommands_CheckAll(JsonObjectConst obj);
-    void parse_JSONCommand(JsonObjectConst obj);
+    int8_t CheckAndExecute_JSONCommands();
+    void parse_JSONCommand();
 
     void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
 

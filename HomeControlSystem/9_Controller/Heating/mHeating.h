@@ -8,7 +8,6 @@
 
 #include <NeoPixelBus.h>
 
-#include <ArduinoJson.h>
 #include "1_TaskerManager/mTaskerManager.h"
 
 
@@ -498,15 +497,15 @@ void WebAppend_Root_Draw_Table();
     void SendVoiceSettings(void);
 
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
     
-    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    void parse_JSONCommand(JsonObjectConst obj);
-    void parsesub_CheckAll(JsonObjectConst obj);
-    void parsesub_ModeManual(JsonObjectConst obj);
-    void parsesub_ProgramTimers(JsonObjectConst obj);
-    void parsesub_ProgramTemps(JsonObjectConst obj);
+    int8_t CheckAndExecute_JSONCommands();
+    void parse_JSONCommand();
+
+    // void parsesub_CheckAll(JsonObjectConst obj);
+    // void parsesub_ModeManual(JsonObjectConst obj);
+    // void parsesub_ProgramTimers(JsonObjectConst obj);
+    // void parsesub_ProgramTemps(JsonObjectConst obj);
 
     void SubTasker_HeatingTimers(void);
     void SubTasker_HeatingTemps(void);

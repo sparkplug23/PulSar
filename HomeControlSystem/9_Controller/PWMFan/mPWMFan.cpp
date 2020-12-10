@@ -49,12 +49,12 @@ uint8_t mPWMFan::GetFanspeed(void)
 // Probably to be handled using "light_interface?"
 uint8_t mPWMFan::GetLightState(void)
 {
-  // return pCONT_mry->GetRelay(0);
+  // return pCONT_mry->CommandGet_Relay_Power(0);
   return 0;
 }
 void mPWMFan::SetLightState(uint8_t state)
 {
-  // pCONT_mry->SetRelay(state);
+  // pCONT_mry->CommandSet_Relay_Power(state);
 }
 
 /*********************************************************************************************/

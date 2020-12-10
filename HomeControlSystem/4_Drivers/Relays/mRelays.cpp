@@ -13,6 +13,13 @@
 7) Schedule automatic tod on/off, include duty cycle (with variable for scele, seconds, minutes, hours)
 
 
+Time_On : Auto turn off after x seconds (or minutes)
+Scheduled time, time on/off by a scheduled time, or,
+Disable via internal setters (use flag to check or not) when outside permitted time windows
+
+time_short = 4 bytes, on/off pair = 8 bytes, 4 periods = 32 bytes per relay, 4 relays = 128 bytes ram (passible)
+
+
 add table (optional flag to turn this on/off)
 Relay Name:    ontime, offtime, timeon, last controlled by//
   // I should add a relay "type" ie, external power, internal power, light
@@ -24,9 +31,36 @@ Relay Name:    ontime, offtime, timeon, last controlled by//
 
 void mRelays::init(void){
 
-  relays_connected = pCONT_set->devices_present; //phase out
+  settings.relays_connected = pCONT_set->devices_present; //phase out
 
-  relays_connected = RELAYS_CONNECTED;
+  settings.relays_connected = RELAYS_CONNECTED;
+
+
+  // clear all settings to 0
+  memset(&relay_status, 0, sizeof(relay_status));
+
+  // Set defaults
+  for(int relay_id=0;relay_id<RELAYS_CONNECTED;relay_id++){
+    relay_status[relay_id].timer_decounter.seconds = 0;
+    relay_status[relay_id].timer_decounter.active = false;
+  }
+
+  #ifdef ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+  settings.flags.enabled_relays_allowed_time_window_checks = true;
+  relay_status[0].enabled_ranges[0].enabled = true;
+  relay_status[0].enabled_ranges[0].ontime = {8, 14, 25, 0}; //8 meaning all days   3pm to 8am
+  relay_status[0].enabled_ranges[0].offtime = {8, 7, 0, 0}; //8 meaning all days
+  #else
+  settings.flags.enabled_relays_allowed_time_window_checks = false;
+  #endif // ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+
+
+//{"PowerName":0,"Relay":{"TimeOn":5},"EnabledTime":{"Enabled":1,"OnTime":"01D12:34:56","OffTime":"12D34:56:78"}}
+
+
+      // &relay_status[relay_id].enabled_ranges[0].ontime,
+      // &relay_status[relay_id].enabled_ranges[0].offtime
+
   
   SetPowerOnState();
 }
@@ -54,6 +88,9 @@ int8_t mRelays::Tasker(uint8_t function){
       //   // SetAllPower(POWER_TOGGLE,SRC_IGNORE);
       // }
     break;      
+    case FUNC_EVERY_SECOND:
+      SubTask_Relay_Timed_Seconds();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -63,9 +100,9 @@ int8_t mRelays::Tasker(uint8_t function){
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand();
     break;
-    // case FUNC_SET_POWER:
-    //   // LightSetPower();
-    // break;    
+    case FUNC_SET_POWER_ON_ID:
+      CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
+    break;    
     /************
      * MQTT SECTION * 
     *******************/
@@ -102,6 +139,42 @@ int8_t mRelays::Tasker(uint8_t function){
 } // END function
 
 
+void mRelays::SubTask_Relay_Timed_Seconds(){
+  
+  // Stop if no relays connected
+  if(!settings.relays_connected){
+    return;
+  }
+  
+  // Loop across each connected relay
+  for(int relay_id=0;relay_id<settings.relays_connected;relay_id++){
+
+    if(relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
+      #endif       
+
+      CommandSet_Relay_Power(0, relay_id);
+
+      relay_status[relay_id].timer_decounter.seconds=0;
+
+    }else
+    if(relay_status[relay_id].timer_decounter.seconds>1){ //if =1 then turn off and clear to 0
+      relay_status[relay_id].timer_decounter.seconds--; //decrease
+
+      CommandSet_Relay_Power(1, relay_id);
+      
+      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
+      #endif
+    }else{
+      //assumed off ie == 0
+    }
+  }//end for
+
+}
+
+
 
 void mRelays::MQTTConnected(){
   MQTTHandler_Set_fSendNow();
@@ -111,7 +184,7 @@ void mRelays::MQTTConnected(){
 #ifndef DISABLE_WEBSERVER
 void mRelays::WebAppend_Root_Add_Buttons(){
 
-  if(!relays_connected){
+  if(!settings.relays_connected){
     return;
   }
 
@@ -123,7 +196,7 @@ void mRelays::WebAppend_Root_Add_Buttons(){
   BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Relay Controls","");//PSTR("Relay Controls"),"");
 
   BufferWriterI->Append_P(PSTR("{t}<tr>"));
-    for(uint8_t button_id=0;button_id<relays_connected;button_id++){
+    for(uint8_t button_id=0;button_id<settings.relays_connected;button_id++){
       // Create json template
       snprintf(dlist_json_template, sizeof(dlist_json_template), 
         "{\\\"" D_JSON_POWERNAME "\\\":\\\"%s\\\",\\\"" D_JSON_ONOFF "\\\":\\\"%s\\\"}",
@@ -132,7 +205,7 @@ void mRelays::WebAppend_Root_Add_Buttons(){
       );
       // Build button
       BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
-                                100/relays_connected,
+                                100/settings.relays_connected,
                                 "", 
                                 "buttonh " "reltog",
                                 dlist_json_template, 
@@ -149,14 +222,14 @@ void mRelays::WebAppend_Root_Add_Buttons(){
 
 void mRelays::WebAppend_Root_Draw_PageTable(){
 
-  if(!relays_connected){
+  if(!settings.relays_connected){
     return;
   }
   char buffer[50];
   
   DEBUG_LINE;
   if(settings.fShowTable){
-    for(int ii=0;ii<relays_connected;ii++){
+    for(int ii=0;ii<settings.relays_connected;ii++){
       BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
         BufferWriterI->Append_P(PSTR("<td>%s</td>"), GetRelayNamebyIDCtr(ii,buffer,sizeof(buffer)));
         BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"relpow_tab","?");   
@@ -170,28 +243,28 @@ void mRelays::WebAppend_Root_Draw_PageTable(){
 //append to internal buffer if any root messages table
 void mRelays::WebAppend_Root_Status_Table(){
   
-  if(!relays_connected){
+  if(!settings.relays_connected){
     return;
   }
   char buffer[20]; memset(buffer,0,sizeof(buffer));
 
   if(settings.fShowTable){
     JsonBuilderI->Array_Start("relpow_tab");// Class name
-    for(int row=0;row<relays_connected;row++){  
+    for(int row=0;row<settings.relays_connected;row++){  
       JsonBuilderI->Level_Start();
         JsonBuilderI->Add("id",row);
-        JsonBuilderI->Add("ih",GetRelay(row) ? PSTR("ON") : PSTR("Off"));
+        JsonBuilderI->Add("ih",CommandGet_Relay_Power(row) ? PSTR("ON") : PSTR("Off"));
       JsonBuilderI->Level_End();
     }
     JsonBuilderI->Array_End();  
   }
 
   JsonBuilderI->Array_Start("reltog");// Class name
-  for(int row=0;row<relays_connected;row++){  
+  for(int row=0;row<settings.relays_connected;row++){  
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",row);
       JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
-      JsonBuilderI->Add("bc",GetRelay(row) ? "#00ff00" : "#ee2200");    
+      JsonBuilderI->Add("bc",CommandGet_Relay_Power(row) ? "#00ff00" : "#ee2200");    
     JsonBuilderI->Level_End();
   }  
   JsonBuilderI->Array_End();
@@ -233,28 +306,18 @@ void mRelays::parse_JSONCommand(void){
   }  
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
-
-  uint8_t name_num=0,state=-1;    
-
-  // LEGACY METHOD
-  if(jtok = obj[PM_JSON_NAME]){
-    if(jtok.isStr()){
-      name_num = GetRelayIDbyName(jtok.getStr());
-    }else 
-    if(jtok.isNum()){
-      name_num  = jtok.getInt();
-    }
-    AddLog_P(LOG_LEVEL_WARN, PSTR("LEGACY: Relay method \"name\" changing to \"PowerName\""));
-  }
+ 
+  uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
 
   if(jtok = obj[PM_JSON_POWERNAME]){
     if(jtok.isStr()){
-      name_num = GetRelayIDbyName(jtok.getStr());
+      relay_id = GetRelayIDbyName(jtok.getStr());
     }else 
     if(jtok.isNum()){
-      name_num  = jtok.getInt();
+      relay_id  = jtok.getInt();
     }
   }
+
 
   if(jtok = obj[PM_JSON_ONOFF]){
     if(jtok.isStr()){
@@ -265,75 +328,111 @@ void mRelays::parse_JSONCommand(void){
     }
   }
 
-  if((state>-1)&&(name_num>-1)){
-    SetRelay(name_num,state);
+
+  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+    CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
+  }else
+  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+    CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
+  }
+
+  if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.relays_connected)){
+    CommandSet_Relay_Power(state,relay_id);
+  }
+
+  if(jtok = obj["EnabledTime"]){
+    time_short_t ontime;
+    time_short_t offtime;
+    uint8_t index = 0;
+    
+    if(jtok = obj["EnabledTime"].getObject()[PM_JSON_INDEX]){
+      index = jtok.getInt();    
+    }
+    
+    if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ONTIME]){
+      ontime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
+      relay_status[relay_id].enabled_ranges[index].ontime = ontime;
+    }
+    if(jtok = obj["EnabledTime"].getObject()[PM_JSON_OFFTIME]){
+      offtime = mTime::Parse_Time_TimeShortCtr_To_TimeShort(jtok.getStr());
+      relay_status[relay_id].enabled_ranges[index].ontime = offtime;
+    }
+    if(jtok = obj["EnabledTime"].getObject()[PM_JSON_ENABLED]){
+      relay_status[relay_id].enabled_ranges[index].enabled = jtok.getInt();
+    }
+
+    pCONT_time->PrintDateTime(ontime);
+    pCONT_time->PrintDateTime(offtime);
+
+    mqtthandler_scheduled_teleperiod.flags.SendNow = true;
+
   }
 
 
-  
-  // if(!obj[D_JSON_POWER].isNull()){
-  //   if(const char* value = obj[D_JSON_POWER]){
-  //     state = pCONT_sup->GetStateNumber(value);
-  //   }else 
-  //   if(obj[D_JSON_POWER].is<int>()){
-  //     state  = obj[D_JSON_POWER];
-  //     if(state==2){
-  //       state ^= GetRelay(name_num); //invert
-  //     }
-  //   }    
-  // }
-
-  // if(state>-1){
-  //   SetRelay(name_num,state);
-  // }
-
-
-  //create parsing function
-  // id = ParseJsonObjectValue(function, key, )
-
 }
+
+void mRelays::CommandSet_Timer_Decounter(uint8_t time_secs, uint8_t relay_id){
+  relay_status[relay_id].timer_decounter.seconds = time_secs;
+  relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "%d" D_UNIT_SECOND), relay_status[relay_id].timer_decounter.seconds);  
+  #endif
+}
+
 
 
 /*********************************************************************************************
 * Input & Output Interface ******************************************************************
 *************************************************************************************************/
 
-//tmp fix
-void mRelays::SetRelay(uint8_t state){
-  SetRelay(0,state);
-}
 
   //flip args around so the single arg means state of relay 0
-void mRelays::SetRelay(uint8_t num, uint8_t state){
+  // Only apply changes when state is changed
+void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
-    ,"SetRelay","num",num,"state",state);     
+    ,"CommandSet_Relay_Power","num",num,"state",state);     
   
   //error patch  within vaible range
-  if(!((num>=0)&&(num<=relays_connected))){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " Command Invalid"),"SetRelay");
+  if(!((num>=0)&&(num<=settings.relays_connected))){
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " Command Invalid"),"CommandSet_Relay_Power");
     return;
   }
 
-  if(GetRelay(num)==state){
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"),
+    settings.flags.enabled_relays_allowed_time_window_checks);
+    
+    
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"),
+    IsRelayTimeWindowAllowed(num));
+    
+  // Add checks to see if relay is restricted from controls (locked by time)
+  // flag to enable these checks
+  if(settings.flags.enabled_relays_allowed_time_window_checks){
+    
+    if(!IsRelayTimeWindowAllowed(num)){
+      return;
+    }
+  }
+
+  if(CommandGet_Relay_Power(num)==state){
     relay_status[num].ischanged = false;
     return;
   }else{
     relay_status[num].ischanged = true;
   }
 
-  relay_status[num].onoff = state;
+  // relay_status[num].onoff = state;
+  bitWrite(pCONT_set->power, num, state);
 
-  if(state){ relay_status[num].ontime = pCONT->mt->mtime;
-  }else{ relay_status[num].offtime = pCONT->mt->mtime; }
-
+  if(state){ relay_status[num].last.ontime = pCONT->mt->mtime; //create future "operators" to handle these conversions
+  }else{ relay_status[num].last.offtime = pCONT->mt->mtime; }
 
   ExecuteCommandPower(num,state,SRC_MQTT);
 
 }
 
-uint8_t mRelays::GetRelay(uint8_t num){
-  // num--;
+uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
   return bitRead(pCONT_set->power, num);
 }
 
@@ -343,8 +442,8 @@ uint8_t mRelays::GetRelay(uint8_t num){
 
 const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
   DEBUG_LINE;
-  if(device_id >= relays_connected){ 
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_RELAYS "device_id >= relays_connected %d %d"),device_id,relays_connected);
+  if(device_id >= settings.relays_connected){ 
+    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_RELAYS "device_id >= settings.relays_connected %d %d"),device_id,settings.relays_connected);
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
@@ -354,7 +453,7 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
 const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
   
   char onoffctr[5];
-  switch(GetRelay(device_id)){
+  switch(CommandGet_Relay_Power(device_id)){
     case 0: sprintf(onoffctr,"%s","OFF"); break;
     case 1: sprintf(onoffctr,"%s","ON");  break;
   }
@@ -395,6 +494,21 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
 
 }
 
+
+bool mRelays::IsRelayTimeWindowAllowed(uint8_t relay_id){
+
+  //check all, one for now
+  if(
+    pCONT_time->CheckBetween_Day_DateTimesShort(
+      &relay_status[relay_id].enabled_ranges[0].ontime,
+      &relay_status[relay_id].enabled_ranges[0].offtime
+    )
+  ){
+    return true;
+  }
+  return false;
+
+}
 
 
 
@@ -759,7 +873,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add("relays_connected", relays_connected);
+    JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
   JsonBuilderI->End();
 
 }
@@ -770,17 +884,62 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   JsonBuilderI->Start();
-    for(int device_id=0;device_id<relays_connected;device_id++){
+    for(int device_id=0;device_id<settings.relays_connected;device_id++){
       if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
         JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          JsonBuilderI->Add("onoff",        GetRelay(device_id));
-          JsonBuilderI->Add("onoff_ctr",    GetRelay(device_id)?"ON":"OFF");
-          JsonBuilderI->Add("friendlyname", GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].ontime.hour,relay_status[device_id].ontime.minute,relay_status[device_id].ontime.second);
-          JsonBuilderI->Add("ontime", buffer);
-          snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].offtime.hour,relay_status[device_id].offtime.minute,relay_status[device_id].offtime.second);
-          JsonBuilderI->Add("offtime", buffer);
+          JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+          JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+          JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+          JsonBuilderI->Level_Start_P(PM_JSON_LAST);
+            snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
+            JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+            snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
+            JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
+          JsonBuilderI->Level_End();
+        JsonBuilderI->Level_End();
+        
+      }
+    }
+  JsonBuilderI->End();
+
+}
+
+
+
+uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level){
+
+  char buffer[50];
+
+  JsonBuilderI->Start();
+
+  
+    for(int device_id=0;device_id<settings.relays_connected;device_id++){
+      if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
+        
+        JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+          JsonBuilderI->Level_Start("enabled_ranges");
+
+            JsonBuilderI->Array_Start("ontime");
+              JsonBuilderI->Add(mTime::ConvertShortTime_HHMMSS(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
+
+
+
+
+            JsonBuilderI->Array_End();
+
+
+          JsonBuilderI->Level_End();
+
+          // JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+          // JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+          // JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+          // JsonBuilderI->Level_Start_P(PM_JSON_LAST);
+          //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
+          //   JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+          //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
+          //   JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
+          // JsonBuilderI->Level_End();
         JsonBuilderI->Level_End();
         
       }
@@ -829,6 +988,20 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
+
+  
+  mqtthandler_ptr = &mqtthandler_scheduled_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 600; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Scheduled;
+
+
   
 } //end "MQTTHandler_Init"
 
@@ -838,6 +1011,7 @@ void mRelays::MQTTHandler_Set_fSendNow(){
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  mqtthandler_scheduled_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
@@ -846,6 +1020,7 @@ void mRelays::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  mqtthandler_scheduled_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
 } //end "MQTTHandler_Set_TelePeriod"
 
@@ -855,13 +1030,15 @@ void mRelays::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
     MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
+    MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID
   };
   
   struct handler<mRelays>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+    &mqtthandler_sensor_teleperiod,
+    &mqtthandler_scheduled_teleperiod
   };
 
   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_RELAY_ID,
@@ -875,16 +1052,4 @@ void mRelays::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 ////////////////////// END OF MQTT /////////////////////////
 
 #endif
-
-
-
-// template void mRelays::ftest<int>();
-// template void mRelays::ftest2<int>(int value);
-// template void mRelays::ftest2<char>(char value);
-
-
-// template int8_t mRelays::Tasker2<JsonObjectConst>(uint8_t function, JsonObjectConst param1);
-// template int8_t mRelays::Tasker2<uint8_t>(uint8_t function, uint8_t param1);
-
-
 

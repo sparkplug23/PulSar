@@ -12,11 +12,7 @@
 
 #include "2_CoreSystem/Time/mTime.h"
 
-
-// template<typename T>
-// void f();
-
-// extern template void f<int>();
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR) "scheduled";
 
 
 class mRelays{
@@ -27,8 +23,27 @@ class mRelays{
       #define RELAYS_CONNECTED 4
     #endif
     
+    typedef union {
+      uint16_t data; // allows full manipulating
+      struct { 
+        // enable seconds on
+        uint16_t enabled_timer_decounters : 1;
+        // enable seconds on
+        uint16_t enabled_scheduled_autocontrol : 1;
+        // enable seconds on
+        uint16_t enabled_relays_allowed_time_window_checks : 1;
+      };
+    } RELAY_SETTINGS_FLAGS;
+
+
     struct SETTINGS{
+      /**
+       * Shared flags 
+       * */
+      RELAY_SETTINGS_FLAGS flags;
+
       uint8_t fShowTable = false;
+      uint8_t relays_connected = 0;
     }settings;
 
     int8_t CheckAndExecute_JSONCommands();
@@ -36,33 +51,15 @@ class mRelays{
 
     #define RELAYS_MAX_COUNT 4
 
-    enum RELAY_IDS{
-      RELAY_0_ID=0,
-      RELAY_1_ID,
-      RELAY_2_ID,
-      RELAY_3_ID,
-      RELAY_MAX_ID
-    }; //phase out? use numbers
+    // enum RELAY_IDS{
+    //   RELAY_0_ID=0,
+    //   RELAY_1_ID,
+    //   RELAY_2_ID,
+    //   RELAY_3_ID,
+    //   RELAY_MAX_ID
+    // }; //phase out? use numbers
 
     const char* GetRelayNameStoredbyIDCtr(char* name_buffer, uint8_t name_buffer_space, uint8_t device_id);
-
-    #define D_DEVICE_RELAY_0_NAME "R0"
-    #ifndef D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG
-      #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Relay0"
-    #endif
-    #define D_DEVICE_RELAY_1_NAME "R1"
-    #ifndef D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG
-      #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Relay1"
-    #endif
-    #define D_DEVICE_RELAY_2_NAME "R2"
-      #ifndef D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG
-      #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Relay2"
-    #endif
-    #define D_DEVICE_RELAY_3_NAME "R3"
-      #ifndef D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG
-      #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Relay3"
-    #endif
-    
 
     int8_t Tasker(uint8_t function);
 
@@ -73,17 +70,16 @@ class mRelays{
     void init(void);
 
     typedef unsigned long power_t;              // Power (Relay) type
-    uint8_t relays_connected = 0;
     
     void SetLatchingRelay(power_t lpower, uint32_t state);
     void SetDevicePower(power_t rpower, uint32_t source);
     void RestorePower(bool publish_power, uint32_t source);   
     void SetAllPower(uint32_t state, uint32_t source);
     void ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source);
-    // void ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source);
+    
 
     void SetPowerOnState(void);
-    // power_t power = 0;                          // Current copy of Settings.power
+    
     power_t last_power = 0;                     // Last power set state
     power_t blink_power;                        // Blink power state
     power_t blink_mask = 0;                     // Blink relay active mask
@@ -96,47 +92,90 @@ class mRelays{
     uint32_t tSavedTick = millis(),tSavedForceUpdate;
     uint8_t toggle_bit = 0;
     
-#ifndef DISABLE_WEBSERVER
+  #ifndef DISABLE_WEBSERVER
     void WebAppend_Root_Status_Table();
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Add_Buttons();
-#endif // DISABLE_WEBSERVER
+  #endif // DISABLE_WEBSERVER
 
-    uint32_t tSavedTest = millis();
+    // uint32_t tSavedTest = millis();
 
     uint8_t fForceMQTTUpdate = true; //each local subtasker has its own fForce
-
 
 
 //
   // I should add a relay "type" ie, external power, internal power, light
 
+    #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    
+    void SubTask_Relay_Timed_Seconds();
+
+    #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    
 
     struct RELAY_STATUS{
+    #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+      /**
+       * 0 = not running
+       * 1 = turn off then set to 0 to be off
+       * 2+ count down
+       * */
+      struct TIME_DECOUNTERS{
+        uint16_t seconds = 0;
+        uint8_t active = false;
+      }timer_decounter;
+      /**
+       * Records when relays are turned on/off
+       * */
+      struct LAST_CHANGED_TIME{
+        struct datetime ontime;   //to be short_time with operators added
+        struct datetime offtime;
+      }last;
+      /**
+       * Times during the day when relays auto turn on/off
+       * */
+      struct SCHEDULED_AUTO_TIME_PERIODS{
+        struct time_short ontime;
+        struct time_short offtime;
+        // Monday = bit0, Sunday = bit6, bit7 (MSB) = day_of_week enabled
+        uint8_t days_of_week_enabled_bitpacked = 0x00;
+        uint8_t enabled = false;
+      }scheduled[3];
+      struct SCHEDULED_ENABLED_TIME_PERIODS{
+        struct time_short ontime;
+        struct time_short offtime;
+        uint8_t enabled = false;
+      }enabled_ranges[3];
+    #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
 
-      //also flags bit
-      uint8_t onoff = false;
+      
       uint8_t ischanged = false;
-      // uint8_t flags.relay_type
-      struct datetime ontime;
-      struct datetime offtime;
-    }relay_status[RELAYS_CONNECTED];
 
-    void SetRelay(uint8_t state);
-    uint8_t GetRelay(uint8_t num);
-    void SetRelay(uint8_t num, uint8_t state);
+    }relay_status[RELAYS_CONNECTED];
+    
+bool IsRelayTimeWindowAllowed(uint8_t relay_id);
+
+
+    /**
+     * Commands
+     */
+    void CommandSet_Timer_Decounter(uint8_t time_secs, uint8_t relay_id = 0);
+
+
+
+    void CommandSet_Relay_Power(uint8_t state, uint8_t relay_id = 0);
+    uint8_t CommandGet_Relay_Power(uint8_t num);
 
     const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
-   const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
+    const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
     int8_t GetRelayIDbyName(const char* c);
 
     int8_t GetDeviceIDbyName(const char* c);
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Scheduled(uint8_t json_level = 0);
 
-  
-  //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
@@ -147,10 +186,14 @@ class mRelays{
     struct handler<mRelays> mqtthandler_settings_teleperiod;
     struct handler<mRelays> mqtthandler_sensor_ifchanged;
     struct handler<mRelays> mqtthandler_sensor_teleperiod;
+    struct handler<mRelays> mqtthandler_scheduled_teleperiod;
+
+    // Extra module only handlers
+    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
+      MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
+      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
+    };
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
-
 };
 
 

@@ -24,7 +24,7 @@ typedef struct  FREEMEM_HANDLER{
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-#include "2_CoreSystem/Languages/mLanguage.h"
+//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #ifdef ESP32
@@ -1129,6 +1129,10 @@ DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)
 DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_NO_SAVE)
   "<br/>"
   "</form></fieldset>";
+
+DEFINE_PGM_CTR(PM_WEB_JSON_FORMAT_KEY_IH) "ih";
+DEFINE_PGM_CTR(PM_WEB_JSON_FORMAT_KEY_IHR) "ihr";
+DEFINE_PGM_CTR(PM_WEB_JSON_FORMAT_KEY_FC) "fc";
 
 
 // DEFINE_PGM_CTR(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE)

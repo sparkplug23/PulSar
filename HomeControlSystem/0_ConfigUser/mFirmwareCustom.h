@@ -15,6 +15,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/mUserOptions.h"
+// #include "6_Lights/_Interface/palettes.h"
 #ifdef ESP8266
 #include <avr/pgmspace.h>
 #endif // ESP8266
@@ -23,11 +24,6 @@
 #endif
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
-
-/*todo
-show/hide palette
-debug
-*/
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -70,7 +66,8 @@ debug
 **/
 // #define DEVICE_GARAGELIGHT
 //#define DEVICE_GARAGELIGHT2
-#//define DEVICE_SIDEDOORLIGHT
+// #define DEVICE_SIDEDOORLIGHT
+// #define DEVICE_SIDEDOORLIGHT_TEST
 // #define DEVICE_SHELLY1_TESTER
 //#define DEVICE_RADIATORFAN
 //#define DEVICE_BEDROOMBLINDS
@@ -97,7 +94,7 @@ debug
  *  SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- SENSOR   -- 
 **/
 // #define DEVICE_ATTICSENSOR
-// #define DEVICE_BEDROOMSENSOR
+#define DEVICE_BEDROOMSENSOR
 // #define DEVICE_IMMERSIONSENSOR
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_UTILITYSENSOR
@@ -118,6 +115,7 @@ debug
 //#define DEVICE_SILVERLAMP1
 //#define DEVICE_SILVERLAMP2
 //#define DEVICE_HALLWAYMIRROR
+// #define DEVICE_SOCKET_NUMBERED
 
 /**
  *  SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- SHELLY   -- 
@@ -439,10 +437,10 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[15,95,0]" 
-        "},"
+    // "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
+    // "\"" D_JSON_SCENE_COLOUR   "\":{"
+    //       "\"" D_JSON_HSB    "\":[15,95,0]" 
+    //     "},"
     "\"" D_JSON_BRIGHTNESS     "\":"    "0"
   "}";  
 #endif
@@ -485,10 +483,10 @@ debug
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
-          "\"" D_JSON_HSB    "\":[15,95,0]" 
-        "},"
+    // "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
+    // "\"" D_JSON_SCENE_COLOUR   "\":{"
+    //       "\"" D_JSON_HSB    "\":[15,95,0]" 
+    //     "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
     "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";  
@@ -517,10 +515,10 @@ debug
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 11
    
-  #define STRIP_SIZE_MAX 50
-
+  #define ENABLE_PIXEL_FUNCTION_FLASHER
+   
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   #define USE_MODULE_TEMPLATE
@@ -528,38 +526,32 @@ debug
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"   
+    "\"" D_JSON_GPIOC "\":{"
       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define USE_LIGHTING_TEMPLATE
+  #define STRIP_SIZE_MAX 50
+
+ #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
-    // "\"" D_JSON_BRIGHTNESS       "\":0,"
-    // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
-    "\"Mixer\":{"
-      "\"Enabled\":1,"
-      // "\"" D_JSON_RUNNING_ID "\":7,"
-      "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
+    "\"" D_JSON_FLASHER "\":{" 
+      "\"Function\":1" //slow glow
     "},"
-    "\"PixelGrouping\":{"
-      // "\"Enabled\":\"Off\","
-      "\"Mode\":3"
-    "},"
-    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
+    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
+    "\"TimeMs\":30000,"
+    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
     "\"BrightnessRGB\":100"
   "}";
 
@@ -1686,7 +1678,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":1,\"RateMs\":60000},"
     "\"TimeMs\":30000,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
+    "\"ColourPalette\":47,"//\"" "Christmas Crystal 1" "\"," //c16    43 is the colours for this christmas
     "\"BrightnessRGB\":60"
   "}";
 
@@ -2174,12 +2166,12 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" "Attic" "\""
-        "],"
-        "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-          "\"" "Cold Water Tank" "\""
-        "]"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" "Attic" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" "Cold Water Tank" "\""
+      "]"
     "}"
   "}";
 
@@ -2676,12 +2668,18 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   
   // #define ENABLE_BUG_TRACING
 
+  #define USE_SUNRISE
+  
+  #define ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS
+  #define ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
+  #define ENABLE_DEVFEATURE_RTC_TIME_V2
+
   // #define USE_MODULE_SENSORS_DOOR
   // // #define USE_SENSOR_DOOR_LOCK
   // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  #define USE_MODULE_SENSORS_DS18B20
-  #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
+  // #define USE_MODULE_SENSORS_DS18B20
+  // #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
 
   #define USE_MODULE_SENSORS_MOTION
   #define MOTIONALERT_PAYLOAD1_CTR "Bedroom"
@@ -2689,10 +2687,10 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // Test ultrasonic oilfurnace code
   // #define USE_BUILD_TYPE_CUSTOM
   // #define USE_MODULE_CUSTOM_OILFURNACE
-  #define USE_MODULE_SENSORS_ULTRASONICS  
+  // #define USE_MODULE_SENSORS_ULTRASONICS  
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
-  #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_BME
 
   // // #define USE_MODULE_SENSORS_BUTTONS
 
@@ -2710,8 +2708,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-    
+    "\"" D_JSON_GPIOC "\":{"    
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"D0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif
@@ -2954,6 +2951,65 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_SENSORS_MOTION
 
   #define ENABLE_DEVFEATURE_BLOCK_RESTART
+  #define ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+  #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+  
+  #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
+
+  #define USE_MODULE_DRIVERS_RELAY
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      #endif 
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\"," //d2 normally
+      #endif
+      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
+  #define RELAYS_CONNECTED 1
+  
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+#ifdef DEVICE_SIDEDOORLIGHT_TEST
+  #define DEVICENAME_CTR          "sidedoorlight_test"
+  #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Test"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 3
+
+  //#define DISABLE_WEBSERVER
+   
+  #define USE_MODULE_SENSORS_MOTION
+
+  #define ENABLE_DEVFEATURE_BLOCK_RESTART
+  #define ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
   
   #define USE_MODULE_CUSTOM_SECURITY_LIGHT //disable until I rewrite for the sidelight
 
@@ -3171,6 +3227,9 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_SENSORS_BME
+
+  #define DISABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
@@ -4404,6 +4463,46 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
         "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
           "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
         "]"
+    "}"
+  "}";
+#endif
+
+#ifdef DEVICE_SOCKET_NUMBERED
+  #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS
+  #define ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
+  #define ENABLE_DEVFEATURE_RTC_TIME_V2
+  
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 #endif

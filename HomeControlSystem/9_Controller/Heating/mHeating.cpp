@@ -263,12 +263,12 @@ void mHeating::init_dht22_sensor_parameters(){
 
 
 void mHeating::SetHeatingRelay(uint8_t device_id, uint8_t state){
-  pCONT_mry->SetRelay(device_id,state); //index offset starts at 1
+  pCONT_mry->CommandSet_Relay_Power(state,device_id); //index offset starts at 1
 }
 
 uint8_t mHeating::GetHeatingRelay(uint8_t device_id){
   DEBUG_LINE;
-  return pCONT_mry->GetRelay(device_id);//index offset starts at 1
+  return pCONT_mry->CommandGet_Relay_Power(device_id);//index offset starts at 1
 }
 
 uint8_t mHeating::GetAnyHeatingRelay(){
@@ -1177,8 +1177,8 @@ uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
   for(int device_id=0;device_id<4;device_id++){
     JsonBuilderI->Level_Start_P(
       pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Add_FP(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  heating_device_relays[device_id].ontime.hour,  heating_device_relays[device_id].ontime.minute,  heating_device_relays[device_id].ontime.second);
-      JsonBuilderI->Add_FP(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), heating_device_relays[device_id].offtime.hour, heating_device_relays[device_id].offtime.minute, heating_device_relays[device_id].offtime.second);
+      JsonBuilderI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  heating_device_relays[device_id].ontime.hour,  heating_device_relays[device_id].ontime.minute,  heating_device_relays[device_id].ontime.second);
+      JsonBuilderI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), heating_device_relays[device_id].offtime.hour, heating_device_relays[device_id].offtime.minute, heating_device_relays[device_id].offtime.second);
       JsonBuilderI->Add(D_JSON_TIME_ON,   heating_device_relays[device_id].time_minutes_on);
       JsonBuilderI->Add(D_JSON_ISCHANGED, heating_device_relays[device_id].ischanged);
     JsonBuilderI->Level_End();
@@ -1943,9 +1943,12 @@ int8_t mHeating::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_COMMAND:
-
-    break;  
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -1973,65 +1976,53 @@ int8_t mHeating::Tasker(uint8_t function){
   #endif // USE_MODULE_CORE_WEBSERVER
 
 } // END Tasker
-int8_t mHeating::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
 
-//delete? make not needed with unique commands
-void mHeating::parsesub_CheckAll(JsonObjectConst obj){
 
-  parsesub_ModeManual(obj);
-  parsesub_ProgramTimers(obj);
-  parsesub_ProgramTemps(obj);
-
-}
-
-int8_t mHeating::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mRelays::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/heating")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_HEATING_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
 
-void mHeating::parse_JSONCommand(JsonObjectConst obj){
+// void mHeating::parse_JSONCommand(JsonObjectConst obj){
     
-  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
-    #endif
-    parsesub_ModeManual(obj);
-  }else
-  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
-    #endif
-    parsesub_ProgramTimers(obj);
-  }else
-  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
-    #endif
-    parsesub_ProgramTemps(obj);
-  }
+//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+//     #endif
+//     parsesub_ModeManual(obj);
+//   }else
+//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
+//     #endif
+//     parsesub_ProgramTimers(obj);
+//   }else
+//   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
+//     #endif
+//     parsesub_ProgramTemps(obj);
+//   }
 
-}
+// }
 
 
-void mHeating::parsesub_ModeManual(JsonObjectConst obj){
+void mHeating::parse_JSONCommand(){//parsesub_ModeManual(JsonObjectConst obj){
+
+  /***
+   * Manual
+   * */
 
   int8_t device_id,schedule_id;
   uint8_t timeon,tempset;
@@ -2139,11 +2130,11 @@ void mHeating::parsesub_ModeManual(JsonObjectConst obj){
 
   
 
-}
+// }
 
 
 
-void mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
+// void mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
 
   int8_t device_id,schedule_id;
   uint8_t timeon,tempset;
@@ -2183,10 +2174,10 @@ void mHeating::parsesub_ProgramTimers(JsonObjectConst obj){
 
   
 
-}
+// }
 
 
-void mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
+// void mHeating::parsesub_ProgramTemps(JsonObjectConst obj){
 
   int8_t device_id,schedule_id;
   uint8_t timeon,tempset;

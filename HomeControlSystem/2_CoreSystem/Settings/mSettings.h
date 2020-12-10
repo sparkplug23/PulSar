@@ -40,6 +40,41 @@ extern struct DATA_BUFFER data_buffer;
 #define D_DATA_BUFFER_CLEAR() memset(&data_buffer,0,sizeof(data_buffer))
 
 
+// struct TIME_T {
+//   uint8_t       second;
+//   uint8_t       minute;
+//   uint8_t       hour;
+//   uint8_t       day_of_week;               // sunday is day 1
+//   uint8_t       day_of_month;
+//   uint8_t       month;
+//   char          name_of_month[4];
+//   uint16_t      day_of_year;
+//   uint16_t      year;
+//   unsigned long days;
+//   unsigned long valid;
+// } ;
+// extern struct TIME_T RtcTime;
+// RtcTime;
+
+typedef union {
+  uint16_t data;
+  struct {
+    uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
+    uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
+    uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
+    uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
+    uint16_t hour : 5;                     // bits 11 - 15 = 0-23
+  };
+} TimeRule;
+
+// extern union TimeRule TimeRuleTest;
+// TimeRule;
+
+// struct TIMERULES{
+//   TimeRule timerule;
+// };
+// extern struct TIMERULES TimeRule;
+
 
 
 #include "2_CoreSystem/Support/mSupport.h"
@@ -47,7 +82,7 @@ extern struct DATA_BUFFER data_buffer;
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#include "2_CoreSystem/Languages/mLanguage.h"
+//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 #include "2_CoreSystem/mFirmwareDefaults.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -82,6 +117,12 @@ extern struct DATA_BUFFER data_buffer;
 #define LONGITUDE                   2.294442   // [Longitude] Your location to be used with sunrise and sunset
 #endif
 
+
+// Sunrise and Sunset DawnType
+#define DAWN_NORMAL            -0.8333
+#define DAWN_CIVIL             -6.0
+#define DAWN_NAUTIC            -12.0
+#define DAWN_ASTRONOMIC        -18.0
 
 #ifndef COLOR_TEXT
 #define COLOR_TEXT                  "#000"     // Global text color - Black
@@ -266,6 +307,7 @@ const uint16_t TOPSZ = 2;                 // Max number of characters in topic s
 // const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
 
 const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
+const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
 
 // #ifdef USE_MQTT_TLS
 //   const uint16_t WEB_LOG_SIZE = 2000;       // Max number of characters in weblog
@@ -284,8 +326,10 @@ const uint32_t MIN_BACKLOG_DELAY = 2;       // Minimal backlog delay in 0.1 seco
 const uint32_t SOFT_BAUDRATE = 9600;        // Default software serial baudrate
 const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
 const uint32_t SERIAL_POLLING = 100;        // Serial receive polling in ms
-const uint8_t MAX_STATUS = 11;              // Max number of status lines
+// const uint8_t MAX_STATUS = 11;              // Max number of status lines
 
+
+const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01
 
 const char D_NO_MATCH_CTR[] = "NoMatch";
 
@@ -319,7 +363,9 @@ enum WeekInMonthOptions {Last, First, Second, Third, Fourth};
 enum DayOfTheWeekOptions {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
 enum MonthNamesOptions {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
 enum HemisphereOptions {North, South};
-enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_RESTART, DT_ENERGY };
+// enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_RESTART, DT_ENERGY };
+enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_LOCALNOTZ, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET };
+
 
 enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 
@@ -409,7 +455,8 @@ enum XsnsFunctions {
 
   // Configure sensors and drivers for device
   // Looping trigger times
-  FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_200_MSECOND, FUNC_EVERY_250_MSECOND, FUNC_EVERY_SECOND, 
+  FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_200_MSECOND, FUNC_EVERY_250_MSECOND, 
+  FUNC_EVERY_SECOND, FUNC_EVERY_SECOND_TP0MS_WINDOW, FUNC_EVERY_SECOND_TP250MS_WINDOW, FUNC_EVERY_SECOND_TP500MS_WINDOW, FUNC_EVERY_SECOND_TP750MS_WINDOW, // All run only once a second, but with delays to spread out tasks which occur at that time cycle
   FUNC_EVERY_FIVE_SECOND, //Used mainly as debugging
   FUNC_EVERY_FIVE_MINUTE,
   FUNC_EVERY_MINUTE, FUNC_EVERY_HOUR, FUNC_EVERY_MIDNIGHT, FUNC_EVERY_MIDDAY,
@@ -458,6 +505,8 @@ enum XsnsFunctions {
   // 
   FUNC_SET_POWER, FUNC_SET_DEVICE_POWER, FUNC_SHOW_SENSOR,
   FUNC_RULES_PROCESS, FUNC_SERIAL, FUNC_FREE_MEM, FUNC_BUTTON_PRESSED,
+  FUNC_SET_POWER_ON_ID,
+  FUNC_SET_POWER_OFF_ID,
   // Energy
   FUNC_ENERGY_RESET,
   // Calls to run drivers when sensors change rather than waiting on loop
@@ -537,6 +586,7 @@ const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Seri
 extern uint8_t light_device;  // Light device number
 extern uint8_t light_power;  // Light power
 extern uint8_t rotary_changed; // Rotary switch changed
+
 
 
 const char kWebColors[] PROGMEM =
@@ -930,16 +980,16 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 
 
 
-typedef union {
-  uint16_t data;
-  struct {
-    uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
-    uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
-    uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
-    uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
-    uint16_t hour : 5;                     // bits 11 - 15 = 0-23
-  };
-} TimeRule;
+// typedef union {
+//   uint16_t data;
+//   struct {
+//     uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
+//     uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
+//     uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
+//     uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
+//     uint16_t hour : 5;                     // bits 11 - 15 = 0-23
+//   };
+// } TimeRule;
 
 typedef union {
   uint32_t data;
@@ -1241,6 +1291,7 @@ struct SettingsMQTT{
 };
 
 
+
 struct SYSCFG {
   // Header (partial loading during boot)
   uint16_t      cfg_holder;                // 000 v6 header
@@ -1307,16 +1358,17 @@ struct SYSCFG {
   
   uint8_t       ina219_mode;               // 531
 
-  StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
+  // StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
 
   uint16_t      mqtt_retry;                // 396
   
 
   // Timer         timer[MAX_TIMERS];         // 670
   // uint16_t      pulse_timer[8]; // 532 //#define MAX_PULSETIMERS 8  
+  TimeRule tflag[2];                  // 2E2
   // TimeRule      tflag[2];                  // 2E2
-  // char          ntp_server[3][33];         // 4CE
-  // int16_t       toffset[2];                // 30E
+  char          ntp_server[3][33];         // 4CE
+  int16_t       toffset[2];                // 30E
   // Weight
   // uint16_t      weight_max;                // 7BE Total max weight in kilogram
   // unsigned long weight_reference;          // 7C0 Reference weight in gram
@@ -1417,20 +1469,6 @@ struct RTCMEM {
 } RtcSettings;
 
 
-// Phase this out into my own
-struct TIME_T {
-  uint8_t       second;
-  uint8_t       minute;
-  uint8_t       hour;
-  uint8_t       day_of_week;               // sunday is day 1
-  uint8_t       day_of_month;
-  uint8_t       month;
-  char          name_of_month[4];
-  uint16_t      day_of_year;
-  uint16_t      year;
-  unsigned long days;
-  unsigned long valid;
-} RtcTime;
 
 
 uint8_t flag_boot_complete = false;
@@ -1548,7 +1586,7 @@ int restart_flag = 0;                       // Sonoff restart flag
 int wifi_state_flag = WIFI_RESTART;         // Wifi state flag
 int tele_period = 1;                        // Tele period timer
 int blinks = 201;                           // Number of LED blinks
-// uint32_t uptime = 0;                        // Counting every second until 4294967295 = 130 year
+uint32_t uptime = 0;                        // Counting every second until 4294967295 = 130 year
 uint32_t loop_load_avg = 0;                 // Indicative loop load average
 // uint32_t global_update = 0;                 // Timestamp of last global temperature and humidity update
 // float global_temperature = 0;               // Provide a global temperature to be used by some sensors

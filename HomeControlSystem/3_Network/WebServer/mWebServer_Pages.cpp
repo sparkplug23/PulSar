@@ -61,7 +61,7 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
       JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
@@ -70,7 +70,7 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);    
         }break;
         case 2:
@@ -79,7 +79,7 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
 
         break;
         case 3:
-            JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+            JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
     
         break;
       } //end switch 
@@ -90,7 +90,7 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
   
   // JsonBuilderI->Array_Start("debug_line");// Class name
   //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //     JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
   //   JsonBuilderI->Level_End();
   // JsonBuilderI->Array_End();
   JsonBuilderI->End();
@@ -116,7 +116,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
@@ -125,7 +125,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
           JsonBuilderI->Add("fc", colour_ctr);   
           // JsonBuilderI->Add("fc", "red");    
         }break;
@@ -134,7 +134,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
         break;
         case 3:
-            JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+            JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
         break;
       } //end switch 
     JsonBuilderI->Level_End();
@@ -144,7 +144,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
   
   // JsonBuilderI->Array_Start("debug_line");// Class name
   //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add_FP("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //     JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
   //   JsonBuilderI->Level_End();
   // JsonBuilderI->Array_End();
   JsonBuilderI->End();

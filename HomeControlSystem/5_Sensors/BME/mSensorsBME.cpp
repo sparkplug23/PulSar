@@ -188,7 +188,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
         case 0:
         
           pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s&deg;%c\""),value_ctr,pCONT_sup->TempUnit());
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s&deg;%c\""),value_ctr,pCONT_sup->TempUnit());
 
           if(sensor[sensor_counter].temperature<=25){
             sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
@@ -204,7 +204,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
         case 1:    
 
           pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s%%\""),value_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s%%\""),value_ctr);
        
           if(sensor[sensor_counter].humidity>70){
             sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
@@ -217,7 +217,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
         case 2:     
           
           pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s hPa\""),value_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s hPa\""),value_ctr);
           
           if(sensor[sensor_counter].pressure>1000){
             sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids

@@ -269,17 +269,17 @@ void mPWMLight::WebAppend_Root_Status_Table(){
       switch(row){
         default:
         case 0: JsonBuilderI->Add("ih","Unset"); break;
-        case 1: JsonBuilderI->Add_FP("ih",PSTR("\"%d secs\""), pCONT_iLight->auto_time_off_secs); break;
+        case 1: JsonBuilderI->Add_FV("ih",PSTR("\"%d secs\""), pCONT_iLight->auto_time_off_secs); break;
 
         
         // case 1:
-        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d/%d (secs)\""), 
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
         //     animation.transition.rate_ms.val/1000, 
         //     animation.transition.time_ms.val/1000
         //   );
         // break;
         // case 2: 
-        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d%% [#%d]\""),
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
         //     animation.transition.pixels_to_update_as_percentage.val, 
         //     GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
         //   );
@@ -287,12 +287,12 @@ void mPWMLight::WebAppend_Root_Status_Table(){
         // case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
         // case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer));   break;
         // case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
-        // case 6: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+        // case 6: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
         // case 7:
         //   if(!animation.auto_time_off_secs){ //off
         //     JsonBuilderI->Add("ih","Unset");
         //   }else{
-        //     JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""),
+        //     JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
         //       animation.auto_time_off_secs,"secs"
         //     );
         //   }
@@ -2502,12 +2502,12 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 
         // If RGB colours are active, show them
         if((r>0)||(g>0)||(b>0)){
-          JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),r,g,b);
+          JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),r,g,b);
         }else
         // If no colours, check for CCT
         if((cw>0)||(ww>0)){
           //needs fixing
-          JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),cw,ww,0);
+          JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),cw,ww,0);
         }
 
       }  
@@ -2546,7 +2546,7 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 //       RgbTypeColor c;
 //       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
 //         c = GetPixelColor(i);
-//         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+//         JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
 //       }  
 //       JsonBuilderI->Array_End();
 
@@ -2572,9 +2572,9 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 //     JsonBuilderI->Level_Start();
 //     char title_ctr[30];
 //     if(palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
-//       JsonBuilderI->Add_FP("ih",PSTR("\"%s (Gradient)\""),GetPaletteFriendlyNameByID(palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
+//       JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""),GetPaletteFriendlyNameByID(palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
 //     }else{
-//       JsonBuilderI->Add_FP("ih",PSTR("\"%s (#%d)\""),GetPaletteFriendlyNameByID(palettelist.ptr->id,title_ctr,sizeof(title_ctr)),GetPixelsInMap(palettelist.ptr));
+//       JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),GetPaletteFriendlyNameByID(palettelist.ptr->id,title_ctr,sizeof(title_ctr)),GetPixelsInMap(palettelist.ptr));
 //     }
 //     JsonBuilderI->Level_End();
 //   JsonBuilderI->Array_End();
@@ -2603,7 +2603,7 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 //         }else{      
 //           c = RgbColor(0,0,0);//default black
 //         }
-//         JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+//         JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
 //       }
 //       JsonBuilderI->Array_End();
 

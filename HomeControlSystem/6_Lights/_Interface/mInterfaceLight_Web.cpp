@@ -215,9 +215,9 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
     JsonBuilderI->Level_Start();
     char title_ctr[30];
     if(pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
-      JsonBuilderI->Add_FP("ih",PSTR("\"%s (Gradient)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
+      JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
     }else{
-      JsonBuilderI->Add_FP("ih",PSTR("\"%s (#%d)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+      JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
     }
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
@@ -246,7 +246,7 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
         }else{      
           c = RgbColor(0);//default black
         }
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
       }
       JsonBuilderI->Array_End();
 
@@ -268,7 +268,7 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
     //   int16_t pixel_position = -2;
     //   for (uint16_t hue= 1; hue < 360;hue += 10){
     //     c = HsbColor(HueN2F(hue),scene.colour.,pCONT_ladd->scene.colour.B);         
-    //     JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),scene.colour.R,scene.colour.G,scene.colour.B);
+    //     JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),scene.colour.R,scene.colour.G,scene.colour.B);
     //   }
     //   JsonBuilderI->Array_End();
     // JsonBuilderI->Level_End();
@@ -281,8 +281,8 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
         JsonBuilderI->Array_Start("bclg");
         RgbColor sat_low_colour = HsbColor(hsb.H,0,hsb.B);
         RgbColor sat_high_colour = HsbColor(hsb.H,1,hsb.B);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_low_colour.R,sat_low_colour.G,sat_low_colour.B);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),sat_high_colour.R,sat_high_colour.G,sat_high_colour.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),sat_low_colour.R,sat_low_colour.G,sat_low_colour.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),sat_high_colour.R,sat_high_colour.G,sat_high_colour.B);
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();
 
@@ -291,8 +291,8 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
         JsonBuilderI->Array_Start("bclg");    
         RgbColor brt_low_colour = HsbColor(hsb.H,hsb.S,0);
         RgbColor brt_high_colour = HsbColor(hsb.H,hsb.S,1);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_low_colour.R,brt_low_colour.G,brt_low_colour.B);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),brt_high_colour.R,brt_high_colour.G,brt_high_colour.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),brt_low_colour.R,brt_low_colour.G,brt_low_colour.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),brt_high_colour.R,brt_high_colour.G,brt_high_colour.B);
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();
 
@@ -431,7 +431,7 @@ void mInterfaceLight::WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest
   //     RgbTypeColor c;
   //     for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
   //       c = GetPixelColor(i);
-  //       JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+  //       JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
   //     }  
   //     JsonBuilderI->Array_End();
 

@@ -26,6 +26,13 @@ int8_t mSupport::Tasker(uint8_t function){
 
     }break;
     case FUNC_EVERY_SECOND:
+
+
+    //add back that I divide supports into subtasks to split tasks evenly across a second
+
+      // #ifdef ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
+      //   return 0;
+      // #endif
       PerformEverySecond();
     break;
     case FUNC_EVERY_FIVE_MINUTE:
@@ -2069,7 +2076,16 @@ void mSupport::PerformEverySecond(void)
       }
     }
 
+  // Wifi keep alive to send Gratuitous ARP
+  //wifiKeepAlive();
 
+  pCONT_time->WifiPollNtp();
+
+// #ifdef ESP32
+//   if (11 == TasmotaGlobal.uptime) {  // Perform one-time ESP32 houskeeping
+//     ESP_getSketchSize();             // Init sketchsize as it can take up to 2 seconds
+//   }
+// #endif
 //     //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
 
 // /*
@@ -2156,7 +2172,7 @@ void mSupport::UpdateStatusBlink(){
   
   DEBUG_LINE;
   uint8_t blinkinterval = 1;
-  // global_state.network_down = (global_state.wifi_down && global_state.eth_down);
+  pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
 
   if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
     if (pCONT_set->global_state.data) {                              // Any problem
@@ -2216,6 +2232,16 @@ void mSupport::UpdateStatusBlink(){
 
 }
 
+
+// Force a float value between two ranges, and adds or substract the range until we fit
+float mSupport::ModulusRangef(float f, float a, float b) {
+  if (b <= a) { return a; }       // inconsistent, do what we can
+  float range = b - a;
+  float x = f - a;                // now range of x should be 0..range
+  x = fmodf(x, range);            // actual range is now -range..range
+  if (x < 0.0f) { x += range; }   // actual range is now 0..range
+  return x + a;                   // returns range a..b
+}
 
 
 // #ifdef ESP8266

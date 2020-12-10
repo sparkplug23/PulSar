@@ -310,7 +310,7 @@ void mSwitches::WebAppend_Root_Status_Table(){
   for(int row=0;row<settings.switches_found;row++){
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add_FP("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
+      JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
       if(IsSwitchActive(row)){
         JsonBuilderI->Add("fc","#00ff00");
       }else{

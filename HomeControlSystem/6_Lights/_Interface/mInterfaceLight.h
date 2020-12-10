@@ -1127,6 +1127,7 @@ uint8_t getColorMode();
     void init_ColourPalettes_Christmas_13();
     void init_ColourPalettes_Christmas_14();
     void init_ColourPalettes_Christmas_15();
+    void init_ColourPalettes_Christmas_16();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1206,6 +1207,7 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_CHRISTMAS_13_ID,
     PALETTELIST_STATIC_CHRISTMAS_14_ID,
     PALETTELIST_STATIC_CHRISTMAS_15_ID,
+    PALETTELIST_STATIC_CHRISTMAS_16_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
 
@@ -1303,6 +1305,7 @@ uint8_t getColorMode();
       PALETTE christmas_13;
       PALETTE christmas_14;
       PALETTE christmas_15;
+      PALETTE christmas_16;
     }palettelist;
 
 

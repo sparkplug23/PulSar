@@ -125,7 +125,7 @@ void mExerciseBike::Tasker(uint8_t function){
       // /****
       //  *  Show LED power 
       //  * ****/
-      // uint8_t onoff = pCONT->mry->GetRelay(0);
+      // uint8_t onoff = pCONT->mry->CommandGet_Relay_Power(0);
       // uint8_t fsize = 32;
       // char onoff_ctr[50];
       // if(onoff){
@@ -244,7 +244,7 @@ void mExerciseBike::SetLight(uint8_t light_id, uint8_t state){
 //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"relay_id",relay_id);      
 
 //   if(relay_id>=0){ //if found
-//     pCONT->mry->SetRelay(relay_id,state);
+//     pCONT->mry->CommandSet_Relay_Power(relay_id,state);
 //   }
 
 }

@@ -98,10 +98,10 @@ void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
-      pCONT_set->Settings.global_state.mqtt_down = 1;
+      pCONT_set->global_state.mqtt_down = 1;
       if (!Mqtt.retry_counter) {        
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d"),Mqtt.retry_counter);
+        AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
     #endif// ENABLE_LOG_LEVEL_INFO
         MqttReconnect();
       } else {
@@ -111,10 +111,10 @@ void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
     #endif// ENABLE_LOG_LEVEL_INFO
       }
     } else {
-      pCONT_set->Settings.global_state.mqtt_down = 0;
+      pCONT_set->global_state.mqtt_down = 0;
     }
   } else {
-    pCONT_set->Settings.global_state.mqtt_down = 0;
+    pCONT_set->global_state.mqtt_down = 0;
     if (Mqtt.initial_connection_state) {
       MqttReconnect();
     }
@@ -186,7 +186,7 @@ DEBUG_LINE;
 //   if (Mqtt.allowed) {
 //     AddLog_P(LOG_LEVEL_INFO, S_LOG_MQTT, PSTR(D_CONNECTED));
     Mqtt.connected = true;
-//     Mqtt.retry_counter = 0;
+    Mqtt.retry_counter = 0;
 //     Mqtt.connect_count++;
 
 //     GetTopic_P(stopic, TELE, mqtt_topic, S_LWT);
@@ -268,7 +268,7 @@ void mMQTT::MqttDisconnected(int state)
     // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "Connection FAILED, state = [%s], retrying in %d ms"),state_ctr(),connection_maintainer.rSavedReconnectAttempt);
 
   Mqtt.connected = false;
-  // Mqtt.retry_counter = Settings.mqtt_retry;
+  Mqtt.retry_counter = pCONT_set->Settings.mqtt_retry;
 
   // pubsub->disconnect();
 
@@ -297,14 +297,14 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   //   return;
   // }
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION));
-    #endif// ENABLE_LOG_LEVEL_INFO
+  #endif// ENABLE_LOG_LEVEL_INFO
 
   DEBUG_LINE;
   Mqtt.connected = false;
   Mqtt.retry_counter = pCONT_set->Settings.mqtt_retry;
-  pCONT_set->Settings.global_state.mqtt_down = 1;
+  pCONT_set->global_state.mqtt_down = 1;
 
   // char *mqtt_user = nullptr;
   // char *mqtt_pwd = nullptr;
@@ -319,7 +319,7 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   // Response_P(S_LWT_OFFLINE);
 
   DEBUG_LINE;
-  DEBUG_CHECK_AND_PRINT_NULLPTR(pubsub);
+  // DEBUG_CHECK_AND_PRINT_NULLPTR(pubsub);
   // If object was created, AND connected was the previous state, disconnect first
   if(pubsub!=nullptr){
     if (pubsub->connected()) { pubsub->disconnect(); }
@@ -328,6 +328,10 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   DEBUG_LINE;
   // Create again if needed
   if(pubsub == nullptr){
+    if(client != nullptr){
+      client->stop(); // force off before starting again
+      delay(20);      // Allow wifi to clear
+    }
     client = new WiFiClient(); // Wifi Client reconnect issue 4497 ie memory leak on each attempt without this (https://github.com/esp8266/Arduino/issues/4497)
     pubsub = new mPubSubClient(*client);
   }
@@ -353,12 +357,12 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT->mt->uptime.hhmmss_ctr);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
+  #endif// ENABLE_LOG_LEVEL_INFO
 
-    #endif// ENABLE_LOG_LEVEL_INFO
   if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     MqttConnected();
   } else {
@@ -371,9 +375,9 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
 void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+  #endif// ENABLE_LOG_LEVEL_INFO
 
   // Do not allow more data than would be feasable within stack space
   if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
@@ -732,13 +736,12 @@ DEBUG_LINE;
 
 DEBUG_LINE;
 if(pubsub!=nullptr){
-
-DEBUG_LINE;
-  return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
-}
-DEBUG_LINE;
-return 0;
-//TRACE();
+  DEBUG_LINE;
+    return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
+  }
+  DEBUG_LINE;
+  return 0;
+  //TRACE();
 }
 
 

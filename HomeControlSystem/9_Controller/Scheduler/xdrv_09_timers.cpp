@@ -220,7 +220,7 @@
 // //   duskdawn->time = timeBuffer;
 // // }
 // //
-// // String GetSun(uint8_t dawn)
+// // String GetSunTimeAtHorizon(uint8_t dawn)
 // // {
 // //   char stime[6];
 // //
@@ -737,7 +737,7 @@
 //   }
 //   WSBufferAppend_P(HTTP_FORM_TIMER2);
 // #ifdef USE_SUNRISE
-//   WSBufferAppend_P(HTTP_FORM_TIMER3, 100 + (strlen(D_SUNSET) *12), GetSun(0).c_str(), GetSun(1).c_str());
+//   WSBufferAppend_P(HTTP_FORM_TIMER3, 100 + (strlen(D_SUNSET) *12), GetSunTimeAtHorizon(0).c_str(), GetSunTimeAtHorizon(1).c_str());
 // #else
 //   WSBufferAppend_P(HTTP_FORM_TIMER3);
 // #endif  // USE_SUNRISE

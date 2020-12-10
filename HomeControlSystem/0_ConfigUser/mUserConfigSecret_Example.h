@@ -19,6 +19,7 @@
 #undef  STA_PASS3
 #define STA_PASS3            "**********"                // [Password2] Optional alternate AP Wifi password
 
-// #define LATITUDE               44.858360         // [Latitude] Your location to be used with sunrise and sunset
-// #define LONGITUDE              6.294442          // [Longitude] Your location to be used with sunrise and sunset
+// Belfast
+#define LATITUDE               54.5973         // [Latitude] Your location to be used with sunrise and sunset
+#define LONGITUDE              5.9301          // [Longitude] Your location to be used with sunrise and sunset
 

@@ -85,7 +85,7 @@ struct functionhandler {
 #endif
 
 #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/Languages/mLanguage.h"
+//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 #include "2_CoreSystem/Logging/mLogging.h"
 #include "2_CoreSystem/Time/mTime.h"
@@ -170,6 +170,22 @@ T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min =
   return result; 
 
 }
+
+
+template <typename T, typename U, typename V>
+bool IsWithinRange(T val_to_check, U min_val, V max_val){
+
+  if(
+    (val_to_check >= min_val)&&
+    (val_to_check <= max_val)
+  ){
+    return true;
+  }
+
+  return false;
+
+}
+
 
 
 // Return new state
@@ -446,6 +462,8 @@ void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
     int16_t SearchForTextIndexedID(const char* name_tofind, const char* haystack, int8_t* class_id, int8_t* device_id);
 
 
+// Force a float value between two ranges, and adds or substract the range until we fit
+float ModulusRangef(float f, float a, float b);
 
 
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);

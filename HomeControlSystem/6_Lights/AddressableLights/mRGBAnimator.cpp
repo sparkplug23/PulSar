@@ -2984,10 +2984,12 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
 
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
 
+#ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
           
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
               animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
             }
+            #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
             // #ifdef ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
             // AddLog_P(LOG_LEVEL_DEBUG, PSTR("colour=%d,%d,%d brt_set=%d"),
@@ -3020,10 +3022,11 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             // animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
               
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
-            
+           #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
               animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
             }
+            #endif //             ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
             //   AddLog_P(LOG_LEVEL_TEST, PSTR("colou2=%d,%d,%d"),
             // animation_colours[ledout.pattern[ledout.index]].DesiredColour.R,
@@ -3141,8 +3144,10 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
         start_colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,  &start_pixel_position);
         end_colour   = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel+1,&end_pixel_position);
 
+#ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
         start_colour = ApplyBrightnesstoDesiredColour(start_colour,pCONT_iLight->getBriRGB());
         end_colour   = ApplyBrightnesstoDesiredColour(end_colour,pCONT_iLight->getBriRGB());
+#endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
         //#ifdef ENABLE_LOG_LEVEL_DEBUG
         //  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "s%d,%d %d %d"),pCONT_iLight->HueF2N(start_colour.H),pCONT_iLight->SatF2N(start_colour.S),pCONT_iLight->BrtF2N(start_colour.B),start_pixel_position);
@@ -3975,7 +3980,7 @@ void mRGBAnimator::EveryLoop(){
     if(pCONT_iLight->light_power!=pCONT_iLight->light_power_Saved){
       pCONT_iLight->light_power_Saved = pCONT_iLight->light_power;
       // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pCONT_iLight->light_power_Saved"));
-      //pCONT->mry->SetRelay(0,pCONT_iLight->light_power);
+      //pCONT->mry->CommandSet_Relay_Power(0,pCONT_iLight->light_power);
     }
 
     //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "file%sline%d"),__FILE__,__LINE__);
@@ -3997,7 +4002,7 @@ void mRGBAnimator::EveryLoop(){
       #endif
     }
     // #ifdef USE_MODULE_DRIVERS_RELAY
-    //   //pCONT->mry->SetRelay(0,fAnyLEDsOnOffCount>0?1:0);
+    //   //pCONT->mry->CommandSet_Relay_Power(0,fAnyLEDsOnOffCount>0?1:0);
     // #endif
   }
   DEBUG_LINE;
@@ -4250,7 +4255,7 @@ uint8_t mRGBAnimator::ConstructJSON_State(uint8_t json_level){
     JsonBuilderI->Array_Start("rgb");
     for(int i=0;i<numpixels;i++){
       RgbTypeColor c = GetPixelColor(i);
-      JsonBuilderI->Add_FP(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
+      JsonBuilderI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
     }
     JsonBuilderI->Array_End();
   return JsonBuilderI->End();

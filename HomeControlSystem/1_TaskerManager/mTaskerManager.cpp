@@ -1,5 +1,17 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
+
+/* Null, because instance will be initialized on demand. */
+mTaskerManager* mTaskerManager::instance = nullptr;
+
+
+mTaskerManager* mTaskerManager::GetInstance(){
+  if (instance == nullptr){
+    instance = new mTaskerManager();
+  }
+  return instance;
+}
+
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::Instance_Init(){
 
@@ -44,8 +56,7 @@ uint8_t mTaskerManager::Instance_Init(){
     if(mdb == nullptr){ mdb = new mDoorBell(); }
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-    mPulseCounter mpc;
-    if(mois == nullptr){ mois = new mMoistureSensor(); }
+    if(mpc == nullptr){ mpc = new mPulseCounter(); }
   #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
     if(mbtn == nullptr){ mbtn = new mButtons(); }
@@ -151,15 +162,10 @@ void mTaskerManager::Init_InterfaceHandler(){
   // array[0] = new mSettings();
   // array[1] = new mSupport();
 
-
-
-
 }
 
 // Gets the class id's and stores in array, used in interface 
 uint8_t mTaskerManager::InitClassList(){
-
-DEBUG_LINE;
 
   memset(&module_settings,0,sizeof(module_settings));
 
@@ -233,7 +239,6 @@ DEBUG_LINE;
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_PZEM004T_MODBUS_ID;
   #endif
 
-  
   // Wireless
   #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_IRTRANSCEIVER_ID;
@@ -245,7 +250,9 @@ DEBUG_LINE;
     module_settings.list[module_settings.count++] = mSAWProtocol_ID;
   #endif
 
-  // Drivers
+  /**
+   * Drivers
+   * */
   #ifdef D_MODULE_DRIVERS_RELAY_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_RELAY_ID;
   #endif
@@ -314,17 +321,6 @@ uint16_t mTaskerManager::GetClassCount(){
   return module_settings.count;
 }
 
-
-/* Null, because instance will be initialized on demand. */
-mTaskerManager* mTaskerManager::instance = nullptr;
-
-
-mTaskerManager* mTaskerManager::GetInstance(){
-  if (instance == nullptr){
-    instance = new mTaskerManager();
-  }
-  return instance;
-}
 
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::CheckPointersPass(){
@@ -484,7 +480,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
   DEBUG_LINE;
 
   uint8_t fModule_present = false;
-  #ifdef ENABLE_ADVANCED_DEBUGGING
+  #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     char buffer_taskname[50];
   #endif
 
@@ -508,7 +504,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     // DEBUG_LINE;
 
     // Remember start millis
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)
+    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();
     #endif
     fModule_present = true; //assume true
@@ -529,13 +525,10 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
           //#endif
         
-        
-        
         break;
       #endif
       #ifdef D_MODULE_CORE_SETTINGS_ID
-        case D_MODULE_CORE_SETTINGS_ID:   
-        
+        case D_MODULE_CORE_SETTINGS_ID:           
         
           // #ifdef USE_INTERFACE_NEW
           //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
@@ -572,7 +565,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
           
           #endif
           
-           break;
+        break;
       #endif
       #ifdef D_MODULE_NETWORK_MQTT_ID
         case D_MODULE_NETWORK_MQTT_ID:    
@@ -730,13 +723,14 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       break;
     } //end switch
 
-    #ifdef DEBUG_EXECUTION_TIME
+    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     // Remember start millis
     uint32_t end_millis = millis();
 
     // Get this execution time 
     uint32_t this_millis = end_millis - start_millis;
-
+    
+    #if defined(DEBUG_EXECUTION_TIME)
     // Get average
     if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
       module_settings.execution_time_average_ms[i] += this_millis;
@@ -747,10 +741,16 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
         module_settings.execution_time_max_ms[i] = this_millis; // remember max
       }
     }
+    #endif // DEBUG_EXECUTION_TIME
     #endif
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
+    #endif
+    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+      if(this_millis > 500){
+        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+      }
     #endif
 
     // print boot info as it proceeds

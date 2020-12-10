@@ -30,9 +30,16 @@ class mMotionSensor{
     // All SubTasks called by Tasker 
     void EveryLoop();
 
+    enum MOTION_TRIGGER_TYPE_IDS{
+      MOTION_TRIGGER_TYPE_REPORT_ONLY_ID=0,
+      MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID,
+      MOTION_TRIGGER_TYPE_LENGTH_ID
+    };
+
     struct SETTINGS{
       uint8_t sensors_active = 0;
       uint8_t fEnableSensor = false;
+      uint8_t motion_trigger_type = MOTION_TRIGGER_TYPE_REPORT_ONLY_ID;
     }settings;
 
     void parse_JSONCommand();

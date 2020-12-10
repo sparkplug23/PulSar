@@ -38,12 +38,10 @@
 #define D_DATE_TIME_SEPARATOR "T"
 #define D_HOUR_MINUTE_SEPARATOR ":"
 #define D_MINUTE_SECOND_SEPARATOR ":"
+#define D_DECIMAL_SEPARATOR "."
 
 #define D_DAY3LIST "MonTueWedThuFriSatSun"
 #define D_MONTH3LIST "JanFebMarAprMayJunJulAugSepOctNovDec"
-
-// Non JSON decimal separator
-#define D_DECIMAL_SEPARATOR "." //comma in european
 
 
 #define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
@@ -384,6 +382,7 @@
 #define D_MULTI_PRESS "multi-press"
 #define D_NOISE "Noise"
 #define D_NONE "None"
+#define D_NOT_PRESSED "Not Pressed"
 #define D_OFF "Off"
 #define D_OFFLINE "Offline"
 #define D_OK "Ok"
@@ -401,6 +400,7 @@
 #define D_POWERUSAGE_REACTIVE "Reactive Power"
 #define D_PRESSURE "Pressure"
 #define D_PRESSUREATSEALEVEL "SeaPressure"
+#define D_PRESSED "Pressed"
 #define D_PROGRAM_FLASH_SIZE "Program Flash Size"
 #define D_PROGRAM_SIZE "Program Size"
 #define D_PROJECT "Project"
@@ -1401,8 +1401,9 @@
 #define D_JSON_DATA "Data"
 #define D_JSON_DATETIME "DateTime"
 #define D_JSON_DESIRED "Desired"
-#define D_JSON_DEVICE "device"
+#define D_JSON_DEVICE "Device"
 #define D_JSON_DEVICEID "DeviceID"
+#define D_JSON_DEVICES_CONNECTED "DevicesConnected"
 
 #define D_JSON_DEVIATION "Deviation"
 
@@ -1445,7 +1446,7 @@
 #define D_JSON_FAILSAFE "failsafe"
 #define D_JSON_FUNCTIONS "functions"
 #define D_JSON_HUM "hum"
-#define D_JSON_HUE "hue"
+#define D_JSON_HUE "Hue"
 #define D_JSON_INDEX "Index"
 #define D_JSON_ISCHANGED "ischanged"
 #define D_JSON_ISCHANGEDMETHOD "IsChangedMethod"
@@ -1478,19 +1479,25 @@
 #define D_JSON_NOTIFICATIONS "Notifications"
 
 #define D_JSON_POWERNAME "PowerName"
+#define D_JSON_RELAY "Relay"
 
 #define D_JSON_ANIMATIONENABLE "AnimationEnable"
 #define D_JSON_AGED_COLOURING "AgedColouring"
 
 #define D_JSON_ON "On"
 #define D_JSON_ONTIME "ontime"
-#define D_JSON_ONOFF "onoff"
+#define D_JSON_ONOFF "OnOff"
+#define D_JSON_ONOFF_NAME "OnOffName"
 #define D_JSON_OFF "Off"
 #define D_JSON_OFFTIME "offtime"
 #define D_JSON_ORDER "Order"
 #define D_JSON_OUTLIERS "Outliers"
 #define D_JSON_PACKETS "Packets"
 #define D_JSON_PIXELSGROUPED "pixels_grouped"
+
+#define D_JSON_LAST "Last"
+#define D_JSON_ONTIME "OnTime"
+#define D_JSON_OFFTIME "OffTime"
 
 // #define D_JSON_PIXELS_UPDATE_NUMBER "pixels_to_update_as_number"
 // #define D_JSON_PIXELS_UPDATE_PERCENTAGE "pixels_to_update_as_percentage"
@@ -1513,7 +1520,7 @@
   #define D_JSON_RELAY_NAME "Relay Name"
   #define D_JSON_MOTION_NAME "Motion Name"
 
-#define D_JSON_SAT "sat"
+#define D_JSON_SAT "Sat"
 #define D_JSON_SECONDS "seconds"
 #define D_JSON_SET "Set"
 #define D_JSON_SENS1 "sens1"
@@ -1869,7 +1876,7 @@
 #define D_ASTERISK_PWD "****"
 
 #ifndef MY_LANGUAGE
-  #include "2_CoreSystem/Languages/mLanguage.h"
+  //#include "//2_CoreSystem/Languages/mLanguage.h"
 #else
   #define QUOTEME(x) QUOTEME_1(x)
   #define QUOTEME_1(x) #x

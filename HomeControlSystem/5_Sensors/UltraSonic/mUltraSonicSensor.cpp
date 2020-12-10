@@ -566,7 +566,7 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
         default:
         case 0:
           dtostrf(GetDistanceCMReading()/100,3,2,float_ctr);
-          JsonBuilderI->Add_FP("ih",PSTR("\"%s m\""),float_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s m\""),float_ctr);
         break;
         case 1: JsonBuilderI->Add_P("ih",presence_detect.detected_rtc_ctr); break;
       }  

@@ -6,33 +6,33 @@ void mSecurityLight::init(void){
   
   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mSecurityLight::init");
 
-  light_control_driveway.enabled_starttime.Mday = 6; // set to today with __DATE__ later
-  light_control_driveway.enabled_starttime.month = mTime::MONTH_AUGUST;
-  light_control_driveway.enabled_starttime.year = 2019;
-  light_control_driveway.enabled_starttime.hour = 16;
-  light_control_driveway.enabled_starttime.minute = 0;
-  light_control_driveway.enabled_starttime.second = 1;
+  // light_control_driveway.enabled_starttime.Mday = 6; // set to today with __DATE__ later
+  // light_control_driveway.enabled_starttime.month = mTime::MONTH_AUGUST;
+  // light_control_driveway.enabled_starttime.year = 2019;
+  // light_control_driveway.enabled_starttime.hour = 16;
+  // light_control_driveway.enabled_starttime.minute = 0;
+  // light_control_driveway.enabled_starttime.second = 1;
 
-  light_control_driveway.enabled_endtime.Mday = 6; // set to today with __DATE__ later
-  light_control_driveway.enabled_endtime.month = mTime::MONTH_AUGUST;
-  light_control_driveway.enabled_endtime.year = 2019;
-  light_control_driveway.enabled_endtime.hour = 23;
-  light_control_driveway.enabled_endtime.minute = 59;
-  light_control_driveway.enabled_endtime.second = 1;
+  // light_control_driveway.enabled_endtime.Mday = 6; // set to today with __DATE__ later
+  // light_control_driveway.enabled_endtime.month = mTime::MONTH_AUGUST;
+  // light_control_driveway.enabled_endtime.year = 2019;
+  // light_control_driveway.enabled_endtime.hour = 23;
+  // light_control_driveway.enabled_endtime.minute = 59;
+  // light_control_driveway.enabled_endtime.second = 1;
 
-  light_control_garden.enabled_starttime.Mday = 6; // set to today with __DATE__ later
-  light_control_garden.enabled_starttime.month = mTime::MONTH_AUGUST;
-  light_control_garden.enabled_starttime.year = 2019;
-  light_control_garden.enabled_starttime.hour = 20;
-  light_control_garden.enabled_starttime.minute = 0;
-  light_control_garden.enabled_starttime.second = 1;
+  // light_control_garden.enabled_starttime.Mday = 6; // set to today with __DATE__ later
+  // light_control_garden.enabled_starttime.month = mTime::MONTH_AUGUST;
+  // light_control_garden.enabled_starttime.year = 2019;
+  // light_control_garden.enabled_starttime.hour = 20;
+  // light_control_garden.enabled_starttime.minute = 0;
+  // light_control_garden.enabled_starttime.second = 1;
 
-  light_control_garden.enabled_endtime.Mday = 6; // set to today with __DATE__ later
-  light_control_garden.enabled_endtime.month = mTime::MONTH_AUGUST;
-  light_control_garden.enabled_endtime.year = 2019;
-  light_control_garden.enabled_endtime.hour = 20;
-  light_control_garden.enabled_endtime.minute = 1;
-  light_control_garden.enabled_endtime.second = 1;
+  // light_control_garden.enabled_endtime.Mday = 6; // set to today with __DATE__ later
+  // light_control_garden.enabled_endtime.month = mTime::MONTH_AUGUST;
+  // light_control_garden.enabled_endtime.year = 2019;
+  // light_control_garden.enabled_endtime.hour = 20;
+  // light_control_garden.enabled_endtime.minute = 1;
+  // light_control_garden.enabled_endtime.second = 1;
 
   // light_control_driveway.seconds_on = 10;
   // light_control_garden.seconds_on = 10;
@@ -83,27 +83,27 @@ int8_t mSecurityLight::Tasker(uint8_t function){
       //   pCONT->mms->pir_detect.ischanged = true;
       // }
 
-      SubTask_Light();
+      // SubTask_Light();
 
     break;
     //#ifdef USE_MODULE_NETWORKS_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
-    break;
+    // case FUNC_MQTT_HANDLERS_INIT:
+    // case FUNC_MQTT_HANDLERS_RESET:
+    //   MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+    // break;
+    // case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    //   MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+    // break;
+    // case FUNC_MQTT_SENDER:
+    //   MQTTHandler_Sender(); //optional pass parameter
+    // break;
     //#endif
   }
 
 } // END function
 
 
-int8_t mRelays::CheckAndExecute_JSONCommands(){
+int8_t mSecurityLight::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR)>=0){
@@ -120,7 +120,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(){
 }
 
 
-void mRelays::parse_JSONCommand(void){
+void mSecurityLight::parse_JSONCommand(void){
 
   // Need to parse on a copy
   char parsing_buffer[data_buffer.payload.len+1];
@@ -201,31 +201,31 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 
 
   // Automatic
-  if(pir_detect_copy.ischanged){ pir_detect_copy.ischanged=false;
+  // if(pir_detect_copy.ischanged){ pir_detect_copy.ischanged=false;
 
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mSecurityLight::SubTask_Light");
+  //   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mSecurityLight::SubTask_Light");
 
-    //driveway
-    if(pir_detect_copy.isactive && light_control_driveway.fEnableAutomaticLight){
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
+  //   //driveway
+  //   if(pir_detect_copy.isactive && light_control_driveway.fEnableAutomaticLight){
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
 
-      #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
-      if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
-      #endif
-        SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
-      #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
-      }else{
-        //SetLight(LIGHT_DRIVEWAY_ID,OFF);
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"NOT SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
-      }
-      #endif
-    }
+  //     #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
+  //     if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
+  //     #endif
+  //       SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
+  //     #ifndef DISABLE_MOTIONLIGHT_TIMED_LINK
+  //     }else{
+  //       //SetLight(LIGHT_DRIVEWAY_ID,OFF);
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"NOT SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
+  //     }
+  //     #endif
+  //   }
 
-    // Clear copy struct
-    memset(&pir_detect_copy,0,sizeof(pir_detect_copy));
+  //   // Clear copy struct
+  //   memset(&pir_detect_copy,0,sizeof(pir_detect_copy));
 
-  }
+  // }
 
   
 
@@ -247,31 +247,31 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 
   // MOVE THIS IN TO RELAYS, NOT SECURITY LIGHTS, USE GETTERS AND SETTERS FOR RELAYS
   // no longer named structs, needs to be veriable, timed goes by relay
-  if(mTime::TimeReached(&tSavedSeconds,1000)){
-    if(light_control_driveway.seconds_on>0){ 
-      light_control_driveway.seconds_on--;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
-      SetLight(LIGHT_DRIVEWAY_ID,ON);
-      //fForceMQTTUpdate = true;
-    }else if(light_control_driveway.seconds_on==0){
-      light_control_driveway.seconds_on = -1; //stop
-      //fForceMQTTUpdate = true;
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
-      SetLight(LIGHT_DRIVEWAY_ID,OFF);
-    }
+  // if(mTime::TimeReached(&tSavedSeconds,1000)){
+  //   if(light_control_driveway.seconds_on>0){ 
+  //     light_control_driveway.seconds_on--;
+  //     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
+  //     SetLight(LIGHT_DRIVEWAY_ID,ON);
+  //     //fForceMQTTUpdate = true;
+  //   }else if(light_control_driveway.seconds_on==0){
+  //     light_control_driveway.seconds_on = -1; //stop
+  //     //fForceMQTTUpdate = true;
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
+  //     SetLight(LIGHT_DRIVEWAY_ID,OFF);
+  //   }
 
-    if(light_control_garden.seconds_on>0){
-      light_control_garden.seconds_on--;
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
-      SetLight(LIGHT_GARDEN_ID,ON);
-      // fForceMQTTUpdate = true;
-    }else if(light_control_garden.seconds_on==0){
-      light_control_garden.seconds_on = -1; //stop
-      // fForceMQTTUpdate = true;
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
-      SetLight(LIGHT_GARDEN_ID,OFF);
-    }
-  }
+  //   if(light_control_garden.seconds_on>0){
+  //     light_control_garden.seconds_on--;
+  //     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+  //     SetLight(LIGHT_GARDEN_ID,ON);
+  //     // fForceMQTTUpdate = true;
+  //   }else if(light_control_garden.seconds_on==0){
+  //     light_control_garden.seconds_on = -1; //stop
+  //     // fForceMQTTUpdate = true;
+  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+  //     SetLight(LIGHT_GARDEN_ID,OFF);
+  //   }
+  // }
 
 }
 
@@ -282,28 +282,28 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 // move timers on to be part of relay struct/class?
 void mSecurityLight::SetLight(uint8_t light_id, uint8_t state){
 
-  int8_t relay_id;
-// THIS IS BAD< PHASE OU TTO WORK WITH OTEHER LIGHTS
-//this should all be in interface light
-  switch(light_id){
-    case LIGHT_DRIVEWAY_ID: relay_id = pCONT->mry->GetRelayIDbyName("Driveway Light"); light_control_driveway.ischanged = true; break;
-    case LIGHT_GARDEN_ID:   relay_id = pCONT->mry->GetRelayIDbyName("Garden Light"); light_control_garden.ischanged = true; break;
-  }
+//   int8_t relay_id;
+// // THIS IS BAD< PHASE OU TTO WORK WITH OTEHER LIGHTS
+// //this should all be in interface light
+//   switch(light_id){
+//     case LIGHT_DRIVEWAY_ID: relay_id = pCONT->mry->GetRelayIDbyName("Driveway Light"); light_control_driveway.ischanged = true; break;
+//     case LIGHT_GARDEN_ID:   relay_id = pCONT->mry->GetRelayIDbyName("Garden Light"); light_control_garden.ischanged = true; break;
+//   }
 
-  if(state==TIMED_ON){
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_SVALUE),"state","TIMED_ON");     
-    state = ON; // For relay call
-    switch(light_id){
-      case LIGHT_DRIVEWAY_ID: light_control_driveway.seconds_on = 60; break;
-      case LIGHT_GARDEN_ID:   light_control_driveway.seconds_on = 60; break;
-    }
-  }
+//   if(state==TIMED_ON){
+//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_SVALUE),"state","TIMED_ON");     
+//     state = ON; // For relay call
+//     switch(light_id){
+//       case LIGHT_DRIVEWAY_ID: light_control_driveway.seconds_on = 60; break;
+//       case LIGHT_GARDEN_ID:   light_control_driveway.seconds_on = 60; break;
+//     }
+//   }
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"relay_id",relay_id);      
+//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"relay_id",relay_id);      
 
-  if(relay_id>=0){ //if found
-    pCONT->mry->SetRelay(relay_id,state);
-  }
+//   if(relay_id>=0){ //if found
+//     pCONT->mry->CommandSet_Relay_Power(relay_id,state);
+//   }
 
 }
 
@@ -391,7 +391,7 @@ uint8_t mSecurityLight::ConstructJSON_LightStates(uint8_t json_level){
 
   //     JsonObject relayobj = root.createNestedObject(pCONT->mry->GetRelayNamebyIDCtr(device_id, buffer, sizeof(buffer)));
 
-  //     relayobj["onoff"] = pCONT->mry->GetRelay(device_id);
+  //     relayobj["onoff"] = pCONT->mry->CommandGet_Relay_Power(device_id);
   //     relayobj["seconds_on"] = light_control_ptr->seconds_on;
 
   //     char time_ctr[40]; memset(time_ctr,'\0',sizeof(time_ctr));
@@ -510,44 +510,44 @@ void mSecurityLight::MQTTHandler_Set_TelePeriod(){
 
 void mSecurityLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
+  // uint8_t mqtthandler_list_ids[] = {
+  //   MQTT_HANDLER_SETTINGS_ID, 
+  //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+  //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  // };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
+  // struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+  //   &mqtthandler_settings_teleperiod,
+  //   &mqtthandler_sensor_ifchanged,
+  //   &mqtthandler_sensor_teleperiod
+  // };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-  uint8_t flag_handle_all = false, handler_found = false
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  // pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  //   mqtthandler_list_ptr, mqtthandler_list_ids,
+  //   sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+  //   mqtt_handler_id
+  // );
+  // uint8_t flag_handle_all = false, handler_found = false
+  // if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
 
-  do{
+  // do{
 
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      case MQTT_HANDLER_MODULE_LIGHTSTATE_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_ifchanged; break;
-      case MQTT_HANDLER_MODULE_LIGHTSTATE_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
+  //   switch(mqtt_handler_id){
+  //     case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
+  //     case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
+  //     case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
+  //     case MQTT_HANDLER_MODULE_LIGHTSTATE_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_ifchanged; break;
+  //     case MQTT_HANDLER_MODULE_LIGHTSTATE_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_teleperiod; break;
+  //     default: handler_found=false; break; // nothing 
+  //   } // switch
 
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_SECURITYLIGHT_ID,mqtthandler_ptr); }
+  //   // Pass handlers into command to test and (ifneeded) execute
+  //   if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_SECURITYLIGHT_ID,mqtthandler_ptr); }
 
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
+  //   // stop searching
+  //   if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
 
-  }while(flag_handle_all);
+  // }while(flag_handle_all);
 
 }
 

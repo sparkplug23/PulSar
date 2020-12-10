@@ -2,6 +2,8 @@
 
 #ifdef USE_MODULE_SENSORS_ANALOG_MEASURE
 
+Make basic class, report adc via mqtt (for tree level)
+
 void mAnalog::Pre_Init(void){
 
   sensors_active = 0;

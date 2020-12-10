@@ -5,12 +5,12 @@
 
 #include <stdint.h>
 
-#include "2_CoreSystem/JSON/namespace.hpp"
+#include "2_CoreSystem/JSON/internal/namespace.hpp"
 
-#include "2_CoreSystem/JSON/is_char_type.hpp"
-#include "2_CoreSystem/JSON/is_string_type.hpp"
-#include "2_CoreSystem/JSON/is_number_type.hpp"
-#include "2_CoreSystem/JSON/is_float_type.hpp"
+#include "2_CoreSystem/JSON/internal/is_char_type.hpp"
+#include "2_CoreSystem/JSON/internal/is_string_type.hpp"
+#include "2_CoreSystem/JSON/internal/is_number_type.hpp"
+#include "2_CoreSystem/JSON/internal/is_float_type.hpp"
 
 #include "2_CoreSystem/Support/mSupport.h"
 #include "2_CoreSystem/Settings/mSettings.h"
@@ -66,14 +66,21 @@ class JsonBuilder{
     void Level_Start(const char* key);
     void Level_Start_P(const char* keyP, ...);
     void Level_End();
-    void Array_Start(const char* key);
+
     void Array_Start();
+    void Array_Start(const char* key);
+    void Array_Start_P(const char* key);
+
     void Array_End();
-    void Add_FP(const char* key, const char* formatP_value, ...);
+    
+    void Add_P_FV(const char* key, const char* formatP_value, ...);
+    void Add_FV(const char* key, const char* formatP_value, ...);
+    void Add_FV(const char* formatP_value, ...);
+
+
     void AppendBuffer(const char* formatP, ...);
     void AddKey(const char* key);
     void Level_Start(); //no key name 
-    void Add_FP(const char* formatP_value, ...);
 
     template <typename T>
     T GetLength(){
@@ -164,6 +171,14 @@ class JsonBuilder{
       }
 
     }
+
+
+
+// #ifdef TEMPLATE_JSON
+    // template <typename T>
+    // void Add_P_P(const char* key, T value){
+//P1 is key in prgm, p2 is value in pgm
+
 
 // #ifdef TEMPLATE_JSON
     template <typename T>

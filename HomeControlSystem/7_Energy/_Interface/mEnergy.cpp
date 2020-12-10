@@ -642,7 +642,7 @@ void mEnergy::EnergyShow(bool json)
     // bool show_energy_period = (0 == pCONT_set->tele_period);
 
     // pCONT_sup->ResponseAppend_P(PSTR(",\"" D_RSLT_ENERGY "\":{\"" D_JSON_TOTAL_START_TIME "\":\"%s\",\"" D_JSON_TOTAL "\":%s,\"" D_JSON_YESTERDAY "\":%s,\"" D_JSON_TODAY "\":%s"),
-    //   pCONT->mt->GetDateAndTime(DT_ENERGY),
+    //   pCONT->mt->GetDateAndTimeCtr(DT_ENERGY),
     //   EnergyFormatIndex(value_chr, energy_total_chr[0], json, energy_total_fields),
     //   energy_yesterday_chr,
     //   energy_daily_chr);
@@ -1027,7 +1027,7 @@ void mEnergy::WebAppend_Root_Status_Table(){
         }else{
           JsonBuilderI->Add("fc","#ffffff");
         }
-        // JsonBuilderI->Add_FP("ih","\"c%d d%d\"", count-1, device);
+        // JsonBuilderI->Add_FV("ih","\"c%d d%d\"", count-1, device);
         switch(row){
           case 0: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].voltage); break;
           case 1: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].current); break;

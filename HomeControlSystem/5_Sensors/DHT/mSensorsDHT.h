@@ -12,8 +12,6 @@
 class DHTesp;
 #include "1_TaskerManager/mTaskerManager.h"
 
-#include <ArduinoJson.h>
-
 #ifdef USE_MODULE_CORE_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -135,25 +133,19 @@ class mSensorsDHT{
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mSensorsDHT> mqtthandler_settings_teleperiod;
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mSensorsDHT> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsDHT> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    
-  //#endif
-
-  
+      
 };
 #endif
 

@@ -504,13 +504,13 @@ void mOilFurnace::WebAppend_Root_Status_Table(){
         default:
         case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
         // case 1:
-        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d/%d (secs)\""), 
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
         //     animation.transition.rate_ms.val/1000, 
         //     animation.transition.time_ms.val/1000
         //   );
         // break;
         // case 2: 
-        //   JsonBuilderI->Add_FP("ih",PSTR("\"%d%% [#%d]\""),
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
         //     animation.transition.pixels_to_update_as_percentage.val, 
         //     GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage.val)
         //   );
@@ -518,12 +518,12 @@ void mOilFurnace::WebAppend_Root_Status_Table(){
         // case 3: JsonBuilderI->Add("ih",GetTransitionOrderName(buffer)); break;
         // case 4: JsonBuilderI->Add("ih",GetAnimationModeName(buffer, sizeof(buffer)));   break;
         // case 5: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
-        // case 6: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
+        // case 6: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""), (int)power_rating.power,"W"); break;
         // case 7:
         //   if(!animation.auto_time_off_secs){ //off
         //     JsonBuilderI->Add("ih","Unset");
         //   }else{
-        //     JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""),
+        //     JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
         //       animation.auto_time_off_secs,"secs"
         //     );
         //   }

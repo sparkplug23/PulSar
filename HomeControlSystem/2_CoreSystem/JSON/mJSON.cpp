@@ -88,6 +88,12 @@ void JsonBuilder::Array_Start(const char* key)
     if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":[",key);
 }
+void JsonBuilder::Array_Start_P(const char* key)
+{
+    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }
+    if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":[",key);
+}
 void JsonBuilder::Array_Start() // only add the bracket for manual building
 {
     if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }
@@ -146,7 +152,23 @@ void JsonBuilder::Level_End()
 
 
 // Use valist to populate the key
-void JsonBuilder::Add_FP(const char* key, const char* formatP_value, ...)
+void JsonBuilder::Add_P_FV(const char* key, const char* formatP_value, ...) // P = progmem key, FV = format value
+{
+  char* buff = data_buffer.payload.ctr;
+  uint16_t* len = &data_buffer.payload.len;
+  // Prefix comma if not first pair
+  if((*len>1)&&(buff[*len-1]!='{')){ *len += sprintf_P(&buff[*len],","); }
+  // Write key
+  *len += sprintf_P(&buff[*len],"\"%S\":",key);
+  // Add value
+  va_list arg;
+  va_start(arg, formatP_value);
+  *len += vsnprintf_P(&buff[*len], DATA_BUFFER_PAYLOAD_MAX_LENGTH-*len, formatP_value, arg);
+  va_end(arg);
+}
+
+// Use valist to populate the key
+void JsonBuilder::Add_FV(const char* key, const char* formatP_value, ...) // FV = format value
 {
   char* buff = data_buffer.payload.ctr;
   uint16_t* len = &data_buffer.payload.len;
@@ -162,7 +184,7 @@ void JsonBuilder::Add_FP(const char* key, const char* formatP_value, ...)
 }
 
 // Use valist to populate the key
-void JsonBuilder::Add_FP(const char* formatP_value, ...)
+void JsonBuilder::Add_FV(const char* formatP_value, ...)
 {
   // Prefix comma if not first pair
   if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')&&(writer.buffer[*writer.length-1]!='[')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }

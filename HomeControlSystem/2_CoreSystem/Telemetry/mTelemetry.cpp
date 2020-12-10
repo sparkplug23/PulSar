@@ -193,7 +193,7 @@ void mTelemetry::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -403,7 +403,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
     // // test end
 
     JsonBuilderI->Add(PM_JSON_TIME,           pCONT_time->mtime.hhmmss_ctr);
-    JsonBuilderI->Add_FP(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JsonBuilderI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime_value.sleep ? "Dynamic" : "Unknown");
     JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_set->runtime_value.sleep); // typ. 20
@@ -413,7 +413,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JsonBuilderI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
     JsonBuilderI->Level_Start(PM_JSON_NETWORK);
-      JsonBuilderI->Add_FP(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+      JsonBuilderI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
       JsonBuilderI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
       JsonBuilderI->Add(PM_JSON_RSSI,         WiFi.RSSI());
       JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
@@ -443,7 +443,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_POWER,          pCONT_set->power); 
     JsonBuilderI->Add(PM_JSON_POWERONSTATE,   pCONT_set->Settings.poweronstate); 
     JsonBuilderI->Add(PM_JSON_LEDSTATE,       pCONT_set->Settings.ledstate);
-    JsonBuilderI->Add_FP(PM_JSON_LEDMASK,     PSTR("\"%04X\""), 0); 
+    JsonBuilderI->Add_FV(PM_JSON_LEDMASK,     PSTR("\"%04X\""), 0); 
     JsonBuilderI->Add(PM_JSON_SAVEDATA,       0); 
     JsonBuilderI->Add(PM_JSON_SAVESTATE,      0); 
     JsonBuilderI->Add(PM_JSON_SWITCHMODE,     0); 
@@ -454,7 +454,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_BAUDRATE,       (uint16_t)115200);
     JsonBuilderI->Add(PM_JSON_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
     JsonBuilderI->Add(PM_JSON_OTAURL,         "http://something.org/hacs/release/minimal.bin");
-    JsonBuilderI->Add_FP(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
+    JsonBuilderI->Add_FV(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
     JsonBuilderI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
     JsonBuilderI->Add(PM_JSON_STARTUPUTC,     "2019-12-10T21:35:44");
   return JsonBuilderI->End();
@@ -468,7 +468,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,     pCONT_set->firmware_version.current.name_ctr);
     JsonBuilderI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
-    JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer));
+    JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
     JsonBuilderI->Add(PM_JSON_BUILDTIME,       __TIME__);
     // JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
@@ -481,7 +481,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
     // JsonBuilderI->Add(PM_JSON_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
     // JsonBuilderI->Add(PM_JSON_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
-    JsonBuilderI->Add_FP(PM_JSON_FEATURES,     PSTR("[\"%08X\",\"%08X\",\"%08X\",\"%08X\"]"), 0,0,0,0);
+    JsonBuilderI->Add_FV(PM_JSON_FEATURES,     PSTR("[\"%08X\",\"%08X\",\"%08X\",\"%08X\"]"), 0,0,0,0);
     JsonBuilderI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
     JsonBuilderI->Add(PM_JSON_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
     JsonBuilderI->Add(PM_JSON_TEMPLATE_USED,   pCONT_set->boot_status.module_template_used);  
@@ -507,7 +507,7 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level){ // Debug info
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_PROGRAMSIZE,      ESP.getSketchSize()/1024);
     #ifdef ESP8266
-    JsonBuilderI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024);
+    JsonBuilderI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
     JsonBuilderI->Add(PM_JSON_HEAPSIZE,         ESP.getFreeHeap()/1024);
     JsonBuilderI->Add(PM_JSON_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
     JsonBuilderI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
@@ -527,16 +527,16 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
   IPAddress dnsip     = IPAddress(pCONT_set->Settings.ip_address[3]);
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add_FP(PM_JSON_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JsonBuilderI->Add(PM_JSON_SSID, WiFi.SSID().c_str());
     JsonBuilderI->Add(PM_JSON_SSID_NUMBERED, pCONT_set->Settings.sta_active); // Used to debug switching in grafana
     JsonBuilderI->Add(PM_JSON_RSSI, WiFi.RSSI());
     JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
     JsonBuilderI->Add(PM_JSON_HOSTNAME, pCONT_set->my_hostname);
-    JsonBuilderI->Add_FP(PM_JSON_STATIC_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),staticip[0],staticip[1],staticip[2],staticip[3]);
-    JsonBuilderI->Add_FP(PM_JSON_GATEWAY,PSTR("\"%d.%d.%d.%d\""),gatewayip[0],gatewayip[1],gatewayip[2],gatewayip[3]);
-    JsonBuilderI->Add_FP(PM_JSON_SUBNETMASK,PSTR("\"%d.%d.%d.%d\""),subnetip[0],subnetip[1],subnetip[2],subnetip[3]);
-    JsonBuilderI->Add_FP(PM_JSON_DNSSERVER,PSTR("\"%d.%d.%d.%d\""),dnsip[0],dnsip[1],dnsip[2],dnsip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_STATIC_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),staticip[0],staticip[1],staticip[2],staticip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_GATEWAY,PSTR("\"%d.%d.%d.%d\""),gatewayip[0],gatewayip[1],gatewayip[2],gatewayip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_SUBNETMASK,PSTR("\"%d.%d.%d.%d\""),subnetip[0],subnetip[1],subnetip[2],subnetip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_DNSSERVER,PSTR("\"%d.%d.%d.%d\""),dnsip[0],dnsip[1],dnsip[2],dnsip[3]);
     JsonBuilderI->Add(PM_JSON_BSSID, WiFi.BSSIDstr().c_str());
     JsonBuilderI->Add(PM_JSON_MAC, WiFi.macAddress().c_str());
     JsonBuilderI->Add(PM_JSON_WEBSERVER_ENABLED, pCONT_set->Settings.webserver);
@@ -566,15 +566,46 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
 
 
 uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){ 
+
+  char buffer[80];
        
   JsonBuilderI->Start();
-    JsonBuilderI->Add(PM_JSON_UTC_TIME,   pCONT_time->GetUTCTimeCtr());
-    JsonBuilderI->Add(PM_JSON_LOCAL_TIME, pCONT_time->GetLocalTimeCtr());
-    JsonBuilderI->Add(PM_JSON_STARTDST,   pCONT_time->GetStartDSTTimeCtr());
-    JsonBuilderI->Add(PM_JSON_ENDDST,     pCONT_time->GetEndDSTTimeCtr());
-    JsonBuilderI->Add(PM_JSON_TIMEZONE,   pCONT_time->GetTimeZoneCtr());
-    JsonBuilderI->Add(PM_JSON_SUNRISE,    pCONT_time->GetSunriseCtr());
-    JsonBuilderI->Add(PM_JSON_SUNSET,     pCONT_time->GetSunsetCtr());
+    JsonBuilderI->Add(PM_JSON_UTC_TIME,   pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_LOCAL_TIME, pCONT_time->GetDateAndTimeCtr(DT_LOCALNOTZ, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_STARTDST,   pCONT_time->GetDateAndTimeCtr(DT_DST, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_ENDDST,     pCONT_time->GetDateAndTimeCtr(DT_STD, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_TIMEZONE,   pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_SUNRISE,    pCONT_time->GetDateAndTimeCtr(DT_SUNRISE, buffer, sizeof(buffer)));
+    JsonBuilderI->Add(PM_JSON_SUNSET,     pCONT_time->GetDateAndTimeCtr(DT_SUNSET, buffer, sizeof(buffer)));
+#ifdef ENABLE_DEVFEATURE_RTC_TIME_V2
+    JsonBuilderI->Level_Start("debug_v2");
+      JsonBuilderI->Add("utc_time",pCONT_time->Rtc.utc_time);
+      JsonBuilderI->Add("local_time",pCONT_time->Rtc.local_time);
+      JsonBuilderI->Add("daylight_saving_time",pCONT_time->Rtc.daylight_saving_time);
+      JsonBuilderI->Add("standard_time",pCONT_time->Rtc.standard_time);
+      JsonBuilderI->Add("ntp_time",pCONT_time->Rtc.ntp_time);
+      JsonBuilderI->Add("midnight",pCONT_time->Rtc.midnight);
+      JsonBuilderI->Add("restart_time",pCONT_time->Rtc.restart_time);
+      JsonBuilderI->Add("millis",pCONT_time->Rtc.millis);
+      JsonBuilderI->Add("last_sync",pCONT_time->Rtc.last_sync);
+      JsonBuilderI->Add("time_timezone",pCONT_time->Rtc.time_timezone);
+      JsonBuilderI->Add("ntp_sync_minute",pCONT_time->Rtc.ntp_sync_minute);
+      JsonBuilderI->Add("midnight_now",pCONT_time->Rtc.midnight_now);
+      JsonBuilderI->Add("user_time_entry",pCONT_time->Rtc.user_time_entry);
+      JsonBuilderI->Add("ntp_last_active_secs", (millis()-pCONT_time->Rtc.ntp_last_active)/1000);
+      JsonBuilderI->Add("last_sync_secs", (pCONT_time->Rtc.utc_time-pCONT_time->Rtc.last_sync)/1000);
+
+      JsonBuilderI->Add("GetUptime",pCONT_time->GetUptime().c_str());
+
+    JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("RtcTime");
+      JsonBuilderI->Add("valid",pCONT_time->RtcTime.valid);
+      JsonBuilderI->Add_FV("time","\"%02d:%02d:%02d\"",pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
+
+
+
+    JsonBuilderI->End();
+#endif // ENABLE_DEVFEATURE_RTC_TIME_V2
   return JsonBuilderI->End();
 
 }
@@ -603,7 +634,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ //
   
   JsonBuilderI->Add(PM_JSON_DEVICE, pCONT_set->Settings.system_name.device);
   JsonBuilderI->Add(D_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
-  JsonBuilderI->Add_FP(D_JSON_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
+  JsonBuilderI->Add_FV(D_JSON_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
                       pCONT_time->mtime.Mday, pCONT_time->mtime.month, pCONT_time->mtime.year,
                       pCONT_time->mtime.hour, pCONT_time->mtime.minute, pCONT_time->mtime.second
                     );
@@ -646,7 +677,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
   IPAddress localip = WiFi.localIP();
   
   JsonBuilderI->Start();
-    JsonBuilderI->Add_FP(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
+    JsonBuilderI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_sup->loop_delay_temp);
     JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec);
@@ -656,7 +687,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
     #endif // #ifdef USE_NETWORK_MDNS
     JsonBuilderI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,    pCONT_set->firmware_version.current.name_ctr);
-    JsonBuilderI->Add_FP(PM_JSON_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+    JsonBuilderI->Add_FV(PM_JSON_IPADDRESS,   PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,      pCONT_set->Settings.bootcount);
   return JsonBuilderI->End();
 

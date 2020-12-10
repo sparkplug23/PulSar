@@ -17,7 +17,7 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-#include "2_CoreSystem/Languages/mLanguage.h"
+//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #ifdef ESP32
@@ -64,6 +64,8 @@ class mWiFi{
 
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();
+
+    
 
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;

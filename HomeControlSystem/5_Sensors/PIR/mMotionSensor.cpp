@@ -188,6 +188,10 @@ void mMotionSensor::Init(){
     pir_detect[sensor_id].state = PIR_Detected(sensor_id);
   }
 
+  #ifdef DEVICE_SIDEDOORLIGHT
+  settings.motion_trigger_type = MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID;
+  #endif
+
 }
 
 uint8_t mMotionSensor::PIR_Detected(uint8_t sensor_id){
@@ -220,9 +224,24 @@ void mMotionSensor::EveryLoop(){
         
         // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr));
         pir_detect[sensor_id].isactive = true;
+
+        if(pCONT_time->UpTime()>60){
+          if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
+            pCONT->Tasker_Interface(FUNC_SET_POWER_ON_ID);
+            #ifdef USE_MODULE_DRIVERS_RELAY
+              pCONT_mry->CommandSet_Timer_Decounter(60); //retrigger to 60 seconds
+            #endif // USE_MODULE_DRIVERS_RELAY
+          }
+        }
+
       }else{
         pir_detect[sensor_id].tEndedTime = millis();
         pir_detect[sensor_id].isactive = false;
+
+        if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
+          pCONT->Tasker_Interface(FUNC_SET_POWER_OFF_ID);
+        }
+
       }
       // char buffer[20];
       // char buffer2[20];
@@ -247,6 +266,10 @@ void mMotionSensor::EveryLoop(){
   // Use short timer to automatically clear event
   //if > 1 sec
   //clear struct
+
+
+
+
 }
 
 
@@ -295,12 +318,13 @@ uint8_t mMotionSensor::ConstructJSON_Settings(uint8_t json_method){
     JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.sensors_active);
     JsonBuilderI->Array_AddArray("pin", pin, 3);
 
+
     //debug
     // JsonBuilderI->Add_P("pin[0]", settings.sensors_active);
     JsonBuilderI->Array_Start("pin_state");
-      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[0]));
-      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[1]));
-      JsonBuilderI->Add_FP(PSTR("%d"),digitalRead(pin[2]));
+      JsonBuilderI->Add_FV(PSTR("%d"),digitalRead(pin[0]));
+      JsonBuilderI->Add_FV(PSTR("%d"),digitalRead(pin[1]));
+      JsonBuilderI->Add_FV(PSTR("%d"),digitalRead(pin[2]));
     JsonBuilderI->Array_End();
     
 
@@ -354,7 +378,7 @@ void mMotionSensor::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

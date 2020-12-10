@@ -45,7 +45,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(abs(millis()-tCheckForMaxTemp)>=60000*10){tCheckForMaxTemp=millis();
 
-      pCONT->mry->SetRelay(RAD_FAN_RELAY_ON);
+      pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
 
       // int tempsensorid;
       // if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
@@ -54,13 +54,13 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
       //   if((pCONT_msdb18->sensor[tempsensorid].reading.val>25)&&(pCONT_msdb18->sensor[tempsensorid].reading.isvalid)){
       //      //FAN_ON(); 
       //      #ifdef USE_MODULE_DRIVERS_RELAY
-      //       pCONT->mry->SetRelay(RAD_FAN_RELAY_ON);
+      //       pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
       //      #endif
       //      fan.ischanged = true;
       //   }else{
       //      //FAN_OFF(); 
       //      #ifdef USE_MODULE_DRIVERS_RELAY
-      //      pCONT->mry->SetRelay(RAD_FAN_RELAY_OFF);
+      //      pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_OFF);
       //      #endif
       //      fan.ischanged = true;
       //      fan.secs = 0;
@@ -189,7 +189,7 @@ void mRadiatorFan::Append_Hardware_Status_Message(){
 
 //   int8_t fan_state = -1;
 //   #ifdef USE_MODULE_DRIVERS_RELAY
-//     fan_state = pCONT->mry->GetRelay(0);
+//     fan_state = pCONT->mry->CommandGet_Relay_Power(0);
 //   #endif
 
 // //  if(fan_state){

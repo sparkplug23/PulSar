@@ -80,19 +80,19 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
           if(!pCONT_iLight->auto_time_off_secs){ //off
             JsonBuilderI->Add("ih","Unset");
           }else{
-            JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s)\""),
+            JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
               pCONT_iLight->auto_time_off_secs,"secs"
             );
           }
         break;
         case 2:
-          JsonBuilderI->Add_FP("ih",PSTR("\"%d/%d (secs)\""), 
+          JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
             pCONT_iLight->animation.transition.rate_ms.val/1000, 
             pCONT_iLight->animation.transition.time_ms.val/1000
           );
         break;
         case 3: 
-          JsonBuilderI->Add_FP("ih",PSTR("\"%d%% [#%d]\""),
+          JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
             pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 
             GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
           );
@@ -102,7 +102,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
         #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
         case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
         #endif
-        case 7: JsonBuilderI->Add_FP("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
+        case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
     
     JsonBuilderI->Level_End();
@@ -2202,7 +2202,7 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
       RgbTypeColor c;
       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
         c = GetPixelColor(i);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
       }  
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();
@@ -2216,7 +2216,7 @@ void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRe
       RgbTypeColor c2;
       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
         c2 = GetPixelColor(i);
-        JsonBuilderI->Add_FP(PSTR("\"%02X%02X%02X\""),c2.R,c2.G,c2.B);
+        JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c2.R,c2.G,c2.B);
       }  
       JsonBuilderI->Array_End();
     JsonBuilderI->Level_End();

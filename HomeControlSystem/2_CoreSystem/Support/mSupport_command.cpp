@@ -420,8 +420,8 @@
 // #endif
 //                           "}}"),
 //                           Settings.baudrate * 300, GetSerialConfig().c_str(), SettingsText(SET_MQTT_GRP_TOPIC), SettingsText(SET_OTAURL),
-//                           GetResetReason().c_str(), GetUptime().c_str(), GetDateAndTime(DT_RESTART).c_str(), Settings.sleep,
-//                           Settings.cfg_holder, Settings.bootcount, GetDateAndTime(DT_BOOTCOUNT).c_str(), Settings.save_flag
+//                           GetResetReason().c_str(), GetUptime().c_str(), GetDateAndTimeCtr(DT_RESTART).c_str(), Settings.sleep,
+//                           Settings.cfg_holder, Settings.bootcount, GetDateAndTimeCtr(DT_BOOTCOUNT).c_str(), Settings.save_flag
 // #ifdef ESP8266
 //                           , GetSettingsAddress()
 // #endif
@@ -513,13 +513,13 @@
 // #if defined(USE_TIMERS) && defined(USE_SUNRISE)
 //     Response_P(PSTR("{\"" D_JSON_STATUS D_STATUS7_TIME "\":{\"" D_JSON_UTC_TIME "\":\"%s\",\"" D_JSON_LOCAL_TIME "\":\"%s\",\"" D_JSON_STARTDST "\":\"%s\",\""
 //                           D_JSON_ENDDST "\":\"%s\",\"" D_JSON_TIMEZONE "\":%s,\"" D_JSON_SUNRISE "\":\"%s\",\"" D_JSON_SUNSET "\":\"%s\"}}"),
-//                           GetDateAndTime(DT_UTC).c_str(), GetDateAndTime(DT_LOCALNOTZ).c_str(), GetDateAndTime(DT_DST).c_str(),
-//                           GetDateAndTime(DT_STD).c_str(), stemp, GetSun(0).c_str(), GetSun(1).c_str());
+//                           GetDateAndTimeCtr(DT_UTC).c_str(), GetDateAndTimeCtr(DT_LOCALNOTZ).c_str(), GetDateAndTimeCtr(DT_DST).c_str(),
+//                           GetDateAndTimeCtr(DT_STD).c_str(), stemp, GetSunTimeAtHorizon(0).c_str(), GetSunTimeAtHorizon(1).c_str());
 // #else
 //     Response_P(PSTR("{\"" D_JSON_STATUS D_STATUS7_TIME "\":{\"" D_JSON_UTC_TIME "\":\"%s\",\"" D_JSON_LOCAL_TIME "\":\"%s\",\"" D_JSON_STARTDST "\":\"%s\",\""
 //                           D_JSON_ENDDST "\":\"%s\",\"" D_JSON_TIMEZONE "\":%s}}"),
-//                           GetDateAndTime(DT_UTC).c_str(), GetDateAndTime(DT_LOCALNOTZ).c_str(), GetDateAndTime(DT_DST).c_str(),
-//                           GetDateAndTime(DT_STD).c_str(), stemp);
+//                           GetDateAndTimeCtr(DT_UTC).c_str(), GetDateAndTimeCtr(DT_LOCALNOTZ).c_str(), GetDateAndTimeCtr(DT_DST).c_str(),
+//                           GetDateAndTimeCtr(DT_STD).c_str(), stemp);
 // #endif  // USE_TIMERS and USE_SUNRISE
 //     MqttPublishPrefixTopic_P(option, PSTR(D_JSON_STATUS "7"));
 //   }

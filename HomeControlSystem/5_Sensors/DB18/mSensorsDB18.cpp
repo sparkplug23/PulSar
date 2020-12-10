@@ -10,7 +10,7 @@ void mSensorsDB18::Pre_Init(){
   settings.nSensorsFound = 0;
 
   if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) {  // not set when 255
-    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID];
+    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
@@ -30,7 +30,7 @@ void mSensorsDB18::Pre_Init(){
   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
   if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
-    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID];
+    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
@@ -54,7 +54,7 @@ void mSensorsDB18::Pre_Init(){
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "settings.fEnableSensor, %d sensors"),settings.nSensorsFound);
   }
 
-  delay(2000);
+  // delay(2000);
 
 }
 
@@ -211,52 +211,13 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[40];
   char title [40];
   
-
   uint8_t corrected_sensor_id = 0;
-  // for(int sensor_id=0;sensor_id<3;sensor_id++){ //db18_sensors_active
-
-  //   corrected_sensor_id = sensor[sensor_id].address_id;
-    
-  //   if(sensor[corrected_sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
-
-
-  //     sprintf(title, "%d", sensor_id);
-  //     JsonBuilderI->Level_Start(title);//pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,corrected_sensor_id,buffer,sizeof(buffer)));  
-
-
-  //     JsonBuilderI->Add("name",pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,sensor_id,buffer,sizeof(buffer)));   
-  //       JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[corrected_sensor_id].reading.val);
-  //       JsonBuilderI->Add(D_JSON_ISVALID, sensor[corrected_sensor_id].reading.isvalid);
-  //       //JsonBuilderI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
-
-  //       // if(json_level <= JSON_LEVEL_DEBUG){
-  //         JsonBuilderI->Add(D_JSON_ADDRESS, sensor[corrected_sensor_id].address[7]);
-  //         JsonBuilderI->Add("ID", sensor_id);
-  //         JsonBuilderI->Add("Corrected_ID", corrected_sensor_id);
-  //       // }
-  //     JsonBuilderI->Level_End();  
-  //   }
-
-  // } // END for
-
-//fixed
-
-  // corrected_sensor_id = 0;
+  
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){ //db18_sensors_active
-
     
     if(sensor[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
 
-
-      // sprintf(title, "%d", sensor_id);
-      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));  
-
-
-    // corrected_sensor_id = sensor[sensor_id].address_id;
-      // JsonBuilderI->Add("name",pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));   
-        
-        
-        
+      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
         JsonBuilderI->Add(D_JSON_ISVALID, sensor[sensor_id].reading.isvalid);
         JsonBuilderI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
@@ -270,12 +231,6 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
     }
 
   } // END for
-
-
-
-
-
-
     
   return JsonBuilderI->End();
 
@@ -429,7 +384,16 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
       // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),1,GetCorrectedDeviceID(1)); 
 
     }
-    break;    
+    break;   
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break; 
     /************
      * WEBPAGE SECTION * 
     *******************/
@@ -461,63 +425,49 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
   return function_result;
 
 }//end function
-int8_t mSensorsDB18::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
 
 
-int8_t mSensorsDB18::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+int8_t mSensorsDB18::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr, "set/" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
   }else{
     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
   }
 
 }
 
-void mSensorsDB18::parse_JSONCommand(JsonObjectConst obj){
 
-  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
-  //   #endif
-  //   parsesub_ModeManual(obj);
-  // }else 
-  // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/animation",sizeof("/animation")-1)>=0){
-  //   #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "animation"));
-  //   #endif    
-  //   parsesub_ModeAnimation(obj);
-  // }else
+void mSensorsDB18::parse_JSONCommand(){
 
-// }
+ // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len+1];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    #endif// ENABLE_LOG_LEVEL_INFO
+    return;
+  }  
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
 
-// // void mSensorsDB18::JSONCommands_CheckAll(JsonObjectConst obj){
-// //   JSONCommands(obj);
-// // }
-
-// void mSensorsDB18::JSONCommands(JsonObjectConst obj){
 
 
   // Using a desired address, the sensor is searched for, then index (id) is updated
-  if(!obj[F(D_JSON_SENSORADDRESS)].isNull()){
+  if(jtok = obj[PM_JSON_SENSORADDRESS]){
      
-    JsonArrayConst array_group = obj[D_JSON_SENSORADDRESS][D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
-    
+    JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
+      
     #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
     AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
     #endif // LOG_LEVEL_INFO_PARSING
@@ -526,16 +476,14 @@ void mSensorsDB18::parse_JSONCommand(JsonObjectConst obj){
     uint8_t address_index = 0;
     uint8_t original_device_id = 0;
     
-  delay(3000);
+    for(auto group_iter : array_group) {
 
-    for(JsonVariantConst group_iter : array_group) {
-
-      JsonArrayConst array_sensor_address_iter = group_iter;
+      JsonParserArray array_sensor_address_iter = group_iter;
       memset(address_temp,0,sizeof(address_temp));
       address_index = 0;
             
-      for(JsonVariantConst address_id : array_sensor_address_iter) {
-        int address = address_id.as<int>();
+      for(auto address_id : array_sensor_address_iter) {
+        int address = address_id.getInt();
         // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
         //AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_DB18 "address = %d"),address); 
         // #endif
@@ -548,32 +496,7 @@ void mSensorsDB18::parse_JSONCommand(JsonObjectConst obj){
       Serial.println();
 
     }
-
-
-      // AddLog_Array(LOG_LEVEL_INFO_PARSING, "address", address_temp, (uint8_t)8);
-// uint8_t id = 0, cid = 0;
-
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-//     cid = GetCorrectedDeviceID(id++);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("%d sensor[%d].id=%d"), sensor[cid].address[7], cid,sensor[cid].id);
-
+    
   }
 
 }
