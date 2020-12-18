@@ -47,7 +47,7 @@
 //#define DEVICE_RGBFRIDGE              
 // #define DEVICE_RGBBEDROOMFLOOR
 // #define DEVICE_H801_TESTER
-#define DEVICE_CUSTOM_THERESE_01
+#define DEVICE_RGBCUSTOM_USER_01
 
 /**
  *  CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- 
@@ -427,8 +427,8 @@
 #endif
 
 
-#ifdef DEVICE_CUSTOM_THERESE_01
-  #define DEVICENAME_CTR            "rgbcustomtherese01"
+#ifdef DEVICE_RGBCUSTOM_USER_01
+  #define DEVICENAME_CTR            "rgbcustomuser01"
   #define DEVICENAME_FRIENDLY_CTR   "Micro String Lights 01"
 
   #define FORCE_TEMPLATE_LOADING
@@ -470,7 +470,7 @@
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
     "\"TimeMs\":0,"
-    "\"ColourPalette\":\"" "Custom Therese 01" "\","
+    "\"ColourPalette\":\"" "Custom User 01" "\","
     "\"BrightnessRGB\":100"
   "}";
 

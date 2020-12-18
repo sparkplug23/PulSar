@@ -250,7 +250,7 @@ void mInterfaceLight::init_PresetColourPalettes(){
   init_ColourPalettes_Christmas_15();
   init_ColourPalettes_Christmas_16();
   init_ColourPalettes_Sunrise_01();
-  init_ColourPalettes_Custom_Therese_01();
+  init_ColourPalettes_Custom_User_01();
 
 }
 
@@ -568,12 +568,12 @@ void mInterfaceLight::init_ColourPalettes_Sunrise_01(){
 
 
 
-void mInterfaceLight::init_ColourPalettes_Custom_Therese_01(){
-  palettelist.ptr     = &palettelist.custom_therese_01;  
-  palettelist.ptr->id = PALETTELIST_STATIC_CUSTOM_THERESE_01_ID;
-  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CUSTOM_THERESE_01_COLOUR_MAP_IDS);
-  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CUSTOM_THERESE_01_COLOUR_MAP_IDS;
-  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CUSTOM_THERESE_01_NAME_CTR;
+void mInterfaceLight::init_ColourPalettes_Custom_User_01(){
+  palettelist.ptr     = &palettelist.custom_user_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CUSTOM_USER_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CUSTOM_USER_01_NAME_CTR;
   palettelist.ptr->flags.fRandomise_Between_Colour_Pairs = false;
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_NONE;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
@@ -837,7 +837,7 @@ mInterfaceLight::PALETTELIST::PALETTE* mInterfaceLight::GetPalettePointerByID(ui
     case PALETTELIST_STATIC_CHRISTMAS_14_ID:     return &palettelist.christmas_14;
     case PALETTELIST_STATIC_CHRISTMAS_15_ID:     return &palettelist.christmas_15;
     case PALETTELIST_STATIC_CHRISTMAS_16_ID:     return &palettelist.christmas_16;
-    case PALETTELIST_STATIC_CUSTOM_THERESE_01_ID: return &palettelist.custom_therese_01;
+    case PALETTELIST_STATIC_CUSTOM_USER_01_ID: return &palettelist.custom_user_01;
     case PALETTELIST_STATIC_SUNRISE_01_ID:      return &palettelist.sunrise_01;
   }
 }

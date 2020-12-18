@@ -1135,7 +1135,7 @@ const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
     void init_ColourPalettes_Christmas_14();
     void init_ColourPalettes_Christmas_15();
     void init_ColourPalettes_Christmas_16();
-    void init_ColourPalettes_Custom_Therese_01();
+    void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1218,7 +1218,7 @@ const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
     PALETTELIST_STATIC_CHRISTMAS_16_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
-    PALETTELIST_STATIC_CUSTOM_THERESE_01_ID,
+    PALETTELIST_STATIC_CUSTOM_USER_01_ID,
 
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
@@ -1315,7 +1315,7 @@ const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
       PALETTE christmas_14;
       PALETTE christmas_15;
       PALETTE christmas_16;
-      PALETTE custom_therese_01;
+      PALETTE custom_user_01;
     }palettelist;
 
 
