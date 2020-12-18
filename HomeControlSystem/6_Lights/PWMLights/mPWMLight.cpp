@@ -10,47 +10,32 @@ int8_t mPWMLight::Tasker(uint8_t function){
   /************
    * INIT SECTION * 
   *******************/
-//   if(function == FUNC_PRE_INIT){
-//     //LightModuleInit();
-//     return FUNCTION_RESULT_HANDLED_ID;
-//   }
   if(function == FUNC_INIT){
     Init();
   }
 
   if(pCONT_set->Settings.light_settings.type > LT_LIGHT_INTERFACE_END){
-    //     Serial.printf("Skipping light type %d\n\r",pCONT_set->Settings.light_settings.type); 
     return FUNCTION_RESULT_MODULE_DISABLED_ID; 
   }
 
   switch(function){
     /************
-     * SETTINGS SECTION * 
-    *******************/
-    /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_50_MSECOND:{
-      //LightAnimate();  
-    }break;
     case FUNC_LOOP:
       SubTask_Animation();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
-
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MQTT
-//     case FUNC_MQTT_SENDER:
-//      SubTasker_MQTTSender();
-//     break;
-    #endif
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
   } // end switch
-  
-  
+    
   #ifdef USE_MODULE_CORE_WEBSERVER
   return Tasker_Web(function);
   #endif // USE_MODULE_CORE_WEBSERVER
@@ -85,6 +70,44 @@ void mPWMLight::Init(void) //LightInit(void)
   // memset(&fade_start_10,0,sizeof(fade_start_10));
 
   pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
+
+}
+
+
+
+int8_t mPWMLight::CheckAndExecute_JSONCommands(){
+
+  // Check if instruction is for me
+  if(mSupport::SetTopicMatch_P(data_buffer.topic.ctr,PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_PWM_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+
+void mPWMLight::parse_JSONCommand(void){
+
+  // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len+1];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    #endif// ENABLE_LOG_LEVEL_INFO
+    return;
+  }  
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  char buffer[50];
 
 }
 

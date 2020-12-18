@@ -119,21 +119,13 @@ struct handler {
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
 };
 
-#ifdef USE_PUBSUB_V1
-#include "mPubSubClient.h"
-class mPubSubClient;
-#else
 #include "PubSubClient.h"
 class mPubSubClient;
-#endif
 
 #include "0_ConfigUser/mUserConfig.h"
 #include "2_CoreSystem/Support/mSupport.h"
 class mSupport;
 
-#ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-#include <ArduinoJson.h>
-#endif // ENABLE_DEVFEATURE_ARDUINOJSON
 #ifdef ESP32
   #include <WiFi.h> //esp32
 #endif
@@ -246,6 +238,7 @@ const char* state_ctr(void);
     template<typename T>
     void MQTTHandler_Command(T& class_ptr, uint8_t class_id, handler<T>* handler_ptr)
     {
+
       if(handler_ptr == nullptr){
         return;
       }
@@ -253,11 +246,11 @@ const char* state_ctr(void);
       #ifdef ENABLE_ADVANCED_DEBUGGING
         #ifndef DISABLE_SERIAL_LOGGING
         // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
-        Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
+        //Serial.printf("1MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
         #endif
       #endif
       
-        // Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
+      // Serial.printf("MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
 
       if(handler_ptr->flags.PeriodicEnabled){
         if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
@@ -265,10 +258,8 @@ const char* state_ctr(void);
           handler_ptr->flags.SendNow = true;
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;
           if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
-            // handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change
-            
-            //Serial.println("flag_uptime_reached_reduce_frequency");
-            
+            // handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change            
+            //Serial.println("flag_uptime_reached_reduce_frequency");            
             handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs; //only reduce if new rate is longer
           }
         }
@@ -276,8 +267,11 @@ const char* state_ctr(void);
       if(handler_ptr->flags.SendNow){ 
         handler_ptr->flags.SendNow = false;
         handler_ptr->tSavedLastSent = millis();    
+
         
 
+  // Serial.printf("mqtthandler_sensor_ifchanged=%d\n\r",mqtthandler_list_ptr[1]->tRateSecs);
+        
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);

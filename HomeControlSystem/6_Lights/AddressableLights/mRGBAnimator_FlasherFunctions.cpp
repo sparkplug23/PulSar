@@ -27,7 +27,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
       break;
       case FLASHER_REGION_ANIMATE_ID: //shift along
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE_LOWLEVEL,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+        //AddLog_P(LOG_LEVEL_DEBUG_MORE_LOWLEVEL,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
         #endif
         // RotateDesiredColour(1,flashersettings.flags.movement_direction);
 
@@ -550,7 +550,13 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_F
 
         uint16_t index_random = random(0,strip_size);
 
+        #ifndef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL //tmp fix
         HsbColor hsb = GetPixelColor(index_random);
+        #else
+        HsbColor hsb = RgbColor(GetPixelColor(index_random));
+
+
+        #endif
 
         uint8_t brightness_now = mapvalue(pCONT_iLight->BrtF2N(hsb.B),0,100,0,255);
 

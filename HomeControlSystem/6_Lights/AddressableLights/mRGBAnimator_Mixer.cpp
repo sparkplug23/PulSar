@@ -518,7 +518,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Mixer(){
       // for(id_next=id;id_next<FLASHER_FUNCTION_MIXER_LENGTH_ID;id_next){
       //   if(mixer.group[id_next].isenabled){
       //     // IF time is valid
-      //     //if(pCONT->mt->mtime.isvalid){
+      //     //if(pCONT->mt->RtcTime.isvalid){
       //       // IF is time restricted AND is not between those times THEN skip it
       //     //   if(mixer.group[id_next].enable_skip_restricted_by_time
       //                &&(!pCONT->mt->CheckBetween_Day_DateTimes(&mixer.mode.times.flashing_starttime,&mixer.mode.times.flashing_endtime))){// If time restrictions are not prohibating group
@@ -546,7 +546,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Mixer(){
 //        // do{
 //       //   if(mixer.group[id_next].isenabled){
 //       //     // IF time is valid
-//       //     //if(pCONT->mt->mtime.isvalid){
+//       //     //if(pCONT->mt->RtcTime.isvalid){
 //       //       // IF is time restricted AND is not between those times THEN skip it
 //       //     //   if(mixer.group[id_next].enable_skip_restricted_by_time&&(!pCONT->mt->CheckBetween_Day_DateTimes(&mixer.mode.times.flashing_starttime,&mixer.mode.times.flashing_endtime))){// If time restrictions are not prohibating group
 //       //     //     id_next++;

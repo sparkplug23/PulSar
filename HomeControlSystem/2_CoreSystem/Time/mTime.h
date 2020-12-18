@@ -102,14 +102,12 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 #include <EEPROM.h>
 #define EEPROM_ADDR_REBOOT_COUNTER 0
 
-#include "NTPClient.h"
 #include <WiFiUdp.h>
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/Settings/mSettings.h"
 
-#include "TimeLib.h"
 #ifdef ESP8266
   extern "C" {
     #include "sntp.h"
@@ -226,7 +224,7 @@ void RtcSync(void);
 
     const char* getFormattedUptime(char* buffer, uint8_t buflen);
 
-    datetime_t mtime;
+    // datetime_t RtcTime;
     datetime_t RtcTime;
 
 

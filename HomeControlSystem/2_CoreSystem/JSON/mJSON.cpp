@@ -35,6 +35,19 @@ JsonBuilder* JsonBuilder::GetInstance(){
   return instance;
 }
 
+char* JsonBuilder::GetBufferPtr(){
+  return writer.buffer;
+}
+uint16_t JsonBuilder::GetLength(){
+  return *writer.length;
+}
+uint16_t* JsonBuilder::GetLengthPtr(){
+  return writer.length;
+}
+uint16_t JsonBuilder::GetBufferSize(){
+  return writer.buffer_size;
+}
+
 void JsonBuilder::Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size)
 {
   // PRINT_FLUSHED("JsonBuilder::Start(,,)");

@@ -58,6 +58,10 @@ class JsonBuilder{
     /* Here will be the instance stored. */
     static JsonBuilder* instance;
     
+    char* GetBufferPtr();
+    uint16_t GetLength();
+    uint16_t* GetLengthPtr();
+    uint16_t GetBufferSize();
 
     void Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size);
     void Start();

@@ -1072,46 +1072,10 @@
       255, 60, 0,   
       25, 112, 25, //pastel green
       0, 100, 100, // cyan
-
       255, 0, 72, //hot pink
-
       236, 19, 19,   //pastel red
-      
       252, 44, 3,
-
-      252, 157, 3 //warm yellow
-
-      // 39, 184, 39, //pastel green
-      // 34, 153, 34,
-
-      // 255, 255, 255 //mark colour for testing
-
-      //test with dimmer colours
-      // 255, 0, 0,
-      // 0, 255, 0,
-      // 255, 26, 64,
-      // 0, 0, 150,
-      // 255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
-
-      // //test with dimmer colours
-      // 255, 0, 0,
-      // 0, 155, 0,
-      // 255, 26, 64,
-      // 0, 0, 200,
-      // 255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE   
-  
-  
-      // 255, 5, 5,
-      // 255, 213, 0,
-      // 0, 100, 200,
-      // 157, 0, 255,
-      // 255, 0, 128,
-      
-
-      
-      // 255, 255, 255
-  
-  
+      252, 157, 3 //warm yellow 
     };
 
 
@@ -1155,44 +1119,19 @@
       255, 26, 64,
       0, 0, 255,
       255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
-
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-
       //test with dimmer colours
       255, 0, 0,
       0, 255, 0,
       255, 26, 64,
       0, 0, 150,
       255, 60, 0,     //COLOUR_FLOAT_HUE_ORANGE 
-
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-
       //test with dimmer colours
       255, 0, 0,
       0, 155, 0,
       255, 26, 64,
       0, 0, 200,
       255, 67, 10,     //COLOUR_FLOAT_HUE_ORANGE 
-
-      0,255,255, // cyan
-
-
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0,
-      // 0,0,0
-
-
+      0,255,255 // cyan
     };
 
 
@@ -1212,7 +1151,6 @@
       0, 150,100,     // green-Cyan  **   30 digits less (cyan too bright, reduce it)
       100,100,100, // dull white??
       0, 0, 255,     // Blue
-
       255, 0, 0,     // Red
       0, 150, 0,     // Green
       255, 26, 64,   // Pink
@@ -1247,18 +1185,31 @@
     };
 
 
+    #ifndef D_PALETTE_CUSTOM_THERESE_01_NAME_CTR
+    #define D_PALETTE_CUSTOM_THERESE_01_NAME_CTR        "Custom Therese 01"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CUSTOM_THERESE_01_NAME_CTR)        D_PALETTE_CUSTOM_THERESE_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CUSTOM_THERESE_01_COLOUR_MAP_IDS)
+    { // R,G,B
+      255, 0, 0,   // Red,   100%
+      0, 150, 0,   // Green, 100%
+      255, 26, 64, // Christmas pink
+      0, 0, 200,   // Dark blue, faded
+      255, 60, 0,  // Yellow
+      255, 30, 0,  // Orange
+      25, 112, 25, // Green Pastel
+      255, 40, 40, // Red Pastel
+      0, 100, 100, // cyan
+      255, 0, 72,  // hot pink
+      236, 19, 19, // pastel red
+      252, 44, 3,  //
+      252, 157, 3, // warm yellow  
+      //255, 15, 15, // christmas pink
+      //255, 26, 64, // christmas pink
+      255, 0, 250  // Purple
+    };
 
-// small church pastels (maybe just use preset above, or, try new set led output directly from progmem)
 
-
-// crsytal, remove green and blue, use only the others from 43
-
-
-// straiten tree with string
-
-// wire 4 gang on directly, take single socket for tree
-
-// light box, use plug from outside... use vreg for small church inside it 
 
 /**
  * 

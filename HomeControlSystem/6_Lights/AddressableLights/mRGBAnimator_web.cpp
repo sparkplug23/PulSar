@@ -1364,6 +1364,8 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
   //   WebSend_JSON_RootPage_LiveviewPixels(request); 
   // });
   
+  
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
   /**
    * RGB LIGHT SETTINGS
    * */
@@ -1425,6 +1427,7 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
   //   // }
   //   // Web_Base_Page_Draw(request);
   // });
+  #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 
   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls", HTTP_POST, [](AsyncWebServerRequest *request){
     //nothing and dont remove it
@@ -1463,6 +1466,7 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
     }
   });
 
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
     Web_RGBLightSettings_Draw(request);
   });
@@ -1489,11 +1493,13 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
   pCONT_web->pWebServer->on(D_WEB_HANDLE_PALETTE_EDITOR_CTR "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
     Web_PaletteEditor_Draw(request);
   });
+  #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 
 } //add handlers
 
 
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 void mRGBAnimator::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
   
   JsonBuilderI->Start();
@@ -1619,6 +1625,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_PageButtons(){
 
 }
 
+#endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 
 /***************
@@ -1629,6 +1636,8 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_PageButtons(){
  * 
  * 
  * *********/
+
+#ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 void mRGBAnimator::Web_PaletteEditor_Draw(AsyncWebServerRequest *request){
         
@@ -1713,6 +1722,8 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   //                           );
   // }
 
+  //create json function/command that "sets select to value"
+
   JsonBuilderI->AppendBuffer(
     PSTR(
       "<br/>"
@@ -1727,11 +1738,13 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   element_list_num = pCONT_iLight->CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr) ? 
         PALETTELIST_COLOUR_AMOUNT_MAX : pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
 
+        element_list_num = 20;
+
   for (uint8_t row_id = 0; row_id < element_list_num; row_id++) {
     snprintf_P(title_ctr, sizeof(title_ctr), "%02d None", row_id+1);
     JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_START_0V);
       JsonBuilderI->AppendBuffer(PSTR("{sw}200px'><b>%s</b></td>"),title_ctr);
-      JsonBuilderI->AppendBuffer(PSTR("{sw}216px'>{si}g%d' name='g%d{si2}"),row_id_selected[row_id],row_id_selected[row_id]);
+      JsonBuilderI->AppendBuffer(PSTR("{sw}216px'>{si}g%d' name='collist g%d{si2}"),row_id_selected[row_id],row_id_selected[row_id]);
     JsonBuilderI->AppendBuffer(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }
 
@@ -1843,7 +1856,7 @@ void mRGBAnimator::WebAppend_PaletteEditor_FillOptions_Controls(){
         for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
             row_id, 
-            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer)
+            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
           );
         }
         JsonBuilderI->AppendBuffer("\"");
@@ -1902,9 +1915,12 @@ void mRGBAnimator::WebAppend_PaletteEditor_FillOptions_Controls(){
 }
 
 
+#endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 
 
+
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request){
 
@@ -2115,8 +2131,8 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
         JsonBuilderI->AppendBuffer("\"");    
         for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
-            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer),
-            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer2)
+            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer)),
+            pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer2, sizeof(buffer2))
           );
         }
         JsonBuilderI->AppendBuffer("\"");
@@ -2159,12 +2175,13 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
 
 }
 
+#endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 
 
 
 void mRGBAnimator::WebAppend_Root_Draw_Table(){
 
-  pCONT_web->WebAppend_Root_Draw_Table_dList(8,"rgb_table", kTitle_TableTitles_Root);
+  pCONT_web->WebAppend_Root_Draw_Table_dList_P(8,"rgb_table", kTitle_TableTitles_Root);
   
 }
 

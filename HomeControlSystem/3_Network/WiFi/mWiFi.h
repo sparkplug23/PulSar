@@ -79,7 +79,7 @@ class mWiFi{
       #define WIFI_RSSI_THRESHOLD     10         // Difference in dB between current network and scanned network
     #endif
     #ifndef WIFI_RESCAN_MINUTES
-      #define WIFI_RESCAN_MINUTES     30         // Number of minutes between wifi network rescan
+      #define WIFI_RESCAN_MINUTES     44         // Number of minutes between wifi network rescan
     #endif
 
 

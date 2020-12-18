@@ -425,8 +425,8 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
   // relay_status[num].onoff = state;
   bitWrite(pCONT_set->power, num, state);
 
-  if(state){ relay_status[num].last.ontime = pCONT->mt->mtime; //create future "operators" to handle these conversions
-  }else{ relay_status[num].last.offtime = pCONT->mt->mtime; }
+  if(state){ relay_status[num].last.ontime = pCONT->mt->RtcTime; //create future "operators" to handle these conversions
+  }else{ relay_status[num].last.offtime = pCONT->mt->RtcTime; }
 
   ExecuteCommandPower(num,state,SRC_MQTT);
 

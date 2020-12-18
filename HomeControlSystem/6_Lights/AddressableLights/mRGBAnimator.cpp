@@ -222,8 +222,7 @@ void mRGBAnimator::parse_JSONCommand(void){
    * */
   if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_FUNCTION]){
     if(jtok.isStr()){
-      const char* functionctr = jtok.getStr();
-      if((tmp_id=GetFlasherFunctionIDbyName(functionctr))>=0){
+      if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0){
         flashersettings.function = tmp_id;      //make function "changeFlasherFunction" so then the region is automatically updated internally
         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
         data_buffer.isserviced++;
@@ -828,7 +827,7 @@ DEBUG_LINE;
     #endif // ENABLE_PIXEL_FUNCTION_FLASHER
   }
 
-DEBUG_LINE;
+
   uint16_t buffer_length = 0;
   char* buffer = pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;
   for(uint8_t i=0;i<20;i++){

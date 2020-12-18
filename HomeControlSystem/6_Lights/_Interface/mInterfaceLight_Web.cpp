@@ -30,9 +30,9 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
     
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
-      if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
+      //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
         WebAppend_Root_RGBPalette();
-      }
+      //}
       WebAppend_Root_Sliders();  //move webui stuff into here, as "scenes" will soon be replaced by colour[5].. make it a struct, but read/write using bytes when need by pointer of struct
 
     break;
@@ -59,7 +59,9 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 //ADD METHOD THAT UPDATES HUE,SAT,BRT BASED ON OTHER VALUE
 //USE INEAR GRAD TO CHANGE IT
 
-  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+//  pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
+
+  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene2 Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
 
   HsbColor hsb_current = HsbColor(RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
   
@@ -195,8 +197,10 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
   
 
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
   // Will include all settings related to ANY form of lighting hardware
   pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
+  #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
   
    #endif // USE_MODULE_LIGHTS_ADDRESSABLE
 
@@ -374,13 +378,13 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
 
       BufferWriterI->Append_P(PSTR("<optgroup label='User Editable'>"));
       
-      char name_ctr[20];
+      char buffer[20];
       
       for (uint8_t row_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID; row_id < pCONT_iLight->PALETTELIST_VARIABLE_USER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 
-          pCONT_iLight->GetPaletteFriendlyNameByID(row_id,name_ctr,20)
+          pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
         );
       }
       BufferWriterI->Append_P(PSTR("</optgroup>"));
@@ -389,7 +393,7 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 
-          pCONT_iLight->GetPaletteFriendlyNameByID(row_id)
+          pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
         );
       }
       BufferWriterI->Append_P(PSTR("</optgroup>"));

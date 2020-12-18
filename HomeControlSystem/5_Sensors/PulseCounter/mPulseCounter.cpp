@@ -206,7 +206,7 @@ void mPulseCounter::EveryLoop(){
   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),Change_Detected_Ctr(sensor_id),sensor_id);
     if(Change_Detected(sensor_id)!=sensor[sensor_id].instant.state){
   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Change_Detected_Ctr(sensor_id)",sensor_id);
-      //if(pCONT->mt->mtime.seconds_nonreset<20){ break; }
+      //if(pCONT->mt->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",Change_Detected_Ctr(sensor_id),false);
 
       sensor[sensor_id].instant.state = Change_Detected(sensor_id);
@@ -216,7 +216,7 @@ void mPulseCounter::EveryLoop(){
       if(sensor[sensor_id].instant.state){
         sensor[sensor_id].instant.timing_rise_ms = millis() - sensor[sensor_id].instant.tDetectTime;
         sensor[sensor_id].instant.tDetectTime = millis(); 
-        memcpy(sensor[sensor_id].instant.detected_rtc_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr));
+        memcpy(sensor[sensor_id].instant.detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
         sensor[sensor_id].instant.isactive = true;
       }else{
         sensor[sensor_id].instant.timing_fall_ms = millis() - sensor[sensor_id].instant.tEndedTime;

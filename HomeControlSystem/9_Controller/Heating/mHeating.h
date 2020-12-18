@@ -30,22 +30,6 @@
 #define WEB_HANDLE_BUTTON_NAME_TEMP_SET "btte"
 #define WEB_HANDLE_BUTTON_NAME_TIMER_SET "btti"
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Upstairs RELAY"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Downstairs RELAY"
-  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Immersion RELAY"
-  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Water Boiler RELAY"
-
-  #define D_DHT_NAME_DOWNSTAIRS "Downstairs DHT"
-  #define D_DHT_NAME_UPSTAIRS "Upstairs DHT"
-
-  #define D_DB18_NAME_DOWNSTAIRS_PIPE "Downstairs_Pipe"
-  #define D_DB18_NAME_UPSTAIRS_PIPE "Upstairs_Pipe"
-  #define D_DB18_NAME_BOILER_PIPE "Boiler_Pipe"
-  #define D_DB18_NAME_IMMERSION_HEATER "Immersion_Heater"
-  #define D_DB18_NAME_TANK_TOP "Tank_Top"
-  #define D_DB18_NAME_TANK_MIDDLE "Tank_Middle"
-  #define D_DB18_NAME_TANK_BOTTOM "Tank_Bottom"
-  #define D_DB18_NAME_TANK_OUT "Tank_Out"
 
 
 
@@ -54,6 +38,7 @@
 
 
 
+//phase outstrcmp without case
 #define D_HEATING_SENSOR_NAME_SHORT_DS_LOWERCASE "ds"
 #define D_HEATING_SENSOR_NAME_SHORT_US_LOWERCASE "us"
 #define D_HEATING_SENSOR_NAME_SHORT_WB_LOWERCASE "wb"
@@ -200,24 +185,7 @@ enum DEVICELIST_ALL_IDS{
 
     
 void init_db18_sensor_parameters();
-
-
 void init_relay_driver_parameters();
-
-    DeviceAddress thermo_addr_dsp = {0x28,0xFF,0x98,0xAB,0xC1,0x17,0x04,0xE7};
-    DeviceAddress thermo_addr_usp = {0x28,0xFF,0x83,0x06,0xC2,0x17,0x04,0x3B};
-    DeviceAddress thermo_addr_wbp = {0x28,0xFF,0xCC,0xE2,0xC1,0x17,0x04,0x1E};
-    DeviceAddress thermo_addr_ih = {0x28,0xFF,0x88,0x69,0x35,0x16,0x04,0x72};
-    DeviceAddress thermo_addr_tank_bottom = {0x28,0xFF,0x32,0xB0,0xC1,0x17,0x04,0xC5};
-    DeviceAddress thermo_addr_tank_out = {0x28,0xFF,0xD8,0x6C,0x35,0x16,0x04,0x66};
-    DeviceAddress thermo_addr_tank_top = {0x28,0xFF,0xA2,0xA7,0x35,0x16,0x04,0x1B};
-    DeviceAddress thermo_addr_tank_middle = {0x28,0xFF,0xDB,0x5D,0x35,0x16,0x04,0xEF};
-
-    // int8_t pin_ds = -1;
-    // int8_t pin_us = -1;
-    // int8_t pin_wb = -1;
-    // int8_t pin_ih = -1;
-
     
     enum CLIMATESENSOR_DHT_IDS{
       DHT_DOWNSTAIRS_ID=0,
@@ -242,13 +210,15 @@ struct HEATING_STATUS{
 
 
 
-
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 void WebPage_Root_AddHandlers();
 
 void WebAppend_Root_Status_Table();
 
 void Web_Root_Draw(AsyncWebServerRequest *request);
+
+#endif // USE_MODULE_CORE_WEBSERVER
 
 
 void WebCommand_Parse(void);

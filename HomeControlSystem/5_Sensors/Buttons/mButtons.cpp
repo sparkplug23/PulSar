@@ -87,7 +87,12 @@ uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
 void mButtons::ButtonHandler(void)
 {
   
-  if (pCONT->mt->uptime.seconds_nonreset < 4) { return; } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+  if (pCONT->mt->uptime.seconds_nonreset < 4) { 
+    
+    
+    // Serial.println("ButtonHandler block");
+    
+    return; } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 
   uint8_t button = NOT_PRESSED;
   uint8_t button_present = 0;
@@ -124,10 +129,11 @@ void mButtons::ButtonHandler(void)
 
     if (button_present) {
       
-      if (pCONT->Tasker_Interface(FUNC_BUTTON_PRESSED)) {
-        // Serviced internally
-      }
-      else {
+      // if (pCONT->Tasker_Interface(FUNC_BUTTON_PRESSED)) {
+      //   // Serviced internally    //causes button not to work right now, tasker is returning true always
+      // }
+      // else 
+      {
       if ((PRESSED == button) && (NOT_PRESSED == lastbutton[button_index])) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
           AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);

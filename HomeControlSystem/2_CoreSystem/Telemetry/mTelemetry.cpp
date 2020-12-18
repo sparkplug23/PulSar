@@ -193,7 +193,7 @@ void mTelemetry::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -402,7 +402,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
     // JsonBuilderI->Level_End();
     // // test end
 
-    JsonBuilderI->Add(PM_JSON_TIME,           pCONT_time->mtime.hhmmss_ctr);
+    JsonBuilderI->Add(PM_JSON_TIME,           pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
     JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime_value.sleep ? "Dynamic" : "Unknown");
@@ -429,7 +429,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
       JsonBuilderI->Add(PM_JSON_MESSAGE,         hardwarestatus.ctr); //this can be turned into a subadd method
       JsonBuilderI->Add(PM_JSON_LEVEL,           hardwarestatus.importance);
     JsonBuilderI->Level_End();
-    // JsonBuilderI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->mtime.hhmmss_ctr);
+    // JsonBuilderI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
   return JsonBuilderI->End();
     
 }
@@ -577,7 +577,7 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_TIMEZONE,   pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_SUNRISE,    pCONT_time->GetDateAndTimeCtr(DT_SUNRISE, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_SUNSET,     pCONT_time->GetDateAndTimeCtr(DT_SUNSET, buffer, sizeof(buffer)));
-#ifdef ENABLE_DEVFEATURE_RTC_TIME_V2
+#ifdef ENABLE_DEVFEATURE_RTC_TIME_V2_MQTT_DEBUG
     JsonBuilderI->Level_Start("debug_v2");
       JsonBuilderI->Add("utc_time",pCONT_time->Rtc.utc_time);
       JsonBuilderI->Add("local_time",pCONT_time->Rtc.local_time);
@@ -594,18 +594,13 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){
       JsonBuilderI->Add("user_time_entry",pCONT_time->Rtc.user_time_entry);
       JsonBuilderI->Add("ntp_last_active_secs", (millis()-pCONT_time->Rtc.ntp_last_active)/1000);
       JsonBuilderI->Add("last_sync_secs", (pCONT_time->Rtc.utc_time-pCONT_time->Rtc.last_sync)/1000);
-
       JsonBuilderI->Add("GetUptime",pCONT_time->GetUptime().c_str());
-
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("RtcTime");
       JsonBuilderI->Add("valid",pCONT_time->RtcTime.valid);
       JsonBuilderI->Add_FV("time","\"%02d:%02d:%02d\"",pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
-
-
-
     JsonBuilderI->End();
-#endif // ENABLE_DEVFEATURE_RTC_TIME_V2
+#endif // ENABLE_DEVFEATURE_RTC_TIME_V2_MQTT_DEBUG
   return JsonBuilderI->End();
 
 }
@@ -635,8 +630,8 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ //
   JsonBuilderI->Add(PM_JSON_DEVICE, pCONT_set->Settings.system_name.device);
   JsonBuilderI->Add(D_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
   JsonBuilderI->Add_FV(D_JSON_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
-                      pCONT_time->mtime.Mday, pCONT_time->mtime.month, pCONT_time->mtime.year,
-                      pCONT_time->mtime.hour, pCONT_time->mtime.minute, pCONT_time->mtime.second
+                      pCONT_time->RtcTime.Mday, pCONT_time->RtcTime.month, pCONT_time->RtcTime.year,
+                      pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second
                     );
   JsonBuilderI->Level_Start(D_JSON_COUNTER);
     JsonBuilderI->Add("All", (uint8_t)0);

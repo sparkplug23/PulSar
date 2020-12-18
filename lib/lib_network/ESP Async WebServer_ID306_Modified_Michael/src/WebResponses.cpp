@@ -203,7 +203,7 @@ bool AsyncWebServerResponse::_started() const { return _state > RESPONSE_SETUP; 
 bool AsyncWebServerResponse::_finished() const { return _state > RESPONSE_WAIT_ACK; }
 bool AsyncWebServerResponse::_failed() const { return _state == RESPONSE_FAILED; }
 bool AsyncWebServerResponse::_sourceValid() const { return false; }
-void AsyncWebServerResponse::_respond(AsyncWebServerRequest *request){ Serial.println("AsyncWebServerResponse::_respond"); _state = RESPONSE_END; request->client()->close(); }
+void AsyncWebServerResponse::_respond(AsyncWebServerRequest *request){ _state = RESPONSE_END; request->client()->close(); }
 size_t AsyncWebServerResponse::_ack(AsyncWebServerRequest *request, size_t len, uint32_t time){ return 0; }
 
 /*

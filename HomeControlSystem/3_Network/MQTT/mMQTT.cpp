@@ -611,9 +611,9 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
 
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
+  #endif// ENABLE_LOG_LEVEL_INFO
 
   publish_ft(module_ctr,
              topic_type,

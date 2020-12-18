@@ -31,6 +31,18 @@ void mUltraSonicSensor::Init(void){
           
 }
 
+
+//every millis, start an update, which turns on the interrupt
+
+/*
+ISR_Echo()
+
+check millis against
+
+
+
+*/
+
 int mUltraSonicSensor::GetDurationReading(void){
 
   // If sensor is invalid, use shorter delay to read again (but not too fast)
@@ -62,6 +74,8 @@ int mUltraSonicSensor::GetDurationReading(void){
   // Reads the echoPin, returns the sound wave travel time in microseconds
   duration = pulseIn(pin_echo, HIGH);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
   ultrasonic.duration_raw = duration;
+
+  // CHANGE TO USE INTERRUPT BASED METHOD, IE trigger (turn on interrupt) and have it compare start millis and triggered millis (is pulse nano or millis?)
 
   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
 
@@ -447,20 +461,17 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
 
     D_DATA_BUFFER_CLEAR();
 
-    StaticJsonDocument<300> doc;
-    JsonObject root = doc.to<JsonObject>();
-    #ifdef MOTIONALERT_PAYLOAD1_CTR
-      root["location"] = MOTIONALERT_PAYLOAD1_CTR;
-    #endif
-    root["time"] = pCONT->mt->mtime.hhmmss_ctr;
-
-    data_buffer.payload.len = measureJson(root)+1;
-    serializeJson(doc,data_buffer.payload.ctr);
+    char buffer[50];
+      
+    JsonBuilderI->Start();
+      JsonBuilderI->Add("location", pCONT_set->GetDeviceName(D_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("time", pCONT->mt->RtcTime.hhmmss_ctr);
+    JsonBuilderI->End();
 
     if(presence_detect.isactive){
-      pCONT_mqtt->ppublish("status/presence/detected",data_buffer.payload.ctr,false);
+      pCONT_mqtt->ppublish("status/presence/detected",JsonBuilderI->GetBufferPtr(),false);
     }else{
-      pCONT_mqtt->ppublish("status/presence/over",data_buffer.payload.ctr,false);
+      pCONT_mqtt->ppublish("status/presence/over",JsonBuilderI->GetBufferPtr(),false);
     }
 
   }
@@ -504,7 +515,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
         pCONT->Tasker_Interface(FUNC_SENSOR_UPDATED); // Tell other dependent modules we have changed
       }
 
-      SubTask_DetectMotion();
+     // SubTask_DetectMotion();
          
     break;
     case FUNC_EVERY_SECOND:
@@ -605,7 +616,10 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       
       if(presence_detect.state!=object_detected_static.ispresent){
         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF presence_detect"));
+
         pCONT_mqtt->ppublish("status/presence/event",object_detected_static.ispresent?"Present":"Not Present",false);
+        
+        
         presence_detect.state = object_detected_static.ispresent;
         presence_detect.tDetectTime = millis();
 
@@ -614,7 +628,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
         if(presence_detect.state){ 
           presence_detect.isactive = true;
           // presence_detect.wasactive = false; //toggle as "previous state"
-          memcpy(presence_detect.detected_rtc_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr));
+          memcpy(presence_detect.detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
         }else{
           presence_detect.isactive = false;
           // presence_detect.wasactive = true; //toggle as "previous state"
@@ -748,10 +762,9 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
 }
 
 /*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
+******** MQTT Stuff **************************************************************************************************************************
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
 
 void mUltraSonicSensor::MQTTHandler_Init(){
 

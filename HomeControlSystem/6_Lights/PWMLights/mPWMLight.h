@@ -21,6 +21,11 @@ class mPWMLight{//} : public mInterfaceLight{
 
     void FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0));
         
+        
+int8_t CheckAndExecute_JSONCommands();
+void parse_JSONCommand(void);
+
+
     #define LST_MAX 5
     // uint16_t fade_start_10[LST_MAX] = {0,0,0,0,0};
     // uint16_t fade_cur_10[LST_MAX];

@@ -304,14 +304,9 @@ AddLog_P(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
 //chcked
 void mWiFi::ScanBestAndBeginWifi()
 {
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_WIFI "ScanBestAndBeginWifi"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-  
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
-
-
-// delay(2000);
+  #endif// ENABLE_LOG_LEVEL_INFO
 
   static int8_t best_network_db;
 
@@ -341,14 +336,15 @@ void mWiFi::ScanBestAndBeginWifi()
     best_network_db = WiFi.RSSI();                  // Get current rssi and add threshold
     if (best_network_db < -WIFI_RSSI_THRESHOLD) { best_network_db += WIFI_RSSI_THRESHOLD; }
     connection.scan_state = 3;
-
-
-    // char buffer[100];
-    // sprintf(buffer, "Scan is about to start %s", pCONT_time->mtime.hhmmss_ctr);
-    // pCONT_mqtt->ppublish("alert/wifi_scan",buffer,false);
-
-
   }
+
+  
+if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){  
+  AddLog_P(LOG_LEVEL_INFO, PSTR("WiFi.scanComplete() RUNNING"));
+  AddLog_P(LOG_LEVEL_INFO, PSTR("WiFi.IP() %s"),WiFi.localIP().toString().c_str());
+}
+
+
   // Init scan
   if (3 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -358,12 +354,19 @@ void mWiFi::ScanBestAndBeginWifi()
       WiFi.scanNetworks(true);                      // Start wifi scan async
       connection.scan_state++;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG, S_LOG_WIFI, PSTR("Network (re)scan started..."));
+      AddLog_P(LOG_LEVEL_INFO, PSTR("Network (re)scan started..."));
     #endif// ENABLE_LOG_LEVEL_INFO
       return;
     }
+    // else{
+    //   AddLog_P(LOG_LEVEL_INFO, PSTR("WiFi.scanComplete() %d"),WiFi.scanComplete());
+    // }
   }
+
+
   int8_t scan_result = WiFi.scanComplete();
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "scan_result=%d"),scan_result);
+
   // Check scan done
   if (4 == connection.scan_state) {
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -894,9 +897,9 @@ void mWiFi::WifiCheck(uint8_t param)
       } else {
 
         if (connection.scan_state) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+          #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"scan_state",connection.scan_state);
-    #endif// ENABLE_LOG_LEVEL_INFO
+          #endif// ENABLE_LOG_LEVEL_INFO
           ScanBestAndBeginWifi(); 
         }
 

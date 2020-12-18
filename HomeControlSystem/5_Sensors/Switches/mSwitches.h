@@ -119,8 +119,9 @@ class mSwitches{
       uint8_t  state     = false;
       // uint8_t  isactive  = false;
       uint8_t  ischanged = false;
+      int8_t pin = -1; // -1 is not active
 
-      uint8_t is_active_low = false; //defualt active high
+      uint8_t active_state_value = false; //defualt active high
 
       uint8_t lastwallswitch;
       uint8_t holdwallswitch;
@@ -134,7 +135,7 @@ class mSwitches{
       // uint32_t tDetectTime;
       // uint32_t tEndedTime;
       // time_short_t detected_time;
-    }states[MAX_SWITCHES];
+    }switches[MAX_SWITCHES];
 
     bool IsSwitchActive(uint8_t id);
 

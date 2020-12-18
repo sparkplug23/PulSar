@@ -93,22 +93,22 @@ void AddLog_P(
 
   memset(mxtime,0,sizeof(mxtime));
   if(pCONT_set->Settings.log_time_isshort){
-    if(pCONT_time->mtime.hour<1){
+    if(pCONT_time->RtcTime.hour<1){
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
-        pCONT_time->mtime.minute,pCONT_time->mtime.second,
+        pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
         pCONT_time->uptime.minute,pCONT_time->uptime.second);
     }else{
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "), //add hour
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
-        pCONT_time->mtime.minute,pCONT_time->mtime.second,
+        pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
         pCONT_time->uptime.minute,pCONT_time->uptime.second);
     }
     
   }else{
     snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
     // sprintf(mxtime, PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
-      pCONT_time->mtime.hour,pCONT_time->mtime.minute,pCONT_time->mtime.second,
+      pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
       pCONT_time->uptime.Mday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
   }
 
@@ -234,9 +234,9 @@ void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...)
   uint8_t uminute = 0;
   uint8_t usecond = 0;
   if(pCONT_time!=NULL){ 
-    hour = pCONT_time->mtime.hour; 
-    minute = pCONT_time->mtime.minute; 
-    second = pCONT_time->mtime.second; 
+    hour = pCONT_time->RtcTime.hour; 
+    minute = pCONT_time->RtcTime.minute; 
+    second = pCONT_time->RtcTime.second; 
     uday = pCONT_time->uptime.Mday; 
     uhour = pCONT_time->uptime.hour;   
     uminute = pCONT_time->uptime.minute; 
@@ -304,9 +304,9 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   // uint8_t uminute = 0;
   // uint8_t usecond = 0;
   // if(pCONT_time!=NULL){ 
-  //   hour = pCONT_time->mtime.hour; 
-  //   minute = pCONT_time->mtime.minute; 
-  //   second = pCONT_time->mtime.second; 
+  //   hour = pCONT_time->RtcTime.hour; 
+  //   minute = pCONT_time->RtcTime.minute; 
+  //   second = pCONT_time->RtcTime.second; 
   //   uday = pCONT_time->uptime.Mday; 
   //   usecond = pCONT_time->uptime.second; 
   //   uminute = pCONT_time->uptime.minute; 

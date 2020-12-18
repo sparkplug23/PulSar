@@ -61,7 +61,7 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
       JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->RtcTime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
@@ -116,7 +116,7 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->mtime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->RtcTime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
           JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
@@ -175,6 +175,8 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
 
 void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
 
+  AddLog_P(LOG_LEVEL_TEST, PSTR("mWebServer::HandlePage_Root"));
+
   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_ASYNC WEB_HANDLER_SCRIPT_WEB_DATA_FETCHER_RUNTIME_URLS_RATES_VAR "Sf::%s"),"HandlePage_Root");
 
   // if (CaptivePortal(request)) { return; }  // If captive portal redirect instead of displaying the page.
@@ -198,7 +200,20 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
   //   #endif  // Not FIRMWARE_MINIMAL
   //   return;
   // }
-    
+  
+  // delay(1000);
+
+
+  // JsonBuilderI->Start();
+  //   JsonBuilderI->Level_Start("function");
+  //     JsonBuilderI->Level_Start("Parse_Urls");
+  //       // pCONT->Tasker_Interface(FUNC_WEB_APPEND_RUNTIME_ROOT_URLS);
+  //     JsonBuilderI->Level_End();
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->End();
+
+  // request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
+
   AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
   response->addHeader("Content-Encoding","gzip");
   request->send(response);
@@ -226,7 +241,7 @@ void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
   JsonBuilderI->Start();
-   WebAppend_Root_Draw_ModuleTable();
+    WebAppend_Root_Draw_ModuleTable();
     WebAppend_Root_Draw_ModuleButtons();
   JsonBuilderI->End();
   
@@ -368,12 +383,20 @@ void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
   }
 
   // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+  // return;
+
+  // Serial.println(PAGE_ROOT[0]);
+  // Serial.println(PAGE_ROOT[1]);
+  // Serial.println(PAGE_ROOT[2]);
+  // Serial.flush();
+  // delay(1000);
   
   AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
 
   response->addHeader("Content-Encoding","gzip");
   
   request->send(response);
+
 }
 
 

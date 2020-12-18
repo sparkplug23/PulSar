@@ -286,7 +286,7 @@ void mSensorsDB18::printAddress(DeviceAddress deviceAddress, int8_t index){
   //   deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
 }
 
-
+#ifdef USE_MODULE_CORE_WEBSERVER
 void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[100];
@@ -345,7 +345,7 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Data(){
   JsonBuilderI->Array_End();
 
 }
-
+#endif // USE_MODULE_CORE_WEBSERVER
 
 int8_t mSensorsDB18::Tasker(uint8_t function){
 

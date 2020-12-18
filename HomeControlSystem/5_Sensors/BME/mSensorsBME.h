@@ -7,16 +7,15 @@
 
 #include <Wire.h>
 #include <SPI.h>
-#include "5_Sensors/BME/mAdafruit_Sensor.h"
-#include "5_Sensors/BME/Adafruit_BME280.h"
+#include "5_Sensors/BME/internal/mAdafruit_Sensor.h"
+#include "5_Sensors/BME/internal/Adafruit_BME280.h"
 
 class Adafruit_BME280;
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 class mSensorsBME{
-  private:
-    //#define D_MODULE_TOPIC_NAME "bme"
+  
   public:
     mSensorsBME(){};
     void Pre_Init(void);

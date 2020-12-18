@@ -1095,6 +1095,13 @@ void UpdateSetOutputs();
 uint8_t getColorMode();
 
 
+  
+int8_t GetPixelHardwareTypeIDbyName(const char* c);
+const char* GetPixelHardwareTypeName(char* buffer);
+const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
+
+
+
 
     
     void init_PresetColourPalettes(); 
@@ -1128,6 +1135,7 @@ uint8_t getColorMode();
     void init_ColourPalettes_Christmas_14();
     void init_ColourPalettes_Christmas_15();
     void init_ColourPalettes_Christmas_16();
+    void init_ColourPalettes_Custom_Therese_01();
     void init_ColourPalettes_Sunrise_01();
 
 
@@ -1210,6 +1218,7 @@ uint8_t getColorMode();
     PALETTELIST_STATIC_CHRISTMAS_16_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_OCEAN_01_ID,
+    PALETTELIST_STATIC_CUSTOM_THERESE_01_ID,
 
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
@@ -1306,6 +1315,7 @@ uint8_t getColorMode();
       PALETTE christmas_14;
       PALETTE christmas_15;
       PALETTE christmas_16;
+      PALETTE custom_therese_01;
     }palettelist;
 
 
@@ -1317,7 +1327,7 @@ uint8_t getColorMode();
     void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, uint8_t* colour_ids, uint8_t colour_ids_len);
 
     const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer, uint8_t buflen);
-    const char* GetPaletteFriendlyNameByID(uint8_t id, char* name = nullptr, uint8_t name_size= 0);    
+    const char* GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8_t buflen);    
 
     uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit = 0);
     HsbColor GetHsbColour(uint8_t id);

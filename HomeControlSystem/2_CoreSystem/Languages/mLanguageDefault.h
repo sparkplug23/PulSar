@@ -205,6 +205,11 @@
   #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "pixels"
 //#endif
 //#ifdef USE_MODULE_LIGHTS_PWMCONTROLLED
+
+#define D_MODULE_LIGHTS_PWM_FRIENDLY_CTR "pwmlight"
+#define D_MODULE_LIGHTS_PWM_CTR "Pwmlight"
+
+
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
 //#endif
@@ -216,6 +221,10 @@
 //#ifdef USE_MODULE_SENSORS_SWITCHES
   #define D_MODULE_SENSORS_SWITCHES_CTR              "mSwitches"
   #define D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR              "switches"
+//#endif
+//#ifdef USE_MODULE_SENSORS_SWITCHES
+  #define D_MODULE_SENSORS_ANALOG_CTR              "mSensorsAnalog"
+  #define D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR              "analog"
 //#endif
 //#ifdef USE_MODULE_SENSORS_DOORCHIME
   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
@@ -1404,6 +1413,9 @@
 #define D_JSON_DEVICE "Device"
 #define D_JSON_DEVICEID "DeviceID"
 #define D_JSON_DEVICES_CONNECTED "DevicesConnected"
+
+
+#define D_JSON_HEATING_DEVICE "HeatingDevice"
 
 #define D_JSON_DEVIATION "Deviation"
 

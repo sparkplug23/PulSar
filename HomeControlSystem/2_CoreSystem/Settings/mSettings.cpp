@@ -422,7 +422,8 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
       // Serial.println("FUNC_EVERY_MINUTE");
       
 // #ifdef DISABLE_SETTINGS_SAVING_BUG
-      pCONT_set->SettingsSave(1);
+      // pCONT_set->SettingsSave(1);
+      Serial.println("SettingsSave dis");
     // #endif
     break;
     case FUNC_ON_SUCCESSFUL_BOOT:
@@ -1044,6 +1045,9 @@ uint32_t mSettings::GetSettingsCrc32(void)
 
 void mSettings::SettingsSave(uint8_t rotate)
 {
+
+// Serial.println("SettingsSave NOT return");
+//   return;
   
     #ifdef ESP8266
 /* Save configuration in eeprom or one of 7 slots below
@@ -1065,9 +1069,9 @@ void mSettings::SettingsSave(uint8_t rotate)
     }
     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
       settings_location = SETTINGS_LOCATION +1;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
+    // #endif// ENABLE_LOG_LEVEL_INFO
     }
     if (stop_flash_rotate) {
       settings_location = SETTINGS_LOCATION;

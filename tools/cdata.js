@@ -246,7 +246,7 @@ function writeChunks(srcDir, specs, resultFile) {
 
 // writeHtmlGzipped("HomeControlSystem/data/index.htm", "HomeControlSystem/html_ui.h");
 writeHtmlGzipped("HomeControlSystem/data/root_page.htm", "HomeControlSystem/html_ui.h");
-writeHtmlGzippedExtern("HomeControlSystem/data/root_page.htm", "HomeControlSystem/html_ui", "html_ui");
+// writeHtmlGzippedExtern("HomeControlSystem/data/root_page.htm", "HomeControlSystem/html_ui", "html_ui");
 
 writeChunks(
   "HomeControlSystem/data",

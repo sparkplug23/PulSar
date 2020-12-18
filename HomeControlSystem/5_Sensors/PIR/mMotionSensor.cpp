@@ -53,7 +53,6 @@ int8_t mMotionSensor::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifndef DISABLE_WEBSERVER
     #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Draw_PageTable();
@@ -61,8 +60,7 @@ int8_t mMotionSensor::Tasker(uint8_t function){
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
-    #endif //USE_MODULE_CORE_WEBSERVER    
-    #endif // DISABLE_WEBSERVER
+    #endif //USE_MODULE_CORE_WEBSERVER
   }
 
 } // END function
@@ -213,7 +211,7 @@ void mMotionSensor::EveryLoop(){
   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
     if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state){
-      //if(pCONT->mt->mtime.seconds_nonreset<20){ break; }
+      //if(pCONT->mt->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
       pir_detect[sensor_id].state = PIR_Detected(sensor_id);
       if(pir_detect[sensor_id].state){
@@ -222,7 +220,7 @@ void mMotionSensor::EveryLoop(){
         
         pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNow();
         
-        // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr));
+        // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
         pir_detect[sensor_id].isactive = true;
 
         if(pCONT_time->UpTime()>60){
@@ -338,8 +336,8 @@ uint8_t mMotionSensor::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
   
-  char buffer[50];
-  char buffer2[20];
+  char buffer[80];
+  // char buffer2[20];
 
   JsonBuilderI->Start();
 
@@ -349,7 +347,7 @@ uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
       pir_detect[sensor_id].ischanged = false;
       
       JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer2, sizeof(buffer2)));
+      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
       //if another is yet to send, then reset the mqtt_handler to fire immeditely again!

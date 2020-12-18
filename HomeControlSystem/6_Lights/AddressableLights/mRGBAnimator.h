@@ -983,6 +983,8 @@ void WebAppend_JSON_RootPage_LiveviewPixels();
 
 #ifndef DISABLE_WEBSERVER
 
+
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
 // void Web_RGBLightSettings_LoadScript(AsyncWebServerRequest *request);
 void Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request);
@@ -996,6 +998,7 @@ void WebAppend_RGBLightSettings_Draw_Controls();
 // void Web_RGBPaletteEditor_LoadScript(AsyncWebServerRequest *request);
 // void Web_RGBPaletteEditor_RunTimeScript(AsyncWebServerRequest *request);
 // void Web_RGBPaletteEditor_FillOptions(AsyncWebServerRequest *request);
+#endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
 // void WebAppend_RGBPaletteEditor_FillOptions_Controls();
 // void WebAppend_RGBPaletteEditor_FillOptions_Controls_Selected();
 // void WebAppend_RGBPaletteEditor_Draw_Controls();

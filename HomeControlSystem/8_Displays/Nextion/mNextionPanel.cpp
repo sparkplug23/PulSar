@@ -421,7 +421,7 @@ void mNextionPanel::EverySecond_SendScreenInfo(){
 
   char rtc_ctr[40]; memset(rtc_ctr,'\0',sizeof(rtc_ctr));
   sprintf(rtc_ctr, "%02d:%02d:%02d",
-  pCONT_time->mtime.hour,pCONT_time->mtime.minute,pCONT_time->mtime.second);
+  pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
 
   SetAttribute_Txt(settings.page,5,rtc_ctr);
   

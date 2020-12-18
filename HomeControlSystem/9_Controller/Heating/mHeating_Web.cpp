@@ -2,6 +2,8 @@
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 
+#ifdef USE_MODULE_CORE_WEBSERVER
+
 int8_t mHeating::Tasker_Web(uint8_t function){
 
   switch(function){    
@@ -422,6 +424,7 @@ void mHeating::WebPage_Root_AddHandlers(){
 
 // }
 
+#endif // USE_MODULE_CORE_WEBSERVER
 
 
 #endif

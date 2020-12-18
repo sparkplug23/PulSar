@@ -64,6 +64,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_SWITCHES
     if(mswh == nullptr){ mswh = new mSwitches(); }
   #endif
+  #ifdef USE_MODULE_SENSORS_ANALOG
+    if(msanalog == nullptr){ msanalog = new mSensorsAnalog(); }
+  #endif
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
     if(mspm == nullptr){ mspm = new mPzem_AC(); }
   #endif
@@ -199,6 +202,9 @@ uint8_t mTaskerManager::InitClassList(){
   #endif
   #ifdef D_MODULE_SENSORS_SWITCHES_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_SWITCHES_ID;
+  #endif
+  #ifdef D_MODULE_SENSORS_ANALOG_ID
+    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_ANALOG_ID;
   #endif
   #ifdef D_MODULE_CORE_HARDWAREPINS_ID
     module_settings.list[module_settings.count++] = D_MODULE_CORE_HARDWAREPINS_ID;
@@ -686,6 +692,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #ifdef D_MODULE_SENSORS_SWITCHES_ID
         case D_MODULE_SENSORS_SWITCHES_ID:        result = mswh->Tasker(function); break;
       #endif
+      #ifdef D_MODULE_SENSORS_ANALOG_ID
+        case D_MODULE_SENSORS_ANALOG_ID:        result = msanalog->Tasker(function); break;
+      #endif
       #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
         case D_MODULE_SENSORS_PULSECOUNTER_ID:    result = mpc->Tasker(function); break;
       #endif
@@ -1040,8 +1049,12 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_SENSORS_SWITCHES_ID
       case D_MODULE_SENSORS_SWITCHES_ID:
-      Serial.println("D_MODULE_SENSORS_SWITCHES_ID");
         return D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR; 
+      break;
+    #endif
+    #ifdef D_MODULE_SENSORS_ANALOG_ID
+      case D_MODULE_SENSORS_ANALOG_ID:
+        return PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR; 
       break;
     #endif
     #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID

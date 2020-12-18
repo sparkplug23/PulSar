@@ -140,7 +140,7 @@ void mSAWMain::MQQTDataBuilder_Decoded(void){
   // }decode;
 
   root["name"] = msp_msm->decode.namectr;
-  root["time"] = pCONT->mt->mtime.hhmmss_ctr;
+  root["time"] = pCONT->mt->RtcTime.hhmmss_ctr;
 
   JsonObject& decodedobj = root.createNestedObject("raw");
   decodedobj["code"] = (uint32_t)msp_msm->decode.decimel;

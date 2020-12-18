@@ -625,7 +625,7 @@
 
 //   char rtc_ctr[40]; memset(rtc_ctr,'\0',sizeof(rtc_ctr));
 //   sprintf(rtc_ctr, "%02d:%02d:%02d",
-//   mcl->mt->mtime.hour,mcl->mt->mtime.minute,mcl->mt->mtime.second);
+//   mcl->mt->RtcTime.hour,mcl->mt->RtcTime.minute,mcl->mt->RtcTime.second);
 
 //   SetAttribute_Txt(settings.page,5,rtc_ctr);
   

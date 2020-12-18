@@ -790,12 +790,12 @@ void AsyncWebServerRequest::addInterestingHeader(const String& name){
 void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
   
   #ifdef DEBUG_ASYNC
-  Serial.println("AsyncWebServerRequest::sendONE=S for ");
+  Serial.println("AsyncWebServerRequest::sendONE=S for "); Serial.flush();
   #endif
   _response = response;
   if(_response == NULL){    
     #ifdef DEBUG_ASYNC
-    Serial.println("_response == NULL");
+    Serial.println("_response == NULL"); Serial.flush();
     #endif
     _client->close(true);
     _onDisconnect();
@@ -803,7 +803,7 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
   }
   if(!_response->_sourceValid()){
     #ifdef DEBUG_ASYNC
-    Serial.println("!_response->_sourceValid()");
+    Serial.println("!_response->_sourceValid()"); Serial.flush();
     #endif
     delete response;
     _response = NULL;
@@ -916,7 +916,8 @@ AsyncResponseStream * AsyncWebServerRequest::beginResponseStream(uint8_t content
 AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, uint8_t contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback){
   
   #ifdef DEBUG_ASYNC
-  Serial.println("AsyncWebServerRequest::send=beginResponse_P AsyncProgmemResponse 1");
+  Serial.println("AsyncWebServerRequest::send=beginResponse_P AsyncProgmemResponse 1"); Serial.flush();
+  // delay(5000);
   #endif
   return new AsyncProgmemResponse(code, contentType, content, len, callback);
 }

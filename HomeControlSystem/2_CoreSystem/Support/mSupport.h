@@ -119,6 +119,17 @@ T WithinLimits(T lower, T value, T upper){
   }
 }
 
+template <typename T>
+bool CheckAndClearFlag(T* flag){
+  if(*flag){        // If set, clear and return true, else false
+    *flag = false;
+    return true;
+  }
+  return false;
+}
+
+
+
 template<typename T>
 T min3(T a, T b, T c) {
   return (a < b && a < c) ? a : (b < c) ? b : c;
@@ -386,6 +397,10 @@ bool JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level_set, uint
 
 void AppendDList(char* buffer, const char* to_add);
 void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
+int GetDListIDbyNameCtr_P(char* destination, size_t destination_size, const char* needle, const char* haystack);
+int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* needle, const char* haystack);
+
+
 
     uint32_t tSaved_SlowAllTemplatesOnSerial;
     void SlowAllTemplatesOnSerial();
@@ -467,6 +482,8 @@ float ModulusRangef(float f, float a, float b);
 
 
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
+    
+
     int8_t GetStateNumber(const char *state_text);
     void SetSerialBaudrate(int baudrate);
     void ClaimSerial(void);

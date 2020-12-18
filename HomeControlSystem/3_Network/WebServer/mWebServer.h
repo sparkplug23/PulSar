@@ -1374,6 +1374,7 @@ class mWebServer : public AsyncWebHandler{
     bool CheckWebSendFreeMemoryTooLow(uint16_t memory_needed = 0);
     void send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)  ;
     void WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles);
+    void WebAppend_Root_Draw_Table_dList_P(uint8_t row_count, char const* value_handle, const char* dList_titles);
     void WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles);
     void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
     void WebAppend_Root_Draw_PageTitleFields();

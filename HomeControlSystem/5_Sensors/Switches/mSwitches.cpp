@@ -28,15 +28,9 @@ int8_t mSwitches::Tasker(uint8_t function){
       // switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
       // switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
     break;
-    case FUNC_JSON_COMMAND: 
+    // case FUNC_JSON_COMMAND: 
     
-    break;
-    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      WebAppend_Root_Draw_Table();
-    break; 
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break; 
+    // break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -55,41 +49,74 @@ int8_t mSwitches::Tasker(uint8_t function){
       MQTTHandler_Set_fSendNow();
     break;
     #endif //USE_MQTT
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifdef USE_MODULE_CORE_WEBSERVER
+    case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+      WebAppend_Root_Draw_Table();
+    break; 
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break; 
+    #endif //USE_MODULE_CORE_WEBSERVER
 
   }
 
 }
 
+
+
 void mSwitches::SwitchInit(void)
 {
 
-  uint8_t switch_default_is_active_low = false;
-  #ifdef ENABLE_SWITCH_ACTIVE_LOW
-  switch_default_is_active_low = true;
-  #endif // ENABLE_SWITCH_ACTIVE_LOW
+  // Init states
+  for(uint8_t pin_id=0;pin_id<MAX_SWITCHES;pin_id++){
+    switches[pin_id].lastwallswitch = 1;  // Init global to virtual switch state;
+    switches[pin_id].active_state_value = 1; // default is active high
+    switches[pin_id].switch_virtual = switches[pin_id].lastwallswitch;
+  }
 
-  settings.switches_found = 0;
-  for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
+  // Check all possible pin options
+  settings.switches_found = 0;    
+  for(uint8_t pin_id=GPIO_SWT1_ID;pin_id<GPIO_SWT1_ID+(MAX_SWITCHES*4);pin_id++){
 
-    states[i].is_active_low = switch_default_is_active_low; // default is active high
-    states[i].lastwallswitch = 1;  // Init global to virtual switch state;
+    if(pCONT_pins->PinUsed(pin_id)){
+      
+      switches[settings.switches_found].pin = pCONT_pins->GetPin(pin_id);
 
-    if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)){
-      settings.switches_found++;
-      #ifdef USE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR("settings.switches_found=%d"),settings.switches_found);
-      #endif
-      pinMode(pCONT_pins->GetPin(GPIO_SWT1_ID,i), 
-        bitRead(switch_no_pullup, i) ? 
-          INPUT :  // no pullup/down
-          ((16 == pCONT_pins->GetPin(GPIO_SWT1_ID,i)) // GPIO16 ie D0 // PULLDOWN only possible for pin16
-            ? INPUT_PULLDOWN_16 : 
-              INPUT_PULLUP)   // if not 16, then pull up is only option
-      );
-      states[i].lastwallswitch = digitalRead(pCONT_pins->GetPin(GPIO_SWT1_ID,i));  // Set global now so doesn't change the saved power state on first switch check
-    }
+      // Standard pin, active high, with pulls 
+      if(IsWithinRange(pin_id, GPIO_SWT1_ID, GPIO_SWT1_ID+MAX_SWITCHES)){
+        pinMode(switches[settings.switches_found].pin, INPUT_PULLUP);
+        switches[settings.switches_found].active_state_value = HIGH;
+      }else
+      // Inverted pin, active low, with pulls
+      if(IsWithinRange(pin_id, GPIO_SWT1_INV_ID, GPIO_SWT1_INV_ID+MAX_SWITCHES)){
+        pinMode(switches[settings.switches_found].pin, INPUT_PULLUP);
+        switches[settings.switches_found].active_state_value = LOW;
+      }else
+      // Standard pin, active high, NO pulls
+      if(IsWithinRange(pin_id, GPIO_SWT1_NP_ID, GPIO_SWT1_NP_ID+MAX_SWITCHES)){
+        pinMode(switches[settings.switches_found].pin, INPUT);
+        switches[settings.switches_found].active_state_value = HIGH;
+      }else
+      // 
+      if(IsWithinRange(pin_id, GPIO_SWT1_INV_NP_ID, GPIO_SWT1_INV_NP_ID+MAX_SWITCHES)){
+        pinMode(switches[settings.switches_found].pin, INPUT);
+        switches[settings.switches_found].active_state_value = LOW;
+      }
 
-    states[i].switch_virtual = states[i].lastwallswitch;
+      // Set global now so doesn't change the saved power state on first switch check
+      switches[settings.switches_found].lastwallswitch = digitalRead(switches[settings.switches_found].pin);  
+      
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog_P(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
+      #endif // ENABLE_LOG_LEVEL_INFO
+      
+      if(settings.switches_found++ >= MAX_SWITCHES){ break; }
+
+    } // if PinUsed
+
   }
 
   if(TickerSwitch == nullptr){
@@ -120,36 +147,39 @@ void mSwitches::SwitchProbe(void)
   uint8_t force_low = (pCONT_set->Settings.switch_debounce % 50) &2;                    // 52, 102, 152 etc
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
-    if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)) {
+
+    // if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)) {      
+    if(switches[i].pin != -1){
+      
 
       // Olimex user_switch2.c code to fix 50Hz induced pulses
-      if (1 == digitalRead(pCONT_pins->GetPin(GPIO_SWT1_ID +i])) {
+      if (1 == digitalRead(switches[i].pin)) {
 
         if (force_high) {                               // Enabled with SwitchDebounce x1
-          if (1 == states[i].switch_virtual) {
-            states[i].switch_state_buf = state_filter;         // With noisy input keep current state 1 unless constant 0
+          if (1 == switches[i].switch_virtual) {
+            switches[i].switch_state_buf = state_filter;         // With noisy input keep current state 1 unless constant 0
           }
         }
 
-        if (states[i].switch_state_buf < state_filter) {
-          states[i].switch_state_buf++;
-          if (state_filter == states[i].switch_state_buf) {
-            states[i].switch_virtual = 1;
+        if (switches[i].switch_state_buf < state_filter) {
+          switches[i].switch_state_buf++;
+          if (state_filter == switches[i].switch_state_buf) {
+            switches[i].switch_virtual = 1;
           }
         }
 
       } else {
 
         if (force_low) {                                // Enabled with SwitchDebounce x2
-          if (0 == states[i].switch_virtual) {
-            states[i].switch_state_buf = 0;                    // With noisy input keep current state 0 unless constant 1
+          if (0 == switches[i].switch_virtual) {
+            switches[i].switch_state_buf = 0;                    // With noisy input keep current state 0 unless constant 1
           }
         }
 
-        if (states[i].switch_state_buf > 0) {
-          states[i].switch_state_buf--;
-          if (0 == states[i].switch_state_buf) {
-            states[i].switch_virtual = 0;
+        if (switches[i].switch_state_buf > 0) {
+          switches[i].switch_state_buf--;
+          if (0 == switches[i].switch_state_buf) {
+            switches[i].switch_virtual = 0;
           }
         }
         
@@ -179,16 +209,20 @@ void mSwitches::SwitchHandler(uint8_t mode)
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.switch_debounce;
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
-    if ((pCONT_pins->GetPin(GPIO_SWT1_ID +i] < 99) || (mode)) {
+    if (
+      //      pCONT_pins->PinUsed(GPIO_SWT1_ID,i)
+      (switches[i].pin != -1) 
+      
+       || (mode)) {
 
-      if (states[i].holdwallswitch) {
-        states[i].holdwallswitch--;
-        if (0 == states[i].holdwallswitch) {
+      if (switches[i].holdwallswitch) {
+        switches[i].holdwallswitch--;
+        if (0 == switches[i].holdwallswitch) {
          // SendKey(1, i +1, 3);           // Execute command via MQTT
         }
       }
 
-      button = states[i].switch_virtual;
+      button = switches[i].switch_virtual;
 
       // enum SwitchModeOptions {TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE, MAX_SWITCH_OPTION};
 
@@ -203,9 +237,9 @@ void mSwitches::SwitchHandler(uint8_t mode)
       // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
       // state 16 = POWER_SHOW_STATE = Show power state
 
-      if (button != states[i].lastwallswitch) {
-        states[i].ischanged = true;
-        AddLog_P(LOG_LEVEL_TEST,PSTR("button%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),button,i,states[i].lastwallswitch);
+      if (button != switches[i].lastwallswitch) {
+        switches[i].ischanged = true;
+        AddLog_P(LOG_LEVEL_TEST,PSTR("button%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),button,i,switches[i].lastwallswitch);
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
         case TOGGLE:
@@ -218,41 +252,42 @@ void mSwitches::SwitchHandler(uint8_t mode)
           switchflag = ~button &1;       // Follow inverted wall switch state
           break;
         case PUSHBUTTON:
-          if ((PRESSED == button) && (NOT_PRESSED == states[i].lastwallswitch)) {
+          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTON_INV:
-          if ((NOT_PRESSED == button) && (PRESSED == states[i].lastwallswitch)) {
+          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with releasing pushbutton from Gnd
           }
           break;
         case PUSHBUTTON_TOGGLE:
-          if (button != states[i].lastwallswitch) {
+          if (button != switches[i].lastwallswitch) {
             switchflag = 2;              // Toggle with any pushbutton change
           }
           break;
         case PUSHBUTTONHOLD:
-          if ((PRESSED == button) && (NOT_PRESSED == states[i].lastwallswitch)) {
-            states[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
+          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch)) {
+            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((NOT_PRESSED == button) && (PRESSED == states[i].lastwallswitch) && (states[i].holdwallswitch)) {
-            states[i].holdwallswitch = 0;
+          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+            switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTONHOLD_INV:
-          if ((NOT_PRESSED == button) && (PRESSED == states[i].lastwallswitch)) {
-            states[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
+          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch)) {
+            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((PRESSED == button) && (NOT_PRESSED == states[i].lastwallswitch) && (states[i].holdwallswitch)) {
-            states[i].holdwallswitch = 0;
+          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+            switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         }
 
         mqtthandler_sensor_ifchanged.flags.SendNow = true;
+        mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
         if (switchflag < 3) {
           #ifdef USE_MODULE_DRIVERS_RELAY
@@ -264,13 +299,13 @@ void mSwitches::SwitchHandler(uint8_t mode)
           #endif    
         }
 
-        states[i].lastwallswitch = button;
-        states[i].state = button;
+        switches[i].lastwallswitch = button;
+        switches[i].state = button;
 
       }
     }else{
       
-        states[i].ischanged = false;
+        switches[i].ischanged = false;
     }
   }
 }
@@ -297,7 +332,7 @@ void mSwitches::WebAppend_Root_Draw_Table(){
     "Switch 7" "|" 
     "Switch 8" "|" ;
 
-  pCONT_web->WebAppend_Root_Draw_Table_dList(settings.switches_found,"switch_table", kTitle_TableTitles_Root);
+ pCONT_web->WebAppend_Root_Draw_Table_dList(settings.switches_found,"switch_table", kTitle_TableTitles_Root); //add flag (or another function) that draws names with numbers after it
 
 }
 
@@ -326,10 +361,10 @@ void mSwitches::WebAppend_Root_Status_Table(){
 
 bool mSwitches::IsSwitchActive(uint8_t id){
 // Needs to know what type the button is, low, high, no pullup etc
-  if(states[id].lastwallswitch){
-    return states[id].is_active_low ? false : true;
+  if(switches[id].lastwallswitch){
+    return switches[id].active_state_value ? false : true;
   }
-  return states[id].is_active_low ? true : false;  
+  return switches[id].active_state_value ? true : false;  
 }
 
 
@@ -342,17 +377,17 @@ void mSwitches::SwitchPullupFlag(uint16 switch_bit)
 
 uint8_t mSwitches::SwitchLastState(uint8_t index)
 {
-  return states[index].lastwallswitch;
+  return switches[index].lastwallswitch;
 }
 
 void mSwitches::SwitchSetVirtual(uint8_t index, uint8_t state)
 {
-  states[index].switch_virtual = state;
+  switches[index].switch_virtual = state;
 }
 
 uint8_t mSwitches::SwitchGetVirtual(uint8_t index)
 {
-  return states[index].switch_virtual;
+  return switches[index].switch_virtual;
 }
 
 
@@ -377,18 +412,18 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50]; 
 
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
-    if(states[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
+    if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
       
       JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_SWITCHES_ID, sensor_id, buffer, sizeof(buffer)));
         JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
         JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
-        JsonBuilderI->Add("ischanged", states[sensor_id].ischanged);
-        JsonBuilderI->Add("lastwallswitch", states[sensor_id].lastwallswitch);
-        JsonBuilderI->Add("holdwallswitch", states[sensor_id].holdwallswitch);
-        JsonBuilderI->Add("switch_state_buf", states[sensor_id].switch_state_buf);
-        JsonBuilderI->Add("switch_virtual", states[sensor_id].switch_virtual);
-        JsonBuilderI->Add("is_linked_to_internal_relay", states[sensor_id].is_linked_to_internal_relay);
-        JsonBuilderI->Add("linked_internal_relay_id", states[sensor_id].linked_internal_relay_id);
+        JsonBuilderI->Add("ischanged", switches[sensor_id].ischanged);
+        JsonBuilderI->Add("lastwallswitch", switches[sensor_id].lastwallswitch);
+        JsonBuilderI->Add("holdwallswitch", switches[sensor_id].holdwallswitch);
+        JsonBuilderI->Add("switch_state_buf", switches[sensor_id].switch_state_buf);
+        JsonBuilderI->Add("switch_virtual", switches[sensor_id].switch_virtual);
+        JsonBuilderI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
+        JsonBuilderI->Add("linked_internal_relay_id", switches[sensor_id].linked_internal_relay_id);
       JsonBuilderI->Level_End();
       
     }

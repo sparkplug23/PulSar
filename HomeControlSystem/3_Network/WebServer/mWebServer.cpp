@@ -115,6 +115,25 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
 
 void mWebServer::WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles){
   char listheading[50];
+
+  //row_count=2;
+
+  BufferWriterI->Append_P(PSTR("{t}"));
+  for(int ii=0;ii<row_count;ii++){
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+      BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_sup->GetTextIndexed(listheading, sizeof(listheading), ii, dList_titles));
+      BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
+    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  }    
+  BufferWriterI->Append_P(PSTR("{t2}"));
+}
+
+
+void mWebServer::WebAppend_Root_Draw_Table_dList_P(uint8_t row_count, char const* value_handle, const char* dList_titles){
+  char listheading[50];
+
+  //row_count=2;
+
   BufferWriterI->Append_P(PSTR("{t}"));
   for(int ii=0;ii<row_count;ii++){
     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);

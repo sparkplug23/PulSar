@@ -22,7 +22,6 @@
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 #include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "2_CoreSystem/mHardwareTemplates.h"                // Hardware configuration
-#include "2_CoreSystem/Time/mTime.h"
 
 //https://www.fluentcpp.com/2018/03/06/issues-singletons-signals/
 
@@ -332,8 +331,8 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   #include "6_Lights/PWMLights/mPWMLight.h"
   class mPWMLight;
   #define D_MODULE_LIGHTS_PWM_ID 142
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_CTR)              "PWMLight";
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)              "pwmlight";
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_CTR)              D_MODULE_LIGHTS_PWM_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)              D_MODULE_LIGHTS_PWM_FRIENDLY_CTR;
   #define pCONT_lPWM pCONT->mlights_pwm
 #endif
 
@@ -354,10 +353,18 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR)              "switches";
   #define pCONT_swt                                               pCONT->mswh
 #endif
+#ifdef USE_MODULE_SENSORS_ANALOG
+  #include "5_Sensors/Analog/mSensorsAnalog.h"
+  class mSensorsAnalog;
+  #define D_MODULE_SENSORS_ANALOG_ID 122
+  DEFINE_PGM_CTR(PM_MODULE_SENSORS_ANALOG_CTR)              D_MODULE_SENSORS_ANALOG_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR)     D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR;
+  #define pCONT_msanalog                                    pCONT->msanalog
+#endif
 #ifdef USE_MODULE_SENSORS_DOORCHIME
   #include "5_Sensors/DoorBell/mDoorBell.h"
   class mDoorBell;
-  #define D_MODULE_SENSORS_DOORBELL_ID 122
+  #define D_MODULE_SENSORS_DOORBELL_ID 123
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOORBELL_CTR)              "mDoorBell";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR)              "doorbell";
   #define pCONT_mdb                                           pCONT->mdb
@@ -366,14 +373,14 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   #include "7_Energy/PowerMeter/mPzem_AC.h"
   class mPzem_AC;  
   #define pCONT_pzem                                           pCONT->mspm
-  #define D_MODULE_SENSORS_PZEM004T_MODBUS_ID 123
+  #define D_MODULE_SENSORS_PZEM004T_MODBUS_ID 124
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_PZEM004T_MODBUS_CTR)              "mPzem_AC";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR)              "powermeter_pzem";
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/DHT/mSensorsDHT.h"
   class mSensorsDHT;
-  #define            D_MODULE_SENSORS_DHT_ID                   124
+  #define            D_MODULE_SENSORS_DHT_ID                   125
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DHT_CTR)               "mSensorsDHT";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DHT_FRIENDLY_CTR)      "dht";
   #define pCONT_dht                                           pCONT->msdht
@@ -381,7 +388,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/BME/mSensorsBME.h"
   class mSensorsBME;
-  #define            D_MODULE_SENSORS_BME_ID                  125
+  #define            D_MODULE_SENSORS_BME_ID                  126
   #define            pCONT_bme                               pCONT->msbme
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_BME_CTR)              "mSensorsBME";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_BME_FRIENDLY_CTR)     "bme";
@@ -389,7 +396,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_DS18B20
   #include "5_Sensors/DB18/mSensorsDB18.h"
   class mSensorsDB18;
-  #define D_MODULE_SENSORS_DB18S20_ID 126
+  #define D_MODULE_SENSORS_DB18S20_ID 127
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DB18S20_CTR)              "mSensorsDB18";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)              "db18s20";
   #define pCONT_msdb18        pCONT->msdb18
@@ -397,7 +404,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_INA219
   #include "5_Sensors/INA219/mSensorsINA219.h"
   class mSensorsINA219;
-  #define D_MODULE_SENSORS_INA219_ID 127
+  #define D_MODULE_SENSORS_INA219_ID 128
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_INA219_CTR)              "mSensorsINA219";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_INA219_FRIENDLY_CTR)     "ina219";
   #define pCONT_mina219        pCONT->msina219
@@ -405,7 +412,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   class mUltraSonicSensor;
-  #define D_MODULE_SENSORS_ULTRASONIC_ID 128
+  #define D_MODULE_SENSORS_ULTRASONIC_ID 129
   #define            pCONT_ult                               pCONT->mus
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_ULTRASONIC_CTR)           "mUltraSonicSensor";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR)     "ultrasonic";
@@ -413,7 +420,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/Door/mDoorSensor.h"
   class mDoorSensor;
-  #define D_MODULE_SENSORS_DOOR_ID 129
+  #define D_MODULE_SENSORS_DOOR_ID 130
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOOR_CTR)                D_MODULE_SENSORS_DOOR_CTR;
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR)       D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
   #define pCONT_msdb18        pCONT->msdb18
@@ -421,21 +428,21 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #ifdef USE_MODULE_SENSORS_MOTION
   #include "5_Sensors/PIR/mMotionSensor.h"
   class mMotionSensor;
-  #define D_MODULE_SENSORS_MOTION_ID 130 //new layout
+  #define D_MODULE_SENSORS_MOTION_ID 131
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_CTR)                D_MODULE_SENSORS_MOTION_CTR;
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)       D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
   class mMoistureSensor;
-  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID 131
+  #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID 132
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR)              "mMoistureSensor";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_RESISTIVE_MOISTURE_FRIENDLY_CTR)              "moisture";
 #endif
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   class mPulseCounter;
-  #define D_MODULE_SENSORS_PULSECOUNTER_ID 132
+  #define D_MODULE_SENSORS_PULSECOUNTER_ID 133
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_PULSECOUNTER_CTR)              "mPulseCounter";
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR)              "pulsecounter";
 #endif
@@ -754,7 +761,9 @@ class mTaskerManager{
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
     mPzem_AC *mspm = nullptr;
   #endif
-
+  #ifdef USE_MODULE_SENSORS_ANALOG
+    mSensorsAnalog *msanalog = nullptr;
+  #endif
 
   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
     mExerciseBike *meb = nullptr;

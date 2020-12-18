@@ -48,6 +48,18 @@ struct HsbColor
     // ------------------------------------------------------------------------
     HsbColor(const RgbColor& color);
 
+    // // ------------------------------------------------------------------------
+    // // Construct a HsbColor using RgbwColor (NOTE: This will loose the white channel)
+    // // ------------------------------------------------------------------------
+    // HsbColor(const RgbwColor& color) :
+    //     H(color.R),
+    //     S(color.G),
+    //     B(color.B),
+    //     // WW(0),
+    //     // WC(0)
+    // {
+    // };
+
     // ------------------------------------------------------------------------
     // Construct a HsbColor that will have its values set in latter operations
     // CAUTION:  The H,S,B members are not initialized and may not be consistent

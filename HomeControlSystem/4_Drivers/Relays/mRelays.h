@@ -106,15 +106,15 @@ class mRelays{
 //
   // I should add a relay "type" ie, external power, internal power, light
 
-    #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    // #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
     
     void SubTask_Relay_Timed_Seconds();
 
-    #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
     
 
     struct RELAY_STATUS{
-    #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    // #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
       /**
        * 0 = not running
        * 1 = turn off then set to 0 to be off
@@ -146,7 +146,7 @@ class mRelays{
         struct time_short offtime;
         uint8_t enabled = false;
       }enabled_ranges[3];
-    #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
 
       
       uint8_t ischanged = false;

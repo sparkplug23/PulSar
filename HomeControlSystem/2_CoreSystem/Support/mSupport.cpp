@@ -1537,7 +1537,11 @@ char* mSupport::GetTextIndexed(char* destination, size_t destination_size, uint1
 
       // (addr) (*(const uint8_t *)(addr))
 
-      ch = pgm_read_byte(read++);  //pads
+      ch = *read; //get vlaue from pointer
+      read++; // move pointer forward
+
+      // ch = pgm_read_byte(read++);  //pads
+
       if (size && (ch != '|'))  {
         *write++ = ch;
         size--;
@@ -1640,6 +1644,77 @@ int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* ha
 
 
 
+int mSupport::GetDListIDbyNameCtr_P(char* destination, size_t destination_size, const char* needle, const char* haystack)
+{
+  // Returns -1 of not found
+  // Returns index and command if found
+  int result = -1;
+  const char* read = haystack;
+  char* write = destination;
+
+  while (true) {
+    result++;
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+      ch = pgm_read_byte(read++);
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    *write = '\0';
+    if (!strcasecmp(needle, destination)) {
+      break;
+    }
+    if (0 == ch) {
+      result = -1;
+      break;
+    }
+  }
+  return result;
+}
+
+int mSupport::GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* needle, const char* haystack)
+{
+
+  Serial.println("GetDListIDbyNameCtr");Serial.flush();
+  // Returns -1 of not found
+  // Returns index and command if found
+  int result = -1;
+  const char* read = haystack;
+  char* write = destination;
+
+  while (true) {
+    result++;
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+      ch = *read;
+      read++;
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    *write = '\0';
+    if (!strcasecmp(needle, destination)) {
+      break;
+    }
+    if (0 == ch) {
+      result = -1;
+      break;
+    }
+  }
+  return result;
+}
+
+
+
+
+
 
 int mSupport::GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack)
 {
@@ -1672,6 +1747,9 @@ int mSupport::GetCommandCode(char* destination, size_t destination_size, const c
   }
   return result;
 }
+
+
+
 
 int8_t mSupport::GetStateNumber(const char *state_text)
 {
@@ -2172,7 +2250,7 @@ void mSupport::UpdateStatusBlink(){
   
   DEBUG_LINE;
   uint8_t blinkinterval = 1;
-  pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
+  // pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
 
   if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
     if (pCONT_set->global_state.data) {                              // Any problem
@@ -2617,6 +2695,7 @@ bool mSupport::I2cDevice(uint8_t addr)
     #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint8_t address = 1; address <= 127; address++) {
+      AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) {
     #ifdef ENABLE_LOG_LEVEL_INFO

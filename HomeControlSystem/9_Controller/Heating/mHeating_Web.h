@@ -5,6 +5,7 @@
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 // no class, include within header class
 
@@ -13,15 +14,13 @@ int test = 0;
 int8_t Tasker_Web(uint8_t function);
 
 
+#endif // USE_MODULE_CORE_WEBSERVER
 
 
 
 
 
 
-
-
-//#define USE_SUNRISE
 
 // const char HTTP_BTN_MENU_TIMER[] PROGMEM =
 //   "<p><form action='" WEB_HANDLE_HEATING_TIMER "' method='get'><button>" D_CONFIGURE_TIMER "</button></form></p>";

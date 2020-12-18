@@ -50,7 +50,7 @@ void mDoorBell::RingDoorBellSet(uint8_t freq, uint8_t seconds){
   ringer.freq = freq;
   ringer.seconds = seconds;
   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Set"));
-  memcpy(ringer.trigger_time_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr)); 
+  memcpy(ringer.trigger_time_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr)); 
 }
 
 // Function called each time
@@ -261,7 +261,7 @@ void mDoorBell::MQTTSendDoorSensorIfChanged(){
     JsonObject root = doc.to<JsonObject>();
 
     root["location"] = DOORALERT_PAYLOAD_CTR;
-    root["time"] = pCONT->mt->mtime.hhmmss_ctr;
+    root["time"] = pCONT->mt->RtcTime.hhmmss_ctr;
 
     data_buffer.payload.len = measureJson(root)+1;
     serializeJson(doc,data_buffer.payload.ctr);
@@ -341,7 +341,7 @@ int8_t mDoorBell::Tasker(uint8_t function){
           doorbell_switch.isactive = true;
           doorbell_switch.tDetectTimeforDebounce = millis();   
 
-          memcpy(doorbell_switch.trigger_time_ctr,pCONT->mt->mtime.hhmmss_ctr,sizeof(pCONT->mt->mtime.hhmmss_ctr)); 
+          memcpy(doorbell_switch.trigger_time_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr)); 
 
           if(settings.fEnable_Switch_Relay_Binding){
             RingDoorBellSet(1,2); //1 per sec for 2 secs (2 rings)
@@ -351,7 +351,7 @@ int8_t mDoorBell::Tasker(uint8_t function){
           doorbell_switch.isactive = false;
         }
         doorbell_switch.ischanged = true;
-        doorbell_switch.changedtime = pCONT->mt->mtime;
+        doorbell_switch.changedtime = pCONT->mt->RtcTime;
         fUpdateSendDoorSensor = true;
         
       }

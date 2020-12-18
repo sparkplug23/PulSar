@@ -842,12 +842,13 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
   }
 #endif
 #ifdef USE_MODULE_SENSORS_SWITCHES
-  if ((val >= GPIO_SWT1_ID) && (val < GPIO_SWT1_ID + MAX_SWITCHES)) {
-    offset = (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-  }
-  if ((val >= GPIO_SWT1_NP_ID) && (val < GPIO_SWT1_NP_ID + MAX_SWITCHES)) {
-    offset = -(GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-  }
+  // if ((val >= GPIO_SWT1_ID) && (val < GPIO_SWT1_ID + MAX_SWITCHES)) {
+  //   offset = (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
+  // }
+  // if ((val >= GPIO_SWT1_NP_ID) && (val < GPIO_SWT1_NP_ID + MAX_SWITCHES)) {
+  //   offset = -(GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
+  // }
+  AddLog_P(LOG_LEVEL_ERROR, PSTR("GetUsedInModule missing for switch"));
 #endif
   if ((val >= GPIO_REL1_ID) && (val < GPIO_REL1_ID + MAX_RELAYS)) {
     offset = (GPIO_REL1_INV_ID - GPIO_REL1_ID);
@@ -1034,15 +1035,20 @@ void mHardwarePins::GpioInit(void)
 
     if (mpin) {
 
-      #ifdef USE_MODULE_SENSORS_SWITCHES
-      if ((mpin >= GPIO_SWT1_NP_ID) && (mpin < (GPIO_SWT1_NP_ID + MAX_SWITCHES))) {
-        pCONT->mswh->SwitchPullupFlag(mpin - GPIO_SWT1_NP_ID);
-        mpin -= (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
-    #endif // ENABLE_LOG_LEVEL_INFO
-      }else
-      #endif
+      // // Test for special pin options, though, I could probably do this in their own module inits 
+      // #ifdef USE_MODULE_SENSORS_SWITCHES
+      // // If button is a pullup type, record that its a pullup
+      // if (
+      //   ((mpin >= GPIO_SWT1_NP_ID)     && (mpin < (GPIO_SWT1_NP_ID + MAX_SWITCHES))) ||
+      //   ((mpin >= GPIO_SWT1_INV_NP_ID) && (mpin < (GPIO_SWT1_INV_NP_ID + MAX_SWITCHES)))
+      // ){
+      //   pCONT->mswh->SwitchPullupFlag(mpin - GPIO_SWT1_NP_ID);
+      //   mpin -= (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
+      // #ifdef ENABLE_LOG_LEVEL_INFO
+      //     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
+      // #endif // ENABLE_LOG_LEVEL_INFO
+      // }else
+      // #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
       if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
         pCONT->mbtn->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3

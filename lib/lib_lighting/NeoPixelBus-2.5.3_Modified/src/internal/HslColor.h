@@ -56,6 +56,7 @@ struct HslColor
     HslColor()
     {
     };
+    
 
     // ------------------------------------------------------------------------
     // LinearBlend between two colors by the amount defined by progress variable

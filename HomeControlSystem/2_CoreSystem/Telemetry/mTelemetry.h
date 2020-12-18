@@ -124,8 +124,7 @@ class mTelemetry{
     
     #define HARDWARE_STATUS_MAX_LENGTH 200
     struct STATUSHARDWARE{
-//make function that appends pretty simple message
-
+      //make function that appends pretty simple message
       char ctr[HARDWARE_STATUS_MAX_LENGTH];
       uint8_t len = 0;
       uint8_t importance = 0; //0 low, 1 med, 2 high
