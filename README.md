@@ -1,6 +1,3 @@
-
-UNDERDEVELOPMENT -- Not ready for public use until v1.0 is reached
-
 # Home Automation Control System (HACS)
 
 Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. Written with VSCode IDE and PlatformIO.
