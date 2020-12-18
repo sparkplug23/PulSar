@@ -1,7 +1,6 @@
 # Home Automation Control System (HACS)
 
-Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. Written with VSCode IDE and PlatformIO.
-Project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity, is intended to allow easy integration of additional sensors or drivers as the project expands.
+Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity, is intended to allow easy integration of additional sensors or drivers as the project expands. 
 
 If you like **HACS**, give it a star, or fork it, and contribute! 
 
@@ -36,4 +35,5 @@ This program is licensed under GPL-3.0
 
 ## Notes
 - HACS is pronounced as "Hex/Hacks".
+- Written with VSCode IDE and PlatformIO.
 - [x]<sup>1</sup> extra comment.
