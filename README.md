@@ -1,4 +1,4 @@
-# Home Automation Control System (HACS)
+# Home Automation Control System (HACS, pronounched "Hex")
 
 Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. Written with VSCode IDE and PlatformIO.
 Project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases.
