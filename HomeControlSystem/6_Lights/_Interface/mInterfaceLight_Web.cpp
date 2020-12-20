@@ -600,7 +600,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //    // SetColour_Hue(arg_value);
-// changeHSB_Hue(arg_value);
+// CommandSet_Hue360(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }
@@ -614,7 +614,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 
 // arg_value = map(arg_value, 0,100, 0,255);
 
-//     changeHSB_Sat(arg_value);
+//     CommandSet_Sat(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }
@@ -625,7 +625,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // arg_value = map(arg_value, 0,100, 0,255);
-//     changeBriRGB(arg_value);
+//     CommandSet_BrtRGB255(arg_value);
     
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
@@ -637,7 +637,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-//     LightSetColorTemp(arg_value);
+//     CommandSet_ColourTemp(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }
@@ -648,7 +648,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // arg_value = map(arg_value, 0,100, 0,255);
-//     changeBriCT(arg_value);
+//     CommandSet_BrtCT255(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }
@@ -659,7 +659,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // // arg_value = map(arg_value, 0,100, 0,255);
-// //     changeBriCT(arg_value);
+// //     CommandSet_BrtCT255(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }
@@ -672,11 +672,11 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // // arg_value = map(arg_value, 0,100, 0,255);
 //     if(isCTRGBLinked()){
-//         setCTRGBLinked(false);
+//         CommandSet_RGBCT_Linked(false);
 //     }else{
-//         setCTRGBLinked(true);
+//         CommandSet_RGBCT_Linked(true);
 //     }
-//     // changeBriCT(arg_value);
+//     // CommandSet_BrtCT255(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
 //   }

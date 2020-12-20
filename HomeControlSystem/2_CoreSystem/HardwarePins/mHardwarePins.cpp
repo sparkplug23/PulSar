@@ -394,9 +394,9 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else if(strcmp(c,"16")==0){ pin = 16; }
   else{
     pin = -1;
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog_P(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
-    #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
   }
 
     #ifdef ENABLE_LOG_LEVEL_INFO

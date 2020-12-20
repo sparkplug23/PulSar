@@ -8,7 +8,7 @@ void mDoorSensor::pre_init(void){
 
   if(pCONT_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
     // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
-    pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID),INPUT_PULLUP);
+    pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
     settings.fEnableSensor = true;
   }else{
     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
@@ -115,6 +115,7 @@ void mDoorSensor::EveryLoop(){
 
 }
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
 void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[10];
@@ -178,6 +179,8 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
 }
 
 
+    #endif // USE_MODULE_CORE_WEBSERVER
+
 const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
   if(door_detect.isactive){
     snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENED_CTR, sizeof(PM_EVENT_DOOR_OPENED_CTR));
@@ -199,19 +202,19 @@ uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   
+  char buffer[50];
+
+  JsonBuilderI->Start();
+  JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
+  JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){
-
-    char buffer[50];
-
-    JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
     JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, buffer, sizeof(buffer)));
     JsonBuilderI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
-    return JsonBuilderI->End();
-
   }
-  
+
+  return JsonBuilderI->End();
+
 }
 
 
@@ -247,7 +250,7 @@ void mDoorSensor::MQTTHandler_Init(){
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;

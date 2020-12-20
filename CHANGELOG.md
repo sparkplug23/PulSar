@@ -17,6 +17,8 @@ Section Next, will always be "Development", which with copy and paste will becom
 
 ### Changed
 - refactored ``ini`` files to allow esp8266 and esp32 boots
+- ``INFO_PARSING`` is now reffered to as ``COMMANDS`` as values are set with `CommandSet_x` functions to consolate `AddLog`
+- `AnimationProfile` function/enum list changed to `SetLightPowerState`
 
 ### Fixed
 - RTC code to use interrupts, eliminating time drift

@@ -47,7 +47,7 @@
 //#define DEVICE_RGBFRIDGE              
 // #define DEVICE_RGBBEDROOMFLOOR
 // #define DEVICE_H801_TESTER
-#define DEVICE_RGBCUSTOM_USER_01
+ #define DEVICE_RGBCUSTOM_USER_01
 
 /**
  *  CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- 
@@ -3647,12 +3647,16 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
 
 #endif
+
+
 #ifdef DEVICE_UTILITYSENSOR
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
 
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
+
+   #define DISABLE_WEBSERVER //memory to low for OTA
      
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_MOTION
@@ -3666,7 +3670,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_BME
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR    "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_PIR_1_INV_CTR)

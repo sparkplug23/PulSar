@@ -106,17 +106,17 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
       //Serial.println("virtual void handleBody(AsyncWebServerRequest");Serial.flush();
       if(_onBody){
               
-        Serial.println("_onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
+        //Serial.println("_onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
         _onBody(request, data, len, index, total);
 
       }else{
         
-        Serial.println("NOT _onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
+        //Serial.println("NOT _onBody virtual void handleBody(AsyncWebServerRequest");Serial.flush();
       }
 
-      if(_onBody==NULL){
-      Serial.println("_onBody==NULL");Serial.flush();
-      }
+      // if(_onBody==NULL){
+      // Serial.println("_onBody==NULL");Serial.flush();
+      // }
       
     }
     virtual bool isRequestHandlerTrivial() override final {return _onRequest ? false : true;}

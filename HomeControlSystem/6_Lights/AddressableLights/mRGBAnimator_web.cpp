@@ -94,7 +94,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
         case 3: 
           JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
             pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 
-            GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
+            pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
           );
         break;
         case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
@@ -169,7 +169,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
 //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
 //         memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
 //         pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);        // Add this as "SAVE" state then "LOAD" state
-//         pCONT_iLight->light_power = true;
+//         pCONT_iLight->light_power_state = true;
 //       break;
 //       default:
 //       case 1:
@@ -177,7 +177,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
 //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
 //         memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
 //         pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-//         pCONT_iLight->light_power = false;
+//         pCONT_iLight->light_power_state = false;
 //       break;
 //     }
 
@@ -2190,17 +2190,17 @@ void mRGBAnimator::WebAppend_Root_Draw_Table(){
 void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRequest *request)
 {
 
-  uint16_t leds_max_to_show = strip_size<MAX_LIVE_LEDS?strip_size:MAX_LIVE_LEDS;
-  uint8_t number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  uint16_t leds_max_to_show = pCONT_iLight->light_size_count<MAX_LIVE_LEDS?pCONT_iLight->light_size_count:MAX_LIVE_LEDS;
+  uint8_t number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
 
    
-  // uint8_t number_of_pixels = strip_size;
-  // if(strip_size>MAX_LIVE_LEDS){
-  //   number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,strip_size); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  // uint8_t number_of_pixels = pCONT_iLight->light_size_count;
+  // if(pCONT_iLight->light_size_count>MAX_LIVE_LEDS){
+  //   number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
   // }
 
 
-  uint8_t pixels_to_iter = ((strip_size-1)/number_of_pixels)+1;
+  uint8_t pixels_to_iter = ((pCONT_iLight->light_size_count-1)/number_of_pixels)+1;
 
   char type_ctr[5];
   switch(pCONT_iLight->liveview.show_type){

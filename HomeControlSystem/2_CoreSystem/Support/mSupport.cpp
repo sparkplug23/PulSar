@@ -1775,9 +1775,9 @@ int8_t mSupport::GetStateNumber(const char *state_text)
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  #endif// ENABLE_LOG_LEVEL_INFO
 
   return state_number;
 

@@ -452,7 +452,15 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
         struct PIXELS_TO_UPDATE_AS_PERCENTAGE{
           uint8_t val;
           uint8_t map_id = 2;  
-        }pixels_to_update_as_percentage;
+        }pixels_to_update_as_percentage; //phase out, use function to get what it is from a number
+
+        struct PIXELS_TO_UPDATE_AS_NUMBER{
+          uint16_t val;
+          uint8_t map_id = 2;  
+        }pixels_to_update_as_number; //move this to be the primary way its stored
+
+
+
         struct TIME{
           uint16_t val = 5000;
           uint8_t  map_id = 2;
@@ -487,7 +495,7 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     struct ANIMATIONOVERRIDES{
       uint8_t fRefreshAllPixels = false;
       uint16_t time_ms = 1000; //on boot
-    }animation_override;
+    }animation_override; // ie "oneshot" variables that get checked and executed one time only
     
     /**************
      * TURN_ON - fade ON, returns to previous lighting array
@@ -523,20 +531,58 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
 
     
+    // PHASE OUT, renaming LightState
     /**************
      * ANIMATION_PROFILE - As function argument of "SetAnimationProfile"
      * This sets numerous aspects of animation struct to cause set animations to happen:
      * TURN_OFF - will fade leds off
      * TURN_ON  - will fade leds on
     **************/ 
-    enum ANIMATION_PROFILE_IDS{
-      ANIMATION_PROFILE_TURN_OFF_ID=0,
-      ANIMATION_PROFILE_TURN_ON_ID,
-      ANIMATION_PROFILE_NOTHING_ID,
-      ANIMAITON_PROFILE_LENGTH_ID    
+    // enum ANIMATION_PROFILE_IDS{
+    //   ANIMATION_PROFILE_TURN_OFF_ID=0,
+    //   ANIMATION_PROFILE_TURN_ON_ID,
+    //   ANIMATION_PROFILE_NOTHING_ID,
+    //   ANIMAITON_PROFILE_LENGTH_ID    
+    // };
+    enum LIHGT_POWER_STATE_IDS{
+      LIGHT_POWER_STATE_OFF_ID=0,
+      LIGHT_POWER_STATE_ON_ID,
+      LIGHT_POWER_STATE_TOGGLE_ID,
+      LIGHT_POWER_STATE_PAUSED,
+      LIGHT_POWER_STATE_ANIMATING_ID,
+      LIGHT_POWER_STATE_LENGTH_ID
     };
-    void SetAnimationProfile(uint8_t profile_id);
+    // void SetAnimationProfile(uint8_t profile_id);
 
+    /******************************************************************************************************************************
+    ****************** CommandSet_x *************************************************************************************************************
+    ******************************************************************************************************************************/
+
+    void CommandSet_PixelHardwareTypeID(uint8_t value);
+    void CommandSet_LightPowerState(uint8_t value);
+    void CommandSet_Hue_360(uint16_t value);
+    void CommandSet_Sat_255(uint8_t value);
+    void CommandSet_Brt_255(uint8_t value);
+    void CommandSet_BrtRGB_255(uint8_t bri);
+    void CommandSet_BrtCT_255(uint8_t bri);
+    void CommandSet_ColourTemp(uint16_t ct);
+    void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
+    void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
+    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
+    void CommandSet_SingleColourMode_ID(uint8_t value);
+    void CommandSet_PaletteID(uint8_t value);
+    void CommandSet_AnimationModeID(uint8_t value);
+    void CommandSet_HardwareColourTypeID(uint8_t value);
+    void CommandSet_LightSizeCount(uint16_t value);
+    void CommandSet_LightsCountToUpdateAsNumber(uint16_t value);
+    void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value);
+    void CommandSet_TransitionOrderID(uint8_t value);
+    void CommandSet_SceneColour_Raw(uint8_t* values);
+
+
+    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
+    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
+    
     void Settings_Default();  
 
     void BootMessage();
@@ -786,7 +832,7 @@ const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
 void SubTask_AutoOff();
 
 
-  uint8_t light_power = 0;
+  uint8_t light_power_state = 0;
   uint8_t light_power_Saved = 0;
 
 
@@ -864,7 +910,7 @@ void SetPWMChannelSweepRange();
 uint8_t test_index = 0;
 
 
-void mat3x3(const float *mat33, const float *vec3, float *res3);
+//void mat3x3(const float *mat33, const float *vec3, float *res3);
 
 // uint16_t pwm_tester_val = 0;
 // uint8_t pwm_tester_dir = 0;
@@ -962,7 +1008,7 @@ void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
 // void RgbToXy(uint8_t i_r, uint8_t i_g, uint8_t i_b, float *r_x, float *r_y);
 // void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
 void setSubType(uint8_t sub_type);
-bool setCTRGBLinked(bool ct_rgb_linked);
+bool CommandSet_RGBCT_Linked(bool ct_rgb_linked);
 void setAlexaCTRange(bool alexa_ct_range);
 bool isCTRGBLinked();
 bool setPWMMultiChannel(bool pwm_multi_channels);
@@ -972,16 +1018,11 @@ void loadSettings();
 void changeCTB(uint16_t new_ct, uint8_t briCT);
 void changeDimmer(uint8_t dimmer, uint32_t mode = 0);
 void changeBri(uint8_t bri);
-void changeBriRGB(uint8_t bri);
-void changeBriCT(uint8_t bri);
 void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
 void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
 void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);
 
 
-void changeHSB_Hue(uint16_t hue);
-void changeHSB_Sat(uint8_t sat);
-void changeHSB_Brt(uint8_t brt);
     
   void init_Animations();
 
@@ -990,6 +1031,8 @@ void saveSettings();
 void changeChannels(uint8_t *channels);
 uint16_t change8to10(uint8_t v);
 uint8_t change10to8(uint16_t v);
+
+
 
 
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1017,7 +1060,6 @@ void LightGetXY(float *X, float *Y);
 void LightHsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *r_g, uint8_t *r_b);
 uint8_t LightGetBri(uint8_t device);
 void LightSetBri(uint8_t device, uint8_t bri);
-void LightSetColorTemp(uint16_t ct);
 uint16_t LightGetColorTemp(void);
 void LightSetSignal(uint16_t lo, uint16_t hi, uint16_t value);
 char* LightGetColor(char* scolor, boolean force_hex = false);
@@ -1076,7 +1118,10 @@ void SetColour_Sat(uint8_t  sat);
 void SetColour_Brt(uint8_t  brt);
 
 
-uint16_t light_count = 1;
+// uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
+uint16_t light_size_count = 1;
+
+
 
   uint32_t WebColorFromColourMap(uint8_t i);
   // uint32_t WebColorFromColourType(RgbwColor rgb);

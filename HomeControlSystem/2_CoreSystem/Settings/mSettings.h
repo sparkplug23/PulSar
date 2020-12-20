@@ -584,7 +584,7 @@ const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Seri
 \*********************************************************************************************/
 
 extern uint8_t light_device;  // Light device number
-extern uint8_t light_power;  // Light power
+extern uint8_t light_power_state;  // Light power
 extern uint8_t rotary_changed; // Rotary switch changed
 
 

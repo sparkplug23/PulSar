@@ -399,8 +399,8 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   if(data_buffer.fWaiting){data_buffer.fWaiting = false;
     // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
-      AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
+      AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
+      AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
@@ -412,7 +412,7 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
     //   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC, doc.as<JsonObjectConst>());
     // }else{
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError")); Serial.flush();
+    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR)); Serial.flush();
     // #endif// ENABLE_LOG_LEVEL_INFO
     //   return;
     // }
@@ -491,7 +491,7 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer.isserviced);
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer.isserviced);
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -612,7 +612,7 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
   publish_ft(module_ctr,

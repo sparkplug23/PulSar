@@ -431,9 +431,9 @@ int8_t mSensorsDB18::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
     return FUNCTION_RESULT_HANDLED_ID;
@@ -468,9 +468,9 @@ void mSensorsDB18::parse_JSONCommand(){
      
     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
       
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
-    #endif // LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
+    #endif // LOG_LEVEL_COMMANDS
     
     uint8_t address_temp[8];
     uint8_t address_index = 0;
@@ -485,13 +485,13 @@ void mSensorsDB18::parse_JSONCommand(){
       for(auto address_id : array_sensor_address_iter) {
         int address = address_id.getInt();
         // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
-        //AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_DB18 "address = %d"),address); 
+        //AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
         // #endif
         address_temp[address_index++] = address;
         // if(address_index>7){ break; } //error!
       }
 
-      AddLog_Array(LOG_LEVEL_INFO_PARSING, "address", address_temp, (uint8_t)8);
+      AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)8);
       SetIDWithAddress(original_device_id++, address_temp);
       Serial.println();
 

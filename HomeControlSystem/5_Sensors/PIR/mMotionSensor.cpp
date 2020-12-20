@@ -294,9 +294,9 @@ void mMotionSensor::parse_JSONCommand(){ //parse_Command() and pass packet (topi
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError"));
-    #endif //ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  
   JsonParserToken jtok = 0; 

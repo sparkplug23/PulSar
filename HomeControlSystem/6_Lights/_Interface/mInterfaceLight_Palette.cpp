@@ -748,10 +748,10 @@ int8_t mInterfaceLight::GetPaletteIDbyName(const char* c){
     // AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
 
     if(ptr->friendly_name_ctr == nullptr){ 
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
       // move variable name to join standard devicename and just include as indexed? ie 0-20 is their names?
-      #endif // ENABLE_LOG_LEVEL_INFO_PARSING
+      #endif // ENABLE_LOG_LEVEL_COMMANDS
     }
     if(ptr->friendly_name_ctr != nullptr){ 
       if(ii>UO_PALETTELIST_VARIABLE_USER_LENGTH_ID){

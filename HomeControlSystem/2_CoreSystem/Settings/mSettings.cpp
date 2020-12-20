@@ -435,7 +435,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
           
       // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
       //   #ifdef DEBUG_SERIAL_TESTING
-      //     Settings.seriallog_level = LOG_LEVEL_INFO_PARSING;
+      //     Settings.seriallog_level = LOG_LEVEL_COMMANDS;
       //   #else
       //     Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
       //   #endif
@@ -551,9 +551,9 @@ void mSettings::parse_JSONCommand(){
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError"));
-    #endif //ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   } 
 
@@ -562,9 +562,9 @@ void mSettings::parse_JSONCommand(){
   if(jtok = obj[PM_JSON_DEVICENAME]){ 
     // const char* onoff = jtok.getStr();
     
-    // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     // AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK D_PARSING_MATCHED "%s %s"), F(D_JSON_DEVICENAME),onoff); 
-    // #endif // LOG_LEVEL_INFO_PARSING
+    // #endif // LOG_LEVEL_COMMANDS
 
     char module_friendlyname_buffer[30];
     uint16_t module_id = 0;
@@ -575,14 +575,14 @@ void mSettings::parse_JSONCommand(){
       module_id = pCONT->module_settings.list[module_list_id];
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
-      #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING    
+      #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS    
   
       if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer]){ 
-        #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+        #ifdef ENABLE_LOG_LEVEL_COMMANDS
         AddLog_P(LOG_LEVEL_TEST, PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
-        #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+        #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
         
         JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
         if(arr){  
@@ -592,10 +592,10 @@ void mSettings::parse_JSONCommand(){
             jtok = arr[id];
             const char* device_name_ctr = jtok.getStr();
             pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
-            #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+            #ifdef ENABLE_LOG_LEVEL_COMMANDS
             AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
             AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
-            #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+            #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
           } //if array
         }//if array
       }

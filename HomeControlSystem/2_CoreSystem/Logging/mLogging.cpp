@@ -630,7 +630,7 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* _buffer){
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
-    case LOG_LEVEL_INFO_PARSING:   memcpy_P(buffer, PM_LOG_LEVEL_INFO_PARSING_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_PARSING_SHORT_CTR)); break;
+    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_SHORT_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR)); break;
@@ -647,7 +647,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer){ //"Name" as
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_LONG_CTR)); break;
-    case LOG_LEVEL_INFO_PARSING:   memcpy_P(buffer, PM_LOG_LEVEL_INFO_PARSING_LONG_CTR, sizeof(PM_LOG_LEVEL_INFO_PARSING_LONG_CTR)); break;
+    case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_LONG_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_MORE:     memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_MORE_LONG_CTR)); break;
     case LOG_LEVEL_DEBUG_LOWLEVEL: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR)); break;

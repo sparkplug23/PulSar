@@ -150,6 +150,8 @@ void mSensorsBME::EveryLoop(){
   
 }
 
+
+    #ifdef USE_MODULE_CORE_WEBSERVER
 void mSensorsBME::WebAppend_Root_Status_Table_Draw(){
 
   char value_ctr[8];
@@ -235,6 +237,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
   JsonBuilderI->Array_End();
 
 }
+#endif // USE_MODULE_CORE_WEBSERVER
 
 
 // New function that breaks things up into switch statements

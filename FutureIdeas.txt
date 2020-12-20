@@ -19,7 +19,7 @@ Fix multiple repos "git push -f origin master"
     - Enable 4 DHTxx inputs
 
 #Idea 006
-    - Split animation/strip_size to allow the same 50 leds stored to be output 50*strings_connected times
+    - Split animation/light_size_count to allow the same 50 leds stored to be output 50*strings_connected times
         -- ie 50 animation size is required, and transmitted out N times (N being number of strings)
 
 #Idea 007
@@ -486,3 +486,10 @@ Fix multiple repos "git push -f origin master"
 
 #Idea 112
     Use a flag (bigpacked) for bitset to set (as a user option) which rows appear on root page for lighting (ie hide, lighting power)
+
+#Idea 113
+
+You see, I plan on adding log level show methods as:
+- Show set and all levels above it (done)
+- Show ONLY the set level (good for debugging, done)
+- Use bitpacked value to turn on/off which levels to show regardless of heirachy

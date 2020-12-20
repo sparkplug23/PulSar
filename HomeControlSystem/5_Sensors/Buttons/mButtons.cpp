@@ -207,7 +207,7 @@ void mButtons::ButtonHandler(void)
           //       multipress[button_index] = 1;
           //     }
           //   }
-          //   if ((MI_DESK_LAMP == my_module_type) && (button_index == 0) && (rotary_changed)){// && (light_power)) {
+          //   if ((MI_DESK_LAMP == my_module_type) && (button_index == 0) && (rotary_changed)){// && (light_power_state)) {
           //     rotary_changed = 0;                            // Color temp changed, no need to turn of the light
           //   } else {
           //     // if (single_press && SendKey(0, button_index + multipress[button_index], POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set

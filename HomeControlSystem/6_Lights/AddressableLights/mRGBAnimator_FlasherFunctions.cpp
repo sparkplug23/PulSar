@@ -74,8 +74,8 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
   
   // Apply green gradient, brightest at start
 
-  uint16_t start = strip_size/2;
-  uint16_t end = strip_size; 
+  uint16_t start = pCONT_iLight->light_size_count/2;
+  uint16_t end = pCONT_iLight->light_size_count; 
   RgbTypeColor colour_gradient = HsbColor(
                                           pCONT_iLight->HueN2F(120),
                                           pCONT_iLight->SatN2F(100),
@@ -84,18 +84,18 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
   RgbTypeColor colour_random = RgbTypeColor(255,0,0); 
   HsbColor colour_random_adjusted = HsbColor(0);
   uint8_t gradient_end_percentage = 75;
-  uint16_t strip_size_gradient = strip_size*(gradient_end_percentage/100.0f);
-  uint16_t strip_size_single   = strip_size*(75/100.0f);
+  uint16_t strip_size_gradient = pCONT_iLight->light_size_count*(gradient_end_percentage/100.0f);
+  uint16_t strip_size_single   = pCONT_iLight->light_size_count*(75/100.0f);
   
   start = 0;
-  end = strip_size;
+  end = pCONT_iLight->light_size_count;
   for(ledout.index=start;ledout.index<end;ledout.index++){ 
     animation_colours[ledout.index].DesiredColour = RgbTypeColor(0);
   }
   
   //0 to 75% 
   start = 0;
-  end = map(75,0,100,0,strip_size);
+  end = map(75,0,100,0,pCONT_iLight->light_size_count);
   for(ledout.index=start;ledout.index<end;ledout.index++){ 
     animation_colours[ledout.index].DesiredColour.R = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.R,0));
     animation_colours[ledout.index].DesiredColour.G = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.G,0));
@@ -107,8 +107,8 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
   uint8_t desired_pixel;
   
   // 25 to 100%
-  start = map(25,0,100,0,strip_size);
-  end = strip_size;
+  start = map(25,0,100,0,pCONT_iLight->light_size_count);
+  end = pCONT_iLight->light_size_count;
   for(ledout.index=start;ledout.index<end;ledout.index++){ 
     desired_pixel = random(0,pixels-1);
     colour_random = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel);
@@ -157,7 +157,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow(){
 void mRGBAnimator::AnimUpdateMemberFunction_BlendStartingToDesiredColour(const AnimationParam& param)
 {    
 // Serial.println("AnimUpdateMemberFunction_BlendStartingToDesiredColour");
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -249,7 +249,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_Sequential(const AnimationParam& par
 
         // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL AnimUpdateMemberFunction_Sequential"));
   
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -340,7 +340,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_St
       
     
 
-      for(uint16_t index=0;index<strip_size;index++){
+      for(uint16_t index=0;index<pCONT_iLight->light_size_count;index++){
 
 
           if(counter^=1){
@@ -438,7 +438,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_St
 void mRGBAnimator::AnimUpdateMemberFunction_Slow_Glow_Partial_Palette_Step_Through(const AnimationParam& param)
 {    
 
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -460,7 +460,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_Slow_Glow_Partial_Palette_Step_Throu
 
 void mRGBAnimator::SubTask_Flasher_Animate_Function_Tester(){
 
-  uint16_t test_strip_size = strip_size;
+  uint16_t test_strip_size = pCONT_iLight->light_size_count;
   test_strip_size = 50;
 
   // clear
@@ -494,7 +494,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Tester(){
 void mRGBAnimator::AnimUpdateMemberFunction_Tester(const AnimationParam& param)
 {    
 
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -548,7 +548,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_F
     
         UpdateStartingColourWithGetPixel();
 
-        uint16_t index_random = random(0,strip_size);
+        uint16_t index_random = random(0,pCONT_iLight->light_size_count);
 
         #ifndef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL //tmp fix
         HsbColor hsb = GetPixelColor(index_random);
@@ -634,7 +634,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_F
     
         // UpdateStartingColourWithGetPixel();
 
-        // uint16_t index_random = random(0,strip_size);
+        // uint16_t index_random = random(0,pCONT_iLight->light_size_count);
 
         // HsbColor hsb = GetPixelColor(index_random);
 
@@ -660,9 +660,9 @@ void mRGBAnimator::AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lowe
   // As integer so the if statement checks will not fail due to rounding errors
   // uint8_t progress_percentage = param.progress*100; 
   // uint8_t brightness_as_percentage = map(pCONT_iLight->getBriRGB(), 0,255, 0,100);
-  // uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,strip_size);
+  // uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->light_size_count);
 
-  //       uint16_t index_random = random(0,strip_size);
+  //       uint16_t index_random = random(0,pCONT_iLight->light_size_count);
 
   // /*
   // 0-10    20-30   40-50   60-70    80-90      //coloured
@@ -687,14 +687,14 @@ void mRGBAnimator::AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lowe
 
   //       // for (uint16_t ii = 0; ii < random_amount; ii++){
   //       //   SetPixelColor(
-  //       //     random(0,strip_size), 
+  //       //     random(0,pCONT_iLight->light_size_count), 
   //       //     HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
   //       //   );
   //       // }
   //     break;
   //     case 0:
   //     case 100:
-  //       for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  //       for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
   //         SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
   //       }
   //     break;
@@ -704,7 +704,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lowe
 
 
    RgbTypeColor updatedColor;
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -731,10 +731,10 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Pulse_Random_On(){
   // Pick new colours
   UpdateDesiredColourFromPaletteSelected();
   // randomly blank most of them out again
-  uint16_t pixels_to_clear = strip_size-GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+  uint16_t pixels_to_clear = pCONT_iLight->light_size_count-pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
   Serial.printf("pixels_to_clear=%d\n\r",pixels_to_clear);
   for(uint16_t index=0; index<pixels_to_clear; index++ ){
-    animation_colours[random(0,strip_size)].DesiredColour = RgbColor(0);
+    animation_colours[random(0,pCONT_iLight->light_size_count)].DesiredColour = RgbColor(0);
   }
   // Check if output multiplying has been set, if so, change desiredcolour array
   OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
@@ -760,7 +760,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_Pulse_Random_On(const AnimationParam
                                   mSupport::mapfloat(param.progress, 0,0.5, 0,1) : 
                                   mSupport::mapfloat(param.progress, 0.5,1, 1,0) ;
 
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         RgbColor(0),
         animation_colours[pixel].DesiredColour,
@@ -804,16 +804,16 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
 
         uint16_t random_pixel_index = 0;
         
-        for(uint16_t index=0; index<strip_size; index++ ){
+        for(uint16_t index=0; index<pCONT_iLight->light_size_count; index++ ){
           animation_colours[index].DesiredColour = GetPixelColor(index);
         }
 
         // randomly blank most of them out again
         uint8_t colour_or_black = 0;
-        uint16_t pixels_to_update = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+        uint16_t pixels_to_update = pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
         Serial.printf("pixels_to_clear=%d\n\r",pixels_to_update);
         for(uint16_t index=0; index<pixels_to_update; index++ ){
-          random_pixel_index = random(0,strip_size);
+          random_pixel_index = random(0,pCONT_iLight->light_size_count);
           colour_or_black = random(0,1);
 
           // // Check if pixels is already on, if so, make dark
@@ -880,7 +880,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
 void mRGBAnimator::AnimUpdateMemberFunction_Pulse_Random_On_2(const AnimationParam& param)
 {    
  RgbTypeColor updatedColor;
-  for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
     updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
@@ -926,7 +926,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleSingleColourRandom(const Anim
   // As integer so the if statement checks will not fail due to rounding errors
   uint8_t progress_percentage = param.progress*100; 
   uint8_t brightness_as_percentage = map(pCONT_iLight->getBriRGB(), 0,255, 0,100);
-  uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,strip_size);
+  uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->light_size_count);
 
   /*
   0-10    20-30   40-50   60-70    80-90      //coloured
@@ -942,7 +942,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleSingleColourRandom(const Anim
       case 90:
         for (uint16_t ii = 0; ii < random_amount; ii++){
           SetPixelColor(
-            random(0,strip_size), 
+            random(0,pCONT_iLight->light_size_count), 
             HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
           );
         }
@@ -952,7 +952,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleSingleColourRandom(const Anim
       case 40:
       case 60:
       case 80: //go back to coloured
-        for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+        for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
           SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
         }
       break;
@@ -1004,7 +1004,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(cons
   // As integer so the if statement checks will not fail due to rounding errors
   uint8_t progress_percentage = param.progress*100; 
   // uint8_t brightness_as_percentage = map(pCONT_iLight->getBriRGB(), 0,255, 0,100);
-  uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,strip_size);
+  uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->light_size_count);
   RgbTypeColor flash_colour = RgbTypeColor(0);
   uint8_t desired_pixel = 0;
   int16_t pixel_position = -1;
@@ -1014,7 +1014,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(cons
   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
 
   
-  // for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+  // for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
   //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
   //       animation_colours[pixel].StartingColor,
   //       animation_colours[pixel].DesiredColour,
@@ -1042,7 +1042,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(cons
           flash_colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
           flash_colour = ApplyBrightnesstoDesiredColour(flash_colour,flashed_brightness);
           SetPixelColor(
-            random(0,strip_size), 
+            random(0,pCONT_iLight->light_size_count), 
             flash_colour
           );
         }
@@ -1052,7 +1052,7 @@ void mRGBAnimator::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(cons
       case 40:
       case 60:
       case 80: //go back to coloured
-        for (uint16_t pixel = 0; pixel < strip_size; pixel++){
+        for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
           SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
         }
       break;
@@ -1112,7 +1112,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All(){
 //             AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
 //             // Change brightness from 0 to 100% (rotate)
 //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
-//             for(ledout.index=0;ledout.index<strip_size;ledout.index++){ desired_colour[ledout.index].B = direction; }            
+//             for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ desired_colour[ledout.index].B = direction; }            
 //             // Change pCONT_iLight->animation speed
 //             if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*100))){
 //               uint8_t values[8] = {1000,1000,2000,2000,6000,6000,3000,3000}; //off,on,off
@@ -1160,7 +1160,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
 //                                                                     0.4,0.6);
 //             }
                         
-//             for(ledout.index=0;ledout.index<strip_size;ledout.index++){ 
+//             for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ 
 //               desired_colour[ledout.index].S = random_saturation; 
 //               desired_colour[ledout.index].B = adjusted_brightness;//random_saturation<0.5?pCONT_iLight->animation.brightness*0.5:pCONT_iLight->animation.brightness; //test, pair "whiter" less bright (maybe /2)  
 //             }            

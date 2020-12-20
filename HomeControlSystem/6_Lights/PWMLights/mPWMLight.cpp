@@ -79,9 +79,9 @@ int8_t mPWMLight::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch_P(data_buffer.topic.ctr,PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_PWM_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_PWM_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
     return FUNCTION_RESULT_HANDLED_ID;
@@ -135,7 +135,7 @@ void mPWMLight::SubTask_Animation(){
     //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
     //   #endif
     //   fAnyLEDsOnOffCount = 0;
-    //   for(int i=0;i<strip_size;i++){ 
+    //   for(int i=0;i<light_size_count;i++){ 
     //     if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
     //   }          
     // }

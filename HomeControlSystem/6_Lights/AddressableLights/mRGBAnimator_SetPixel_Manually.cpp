@@ -121,7 +121,7 @@ uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
       uint16_t pixels_added = 0;
 
       JsonBuilderI->Array_Start("PixelsOn");
-      for(uint16_t i=0;i<strip_size;i++){ 
+      for(uint16_t i=0;i<light_size_count;i++){ 
         if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
           JsonBuilderI->Add(i); 
           if(pixels_added++>50){

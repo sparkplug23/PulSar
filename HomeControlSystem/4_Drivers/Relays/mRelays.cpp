@@ -150,7 +150,7 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
   for(int relay_id=0;relay_id<settings.relays_connected;relay_id++){
 
     if(relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
@@ -164,7 +164,7 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
 
       CommandSet_Relay_Power(1, relay_id);
       
-      #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
       #endif
     }else{
@@ -277,9 +277,9 @@ int8_t mRelays::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-    #endif // #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
     return FUNCTION_RESULT_HANDLED_ID;
@@ -374,8 +374,8 @@ void mRelays::parse_JSONCommand(void){
 void mRelays::CommandSet_Timer_Decounter(uint8_t time_secs, uint8_t relay_id){
   relay_status[relay_id].timer_decounter.seconds = time_secs;
   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
-  #ifdef ENABLE_LOG_LEVEL_INFO_PARSING
-    AddLog_P(LOG_LEVEL_INFO_PARSING, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "%d" D_UNIT_SECOND), relay_status[relay_id].timer_decounter.seconds);  
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "%d" D_UNIT_SECOND), relay_status[relay_id].timer_decounter.seconds);  
   #endif
 }
 

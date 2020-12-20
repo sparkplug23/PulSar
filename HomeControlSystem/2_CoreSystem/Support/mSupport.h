@@ -201,6 +201,24 @@ bool IsWithinRange(T val_to_check, U min_val, V max_val){
 
 // Return new state
 template <typename T, typename U>
+T ModifyStateNumberIfToggled(T* command_state, U check_state){
+
+  if(*command_state == STATE_NUMBER_TOGGLE_ID){
+    if(check_state){
+      *command_state = STATE_NUMBER_OFF_ID;
+    }else{
+      *command_state = STATE_NUMBER_ON_ID;
+    }
+  }
+  // Serial.printf("NOW is %d\n\r",command_state);
+
+  return *command_state; // return new state
+}
+
+
+
+// Return new state
+template <typename T, typename U>
 T ConvertStateNumberIfToggled(T command_state, U check_state){
 
   //Serial.printf("FLIP TO BE %d\n\r",command_state);

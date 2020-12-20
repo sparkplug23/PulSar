@@ -270,7 +270,7 @@ class mRGBAnimator{
 
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
-    uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
+    // uint16_t light_size_count = STRIP_SIZE_MAX; //allow variable control of size
     uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;
     uint16_t animator_strip_size = ANIMATOR_SIZE_MAX; //allow variable control of size
 
@@ -918,9 +918,6 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
 
 
     void WebSave_RGBColourSelector(void);
-    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
-    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
-    
 
     /***
      * Possible bit level packing of enabling or disabling palette colours allowed in a palette

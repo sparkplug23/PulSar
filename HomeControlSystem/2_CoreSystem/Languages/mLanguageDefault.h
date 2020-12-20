@@ -1122,15 +1122,15 @@
 #define D_NEOPIXEL_BLENDRATE "Transition rate "
 #define D_NEOPIXEL_MODE "Mode "
 
-#define D_NEOPIXEL_TRANSITION "Transition/type "
-#define D_NEOPIXEL_SCENE "Scene "
-#define D_NEOPIXEL_HUE "Hue"
-#define D_NEOPIXEL_SAT "Sat"
-#define D_NEOPIXEL_BRT "Brt"
-#define D_NEOPIXEL_RGB "RGB"
-#define D_NEOPIXEL_HSB "HSB"
-#define D_NEOPIXEL_TIME "Time"
-#define D_NEOPIXEL_FLASHER "Flasher"
+// #define D_NEOPIXEL_TRANSITION "Transition/type "
+// #define D_NEOPIXEL_SCENE "Scene "
+// #define D_NEOPIXEL_HUE "Hue"
+// #define D_NEOPIXEL_SAT "Sat"
+// #define D_NEOPIXEL_BRT "Brt"
+// #define D_NEOPIXEL_RGB "RGB"
+// #define D_NEOPIXEL_HSB "HSB"
+// #define D_NEOPIXEL_TIME "Time"
+// #define D_NEOPIXEL_FLASHER "Flasher"
 
 // Class names (only defined if they exist)
 // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
@@ -1392,13 +1392,13 @@
 
 #define D_JSON_ANY "Any"
 
-#define D_JSON_BRT "brt"
 #define D_JSON_CCT_PERCENTAGE "cct_per"
 #define D_JSON_CCT_TEMP "cct_temp"
 
 #define D_JSON_RGBCCT_LINKED "rgbcct_linked"
 
 #define D_JSON_BRIGHTNESS "Brightness"
+#define D_JSON_BRIGHTNESS_255 "Brightness_255"
 #define D_JSON_BRIGHTNESS_PERCENTAGE "brightness_percentage"
 #define D_JSON_CLIMATE "climate"
 #define D_JSON_CLASSID "ClassID"
@@ -1413,6 +1413,10 @@
 #define D_JSON_DEVICE "Device"
 #define D_JSON_DEVICEID "DeviceID"
 #define D_JSON_DEVICES_CONNECTED "DevicesConnected"
+
+#define D_JSON_SCENE "Scene"
+#define D_JSON_COLOUR "Colour"
+
 
 
 #define D_JSON_HEATING_DEVICE "HeatingDevice"
@@ -1438,7 +1442,9 @@
 #define D_JSON_BRIGHTNESS_MIN "BrightnessMin"
 #define D_JSON_BRIGHTNESS_MAX "BrightnessMax"
 #define D_JSON_BRIGHTNESS_RGB "BrightnessRGB"
+#define D_JSON_BRIGHTNESS_RGB_255 "BrightnessRGB255"
 #define D_JSON_BRIGHTNESS_CCT  "BrightnessCCT"
+#define D_JSON_BRIGHTNESS_CCT255  "BrightnessCCT255"
 #define D_JSON_RANDOM_AMOUNT "RandomAmount"
 
 #define D_JSON_RUNNING_ID "RunningID"
@@ -1533,6 +1539,7 @@
   #define D_JSON_MOTION_NAME "Motion Name"
 
 #define D_JSON_SAT "Sat"
+#define D_JSON_SAT255 "Sat255"
 #define D_JSON_SECONDS "seconds"
 #define D_JSON_SET "Set"
 #define D_JSON_SENS1 "sens1"
@@ -1595,8 +1602,8 @@
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 
 
-#define D_JSON_HARDWARE_TYPE "hardware_type"
-#define D_JSON_STRIP_SIZE "strip_size"
+#define D_JSON_HARDWARE_TYPE "HardwareType"
+#define D_JSON_STRIP_SIZE "LightSize"
 #define D_JSON_RGB_COLOUR_ORDER "colour_order"
 #define D_JSON_STRIP_REPEAT "strip_repeat"
 
@@ -1875,6 +1882,7 @@
 #define D_JSON_LATITUDE "Latitude"
 #define D_JSON_LONGITUDE "Longitude"
 
+#define D_JSON_DESERIALIZATION_ERROR "DeserializationError"
 
 
   #define D_WEBARG_SCENE_HUE "mrgbanimator::scene_hue"
