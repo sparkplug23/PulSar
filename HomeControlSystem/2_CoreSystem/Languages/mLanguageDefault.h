@@ -1452,6 +1452,8 @@
 #define D_JSON_SEQUENTIAL "Sequential"
 #define D_JSON_DIRECTION "Direction"
 
+#define D_RGB_DATA_STREAM "RGBDataStream"
+
 #define D_JSON_ALTERNATE "Alternate"
 #define D_JSON_ALTERNATE_AMOUNT "AlternateAmount"
 #define D_JSON_ALTERNATE_BRIGHTNESS_MIN "AlternateBrightnessMin"

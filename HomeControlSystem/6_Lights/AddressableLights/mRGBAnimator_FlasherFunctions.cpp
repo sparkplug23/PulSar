@@ -1184,6 +1184,613 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
 
 
 
+
+// simple blend function
+void mRGBAnimator::AnimUpdateMemberFunction(const AnimationParam& param)
+{    
+  // if(param.progress == 0){ // 0%   = Starting
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, animation_colours[pixel].StartingColor);
+  //   }
+  // }else
+  // if(param.progress == 1){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
+  //   }
+  // }
+}
+
+void mRGBAnimator::AnimUpdateMemberFunction_TraditionalChasing(const AnimationParam& param)
+{    
+
+  // As integer so the if statement checks will not fail due to rounding errors
+  uint8_t progress_percentage = param.progress*100; 
+
+
+  // if(progress_percentage == 0){ // 0%   = Starting
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(255,0,0));//animation_colours[pixel].StartingColor);
+  //   }
+  // }else
+  // if(progress_percentage == 25){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(0,255,0));
+  //   }
+  // }else
+  // if(progress_percentage == 50){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(0,0,255));
+  //   }
+  // }else
+  // if(progress_percentage == 75){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(255,0,255));
+  //   }
+  // }
+
+
+    // for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+    //   SetPixelColor(pixel, RgbTypeColor(0,0,0));
+    // }
+
+
+  if(progress_percentage == 0){ // 0%   = Starting
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      switch(pixel%4){
+        case 0: SetPixelColor(pixel, RgbTypeColor(255,0,0)); break;
+        case 1: SetPixelColor(pixel, RgbTypeColor(0,255,0)); break;
+        case 2: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 3: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+      }
+      
+    }
+  }else
+  if(progress_percentage == 25){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      switch(pixel%4){
+        case 0: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 1: SetPixelColor(pixel, RgbTypeColor(0,255,0)); break;
+        case 2: SetPixelColor(pixel, RgbTypeColor(0,0,255)); break;
+        case 3: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+      }
+    }
+  }else
+  if(progress_percentage == 50){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      switch(pixel%4){
+        case 0: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 1: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 2: SetPixelColor(pixel, RgbTypeColor(0,0,255)); break;
+        case 3: SetPixelColor(pixel, RgbTypeColor(255, 153, 0)); break;
+      }
+    }
+  }else
+  if(progress_percentage == 75){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      switch(pixel%4){
+        case 0: SetPixelColor(pixel, RgbTypeColor(255,0,0)); break;
+        case 1: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 2: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+        case 3: SetPixelColor(pixel, RgbTypeColor(255, 153, 0)); break;
+      }
+    }
+  }
+
+
+
+  // else
+  // if(param.progress == 1){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(255,255,255));
+  //   }
+  // }
+
+  
+    // for (uint16_t pixel = 1; pixel < pCONT_iLight->light_size_count; pixel++){
+    //   SetPixelColor(pixel, RgbTypeColor(0,0,0));
+    // }
+
+
+
+}
+
+
+void mRGBAnimator::AnimUpdateMemberFunction_TraditionalChasing2(const AnimationParam& param)
+{    
+
+  // As integer so the if statement checks will not fail due to rounding errors
+  uint8_t progress_percentage = param.progress*100; 
+
+    // for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+    //   SetPixelColor(pixel, RgbTypeColor(0,0,0));
+    // }
+
+  if(progress_percentage == 0){ // 0%   = Starting
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      SetPixelColor(pixel, RgbTypeColor(255,0,0));//animation_colours[pixel].StartingColor);
+    }
+  }else
+  if(progress_percentage == 25){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      SetPixelColor(pixel, RgbTypeColor(0,255,0));
+    }
+  }else
+  if(progress_percentage == 50){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      SetPixelColor(pixel, RgbTypeColor(0,0,255));
+    }
+  }else
+  if(progress_percentage == 75){ // 100% = Finishing
+    for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+      SetPixelColor(pixel, RgbTypeColor(255,0,255));
+    }
+  }
+
+
+
+
+  // if(progress_percentage == 0){ // 0%   = Starting
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     switch(pixel%4){
+  //       case 0: SetPixelColor(pixel, RgbTypeColor(255,0,0)); break;
+  //       case 1: SetPixelColor(pixel, RgbTypeColor(0,255,0)); break;
+  //       case 2: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 3: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //     }
+      
+  //   }
+  // }else
+  // if(progress_percentage == 25){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     switch(pixel%4){
+  //       case 0: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 1: SetPixelColor(pixel, RgbTypeColor(0,255,0)); break;
+  //       case 2: SetPixelColor(pixel, RgbTypeColor(0,0,255)); break;
+  //       case 3: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //     }
+  //   }
+  // }else
+  // if(progress_percentage == 50){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     switch(pixel%4){
+  //       case 0: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 1: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 2: SetPixelColor(pixel, RgbTypeColor(0,0,255)); break;
+  //       case 3: SetPixelColor(pixel, RgbTypeColor(255, 153, 0)); break;
+  //     }
+  //   }
+  // }else
+  // if(progress_percentage == 75){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     switch(pixel%4){
+  //       case 0: SetPixelColor(pixel, RgbTypeColor(255,0,0)); break;
+  //       case 1: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 2: SetPixelColor(pixel, RgbTypeColor(0,0,0)); break;
+  //       case 3: SetPixelColor(pixel, RgbTypeColor(255, 153, 0)); break;
+  //     }
+  //   }
+  // }
+
+
+
+  // else
+  // if(param.progress == 1){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, RgbTypeColor(255,255,255));
+  //   }
+  // }
+
+  
+    // for (uint16_t pixel = 1; pixel < pCONT_iLight->light_size_count; pixel++){
+    //   SetPixelColor(pixel, RgbTypeColor(0,0,0));
+    // }
+
+
+
+}
+
+
+
+
+
+
+// simple blend function
+void mRGBAnimator::AnimUpdate_ShowStartingThenDesiredColors(const AnimationParam& param)
+{    
+  // if(param.progress == 0){ // 0%   = Starting
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, animation_colours[pixel].StartingColor);
+  //   }
+  // }else
+  // if(param.progress == 1){ // 100% = Finishing
+  //   for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  //     SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
+  //   }
+  // }
+}
+
+
+
+// simple blend function
+void mRGBAnimator::BlendAnimUpdate(const AnimationParam& param)
+{    
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);
+    SetPixelColor(pixel, updatedColor);
+  } // END for
+}
+
+
+
+
+
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Sequential(){
+
+//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+  
+//   flashersettings.flag_finish_flasher_pair = false;
+//   flashersettings.flags.enable_random_rate = true;
+  
+//   do{ //must complete the pair together //move inside functions
+//     switch(flashersettings.region){
+//       case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+//         #ifdef ENABLE_LOG_LEVEL_DEBUG
+//         AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+//         #endif
+//         UpdateDesiredColourFromPaletteSelected();
+//         flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+//       break;
+//       case FLASHER_REGION_ANIMATE_ID: //shift along
+//         #ifdef ENABLE_LOG_LEVEL_DEBUG
+//         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+//         #endif
+//         RotateDesiredColour(1,flashersettings.flags.movement_direction);
+//         if(flashersettings.flags.force_finish_flasher_pair_once){
+//           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           flashersettings.flags.force_finish_flasher_pair_once = false;
+//         }
+//       break;
+//     }
+//   }while(flashersettings.flag_finish_flasher_pair || flashersettings.flags.force_finish_flasher_pair_once);
+
+// }
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
+
+//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
+
+//   flashersettings.flag_finish_flasher_pair = false;
+//   flashersettings.flags.enable_random_rate = true;
+
+//   // Best "inorder" to compute colour again then brightness
+  
+//   do{ //must complete the pair together //move inside functions
+//     switch(flashersettings.region){
+//       case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+//         #ifdef ENABLE_LOG_LEVEL_DEBUG
+//         AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+//         #endif
+//         UpdateDesiredColourFromPaletteSelected();
+//         flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+//       break;
+//       case FLASHER_REGION_ANIMATE_ID: //shift along
+//         #ifdef ENABLE_LOG_LEVEL_DEBUG
+//         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+//         #endif
+//         // RotateDesiredColour(1,flashersettings.flags.movement_direction);
+
+//         // Calculate new pattern to change
+//         RefreshLEDIndexPattern();
+
+//         // Global brightness is already applied, and will be known as "max range"
+//         // Min range will be another map change here
+//         uint8_t max_brightness = pCONT_iLight->getBriRGB();
+//         uint8_t min_brightness = flashersettings.brightness_min;
+//         uint8_t random_brightness = 0;
+
+//         if(min_brightness > max_brightness){
+//           min_brightness = max_brightness;
+//         }
+
+//         // Change only selected pixel brightness levels
+//         for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
+//           random_brightness = random(min_brightness,max_brightness);          
+//           animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(
+//                                                                               animation_colours[ledout.pattern[ledout.index]].DesiredColour,
+//                                                                               random_brightness);
+//         }
+
+//         if(flashersettings.flags.force_finish_flasher_pair_once){
+//           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           flashersettings.flags.force_finish_flasher_pair_once = false;
+//         }
+//       break;
+//     }
+//   }while(flashersettings.flag_finish_flasher_pair || flashersettings.flags.force_finish_flasher_pair_once);
+
+
+// }
+
+
+// // Fade solid colour from 0 to 75%, and a palette from 25 to 100% (50% overlap)
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Fade_Gradient(){
+    
+// #ifdef ENABLE_FLASHER_ANIMATE_FUNCTION_FADE_GRADIENT
+
+//   flashersettings.flag_finish_flasher_pair = false;
+//   flashersettings.flags.enable_random_rate = true;
+  
+//   // Apply green gradient, brightest at start
+
+//   uint16_t start = pCONT_iLight->light_size_count/2;
+//   uint16_t end = pCONT_iLight->light_size_count; 
+//   RgbTypeColor colour_gradient = HsbColor(
+//                                           pCONT_iLight->HueN2F(120),
+//                                           pCONT_iLight->SatN2F(100),
+//                                           pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100))  
+//                                           );
+//   RgbTypeColor colour_random = RgbTypeColor(255,0,0); 
+//   HsbColor colour_random_adjusted = HsbColor(0);
+//   uint8_t gradient_end_percentage = 75;
+//   uint16_t strip_size_gradient = pCONT_iLight->light_size_count*(gradient_end_percentage/100.0f);
+//   uint16_t strip_size_single   = pCONT_iLight->light_size_count*(75/100.0f);
+  
+//   start = 0;
+//   end = pCONT_iLight->light_size_count;
+//   for(ledout.index=start;ledout.index<end;ledout.index++){ 
+//     animation_colours[ledout.index].DesiredColour = RgbTypeColor(0);
+//   }
+  
+//   //0 to 75% 
+//   start = 0;
+//   end = map(75,0,100,0,pCONT_iLight->light_size_count);
+//   for(ledout.index=start;ledout.index<end;ledout.index++){ 
+//     animation_colours[ledout.index].DesiredColour.R = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.R,0));
+//     animation_colours[ledout.index].DesiredColour.G = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.G,0));
+//     animation_colours[ledout.index].DesiredColour.B = pCONT_iLight->ledGamma(map(ledout.index,start,end,colour_gradient.B,0));
+//   }
+
+//   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   uint8_t pixels = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+//   uint8_t desired_pixel;
+  
+//   // 25 to 100%
+//   start = map(25,0,100,0,pCONT_iLight->light_size_count);
+//   end = pCONT_iLight->light_size_count;
+//   for(ledout.index=start;ledout.index<end;ledout.index++){ 
+//     desired_pixel = random(0,pixels-1);
+//     colour_random = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel);
+//     if((ledout.index%3)==0){
+//       colour_random_adjusted = RgbTypeColor(colour_random);
+//       colour_random_adjusted.B = pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100));
+//       animation_colours[ledout.index].DesiredColour = colour_random_adjusted;
+//     }
+//   }
+
+//   #endif
+
+// }
+
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Random(){
+
+// // #ifdef ENABLE_ADVANCED_MODE_TWINKLE // creating this to reduce "white_leds_index" size
+
+//   switch(flashersettings.region){
+//     case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+//       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+//       UpdateDesiredColourFromPaletteSelected();
+//       flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+//       pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+
+//       flash_twinkle_random.white_pixel_amount = 8; //how often the leds are
+//       // by percentage
+//       //flash_twinkle_random.white_pixel_amount = pCONT_iLight->light_size_count/5;
+
+//       // Generate ledindex for white flashers
+//       flash_twinkle_random.white_total_index = 0;
+//       for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ 
+//         //map type of led they are by numnber 0=off,1=white,2=colour
+//         if(!(ledout.index%flash_twinkle_random.white_pixel_amount)){
+//           flash_twinkle_random.white_leds_index[flash_twinkle_random.white_total_index] = ledout.index;
+//           flash_twinkle_random.stored_colours_index[flash_twinkle_random.white_total_index] = desired_colour[ledout.index];
+//           //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
+//           flash_twinkle_random.white_total_index++;
+//         }              
+//       }   
+                  
+//       //flash_twinkle_random.flash_colour = HsbColor(0,0,1); //white
+
+//       // Test clear
+//       // for(int ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ desired_colour[ledout.index] = HsbColor(RgbColor(0,0,0)); }
+
+//       flashersettings.flag_finish_flasher_pair = true; // must complete regions
+      
+//     break;
+
+//     case FLASHER_REGION_ANIMATE_ID: //shift along
+//       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+
+//       // Reset all back to colour first 
+//       for(int jj=0;jj<flash_twinkle_random.white_total_index;jj++){
+//         desired_colour[flash_twinkle_random.white_leds_index[jj]] = flash_twinkle_random.stored_colours_index[jj];
+//       }
+
+//       // Pick 10 random of the leds to turn to white
+
+      
+//       for(int jj=0;jj<10;jj++){
+//         uint16_t led_rand = random(0,flash_twinkle_random.white_total_index);
+//         desired_colour[flash_twinkle_random.white_leds_index[led_rand]] = flash_twinkle_random.flash_colour;
+//       }
+
+//       flash_twinkle_random.white_on_index++;
+//       if(flash_twinkle_random.white_on_index>=flash_twinkle_random.white_pixel_amount){
+//         flash_twinkle_random.white_on_index = 0;
+//         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; // Wrap back
+//       }
+
+//       flashersettings.flag_finish_flasher_pair = false; // must complete regions
+
+//       // Change pCONT_iLight->animation speed
+//       if(mTime::TimeReached(&flashersettings.function_flash_twinkle.tSavedNewSpeedUpdate,random(0,1)?5000:10000)){//(random(5,10)*1000))){
+//         pCONT_iLight->animation.transition.rate_ms.val = random(0,1)?10:150; // will need to be very fast
+//         pCONT_iLight->animation.transition.time_ms.val = 0; //instant
+//       }
+//     break;
+//   }
+
+//   // #endif
+
+// }
+
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Twinkle_Sequential(){
+  
+// //       case FLASHER_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID:
+// //         switch(flashersettings.region){
+// //           case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+// //             UpdateDesiredColourFromPaletteSelected();
+// //             flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+// //             pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
+
+// //             flash_twinkle_random.white_pixel_amount = 7; //how often the leds are
+// //             // by percentage
+// //             //flash_twinkle_random.white_pixel_amount = pCONT_iLight->light_size_count/5;
+
+// //             // Generate ledindex for white flashers
+// //             flash_twinkle_random.white_total_index = 0;
+// //             for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ 
+// //               //map type of led they are by numnber 0=off,1=white,2=colour
+// //               if(!(ledout.index%flash_twinkle_random.white_pixel_amount)){
+// //                 flash_twinkle_random.white_leds_index[flash_twinkle_random.white_total_index] = ledout.index;
+// //                 flash_twinkle_random.stored_colours_index[flash_twinkle_random.white_total_index] = desired_colour[ledout.index];
+// //                 //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
+// //                 flash_twinkle_random.white_total_index++;
+// //               }              
+// //             }   
+                        
+// //             //flash_twinkle_random.flash_colour = HsbColor(0,0,1); //white
+// //             //flash_twinkle_random.flash_colour = HsbColor(HueN2F(HUE_HOTPINK),SatN2F(100),BrtN2F(100));
+
+// //             // Test clear
+// //             // for(int ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ desired_colour[ledout.index] = HsbColor(RgbColor(0,0,0)); }
+
+// //             flashersettings.flag_finish_flasher_pair = true; // must complete regions
+            
+// //           break;
+// //           case FLASHER_REGION_ANIMATE_ID: //shift along
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+    
+            
+// //             for(int jj=0;jj<flash_twinkle_random.white_total_index;jj++){
+// //               if((jj%flash_twinkle_random.white_pixel_amount)==flash_twinkle_random.white_on_index){
+// //                 desired_colour[flash_twinkle_random.white_leds_index[jj]] = flash_twinkle_random.flash_colour;
+// //               }else{
+// //                 desired_colour[flash_twinkle_random.white_leds_index[jj]] = flash_twinkle_random.stored_colours_index[jj];//offcolour;
+// //               }
+// //               // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "leds_index=%d on/amount=%d/%d on=%d"),
+// //               // flash_twinkle_random.white_leds_index[jj],
+// //               // flash_twinkle_random.white_on_index,
+// //               // flash_twinkle_random.white_pixel_amount,
+// //               // (jj%flash_twinkle_random.white_pixel_amount)==0?1:0);
+// //             }
+
+// //             flash_twinkle_random.white_on_index++;
+// //             if(flash_twinkle_random.white_on_index>=flash_twinkle_random.white_pixel_amount){
+// //               flash_twinkle_random.white_on_index = 0;
+// //               flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID; // Wrap back
+// //             }
+
+// //             flashersettings.flag_finish_flasher_pair = false; // must complete regions
+
+// //             // Change pCONT_iLight->animation speed
+// //             if(mTime::TimeReached(&flashersettings.function_flash_twinkle.tSavedNewSpeedUpdate,random(0,1)?5000:10000)){//(random(5,10)*1000))){
+// //               pCONT_iLight->animation.transition.rate_ms = 90;//random(0,1)?30:30; // will need to be very fast
+// //               pCONT_iLight->animation.transition.time_ms = 0; //instant
+// //             }
+// //           break;
+// //         }
+// //       break;
+
+// }
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All(){
+     
+      
+// //       case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
+// //         switch(flashersettings.region){
+// //           case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+// //             UpdateDesiredColourFromPaletteSelected();
+// //             flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+// //           break;
+// //           case FLASHER_REGION_ANIMATE_ID: //shift along
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+// //             // Change brightness from 0 to 100% (rotate)
+// //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
+// //             for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ desired_colour[ledout.index].B = direction; }            
+// //             // Change pCONT_iLight->animation speed
+// //             if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*100))){
+// //               uint8_t values[8] = {1000,1000,2000,2000,6000,6000,3000,3000}; //off,on,off
+// //               pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
+// //               if(flashersettings.function_seq.rate_index>=8) flashersettings.function_seq.rate_index=0;
+// //               pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms;///4; // brightness shift takes 100% of the time (no colour shift)
+// //             }
+// //           break;
+// //         }
+// //       break;
+// }
+
+
+// void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All(){
+      
+// //       case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
+// //         switch(flashersettings.region){
+// //           case FLASHER_REGION_COLOUR_SELECT_ID: //set colours
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_COLOUR_SELECT"));
+// //             UpdateDesiredColourFromPaletteSelected();
+// //             flashersettings.region = FLASHER_REGION_ANIMATE_ID;
+// //           break;
+// //           case FLASHER_REGION_ANIMATE_ID: //shift along
+// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
+// //             // Change brightness from 0 to 100% (rotate)
+// //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
+// //             float random_saturation = direction ? 1 : ((float)random(0,100)/(float)100);
+
+// //             float adjusted_brightness = random_saturation;// mSupport::mapfloat(random_saturation,
+// //             if(random_saturation<0.6){
+// //               adjusted_brightness = mSupport::mapfloat(random_saturation,
+// //                                                                     0,  0.6,
+// //                                                                     0.4,0.6);
+// //             }
+                        
+// //             for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ 
+// //               desired_colour[ledout.index].S = random_saturation; 
+// //               desired_colour[ledout.index].B = adjusted_brightness;//random_saturation<0.5?pCONT_iLight->animation.brightness*0.5:pCONT_iLight->animation.brightness; //test, pair "whiter" less bright (maybe /2)  
+// //             }            
+// //             // Change pCONT_iLight->animation speed
+// //             //if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*100))){
+// //               uint16_t values[8] = {7,7,9,9,7,7,4,4}; //off,on,off
+// //               pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*1000;
+// //               if(flashersettings.function_seq.rate_index>=8) flashersettings.function_seq.rate_index=0;
+// //               // holds colour more
+// //               //pCONT_iLight->animation.transition.time_ms = direction ? (pCONT_iLight->animation.transition.rate_ms.val/4) : (pCONT_iLight->animation.transition.rate_ms.val); // brightness shift takes 100% of the time (no colour shift)
+// //               pCONT_iLight->animation.transition.time_ms = random(0,1) ? (pCONT_iLight->animation.transition.rate_ms.val/4) : (pCONT_iLight->animation.transition.rate_ms.va;); // brightness shift takes 100% of the time (no colour shift)
+// //             //}
+// //           break;
+// //         }
+// //       break;
+// //       //flasher_start_white_to_Colour: 
+// //         // method that will start all leds on one colour (white?) and slowly add colours in with fade in
+// //       //flasher_change_saturation_between 0 and 100, "fade of saturation", "fade of brightness"
+
+// }
 #endif //USE_MODULE_LIGHTS_ADDRESSABLE
 
 

@@ -33,7 +33,7 @@
 #ifndef DISABLE_PIXEL_FUNCTION_FLASHER 
   #define ENABLE_PIXEL_FUNCTION_FLASHER
 #endif // DISABLE_PIXEL_FUNCTION_FLASHER
-
+#define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
 // #define ENABLE_PIXEL_FUNCTION_FLASHER
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -310,34 +310,38 @@ class mRGBAnimator{
     // };
     
 
-  #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
-  uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
   
-  typedef union {
-    uint16_t data; // allows full manipulating
-    struct { 
-      // enable animations (pause)
-      uint16_t fEnabled : 1;
-      /**
-       * 0 - None
-       * 1 - Basic multiplier
-       * 2 - Using mapped index array 
-      */
-      uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
-      uint16_t mapped_array_editable_or_progmem : 1;
-    };
-  } PIXEL_GROUPED_FLAGS;
+  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+    #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
+    uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
+    
+    typedef union {
+      uint16_t data; // allows full manipulating
+      struct { 
+        // enable animations (pause)
+        uint16_t fEnabled : 1;
+        /**
+         * 0 - None
+         * 1 - Basic multiplier
+         * 2 - Using mapped index array 
+        */
+        uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
+        uint16_t mapped_array_editable_or_progmem : 1;
+      };
+    } PIXEL_GROUPED_FLAGS;
+    
+    struct PIXEL_GROUPED{
+      uint8_t method_id = 0;
+      uint8_t multiplier = 5; // nearby pixels repeat colours
+      struct MAPPED_ARRAY_DATA{
+        uint16_t* values = nullptr;
+        uint8_t  index = 0;
+        uint8_t  length = 0;
+      }mapped_array_data;
+      PIXEL_GROUPED_FLAGS flags;
+    }pixel_group;
   
-  struct PIXEL_GROUPED{
-    uint8_t method_id = 0;
-    uint8_t multiplier = 5; // nearby pixels repeat colours
-    struct MAPPED_ARRAY_DATA{
-      uint16_t* values = nullptr;
-      uint8_t  index = 0;
-      uint8_t  length = 0;
-    }mapped_array_data;
-    PIXEL_GROUPED_FLAGS flags;
-  }pixel_group;
+  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   
 
 
@@ -413,7 +417,7 @@ class mRGBAnimator{
   enum FLASHER_FUNCTION_IDS{
     FLASHER_FUNCTION_NONE_ID = 0,
     FLASHER_FUNCTION_SLOW_GLOW_ID, // solid colours, 1 100%, moving from previous to next
-    FLASHER_FUNCTION_SEQUENTIAL_ID, //instant, or faded (ie INWAVES) // FLASHER_FUNCTION_SEQUENTIAL_FLASH_ID, //FLASHER_FUNCTION_CHASING_FLASH_ID,
+  FLASHER_FUNCTION_SEQUENTIAL_ID, //instant, or faded (ie INWAVES) // FLASHER_FUNCTION_SEQUENTIAL_FLASH_ID, //FLASHER_FUNCTION_CHASING_FLASH_ID,
     FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID, // change ALL, 0 - 100%
     FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID, // change ALL, 0 - 100%
@@ -838,8 +842,30 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     int8_t Tasker(uint8_t function);
     int8_t Tasker_Web(uint8_t function);
 
+
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
+    
+  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+    void CommandSet_Flasher_FunctionID(uint8_t value);
+    void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value);
+    void CommandSet_Flasher_Flags_Movement_Direction(uint8_t value);
+    void CommandSet_Flasher_Brightness_Min(uint8_t value);
+    void CommandSet_Flasher_Brightness_Max(uint8_t value);
+    void CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value);
+    void CommandSet_Flasher_Alternate_Brightness_Max(uint8_t value);
+    void CommandSet_Flasher_Alternate_RandomAmountPercentage(uint8_t value);
+    void CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPaletteColours(uint8_t value);
+    
+  #endif // ENABLE_PIXEL_FUNCTION_FLASHER
+
+
+  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+  void CommandSet_PixelGrouping_Flag_AgedColouring(uint8_t value);
+  void CommandSet_PixelGrouping_Flag_ModeID(uint8_t value);
+  void CommandSet_PixelGrouping_Flag_Multiplier(uint8_t value);
+  void CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* value, uint8_t length);
+  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
 
     

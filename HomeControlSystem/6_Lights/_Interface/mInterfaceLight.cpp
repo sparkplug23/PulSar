@@ -350,6 +350,8 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
   auto_time_off_secs = 0;
   
+
+
   init_Scenes();
 
   init_PresetColourPalettes();
@@ -451,6 +453,8 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
 // changeBri(0); //default off
 
+  //create copy for pCONT_iLight->animation stored
+  memcpy(&animation_stored,&animation,sizeof(animation_stored));// RESTORE copy of state
 
 } //light_init
 
@@ -837,7 +841,13 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   if(jtok = obj[PM_JSON_LIGHTPOWER]){
-    int8_t state = pCONT_sup->GetStateNumber(jtok.getStr());
+    int8_t state = 0;
+    if(jtok.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok.getStr());
+    }else
+    if(jtok.isNum()){
+      state = jtok.getInt(); 
+    }
     ModifyStateNumberIfToggled(&state, light_power_state);
     CommandSet_LightPowerState(state);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -876,6 +886,23 @@ void mInterfaceLight::parse_JSONCommand(void){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+
+  
+  if(jtok = obj[PM_JSON_ANIMATIONENABLE]){ 
+    int8_t state = 0;
+    if(jtok.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok.getStr());
+    }else
+    if(jtok.isNum()){
+      state = jtok.getInt(); 
+    }
+    ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
+    CommandSet_Flag_EnabledAnimation(state);
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
   
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
     if(jtok.isStr()){

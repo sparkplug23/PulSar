@@ -124,7 +124,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
       animation_override.time_ms = 1000; //force fast rate to turn on
       changeBri(255);
       animation.flags.fForceUpdate = true;
-      pCONT_ladd->first_set = 1;//set all
+      //pCONT_ladd->first_set = 1;//set all
 
       light_power_state = true;
 
@@ -253,6 +253,15 @@ void mInterfaceLight::CommandSet_SceneColour_Raw(uint8_t* values){
 
 }
 
+void mInterfaceLight::CommandSet_Flag_EnabledAnimation(uint8_t value){
+
+  animation.flags.fEnable_Animation = value;
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), animation.flags.fEnable_Animation);    
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+}
 
 void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
     

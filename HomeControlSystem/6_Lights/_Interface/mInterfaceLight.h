@@ -578,6 +578,8 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value);
     void CommandSet_TransitionOrderID(uint8_t value);
     void CommandSet_SceneColour_Raw(uint8_t* values);
+    void CommandSet_Flag_EnabledAnimation(uint8_t value);
+    
 
 
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);

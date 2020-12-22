@@ -858,11 +858,11 @@ int8_t mInterfaceLight::CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr){
 
 // Check for friendly names first
 const char* mInterfaceLight::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   return GetPaletteFriendlyNameByID(animation.palette_id, buffer, buflen);
-  #else
-  return GetPaletteFriendlyNameByID(0, buffer);
-  #endif
+  // #else
+  // return GetPaletteFriendlyNameByID(0, buffer);
+  // #endif
 } 
 const char* mInterfaceLight::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8_t buflen){
 

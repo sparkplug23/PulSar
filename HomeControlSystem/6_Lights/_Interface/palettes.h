@@ -1203,9 +1203,7 @@
       255, 0, 72,  // hot pink
       236, 19, 19, // pastel red
       252, 44, 3,  //
-      252, 157, 3, // warm yellow  
-      //255, 15, 15, // christmas pink
-      //255, 26, 64, // christmas pink
+      252, 157, 3, // warm yellow
       255, 0, 250  // Purple
     };
 

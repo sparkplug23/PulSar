@@ -46,8 +46,8 @@
 //#define DEVICE_RGBUTILITY
 //#define DEVICE_RGBFRIDGE              
 // #define DEVICE_RGBBEDROOMFLOOR
-// #define DEVICE_H801_TESTER
- #define DEVICE_RGBCUSTOM_USER_01
+#define DEVICE_H801_TESTER
+// #define DEVICE_RGBCUSTOM_USER_01
 
 /**
  *  CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- 
@@ -437,6 +437,10 @@
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  // Advanced options  
+  //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
   

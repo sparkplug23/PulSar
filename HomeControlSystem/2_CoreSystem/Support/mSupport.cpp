@@ -7,6 +7,15 @@ int8_t mSupport::Tasker(uint8_t function){
   switch(function){
     case FUNC_INIT:
       // fSendTemplatesOnce = true;
+
+      
+#ifdef ESP8266
+  randomSeed(analogRead(0));
+#else
+  randomSeed(analogRead(34)); //esp32
+#endif
+
+
     break;
     case FUNC_LOOP: {
 

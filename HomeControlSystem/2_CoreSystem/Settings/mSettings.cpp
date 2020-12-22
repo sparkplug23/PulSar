@@ -1592,6 +1592,9 @@ void mSettings::SettingsDefault(void)
     pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
     DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
+    
+    pCONT_set->SettingsSave(2);
+    
     DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
