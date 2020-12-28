@@ -41,59 +41,60 @@
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef NeoRgbFeature selectedNeoFeatureType;
 #elif defined(PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL)   //includes 4th channel of white, pixel order variable still important
-  typedef NeoGrbwFeature selectedNeoFeatureType;
+  // typedef NeoGrbwFeature selectedNeoFeatureType; 
+  typedef NeoRgbwFeature selectedNeoFeatureType;
 #else
   typedef NeoGrbFeature selectedNeoFeatureType;
 #endif
 
-    enum TIME_MAP_SECS_IDS{
-      TIME_MAP_SECS_0_ID = 0,
-      TIME_MAP_SECS_1_ID,
-      TIME_MAP_SECS_2_ID,
-      TIME_MAP_SECS_4_ID,
-      TIME_MAP_SECS_6_ID,
-      TIME_MAP_SECS_10_ID,
-      TIME_MAP_SECS_15_ID,
-      TIME_MAP_SECS_20_ID,
-      TIME_MAP_SECS_30_ID,
-      TIME_MAP_SECS_60_ID,
-      TIME_MAP_SECS_LENGTH_ID
-    };
-    const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+  enum TIME_MAP_SECS_IDS{
+    TIME_MAP_SECS_0_ID = 0,
+    TIME_MAP_SECS_1_ID,
+    TIME_MAP_SECS_2_ID,
+    TIME_MAP_SECS_4_ID,
+    TIME_MAP_SECS_6_ID,
+    TIME_MAP_SECS_10_ID,
+    TIME_MAP_SECS_15_ID,
+    TIME_MAP_SECS_20_ID,
+    TIME_MAP_SECS_30_ID,
+    TIME_MAP_SECS_60_ID,
+    TIME_MAP_SECS_LENGTH_ID
+  };
+  const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
 
-    enum RATE_MAP_SECS_IDS{
-      RATE_MAP_SECS_0_ID = 0,
-      RATE_MAP_SECS_1_ID,
-      RATE_MAP_SECS_2_ID,
-      RATE_MAP_SECS_4_ID,
-      RATE_MAP_SECS_6_ID,
-      RATE_MAP_SECS_10_ID,
-      RATE_MAP_SECS_15_ID,
-      RATE_MAP_SECS_20_ID,
-      RATE_MAP_SECS_30_ID,
-      RATE_MAP_SECS_60_ID,
-      RATE_MAP_SECS_LENGTH_ID
-    };
-    const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+  enum RATE_MAP_SECS_IDS{
+    RATE_MAP_SECS_0_ID = 0,
+    RATE_MAP_SECS_1_ID,
+    RATE_MAP_SECS_2_ID,
+    RATE_MAP_SECS_4_ID,
+    RATE_MAP_SECS_6_ID,
+    RATE_MAP_SECS_10_ID,
+    RATE_MAP_SECS_15_ID,
+    RATE_MAP_SECS_20_ID,
+    RATE_MAP_SECS_30_ID,
+    RATE_MAP_SECS_60_ID,
+    RATE_MAP_SECS_LENGTH_ID
+  };
+  const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
 
-    enum PIXELS_UPDATE_PERCENTAGE_IDS{
-      PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
-      PIXELS_UPDATE_PERCENTAGE_5_ID,
-      PIXELS_UPDATE_PERCENTAGE_10_ID,
-      PIXELS_UPDATE_PERCENTAGE_15_ID,
-      PIXELS_UPDATE_PERCENTAGE_20_ID,
-      PIXELS_UPDATE_PERCENTAGE_30_ID,
-      PIXELS_UPDATE_PERCENTAGE_40_ID,
-      PIXELS_UPDATE_PERCENTAGE_50_ID,
-      PIXELS_UPDATE_PERCENTAGE_60_ID,
-      PIXELS_UPDATE_PERCENTAGE_70_ID,
-      PIXELS_UPDATE_PERCENTAGE_80_ID,
-      PIXELS_UPDATE_PERCENTAGE_90_ID,
-      PIXELS_UPDATE_PERCENTAGE_100_ID,
-      PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
-    };
-    const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
-      {0,5,10,15,20,30,40,50,60,70,80,90,100};
+  enum PIXELS_UPDATE_PERCENTAGE_IDS{
+    PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
+    PIXELS_UPDATE_PERCENTAGE_5_ID,
+    PIXELS_UPDATE_PERCENTAGE_10_ID,
+    PIXELS_UPDATE_PERCENTAGE_15_ID,
+    PIXELS_UPDATE_PERCENTAGE_20_ID,
+    PIXELS_UPDATE_PERCENTAGE_30_ID,
+    PIXELS_UPDATE_PERCENTAGE_40_ID,
+    PIXELS_UPDATE_PERCENTAGE_50_ID,
+    PIXELS_UPDATE_PERCENTAGE_60_ID,
+    PIXELS_UPDATE_PERCENTAGE_70_ID,
+    PIXELS_UPDATE_PERCENTAGE_80_ID,
+    PIXELS_UPDATE_PERCENTAGE_90_ID,
+    PIXELS_UPDATE_PERCENTAGE_100_ID,
+    PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
+  };
+  const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
+    {0,5,10,15,20,30,40,50,60,70,80,90,100};
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR)     "ambilight";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR)     "animation";
@@ -157,89 +158,37 @@ class mRGBAnimator{
       }flags;
     }settings;
   
-
     void SetPixelColor(uint16_t indexPixel, RgbTypeColor color);
     RgbTypeColor GetPixelColor(uint16_t indexPixel);
-
-    uint8_t counter_test = 0;
     
-
-    #ifdef PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
-      typedef NeoSk6812Method selectedNeoSpeedType;
-      NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
-    #endif    
-    #ifndef PIXEL_LIGHTING_HARDWARE_SK6812_STRIP
-    // Define pixel hardware sublibrary to use
-    #ifdef USE_WS28XX_HARDWARE_WS2801
-      NeoPixelBus<DotStarBgrFeature, DotStarMethod> *stripbus = nullptr; 
-    #else 
-    // SET Method
-      // #ifdef USE_WS28XX_METHOD_800KBPS
-      //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_BITBANG
-      //   typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_UART800KBPS
-      //   typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_I2S1_800KBPS_ESP32
-      //   typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
-      //   typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType;        
-      // #else
-      //   //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-      //   #ifdef ENABLE_DEBUG_ESP_DECODER
-      //   typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-      //   #else
-      //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-      //   #endif
-      // #endif  
-      #ifdef USE_WS28XX_METHOD_800KBPS
+    #if defined(ESP8266)
+      #if defined(USE_WS28XX_METHOD_800KBPS)
         typedef Neo800KbpsMethod selectedNeoSpeedType;
       #elif defined(USE_WS28XX_METHOD_BITBANG)
         typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_UART800KBPS
-      //   typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;
-      // #elif USE_WS28XX_METHOD_I2S1_800KBPS_ESP32
-      //   typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
-      // #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
-      //  // typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType;    
-      //  typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;    
+      #elif defined(USE_WS28XX_METHOD_UART800KBPS)
+        typedef NeoEsp8266Uart800KbpsMethod selectedNeoSpeedType;   
+      #elif defined(USE_SK6812_METHOD_DEFAULT)
+        typedef NeoSk6812Method selectedNeoSpeedType;   
       #else
-        //   typedef Neo800KbpsMethod selectedNeoSpeedType;
-        // #ifdef ENABLE_DEBUG_ESP_DECODER
-        // typedef NeoEsp8266BitBang800KbpsMethod selectedNeoSpeedType;
-        // #else
-        // typedef Neo800KbpsMethod selectedNeoSpeedType;
-
-        // NeoEsp32I2s1800KbpsMethod
-
-        // working, no wifi
-        //typedef NeoEsp32Rmt6800KbpsMethod selectedNeoSpeedType;
-        //test 2
-        #ifdef ESP32
+        typedef Neo800KbpsMethod selectedNeoSpeedType; // default
+      #endif  
+    #elif defined(ESP32)
+      #if defined(USE_WS28XX_METHOD_I2S1_800KBPS_ESP32)
+        typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+      #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
+        typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
+      #else          
         typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType;
         // typedef NeoEsp32Rmt7800KbpsMethod selectedNeoSpeedType;
-        #else
         //  typedef NeoEsp32I2s1800KbpsMethod selectedNeoSpeedType;
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
-        // typedef NeoWs2811Method  selectedNeoSpeedType;
-        typedef Neo800KbpsMethod selectedNeoSpeedType; //default for all
-        #endif
-
-        // #endif
-      #endif  
-
-
-
-      // Configure
-        NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
       #endif
-    #endif
+    #endif   
+    NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
     
-    // #ifndef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-    // NeoPixelAnimator* animator_controller = nullptr;
-    // #endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
+    
 
-    uint8_t test_flag = false;
 
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
@@ -297,6 +246,8 @@ class mRGBAnimator{
     void AnimUpdateMemberFunction_Sequential(const AnimationParam& param);
     void LoadMixerGroupByID(uint8_t id);
 
+    uint8_t counter_test = 0;
+    uint8_t test_flag = false;
     // void (mRGBAnimator::*AnimUpdateMemberFunction_Ptr)(const AnimationParam& param) = nullptr; // member-function to sender with one args
 
     // #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 20

@@ -148,7 +148,8 @@ class mRelays{
       }enabled_ranges[3];
     // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
 
-      
+      uint16_t time_minutes_on = 0;
+     
       uint8_t ischanged = false;
 
     }relay_status[RELAYS_CONNECTED];

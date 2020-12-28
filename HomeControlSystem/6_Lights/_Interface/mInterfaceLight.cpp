@@ -48,8 +48,6 @@ void mInterfaceLight::init_Scenes(){
 
   mode_singlecolour.name_id = mode_singlecolour_stored.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
 
-  mode_singlecolour.name_id = MODE_SINGLECOLOUR_PALETTE_SINGLE_ID;
-
   // changeHSB(120,100,0);
   
 } //end "init_Scenes"
@@ -57,9 +55,9 @@ void mInterfaceLight::init_Scenes(){
 
 void mInterfaceLight::StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
 
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_INFO, PSTR("BEFORE1 _briCT, _briRGB %d %d"), _briCT, _briRGB);
-      #endif ENABLE_LOG_LEVEL_COMMANDS
+  #endif // ENABLE_LOG_LEVEL_INFO
 
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   pCONT_ladd->FadeToNewColour(targetColor, _time_to_newcolour);
@@ -950,6 +948,13 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   //allowing directly feeding the rgb string (desired pixel) (also for designing colours)
+
+//  If command source was webui, then override changes
+if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI){
+  animation_override.time_ms = 100;
+}
+
+
   
   mode_singlecolour.flag.generate_new_colours = true;
   mqtthandler_debug_teleperiod.flags.SendNow = true;

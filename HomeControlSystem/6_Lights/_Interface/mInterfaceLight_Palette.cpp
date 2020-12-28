@@ -1059,7 +1059,7 @@ void mInterfaceLight::SetPaletteListPtrFromID(uint8_t id){
 RgbcctColor mInterfaceLight::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
 
-  RgbcctColor colour = RgbcctColor(0,255,0,0,0);
+  RgbcctColor colour = RgbcctColor(0);
   uint8_t palette_elements[ptr->colour_map_size];
   uint16_t index_relative = 0; // get expected pixel position
   uint16_t expected_pixel_count = 0; // get expected pixel position

@@ -23,6 +23,27 @@ return potato;
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1200
 #endif //USE_MODULE_CORE_WEBSERVER
 
+enum DATA_BUFFER_FLAG_SOURCE_IDS{
+  DATA_BUFFER_FLAG_SOURCE_MQTT=0,
+  DATA_BUFFER_FLAG_SOURCE_WEBUI
+};
+
+
+typedef union {
+  uint16_t data;
+  struct { 
+    // 3 bits (9 values)
+    // (0) DATA_BUFFER_FLAG_SOURCE_MQTT  // Defaulted to 0
+    // (1) DATA_BUFFER_FLAG_SOURCE_WEBUI
+    uint16_t source_id : 4;
+    // Waiting
+    uint16_t waiting : 1;
+    // Encoding format
+    uint8_t encoded_type_id; //json,raw
+  };
+} DATA_BUFFER_FLAGS;
+
+
 struct DATA_BUFFER{
   struct TOPIC{
     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
@@ -31,10 +52,9 @@ struct DATA_BUFFER{
   struct PAYLOAD{
     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
     uint16_t len = 0;
-    uint8_t encoded_type_id; //json,raw
   }payload;
-  uint8_t fWaiting = false;
-  uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
+  uint8_t isserviced = 0; // Set to 0 on new mqtt
+  DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;
 #define D_DATA_BUFFER_CLEAR() memset(&data_buffer,0,sizeof(data_buffer))

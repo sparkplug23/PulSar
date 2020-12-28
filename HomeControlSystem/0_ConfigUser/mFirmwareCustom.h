@@ -39,15 +39,16 @@
 // #define DEVICE_RGBMICRO2 //projector                  
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 //#define DEVICE_RGBMICRO4 //gazebo
-//#define DEVICE_RGBBEDLIGHT                            
+// #define DEVICE_RGBBEDLIGHT                            
 //#define DEVICE_RGBBEDLIGHT_TEST                            
 // #define DEVICE_RGBDESK
 //#define DEVICE_RGBCOOKER
 //#define DEVICE_RGBUTILITY
-//#define DEVICE_RGBFRIDGE              
+// #define DEVICE_RGBFRIDGE              
 // #define DEVICE_RGBBEDROOMFLOOR
-#define DEVICE_H801_TESTER
-// #define DEVICE_RGBCUSTOM_USER_01
+//#define DEVICE_H801_TESTER
+//#define DEVICE_RGBCUSTOM_USER_01
+// #define DEVICE_TESTER_RGBW
 
 /**
  *  CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- CHRISTMAS -- 
@@ -75,12 +76,12 @@
 // #define DEVICE_DOORBELLWALLCHIME                 
 // #define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
-// #define DEVICE_HEATING
+#define DEVICE_HEATING
 //#define DEVICE_KITCHENPANEL
 // #define DEVICE_LANDINGPANEL
 //#define DEVICE_BLACKDOORBELL
 // #define DEVICE_BEDROOM_CEILINGFAN
-// #define DEVICE_FLOORFAN1
+//#define DEVICE_FLOORFAN1
 // #define DEVICE_DESKFAN
 // #define DEVICE_CAM_TESTER
 
@@ -111,7 +112,6 @@
 //#define DEVICE_DRESSERLIGHT
 //#define DEVICE_BEDSIDE_LAMP1
 //#define DEVICE_CANDLEWARMER
-//#define DEVICE_EXTRACTORFAN
 //#define DEVICE_EXTENTION1
 //#define DEVICE_SILVERLAMP1
 //#define DEVICE_SILVERLAMP2
@@ -434,13 +434,16 @@
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 21
 
+  #define DISABLE_WEBSERVER
+  #define DISABLE_NETWORK
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   // Advanced options  
   //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
-  #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
+  // #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
   
@@ -472,14 +475,71 @@
     "\"" D_JSON_FLASHER "\":{" 
       "\"Function\":1" //slow glow
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":0,"
+    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+    "\"TimeMs\":5000,"
     "\"ColourPalette\":\"" "Custom User 01" "\","
     "\"BrightnessRGB\":100"
   "}";
 
 #endif
 
+
+
+#ifdef DEVICE_TESTER_RGBW
+  #define DEVICENAME_CTR            "tester_rgbw"
+  #define DEVICENAME_FRIENDLY_CTR   "Tester RGBW WS2812 Lights"
+
+  #define FORCE_TEMPLATE_LOADING
+  //#define SETTINGS_HOLDER 21
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+  #define USE_SK6812_METHOD_DEFAULT
+
+  // Advanced options  
+  //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  // #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
+
+  //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  #define STRIP_SIZE_MAX 50
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_FLASHER "\":{" 
+      "\"Function\":1" //slow glow
+    "},"
+    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+    "\"TimeMs\":0,"
+    "\"ColourPalette\":\"" "User 01" "\","
+    "\"BrightnessRGB\":100"
+  "}";
+
+#endif
 
 #ifdef DEVICE_RGBDELL
   #define DEVICENAME_CTR            "rgbdell"
@@ -510,22 +570,27 @@
 
 
   #define STRIP_SIZE_MAX 133
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\""  "WS28XX" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\""  D_JSON_GRB    "\","
-    // "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    // "\"" D_JSON_SCENE_COLOUR   "\":{"
-    //       "\"" D_JSON_HSB    "\":[15,95,0]" 
-    //     "},"
-    "\"" D_JSON_BRIGHTNESS     "\":"    "0"
-  "}";  
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_SCENE  "\","
+    "\"" D_JSON_FLASHER "\":{" 
+      "\"Function\":1" //slow glow
+    "},"
+    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+    "\"TimeMs\":0,"
+    "\"ColourPalette\":\"" "Custom User 01" "\","
+    "\"BrightnessRGB\":100"
+  "}";
+
 #endif
 
 #ifdef DEVICE_RGBDESK
@@ -556,24 +621,26 @@
   "}";
 
   #define STRIP_SIZE_MAX 60
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    // "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    // "\"" D_JSON_SCENE_COLOUR   "\":{"
-    //       "\"" D_JSON_HSB    "\":[15,95,0]" 
-    //     "},"
-    "\"" D_JSON_BRIGHTNESS       "\":0,"
-    "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
-  "}";  
-
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
+    "\"" D_JSON_FLASHER "\":{" 
+      "\"Function\":1" //slow glow
+    "},"
+    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+    "\"TimeMs\":0,"
+    "\"ColourPalette\":\"" "Custom User 01" "\","
+    "\"BrightnessRGB\":0"
+  "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Radar"
   
@@ -1496,6 +1563,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  
+  #define USE_SERIAL_ALTERNATE_TX
 
   // #define ENABLE_FUNCTION_DEBUG  
   // #define ENABLE_BUG_TRACING
@@ -1582,19 +1651,20 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
+ 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE   "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
     #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE      "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
-    "\"" D_JSON_STRIP_SIZE      "\":50,"
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "\","
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 17\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
     
@@ -1607,8 +1677,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "rgbbedroomfloor"
   #define DEVICENAME_FRIENDLY_CTR "H801 Bedroom Floor Light"
   
-  // #define ENABLE_FUNCTION_DEBUG  
-
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -1616,7 +1684,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 2 
 
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM
   
   #define USE_MODULE_TEMPLATE
@@ -1634,7 +1702,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","   //"\":\"WS2812\","
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
@@ -1644,8 +1712,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
-    "\"" D_JSON_BRIGHTNESS     "\":10,"
-    "\"" D_JSON_BRIGHTNESS_RGB        "\":10"
+    "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
   
 #endif
@@ -2271,7 +2338,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
-  #define FORCE_DEVICENAME_CLEAR_ON_BOOT
+  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
   // #define ENABLE_HEATING_DEBUG_TIMES
   #define DISABLE_WEBSERVER
 
@@ -2302,8 +2369,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
-  // Controller Device "mHeating.cpp/h"- Sets device names directly
   
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Upstairs"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Downstairs"
@@ -2918,28 +2983,28 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" "bedroom" "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" "Bedroom" "\""
-        "],"
-        "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-          "\"" "speed_of_sound_ambient" "\","
-          "\"" "Bedroom02" "\","
-          "\"" "Bedroom03" "\","
-          "\"" "Bedroom04" "\","
-          "\"" "Bedroom05" "\","
-          "\"" "Bedroom06" "\","
-          "\"" "Bedroom07" "\""
-        "],"
-        "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
-          "\"" "bedroomDOOR" "\""
-        "]"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" "bedroom" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" "Bedroom" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" "speed_of_sound_ambient" "\","
+        "\"" "Bedroom02" "\","
+        "\"" "Bedroom03" "\","
+        "\"" "Bedroom04" "\","
+        "\"" "Bedroom05" "\","
+        "\"" "Bedroom06" "\","
+        "\"" "Bedroom07" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" "bedroomDOOR" "\""
+      "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
@@ -3584,12 +3649,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+  
+  #define USE_SERIAL_ALTERNATE_TX
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define DISABLE_TEMPORARY_RGBANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_MODULE_LIGHTS_PWM
   
   
@@ -3621,12 +3685,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+  
+  #define USE_SERIAL_ALTERNATE_TX
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define DISABLE_TEMPORARY_RGBANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_MODULE_LIGHTS_PWM
   
   #define USE_MODULE_TEMPLATE
@@ -3642,14 +3705,22 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
 
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "\","
-    "\"" D_JSON_CCT_TEMP       "\":500,"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
+    "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
-
 #endif
 
 
@@ -4009,41 +4080,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #endif
 
-
-#ifdef DEVICE_EXTRACTORFAN
-  #define DEVICENAME_CTR          "extractorfan"
-  #define DEVICENAME_FRIENDLY_CTR "Extractor Fan"
-  
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-  
-  #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
-
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-        "]"
-    "}"
-  "}";
-
-#endif
 #ifdef DEVICE_EXTENTION1
   #define DEVICENAME_CTR          "extention1"
   #define DEVICENAME_FRIENDLY_CTR "Extention Lead 1"
@@ -4669,6 +4705,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_SLEEP
+  #define DISABLE_WEBSERVER
 
   #define ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS
   #define ENABLE_DEVFEATURE_TESTING_LONG_LOOPS

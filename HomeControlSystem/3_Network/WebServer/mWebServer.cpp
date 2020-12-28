@@ -238,6 +238,7 @@ void mWebServer::WebPage_Root_AddHandlers(){
       D_DATA_BUFFER_CLEAR();
       memcpy(data_buffer.payload.ctr,data,sizeof(char)*total);
       data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+      data_buffer.flags.source_id = DATA_BUFFER_FLAG_SOURCE_WEBUI;
 
       pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);     
         

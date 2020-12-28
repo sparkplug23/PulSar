@@ -442,8 +442,8 @@ boolean mPubSubClient::loop() {
                     data_buffer.topic.len=tl;
                     memcpy(data_buffer.topic.ctr,topic,data_buffer.topic.len*sizeof(char));
                     memcpy(data_buffer.payload.ctr,(char*)payload,data_buffer.payload.len*sizeof(char));
-                    data_buffer.fWaiting = true;
-                    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_PUBSUB "\"data_buffer.fWaiting = true;\""));
+                    data_buffer.flags.waiting = true;
+                    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_PUBSUB "\"data_buffer.flags.waiting = true;\""));
 
                 } else if (type == MQTTPINGREQ) {
                     buffer[0] = MQTTPINGRESP;

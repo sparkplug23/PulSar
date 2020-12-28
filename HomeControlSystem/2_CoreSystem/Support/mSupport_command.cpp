@@ -2033,7 +2033,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
   //   sprintf(data_buffer.payload.ctr,"{\"name\":\"COLOURSCENE\",\"hue\":%s}",dataBuf);
   //   data_buffer.topic.len = strlen(data_buffer.topic.ctr);
   //   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-  //   data_buffer.fWaiting = true;
+  //   data_buffer.flags.waiting = true;
 
 
 

@@ -1,10 +1,8 @@
 #include "mPWMLight.h"
 
-#ifdef USE_MODULE_LIGHTS_PWM // interface is the gateway
+#ifdef USE_MODULE_LIGHTS_PWM 
 
 
-
-// // Used for timed on or off events
 int8_t mPWMLight::Tasker(uint8_t function){
 
   /************
@@ -43,31 +41,7 @@ int8_t mPWMLight::Tasker(uint8_t function){
 } // END function
 
 
-void mPWMLight::Init(void) //LightInit(void)
-{
-
-//   memset(&pwm_channel_test,0,sizeof(pwm_channel_test));
-
-//   device = pCONT_set->devices_present;
-  
-//   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
-//   subtype = LST_RGBCW;
-  
-//   pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
-
-//   pCONT_set->Settings.pwm_range = PWM_RANGE; //tmp
-
-//   // pCONT_set->Settings.dimmer_hw_min = 0;
-//   // pCONT_set->Settings.dimmer_hw_max =100;
-//   // pCONT_set->Settings.light_correction = 0;
-  
-//   // hsb_colour = HsbColor(0);
-
-//   pCONT_set->Settings.light_settings.light_fade = 1;
-//   pCONT_set->Settings.light_settings.light_speed = 5*2;
-//   pCONT_set->power = 1;
-
-  // memset(&fade_start_10,0,sizeof(fade_start_10));
+void mPWMLight::Init(void){
 
   pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
 
@@ -101,7 +75,7 @@ void mPWMLight::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    AddLog_P(LOG_LEVEL_ERROR, PM_JSON_DESERIALIZATION_ERROR);
     #endif// ENABLE_LOG_LEVEL_INFO
     return;
   }  
@@ -112,45 +86,20 @@ void mPWMLight::parse_JSONCommand(void){
 }
 
 void mPWMLight::SubTask_Animation(){
-  //if(pCONT_iLight->animation.flags.fEnable_Animation){
-  // while(blocking_force_animate_to_complete){
-  if (pCONT_iLight->animator_controller->IsAnimating()){ //Serial.print("~a"); // the normal lop just needs these two to run the active animations_fadeall
+  
+  if (pCONT_iLight->animator_controller->IsAnimating()){ 
     pCONT_iLight->animator_controller->UpdateAnimations();
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog_P(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);  //Serial.flush();
+    // AddLog_P(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);
     #endif // ENABLE_LOG_LEVEL_DEBUG
     LightUpdate();
-    // if(!pCONT_iLight->animation.flags.fRunning){   
-    //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Started"));
-    //   #endif
-    // }
     pCONT_iLight->animation.flags.fRunning = true; 
-    // fPixelsUpdated = true;
     pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
-    //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
   }else{
-    // if(pCONT_iLight->animation.flags.fRunning){ 
-    //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
-    //   #endif
-    //   fAnyLEDsOnOffCount = 0;
-    //   for(int i=0;i<light_size_count;i++){ 
-    //     if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
-    //   }          
-    // }
     pCONT_iLight->animation.flags.fRunning = false;
     pCONT_set->Settings.enable_sleep = true;
-    // if(blocking_force_animate_to_complete){ //if it was running
-    //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
-    //   #endif
-    //   blocking_force_animate_to_complete = false;
-    // }
   }
-  //   if(mTime::TimeReached(&tSavedBlocking_ForceAnimateToComplete,5000)) {blocking_force_animate_to_complete = false; break; }//exit blocking lo op
-  // }
-  //}//pCONT_
+
 }
 
 
@@ -184,7 +133,6 @@ void mPWMLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newco
   //   case TRANSITION_METHOD_BLEND_ID:   time_tmp = _time_to_newcolour; break;
   // }
 
-  // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
     AddLog_P(LOG_LEVEL_TEST, PSTR("animation_override.time_ms ENABLED = %d"),pCONT_iLight->animation_override.time_ms);
     time_tmp = pCONT_iLight->animation_override.time_ms;
@@ -204,13 +152,10 @@ void mPWMLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newco
 
 void mPWMLight::BlendAnimUpdate(const AnimationParam& param)
 {    
-  // This will be moved to interface as global conversion method
-  RgbcctColor updatedColor = RgbcctColor::LinearBlend(
+  output_colour = RgbcctColor::LinearBlend(
       animation_colours.StartingColor,
       animation_colours.DesiredColour,
       param.progress);
-  // Store in local variable
-  output_colour = updatedColor;
 }
 
 
@@ -230,6 +175,9 @@ void mPWMLight::LightSetPWMOutputsRgbcctColor(RgbcctColor colour){
 
 }
 
+/**
+ * Kept using array for sutypes of other colours
+ * */
 void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   
   uint16_t cur_col;
@@ -237,7 +185,7 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   uint16_t pwm_value;
 
   // now apply the actual PWM values, adjusted and remapped 10-bits range
-  if (pCONT_set->Settings.light_settings.type < LT_PWM6) {   // only for direct PWM lights, not for Tuya, Armtronix...
+  if (pCONT_set->Settings.light_settings.type < LT_PWM6) {
     for (uint8_t i = 0; i < (pCONT_iLight->subtype - pCONT_iLight->pwm_offset); i++) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
         // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);

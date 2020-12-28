@@ -2735,7 +2735,7 @@ void mSupport::parse_JSONCommand(){
   // Check if instruction is for me
   if(mSearchCtrIndexOf(data_buffer.topic.ctr,"set/system")>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_SYSTEM));
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CORE_SUPPORT_FRIENDLY_CTR));
     #endif// ENABLE_LOG_LEVEL_INFO
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{

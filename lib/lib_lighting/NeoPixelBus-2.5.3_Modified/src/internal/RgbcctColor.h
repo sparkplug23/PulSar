@@ -78,7 +78,8 @@ struct RgbcctColor
         R(color.R),
         G(color.G),
         B(color.B),
-        WC(color.W)    //to be renamed W1/W2, since it could be warm white or cold white
+        WC(color.W),    //to be renamed W1/W2, since it could be warm white or cold white
+        WW(color.W)
         // R(0),G(0),B(0),WC(0)    
     {
     };

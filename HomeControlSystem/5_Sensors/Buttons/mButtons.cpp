@@ -281,22 +281,27 @@ int8_t mButtons::Tasker(uint8_t function){
     /************
      * WEB SECTION * 
     *******************/
+    #ifdef USE_MODULE_CORE_WEBSERVER
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break; 
+    
+    #endif // USE_MODULE_CORE_WEBSERVER
   }
 
 }
 
 
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
 
 void mButtons::WebAppend_Root_Draw_Table(){
 
   pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(buttons_found,"button_table", "Button");
+
 
 }
 
@@ -322,6 +327,7 @@ void mButtons::WebAppend_Root_Status_Table(){
   
 }
 
+    #endif // USE_MODULE_CORE_WEBSERVER
 
 bool mButtons::IsButtonActive(uint8_t id){
 // Needs to know what type the button is, low, high, no pullup etc

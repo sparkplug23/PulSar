@@ -1,7 +1,7 @@
 #include "mPWMLight.h"
 
 #ifdef USE_MODULE_LIGHTS_PWM
-// #ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 int8_t mPWMLight::Tasker_Web(uint8_t function){
 
@@ -2624,5 +2624,6 @@ void mPWMLight::WebAppend_JSON_RootPage_LiveviewPixels()//(AsyncWebServerRequest
 //   BufferWriterI->Append_P(PSTR("<div class='%s'></div>"),"rgb_live_draw"); 
 // }
 
+#endif // USE_MODULE_CORE_WEBSERVER
 
 #endif

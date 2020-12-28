@@ -390,13 +390,13 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   memcpy(data_buffer.payload.ctr, mqtt_data, sizeof(char)*data_buffer.payload.len);
 
   if(data_len){
-    data_buffer.fWaiting = true;
+    data_buffer.flags.waiting = true;
   }
 
   // Method which checks if the data was directly meant for it (not json formatted but raw)
   // if (XdrvCall(FUNC_MQTT_DATA)) { return; }
 
-  if(data_buffer.fWaiting){data_buffer.fWaiting = false;
+  if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
     // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
@@ -578,8 +578,8 @@ void mMQTT::parsesub_MQTTSettingsCommand(){
   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
   // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
   //   return;
   // }
   // JsonObject obj = doc.as<JsonObject>();

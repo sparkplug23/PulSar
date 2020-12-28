@@ -322,7 +322,7 @@ void mSettings::Function_Template_Load(){
 // }
 
 
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_ERROR_JSON_DESERIALIZATION));
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     
 //     // delay(3000);
     
@@ -625,8 +625,8 @@ void mSettings::parse_JSONCommand(){
   // DeserializationError error = deserializeJson(doc, data_buffer_old.payload.ctr);
   
   // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
   //   return 0;
   // }
   // JsonObject obj = doc.as<JsonObject>();
@@ -667,8 +667,8 @@ void mSettings::parse_JSONCommand(){
   // //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_PARSING_MATCHED "\"parsesub_FirmwareInformation\"=\"%s\""),data_buffer_old.payload.ctr);
   
   // if(error){
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_ERROR_JSON_DESERIALIZATION));
-  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+  //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
   //   return 0;
   // }
   // JsonObject obj = doc.as<JsonObject>();

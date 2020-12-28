@@ -546,38 +546,29 @@ void mRGBAnimator::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_F
     case FLASHER_REGION_ANIMATE_ID: //shift along
 
     
-        UpdateStartingColourWithGetPixel();
+      UpdateStartingColourWithGetPixel();
 
-        uint16_t index_random = random(0,pCONT_iLight->light_size_count);
+      uint16_t index_random = random(0,pCONT_iLight->light_size_count);
 
-        #ifndef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL //tmp fix
-        HsbColor hsb = GetPixelColor(index_random);
-        #else
-        HsbColor hsb = RgbColor(GetPixelColor(index_random));
+      #ifndef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL //tmp fix
+      HsbColor hsb = GetPixelColor(index_random);
+      #else
+      HsbColor hsb = RgbColor(GetPixelColor(index_random));
+      #endif
 
+      uint8_t brightness_now = mapvalue(pCONT_iLight->BrtF2N(hsb.B),0,100,0,255);
 
-        #endif
-
-        uint8_t brightness_now = mapvalue(pCONT_iLight->BrtF2N(hsb.B),0,100,0,255);
-
-        
       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE %d %d"), brightness_now, flashersettings.brightness_max);
 
-        if(brightness_now < flashersettings.brightness_max){ //+5 to margins so its not the same
-          hsb.B = pCONT_iLight->BrtN2F(flashersettings.brightness_max);
-
-  // animation_colours[index_random].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[index_random].DesiredColour, flashersettings.brightness_max);
-            
-
-          animation_colours[index_random].DesiredColour = hsb;
-        }
+      if(brightness_now < flashersettings.brightness_max){ //+5 to margins so its not the same
+        hsb.B = pCONT_iLight->BrtN2F(flashersettings.brightness_max);
+        // animation_colours[index_random].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[index_random].DesiredColour, flashersettings.brightness_max);
+        animation_colours[index_random].DesiredColour = hsb;
+      }
 
       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "FLASHER_SEQUENTIAL FLASHER_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_BlendStartingToDesiredColour(param); });
-      break;
-
-      
-      // Stay on this until restarted
+    break;
   }
 
 }

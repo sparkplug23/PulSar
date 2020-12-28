@@ -78,9 +78,13 @@ void ButtonLoop(void);
 
 char* IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen);
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
 
 void WebAppend_Root_Draw_Table();
 void WebAppend_Root_Status_Table();
+
+    #endif // USE_MODULE_CORE_WEBSERVER
+
 bool IsButtonActive(uint8_t id);
 
 

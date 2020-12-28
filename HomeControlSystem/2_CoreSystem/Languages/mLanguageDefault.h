@@ -22,13 +22,19 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 
-
 #define STR_HELPER2(x)  #x
 #ifndef STR2
 #define STR2(x)  STR_HELPER2(x)
 #endif
 
-#define LANGUAGE_LCID 2057
+#ifdef ENABLE_LANGUAGE_DEFAULT_EXTENDED
+#include "2_CoreSystem/Languages/mLanguageDefault_Extended.h"
+#endif
+
+/**
+ * Time
+ * */
+
 // HTML (ISO 639-1  Language Code
 #define D_HTML_LANGUAGE "en"
 
@@ -43,7 +49,9 @@
 #define D_DAY3LIST "MonTueWedThuFriSatSun"
 #define D_MONTH3LIST "JanFebMarAprMayJunJulAugSepOctNovDec"
 
-
+/**
+ * TaskerInterface Functions
+ * */
 #define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
 #define D_FUNC_POINTER_INIT_CTR                             "POINTER_INIT"
 #define D_FUNC_TEMPLATE_LOAD_CTR                            "TEMPLATE_LOAD"
@@ -304,12 +312,15 @@
 //#endif
 
 
-// Common list - These are D_<exact letters in string> that are Capital first
+/**
+ * Common list - These are D_<exact letters in string> that are Capital first
+ * */
 #define D_ALTITUDE              "Altitude"
 #define D_ADMIN                 "Admin"
 #define D_AIR_QUALITY           "Air quality"
-#define D_AP                    "AP"                    // Access Point
-#define D_AS                    "as"
+#define D_ANALOG_INPUT          "Analog"
+#define D_AP                    "AP"
+#define D_AS                    "As"
 #define D_AUTO                  "AUTO"
 #define D_BLINK                 "Blink"
 #define D_BLINKOFF              "BlinkOff"
@@ -322,206 +333,197 @@
 #define D_CELSIUS               "Celsius"
 #define D_CHANNEL               "Channel"
 #define D_CO2                   "Carbon dioxide"
-#define D_CODE                  "code"                // Button code
 #define D_COLDLIGHT             "Cold"
 #define D_COMMAND               "Command"
 #define D_CONNECTED             "Connected"
-#define D_COUNT "Count"
-#define D_COUNTER "Counter"
-#define D_CURRENT "Current"          
-#define D_DATA "Data"
-#define D_DARKLIGHT "Dark"
-#define D_DEBUG "Debug"
-#define D_DEVICE "Device"
-#define D_DISABLED "Disabled"
-#define D_DESIRED "Desired"
-#define D_DISTANCE "Distance"
-#define D_DNS_SERVER "DNS Server"
-#define D_DONE "Done"
-#define D_DURATION "Duration"
-#define D_DST_TIME "DST"
-#define D_ECO2 "eCO2"
-#define D_EMULATION "Emulation"
-#define D_ENABLED "Enabled"
-#define D_ERASE "Erase"
-#define D_ERROR "Error"
-#define D_WARNING "Warning"
-#define D_FAHRENHEIT "Fahrenheit"
-#define D_FAILED "Failed"
-#define D_FALLBACK "Fallback"
-#define D_FALLBACK_TOPIC "Fallback Topic"
-#define D_FALSE "False"
-#define D_FILE "File"
-#define D_FLOW_RATE "Flow rate"
-#define D_FREE_MEMORY "Free Memory"
-#define D_FREQUENCY "Frequency"
-#define D_GAS "Gas"
-#define D_GATEWAY "Gateway"
-#define D_GROUP "Group"
-#define D_HOST "Host"
-#define D_HOSTNAME "Hostname"
-#define D_HUM "Hum"
-#define D_HUMIDITY "Humidity"
-#define D_ILLUMINANCE "Illuminance"
-#define D_IMMEDIATE "immediate"      // Button immediate
-#define D_IMPORTANCE "Importance"      // Button immediate
-#define D_INDEX "Index"
-#define D_INFO "Info"
-#define D_INFRARED "Infrared"
-#define D_INITIALIZED "Initialized"
-#define D_IP_ADDRESS "IP Address"
-#define D_IP "IP"
-#define D_ISVALID "IsValid"
-#define D_ISRUNNING "IsRunning"
-#define D_ISCHANGED "IsChanged"
-#define D_LIGHT "Light"
-#define D_LIMIT "Limit"
-#define D_LENGTH "Length"
-#define D_LIMIT "Limit"
-#define D_DIMMER "Dimmer"
-#define D_LWT "LWT"
-#define D_MEASURE "Measure"
-#define D_MESSAGE "Message"
-#define D_MAX "Max"
-#define D_MIN "Min"
-#define D_MODE "Mode"
-#define D_STEP "Step"
-#define D_MODULE "Module"
-#define D_MQTT "MQTT"
-#define D_MULTI_PRESS "multi-press"
-#define D_NOISE "Noise"
-#define D_NONE "None"
-#define D_NOT_PRESSED "Not Pressed"
-#define D_OFF "Off"
-#define D_OFFLINE "Offline"
-#define D_OK "Ok"
-#define D_ON "On"
-#define D_ONLINE "Online"
-#define D_ONTIME "Ontime"
-#define D_ONOFF "OnOff"
-#define D_OFFTIME "Offtime"
-#define D_PASSWORD "Password"
-#define D_PORT "Port"
-#define D_POWER_FACTOR "Power Factor"
-#define D_POWERUSAGE "Power"
-#define D_POWERUSAGE_ACTIVE "Active Power"
-#define D_POWERUSAGE_APPARENT "Apparent Power"
-#define D_POWERUSAGE_REACTIVE "Reactive Power"
-#define D_PRESSURE "Pressure"
-#define D_PRESSUREATSEALEVEL "SeaPressure"
-#define D_PRESSED "Pressed"
-#define D_PROGRAM_FLASH_SIZE "Program Flash Size"
-#define D_PROGRAM_SIZE "Program Size"
-#define D_PROJECT "Project"
-#define D_RAIN "Rain"
-#define D_RGB "RGB"
-#define D_READ "Read"
-#define D_RELAY "Relay"
-#define D_RECEIVED "Received"
-#define D_RESTART "Restart"
-#define D_RESTARTING "Restarting"
-#define D_RESTART_REASON "Restart Reason"
-#define D_RESTORE "restore"
-#define D_RETAINED "retained"
-#define D_RULE "Rule"
-#define D_SAVE "Save"
-#define D_SENSOR "Sensor"
-#define D_SET "Set"
-#define D_SECS "Secs"
-#define D_SIZE "Size"
-#define D_SSID "SSId"
-#define D_START "Start"
-#define D_STATUS "Status"
-#define D_STD_TIME "STD"
-#define D_STOP "Stop"
-#define D_SUBNET_MASK "Subnet Mask"
-#define D_SUBSCRIBE_TO "Subscribe to"
-#define D_UNSUBSCRIBE_FROM "Unsubscribe from"
-#define D_SUCCESSFUL "Successful"
-#define D_SUNRISE "Sunrise"
-#define D_SUNSET "Sunset"
-#define D_SYSTEM "System"
-#define D_TEMP "Temp"
-#define D_TEMPS "Temps"
-#define D_TYPE "Type"
-#define D_TEMPERATURE "Temperature"
-#define D_TO "to"
-#define D_TOGGLE "Toggle"
-#define D_TIME_ON "Time_On"
-#define D_TOPIC "Topic"
-#define D_TIMERS "Timers"
-#define D_PAYLOAD "Payload"
-#define D_TOTAL_USAGE "Total Usage"
-#define D_TRANSMIT "Transmit"
-#define D_TRUE "True"
-#define D_TVOC "TVOC"
-#define D_UPGRADE "upgrade"
-#define D_UPLOAD "Upload"
-#define D_UPTIME "Uptime"
-#define D_USER "User"
-#define D_UTC_TIME "UTC"
-#define D_UV_INDEX "UV Index"
-#define D_UV_INDEX_1 "Low"
-#define D_UV_INDEX_2 "Mid"
-#define D_UV_INDEX_3 "High"
-#define D_UV_INDEX_4 "Danger"
-#define D_UV_INDEX_5 "BurnL1/2"
-#define D_UV_INDEX_6 "BurnL3"
-#define D_UV_INDEX_7 "OoR"         // Out of Range
-#define D_UV_LEVEL "UV Level"
-#define D_UV_POWER "UV Power"
-#define D_VERSION "Version"
-#define D_VOLTAGE "Voltage"
-#define D_VALUES "Values"
-#define D_WEIGHT "Weight"
-#define D_WARMLIGHT "Warm"
-#define D_WEB_SERVER "Web Server"
-#define D_LOAD "Load"
-#define D_SAVE "Save"
+#define D_COUNT                 "Count"
+#define D_COUNTER               "Counter"
+#define D_CURRENT               "Current"          
+#define D_DATA                  "Data"
+#define D_DARKLIGHT             "Dark"
+#define D_DEBUG                 "Debug"
+#define D_DEVICE                "Device"
+#define D_DISABLED              "Disabled"
+#define D_DESIRED               "Desired"
+#define D_DISTANCE              "Distance"
+#define D_DNS_SERVER            "DNS Server"
+#define D_DONE                  "Done"
+#define D_DURATION              "Duration"
+#define D_DST_TIME              "DST"
+#define D_EMULATION             "Emulation"
+#define D_ENABLED               "Enabled"
+#define D_ERASE                 "Erase"
+#define D_ERROR                 "Error"
+#define D_WARNING               "Warning"
+#define D_FAHRENHEIT            "Fahrenheit"
+#define D_FAILED                "Failed"
+#define D_FALLBACK              "Fallback"
+#define D_FALLBACK_TOPIC        "Fallback Topic"
+#define D_FALSE                 "False"
+#define D_FILE                  "File"
+#define D_FLOW_RATE             "Flow rate"
+#define D_FREE_MEMORY           "Free Memory"
+#define D_FREQUENCY             "Frequency"
+#define D_GAS                   "Gas"
+#define D_GATEWAY               "Gateway"
+#define D_GROUP                 "Group"
+#define D_HOST                  "Host"
+#define D_HOSTNAME              "Hostname"
+#define D_HUM                   "Hum"
+#define D_HUMIDITY              "Humidity"
+#define D_ILLUMINANCE           "Illuminance"
+#define D_IMMEDIATE             "Immediate"
+#define D_IMPORTANCE            "Importance"
+#define D_INDEX                 "Index"
+#define D_INFO                  "Info"
+#define D_INFRARED              "Infrared"
+#define D_INITIALIZED           "Initialized"
+#define D_IP_ADDRESS            "IP Address"
+#define D_IP                    "IP"
+#define D_ISVALID               "IsValid"
+#define D_ISRUNNING             "IsRunning"
+#define D_ISCHANGED             "IsChanged"
+#define D_LIGHT                 "Light"
+#define D_LIMIT                 "Limit"
+#define D_LENGTH                "Length"
+#define D_LIMIT                 "Limit"
+#define D_DIMMER                "Dimmer"
+#define D_LWT                   "LWT"
+#define D_MEASURE               "Measure"
+#define D_MESSAGE               "Message"
+#define D_MAX                   "Max"
+#define D_MIN                   "Min"
+#define D_MODE                  "Mode"
+#define D_STEP                  "Step"
+#define D_MODULE                "Module"
+#define D_MQTT                  "MQTT"
+#define D_MULTI_PRESS           "multi-press"
+#define D_NOISE                 "Noise"
+#define D_NONE                  "None"
+#define D_NOT_PRESSED           "Not Pressed"
+#define D_OFF                   "Off"
+#define D_OFFLINE               "Offline"
+#define D_OK                    "Ok"
+#define D_ON                    "On"
+#define D_ONLINE                "Online"
+#define D_ONTIME                "Ontime"
+#define D_ONOFF                 "OnOff"
+#define D_OFFTIME               "Offtime"
+#define D_PASSWORD              "Password"
+#define D_PARSING_NOMATCH       "Parsing Match"
+#define D_PARSING_MATCHED       "Parsing Not Matched"
+#define D_PORT                  "Port"
+#define D_POWER_FACTOR          "Power Factor"
+#define D_POWERUSAGE            "Power"
+#define D_POWERUSAGE_ACTIVE     "Active Power"
+#define D_POWERUSAGE_APPARENT   "Apparent Power"
+#define D_POWERUSAGE_REACTIVE   "Reactive Power"
+#define D_PRESSURE              "Pressure"
+#define D_PRESSUREATSEALEVEL    "SeaPressure"
+#define D_PRESSED               "Pressed"
+#define D_PROGRAM_FLASH_SIZE    "Program Flash Size"
+#define D_PROGRAM_SIZE          "Program Size"
+#define D_PROJECT               "Project"
+#define D_RAIN                  "Rain"
+#define D_RGB                   "RGB"
+#define D_READ                  "Read"
+#define D_RELAY                 "Relay"
+#define D_RECEIVED              "Received"
+#define D_RESTART               "Restart"
+#define D_RESTARTING            "Restarting"
+#define D_RESTART_REASON        "Restart Reason"
+#define D_RESTORE               "restore"
+#define D_RETAINED              "retained"
+#define D_RULE                  "Rule"
+#define D_SAVE                  "Save"
+#define D_SENSOR                "Sensor"
+#define D_SET                   "Set"
+#define D_SECS                  "Secs"
+#define D_SIZE                  "Size"
+#define D_SSID                  "SSId"
+#define D_START                 "Start"
+#define D_STATUS                "Status"
+#define D_STD_TIME              "STD"
+#define D_STOP                  "Stop"
+#define D_SUBNET_MASK           "Subnet Mask"
+#define D_SUBSCRIBE_TO          "Subscribe to"
+#define D_UNSUBSCRIBE_FROM      "Unsubscribe from"
+#define D_SUCCESSFUL            "Successful"
+#define D_SUNRISE               "Sunrise"
+#define D_SUNSET                "Sunset"
+#define D_SYSTEM                "System"
+#define D_FUNCTION_TASKER_INTERFACE "Tasker_Interface "
+#define D_TEMP                  "Temp"
+#define D_TEMPS                 "Temps"
+#define D_TYPE                  "Type"
+#define D_TEMPERATURE           "Temperature"
+#define D_TO                    "to"
+#define D_TOGGLE                "Toggle"
+#define D_TIME_ON               "Time_On"
+#define D_TOPIC                 "Topic"
+#define D_TIMERS                "Timers"
+#define D_PAYLOAD               "Payload"
+#define D_TOTAL_USAGE           "Total Usage"
+#define D_TRANSMIT              "Transmit"
+#define D_TRUE                  "True"
+#define D_UPGRADE               "Upgrade"
+#define D_UPLOAD                "Upload"
+#define D_UPTIME                "Uptime"
+#define D_USER                  "User"
+#define D_UTC_TIME              "UTC"
+#define D_VERSION               "Version"
+#define D_VOLTAGE               "Voltage"
+#define D_VALUES                "Values"
+#define D_WEIGHT                "Weight"
+#define D_WARMLIGHT             "Warm"
+#define D_WEB_SERVER            "Web Server"
+#define D_LOAD                  "Load"
+#define D_SAVE                  "Save"
+#define D_TASKER "Tasker "
+#define D_UNKNOWN "UNKNOWN"
+#define D_DEBUG_FUNCTION "Debug Function: "
+#define D_SENDING "Sending"
 
-// sonoff.ino
-#define D_WARNING_MINIMAL_VERSION "WARNING This version does not support persistent settings"
-#define D_LEVEL_10 "level 1-0"
-#define D_LEVEL_01 "level 0-1"
-#define D_SERIAL_LOGGING_DISABLED "Serial logging disabled"
-#define D_SYSLOG_LOGGING_REENABLED "Syslog logging re-enabled"
 
-#define D_SET_BAUDRATE_TO "Set Baudrate to"
-#define D_RECEIVED_TOPIC "Received Topic"
-#define D_DATA_SIZE "Data Size"
-#define D_ANALOG_INPUT "Analog"
+// main.cpp
+#define D_SERIAL_LOGGING_DISABLED       "Serial logging disabled"
+#define D_SYSLOG_LOGGING_REENABLED      "Syslog logging re-enabled"
+#define D_SET_BAUDRATE_TO               "Set Baudrate to"
 
-// support.ino
-#define D_OSWATCH "osWatch"
-#define D_BLOCKED_LOOP "Blocked Loop"
-#define D_WPS_FAILED_WITH_STATUS "WPSconfig FAILED with status"
-#define D_ACTIVE_FOR_3_MINUTES "active for 3 minutes"
-#define D_FAILED_TO_START "failed to start"
-#define D_PATCH_ISSUE_2186 "Patch issue 2186"
-#define D_CONNECTING_TO_AP "Connecting to AP"
-#define D_IN_MODE "in mode"
-#define D_CONNECT_FAILED_NO_IP_ADDRESS "Connect failed as no IP address received"
+/**
+ *  support
+ * */
+#define D_OSWATCH                       "osWatch"
+#define D_BLOCKED_LOOP                  "Blocked Loop"
+#define D_WPS_FAILED_WITH_STATUS        "WPSconfig FAILED with status"
+#define D_ACTIVE_FOR_3_MINUTES          "active for 3 minutes"
+#define D_FAILED_TO_START               "failed to start"
+#define D_CONNECTING_TO_AP              "Connecting to AP"
+#define D_IN_MODE                       "in mode"
+#define D_CONNECT_FAILED_NO_IP_ADDRESS  "Connect failed as no IP address received"
 #define D_CONNECT_FAILED_AP_NOT_REACHED "Connect failed as AP cannot be reached"
 #define D_CONNECT_FAILED_WRONG_PASSWORD "Connect failed with AP incorrect password"
-#define D_CONNECT_FAILED_AP_TIMEOUT "Connect failed with AP timeout"
-#define D_ATTEMPTING_CONNECTION "Attempting connection..."
-#define D_CHECKING_CONNECTION "Checking connection..."
-#define D_QUERY_DONE "Query done. MQTT services found"
-#define D_MQTT_SERVICE_FOUND "MQTT service found on"
-#define D_FOUND_AT "found at"
-#define D_SYSLOG_HOST_NOT_FOUND "Syslog Host not found"
+#define D_CONNECT_FAILED_AP_TIMEOUT     "Connect failed with AP timeout"
+#define D_ATTEMPTING_CONNECTION         "Attempting connection..."
+#define D_CHECKING_CONNECTION           "Checking connection..."
+#define D_QUERY_DONE                    "Query done. MQTT services found"
+#define D_MQTT_SERVICE_FOUND            "MQTT service found on"
+#define D_FOUND_AT                      "found at"
+#define D_SYSLOG_HOST_NOT_FOUND         "Syslog Host not found"
+#define D_ERROR_UNSUPPORTED             "ERROR : Feature not currently supported"
 
-#define D_ERROR_UNSUPPORTED "ERROR : Feature not currently supported"
-#define D_ERROR_JSON_DESERIALIZATION "JSON DeserializationError"
+/**
+ * settings
+ * */
+#define D_SAVED_TO_FLASH_AT             "Saved to flash at"
+#define D_LOADED_FROM_FLASH_AT          "Loaded from flash at"
+#define D_USE_DEFAULTS                  "Use defaults"
+#define D_ERASED_SECTOR                 "Erased sector"
 
-// settings.ino
-#define D_SAVED_TO_FLASH_AT "Saved to flash at"
-#define D_LOADED_FROM_FLASH_AT "Loaded from flash at"
-#define D_USE_DEFAULTS "Use defaults"
-#define D_ERASED_SECTOR "Erased sector"
-
-// xdrv_02_webserver.ino
-#define D_NOSCRIPT "JavaScript Needed"//"To use HACS, please enable JavaScript"
+/**
+ * webserver
+ * */
+#define D_NOSCRIPT "JavaScript Needed"
 #define D_MINIMAL_FIRMWARE_PLEASE_UPGRADE "MINIMAL firmware<br/>please upgrade"
 #define D_WEBSERVER_ACTIVE_ON "Web server active on"
 #define D_WEBSERVER "WebServer"
@@ -666,57 +668,54 @@
 #define D_ENABLE_WEBLOG_FOR_RESPONSE "Enable weblog 2 if response expected"
 #define D_NEED_USER_AND_PASSWORD "Need user=<username>&password=<password>"
 
-// xdrv_01_mqtt.ino
+/**
+ * Pixels
+ * */
+#define D_NEOPIXEL_PALETTE "Palette "
+#define D_NEOPIXEL_TRANSITION_ORDER "Transition order "
+#define D_NEOPIXEL_BLENDTIME "Transition time "
+#define D_NEOPIXEL_BLENDRATE "Transition rate "
+#define D_NEOPIXEL_MODE "Mode "
+
+/**
+ * mqtt
+ * */
 #define D_FINGERPRINT "Verify TLS fingerprint..."
 #define D_TLS_CONNECT_FAILED_TO "TLS Connect failed to"
 #define D_RETRY_IN "Retry in"
 #define D_VERIFIED "Verified using Fingerprint"
 #define D_INSECURE "Insecure connection due to invalid Fingerprint"
 #define D_CONNECT_FAILED_TO "Connect failed to"
+#define D_TOPIC_TELE      "tele"
+#define D_TOPIC_IFCHANGED "ifchanged"
+#define D_TOPIC_SLASH "/"
+#define D_TOPIC_STATUS "status"
+#define D_TOPIC_STATUS_S      D_TOPIC_STATUS D_TOPIC_SLASH
+#define D_TOPIC_S_TELE_S      D_TOPIC_SLASH D_TOPIC_TELE D_TOPIC_SLASH
+#define D_TOPIC_S_IFCHANGED_S D_TOPIC_SLASH D_TOPIC_IFCHANGED D_TOPIC_SLASH
+// #define D_TOPIC_PIXELS "/pixels"
+// #define D_TOPIC_NEXTION "/nextion"
+// #define D_TOPIC_CEILINGFAN "/ceilingfan"
+// #define D_TOPIC_SYSTEM "/system"
+// #define D_TOPIC_HEATING "/heating"
+// #define D_TOPIC_RELAYS "/relays"
+// #define D_TOPIC_RADIATORFAN "/radiatorfan"
+// #define D_TOPIC_BLINDS "/blinds"
+#define D_TOPIC_COMMAND "set" //to be "command"
+#define D_TOPIC_STATUS "status" //to be "command"
 
-// xplg_wemohue.ino
-#define D_MULTICAST_DISABLED "Multicast disabled"
-#define D_MULTICAST_REJOINED "Multicast (re)joined"
-#define D_MULTICAST_JOIN_FAILED "Multicast join failed"
-#define D_FAILED_TO_SEND_RESPONSE "Failed to send response"
 
-#define D_WEMO "WeMo"
-#define D_WEMO_BASIC_EVENT "WeMo basic event"
-#define D_WEMO_EVENT_SERVICE "WeMo event service"
-#define D_WEMO_META_SERVICE "WeMo meta service"
-#define D_WEMO_SETUP "WeMo setup"
-#define D_RESPONSE_SENT "Response sent"
-
-#define D_HUE "Hue"
-#define D_HUE_BRIDGE_SETUP "Hue setup"
-#define D_HUE_API_NOT_IMPLEMENTED "Hue API not implemented"
-#define D_HUE_API "Hue API"
-#define D_HUE_POST_ARGS "Hue POST args"
-#define D_3_RESPONSE_PACKETS_SENT "3 response packets sent"
-
-//NEXTION
+/**
+ * Nextion
+ * */
 #define D_NEXTION_TX "HMI TX --> "
 #define D_NEXTION_RX "HMI RX <-- "
 #define D_NEXTION_COMMAND "TYPE"
 
-// xdrv_07_domoticz.ino
-#define D_DOMOTICZ_PARAMETERS "Domoticz parameters"
-#define D_DOMOTICZ_IDX "Idx"
-#define D_DOMOTICZ_KEY_IDX "Key idx"
-#define D_DOMOTICZ_SWITCH_IDX "Switch idx"
-#define D_DOMOTICZ_SENSOR_IDX "Sensor idx"
-  #define D_DOMOTICZ_TEMP "Temp"
-  #define D_DOMOTICZ_TEMP_HUM "Temp,Hum"
-  #define D_DOMOTICZ_TEMP_HUM_BARO "Temp,Hum,Baro"
-  #define D_DOMOTICZ_POWER_ENERGY "Power,Energy"
-  #define D_DOMOTICZ_ILLUMINANCE "Illuminance"
-  #define D_DOMOTICZ_COUNT "Count/PM1"
-  #define D_DOMOTICZ_VOLTAGE "Voltage/PM2.5"
-  #define D_DOMOTICZ_CURRENT "Current/PM10"
-  #define D_DOMOTICZ_AIRQUALITY "AirQuality"
-#define D_DOMOTICZ_UPDATE_TIMER "Update timer"
 
-// xdrv_09_timers.ino
+/**
+ * Timers
+ * */
 #define D_CONFIGURE_TIMER "Configure Timer"
 #define D_TIMER_PARAMETERS "Timer parameters"
 #define D_TIMER_ENABLE "Enable Timers"
@@ -727,56 +726,36 @@
 #define D_TIMER_OUTPUT "Output"
 #define D_TIMER_ACTION "Action"
 
-// xdrv_10_knx.ino
-#define D_CONFIGURE_KNX "Configure KNX"
-#define D_KNX_PARAMETERS "KNX Parameters"
-#define D_KNX_GENERAL_CONFIG "General"
-#define D_KNX_PHYSICAL_ADDRESS "Physical Address"
-#define D_KNX_PHYSICAL_ADDRESS_NOTE "( Must be unique on the KNX network )"
-#define D_KNX_ENABLE "Enable KNX"
-#define D_KNX_GROUP_ADDRESS_TO_WRITE "Data to Send to Group Addresses"
-#define D_ADD "Add"
-#define D_DELETE "Delete"
-#define D_REPLY "Reply"
-#define D_KNX_GROUP_ADDRESS_TO_READ "Group Addresses to Receive Data from"
-#define D_LOG_KNX "KNX: "
-#define D_RECEIVED_FROM "Received from"
-#define D_KNX_COMMAND_WRITE "Write"
-#define D_KNX_COMMAND_READ "Read"
-#define D_KNX_COMMAND_OTHER "Other"
-#define D_SENT_TO "sent to"
-#define D_KNX_WARNING "The group address ( 0 / 0 / 0 ) is reserved and can not be used."
-#define D_KNX_ENHANCEMENT "Communication Enhancement"
-#define D_KNX_TX_SLOT "KNX TX"
-#define D_KNX_RX_SLOT "KNX RX"
 
-// xdrv_03_energy.ino
+/**
+ * Energy
+ * */
 #define D_ENERGY_TODAY "Energy Today"
 #define D_ENERGY_YESTERDAY "Energy Yesterday"
 #define D_ENERGY_TOTAL "Energy Total"
 
-// xsns_05_ds18b20.ino
+
+/**
+ * db18s20
+ * */
 #define D_SENSOR_BUSY "Sensor busy"
 #define D_SENSOR_CRC_ERROR "Sensor CRC error"
 #define D_SENSORS_FOUND "Sensors found"
 
-// xsns_06_dht.ino
+
+/**
+ * dht
+ * */
 #define D_TIMEOUT_WAITING_FOR "Timeout waiting for"
 #define D_START_SIGNAL_LOW "start signal low"
 #define D_START_SIGNAL_HIGH "start signal high"
 #define D_PULSE "pulse"
 #define D_CHECKSUM_FAILURE "Checksum failure"
 
-// xsns_07_sht1x.ino
-#define D_SENSOR_DID_NOT_ACK_COMMAND "Sensor did not ACK command"
-#define D_SHT1X_FOUND "SHT1X found"
 
-// xsns_18_pms5003.ino
-#define D_STANDARD_CONCENTRATION "CF-1 PM"     // Standard Particle CF-1 Particle Matter
-#define D_ENVIRONMENTAL_CONCENTRATION "PM"     // Environmetal Particle Matter
-#define D_PARTICALS_BEYOND "Particals"
-
-// xsns_32_mpu6050.ino
+/**
+ * mpu6050
+ * */
 #define D_AX_AXIS "Accel. X-Axis"
 #define D_AY_AXIS "Accel. Y-Axis"
 #define D_AZ_AXIS "Accel. Z-Axis"
@@ -784,50 +763,21 @@
 #define D_GY_AXIS "Gyro Y-Axis"
 #define D_GZ_AXIS "Gyro Z-Axis"
 
-// xsns_34_hx711.ino
-#define D_HX_CAL_REMOVE "Remove weigth"
-#define D_HX_CAL_REFERENCE "Load reference weigth"
-#define D_HX_CAL_DONE "Calibrated"
-#define D_HX_CAL_FAIL "Calibration failed"
-#define D_RESET_HX711 "Reset Scale"
-#define D_CONFIGURE_HX711 "Configure Scale"
-#define D_HX711_PARAMETERS "Scale parameters"
-#define D_ITEM_WEIGHT "Item weight"
-#define D_REFERENCE_WEIGHT "Reference weigth"
-#define D_CALIBRATE "Calibrate"
-#define D_CALIBRATION "Calibration"
 
-//xsns_35_tx20.ino
-#define D_TX20_WIND_DIRECTION "Wind Direction"
-#define D_TX20_WIND_SPEED "Wind Speed"
-#define D_TX20_WIND_SPEED_AVG "Wind Speed Avg"
-#define D_TX20_WIND_SPEED_MAX "Wind Speed Max"
-#define D_TX20_NORTH "N"
-#define D_TX20_EAST "E"
-#define D_TX20_SOUTH "S"
-#define D_TX20_WEST "W"
-
-//xsns_43_hre.ino
-#define D_LOG_HRE "HRE: "
-
-// mHardwareTemplates.h - keep them as short as possible to be able to fit them in GUI drop down box
 /****
  * 
  * List of function, that will be shown in webui
- * 
+ *  keep them as short as possible to be able to fit them in GUI drop down box 
  * */
 #define D_GPIO_FUNCTION_NONE_CTR          "None"
 #define D_GPIO_FUNCTION_USER_CTR          "User"
 #define D_GPIO_FUNCTION_DOOR_POSITION_CTR "Door Position"
 #define D_GPIO_FUNCTION_RGB_DATA_CTR      "WS281x Data"
 #define D_GPIO_FUNCTION_RGB_CLOCK_CTR     "WS281x Clock"
-
 #define D_GPIO_FUNCTION_SWT1_CTR     "SWT1"
 #define D_GPIO_FUNCTION_SWT2_CTR     "SWT2"
-
 #define D_GPIO_FUNCTION_SWT1_NP_CTR     "SWT1_NP"
 #define D_GPIO_FUNCTION_SWT2_NP_CTR     "SWT2_NP"
-
 #define D_GPIO_FUNCTION_REL1_CTR          "Relay 1"
 #define D_GPIO_FUNCTION_REL2_CTR          "Relay 2"
 #define D_GPIO_FUNCTION_REL3_CTR          "Relay 3"
@@ -836,14 +786,9 @@
 #define D_GPIO_FUNCTION_REL2_INV_CTR      "Relay 2 Inv"
 #define D_GPIO_FUNCTION_REL3_INV_CTR      "Relay 3 Inv"
 #define D_GPIO_FUNCTION_REL4_INV_CTR      "Relay 4 Inv"
-
-
-
 #define D_GPIO_FUNCTION_FAN_PWM1_CTR      "Fan PWM1"
 #define D_GPIO_FUNCTION_I2C_SCL_CTR       "I2C SCL"
 #define D_GPIO_FUNCTION_I2C_SDA_CTR       "I2C SDA"
-
-
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"
 #define D_GPIO_FUNCTION_PIR_3_CTR         "PIR 3"
@@ -856,9 +801,6 @@
 #define D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "PIR 1 NP Inv"
 #define D_GPIO_FUNCTION_PIR_2_NP_INV_CTR     "PIR 2 NP Inv"
 #define D_GPIO_FUNCTION_PIR_3_NP_INV_CTR     "PIR 3 NP Inv"
-
-
-
 #define D_GPIO_FUNCTION_DHT11_CTR         "DHT11"
 #define D_GPIO_FUNCTION_DHT11_1_CTR         "DHT11_1"
 #define D_GPIO_FUNCTION_DHT11_2_CTR         "DHT11_2"
@@ -886,40 +828,29 @@
 // #define D_GPIO_FUNCTION_RELAY_3_CTR       D_GPIO_FUNCTION_RELAY_CTR " 3"      // Suffix "1i"
 // #define D_GPIO_FUNCTION_RELAY_4_CTR       D_GPIO_FUNCTION_RELAY_CTR " 4"      // Suffix "1i"
 #define D_GPIO_FUNCTION_LED_CTR           "Led"        // Suffix "1i"
-
 #define D_GPIO_FUNCTION_NETWORK_STATUS_LED_CTR "Network Status LED"
-
 #define D_GPIO_FUNCTION_LEDLNK_CTR          D_GPIO_FUNCTION_LED_CTR "_Link"
 #define D_GPIO_FUNCTION_LEDLNK_INV_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
-
 #define D_GPIO_FUNCTION_DOOR_OPEN_CTR       "Door Open"
 #define D_GPIO_FUNCTION_DOOR_LOCK_CTR       "Door Lock"
-
 #define D_GPIO_FUNCTION_SERIAL_DEBUG_TX_ID "Serial Debug TX"
 #define D_GPIO_FUNCTION_SERIAL_DEBUG_RX_ID "Serial Debug RX"
-
 #define D_GPIO_FUNCTION_LED1_CTR           D_GPIO_FUNCTION_LED_CTR "1"
 #define D_GPIO_FUNCTION_LED2_CTR           D_GPIO_FUNCTION_LED_CTR "2"
 #define D_GPIO_FUNCTION_LED3_CTR           D_GPIO_FUNCTION_LED_CTR "3"
 #define D_GPIO_FUNCTION_LED4_CTR           D_GPIO_FUNCTION_LED_CTR "4"
 #define D_GPIO_FUNCTION_LED5_CTR           D_GPIO_FUNCTION_LED_CTR "5"
-
 #define D_GPIO_FUNCTION_LED1_INV_CTR           D_GPIO_FUNCTION_LED_CTR "1" " Inv"
 #define D_GPIO_FUNCTION_LED2_INV_CTR           D_GPIO_FUNCTION_LED_CTR "2" " Inv"
 #define D_GPIO_FUNCTION_LED3_INV_CTR           D_GPIO_FUNCTION_LED_CTR "3" " Inv"
 #define D_GPIO_FUNCTION_LED4_INV_CTR           D_GPIO_FUNCTION_LED_CTR "4" " Inv"
 #define D_GPIO_FUNCTION_LED5_INV_CTR           D_GPIO_FUNCTION_LED_CTR "5" " Inv"
-
 #define D_GPIO_FUNCTION_PWM1_CTR           "PWM1"        // Suffix "1"
 #define D_GPIO_FUNCTION_PWM2_CTR           "PWM2"        // Suffix "1"
 #define D_GPIO_FUNCTION_PWM3_CTR           "PWM3"        // Suffix "1"
 #define D_GPIO_FUNCTION_PWM4_CTR           "PWM4"        // Suffix "1"
 #define D_GPIO_FUNCTION_PWM5_CTR           "PWM5"        // Suffix "1"
-
 #define D_GPIO_FUNCTION_TXD_CTR            "Serial Tx"
-
-
-
 #define D_GPIO_FUNCTION_COUNTER_CTR       "Counter"    // Suffix "1"
 #define D_GPIO_FUNCTION_IRRECV_CTR        "IRrecv"
 #define D_SENSOR_MHZ_RX_CTR        "MHZ Rx"
@@ -928,26 +859,20 @@
 #define D_GPIO_FUNCTION_PZEM016_RX_CTR    "PZEM016 Rx"
 #define D_GPIO_FUNCTION_PZEM017_RX_CTR    "PZEM017 Rx"
 #define D_GPIO_FUNCTION_PZEM0XX_TX_CTR    "PZEM0XX Tx"
-#define D_SENSOR_SAIR_RX_CTR       "SAir Rx"
-#define D_SENSOR_SAIR_TX_CTR       "SAir Tx"
 #define D_SENSOR_SPI_CS_CTR        "SPI CS"
 #define D_SENSOR_SPI_DC_CTR        "SPI DC"
 #define D_SENSOR_BACKLIGHT_CTR     "BkLight"
 #define D_SENSOR_PMS5003_CTR       "PMS5003"
 #define D_GPIO_FUNCTION_SDS0X1_RX_CTR      "SDS0X1 Rx"
 #define D_GPIO_FUNCTION_SDS0X1_TX_CTR      "SDS0X1 Tx"
-#define D_SENSOR_SBR_RX_CTR        "SerBr Rx"
-#define D_SENSOR_SBR_TX_CTR        "SerBr Tx"
 #define D_GPIO_FUNCTION_SR04_ECHO_CTR      "SR04 Ech"
 #define D_GPIO_FUNCTION_SR04_TRIG_CTR      "SR04 Trig"
 #define D_GPIO_FUNCTION_NEXTION_RX_CTR     "Nextion Rx"
 #define D_GPIO_FUNCTION_NEXTION_TX_CTR     "Nextion Tx"
-
 #define D_GPIO_FUNCTION_KEY1_CTR        "Key1"
 #define D_GPIO_FUNCTION_KEY1_INV_CTR        "Key1 Inv"
 #define D_GPIO_FUNCTION_KEY2_CTR        "Key2"
 #define D_GPIO_FUNCTION_KEY2_INV_CTR        "Key1 2nv"
-
 #define D_SENSOR_SDM120_TX_CTR     "SDMx20 Tx"
 #define D_SENSOR_SDM120_RX_CTR     "SDMx20 Rx"
 #define D_SENSOR_SDM630_TX_CTR     "SDM630 Tx"
@@ -975,8 +900,6 @@
 #define D_SENSOR_MAX31855_CS_CTR   "MX31855 CS"
 #define D_SENSOR_MAX31855_CLK_CTR  "MX31855 CLK"
 #define D_SENSOR_MAX31855_DO_CTR   "MX31855 DO"
-#define D_SENSOR_NRG_SEL_CTR       "HLWBL SEL"  // Suffix "i"
-#define D_SENSOR_NRG_CF1_CTR       "HLWBL CF1"
 #define D_SENSOR_HLW_CF_CTR        "HLW8012 CF"
 #define D_SENSOR_HJL_CF_CTR        "BL0937 CF"
 #define D_SENSOR_MCP39F5_TX_CTR    "MCP39F5 Tx"
@@ -994,7 +917,7 @@
 #define D_SENSOR_ARIRFRCV_CTR      "ALux IrRcv"
 #define D_SENSOR_TXD_CTR           "Serial Tx"
 #define D_SENSOR_RXD_CTR           "Serial Rx"
-#define D_SENSOR_ROTARY_CTR        "Rotary"     // Suffix "1A"
+#define D_SENSOR_ROTARY_CTR        "Rotary"
 #define D_SENSOR_HRE_CLOCK_CTR     "HRE Clock"
 #define D_SENSOR_HRE_DATA_CTR      "HRE Data"
 #define D_SENSOR_ADE7953_IRQ_CTR   "ADE7953 IRQ"
@@ -1002,16 +925,13 @@
 #define D_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR     "HBRIDGE L9110 Input B"
 #define D_GPIO_FUNCTION_HBRIDGE_L9110_OA_CTR     "HBRIDGE L9110 Output A"
 #define D_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR     "HBRIDGE L9110 Output B"
-
-// Group of analog types, basic, position (convert to range)
 #define D_GPIO_FUNCTION_ANALOG_POSITION_CTR "Analog Position"
-
 #define D_GPIO_FUNCTION_FAN_IRSEND_CTR "Fan IRSend"
 
 
-
-
-// Units
+/**
+ *  Units
+ * */
 #define D_UNIT_AMPERE "A"
 #define D_UNIT_CENTIMETER "cm"
 #define D_UNIT_HERTZ "Hz"
@@ -1045,7 +965,9 @@
 #define D_UNIT_WATTHOUR "Wh"
 #define D_UNIT_WATT_METER_QUADRAT "W/m²"
 
-// Log message prefix
+/**
+ *  Log message prefix
+ * */
 #define D_LOG_APPLICATION "APP: "  // Application
 #define D_LOG_BRIDGE "BRG: "       // Bridge
 #define D_LOG_CONFIG "CFG: "       // Settings
@@ -1095,68 +1017,6 @@
 #define D_LOG_MEMORY "MEM: "       // 
 #define D_LOG_ASYNC "ASC: "
 #define D_LOG_TEST "TST: "
-// const char D_LOG_TEST[] PROGMEM = "TST: "; // test point
-
-#define D_PARSING_NOMATCH "NO MATCH "
-#define D_PARSING_MATCHED "MATCHED "
-
-
-#define D_TOPIC_TELE      "tele"
-#define D_TOPIC_IFCHANGED "ifchanged"
-#define D_TOPIC_SLASH "/"
-#define D_TOPIC_STATUS "status"
-
-#define D_TOPIC_STATUS_S      D_TOPIC_STATUS D_TOPIC_SLASH
-#define D_TOPIC_S_TELE_S      D_TOPIC_SLASH D_TOPIC_TELE D_TOPIC_SLASH
-#define D_TOPIC_S_IFCHANGED_S D_TOPIC_SLASH D_TOPIC_IFCHANGED D_TOPIC_SLASH
-
-#define D_TASKER "Tasker "
-
-#define D_UNKNOWN "UNKNOWN"
-
-#define D_DEBUG_FUNCTION "Debug Function: "
-
-#define D_NEOPIXEL_PALETTE "Palette "
-#define D_NEOPIXEL_TRANSITION_ORDER "Transition order "
-#define D_NEOPIXEL_BLENDTIME "Transition time "
-#define D_NEOPIXEL_BLENDRATE "Transition rate "
-#define D_NEOPIXEL_MODE "Mode "
-
-// #define D_NEOPIXEL_TRANSITION "Transition/type "
-// #define D_NEOPIXEL_SCENE "Scene "
-// #define D_NEOPIXEL_HUE "Hue"
-// #define D_NEOPIXEL_SAT "Sat"
-// #define D_NEOPIXEL_BRT "Brt"
-// #define D_NEOPIXEL_RGB "RGB"
-// #define D_NEOPIXEL_HSB "HSB"
-// #define D_NEOPIXEL_TIME "Time"
-// #define D_NEOPIXEL_FLASHER "Flasher"
-
-// Class names (only defined if they exist)
-// #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  #define D_CLASS_NAME_MRGBANIMATOR "mRGBAnimator::"
-// #endif
-
-
-#define D_SENDING "Sending"
-
-//Topic Name
-#define D_TOPIC_PIXELS "/pixels"
-#define D_TOPIC_NEXTION "/nextion"
-#define D_TOPIC_CEILINGFAN "/ceilingfan"
-#define D_TOPIC_SYSTEM "/system"
-#define D_TOPIC_HEATING "/heating"
-#define D_TOPIC_RELAYS "/relays"
-#define D_TOPIC_RADIATORFAN "/radiatorfan"
-#define D_TOPIC_BLINDS "/blinds"
-
-#define D_TOPIC_COMMAND "set" //to be "command"
-#define D_TOPIC_STATUS "status" //to be "command"
-
-
-#define D_TESTPOINT "Testpoint "
-
-#define D_FUNCTION_TASKER_INTERFACE "Tasker_Interface "
 
 
 //SDM220
@@ -1169,13 +1029,9 @@
 #define D_UNIT_KWARH      "kVArh"
 #define D_UNIT_ANGLE      "Deg"
 
-//#endif  // _LANGUAGE_EN_GB_H_
-
 
 /*********************************************************************************************\
- * All text used in Commands, MQTT, JSON messages only in English (#1473)
- *
- * (At this location they can/may be overruled by language files using undefs)
+ * All text used in Commands
 \*********************************************************************************************/
 
 #define D_JSON_ABORTED "Aborted"
@@ -1222,7 +1078,6 @@
 #define D_JSON_MQTT_ENABLE_RESTART "MQTT Enable Restart"
 #define D_JSON_ENDDST "EndDST"           // End Daylight Savings Time
 #define D_JSON_ERASE "Erase"
-// #define D_JSON_ERROR "Error"
 #define D_JSON_EVERY "Every"
 #define D_JSON_EXPORT_ACTIVE "ExportActivePower"
 #define D_JSON_EXPORT_REACTIVE "ExportReactivePower"
@@ -1383,17 +1238,11 @@
 #define D_JSON_WIFICONFIG_STATE "WiFiConfig State"
 #define D_JSON_YESTERDAY "Yesterday"
 #define D_JSON_ZERO_POINT_CALIBRATION "Zero Point Calibration"
-
-
-// My own JSON named are for root[JSON] and are all lower case
 #define D_JSON_ALTITUDE "altitude"
 #define D_JSON_AGE "age"
-
-
 #define D_JSON_ANY "Any"
-
-#define D_JSON_CCT_PERCENTAGE "cct_per"
-#define D_JSON_CCT_TEMP "cct_temp"
+#define D_JSON_CCT_PERCENTAGE "CCT_TempPercentage"
+#define D_JSON_CCT_TEMP "CCT_Temp"
 
 #define D_JSON_RGBCCT_LINKED "rgbcct_linked"
 
@@ -1519,9 +1368,6 @@
 #define D_JSON_ONTIME "OnTime"
 #define D_JSON_OFFTIME "OffTime"
 
-// #define D_JSON_PIXELS_UPDATE_NUMBER "pixels_to_update_as_number"
-// #define D_JSON_PIXELS_UPDATE_PERCENTAGE "pixels_to_update_as_percentage"
-
 #define D_JSON_PIXELS_UPDATE_NUMBER "PixelUpdateNum"
 #define D_JSON_PIXELS_UPDATE_PERCENTAGE "PixelUpdatePerc"
 
@@ -1537,8 +1383,8 @@
 #define D_JSON_RECEIVEDCOUNT "ReceivedCount"
 #define D_JSON_RATIO "Ratio"
 
-  #define D_JSON_RELAY_NAME "Relay Name"
-  #define D_JSON_MOTION_NAME "Motion Name"
+#define D_JSON_RELAY_NAME "Relay Name"
+#define D_JSON_MOTION_NAME "Motion Name"
 
 #define D_JSON_SAT "Sat"
 #define D_JSON_SAT255 "Sat255"
@@ -1573,17 +1419,16 @@
 #define D_JSON_TIME_MAINTAINING "TimeMaintaining"
 #define D_JSON_TIME_RUNNING "TimeRunning"
 #define D_JSON_TIME_TO_HEAT "TimeToHeat"
-#define D_JSON_TEMP "temp"
+#define D_JSON_TEMP "Temp"
 #define D_JSON_TRANSITION "Transition"
-#define D_JSON_TYPE "type"
-#define D_JSON_RELAY "relay"
+#define D_JSON_TYPE "Type"
+#define D_JSON_RELAY "Relay"
 
 #define D_JSON_MANUAL_SETPIXEL_TO_SCENE "ManualSetPixelToScene"
 
 #define D_JSON_TIME_SCALER_AS_PERCENTAGE "TimeMultiplierAsPerc"
 
-
-// #define D_JSON_EXTERNAL_POWER_ONOFF "ExternalPowerOnOff"
+#define D_JSON_EXTERNAL_POWER_ONOFF "ExternalPowerOnOff"
 
 
 
@@ -1624,23 +1469,10 @@
 #define D_RSLT_UPTIME "UPTIME"
 #define D_RSLT_WARNING "WARNING"
 
-#define D_LOG_SOME_SETTINGS_RESET "Some settings have been reset"
-
 // Commands sonoff.ino
 #define D_JSON_BACKLOG "Backlog"
 #define D_JSON_DELAY "Delay"
 #define D_JSON_STATUS "Status"
-  #define D_STATUS1_PARAMETER "PRM"
-  #define D_STATUS2_FIRMWARE "FWR"
-  #define D_STATUS3_LOGGING "LOG"
-  #define D_STATUS4_MEMORY "MEM"
-  #define D_STATUS5_NETWORK "NET"
-  #define D_STATUS6_MQTT "MQT"
-  #define D_STATUS7_TIME "TIM"
-  #define D_STATUS8_POWER "PWR"
-  #define D_STATUS9_MARGIN "PTH"
-  #define D_STATUS10_SENSOR "SNS"
-  #define D_STATUS11_STATUS "STS"
 #define D_JSON_STATE "State"
 #define D_JSON_POWER "Power"
 #define D_JSON_FANSPEED "FanSpeed"
@@ -1743,11 +1575,6 @@
 #define D_JSON_MQTTUSER "MqttUser"
 #define D_JSON_MQTTPASSWORD "MqttPassword"
 #define D_JSON_FULLTOPIC "FullTopic"
-#define D_JSON_PREFIX "Prefix"
-  #define PRFX_MAX_STRING_LENGTH 5
-  #define D_CMND "cmnd"
-  #define D_STAT "stat"
-  #define D_TELE "tele"
 #define D_JSON_GROUPTOPIC "GroupTopic"
 #define D_JSON_TOPIC "Topic"
 #define D_JSON_BUTTONTOPIC "ButtonTopic"
@@ -1856,14 +1683,6 @@
   #define D_JSON_RFRECEIVED "RfReceived"
 #define D_JSON_RFRAW "RfRaw"
 
-// Commands xdrv_07_domoticz.ino
-#define D_JSON_DOMOTICZ "Domoticz"
-#define D_JSON_IDX "Idx"
-#define D_JSON_KEYIDX "KeyIdx"
-#define D_JSON_SWITCHIDX "SwitchIdx"
-#define D_JSON_SENSORIDX "SensorIdx"
-#define D_JSON_UPDATETIMER "UpdateTimer"
-
 // Commands xdrv_08_serial_bridge.ino
 #define D_JSON_SSERIALSEND "SSerialSend"
 #define D_JSON_SBAUDRATE "SBaudrate"
@@ -1886,10 +1705,6 @@
 
 #define D_JSON_DESERIALIZATION_ERROR "DeserializationError"
 
-
-  #define D_WEBARG_SCENE_HUE "mrgbanimator::scene_hue"
-  #define D_WEBARG_SCENE_SAT "mrgbanimator::scene_sat"
-  #define D_WEBARG_SCENE_BRT "mrgbanimator::scene_brt"
   
 
 /********************************************************************************************/
@@ -1905,236 +1720,6 @@
   #define INCLUDE_FILE(x) QUOTEME(language/x.h)
   #include INCLUDE_FILE(MY_LANGUAGE)
 #endif
-#ifndef LANGUAGE_LCID
-  #define LANGUAGE_LCID 2057  // en-GB
-#endif
 
-// Common
-enum UnitNames {
-  UNIT_AMPERE,
-  UNIT_HOUR,
-  UNIT_KILOOHM,
-  UNIT_KILOWATTHOUR,
-  UNIT_LUX,
-  UNIT_MICROSECOND,
-  UNIT_MILLIAMPERE,
-  UNIT_MILLIMETER_MERCURY,
-  UNIT_MILLISECOND,
-  UNIT_MINUTE,
-  UNIT_PPB,
-  UNIT_PPD,
-  UNIT_PPM,
-  UNIT_PERCENTAGE,
-  UNIT_PRESSURE,
-  UNIT_SECOND,
-  UNIT_SECTORS,
-  UNIT_VOLT,
-  UNIT_WATT,
-  UNIT_WATTHOUR,
-  UNIT_HERTZ };
-const char kUnitNames[] PROGMEM =
-  D_UNIT_AMPERE "|"
-  D_UNIT_HOUR "|"
-  D_UNIT_KILOOHM "|"
-  D_UNIT_KILOWATTHOUR "|"
-  D_UNIT_LUX "|"
-  D_UNIT_MICROSECOND "|"
-  D_UNIT_MILLIAMPERE "|"
-  D_UNIT_MILLIMETER_MERCURY "|"
-  D_UNIT_MILLISECOND "|"
-  D_UNIT_MINUTE "|"
-  D_UNIT_PARTS_PER_BILLION "|"
-  D_UNIT_PARTS_PER_DECILITER "|"
-  D_UNIT_PARTS_PER_MILLION "|"
-  "%|"
-  D_UNIT_PRESSURE "|"
-  D_UNIT_SECOND "|"
-  D_UNIT_SECTORS "|"
-  D_UNIT_VOLT "|"
-  D_UNIT_WATT "|"
-  D_UNIT_WATTHOUR "|"
-  D_UNIT_HERTZ ;
-
-const char S_JSON_COMMAND_NVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%d %s\"}";
-const char S_JSON_COMMAND_LVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%lu %s\"}";
-const char S_JSON_COMMAND_SVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%s %s\"}";
-const char S_JSON_COMMAND_NVALUE_UNIT[] PROGMEM =             "{\"%s\":\"%d%s\"}";
-const char S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT[] PROGMEM = "{\"%s\":\"%d%s (%d%s)\"}";
-
-const char S_JSON_COMMAND_NVALUE_SVALUE[] PROGMEM =           "{\"%s\":\"%d (%s)\"}";
-const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D_JSON_ACTIVE " %d)\"}";
-
-const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
-#define    D_JSON_COMMAND_NVALUE                              "{\"%s\":%d}"
-#define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
-#define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY "\":%d}"
-
-#define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
-const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
-const char S_JSON_COMMAND_FVALUE[] PROGMEM =                  "{\"%s\":%.1f}";
-const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
-#define    D_JSON_COMMAND_SVALUE                              "{\"%s\":\"%s\"}"
-#define    D_JSON_COMMAND_SVALUE_P                            "{\"%S\":\"%s\"}"
-
-
-#define    D_JSON_COMMAND_SVALUE_K(KEY)                       "{\"" KEY ":\"%s\"}"
-
-// #define    D_JSON_COMMAND_SVALUE_K1                       "{\""
-// #define    D_JSON_COMMAND_SVALUE_K2                       ":\"%s\"}"
-
-
-const char S_JSON_COMMAND_SVALUE_SVALUE[] PROGMEM =           "{\"%s\":{\"%s\":\"%s\"}}";
-#define    D_JSON_COMMAND_SVALUE_SVALUE                       "{\"%s\":{\"%s\":\"%s\"}}"
-#define    D_JSON_COMMAND_SVALUE_SVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":\"%s\"}}"
-
-const char S_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%s\":{\"%s\":%d}}";
-#define    D_JSON_COMMAND_SVALUE_NVALUE                       "{\"%s\":{\"%s\":%d}}"
-#define    D_JSON_COMMAND_SVALUE_NVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":%d}}"
-
-
-
-const char S_JSON_COMMAND_ASTERIX[] PROGMEM =                 "{\"%s\":\"" D_ASTERIX "\"}";
-const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  // %s must provide quotes on non-number
-
-
-#define    D_JSON_KEYVALUE_NVALUE                             "\"%s\":%d"
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
-#define    D_JSON_KEYVALUE_SVALUE                             "\"%s\":\"%s\""
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
-#define    D_JSON_KEYVALUE_FVALUE                             "\"%s\":%s"
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
-
-
-
-#define    D_FUNCTION_NAME_SVALUE                              "f::\"%s\""
-
-const char S_JSON_COMMAND_INDEX_NVALUE[] PROGMEM =            "{\"%s%d\":%d}";
-const char S_JSON_COMMAND_INDEX_LVALUE[] PROGMEM =            "{\"%s%d\":%lu}";
-const char S_JSON_COMMAND_INDEX_SVALUE[] PROGMEM =            "{\"%s%d\":\"%s\"}";
-const char S_JSON_COMMAND_INDEX_ASTERIX[] PROGMEM =           "{\"%s%d\":\"" D_ASTERIX "\"}";
-const char S_JSON_COMMAND_INDEX_SVALUE_SVALUE[] PROGMEM =     "{\"%s%d\":\"%s%s\"}";
-const char S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE[] PROGMEM = "{\"%s%d\":\"%d (" D_JSON_ACTIVE " %d)\"}";
-
-const char S_JSON_SENSOR_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":%d}";
-const char S_JSON_SENSOR_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":\"%s\"}";
-
-const char S_JSON_DRIVER_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":%d}";
-const char S_JSON_DRIVER_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":\"%s\"}";
-
-const char JSON_SNS_TEMP[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s}";
-const char JSON_SNS_TEMPHUM[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s,\"" D_JSON_HUMIDITY "\":%s}";
-
-const char JSON_SNS_GNGPM[] PROGMEM = ",\"%s\":{\"" D_JSON_TOTAL_USAGE "\":%s,\"" D_JSON_FLOWRATE "\":%s}";
-
-const char S_LOG_I2C_FOUND_AT[] PROGMEM = D_LOG_I2C "%s " D_FOUND_AT " 0x%x";
-
-const char S_LOG_HTTP[] PROGMEM = D_LOG_HTTP;
-const char S_LOG_WIFI[] PROGMEM = D_LOG_WIFI;
-const char S_LOG_MQTT[] PROGMEM = D_LOG_MQTT;
-const char S_RSLT_POWER[] PROGMEM = D_RSLT_POWER;
-const char S_RSLT_RESULT[] PROGMEM = D_RSLT_RESULT;
-const char S_RSLT_WARNING[] PROGMEM = D_RSLT_WARNING;
-const char S_LWT[] PROGMEM = D_LWT;
-const char S_OFFLINE[] PROGMEM = D_OFFLINE;
-
-// sonoff.ino
-// #define MAX_BUTTON_COMMANDS  5  // Max number of button commands supported
-// const char kCommands[MAX_BUTTON_COMMANDS][14] PROGMEM = {
-//   D_JSON_WIFICONFIG " 1",   // Press button three times
-//   D_JSON_WIFICONFIG " 2",   // Press button four times
-//   D_JSON_WIFICONFIG " 3",   // Press button five times
-//   D_JSON_RESTART " 1",      // Press button six times
-//   D_JSON_UPGRADE " 1" };    // Press button seven times
-// #ifdef ESP8266
-// const char kWifiConfig[MAX_WIFI_OPTION][WCFG_MAX_STRING_LENGTH] PROGMEM = {
-//   D_WCFG_0_RESTART,
-//   D_WCFG_1_SMARTCONFIG,
-//   D_WCFG_2_WIFIMANAGER,
-//   D_WCFG_3_WPSCONFIG,
-//   D_WCFG_4_RETRY,
-//   D_WCFG_5_WAIT,
-//   D_WCFG_6_SERIAL,
-//   D_WCFG_7_WIFIMANAGER_RESET_ONLY };
-//   #endif
-// const char kPrefixes[3][PRFX_MAX_STRING_LENGTH] PROGMEM = {
-//   D_CMND,
-//   D_STAT,
-//   D_TELE };
-/*
-//   en-GB.h - localization for English - United Kingdom for Sonoff-Tasmota
-
-//   Copyright (C) 2019  Theo Arends
-
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// */
-
-// const char kCodeImage[] PROGMEM = "sonoff|minimal|classic|sensors|knx|basic|display";
-
-// support.ino
-static const char kMonthNames[] PROGMEM = D_MONTH3LIST;
-
-DEFINE_PGM_CTR(kOptionOff)        "OFF|" "0|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
-DEFINE_PGM_CTR(kOptionOn)         "ON|"  "1|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
-DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" D_ADMIN ;
-DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
-DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
-
-// xdrv_02_webserver.ino
-// #ifdef USE_MODULE_CORE_WEBSERVER
-// const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_SEAPRESSURE[] PROGMEM = "{s}%s " D_PRESSUREATSEALEVEL "{m}%s %s{e}";          // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_ANALOG[] PROGMEM = "{s}%s " D_ANALOG_INPUT "%d{m}%d{e}";                      // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_ILLUMINANCE[] PROGMEM = "{s}%s " D_ILLUMINANCE "{m}%d " D_UNIT_LUX "{e}";     // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_CO2[] PROGMEM = "{s}%s " D_CO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_CO2EAVG[] PROGMEM = "{s}%s " D_ECO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";  // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_GALLONS[] PROGMEM = "{s}%s " D_TOTAL_USAGE "{m}%s " D_UNIT_GALLONS " {e}";    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_GPM[] PROGMEM = "{s}%s " D_FLOW_RATE "{m}%s " D_UNIT_GALLONS_PER_MIN" {e}";   // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-// const char HTTP_SNS_DISTANCE[] PROGMEM = "{s}%s " "Distance" "{m}%s%s{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-
-// const char HTTP_SNS_GENERIC[] PROGMEM = "{s}%s{m}%s{e}";
-// const char HTTP_SNS_GENERIC_NVALUE[] PROGMEM = "{s}%s{m}%d{e}";
-// const char HTTP_SNS_GENERIC_SVALUE[] PROGMEM = "{s}%s{m}%s{e}";
-// const char HTTP_SNS_GENERIC_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
-// const char HTTP_SNS_GENERIC_NVALUE_UNIT[] PROGMEM = "{s}%s{m}%d %s{e}";
-// const char HTTP_SNS_GENERIC_SVALUE_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
- 
-// const char HTTP_SNS_VOLTAGE[] PROGMEM = "{s}" D_VOLTAGE "{m}%s " D_UNIT_VOLT "{e}";
-// const char HTTP_SNS_CURRENT[] PROGMEM = "{s}" D_CURRENT "{m}%s " D_UNIT_AMPERE "{e}";
-// const char HTTP_SNS_POWER[] PROGMEM = "{s}" D_POWERUSAGE "{m}%s " D_UNIT_WATT "{e}";
-// const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
-
-
-const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;
-const char S_CONFIGURATION[] PROGMEM = D_CONFIGURATION;
-const char S_SYSTEM_SETTINGS[] PROGMEM = D_SYSTEM_SETTINGS;
-const char S_CONFIGURE_TEMPLATE[] PROGMEM = D_CONFIGURE_TEMPLATE;
-const char S_CONFIGURE_MODULE[] PROGMEM = D_CONFIGURE_MODULE;
-const char S_COLOUR_PALETTE_EDITOR[] PROGMEM = D_COLOUR_PALETTE_EDITOR;
-const char S_COLOUR_MIXER_EDITOR[] PROGMEM = D_COLOUR_MIXER_EDITOR;
-const char S_CONFIGURE_WIFI[] PROGMEM = D_CONFIGURE_WIFI;
-const char S_NO_NETWORKS_FOUND[] PROGMEM = D_NO_NETWORKS_FOUND;
-const char S_CONFIGURE_LOGGING[] PROGMEM = D_CONFIGURE_LOGGING;
-const char S_CONFIGURE_OTHER[] PROGMEM = D_CONFIGURE_OTHER;
-const char S_SAVE_CONFIGURATION[] PROGMEM = D_SAVE_CONFIGURATION;
-const char S_RESET_CONFIGURATION[] PROGMEM = D_RESET_CONFIGURATION;
-const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
-const char S_FIRMWARE_UPGRADE[] PROGMEM = D_FIRMWARE_UPGRADE;
-const char S_CONSOLE[] PROGMEM = D_CONSOLE;
-const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
-const char S_RESTART[] PROGMEM = D_RESTART;
-// #endif  // USE_MODULE_CORE_WEBSERVER
 
 #endif  // _I18N_H_

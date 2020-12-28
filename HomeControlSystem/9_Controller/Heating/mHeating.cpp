@@ -5,16 +5,15 @@
 
 void mHeating::pre_init(void){
 
-  init_success = true; // Begins true, anything bad sets to false
+  //init_success = true; // Begins true, anything bad sets to false
 
 }
 
 void mHeating::init(void){
 
-  for(uint8_t device_id=0;device_id<4;device_id++){ SetHeatingRelay(device_id,RELAY_STATE_OFF); }
-
-  tSavedHeatingTimer = millis();
-  tSavedHeatingTemps = millis();
+  for(uint8_t device_id=0;device_id<4;device_id++){ 
+    SetHeatingRelay(device_id,RELAY_STATE_OFF); 
+  }
 
   for(int device_id=0;device_id<HEATING_DEVICE_TIMERS_MAX;device_id++){
     program_timers[device_id].time_minutes_on = -1;
@@ -36,6 +35,8 @@ void mHeating::init(void){
   program_temps[DEVICE_IH_ID].status.data.len = 0;
   memset(&program_temps[DEVICE_WB_ID].status.data.ctr,0,sizeof(program_temps[DEVICE_WB_ID].status.data.ctr));
   program_temps[DEVICE_WB_ID].status.data.len = 0;
+
+  memset(&status_message, 0, sizeof(status_message));
 
   program_temps[DEVICE_US_ID].temp.desired = 20;
   program_temps[DEVICE_DS_ID].temp.desired = 21;
@@ -117,94 +118,16 @@ void mHeating::init(void){
   #endif
   #endif
 
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_US,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_US);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_DS,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_DS);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_IH,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_IH);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_WB,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_WB);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_TT,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_TT);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_TM,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_TM);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_TB,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_TB);
-  // pCONT_set->AddDeviceName(D_HEATING_SENSOR_NAME_LONG_TO,       D_MODULE_SENSORS_DB18S20_ID, DEVICELIST_WATER_TO);
-
-
 }//end function
 
 
 
 void mHeating::init_relay_driver_parameters(){
   
-  // #ifdef TEST_DEVICE_NAME
-  // pCONT_set->AddDeviceName("One", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_US);
-  // pCONT_set->AddDeviceName("Two", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_DS);
-  // pCONT_set->AddDeviceName("Three", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_IH);
-  // pCONT_set->AddDeviceName("Four", D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_WB);
-
-  // #else
-  // pCONT_set->AddDeviceName(D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_US);
-  // pCONT_set->AddDeviceName(D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_DS);
-  // pCONT_set->AddDeviceName(D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_IH);
-  // pCONT_set->AddDeviceName(D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG, D_MODULE_DRIVERS_RELAY_ID,   DEVICELIST_RELAY_WB);
-  // #endif
 
 }
 
 void mHeating::init_db18_sensor_parameters(){
-
-  // PHASE OUT, do the progmem way now
-  
-  // //init db18
-  // uint8_t buffer_length = 0;
-  // // memset(pCONT_msdb18->name_buffer,0,sizeof(pCONT_msdb18->name_buffer));
-
-  // DeviceAddress* address_memory = nullptr;
-
-  // uint8_t sensor_found_id = 0;
-  // // search for sensor by address and assign its name in memory
-  // for(int address_id=0;address_id<8;address_id++){
-
-  //   // Find the sensor name for found sensor eg WHAT IS IN ADDRESS 0
-  //   for(int address_search_id=0;address_search_id<8;address_search_id++){
-  //     // Load sensor to check
-  //     switch(address_search_id){
-  //       case ID_DB18_DS: address_memory = &thermo_addr_dsp; break;
-  //       case ID_DB18_US: address_memory = &thermo_addr_usp; break;
-  //       case ID_DB18_WB: address_memory = &thermo_addr_wbp; break;
-  //       case ID_DB18_IH: address_memory = &thermo_addr_ih; break;
-  //       case ID_DB18_TB: address_memory = &thermo_addr_tank_bottom; break;
-  //       case ID_DB18_TO: address_memory = &thermo_addr_tank_out; break;
-  //       case ID_DB18_TT: address_memory = &thermo_addr_tank_top; break;
-  //       case ID_DB18_TM: address_memory = &thermo_addr_tank_middle; break;
-  //     }
-  //     if(memcmp(pCONT_msdb18->sensor[address_id].address,address_memory,sizeof(DeviceAddress))==0){
-  //       sensor_found_id = address_search_id;
-  //       pCONT_msdb18->sensor[address_id].address_id = address_search_id; // save id against address
-  //       break;
-  //     }
-  //   }// end search for sensor
-
-  // #ifdef TEST_DEVICE_NAME
-  // pCONT_set->AddDeviceName("One", D_MODULE_SENSORS_DB18S20_ID,   0);
-  // pCONT_set->AddDeviceName("Two", D_MODULE_SENSORS_DB18S20_ID,   1);
-  // pCONT_set->AddDeviceName("Three", D_MODULE_SENSORS_DB18S20_ID,  2);
-  // pCONT_set->AddDeviceName("Four", D_MODULE_SENSORS_DB18S20_ID,   3);
-  // pCONT_set->AddDeviceName("Five", D_MODULE_SENSORS_DB18S20_ID,   4);
-  // pCONT_set->AddDeviceName("Six", D_MODULE_SENSORS_DB18S20_ID,   5);
-  // pCONT_set->AddDeviceName("Seven", D_MODULE_SENSORS_DB18S20_ID,   6);
-  // pCONT_set->AddDeviceName("Eight", D_MODULE_SENSORS_DB18S20_ID,   7);
-
-  // #else
-  //   switch(sensor_found_id){
-  //     case ID_DB18_DS: pCONT_set->AddDeviceName(D_DB18_NAME_DOWNSTAIRS_PIPE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_US: pCONT_set->AddDeviceName(D_DB18_NAME_UPSTAIRS_PIPE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_WB: pCONT_set->AddDeviceName(D_DB18_NAME_BOILER_PIPE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_IH: pCONT_set->AddDeviceName(D_DB18_NAME_IMMERSION_HEATER,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_TB: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_BOTTOM,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_TO: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_OUT,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_TT: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_TOP,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //     case ID_DB18_TM: pCONT_set->AddDeviceName(D_DB18_NAME_TANK_MIDDLE,D_MODULE_SENSORS_DB18S20_ID,address_id); break;
-  //   }
-  //   #endif
-  // }
 
   // Measure and report every second
   pCONT_msdb18->settings.rate_measure_ms = 1000;
@@ -232,24 +155,6 @@ void mHeating::init_dht22_sensor_parameters(){
   pCONT->msdht->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
 
 }
-
-/**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-***********ANYTHING ABOVE, MUST BE NEW ***************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-**************************************************************   Huge rewrite
-*/
-
-
 
 /*******************************************************************************************************************************************************
 ************************************************************************************************************************************************
@@ -331,11 +236,6 @@ void mHeating::FunctionHandler_Relay_Status(){ DEBUG_LINE;
       case DEVICE_IH_ID: relay_state = GetHeatingRelay(DEVICE_IH_ID); break;
     }
 
-    switch(relay_state){
-      case 1: heating_device_relays[device_id].time_minutes_on++;  break;
-      case 0: heating_device_relays[device_id].time_minutes_on=-1; break;// RESET
-    }
-
   }
 
 } // END function
@@ -389,29 +289,29 @@ void mHeating::FunctionHandler_Programs_Timers(void){
 
   for(int device_id=0;device_id<DEVICE_ID_TOTAL;device_id++){
 
-      if(program_timers[device_id].time_minutes_on == 0){
-        program_timers[device_id].time_minutes_on = -1; //to disable it
-        program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
-        SetHeater(device_id, RELAY_STATE_OFF); //turn off
-        program_timers[device_id].ischanged=true;
-        state_tmp = ACTIVEP_OFF; // #1 error needs to be done here
-        activeprograms[device_id].timers.state = 0;  
-      }else 
-      if(program_timers[device_id].time_minutes_on > 0){
-        program_timers[device_id].time_minutes_on--;
-        SetHeater(device_id, RELAY_STATE_ON); // only needs called once, that or add ifnoton inside this function turn on
-        program_timers[device_id].ischanged=true;
-        state_tmp = ACTIVEP_ON;
-        activeprograms[device_id].timers.state = 1;        
-      }else{ // <=1 not active
-        activeprograms[device_id].timers.state = 0;  
-      }
+    if(program_timers[device_id].time_minutes_on == 0){
+      program_timers[device_id].time_minutes_on = -1; //to disable it
+      program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
+      SetHeater(device_id, RELAY_STATE_OFF); //turn off
+      program_timers[device_id].ischanged=true;
+      state_tmp = ACTIVEP_OFF; // #1 error needs to be done here
+      activeprograms[device_id].timers.state = 0;  
+    }else 
+    if(program_timers[device_id].time_minutes_on > 0){
+      program_timers[device_id].time_minutes_on--;
+      SetHeater(device_id, RELAY_STATE_ON); // only needs called once, that or add ifnoton inside this function turn on
+      program_timers[device_id].ischanged=true;
+      state_tmp = ACTIVEP_ON;
+      activeprograms[device_id].timers.state = 1;        
+    }else{ // <=1 not active
+      activeprograms[device_id].timers.state = 0;  
+    }
 
-      // Update state change and run special functions if needed // makes no sense
-      // if(activeprograms[device_id].timers.state != state_tmp){ // CAUSES ERROR #1 - duplicate on state
-      //   activeprograms[device_id].timers.state = state_tmp;
-      //   SendMQTTAlertOnChangeofState(device_id,state_tmp);//device,new state
-      // }
+    // Update state change and run special functions if needed // makes no sense
+    // if(activeprograms[device_id].timers.state != state_tmp){ // CAUSES ERROR #1 - duplicate on state
+    //   activeprograms[device_id].timers.state = state_tmp;
+    //   SendMQTTAlertOnChangeofState(device_id,state_tmp);//device,new state
+    // }
 
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING "activeprograms[%d].timers.state = %d"),device_id,
       activeprograms[device_id].timers.state);
@@ -466,31 +366,6 @@ void mHeating::FunctionHandler_Programs_Temps(void){
 
 
   // Use 1 ROC to deactive rapid heating decreases indicating using water
-  /*if(CheckIfROCExceedsNegativeLimit(device_id)){
-
-    // REPEAT OF BELOW CODE
-    pCONT->mso->MessagePrint("CheckIfROCExceedsNegativeLimit");
-    program_temps[device_id].time_running.on = -2; // -1 is just not active, -2 is a freeze out that lasts one hour unless overriden
-    program_temps[device_id].time_maintaining.limit = -1;
-    SetHeater(device_id,0);
-    if(program_temps[device_id].schedule.mode_sch == SCHEDULED_ON){
-      program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF;
-      program_temps[device_id].status.mode = TEMP_MODE_OFF;
-      activeprograms[device_id].temps.state = ACTIVEP_OFF;
-    }else{ //manual
-      program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF;
-      program_temps[device_id].status.mode = TEMP_MODE_OFF;
-      activeprograms[device_id].temps.state = ACTIVEP_OFF;
-    }
-    fForceHeatingTempsUpdate = true;
-
-    char tmpctr[100];  memset(tmpctr,0,sizeof(tmpctr));
-    sprintf(tmpctr, "Detected water usage, %s heating turned off",GetDeviceNameLongbyIDCtr(device_id));
-    pCONT->mso->MessagePrintln(tmpctr);
-    pCONT->mqt->pubsub->publish("heating/alert",tmpctr);
-    pCONT->mqt->pubsub->publish("heating/voice/alert/direct",tmpctr);
-
-  }*/
 
   fForceHeatingTempsUpdate = false; // RESET FLAG 
 
@@ -690,14 +565,14 @@ void mHeating::SubTask_HeatingTemps(void){
 // Waiting: Set for 07:00 (T-03:45)
 void mHeating::SubTask_HeatingTemps_StatusMessage(){
 
-int16_t timeon;
-char tmp[10];
-char namectr[2];
-char time_ctr[50];
-uint8_t ischanged = 0;
-float valf,val;
-int vali;
-int i=0;
+  int16_t timeon;
+  char tmp[10];
+  char namectr[2];
+  char time_ctr[50];
+  uint8_t ischanged = 0;
+  float valf,val;
+  int vali;
+  int i=0;
 
   char tmpctr[50];  memset(tmpctr,0,sizeof(tmpctr));
 
@@ -1138,9 +1013,9 @@ uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].temps.state); 
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start_P(D_JSON_STATUS);  
-      JsonBuilderI->Add(D_JSON_MESSAGE, pCONT_tel->hardwarestatus.ctr);  //nice human message that remains the same
-      JsonBuilderI->Add(D_JSON_LENGTH, pCONT_tel->hardwarestatus.len); 
-      JsonBuilderI->Add(D_JSON_IMPORTANCE, pCONT_tel->hardwarestatus.importance); 
+      JsonBuilderI->Add(D_JSON_MESSAGE, status_message.ctr);  //nice human message that remains the same
+      JsonBuilderI->Add(D_JSON_LENGTH, status_message.len); 
+      JsonBuilderI->Add(D_JSON_IMPORTANCE, status_message.importance); 
     JsonBuilderI->Level_End();
     // JsonBuilderI->Level_Start_P(D_JSON_STATUS "_QuickShow");   //shows on app, that heating has been correctly turned on
     //   JsonBuilderI->Add(D_JSON_MESSAGE, pCONT_tel->hardwarestatus.ctr);  //nice human message that remains the same
@@ -1150,18 +1025,18 @@ uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
 
 
 uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
+
   char buffer[50];
   JsonBuilderI->Start();
   for(int device_id=0;device_id<4;device_id++){
-    JsonBuilderI->Level_Start_P(
-      pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  heating_device_relays[device_id].ontime.hour,  heating_device_relays[device_id].ontime.minute,  heating_device_relays[device_id].ontime.second);
-      JsonBuilderI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), heating_device_relays[device_id].offtime.hour, heating_device_relays[device_id].offtime.minute, heating_device_relays[device_id].offtime.second);
-      JsonBuilderI->Add(D_JSON_TIME_ON,   heating_device_relays[device_id].time_minutes_on);
-      JsonBuilderI->Add(D_JSON_ISCHANGED, heating_device_relays[device_id].ischanged);
+    JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->relay_status[device_id].last.ontime.hour,  pCONT_mry->relay_status[device_id].last.ontime.minute,  pCONT_mry->relay_status[device_id].last.ontime.second);
+      JsonBuilderI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->relay_status[device_id].last.offtime.hour,  pCONT_mry->relay_status[device_id].last.offtime.minute,  pCONT_mry->relay_status[device_id].last.offtime.second);
+      JsonBuilderI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->relay_status[device_id].time_minutes_on);
     JsonBuilderI->Level_End();
   }
   return JsonBuilderI->End();
+
 }
 
 
@@ -1458,48 +1333,54 @@ int8_t mHeating::SubContructCtr_HardwareStatus(){
 
   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
   uint8_t fNotFirstItem = 0;
+  char buffer[100];
 
-  // for(int device_id=0;device_id<4;device_id++){
-  //   if(activeprograms[device_id].timers.state){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s timers %s",
-  //       GetDeviceNamebyIDCtr(device_id),
-  //       GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //     SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].timers.state); //med
-  //   }
-  //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //   }
-  // }
+  for(int device_id=0;device_id<4;device_id++){
+    if(activeprograms[device_id].timers.state){
+      sprintf(&status_message.ctr[status_message.len],"%s timers %s",
+        GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
+        GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state, buffer, sizeof(buffer)));
+      status_message.len = strlen(status_message.ctr);
+      SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
+    }
+    if(fNotFirstItem){
+      sprintf(&status_message.ctr[status_message.len],"%c",'c');
+      status_message.len = strlen(status_message.ctr);
+    }
+  }
 
-  // for(int device_id=0;device_id<4;device_id++){
-  //   if(activeprograms[device_id].temps.state){ pCONT_tel->hardwarestatus.importance = 2;//med
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s temps %s",
-  //       GetDeviceNamebyIDCtr(device_id),
-  //       GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //   }
-  //   SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].temps.state); //med
-  //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //   }
-  // }
+  for(int device_id=0;device_id<4;device_id++){
+    if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
+      sprintf(&status_message.ctr[status_message.len],"%s temps %s",
+        GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
+        GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state, buffer, sizeof(buffer)));
+      status_message.len = strlen(status_message.ctr);
+    }
+    SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
+    if(fNotFirstItem){
+      sprintf(&status_message.ctr[status_message.len],"%c",'c');
+      status_message.len = strlen(status_message.ctr);
+    }
+  }
 
-  // for(int device_id=0;device_id<4;device_id++){
-  //   if(activeprograms[device_id].relays.state){ pCONT_tel->hardwarestatus.importance = 2;//high
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s relays %s",
-  //       GetDeviceNamebyIDCtr(device_id),
-  //       GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //   }
-  //   SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].relays.state); //med
-  //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //   }
-  // }
+  for(int device_id=0;device_id<4;device_id++){
+    if(activeprograms[device_id].relays.state){ status_message.importance = 2;//high
+      sprintf(&status_message.ctr[status_message.len],"%s relays %s",
+        GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
+        GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)));
+      status_message.len = strlen(status_message.ctr);
+    }
+    SetHighestImportance(&status_message.importance,activeprograms[device_id].relays.state); //med
+    if(fNotFirstItem){
+      sprintf(&status_message.ctr[status_message.len],"%c",'c');
+      status_message.len = strlen(status_message.ctr);
+    }
+  }
+
+  if(!status_message.len){
+    sprintf(&status_message.ctr[status_message.len],"%s","Nothing Running");
+    status_message.len = strlen(status_message.ctr);
+  }
 
 }
 
@@ -1511,49 +1392,49 @@ int8_t mHeating::SubContructCtr_HardwareStatus_Long(){
 
   // for(int device_id=0;device_id<4;device_id++){
   //   if(activeprograms[device_id].timers.state){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s Timer %s",
+  //     sprintf(&status_message.ctr[status_message.len],"%s Timer %s",
   //       GetDeviceNameLongbyIDCtr(device_id),
   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
-  //     SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].timers.state); //med
+  //     status_message.len = strlen(status_message.ctr);
+  //     SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
   //   }
   //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+  //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
+  //     status_message.len = strlen(status_message.ctr);
   //   }
   // }
 
   // for(int device_id=0;device_id<4;device_id++){
-  //   if(activeprograms[device_id].temps.state){ pCONT_tel->hardwarestatus.importance = 2;//med
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s Temp %s",
+  //   if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
+  //     sprintf(&status_message.ctr[status_message.len],"%s Temp %s",
   //       GetDeviceNameLongbyIDCtr(device_id),
   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+  //     status_message.len = strlen(status_message.ctr);
   //   }
-  //   SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].temps.state); //med
+  //   SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
   //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+  //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
+  //     status_message.len = strlen(status_message.ctr);
   //   }
   // }
 
   // for(int device_id=0;device_id<4;device_id++){
-  //   if(activeprograms[device_id].relays.state){ pCONT_tel->hardwarestatus.importance = 2;//high
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%s relays %s",
+  //   if(activeprograms[device_id].relays.state){ status_message.importance = 2;//high
+  //     sprintf(&status_message.ctr[status_message.len],"%s relays %s",
   //       GetDeviceNameLongbyIDCtr(device_id),
   //       GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state));
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+  //     status_message.len = strlen(status_message.ctr);
   //   }
-  //   SetHighestImportance(&pCONT_tel->hardwarestatus.importance,activeprograms[device_id].relays.state); //med
+  //   SetHighestImportance(&status_message.importance,activeprograms[device_id].relays.state); //med
   //   if(fNotFirstItem){
-  //     sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"%c",'c');
-  //     pCONT_tel->hardwarestatus.len = strlen(pCONT_tel->hardwarestatus.ctr);
+  //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
+  //     status_message.len = strlen(status_message.ctr);
   //   }
   // }
 
-  if(!pCONT_tel->hardwarestatus.len){
-    pCONT_tel->hardwarestatus.len += sprintf(&pCONT_tel->hardwarestatus.ctr[pCONT_tel->hardwarestatus.len],"Online");
-  }
+  // if(!status_message.len){
+  //   status_message.len += sprintf(&status_message.ctr[status_message.len],"Online");
+  // }
 
 } //end function
 
@@ -1663,42 +1544,34 @@ uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
 ************************************************************************************************************************************************/
 
 // reads relay position for devices
-int8_t mHeating::GetHeater(uint8_t device){
-  switch(device){
-    case DEVICE_DS_ID: return GetHeatingRelay(DEVICE_DS_ID);
-    case DEVICE_US_ID: return GetHeatingRelay(DEVICE_US_ID);
-    case DEVICE_WB_ID: return GetHeatingRelay(DEVICE_WB_ID);
-    case DEVICE_IH_ID: return GetHeatingRelay(DEVICE_IH_ID);
-    default: return -1;
-  }
-}
+// int8_t mHeating::GetHeater(uint8_t device){
+//   switch(device){
+//     case DEVICE_DS_ID: return GetHeatingRelay(DEVICE_DS_ID);
+//     case DEVICE_US_ID: return GetHeatingRelay(DEVICE_US_ID);
+//     case DEVICE_WB_ID: return GetHeatingRelay(DEVICE_WB_ID);
+//     case DEVICE_IH_ID: return GetHeatingRelay(DEVICE_IH_ID);
+//     default: return -1;
+//   }
+// }
 
 void mHeating::SetHeater(uint8_t device, uint8_t state){
 
   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
 
-  #ifdef ENABLE_MQTT_DEBUG_MESSAGES //debug_message/function 
-  pCONT_mqtt->Send_Prefixed_P(PSTR("debug_message/setheater"),PSTR("device=%d,state=%d"),device,state);
-  #endif
-
-
-  //add ontime like relays          
+  // #ifdef ENABLE_MQTT_DEBUG_MESSAGES //debug_message/function 
+  // pCONT_mqtt->Send_Prefixed_P(PSTR("debug_message/setheater"),PSTR("device=%d,state=%d"),device,state);
+  // #endif
 
   //add state check that only runs updates below if new state has been selected, else, return
-  if(GetHeater(device)==state){
-    heating_device_relays[device].ischanged = false;
+  if(GetHeatingRelay(device)==state){
     return;
   }else{
-    heating_device_relays[device].ischanged = true;
     fForceHeatingTempsUpdate = true;
   }
 
   #ifdef ENABLE_RELAY_CONTROLS
 
     SetHeatingRelay(device,state);
-
-    if(state==1){heating_device_relays[device].ontime = pCONT->mt->RtcTime;}
-    if(state==0){heating_device_relays[device].offtime = pCONT->mt->RtcTime;}
 
   #else
     //Serial.println(F("SetHeater Disabled for debugging!"));
@@ -1871,6 +1744,10 @@ int8_t mHeating::Tasker(uint8_t function){
     /************
      * PERIODIC SECTION * 
     *******************/
+   case FUNC_EVERY_SECOND:
+   //temp calculate always, later add flags to update it
+    SubContructCtr_HardwareStatus();
+   break;
     case FUNC_EVERY_MINUTE:     
 
     break;
@@ -2341,7 +2218,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;

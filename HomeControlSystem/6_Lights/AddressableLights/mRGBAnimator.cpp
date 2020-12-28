@@ -2230,7 +2230,7 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
   // if(fromcolor != RgbcctColor(0)){ //? 
   //   fromcolor_npb = fromcolor;
   // }
-  RgbcctColor targetColor_npb = RgbcctColor(targetColor.R,targetColor.G,targetColor.B);
+  RgbcctColor targetColor_npb = targetColor;//RgbcctColor(targetColor.R,targetColor.G,targetColor.B);
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("fromcolor_npb=%d,%d,%d"),fromcolor_npb.R,fromcolor_npb.G,fromcolor_npb.B);

@@ -278,8 +278,8 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_ERROR_JSON_DESERIALIZATION));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_ERROR_JSON_DESERIALIZATION);
+    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_JSON_DESERIALIZATION_ERROR));
+    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
     return 0;
   }
   JsonObject obj = doc.as<JsonObject>();

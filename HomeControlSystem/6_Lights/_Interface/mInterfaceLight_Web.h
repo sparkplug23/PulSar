@@ -3,11 +3,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
-
-// no class, include within header class
-
-// int test = 0;
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 
 #ifdef ESP32

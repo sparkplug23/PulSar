@@ -41,6 +41,7 @@ DEFINE_PGM_CTR(PM_JSON_DOWNTIME)          D_JSON_DOWNTIME;
 DEFINE_PGM_CTR(PM_JSON_DNSSERVER)         D_JSON_DNSSERVER;
 DEFINE_PGM_CTR(PM_JSON_DRIVERS)           D_JSON_DRIVERS;
 DEFINE_PGM_CTR(PM_JSON_DEVICEFRIENDLYNAME) D_JSON_DEVICEFRIENDLYNAME;
+DEFINE_PGM_CTR(PM_JSON_DESERIALIZATION_ERROR) D_JSON_DESERIALIZATION_ERROR;
 
 //E
 DEFINE_PGM_CTR(PM_JSON_ENDDST)            D_JSON_ENDDST;
@@ -309,6 +310,219 @@ DEFINE_PGM_CTR(PM_JSON_RELAY)             D_JSON_RELAY;
 DEFINE_PGM_CTR(PM_PRESSED)                D_PRESSED;
 DEFINE_PGM_CTR(PM_NOT_PRESSED)                D_NOT_PRESSED;
 #endif // USE_MODULE_SENSORS_BUTTONS
+
+
+
+// Common
+enum UnitNames {
+  UNIT_AMPERE,
+  UNIT_HOUR,
+  UNIT_KILOOHM,
+  UNIT_KILOWATTHOUR,
+  UNIT_LUX,
+  UNIT_MICROSECOND,
+  UNIT_MILLIAMPERE,
+  UNIT_MILLIMETER_MERCURY,
+  UNIT_MILLISECOND,
+  UNIT_MINUTE,
+  UNIT_PPB,
+  UNIT_PPD,
+  UNIT_PPM,
+  UNIT_PERCENTAGE,
+  UNIT_PRESSURE,
+  UNIT_SECOND,
+  UNIT_SECTORS,
+  UNIT_VOLT,
+  UNIT_WATT,
+  UNIT_WATTHOUR,
+  UNIT_HERTZ };
+const char kUnitNames[] PROGMEM =
+  D_UNIT_AMPERE "|"
+  D_UNIT_HOUR "|"
+  D_UNIT_KILOOHM "|"
+  D_UNIT_KILOWATTHOUR "|"
+  D_UNIT_LUX "|"
+  D_UNIT_MICROSECOND "|"
+  D_UNIT_MILLIAMPERE "|"
+  D_UNIT_MILLIMETER_MERCURY "|"
+  D_UNIT_MILLISECOND "|"
+  D_UNIT_MINUTE "|"
+  D_UNIT_PARTS_PER_BILLION "|"
+  D_UNIT_PARTS_PER_DECILITER "|"
+  D_UNIT_PARTS_PER_MILLION "|"
+  "%|"
+  D_UNIT_PRESSURE "|"
+  D_UNIT_SECOND "|"
+  D_UNIT_SECTORS "|"
+  D_UNIT_VOLT "|"
+  D_UNIT_WATT "|"
+  D_UNIT_WATTHOUR "|"
+  D_UNIT_HERTZ ;
+
+const char S_JSON_COMMAND_NVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%d %s\"}";
+const char S_JSON_COMMAND_LVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%lu %s\"}";
+const char S_JSON_COMMAND_SVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%s %s\"}";
+const char S_JSON_COMMAND_NVALUE_UNIT[] PROGMEM =             "{\"%s\":\"%d%s\"}";
+const char S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT[] PROGMEM = "{\"%s\":\"%d%s (%d%s)\"}";
+
+const char S_JSON_COMMAND_NVALUE_SVALUE[] PROGMEM =           "{\"%s\":\"%d (%s)\"}";
+const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D_JSON_ACTIVE " %d)\"}";
+
+const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
+#define    D_JSON_COMMAND_NVALUE                              "{\"%s\":%d}"
+#define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
+#define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY "\":%d}"
+
+#define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
+const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
+const char S_JSON_COMMAND_FVALUE[] PROGMEM =                  "{\"%s\":%.1f}";
+const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
+#define    D_JSON_COMMAND_SVALUE                              "{\"%s\":\"%s\"}"
+#define    D_JSON_COMMAND_SVALUE_P                            "{\"%S\":\"%s\"}"
+
+
+#define    D_JSON_COMMAND_SVALUE_K(KEY)                       "{\"" KEY ":\"%s\"}"
+
+// #define    D_JSON_COMMAND_SVALUE_K1                       "{\""
+// #define    D_JSON_COMMAND_SVALUE_K2                       ":\"%s\"}"
+
+
+const char S_JSON_COMMAND_SVALUE_SVALUE[] PROGMEM =           "{\"%s\":{\"%s\":\"%s\"}}";
+#define    D_JSON_COMMAND_SVALUE_SVALUE                       "{\"%s\":{\"%s\":\"%s\"}}"
+#define    D_JSON_COMMAND_SVALUE_SVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":\"%s\"}}"
+
+const char S_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%s\":{\"%s\":%d}}";
+#define    D_JSON_COMMAND_SVALUE_NVALUE                       "{\"%s\":{\"%s\":%d}}"
+#define    D_JSON_COMMAND_SVALUE_NVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":%d}}"
+
+
+
+const char S_JSON_COMMAND_ASTERIX[] PROGMEM =                 "{\"%s\":\"" D_ASTERIX "\"}";
+const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  // %s must provide quotes on non-number
+
+
+#define    D_JSON_KEYVALUE_NVALUE                             "\"%s\":%d"
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
+#define    D_JSON_KEYVALUE_SVALUE                             "\"%s\":\"%s\""
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
+#define    D_JSON_KEYVALUE_FVALUE                             "\"%s\":%s"
+DEFINE_PGM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
+
+
+
+#define    D_FUNCTION_NAME_SVALUE                              "f::\"%s\""
+
+const char S_JSON_COMMAND_INDEX_NVALUE[] PROGMEM =            "{\"%s%d\":%d}";
+const char S_JSON_COMMAND_INDEX_LVALUE[] PROGMEM =            "{\"%s%d\":%lu}";
+const char S_JSON_COMMAND_INDEX_SVALUE[] PROGMEM =            "{\"%s%d\":\"%s\"}";
+const char S_JSON_COMMAND_INDEX_ASTERIX[] PROGMEM =           "{\"%s%d\":\"" D_ASTERIX "\"}";
+const char S_JSON_COMMAND_INDEX_SVALUE_SVALUE[] PROGMEM =     "{\"%s%d\":\"%s%s\"}";
+const char S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE[] PROGMEM = "{\"%s%d\":\"%d (" D_JSON_ACTIVE " %d)\"}";
+
+const char S_JSON_SENSOR_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":%d}";
+const char S_JSON_SENSOR_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":\"%s\"}";
+
+const char S_JSON_DRIVER_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":%d}";
+const char S_JSON_DRIVER_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":\"%s\"}";
+
+const char JSON_SNS_TEMP[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s}";
+const char JSON_SNS_TEMPHUM[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s,\"" D_JSON_HUMIDITY "\":%s}";
+
+const char JSON_SNS_GNGPM[] PROGMEM = ",\"%s\":{\"" D_JSON_TOTAL_USAGE "\":%s,\"" D_JSON_FLOWRATE "\":%s}";
+
+const char S_LOG_I2C_FOUND_AT[] PROGMEM = D_LOG_I2C "%s " D_FOUND_AT " 0x%x";
+
+const char S_LOG_HTTP[] PROGMEM = D_LOG_HTTP;
+const char S_LOG_WIFI[] PROGMEM = D_LOG_WIFI;
+const char S_LOG_MQTT[] PROGMEM = D_LOG_MQTT;
+const char S_RSLT_POWER[] PROGMEM = D_RSLT_POWER;
+const char S_RSLT_RESULT[] PROGMEM = D_RSLT_RESULT;
+const char S_RSLT_WARNING[] PROGMEM = D_RSLT_WARNING;
+const char S_LWT[] PROGMEM = D_LWT;
+const char S_OFFLINE[] PROGMEM = D_OFFLINE;
+
+// sonoff.ino
+// #define MAX_BUTTON_COMMANDS  5  // Max number of button commands supported
+// const char kCommands[MAX_BUTTON_COMMANDS][14] PROGMEM = {
+//   D_JSON_WIFICONFIG " 1",   // Press button three times
+//   D_JSON_WIFICONFIG " 2",   // Press button four times
+//   D_JSON_WIFICONFIG " 3",   // Press button five times
+//   D_JSON_RESTART " 1",      // Press button six times
+//   D_JSON_UPGRADE " 1" };    // Press button seven times
+// #ifdef ESP8266
+// const char kWifiConfig[MAX_WIFI_OPTION][WCFG_MAX_STRING_LENGTH] PROGMEM = {
+//   D_WCFG_0_RESTART,
+//   D_WCFG_1_SMARTCONFIG,
+//   D_WCFG_2_WIFIMANAGER,
+//   D_WCFG_3_WPSCONFIG,
+//   D_WCFG_4_RETRY,
+//   D_WCFG_5_WAIT,
+//   D_WCFG_6_SERIAL,
+//   D_WCFG_7_WIFIMANAGER_RESET_ONLY };
+//   #endif
+// const char kPrefixes[3][PRFX_MAX_STRING_LENGTH] PROGMEM = {
+//   D_CMND,
+//   D_STAT,
+//   D_TELE };
+
+
+
+// support.ino
+static const char kMonthNames[] PROGMEM = D_MONTH3LIST;
+
+DEFINE_PGM_CTR(kOptionOff)        "OFF|" "0|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
+DEFINE_PGM_CTR(kOptionOn)         "ON|"  "1|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
+DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" D_ADMIN ;
+DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
+DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
+
+// xdrv_02_webserver.ino
+// #ifdef USE_MODULE_CORE_WEBSERVER
+// const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_SEAPRESSURE[] PROGMEM = "{s}%s " D_PRESSUREATSEALEVEL "{m}%s %s{e}";          // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_ANALOG[] PROGMEM = "{s}%s " D_ANALOG_INPUT "%d{m}%d{e}";                      // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_ILLUMINANCE[] PROGMEM = "{s}%s " D_ILLUMINANCE "{m}%d " D_UNIT_LUX "{e}";     // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_CO2[] PROGMEM = "{s}%s " D_CO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_CO2EAVG[] PROGMEM = "{s}%s " D_ECO2 "{m}%d " D_UNIT_PARTS_PER_MILLION "{e}";  // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_GALLONS[] PROGMEM = "{s}%s " D_TOTAL_USAGE "{m}%s " D_UNIT_GALLONS " {e}";    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_GPM[] PROGMEM = "{s}%s " D_FLOW_RATE "{m}%s " D_UNIT_GALLONS_PER_MIN" {e}";   // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+// const char HTTP_SNS_DISTANCE[] PROGMEM = "{s}%s " "Distance" "{m}%s%s{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
+
+// const char HTTP_SNS_GENERIC[] PROGMEM = "{s}%s{m}%s{e}";
+// const char HTTP_SNS_GENERIC_NVALUE[] PROGMEM = "{s}%s{m}%d{e}";
+// const char HTTP_SNS_GENERIC_SVALUE[] PROGMEM = "{s}%s{m}%s{e}";
+// const char HTTP_SNS_GENERIC_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
+// const char HTTP_SNS_GENERIC_NVALUE_UNIT[] PROGMEM = "{s}%s{m}%d %s{e}";
+// const char HTTP_SNS_GENERIC_SVALUE_UNIT[] PROGMEM = "{s}%s{m}%s %s{e}";
+ 
+// const char HTTP_SNS_VOLTAGE[] PROGMEM = "{s}" D_VOLTAGE "{m}%s " D_UNIT_VOLT "{e}";
+// const char HTTP_SNS_CURRENT[] PROGMEM = "{s}" D_CURRENT "{m}%s " D_UNIT_AMPERE "{e}";
+// const char HTTP_SNS_POWER[] PROGMEM = "{s}" D_POWERUSAGE "{m}%s " D_UNIT_WATT "{e}";
+// const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
+
+
+const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;
+const char S_CONFIGURATION[] PROGMEM = D_CONFIGURATION;
+const char S_SYSTEM_SETTINGS[] PROGMEM = D_SYSTEM_SETTINGS;
+const char S_CONFIGURE_TEMPLATE[] PROGMEM = D_CONFIGURE_TEMPLATE;
+const char S_CONFIGURE_MODULE[] PROGMEM = D_CONFIGURE_MODULE;
+const char S_COLOUR_PALETTE_EDITOR[] PROGMEM = D_COLOUR_PALETTE_EDITOR;
+const char S_COLOUR_MIXER_EDITOR[] PROGMEM = D_COLOUR_MIXER_EDITOR;
+const char S_CONFIGURE_WIFI[] PROGMEM = D_CONFIGURE_WIFI;
+const char S_NO_NETWORKS_FOUND[] PROGMEM = D_NO_NETWORKS_FOUND;
+const char S_CONFIGURE_LOGGING[] PROGMEM = D_CONFIGURE_LOGGING;
+const char S_CONFIGURE_OTHER[] PROGMEM = D_CONFIGURE_OTHER;
+const char S_SAVE_CONFIGURATION[] PROGMEM = D_SAVE_CONFIGURATION;
+const char S_RESET_CONFIGURATION[] PROGMEM = D_RESET_CONFIGURATION;
+const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
+const char S_FIRMWARE_UPGRADE[] PROGMEM = D_FIRMWARE_UPGRADE;
+const char S_CONSOLE[] PROGMEM = D_CONSOLE;
+const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
+const char S_RESTART[] PROGMEM = D_RESTART;
+// #endif  // USE_MODULE_CORE_WEBSERVER
+
 
 
 #endif
