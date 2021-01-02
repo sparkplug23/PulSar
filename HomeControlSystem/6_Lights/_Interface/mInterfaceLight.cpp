@@ -626,6 +626,10 @@ void mInterfaceLight::parse_JSONCommand(void){
   pCONT_lPWM->parse_JSONCommand();
   #endif // USE_MODULE_LIGHTS_PWM
 
+  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+  pCONT_lwled->parse_JSONCommand();
+  #endif // USE_MODULE_LIGHTS_WLED_EFFECTS
+
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   pCONT_ladd->parse_JSONCommand();
   #endif // USE_MODULE_LIGHTS_ADDRESSABLE

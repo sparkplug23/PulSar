@@ -30,6 +30,14 @@
   "Scene":{"Colour":[255,150,0,0,255]},
 }
 
+{
+  "Effects": {
+    "Current": 51,
+    "Speed": 128,
+    "Intensity": 128,
+    "Palette": 12
+  }
+}
 
 
 

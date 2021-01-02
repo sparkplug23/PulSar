@@ -458,6 +458,7 @@ enum XsnsFunctions {
   FUNC_MODULE_INIT,  // Read progmem configs if needed, read settings configuration
   FUNC_PRE_INIT,     // Configure sub modules and classes as needed
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
+  FUNC_POST_INIT,    // similar to FUNC_CONFIGURE_MODULES_FOR_DEVICE, will run immediately after init
   FUNC_FUNCTION_LAMBDA_INIT,
   FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES,   // Use defaults in code
   FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE, // Load values from settings struct and overwrite module values

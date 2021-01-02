@@ -217,6 +217,9 @@
 #define D_MODULE_LIGHTS_PWM_FRIENDLY_CTR "pwmlight"
 #define D_MODULE_LIGHTS_PWM_CTR "Pwmlight"
 
+#define D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR "wled_effects"
+#define D_MODULE_LIGHTS_WLED_EFFECTS_CTR "wled_effects"
+
 
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
@@ -511,6 +514,7 @@
 #define D_FOUND_AT                      "found at"
 #define D_SYSLOG_HOST_NOT_FOUND         "Syslog Host not found"
 #define D_ERROR_UNSUPPORTED             "ERROR : Feature not currently supported"
+#define D_LOG_SOME_SETTINGS_RESET "Some settings have been reset"
 
 /**
  * settings
@@ -554,7 +558,6 @@
 #define D_CONFIGURE_MODULE "Configure Module"
 #define D_CONFIGURE_WIFI "Configure WiFi"
 #define D_CONFIGURE_MQTT "Configure MQTT"
-#define D_CONFIGURE_DOMOTICZ "Configure Domoticz"
 #define D_CONFIGURE_LOGGING "Configure Logging"
 #define D_CONFIGURE_OTHER "Configure Other"
 #define D_CONFIRM_RESET_CONFIGURATION "Confirm Reset Configuration"
@@ -975,7 +978,6 @@
 #define D_LOG_COMMAND "CMD: "      // Command
 #define D_LOG_DEBUG "DBG: "        // Debug
 #define D_LOG_DHT "DHT: "          // DHT sensor
-#define D_LOG_DOMOTICZ "DOM: "     // Domoticz
 #define D_LOG_DSB "DSB: "          // DS18xB20 sensor
 #define D_LOG_GARAGE "GAR: "         // relays
 #define D_LOG_HTTP "HTP: "         // HTTP webserver
@@ -1404,7 +1406,7 @@
 #define D_JSON_SCENE_COLOUR "SceneColour"
 #define D_JSON_SCENE_NAME   "SceneName"
 
-#define D_JSON_SCHEDULE "schedule"
+#define D_JSON_SCHEDULE "Schedule"
 #define D_JSON_SCHEDULED_OFF D_OFF
 #define D_JSON_SCHEDULED_SET "scheduled_set"
 #define D_JSON_SCHEDULED_ON "scheduled_on"

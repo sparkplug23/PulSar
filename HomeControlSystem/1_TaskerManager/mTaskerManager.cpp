@@ -83,6 +83,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_LIGHTS_PWM
     if(mlights_pwm == nullptr){ mlights_pwm = new mPWMLight(); }
   #endif
+  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+    if(mlights_wled == nullptr){ mlights_wled = new mWLEDEffects(); }
+  #endif
 
   /**
    * Drivers
@@ -283,6 +286,9 @@ uint8_t mTaskerManager::InitClassList(){
   #endif
   #ifdef D_MODULE_LIGHTS_PWM_ID
     module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_PWM_ID
+  #endif  
+  #ifdef D_MODULE_LIGHTS_WLED_EFFECTS_ID
+    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_WLED_EFFECTS_ID
   #endif  
 
   // Displays
@@ -718,6 +724,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
       #ifdef D_MODULE_LIGHTS_PWM_ID
         case D_MODULE_LIGHTS_PWM_ID:     result = mlights_pwm->Tasker(function); break;
+      #endif  
+      #ifdef D_MODULE_LIGHTS_WLED_EFFECTS_ID
+        case D_MODULE_LIGHTS_WLED_EFFECTS_ID:     result = mlights_wled->Tasker(function); break;
       #endif  
 
 

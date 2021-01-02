@@ -1198,6 +1198,124 @@ void SetPixelColor_All(RgbcctColor colour);
     void parsesub_NotificationPanel(JsonObjectConst _obj);
 #endif
 
+/**************
+ * 
+ * 
+ * WLED Adaptations
+ * 
+ * 
+ * ****/
+
+
+// #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+
+// typedef struct Segment { // 24 bytes
+//       uint16_t start;
+//       uint16_t stop; //segment invalid if stop == 0
+//       uint8_t speed;
+//       uint8_t intensity;
+//       uint8_t palette;
+//       uint8_t mode;
+//       uint8_t options; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
+//       uint8_t grouping, spacing;
+//       uint8_t opacity;
+//       uint32_t colors[NUM_COLORS];
+//       void setOption(uint8_t n, bool val)
+//       {
+//         if (val) {
+//           options |= 0x01 << n;
+//         } else
+//         {
+//           options &= ~(0x01 << n);
+//         }
+//       }
+//       bool getOption(uint8_t n)
+//       {
+//         return ((options >> n) & 0x01);
+//       }
+//       bool isSelected()
+//       {
+//         return getOption(0);
+//       }
+//       bool isActive()
+//       {
+//         return stop > start;
+//       }
+//       uint16_t length()
+//       {
+//         return stop - start;
+//       }
+//       uint16_t groupLength()
+//       {
+//         return grouping + spacing;
+//       }
+//       uint16_t virtualLength()
+//       {
+//         uint16_t groupLen = groupLength();
+//         uint16_t vLength = (length() + groupLen - 1) / groupLen;
+//         if (options & MIRROR)
+//           vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+//         return vLength;
+//       }
+//     } segment;
+
+//      // segment runtime parameters
+//     typedef struct Segment_runtime { // 28 bytes
+//       unsigned long next_time;
+//       uint32_t step;
+//       uint32_t call;
+//       uint16_t aux0;
+//       uint16_t aux1;
+//       byte* data = nullptr;
+//       bool allocateData(uint16_t len){
+//         if (data && _dataLen == len) return true; //already allocated
+//         deallocateData();
+//         if (WS2812FX::_usedSegmentData + len > MAX_SEGMENT_DATA) return false; //not enough memory
+//         data = new (std::nothrow) byte[len];
+//         if (!data) return false; //allocation failed
+//         WS2812FX::_usedSegmentData += len;
+//         _dataLen = len;
+//         memset(data, 0, len);
+//         return true;
+//       }
+//       void deallocateData(){
+//         delete[] data;
+//         data = nullptr;
+//         WS2812FX::_usedSegmentData -= _dataLen;
+//         _dataLen = 0;
+//       }
+//       void reset(){next_time = 0; step = 0; call = 0; aux0 = 0; aux1 = 0; deallocateData();}
+//       private:
+//         uint16_t _dataLen = 0;
+//     } segment_runtime;
+
+
+// /*
+//  * Color wipe function
+//  * LEDs are turned on (color1) in sequence, then turned off (color2) in sequence.
+//  * if (bool rev == true) then LEDs are turned off in reverse order
+//  */
+// uint16_t color_wipe(bool rev, bool useRandomColors);
+
+// /*
+//  * Lights all LEDs one after another.
+//  */
+// uint16_t mode_color_wipe(void);
+// /*
+//  * Lights all LEDs one after another. Turns off opposite
+//  */
+// uint16_t mode_color_sweep(void);
+// /*
+//  * Turns all LEDs after each other to a random color.
+//  * Then starts over with another color.
+//  */
+// uint16_t mode_color_wipe_random(void);
+// /*
+//  * Random color introduced alternating from start and end of strip.
+//  */
+// uint16_t mode_color_sweep_random(void);
+// #endif// ENABLE_PIXEL_FUNCTION_FLASHER
+
 
 
 

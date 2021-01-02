@@ -335,6 +335,16 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)              D_MODULE_LIGHTS_PWM_FRIENDLY_CTR;
   #define pCONT_lPWM pCONT->mlights_pwm
 #endif
+#ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+  #include "6_Lights/WLEDEffects/mWLEDEffects.h"
+  class mWLEDEffects;
+  #define D_MODULE_LIGHTS_WLED_EFFECTS_ID 143
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_CTR)              D_MODULE_LIGHTS_WLED_EFFECTS_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR)     D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR;
+  #define pCONT_lwled pCONT->mlights_wled
+#endif
+
+
 
 
 // Sensors (Range 120-169)
@@ -702,6 +712,9 @@ class mTaskerManager{
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
     mPWMLight *mlights_pwm = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+    mWLEDEffects *mlights_wled = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
 
 

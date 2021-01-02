@@ -148,13 +148,19 @@ class mRelays{
       }enabled_ranges[3];
     // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
 
-      uint16_t time_minutes_on = 0;
+      // 0 minutes if off
+      // 1+ minutes, is 0+, so time_minutes_on is really "time_minutes_on-1"
+      //uint16_t time_minutes_on = 0; //phase out, make function to get minutes from seconds
+
+      uint32_t time_seconds_on = 0;
      
       uint8_t ischanged = false;
 
     }relay_status[RELAYS_CONNECTED];
     
 bool IsRelayTimeWindowAllowed(uint8_t relay_id);
+
+void SubTask_Every_Minute();
 
 
     /**

@@ -30,7 +30,7 @@
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
-// #define DEVICE_RGBROOF                                
+#define DEVICE_RGBROOF                                
 // #define DEVICE_RGBDELL
 // #define DEVICE_RGBCRYSTAL1
 //#define DEVICE_RGBCRYSTAL2
@@ -76,7 +76,7 @@
 // #define DEVICE_DOORBELLWALLCHIME                 
 // #define DEVICE_OILFURNACE
 //#define DEVICE_GAZEBCON
-#define DEVICE_HEATING
+// #define DEVICE_HEATING
 //#define DEVICE_KITCHENPANEL
 // #define DEVICE_LANDINGPANEL
 //#define DEVICE_BLACKDOORBELL
@@ -362,7 +362,9 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_WLED_EFFECTS
+#define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
 
   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
   
@@ -385,7 +387,7 @@
   "}";
 
   
-  #define STRIP_SIZE_MAX 50
+  #define STRIP_SIZE_MAX 100
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -396,7 +398,7 @@
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
     "\"" D_JSON_FLASHER "\":{" 

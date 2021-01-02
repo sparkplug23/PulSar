@@ -22,6 +22,7 @@ Section Next, will always be "Development", which with copy and paste will becom
 - `AnimationProfile` function/enum list changed to `SetLightPowerState`
 - Refactored commands in lightinterface and animator (to be renamed `mRGBAddressable`)
 - Created more files (cpp) under lighting to split code segments out for easier reading
+- Cleaned `LanguageDefaults`
 
 ### Fixed
 - RTC code to use interrupts, eliminating time drift

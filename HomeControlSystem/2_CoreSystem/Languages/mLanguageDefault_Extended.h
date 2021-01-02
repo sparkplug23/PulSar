@@ -1629,7 +1629,7 @@
 // #define D_RSLT_UPTIME "UPTIME"
 // #define D_RSLT_WARNING "WARNING"
 
-// #define D_LOG_SOME_SETTINGS_RESET "Some settings have been reset"
+// 
 
 // // Commands sonoff.ino
 // #define D_JSON_BACKLOG "Backlog"

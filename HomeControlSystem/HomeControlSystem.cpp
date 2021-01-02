@@ -464,6 +464,8 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_PRE_INIT);
   // Init devices
   pCONT->Tasker_Interface(FUNC_INIT);
+  // Init devices after others have been configured fully
+  pCONT->Tasker_Interface(FUNC_POST_INIT);
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
   // Load the minimal default settings in modules (hard coded) before loading any stored user values

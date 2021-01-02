@@ -91,6 +91,9 @@ int8_t mRelays::Tasker(uint8_t function){
     case FUNC_EVERY_SECOND:
       SubTask_Relay_Timed_Seconds();
     break;
+    case FUNC_EVERY_MINUTE:
+      SubTask_Every_Minute();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -138,6 +141,10 @@ int8_t mRelays::Tasker(uint8_t function){
   } // end switch
 } // END function
 
+void mRelays::SubTask_Every_Minute(){
+
+
+}
 
 void mRelays::SubTask_Relay_Timed_Seconds(){
   
@@ -149,6 +156,12 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
   // Loop across each connected relay
   for(int relay_id=0;relay_id<settings.relays_connected;relay_id++){
 
+    //change seconds
+    if(relay_status[relay_id].time_seconds_on){
+      relay_status[relay_id].time_seconds_on++; // increment if positive, if 0, it doesnt increase
+    }
+
+    // Auto time off decounters
     if(relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
@@ -425,8 +438,13 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
   // relay_status[num].onoff = state;
   bitWrite(pCONT_set->power, num, state);
 
-  if(state){ relay_status[num].last.ontime = pCONT->mt->RtcTime; //create future "operators" to handle these conversions
-  }else{ relay_status[num].last.offtime = pCONT->mt->RtcTime; }
+  if(state){ 
+    relay_status[num].last.ontime = pCONT->mt->RtcTime; //create future "operators" to handle these conversions
+    relay_status[num].time_seconds_on = 1;
+  }else{ 
+    relay_status[num].last.offtime = pCONT->mt->RtcTime; 
+    relay_status[num].time_seconds_on = 0; // Off 
+  }
 
   ExecuteCommandPower(num,state,SRC_MQTT);
 

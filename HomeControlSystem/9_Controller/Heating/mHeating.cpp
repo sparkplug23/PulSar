@@ -1,7 +1,12 @@
 #include "mHeating.h"
 
-
 #ifdef USE_MODULE_CUSTOM_HEATING
+
+/***
+ * Primary entry point to heating: 
+ *  - All sub cpp files called from here, tasker in here
+ * */
+
 
 void mHeating::pre_init(void){
 
@@ -15,117 +20,30 @@ void mHeating::init(void){
     SetHeatingRelay(device_id,RELAY_STATE_OFF); 
   }
 
-  for(int device_id=0;device_id<HEATING_DEVICE_TIMERS_MAX;device_id++){
-    program_timers[device_id].time_minutes_on = -1;
-    program_timers[device_id].time_minutes_on_start = program_timers[device_id].time_minutes_on;
-    program_timers[device_id].ischanged=false;
-  }
-
-  for(int device_id=0;device_id<HEATING_DEVICE_TIMERS_MAX;device_id++){
-    program_temps[device_id].time_running.on=-1;
-    program_temps[device_id].time_maintaining.limit = -1;
-  }
-
-  // test fill
-  memset(&program_temps[DEVICE_US_ID].status.data.ctr,0,sizeof(program_temps[DEVICE_US_ID].status.data.ctr));
-  program_temps[DEVICE_US_ID].status.data.len = 0;
-  memset(&program_temps[DEVICE_DS_ID].status.data.ctr,0,sizeof(program_temps[DEVICE_DS_ID].status.data.ctr));
-  program_temps[DEVICE_DS_ID].status.data.len = 0;
-  memset(&program_temps[DEVICE_IH_ID].status.data.ctr,0,sizeof(program_temps[DEVICE_IH_ID].status.data.ctr));
-  program_temps[DEVICE_IH_ID].status.data.len = 0;
-  memset(&program_temps[DEVICE_WB_ID].status.data.ctr,0,sizeof(program_temps[DEVICE_WB_ID].status.data.ctr));
-  program_temps[DEVICE_WB_ID].status.data.len = 0;
-
   memset(&status_message, 0, sizeof(status_message));
 
-  program_temps[DEVICE_US_ID].temp.desired = 20;
-  program_temps[DEVICE_DS_ID].temp.desired = 21;
-  program_temps[DEVICE_IH_ID].temp.desired = 40;
-  program_temps[DEVICE_WB_ID].temp.desired = 50;
-
-
-  program_temps[DEVICE_US_ID].temp.mapped_defaults[0] = 0;
-  program_temps[DEVICE_US_ID].temp.mapped_defaults[1] = 10;
-  program_temps[DEVICE_US_ID].temp.mapped_defaults[2] = 23;
-  program_temps[DEVICE_US_ID].temp.mapped_defaults[3] = 25;
+  init_program_timers();
+  init_program_temps();
+  init_program_scheduling();
   
-  program_temps[DEVICE_DS_ID].temp.mapped_defaults[0] = 0;
-  program_temps[DEVICE_DS_ID].temp.mapped_defaults[1] = 20;
-  program_temps[DEVICE_DS_ID].temp.mapped_defaults[2] = 23;
-  program_temps[DEVICE_DS_ID].temp.mapped_defaults[3] = 25;
-  
-  program_temps[DEVICE_IH_ID].temp.mapped_defaults[0] = 0;
-  program_temps[DEVICE_IH_ID].temp.mapped_defaults[1] = 30;
-  program_temps[DEVICE_IH_ID].temp.mapped_defaults[2] = 40;
-  program_temps[DEVICE_IH_ID].temp.mapped_defaults[3] = 50;
-  
-  program_temps[DEVICE_WB_ID].temp.mapped_defaults[0] = 0;
-  program_temps[DEVICE_WB_ID].temp.mapped_defaults[1] = 30;
-  program_temps[DEVICE_WB_ID].temp.mapped_defaults[2] = 40;
-  program_temps[DEVICE_WB_ID].temp.mapped_defaults[3] = 50;
-
-
-  program_timers[DEVICE_US_ID].mapped_defaults[0] = 0;
-  program_timers[DEVICE_US_ID].mapped_defaults[1] = 60;
-  program_timers[DEVICE_US_ID].mapped_defaults[2] = 90;
-  program_timers[DEVICE_US_ID].mapped_defaults[3] = 120;
-  
-  program_timers[DEVICE_DS_ID].mapped_defaults[0] = 0;
-  program_timers[DEVICE_DS_ID].mapped_defaults[1] = 60;
-  program_timers[DEVICE_DS_ID].mapped_defaults[2] = 90;
-  program_timers[DEVICE_DS_ID].mapped_defaults[3] = 120;
-  
-  program_timers[DEVICE_IH_ID].mapped_defaults[0] = 0;
-  program_timers[DEVICE_IH_ID].mapped_defaults[1] = 30;
-  program_timers[DEVICE_IH_ID].mapped_defaults[2] = 60;
-  program_timers[DEVICE_IH_ID].mapped_defaults[3] = 120;
-  
-  program_timers[DEVICE_WB_ID].mapped_defaults[0] = 0;
-  program_timers[DEVICE_WB_ID].mapped_defaults[1] = 30;
-  program_timers[DEVICE_WB_ID].mapped_defaults[2] = 60;
-  program_timers[DEVICE_WB_ID].mapped_defaults[3] = 120;
-
-  pCONT_set->ClearAllDeviceName();
-
   init_relay_driver_parameters();
   init_dht22_sensor_parameters();
   init_db18_sensor_parameters();
 
-
-  // datetime_t dummy_t;
-
-  // dummy_t.Mday = 6; // set to today with __DATE__ later
-  // dummy_t.month = mTime::MONTH_AUGUST;
-  // dummy_t.year = 2019;
-  // dummy_t.hour = 23;
-  // dummy_t.minute = 30;
-  // dummy_t.second = 0;
-
-#ifdef USE_SCHEDULED_HEATING
-
-  for(int device_id=0;device_id<4;device_id++){
-    // program_temps[device_id].schedule.ontime = &dummy_t;
-    // program_temps[device_id].schedule.offtime = &dummy_t;
-    // program_temps[device_id].schedule.untilontime = &dummy_t;
-  }
-  #endif
-
   failsafes.tSaved = millis();
 
-  #ifdef USE_HEATING_TEMPS
-  #ifdef USE_HEATING_PROFILE_ESTIMATION
+  #if defined(USE_HEATING_TEMPS) && defined(USE_HEATING_PROFILE_ESTIMATION)
     init_HeatingProfiles();
-  #endif
   #endif
 
 }//end function
-
 
 
 void mHeating::init_relay_driver_parameters(){
   
 
 }
+
 
 void mHeating::init_db18_sensor_parameters(){
 
@@ -138,7 +56,6 @@ void mHeating::init_db18_sensor_parameters(){
   pCONT_msdb18->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
 
 }
-
 
 
 void mHeating::init_dht22_sensor_parameters(){
@@ -156,9 +73,8 @@ void mHeating::init_dht22_sensor_parameters(){
 
 }
 
+
 /*******************************************************************************************************************************************************
-************************************************************************************************************************************************
-************************************************************************************************************************************************
 ************************************************************************************************************************************************
 ************************************************************************************************************************************************
 ************************************************************************************************************************************************
@@ -173,10 +89,11 @@ void mHeating::SetHeatingRelay(uint8_t device_id, uint8_t state){
   pCONT_mry->CommandSet_Relay_Power(state,device_id); //index offset starts at 1
 }
 
+
 uint8_t mHeating::GetHeatingRelay(uint8_t device_id){
-  DEBUG_LINE;
   return pCONT_mry->CommandGet_Relay_Power(device_id);//index offset starts at 1
 }
+
 
 uint8_t mHeating::GetAnyHeatingRelay(){
   uint8_t oncount = 0;
@@ -187,27 +104,35 @@ uint8_t mHeating::GetAnyHeatingRelay(){
 }
 
 
-//temps at max/above threshold for extended time (count++ if temp>threshold, reset when lower)
-// check once a minute, if relay on OR temp above threshold, add time to counter
 void mHeating::FunctionHandler_FailSafe(void){
 
-  // if(mTime::TimeReached(&failsafes.tSaved,60000)){
+  if(mTime::TimeReached(&failsafes.tSaved,60000)){
 
-    // uint8_t fMessageToSend = false;
-    // char tmpctr[100];
+    uint8_t fMessageToSend = false;
+    char tmpctr[100] = {0}; 
+    char buffer[100];
+    //memset(tmpctr,0,sizeof(tmpctr));
 
-    // for(int device_id=0;device_id<4;device_id++){
-    //   if((heating_device_relays[device_id].time_minutes_on>FAILSAFE_MINUTES_WARNING)&&(heating_device_relays[device_id].time_minutes_on<FAILSAFE_MINUTES_ERROR)){
-    //     memset(tmpctr,0,sizeof(tmpctr));
-    //     sprintf(tmpctr, "Warning, %s heating has been on for a long time of %d minutes",GetDeviceNameLongbyIDCtr(device_id),heating_device_relays[device_id].time_minutes_on);
-    //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
-    //     fMessageToSend = true;
-    //   }else if(heating_device_relays[device_id].time_minutes_on>FAILSAFE_MINUTES_ERROR){
-    //     memset(tmpctr,0,sizeof(tmpctr));
-    //     sprintf(tmpctr, "Error, %s heating has been on for too long. Turning off now.",GetDeviceNameLongbyIDCtr(device_id));
-    //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
-    //     fMessageToSend = true;
-    //   }
+    uint16_t time_minutes_on = 0;
+
+
+    for(int device_id=0;device_id<4;device_id++){
+
+      time_minutes_on = pCONT_mry->relay_status[device_id].time_seconds_on/60;
+
+      if(
+        (time_minutes_on>FAILSAFE_MINUTES_WARNING)&&
+        (time_minutes_on<FAILSAFE_MINUTES_ERROR)
+      ){
+        // snprintf(tmpctr, sizeof(tmpctr), "Warning, %s heating has been on for a long time of %d minutes",GetDeviceNameLongbyIDCtr(device_id),heating_device_relays[device_id].time_minutes_on);
+        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
+        fMessageToSend = true;
+      }else 
+      if(time_minutes_on>FAILSAFE_MINUTES_ERROR){
+        // snprintf(tmpctr, sizeof(tmpctr), "Error, %s heating has been on for too long. Turning off now.",GetDeviceNameLongbyIDCtr(device_id));
+        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
+        fMessageToSend = true;
+      }
 
     //   // if(fMessageToSend){
     //   //   StaticJsonDocument<300> doc;
@@ -218,8 +143,8 @@ void mHeating::FunctionHandler_FailSafe(void){
     //   //   serializeJson(doc,data_buffer.payload.ctr);
     //   //   pCONT->mqt->ppublish("status/alert",data_buffer.payload.ctr,false);
     //   // }
-    // }
-  // } // end timer check
+    }
+  } // end timer check
 
 } //end fucntion
 
@@ -235,6 +160,8 @@ void mHeating::FunctionHandler_Relay_Status(){ DEBUG_LINE;
       case DEVICE_WB_ID: relay_state = GetHeatingRelay(DEVICE_WB_ID); break;
       case DEVICE_IH_ID: relay_state = GetHeatingRelay(DEVICE_IH_ID); break;
     }
+
+    //removed minutes on from here, now check relays
 
   }
 
@@ -405,6 +332,19 @@ uint8_t mHeating::CheckIfROCExceedsNegativeLimit(uint8_t id){
 // Change to switch cases later for easier reading
 void mHeating::SubTask_HeatingTemps(void){
 
+/***
+ * Needs reformatting
+ * 
+ * Temp modes: off, running_targetting, running_maintaining
+ * no schedules here, schedules will be its own thing that can enable temp or timers 
+ * 
+ * 
+ * */
+
+
+
+  #ifdef ENABLE_DEVFEATURE_HEATING_TEMPS_TESTING
+
   // NEED TO HAVE CUTOFF WHEN ITS USED PRIOR TO HITTING TEMP
 
   float measured_temp=0;
@@ -413,8 +353,8 @@ void mHeating::SubTask_HeatingTemps(void){
 
     //run on every loop
     switch(device_id){
-      case DEVICE_DS_ID: measured_temp = pCONT->msdht->sensor[DHT_DOWNSTAIRS_ID].instant.temperature; break;
-      case DEVICE_US_ID: measured_temp = pCONT->msdht->sensor[DHT_UPSTAIRS_ID].instant.temperature; break;
+      case DEVICE_DS_ID: measured_temp = pCONT_dht->sensor[DHT_DOWNSTAIRS_ID].instant.temperature; break;
+      case DEVICE_US_ID: measured_temp = pCONT_dht->sensor[DHT_UPSTAIRS_ID].instant.temperature; break;
       case DEVICE_WB_ID: measured_temp = pCONT_msdb18->sensor[ID_DB18_WB].reading.val; break;
       case DEVICE_IH_ID: measured_temp = pCONT_msdb18->sensor[ID_DB18_IH].reading.val; break;
     }
@@ -436,33 +376,37 @@ void mHeating::SubTask_HeatingTemps(void){
         fRunTemp = true;
         //if on, check time limits
       break;
+      // Awaiting for time before turning on 
+      // NEEDS complete revamp, to allow advanced scheduling (15 minute increments of on and off)
+      // use binary?
+
       case SCHEDULED_SET_ID:{
 
-          //program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
+        //program_temps[device_id].status.mode = TEMP_MODE_SCHEDULED;
 
-          activeprograms[device_id].temps.state = ACTIVEP_SCHEDULED;
+        activeprograms[device_id].temps.state = ACTIVEP_SCHEDULED;
 
-          //uint8_t fTimeReached = pCONT->mt->CheckBetween_Week_DateTimes(&program_temps[device_id].schedule.ontime,&program_temps[device_id].schedule.offtime);
+        //uint8_t fTimeReached = pCONT->mt->CheckBetween_Week_DateTimes(&program_temps[device_id].schedule.ontime,&program_temps[device_id].schedule.offtime);
 
-          uint8_t fTimeReached = pCONT->mt->CheckDateTimeWeekIsNow(&program_temps[device_id].schedule.ontime);
+        uint8_t fTimeReached = pCONT->mt->CheckDateTimeWeekIsNow(&program_temps[device_id].schedule.ontime);
 
-          program_temps[device_id].schedule.untilontime = pCONT->mt->GetDifferenceInDateTimes(&pCONT->mt->RtcTime,&program_temps[device_id].schedule.ontime);
+        program_temps[device_id].schedule.untilontime = pCONT->mt->GetDifferenceInDateTimes(&pCONT->mt->RtcTime,&program_temps[device_id].schedule.ontime);
 
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
+        AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
 
-          // uint8_t hours, minutes, seconds;
-          // pCONT->mt->DateTimeWeek2HHMMSS(&program_temps[device_id].schedule.untilontime,&hours,&minutes,&seconds);
-          //
-          // pCONT->mso->MessagePrint("hours> "); pCONT->mso->MessagePrintln(hours);
-          // pCONT->mso->MessagePrint("minutes> "); pCONT->mso->MessagePrintln(minutes);
-          // pCONT->mso->MessagePrint("seconds> "); pCONT->mso->MessagePrintln(seconds);
+        // uint8_t hours, minutes, seconds;
+        // pCONT->mt->DateTimeWeek2HHMMSS(&program_temps[device_id].schedule.untilontime,&hours,&minutes,&seconds);
+        //
+        // pCONT->mso->MessagePrint("hours> "); pCONT->mso->MessagePrintln(hours);
+        // pCONT->mso->MessagePrint("minutes> "); pCONT->mso->MessagePrintln(minutes);
+        // pCONT->mso->MessagePrint("seconds> "); pCONT->mso->MessagePrintln(seconds);
 
-          // if is reached AND NOT run yet
-          if(fTimeReached&&(!program_temps[device_id].schedule.fHasRun)){
-            program_temps[device_id].schedule.fHasRun = 1;
-            program_temps[device_id].schedule.mode_sch = SCHEDULED_ON_ID;
-            program_temps[device_id].time_running.on = 0;
-          }
+        // if is reached AND NOT run yet
+        if(fTimeReached&&(!program_temps[device_id].schedule.fHasRun)){
+          program_temps[device_id].schedule.fHasRun = 1;
+          program_temps[device_id].schedule.mode_sch = SCHEDULED_ON_ID;
+          program_temps[device_id].time_running.on = 0;
+        }
 
         // if(program_temps[device_id].schedule.fRunning){}
 
@@ -486,57 +430,57 @@ void mHeating::SubTask_HeatingTemps(void){
       // if timer is active
       if(program_temps[device_id].time_running.on >= 0){
 
-          // Time checks - if we have hit max time on (INCLUDES maintain)
-          if(program_temps[device_id].time_running.on > program_temps[device_id].time_running.limit){   
-            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
-            program_temps[device_id].time_running.on = -1; //deactviate
-            program_temps[device_id].time_maintaining.limit = -1;
-          }else{ //stay on
-            SetHeater(device_id,1);
-            program_temps[device_id].status.mode = TEMP_MODE_HEATING_ID;
+        // Time checks - if we have hit max time on (INCLUDES maintain)
+        if(program_temps[device_id].time_running.on > program_temps[device_id].time_running.limit){   
+          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
+          program_temps[device_id].time_running.on = -1; //deactviate
+          program_temps[device_id].time_maintaining.limit = -1;
+        }else{ //stay on
+          SetHeater(device_id,1);
+          program_temps[device_id].status.mode = TEMP_MODE_HEATING_ID;
+          activeprograms[device_id].temps.state = ACTIVEP_ON;
+        }
+
+        // Temp checks
+        if(measured_temp >= program_temps[device_id].temp.desired){   
+          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] > Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
+          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Exceeded Set Point"));
+    
+          // Check should we maintain temp (> minus 1, less than max)
+          if((program_temps[device_id].time_maintaining.on>=0)&&(program_temps[device_id].time_maintaining.on < program_temps[device_id].time_maintaining.limit)){
+            program_temps[device_id].status.mode = TEMP_MODE_MAINTAINING_ID;
             activeprograms[device_id].temps.state = ACTIVEP_ON;
           }
+          // Turn off
+          else{
+            
+            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "desired_count > desired_max"));
+    
+            program_temps[device_id].time_running.on = -2; // -1 is just not active, -2 is a freeze out that lasts one hour unless overriden
+            program_temps[device_id].time_maintaining.limit = -1;
 
-          // Temp checks
-          if(measured_temp >= program_temps[device_id].temp.desired){   
-            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] > Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
-            AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Exceeded Set Point"));
-      
-            // Check should we maintain temp (> minus 1, less than max)
-            if((program_temps[device_id].time_maintaining.on>=0)&&(program_temps[device_id].time_maintaining.on < program_temps[device_id].time_maintaining.limit)){
-              program_temps[device_id].status.mode = TEMP_MODE_MAINTAINING_ID;
-              activeprograms[device_id].temps.state = ACTIVEP_ON;
+            //record time it turned off ie record temp difference and how long we took to get there, I can use this later to estimate
+
+
+            //add mode to repeat schedule
+
+            //will make a basic estimate table ie time per degree
+
+            SetHeater(device_id,0);
+
+            if(program_temps[device_id].schedule.mode_sch == SCHEDULED_ON_ID){
+              program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
+              program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
+              activeprograms[device_id].temps.state = ACTIVEP_OFF;
+            }else{ //manual
+              program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
+              program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
+              activeprograms[device_id].temps.state = ACTIVEP_OFF;
             }
-            // Turn off
-            else{
-              
-              AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "desired_count > desired_max"));
-      
-              program_temps[device_id].time_running.on = -2; // -1 is just not active, -2 is a freeze out that lasts one hour unless overriden
-              program_temps[device_id].time_maintaining.limit = -1;
 
-              //record time it turned off ie record temp difference and how long we took to get there, I can use this later to estimate
+            fForceHeatingTempsUpdate = true;
 
-
-              //add mode to repeat schedule
-
-              //will make a basic estimate table ie time per degree
-
-              SetHeater(device_id,0);
-
-              if(program_temps[device_id].schedule.mode_sch == SCHEDULED_ON_ID){
-                program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
-                program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
-                activeprograms[device_id].temps.state = ACTIVEP_OFF;
-              }else{ //manual
-                program_temps[device_id].schedule.mode_sch = SCHEDULED_OFF_ID;
-                program_temps[device_id].status.mode = TEMP_MODE_OFF_ID;
-                activeprograms[device_id].temps.state = ACTIVEP_OFF;
-              }
-
-              fForceHeatingTempsUpdate = true;
-
-            }
+          }
 
       }//if temp check
       else{ 
@@ -553,6 +497,7 @@ void mHeating::SubTask_HeatingTemps(void){
 
   }//end for loop
 
+  #endif// ENABLE_DEVFEATURE_HEATING_TEMPS_TESTING
 }//end temps fucntion
 
 
@@ -1006,7 +951,7 @@ uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].timers.state); 
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_WB, activeprograms[DEVICE_WB_ID].timers.state); 
     JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start_P(D_JSON_TEMP);  
+    JsonBuilderI->Level_Start_P(D_JSON_TEMPERATURE);  
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_US, activeprograms[DEVICE_US_ID].temps.state); 
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_DS, activeprograms[DEVICE_DS_ID].temps.state); 
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_IH, activeprograms[DEVICE_IH_ID].temps.state); 
@@ -1017,9 +962,13 @@ uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
       JsonBuilderI->Add(D_JSON_LENGTH, status_message.len); 
       JsonBuilderI->Add(D_JSON_IMPORTANCE, status_message.importance); 
     JsonBuilderI->Level_End();
-    // JsonBuilderI->Level_Start_P(D_JSON_STATUS "_QuickShow");   //shows on app, that heating has been correctly turned on
-    //   JsonBuilderI->Add(D_JSON_MESSAGE, pCONT_tel->hardwarestatus.ctr);  //nice human message that remains the same
+
+    // JsonBuilderI->Level_Start_P(D_JSON_STATUS "_Short");  
+    //   JsonBuilderI->Add(D_JSON_MESSAGE, status_message.ctr);  //nice human message that remains the same
+    //   JsonBuilderI->Add(D_JSON_LENGTH, status_message.len); 
+    //   JsonBuilderI->Add(D_JSON_IMPORTANCE, status_message.importance); 
     // JsonBuilderI->Level_End();
+
   return JsonBuilderI->End();
 }
 
@@ -1032,7 +981,8 @@ uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
     JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
       JsonBuilderI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->relay_status[device_id].last.ontime.hour,  pCONT_mry->relay_status[device_id].last.ontime.minute,  pCONT_mry->relay_status[device_id].last.ontime.second);
       JsonBuilderI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->relay_status[device_id].last.offtime.hour,  pCONT_mry->relay_status[device_id].last.offtime.minute,  pCONT_mry->relay_status[device_id].last.offtime.second);
-      JsonBuilderI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->relay_status[device_id].time_minutes_on);
+      JsonBuilderI->Add(D_JSON_TIME_ON "_Seconds",   pCONT_mry->relay_status[device_id].time_seconds_on);
+      JsonBuilderI->Add(D_JSON_TIME_ON "_Mins",   pCONT_mry->relay_status[device_id].time_seconds_on/60);
     JsonBuilderI->Level_End();
   }
   return JsonBuilderI->End();
@@ -1334,40 +1284,43 @@ int8_t mHeating::SubContructCtr_HardwareStatus(){
   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
   uint8_t fNotFirstItem = 0;
   char buffer[100];
+  memset(&status_message,0,sizeof(status_message));
 
-  for(int device_id=0;device_id<4;device_id++){
-    if(activeprograms[device_id].timers.state){
-      sprintf(&status_message.ctr[status_message.len],"%s timers %s",
-        GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-        GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state, buffer, sizeof(buffer)));
-      status_message.len = strlen(status_message.ctr);
-      SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
-    }
-    if(fNotFirstItem){
-      sprintf(&status_message.ctr[status_message.len],"%c",'c');
-      status_message.len = strlen(status_message.ctr);
-    }
-  }
+  // for(int device_id=0;device_id<4;device_id++){
+  //   if(activeprograms[device_id].timers.state){
+  //     sprintf(&status_message.ctr[status_message.len],"%s timers %s",
+  //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
+  //       GetActiveProgramNameCtrbyID(activeprograms[device_id].timers.state, buffer, sizeof(buffer)));
+  //     status_message.len = strlen(status_message.ctr);
+  //     SetHighestImportance(&status_message.importance,activeprograms[device_id].timers.state); //med
+  //   }
+  //   if(fNotFirstItem){
+  //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
+  //     status_message.len = strlen(status_message.ctr);
+  //   }
+  // }
 
-  for(int device_id=0;device_id<4;device_id++){
-    if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
-      sprintf(&status_message.ctr[status_message.len],"%s temps %s",
-        GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-        GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state, buffer, sizeof(buffer)));
-      status_message.len = strlen(status_message.ctr);
-    }
-    SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
-    if(fNotFirstItem){
-      sprintf(&status_message.ctr[status_message.len],"%c",'c');
-      status_message.len = strlen(status_message.ctr);
-    }
-  }
+  // for(int device_id=0;device_id<4;device_id++){
+  //   if(activeprograms[device_id].temps.state){ status_message.importance = 2;//med
+  //     sprintf(&status_message.ctr[status_message.len],"%s temps %s",
+  //       GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
+  //       GetActiveProgramNameCtrbyID(activeprograms[device_id].temps.state, buffer, sizeof(buffer)));
+  //     status_message.len = strlen(status_message.ctr);
+  //   }
+  //   SetHighestImportance(&status_message.importance,activeprograms[device_id].temps.state); //med
+  //   if(fNotFirstItem){
+  //     sprintf(&status_message.ctr[status_message.len],"%c",'c');
+  //     status_message.len = strlen(status_message.ctr);
+  //   }
+  // }
 
   for(int device_id=0;device_id<4;device_id++){
     if(activeprograms[device_id].relays.state){ status_message.importance = 2;//high
-      sprintf(&status_message.ctr[status_message.len],"%s relays %s",
+      sprintf(&status_message.ctr[status_message.len],"%s relays %d",
         GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),
-        GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)));
+        // GetActiveProgramNameCtrbyID(activeprograms[device_id].relays.state, buffer, sizeof(buffer)),
+        pCONT_mry->relay_status[device_id].time_seconds_on
+      );
       status_message.len = strlen(status_message.ctr);
     }
     SetHighestImportance(&status_message.importance,activeprograms[device_id].relays.state); //med
@@ -1603,20 +1556,20 @@ void mHeating::SetHeater(uint8_t device, uint8_t state){
 
 
 const char* mHeating::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen){
-  // if(buffer == nullptr){ return 0;}
-    // return (activeprogram_id == ACTIVEP_OFF ? "OFF" :
-    //     (activeprogram_id == ACTIVEP_ON ? "ON" :
-    //     (activeprogram_id == ACTIVEP_SCHEDULED ? "SCH" :
-    //     "unk\0")));
+ 
+  switch(activeprogram_id){
+    default:          snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH); break;
+    case ACTIVEP_OFF: snprintf(buffer, buflen, "ACTIVEP_OFF"); break;
+    case ACTIVEP_ON: snprintf(buffer, buflen, "ACTIVEP_ON"); break;
+    case ACTIVEP_SCHEDULED: snprintf(buffer, buflen, "ACTIVEP_SCHEDULED"); break;
+  }
+  return buffer;
 
-    snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);
-
-    return buffer;
 }
 
 
 const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
-  // if(buffer == nullptr){ return 0;}
+  
   switch(device_id){ 
     case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_DS_CTR); break;
     case DEVICE_US_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_US_CTR); break;
@@ -1624,9 +1577,12 @@ const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint
     case DEVICE_IH_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_IH_CTR); break;
   }
   return buffer;
+
 }
+
+
 const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
-  // if(buffer == nullptr){ return 0;}
+  
   switch(device_id){ 
     case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_DS_CTR); break;
     case DEVICE_US_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_US_CTR); break;
@@ -1634,7 +1590,9 @@ const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, 
     case DEVICE_IH_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_IH_CTR); break;
   }
   return buffer;
+
 }
+
 int8_t mHeating::GetDeviceIDbyName(const char* c){
   if(c=='\0'){
     return -1;
@@ -1660,16 +1618,16 @@ int8_t mHeating::GetDeviceIDbyName(const char* c){
 }
 
 
-#ifdef USE_SCHEDULED_HEATING
+// #ifdef USE_SCHEDULED_HEATING
 int8_t mHeating::GetScheduleModeIDByCtr(const char* c){
   if(c=='\0'){ return -1; }
-  // if(strstr(c,D_JSON_SCHEDULED_OFF)){ return SCHEDULED_OFF; }
-  // if(strstr(c,D_JSON_SCHEDULED_SET)){ return SCHEDULED_SET; }
-  // if(strstr(c,D_JSON_SCHEDULED_ON)){ return SCHEDULED_ON; }
-  // if(strstr(c,D_JSON_MANUAL_ON)){ return SCHEDULED_MANUAL_ON; }
+  if(strstr(c,D_JSON_SCHEDULED_OFF)){ return SCHEDULED_OFF_ID; }
+  if(strstr(c,D_JSON_SCHEDULED_SET)){ return SCHEDULED_SET_ID; }
+  if(strstr(c,D_JSON_SCHEDULED_ON)){ return SCHEDULED_ON_ID; }
+  if(strstr(c,D_JSON_MANUAL_ON)){ return SCHEDULED_MANUAL_ON_ID; }
   return -1; // none
 }
-const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer){
+const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen){
   // if(buffer == nullptr){ return 0;}
   switch(mode){
     case SCHEDULED_OFF_ID:       memcpy_P(buffer, PM_HEATING_SENSOR_NAME_LONG_DS_CTR, sizeof(PM_HEATING_SENSOR_NAME_LONG_DS_CTR)); break;
@@ -1679,7 +1637,7 @@ const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer){
   }
   return buffer;
 }
-#endif //USE_SCHEDULED_HEATING
+// #endif //USE_SCHEDULED_HEATING
 
 const char* mHeating::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
   // if(buffer == nullptr){ return 0;}
@@ -1714,11 +1672,16 @@ int8_t mHeating::Tasker(uint8_t function){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
-    pre_init();
-  }else
-  if(function == FUNC_INIT){
-    init();
+  switch(function){
+    case FUNC_PRE_INIT:
+      pre_init();
+    break;
+    case FUNC_INIT:
+      init();
+    break;
+    case FUNC_POST_INIT:
+      //tbd
+    break;
   }
 
   // Only continue in to tasker if module was configured properly
@@ -1744,10 +1707,21 @@ int8_t mHeating::Tasker(uint8_t function){
     /************
      * PERIODIC SECTION * 
     *******************/
-   case FUNC_EVERY_SECOND:
-   //temp calculate always, later add flags to update it
-    SubContructCtr_HardwareStatus();
-   break;
+    case FUNC_EVERY_SECOND:
+      //temp calculate always, later add flags to update it
+      SubContructCtr_HardwareStatus();
+
+
+      for(uint8_t device_id=0;device_id<4;device_id++){
+        if(pCONT_mry->CommandGet_Relay_Power(device_id)){
+          activeprograms[device_id].relays.state = 1;
+        }else{
+          activeprograms[device_id].relays.state = 0;
+        }
+      }
+
+
+    break;
     case FUNC_EVERY_MINUTE:     
 
     break;
@@ -1874,31 +1848,27 @@ void mHeating::parse_JSONCommand(void){
     data_buffer.isserviced++;
   }
 
-// // #ifdef USE_HEATING_TEMPS
-// //   // TEMP RELATED
-// //   if(jtok = obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
-// //     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
-// //     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-// //     fForceHeatingTempUpdate = true;
-// //     data_buffer.isserviced++;
-// //   }
+  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_SET]){ 
+    program_temps[device_id].temp.desired = jtok.getInt();
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_SET)), program_temps[device_id].temp.desired);
+    fForceHeatingTempUpdate = true;
+    data_buffer.isserviced++;
+  }
 
-// //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
-// //   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-// //   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-// //   //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-// //   //   fForceHeatingTempsUpdate = true;
-// //   //   data_buffer.isserviced++;
+  if(jtok = obj[D_JSON_SCHEDULE].getObject()[D_JSON_MODE]){ 
+    program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(jtok.getStr());
+    //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+    fForceHeatingTempsUpdate = true;
+    data_buffer.isserviced++;
 
-// //   //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
-// //   //     program_temps[device_id].time_running.on = 0;
-// //   //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
-// //   //     program_temps[device_id].time_running.on = -1;
-// //   //     program_temps[device_id].time_maintaining.on = -1;
-// //   //     SetHeater(device_id,0);
-// //   //   }
-// //   // }
+    if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
+      program_temps[device_id].time_running.on = 0;
+    }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
+      program_temps[device_id].time_running.on = -1;
+      program_temps[device_id].time_maintaining.on = -1;
+      SetHeater(device_id,0);
+    }
+  }
 // //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
 // //   //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
 // //   //   program_temps[device_id].schedule.ontime = ontime;
@@ -1964,30 +1934,7 @@ void mHeating::parse_JSONCommand(void){
 //     return; // Unknown device, can't execute
 //   }
 
-// #ifdef USE_HEATING_TEMPS
-//   // TEMP RELATED
-//   if(jtok = obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
-//     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
-//     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-//     fForceHeatingTempUpdate = true;
-//     data_buffer.isserviced++;
-//   }
 
-//   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
-//   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-//   //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
-//   //   fForceHeatingTempsUpdate = true;
-
-//   //   if(program_temps[device_id].schedule.mode_sch == SCHEDULED_MANUAL_ON_ID){
-//   //     program_temps[device_id].time_running.on = 0;
-//   //   }else if(program_temps[device_id].schedule.mode_sch == SCHEDULED_OFF_ID){
-//   //     program_temps[device_id].time_running.on = -1;
-//   //     program_temps[device_id].time_maintaining.on = -1;
-//   //     SetHeater(device_id,0);
-//   //   }
-//   // }
 //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
 //   //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
 //   //   program_temps[device_id].schedule.ontime = ontime;
@@ -2248,7 +2195,7 @@ void mHeating::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;

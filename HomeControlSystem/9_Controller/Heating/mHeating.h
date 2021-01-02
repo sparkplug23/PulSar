@@ -20,21 +20,21 @@
 #define USE_HEATING_TIMERS
 #define USE_HEATING_TEMPS
 
-#define D_TASKNAME_HEATING "heating"
+// #define D_TASKNAME_HEATING "heating"
 
-#define WEB_HANDLE_HEATING_TIMER "heat_timer"
+// #define WEB_HANDLE_HEATING_TIMER "heat_timer"
 
 //disable  for debugging
 #define ENABLE_RELAY_CONTROLS
 
-#define WEB_HANDLE_BUTTON_NAME_TEMP_SET "btte"
-#define WEB_HANDLE_BUTTON_NAME_TIMER_SET "btti"
+// #define WEB_HANDLE_BUTTON_NAME_TEMP_SET "btte"
+// #define WEB_HANDLE_BUTTON_NAME_TIMER_SET "btti"
 
 
 
 
 #define D_HEATING_PROGRAM_TEMP "Program Temp > "
-#define D_HEATING_PROFILES "Profiles > "
+// #define D_HEATING_PROFILES "Profiles > "
 
 
 
@@ -146,6 +146,10 @@ class mHeating{
     }settings;
 
     #include "9_Controller/Heating/mHeating_Web.h"
+
+    void init_program_timers();
+    void init_program_temps();
+    void init_program_scheduling(void);
 
     enum SENSORDB18_IDS{
       ID_DB18_DS=0,
@@ -443,8 +447,8 @@ class mHeating{
     void SendFormattedVoiceMessage(unsigned char device_name, unsigned char state);
     void SendMQTTAlertOnChangeofState(uint8_t device, uint8_t state);
 
-    #define FAILSAFE_MINUTES_WARNING 150
-    #define FAILSAFE_MINUTES_ERROR 170
+    #define FAILSAFE_MINUTES_WARNING 60*5
+    #define FAILSAFE_MINUTES_ERROR 60*10
 
     void MQQTSendPipesTempsByColoursIfChanged(void);
 

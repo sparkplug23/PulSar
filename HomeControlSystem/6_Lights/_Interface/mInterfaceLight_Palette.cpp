@@ -2,7 +2,14 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
-
+/***
+ * sparkplugToday at 12:30 AM
+I just have to make a palette that is full rgbcct to replace the scene, BUT, and big but, all code I took in from tasmota relies on it the other way, so it would be a HUGE change
+1000-2000 lines or more
+so I think I will just make this a slow change, migrate over in time.
+Note to self, if I make the palette simply return the tasmota colour struct, that would quickly bridge the gap of both methods
+ * 
+ * */
 
 int8_t mInterfaceLight::GetNearestColourMapIDFromColour(HsbColor hsb){
 
