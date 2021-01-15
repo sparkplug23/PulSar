@@ -38,7 +38,7 @@ This program is licensed under GPL-3.0
 
 
 ## How to use the project
-Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different situations. 
+Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different environments. 
 
 1) The folder ```0_ConfigUser``` holds the files to configure the project, with a file named `mUserConfigSecret.h` containing each users configuration parameters. This is not shared via github, but another file `mUserConfigSecret_Example.h` located under tools which contains the basic template. During compile, `mUserConfigSecret_Example.h` will automatically create the `mUserConfigSecret.h` file, where the user can edit freely without github overwriting the changes.
 
