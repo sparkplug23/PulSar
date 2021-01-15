@@ -58,12 +58,12 @@
 #define WIFI_SUBNETMASK        "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
 #define WIFI_DNS               "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
 
-#define STA_SSID1            ""                // [Ssid1] Wifi SSID
-#define STA_PASS1            ""                // [Password1] Wifi password
-#define STA_SSID2            ""                // [Ssid2] Optional alternate AP Wifi SSID
-#define STA_PASS2            ""                // [Password2] Optional alternate AP Wifi password
-#define STA_SSID3            ""                // [Ssid2] Optional alternate AP Wifi SSID
-#define STA_PASS3            ""                // [Password2] Optional alternate AP Wifi password
+// #define STA_SSID1            ""                // [Ssid1] Wifi SSID
+// #define STA_PASS1            ""                // [Password1] Wifi password
+// #define STA_SSID2            ""                // [Ssid2] Optional alternate AP Wifi SSID
+// #define STA_PASS2            ""                // [Password2] Optional alternate AP Wifi password
+// #define STA_SSID3            ""                // [Ssid2] Optional alternate AP Wifi SSID
+// #define STA_PASS3            ""                // [Password2] Optional alternate AP Wifi password
 
 #define WIFI_CONFIG_TOOL       WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
                                                  //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
@@ -138,6 +138,10 @@
     #define MQTT_MAX_PACKET_SIZE 2000
   #endif
 #endif
+
+#ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65
+#endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
 
 

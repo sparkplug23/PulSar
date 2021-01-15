@@ -350,7 +350,17 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   // pubsub->setServer(SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
   //pubsub->setServer(mdns_mqtt_hostname_ctr, 1883);
   //Serial.print("mMQTT:setServer> \""); Serial.print(mdns_mqtt_hostname_ctr); Serial.println("\"");
-  IPAddress mqqtserver(192,168,1,65); //desktop
+  // IPAddress mqqtserver(192,168,1,65); //desktop
+  // IPAddress mqqtserver(192,168,1,65); //desktop
+
+
+  IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
+    
+    
+    
+    // 192,168,1,65); //desktop
+
+
   pubsub->setServer(mqqtserver, 1883);
   
   // Generate will message

@@ -12,9 +12,9 @@
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
+// #define ENABLE_TESTUSER
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/mUserOptions.h"
 // #include "6_Lights/_Interface/palettes.h"
 #ifdef ESP8266
 #include <avr/pgmspace.h>
@@ -43,7 +43,7 @@
 // #define DEVICE_RGBMICRO2 //projector                  
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 //#define DEVICE_RGBMICRO4 //gazebo
-#define DEVICE_RGBBEDLIGHT                            
+// #define DEVICE_RGBBEDLIGHT                            
 //#define DEVICE_RGBBEDLIGHT_TEST                            
 // #define DEVICE_RGBDESK
 //#define DEVICE_RGBCOOKER
@@ -53,6 +53,7 @@
 // #define DEVICE_H801_TESTER
 // #define DEVICE_H801_TESTER_NODEMCU
 //#define DEVICE_RGBCUSTOM_USER_01
+//#define DEVICE_RGBCUSTOM_USER_02
 // #define DEVICE_TESTER_RGBW
 
 /**
@@ -131,8 +132,6 @@
 //#define DEVICE_KITCHENLIGHT3
 //#define DEVICE_KITCHENLIGHT4
 //#define DEVICE_KITCHENLIGHT5 //tester
-
-
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
@@ -443,62 +442,6 @@
 
 #endif
 
-
-#ifdef DEVICE_RGBCUSTOM_USER_01
-  #define DEVICENAME_CTR            "rgbcustomuser01"
-  #define DEVICENAME_FRIENDLY_CTR   "Micro String Lights 01"
-
-  #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define DISABLE_WEBSERVER
-  #define DISABLE_NETWORK
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ANIMATOR
-
-  // Advanced options  
-  //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
-  // #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
-
-  //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define STRIP_SIZE_MAX 50
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
-    "},"
-    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":5000,"
-    "\"ColourPalette\":\"" "Custom User 01" "\","
-    "\"BrightnessRGB\":100"
-  "}";
-
-#endif
 
 
 
