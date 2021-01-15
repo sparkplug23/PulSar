@@ -40,21 +40,24 @@ This program is licensed under GPL-3.0
 ## How to use the project
 Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different environments. 
 
-1) The folder ```0_ConfigUser``` holds the files to configure the project, with a file named `mUserConfigSecret.h` containing each users configuration parameters. This is not shared via github, but another file `mUserConfigSecret_Example.h` located under tools which contains the basic template. During compile, `mUserConfigSecret_Example.h` will automatically create the `mUserConfigSecret.h` file, where the user can edit freely without github overwriting the changes.
+# Configure
 
-2) Inside file `mUserConfigSecret.h`, the SSID and password for up to three networks can be added. The mqtt server, if enabled, also has its broker IP address available for defining.
+1) The folder ```0_ConfigUser``` holds the files to configure the project, with a file named `mUserConfigSecret.h` containing each users configuration parameters. This is not shared via github, but is generated during the first compile (via template file located in the tools folder). Subsequent compiles will not change the `mUserConfigSecret.h` file.
 
-3) By default, (at the time of writing this) two examples of custom user devices are provided. The ```DEVICENAME_CTR``` is the unique name of that device, and mqtt will use this for the topic.
+2) Inside the file `mUserConfigSecret.h`, the user can add their unique values for their automation system. These include the SSID and password for up to three network connections, and if enabled, the mqtt broker IP address.
 
-4) The parameter `MODULE_TEMPLATE` provides the device configuration, including its name, hardware, and the required pin functionality and is formatted using JSON commands. Some of the json keys (eg. `GPIOC`) can be omited, but `MODULE_TEMPLATE` is required for compiling.
+3) There are a number of example configurations for popular devices provided. Some noteworthy parameters are:
+  * ```DEVICENAME_CTR``` is the unique name of that device, and mqtt will use this for the topic.
+  * ```MODULE_TEMPLATE``` provides the device configuration, including its name, hardware, and the required pin functionality and is formatted using JSON commands. Some of the json keys (eg. `GPIOC`) can be omited, but `MODULE_TEMPLATE` is required for compiling.
+  * (*optional*) ```LIGHTING_TEMPLATE``` is also formatted as json, however, this is optional configuration for the lighting modules during boot. This accepts any command which could also be executed via mqtt, webui or serial.
+  * (*optional*) ```FUNCTION_TEMPLATE``` will also run any command, including the configuration of sensors and drivers during boot time.
+  * Additionally, by defining any module as enabled including its required pin function via `GPIOC`, all sensors and drivers are available. It must be noted, this is highly developmental firmware and some modules may either have bugs, or not work at all.
 
-5) The parameter `LIGHTING_TEMPLATE` is also formatted as json, however, this is optional configuration for the lighting during boot. This accepts any command which could also be executed via mqtt, webui or serial.
+# Uploading firmware
 
-6) *To be provided as example.* The parameter `FUNCTION_TEMPLATE` will also run any command, including the configuration of sensors and drivers during boot time.
+4) The file named ```platformio.ini``` has a variable named `default_envs`. Each (on a new line) device in the format `esp_8266_<devicename>` will be compiled. At least one must be provided, but multiple devices can be built and flashed at once.
 
-7) The file named ```platformio.ini``` has a variable named `default_envs`. Each (on a new line) device in the format `esp_8266_<devicename>` will be compiled, provide at least one.
-
-8) The file named ```platformio_env8266.ini``` must contain the environment named in the previous step (ie `esp_8266_<devicename>`). For serial flashing, the minimal environment should have these as a minimum.
+5) The file named ```platformio_env8266.ini``` must contain the environment named in the previous step (ie `esp_8266_<devicename>`). For serial flashing, the minimal environment should have these as a minimum.
 
 ```cpp
 [env:esp_8266_rgbcustomuser01]
