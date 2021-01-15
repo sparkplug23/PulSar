@@ -36,3 +36,10 @@ Libraries used with HACS are:
 
 This program is licensed under GPL-3.0
 
+
+## How to use the project
+Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different situations. 
+
+
+
+
