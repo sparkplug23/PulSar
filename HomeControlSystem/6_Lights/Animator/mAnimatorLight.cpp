@@ -1,6 +1,6 @@
-#include "mRGBAnimator.h"
+#include "mAnimatorLight.h"
 
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -8,10 +8,10 @@
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-int8_t mRGBAnimator::Tasker(uint8_t function){ 
+int8_t mAnimatorLight::Tasker(uint8_t function){ 
 
   int8_t function_result = 0;
-  
+
   #ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
   Tasker_Override_Forcing_Variables_Testing();
   #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
@@ -28,7 +28,6 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
       break;
   }
 
-  if(pCONT_set->Settings.light_settings.type != LT_WS2812){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
   if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
   
   switch(function){
@@ -61,13 +60,8 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
       // Serial.printf("%02d | %d\n\r",i,editable_mapped_array_data_array[i]);
 
       //       }
-      //     SetPixelColor(0,RgbTypeColor(255,0,0));
-      //     SetPixelColor(1,RgbTypeColor(0,255,0));
-      //     SetPixelColor(2,RgbTypeColor(0,0,255));
-      //     SetPixelColor(3,RgbTypeColor(255,0,255));
-      //     SetPixelColor(4,RgbTypeColor(255,255,0));
 
-      // stripbus->Show();
+      // pCONT_iLight->ShowInterface();
 
       // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
       //   char result[100];
@@ -129,12 +123,12 @@ int8_t mRGBAnimator::Tasker(uint8_t function){
 
 
 
-int8_t mRGBAnimator::CheckAndExecute_JSONCommands(){
+int8_t mAnimatorLight::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -146,407 +140,6 @@ int8_t mRGBAnimator::CheckAndExecute_JSONCommands(){
 }
 
 
-void mRGBAnimator::parse_JSONCommand(void){
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif// ENABLE_LOG_LEVEL_ERROR
-    return;
-  }  
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-  char buffer[50];
-
-  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-  /**
-   *  Flasher function specific commands
-   * */
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_FUNCTION]){
-    if(jtok.isStr()){
-      if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0){
-        CommandSet_Flasher_FunctionID(jtok.getInt());
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_Flasher_FunctionID(jtok.getInt());
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_COLOUR_REFRESH_RATE]){ 
-    CommandSet_Flasher_UpdateColourRegion_RefreshSecs(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_FLASHER D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_DIRECTION]){ 
-    CommandSet_Flasher_Flags_Movement_Direction(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_BRIGHTNESS_MIN]){ 
-    CommandSet_Flasher_Brightness_Min(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_BRIGHTNESS_MAX]){ 
-    CommandSet_Flasher_Brightness_Max(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MIN]){ 
-    CommandSet_Flasher_Alternate_Brightness_Min(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MAX]){ 
-    CommandSet_Flasher_Alternate_Brightness_Max(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_ALTERNATE_AMOUNT]){ 
-    CommandSet_Flasher_Alternate_RandomAmountPercentage(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_FLASHER].getObject()[PM_JSON_AGED_COLOURING]){
-    pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = jtok.getInt();
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  #endif // ENABLE_PIXEL_FUNCTION_FLASHER
-
-
-  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-  /**
-   * Pixel output grouping settings
-   * */
-  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_AGED_COLOURING]){
-    CommandSet_PixelGrouping_Flag_AgedColouring(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MODE]){
-    CommandSet_PixelGrouping_Flag_ModeID(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MULTIPLIER]){ 
-    CommandSet_PixelGrouping_Flag_Multiplier(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MULTIPLIER)), pixel_group.multiplier);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MAPPED_MULTIPLIER_DATA]){ 
-    // CommandSet_PixelGrouping_MappedMultiplierData();
-    if(jtok.isArray()){
-      uint8_t array[60];
-      uint8_t arrlen = 0;
-      JsonParserArray arrobj = obj[PM_JSON_PIXELGROUPING].getObject()[PM_JSON_MAPPED_MULTIPLIER_DATA];
-      for(auto v : arrobj) {
-        if(arrlen > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
-        array[arrlen++] = v.getInt();
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
-        #endif// ENABLE_LOG_LEVEL_DEBUG          
-      }
-      CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
-      data_buffer.isserviced++;
-    }
-  }
-  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-    CommandSet_Mixer_Flags_Enabled(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-   
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
-  //   mixer.time_scaler = jtok.getInt();
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
-    CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-    CommandSet_Mixer_RunningID(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
-
-
-  if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
-
-    // uint8_t colour_array[5];
-    // memset(colour_array,0,sizeof(colour_array));
-    // uint8_t jsonpair_count = jtok.size();
-
-    // for(int index = 0; index < jsonpair_count; index++){
-    //   jtok.nextOne(); //skip start of object
-    //   Serial.println(jtok.getInt());
-    //   colour_array[index] = jtok.getInt();
-    // }
-    
-    // CommandSet_SceneColour_Raw(colour_array);
-    // data_buffer.isserviced++;
-
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-
-
-#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-
-
-  if(jtok = obj["Strip"].getObject()["ClearTo"]){ 
-
-
-    if(jtok.isArray()){
-
-
-      RgbcctColor colour = RgbcctColor(0);
-
-      uint8_t index = 0;
-      JsonParserArray array = obj["Strip"].getObject()["ClearTo"];
-      for(auto v : array) {
-        switch(index){
-          case 0: colour.R = v.getInt();
-          case 1: colour.G = v.getInt();
-          case 2: colour.B = v.getInt();
-          case 3: colour.WC = v.getInt();
-          case 4: colour.WW = v.getInt();
-        }
-        
-
-
-
-
-        int val = v.getInt();
-        // if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
-        // editable_mapped_array_data_array[index++] = val;
-        index++;
-
-        // pCONT_iLight->animation.mode_id =  pCONT_iLight->ANIMATION_MODE_MANUAL_SETPIXEL_ID;
-
-        // SetPixelColor(val, pCONT_iLight->mode_singlecolour.colour);
-
-        // animation_colours[val].DesiredColour = pCONT_iLight->mode_singlecolour.colour;
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
-    #endif// ENABLE_LOG_LEVEL_INFO          
-      }
-    
-
-
-
-
-      SetPixelColor_All(colour);
-    }
-
-  }
-
-  if(jtok = obj[PM_JSON_MANUAL_SETPIXEL_TO_SCENE]){ 
-    if(jtok.isArray()){
-
-
-//testing, froce it
-pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,255,255);
-
-
-      uint8_t index = 0;
-      JsonParserArray array = obj[PM_JSON_MANUAL_SETPIXEL_TO_SCENE];
-      for(auto v : array) {
-        int val = v.getInt();
-        // if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
-        // editable_mapped_array_data_array[index++] = val;
-        index++;
-
-        //Count active pixels
-        uint16_t pixels_on = 0;
-        for(uint16_t i=0;i<pCONT_iLight->light_size_count;i++){ 
-          if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
-            pixels_on++;
-          }      
-        }
-
-        if(pixels_on <= 5){
-          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,0,0);
-        }else
-        if(pixels_on <= 10){
-          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(0,255,0);
-        }else
-        if(pixels_on <= 15){
-          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(0,0,255);
-        }else
-        if(pixels_on <= 20){
-          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,0,255);
-        }else{
-          pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,255,255);
-        }
-
-        pCONT_iLight->animation.mode_id =  pCONT_iLight->ANIMATION_MODE_MANUAL_SETPIXEL_ID;
-
-        SetPixelColor(val, pCONT_iLight->mode_singlecolour.colour);
-
-        animation_colours[val].DesiredColour = pCONT_iLight->mode_singlecolour.colour;
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
-    #endif// ENABLE_LOG_LEVEL_INFO          
-      }
-      // pixel_group.mapped_array_data.length = index;
-
-      stripbus->Show();
-
-      data_buffer.isserviced++;
-    }
-  }
-
-
-
-#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-
-
-
-
-  // if(jtok = obj[PM_JSON_PIXELSGROUPED]){
-  //   animation.pixelgrouped = obj[CFLASH(PM_JSON_PIXELSGROUPED];
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE),D_JSON_PIXELSGROUPED,animation.pixelgrouped);
-  //   #endif
-  // }
-
-  //override commands that run for one animation cycle then are cleared to 0
-  // if(!obj[CFLASH(PM_JSON_REFRESH_ALLPIXELS].isNull()){
-  //   animation_override.fRefreshAllPixels = obj[CFLASH(PM_JSON_REFRESH_ALLPIXELS];
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE),D_JSON_REFRESH_ALLPIXELS,animation_override.fRefreshAllPixels);
-  //   #endif
-  // }
-
-// CHANGE TO USE RELAYS INSTEAD
-  // if(!obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)].isNull()){ 
-  //   const char* onoff = obj[CFLASH(PM_JSON_EXTERNAL_POWER_ONOFF)];    
-  //   uint8_t relay_state_new = pCONT_sup->GetStateNumber(onoff);
-  //   uint8_t relay_state_current = 0;
-  //   if(relay_state_new==STATE_NUMBER_TOGGLE_ID){
-  //     // pCONT_iLight->animation.flags.fEnable_Animation ^= 1;
-  //   }else{
-  //     // pCONT_iLight->animation.flags.fEnable_Animation = state;
-  //   }
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_EXTERNAL_POWER_ONOFF,relay_state_new);
-  //   #endif
-  //   data_buffer.isserviced++;
-  // }
-
-
-  // if(!obj[CFLASH(PM_JSON_ONOFF].isNull()){ 
-  //   const char* onoff = obj[CFLASH(PM_JSON_ONOFF];
-  //   if(strstr(onoff,"ON")){ 
-      
-  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-  //     #endif
-      
-  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_ON_ID"));
-  //     #endif
-  //     // Add this as "SAVE" state then "LOAD" state
-  //     memcpy(&pCONT_iLight->animation,&pCONT_iLight->animation_stored,sizeof(pCONT_iLight->animation));// RESTORE copy of state
-
-  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_ON_ID);
-  //     pCONT_iLight->light_power_state = true;
-
-  //     //pCONT_iLight->animation.mode_id = MODE_TURN_ON_ID;
-  //     data_buffer.isserviced++;
-  //   }else if(strstr(onoff,"OFF")){
-  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-  //     #endif
-  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MODE_TURN_OFF_ID"));
-  //     #endif
-  //     memcpy(&pCONT_iLight->animation_stored,&pCONT_iLight->animation,sizeof(pCONT_iLight->animation)); // STORE copy of state
-  //     pCONT_iLight->SetAnimationProfile(pCONT_iLight->ANIMATION_PROFILE_TURN_OFF_ID);
-  //     pCONT_iLight->light_power_state = false;
-
-  //     //pCONT_iLight->animation.mode_id = MODE_TURN_OFF_ID;
-  //     data_buffer.isserviced++;
-  //   }else{
-  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-  //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   }
-  // }
-
-  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  // parsesub_NotificationPanel(obj);
-  // #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
-
-  //pCONT_iLight->animation.flags.fForceUpdate = true;
-  
-  if(data_buffer.isserviced){ //update string, move to shared place
-   
-   //add flag on this, so its not always forced
-   // SetRefreshLEDs(); // implement in 1 second 
-  }
-
-
-// #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST
-  // t_mqtthandler_status_animation.flags.SendNow = true; 
-
-}
-
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -554,22 +147,22 @@ pCONT_iLight->mode_singlecolour.colour = RgbcctColor(255,255,255);
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-void mRGBAnimator::pre_init(void){ 
+void mAnimatorLight::pre_init(void){ 
   
   // Allow runtime changes of animation size
-  pCONT_iLight->light_size_count = STRIP_SIZE_MAX; 
+  pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX; 
   animator_strip_size = ANIMATOR_SIZE_MAX<=STRIP_SIZE_MAX?ANIMATOR_SIZE_MAX:STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
 }
 
-void mRGBAnimator::init(void){ 
+void mAnimatorLight::init(void){ 
     
   // if pixel size changes, free and init again
-  uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->light_size_count<STRIP_SIZE_MAX?pCONT_iLight->light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
   ledout.length = STRIP_SIZE_MAX; 
   
-  pCONT_iLight->light_size_count = STRIP_SIZE_MAX;
+  pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
   DEBUG_LINE;
   // #ifdef USE_WS28XX_HARDWARE_WS2801
@@ -593,7 +186,12 @@ void mRGBAnimator::init(void){
 
   pCONT_iLight->Init_NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE);  
 
-  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;    
+  // delay(5000);
+  // SetPixelColor_All(RgbcctColor(0,10,0,0,0));
+  // delay(5000);
+
+  // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
+      SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
 
   pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
 
@@ -623,7 +221,7 @@ void mRGBAnimator::init(void){
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
     stripbus->ClearTo(0);
-    stripbus->Show();
+    pCONT_iLight->ShowInterface();
   }
 
   pCONT_iLight->animation_override.fRefreshAllPixels = true;
@@ -638,7 +236,7 @@ void mRGBAnimator::init(void){
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
   #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
   init_flasher_settings();
   #endif
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
@@ -652,11 +250,11 @@ void mRGBAnimator::init(void){
 } //end "init"
 
 
-void mRGBAnimator::Settings_Load(){
+void mAnimatorLight::Settings_Load(){
     
   // pCONT_iLight->animation.brightness = pCONT_set->Settings.light_settings.light_brightness_as_percentage/100.0f;
   
-  pCONT_iLight->setBriRGB(pCONT_set->Settings.light_settings.light_brightness_as_percentage);
+  pCONT_iLight->setBriRGB_Global(pCONT_set->Settings.light_settings.light_brightness_as_percentage);
 
   // uint8_t list = 0;
   // SetPaletteListPtrFromID(list);
@@ -679,16 +277,15 @@ void mRGBAnimator::Settings_Load(){
   // }
 
   pCONT_iLight->animation.mode_id = pCONT_set->Settings.animation_settings.animation_mode;
-  pCONT_iLight->animation.palette_id = pCONT_set->Settings.animation_settings.animation_palette;
+  pCONT_iLight->animation.palette.id = pCONT_set->Settings.animation_settings.animation_palette;
   pCONT_iLight->animation.transition.order_id   = pCONT_set->Settings.animation_settings.animation_transition_order;
   pCONT_iLight->animation.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
-  pCONT_iLight->animation.transition.time_ms.val = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
-  pCONT_iLight->animation.transition.rate_ms.val = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
-  pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage;
+  pCONT_iLight->animation.transition.time_ms = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
+  pCONT_iLight->animation.transition.rate_ms = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
 
 }
 
-void mRGBAnimator::Settings_Save(){
+void mAnimatorLight::Settings_Save(){
   
   // pCONT_set->Settings.light_settings.light_brightness_as_percentage = pCONT_iLight->animation.brightness*100;
 
@@ -710,18 +307,18 @@ void mRGBAnimator::Settings_Save(){
   // }
 
   pCONT_set->Settings.animation_settings.animation_mode = pCONT_iLight->animation.mode_id;
-  pCONT_set->Settings.animation_settings.animation_palette = pCONT_iLight->animation.palette_id;
+  pCONT_set->Settings.animation_settings.animation_palette = pCONT_iLight->animation.palette.id;
   pCONT_set->Settings.animation_settings.animation_transition_order = pCONT_iLight->animation.transition.order_id;
   pCONT_set->Settings.animation_settings.animation_transition_method = pCONT_iLight->animation.transition.method_id;
-  pCONT_set->Settings.animation_settings.animation_transition_time_ms = pCONT_iLight->animation.transition.time_ms.val;
-  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = pCONT_iLight->animation.transition.rate_ms.val;
-  pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
+  pCONT_set->Settings.animation_settings.animation_transition_time_ms = pCONT_iLight->animation.transition.time_ms;
+  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = pCONT_iLight->animation.transition.rate_ms;
+  // pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
 
 }
 
 
 
-void mRGBAnimator::Settings_Default(){
+void mAnimatorLight::Settings_Default(){
 
 DEBUG_LINE;
   
@@ -729,7 +326,7 @@ DEBUG_LINE;
 
 DEBUG_LINE;
   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("mRGBAnimator::Settings_Default"));
+  // AddLog_P(LOG_LEVEL_TEST,PSTR("mAnimatorLight::Settings_Default"));
   #endif
 
   #ifdef USE_LIGHTING_TEMPLATE
@@ -742,7 +339,7 @@ DEBUG_LINE;
 
   }else{
     
-    pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
+    //pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
 
 
     // Check for user defined defaults
@@ -754,9 +351,10 @@ DEBUG_LINE;
     #endif
     
     #ifdef DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID
-      pCONT_iLight->animation.transition.time_ms.map_id = 10;/*DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
+      // pCONT_iLight->animation.transition.time_ms.map_id = 10;
+      /*DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
                                                 DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID:TIME_MAP_SECS_15_ID;*/
-      pCONT_iLight->animation.transition.time_ms.val = 2000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
+      pCONT_iLight->animation.transition.time_ms = 2000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
       pCONT_iLight->animation.flags.ftime_use_map = true;
     #else
       pCONT_iLight->animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
@@ -765,22 +363,23 @@ DEBUG_LINE;
     #endif
 
     #ifdef DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID
-      pCONT_iLight->animation.transition.rate_ms.map_id = 6;/*DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
+      // pCONT_iLight->animation.transition.rate_ms.map_id = 6;
+      /*DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
                                                 DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID:RATE_MAP_SECS_15_ID;*/
-      pCONT_iLight->animation.transition.rate_ms.val = 10000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+      pCONT_iLight->animation.transition.rate_ms = 10000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
       pCONT_iLight->animation.flags.frate_use_map = true;
     #else
       pCONT_iLight->animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
-      pCONT_iLight->animation.transition.rate_ms.val = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+      pCONT_iLight->animation.transition.rate_ms = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
       pCONT_iLight->animation.flags.frate_use_map = true;
     #endif
 
-    #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
-      pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = 4;/*DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
-                            DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;*/
-    #else
-      pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
-    #endif
+    // #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
+    //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = 4;/*DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
+    //                         DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;*/
+    // #else
+    //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
+    // #endif
 
     #ifdef DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE
       // pCONT_iLight->animation.brightness = (float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f;//mSupport::WithinLimits(0,(float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f,1)
@@ -796,25 +395,25 @@ DEBUG_LINE;
     #endif
     
     
-      #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-    #ifdef DEFAULT_LIGHTING_FLASHER_FUNCTION_ID
-      flashersettings.function = 1;/*DEFAULT_LIGHTING_FLASHER_FUNCTION_ID<FLASHER_FUNCTION_LENGTH_ID?
-                            DEFAULT_LIGHTING_FLASHER_FUNCTION_ID:FLASHER_FUNCTION_SLOW_GLOW_ID;*/
+      #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+    #ifdef DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID
+      flashersettings.function = 1;/*DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID<EFFECTS_FUNCTION_LENGTH_ID?
+                            DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID:EFFECTS_FUNCTION_SLOW_GLOW_ID;*/
     #else
-      flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_ID;
+      flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
     #endif
-    #endif // ENABLE_PIXEL_FUNCTION_FLASHER
+    #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
   }
 
 
-  uint16_t buffer_length = 0;
-  char* buffer = pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;
-  for(uint8_t i=0;i<20;i++){
-   buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
-  }
-  #ifndef DISABLE_SERIAL_LOGGING
-  //  Serial.println(buffer); log debuf more
-  #endif
+  // uint16_t buffer_length = 0;
+  // char* buffer = pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;
+  // for(uint8_t i=0;i<20;i++){
+  //  buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
+  // }
+  // #ifndef DISABLE_SERIAL_LOGGING
+  // //  Serial.println(buffer); log debuf more
+  // #endif
 
   
   memset(&editable_mapped_array_data_array,0,sizeof(editable_mapped_array_data_array));
@@ -854,10 +453,10 @@ DEBUG_LINE;
 }
 
 
-void mRGBAnimator::GenerateAnimationPixelAmountMaps(){
+void mAnimatorLight::GenerateAnimationPixelAmountMaps(){
 
   // for(int val=0;val<sizeof(pixels_to_update_as_number_map);val++){
-  //   pixels_to_update_as_number_map[val] = ((float)PROGMEM pixels_to_update_as_percentage_map[val]/100.0f)*pCONT_iLight->light_size_count;
+  //   pixels_to_update_as_number_map[val] = ((float)PROGMEM pixels_to_update_as_percentage_map[val]/100.0f)*pCONT_iLight->settings.light_size_count;
   //   if(pixels_to_update_as_number_map[val]==0) pixels_to_update_as_number_map[val] = 1;
   // }
 
@@ -872,9 +471,9 @@ void mRGBAnimator::GenerateAnimationPixelAmountMaps(){
 ********************************************************************************************************************/
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
 
-void mRGBAnimator::init_flasher_settings(){
+void mAnimatorLight::init_flasher_settings(){
 
   flashersettings.flags.movement_direction = 0;
   
@@ -890,7 +489,7 @@ void mRGBAnimator::init_flasher_settings(){
 
 
 
-void mRGBAnimator::SubTask_Flasher_Main(){
+void mAnimatorLight::SubTask_Flasher_Main(){
 
 #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   if(mixer.flags.Enabled){
@@ -904,10 +503,10 @@ void mRGBAnimator::SubTask_Flasher_Main(){
 
 
 
-void mRGBAnimator::SubTask_Flasher_Animate(){
+void mAnimatorLight::SubTask_Flasher_Animate(){
   
   /**
-   * Timer (seconds) to update the FLASHER_REGION_COLOUR_SELECT_ID when otherwise remains static
+   * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
    * */
   SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
   /**
@@ -920,7 +519,7 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
   SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
 
 
-  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms.val))||(pCONT_iLight->animation.flags.fForceUpdate)){
+  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms))||(pCONT_iLight->animation.flags.fForceUpdate)){
 
     // #ifdef ENABLE_DEVFEATURE_FLICKERING_TEST2
     // if(pCONT_iLight->animator_controller->IsAnimating()){
@@ -936,63 +535,76 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
     }
 
 
-    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    char buffer[100];
-    //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
-    #endif
+    //#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+    // char buffer[100];
+    // // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
+    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
+    // //#endif
 
     switch(flashersettings.function){
       default:
-      case FLASHER_FUNCTION_SLOW_GLOW_ID:
+      case EFFECTS_FUNCTION_SLOW_GLOW_ID:
         SubTask_Flasher_Animate_Function_Slow_Glow();
       break;
-      case FLASHER_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
+      case EFFECTS_FUNCTION_SOLID_RGBCCT_ID:
+        SubTask_Flasher_Animate_Function_Solid_RGBCCT();
+      break;
+      case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
         SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
       break;
-      case FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID:
+      case EFFECTS_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID:
         SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through();
       break;
-      case FLASHER_FUNCTION_SEQUENTIAL_ID:
+      case EFFECTS_FUNCTION_SEQUENTIAL_ID:
         SubTask_Flasher_Animate_Function_Sequential();
       break;
-      case FLASHER_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
+      case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
         SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
       break;
-      case FLASHER_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
+      case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
         SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
       break;
-      case FLASHER_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
+      case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
         SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
       break;
-      case FLASHER_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
+      case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
         SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
       break;
-      case FLASHER_FUNCTION_FADE_GRADIENT_ID:
+      case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
         SubTask_Flasher_Animate_Function_Fade_Gradient();
       break;
-      case FLASHER_FUNCTION_TESTER_ID:
+      case EFFECTS_FUNCTION_TESTER_ID:
         SubTask_Flasher_Animate_Function_Tester();
       break; 
-      case FLASHER_FUNCTION_PULSE_RANDOM_ON:
+      case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
         SubTask_Flasher_Animate_Function_Pulse_Random_On();
       break;
-      case FLASHER_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
+      case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
         SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
       break;
-      case FLASHER_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+      case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
+        SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+      break;
+      case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
         SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
       break;
-      case FLASHER_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+      case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
         SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+      break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_ALARM_01:
+        SubTask_Flasher_Animate_Function_SunPositions_Gradient_Alarm_01();
+      break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+        SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
       break;
 
 
-      // case FLASHER_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID:
+      // case EFFECTS_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID:
       //   SubTask_Flasher_Animate_Function_Slow_Glow_Showing_Multiples_Of_Colours();
       // break;
 
 //new pastel random ie change pixel colour 90-100% saturation with slow blend time and randomly
-      // case FLASHER_FUNCTION_FADE_GRADIENT_ID:
+      // case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
       //   SubTask_Flasher_Animate_Function_Fade_Gradient();
       // break;
 
@@ -1025,16 +637,16 @@ void mRGBAnimator::SubTask_Flasher_Animate(){
 
 
 /**
- * Timer (seconds) to update the FLASHER_REGION_COLOUR_SELECT_ID when otherwise remains static
+ * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
  * */
-void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region(){
+void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region(){
 
   if(flashersettings.update_colour_region.refresh_secs || flashersettings.update_colour_region.refresh_decounter_secs){ // >0 is active
     if(mTime::TimeReached(&flashersettings.update_colour_region.tSaved, 1000)){
       AddLog_P(LOG_LEVEL_TEST, PSTR("rate_colours_secs=%d, rate_decounter=%d"),flashersettings.update_colour_region.refresh_secs, flashersettings.update_colour_region.refresh_decounter_secs);
       if(flashersettings.update_colour_region.refresh_decounter_secs == 1){
         flashersettings.update_colour_region.refresh_decounter_secs = flashersettings.update_colour_region.refresh_secs; // reset
-        flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;
+        flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
         flashersettings.flags.force_finish_flasher_pair_once = 1;
       }else
       if(flashersettings.update_colour_region.refresh_decounter_secs > 1){
@@ -1052,14 +664,14 @@ void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_C
  /**
    * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
    * */  
-  void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate(){
+  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate(){
   // Generate randomness to transitions if flag is set
   // if(flashersettings.flags.enable_random_rate){
   //   if(mTime::TimeReached(&flashersettings.random_transitions.tSavedNewSpeedUpdate,flashersettings.random_transitions.rate_ms)){
   //     flashersettings.random_transitions.rate_ms = (random(flashersettings.random_transitions.lower_secs,flashersettings.random_transitions.upper_secs)*1000);
-  //     pCONT_iLight->animation.transition.rate_ms.val = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
+  //     pCONT_iLight->animation.transition.rate_ms = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
   //     if(flashersettings.random_transitions.array_index>=flashersettings.random_transitions.array_index_length) flashersettings.random_transitions.array_index=0;
-  //     pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms.val/4; //75% of time spent on desired colour
+  //     pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
   //   }
   // }
   }
@@ -1067,7 +679,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_C
   /**
    * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
    * */ 
-  void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time(){
+  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time(){
   // if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*1000))){
   //   uint8_t values[8] = {4,8,10,17,20,17,10,8};
   //   pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
@@ -1081,7 +693,7 @@ void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_C
 //  * Changes pixels randomly to new colour, with slow blending
 //  * Requires new colour calculation each call
 //  */
-// void mRGBAnimator::SubTask_Flasher_Animate_Function_Slow_Glow(){
+// void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow(){
 //   // So colour region does not need to change each loop to prevent colour crushing
 //   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 //   UpdateDesiredColourFromPaletteSelected();
@@ -1089,9 +701,9 @@ void mRGBAnimator::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_C
 
 
 
-void mRGBAnimator::UpdateStartingColourWithGetPixel(){
+void mAnimatorLight::UpdateStartingColourWithGetPixel(){
 
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
 
     // Test fix, if desired does not match getcolour, then use ...
 
@@ -1101,33 +713,45 @@ void mRGBAnimator::UpdateStartingColourWithGetPixel(){
 
 }
 
-void mRGBAnimator::UpdateStartingColourWithSingleColour(RgbcctColor colour){
+void mAnimatorLight::UpdateDesiredColourWithGetPixel(){
 
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+
+    // Test fix, if desired does not match getcolour, then use ...
+
+
+    animation_colours[pixel].DesiredColour = GetPixelColor(pixel);
+  }
+
+}
+
+void mAnimatorLight::UpdateStartingColourWithSingleColour(RgbcctColor colour){
+
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     animation_colours[pixel].StartingColor = colour;
   }
 
 }
 
-void mRGBAnimator::UpdateDesiredColourWithSingleColour(RgbcctColor colour){
+void mAnimatorLight::UpdateDesiredColourWithSingleColour(RgbcctColor colour){
 
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     animation_colours[pixel].DesiredColour = colour;
   }
 
 }
 
 
-void mRGBAnimator::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction){
+void mAnimatorLight::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction){
 
 //pixels_amount_to_shift loop this many times
 
   if(direction){ // direction==1 move right ie AWAY from start
 
     // Shift colours (rotate)
-    RgbcctColor colourlast = animation_colours[pCONT_iLight->light_size_count-1].DesiredColour;//desired_colour[0];
+    RgbcctColor colourlast = animation_colours[pCONT_iLight->settings.light_size_count-1].DesiredColour;//desired_colour[0];
     // Shift towards first pixel
-    for(ledout.index=pCONT_iLight->light_size_count-1; //last to first
+    for(ledout.index=pCONT_iLight->settings.light_size_count-1; //last to first
         ledout.index>0;
         ledout.index--
       ){ //+1?
@@ -1142,7 +766,7 @@ void mRGBAnimator::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t d
     // Shift colours (rotate)
     RgbcctColor colourfirst = animation_colours[0].DesiredColour;//desired_colour[0];
     // Shift towards first pixel
-    for(ledout.index=0;ledout.index<pCONT_iLight->light_size_count;ledout.index++){ 
+    for(ledout.index=0;ledout.index<pCONT_iLight->settings.light_size_count;ledout.index++){ 
       animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index+1].DesiredColour;
     }
     // Put first pixel on the end (wrap around)
@@ -1154,7 +778,7 @@ void mRGBAnimator::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t d
 
 
 // // Update struct that shows overview, always sends
-uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
 
   JsonBuilderI->Start();
 
@@ -1198,14 +822,14 @@ uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 
 
 
-#endif // ENABLE_PIXEL_FUNCTION_FLASHER
+#endif // ENABLE_PIXEL_FUNCTION_EFFECTS
 
 
 
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
-************ END OF ANIMATION/FLASHER/MIXER DEFINITIONS ********************************************************************************************
+************ END OF ANIMATION/EFFECTS/MIXER DEFINITIONS ********************************************************************************************
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
@@ -1222,7 +846,7 @@ uint8_t mRGBAnimator::ConstructJSON_Flasher(uint8_t json_level){
 /********************************************************************************************/
 /********************************************************************************************/
 
-const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
+const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
   if(pCONT_iLight->animator_controller->IsAnimating()){
     snprintf_P(buffer, buflen, PSTR("Animating"));
@@ -1230,7 +854,7 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
   }
   if(pCONT_iLight->animation.flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int16_t until_next_millis = pCONT_iLight->animation.transition.rate_ms.val-(millis()-pCONT_iLight->animation_changed_millis);
+    int16_t until_next_millis = pCONT_iLight->animation.transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
     int16_t secs_until_next_event = until_next_millis/1000;
     // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -1241,7 +865,7 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetAnimationStatusCtr %d %d"),
     //   until_next_millis,
-    //   //millis(),pCONT_iLight->animation_changed_millis,pCONT_iLight->animation.transition.rate_ms.val,
+    //   //millis(),pCONT_iLight->runtime.animation_changed_millis,pCONT_iLight->animation.transition.rate_ms,
     //   secs_until_next_event
     // );  
     
@@ -1264,25 +888,34 @@ const char* mRGBAnimator::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 }
 
 
-void mRGBAnimator::SetPixelColor(uint16_t indexPixel, RgbTypeColor color_internal)
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal)
 {
 
-  RgbTypeColor color_hardware = color_internal; //to keep white component if available
-  switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
-    case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
-      color_hardware.G = color_internal.G; 
-      color_hardware.R = color_internal.R; 
-      color_hardware.B = color_internal.B; 
-    break;
-    case  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID:  //1 = RGB, common for WS2811
-      color_hardware.G = color_internal.R; 
-      color_hardware.R = color_internal.G; 
-      color_hardware.B = color_internal.B; 
-    break;
-    case  2: color_hardware.G = color_internal.B; color_hardware.R = color_internal.R; color_hardware.B = color_internal.G; break; //2 = BRG
-    case  3: color_hardware.G = color_internal.R; color_hardware.R = color_internal.B; color_hardware.B = color_internal.G; break; //3 = RBG
-    case  4: color_hardware.G = color_internal.B; color_hardware.R = color_internal.G; color_hardware.B = color_internal.R; break; //4 = BGR
-    default: color_hardware.G = color_internal.G; color_hardware.R = color_internal.B; color_hardware.B = color_internal.R; break; //5 = GBR
+  RgbcctColor color_hardware = color_internal;
+
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order[0];
+
+  // if(indexPixel<100){
+    order = pCONT_iLight->hardware_element_colour_order[0];
+  // }else{
+  //   order = pCONT_iLight->hardware_element_colour_order[1];
+  // }
+
+
+  if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_hardware[order.r] = color_internal.R;
+  }
+  if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_hardware[order.g] = color_internal.G;
+  }
+  if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_hardware[order.b] = color_internal.B;
+  }
+  if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_hardware[order.w] = color_internal.WW;
+  }
+  if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_hardware[order.c] = color_internal.WC;
   }
 
 // DEBUG_LINE_HERE;
@@ -1333,24 +966,27 @@ void mRGBAnimator::SetPixelColor(uint16_t indexPixel, RgbTypeColor color_interna
 
       for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
         if(setpixel_variable_index_counter>50){ return; }
-        stripbus->SetPixelColor(setpixel_variable_index_counter++,color_hardware);  
+        pCONT_iLight->SetPixelColourHardwareInterface(setpixel_variable_index_counter++,color_hardware);  
       }
 
     }else{
-      stripbus->SetPixelColor(indexPixel,color_hardware);
+      pCONT_iLight->SetPixelColourHardwareInterface(indexPixel,color_hardware);
     } // pixel_group.flags.fEnabled
 
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
 
   #else
 
-    stripbus->SetPixelColor(indexPixel,color_hardware);
+    // pCONT_iLight->SetPixelColourHardwareInterface(indexPixel,color_hardware);
+    pCONT_iLight->SetPixelColourHardwareInterface(color_hardware, indexPixel);
+
+    //refer back to lighting interface which will pass to the right hardware
 
   #endif // ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
 
 }
 
-RgbTypeColor mRGBAnimator::GetPixelColor(uint16_t indexPixel)
+RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 {
   DEBUG_LINE;
   if(stripbus == nullptr){    
@@ -1402,40 +1038,67 @@ RgbTypeColor mRGBAnimator::GetPixelColor(uint16_t indexPixel)
 
       for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
         if(setpixel_variable_index_counter>50){ return; }
-        stripbus->SetPixelColor(setpixel_variable_index_counter++,color_hardware);  
+        pCONT_iLight->SetPixelColourHardwareInterface(setpixel_variable_index_counter++,color_hardware);  
       }
 
     }else{
-      stripbus->SetPixelColor(indexPixel,color_hardware);
+      pCONT_iLight->SetPixelColourHardwareInterface(indexPixel,color_hardware);
     } // pixel_group.flags.fEnabled
 
     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
 
   #else
 
-    RgbTypeColor color_hardware = stripbus->GetPixelColor(indexPixel);
+    RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
 
   #endif
 
-  RgbTypeColor color_internal = color_hardware; // To catch white element if present
+  RgbcctColor color_internal = color_hardware; // To catch white element if present
   DEBUG_LINE;
 
-  switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
-    case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
-      color_internal.G = color_hardware.G; 
-      color_internal.R = color_hardware.R; 
-      color_internal.B = color_hardware.B; 
-    break;
-    case  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID:  //1 = RGB, common for WS2811
-      color_internal.R = color_hardware.G; 
-      color_internal.G = color_hardware.R; 
-      color_internal.B = color_hardware.B; 
-    break;
-    case  2: color_internal.B = color_hardware.G; color_hardware.R = color_hardware.R; color_internal.G = color_hardware.B; break; //2 = BRG
-    case  3: color_internal.R = color_hardware.G; color_internal.B = color_hardware.R; color_internal.G = color_hardware.B; break; //3 = RBG
-    case  4: color_internal.B = color_hardware.G; color_internal.G = color_hardware.R; color_internal.R = color_hardware.B; break; //4 = BGR
-    default: color_internal.G = color_hardware.G; color_internal.B = color_hardware.R; color_internal.R = color_hardware.B; break; //5 = GBR
+  // switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
+  //   case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
+  //     color_internal.G = color_hardware.G; 
+  //     color_internal.R = color_hardware.R; 
+  //     color_internal.B = color_hardware.B; 
+  //   break;
+  //   case  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID:  //1 = RGB, common for WS2811
+  //     color_internal.R = color_hardware.G; 
+  //     color_internal.G = color_hardware.R; 
+  //     color_internal.B = color_hardware.B; 
+  //   break;
+  //   case  2: color_internal.B = color_hardware.G; color_hardware.R = color_hardware.R; color_internal.G = color_hardware.B; break; //2 = BRG
+  //   case  3: color_internal.R = color_hardware.G; color_internal.B = color_hardware.R; color_internal.G = color_hardware.B; break; //3 = RBG
+  //   case  4: color_internal.B = color_hardware.G; color_internal.G = color_hardware.R; color_internal.R = color_hardware.B; break; //4 = BGR
+  //   default: color_internal.G = color_hardware.G; color_internal.B = color_hardware.R; color_internal.R = color_hardware.B; break; //5 = GBR
+  // }
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order[0];
+
+
+  // if(indexPixel<100){
+    order = pCONT_iLight->hardware_element_colour_order[0];
+  // }else{
+  //   order = pCONT_iLight->hardware_element_colour_order[1];
+  // }
+
+  if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_internal[order.r] = color_hardware.R;
   }
+  if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_internal[order.g] = color_hardware.G;
+  }
+  if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_internal[order.b] = color_hardware.B;
+  }
+  if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_internal[order.w] = color_hardware.WW;
+  }
+  if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
+    color_internal[order.c] = color_hardware.WC;
+  }
+
+
+
 
   return color_internal;
 }
@@ -1445,11 +1108,9 @@ RgbTypeColor mRGBAnimator::GetPixelColor(uint16_t indexPixel)
 
 
 
-
-
 ////////////////////// START OF MQTT /////////////////////////
 
-void mRGBAnimator::MQTTHandler_Init(){
+void mAnimatorLight::MQTTHandler_Init(){
 
   uint8_t ii = 0;
 
@@ -1462,7 +1123,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
   // mqtthandler_list_ids[ii] = mqtthandler_ptr->handler_id;
   // mqtthandler_list_ptr[ii] = &mqtthandler_ptr;
 
@@ -1475,7 +1136,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Animation;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Animation;
 
   mqtthandler_ptr = &mqtthandler_ambilight_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID;
@@ -1486,7 +1147,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Ambilight;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Ambilight;
   
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS      //make this optional, as it uses extra data and is only for special cases
   mqtthandler_ptr = &mqtthandler_notifications_teleperiod;
@@ -1498,7 +1159,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Notifications;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Notifications;
   #endif
     
   mqtthandler_ptr = &mqtthandler_state_teleperiod;
@@ -1510,19 +1171,19 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_State;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_State;
   
-  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
   mqtthandler_ptr = &mqtthandler_flasher_teleperiod;
-  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FLASHER_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Flasher;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_EFFECTS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Flasher;
   #endif
 
 #ifdef ENABLE_PIXEL_FUNCTION_MIXER
@@ -1535,7 +1196,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Mixer;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mixer;
   #endif
   
   // mqtt_handler_ids
@@ -1545,19 +1206,19 @@ void mRGBAnimator::MQTTHandler_Init(){
   //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
   //     MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
   //   #endif
-  //   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-  //     MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID, MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID
+  //   #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+  //     MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID, MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID
   //   #endif
   // };
   
-  // struct handler<mRGBAnimator>* mqtthandler_list_ptr[];
+  // struct handler<mAnimatorLight>* mqtthandler_list_ptr[];
   // 4] = {
   //   &mqtthandler_settings_teleperiod, &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
   //   &mqtthandler_state_teleperiod,
   //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
   //     &mqtthandler_notifications_teleperiod,
   //   #endif
-  //   #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  //   #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
   //     &mqtthandler_flasher_teleperiod, &mqtthandler_mixer_teleperiod
   //   #endif
   // };
@@ -1573,7 +1234,7 @@ void mRGBAnimator::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRGBAnimator::ConstructJSON_Manual_SetPixel;  
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Manual_SetPixel;  
 #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
 
@@ -1581,7 +1242,7 @@ void mRGBAnimator::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mRGBAnimator::MQTTHandler_Set_fSendNow(){
+void mAnimatorLight::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_animation_teleperiod.flags.SendNow = true;
@@ -1596,7 +1257,7 @@ void mRGBAnimator::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mRGBAnimator::MQTTHandler_Set_TelePeriod(){
+void mAnimatorLight::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -1611,7 +1272,7 @@ void mRGBAnimator::MQTTHandler_Set_TelePeriod(){
 } //end "MQTTHandler_Set_TelePeriod"
 
 
-void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mAnimatorLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID, MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
@@ -1619,8 +1280,8 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
     #endif
-    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-      MQTT_HANDLER_MODULE_FLASHER_TELEPERIOD_ID, 
+    #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID, 
     #endif
     #ifdef ENABLE_PIXEL_FUNCTION_MIXER
       MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID,
@@ -1632,13 +1293,13 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   };
   
   // Could this be put into a function? to allow me to set things to all in this, or by ID
-  struct handler<mRGBAnimator>* mqtthandler_list_ptr[] = {
+  struct handler<mAnimatorLight>* mqtthandler_list_ptr[] = {
     &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
     &mqtthandler_state_teleperiod,
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       &mqtthandler_notifications_teleperiod,
     #endif
-    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+    #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
       &mqtthandler_flasher_teleperiod, 
     #endif
     #ifdef ENABLE_PIXEL_FUNCTION_MIXER
@@ -1650,7 +1311,7 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_ADDRESSABLE_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_ANIMATOR_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
@@ -1677,9 +1338,9 @@ void mRGBAnimator::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-void mRGBAnimator::ApplyBrightnesstoDesiredColour(uint8_t brightness){
+void mAnimatorLight::ApplyBrightnesstoDesiredColour(uint8_t brightness){
 
-  for(uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++ ){
+  for(uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++ ){
     animation_colours[pixel].DesiredColour.R = mapvalue(animation_colours[pixel].DesiredColour.R, 0, 255, 0, brightness);
     animation_colours[pixel].DesiredColour.G = mapvalue(animation_colours[pixel].DesiredColour.G, 0, 255, 0, brightness);
     animation_colours[pixel].DesiredColour.B = mapvalue(animation_colours[pixel].DesiredColour.B, 0, 255, 0, brightness);
@@ -1688,7 +1349,7 @@ void mRGBAnimator::ApplyBrightnesstoDesiredColour(uint8_t brightness){
 }
 
 
-RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightness){
+RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightness){
 
   RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightness);
@@ -1701,7 +1362,7 @@ RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColour(RgbcctColor full_range_
 }
 
 
-RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
+RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
   
   uint8_t new_brightness_255 = 0;
 
@@ -1732,9 +1393,9 @@ RgbcctColor mRGBAnimator::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor fu
 
 
 
-uint16_t mRGBAnimator::SetLEDOutAmountByPercentage(uint8_t percentage){
+uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
-  strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->light_size_count);
+  strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
 
 // AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
@@ -1744,7 +1405,7 @@ uint16_t mRGBAnimator::SetLEDOutAmountByPercentage(uint8_t percentage){
 
 
 
-void mRGBAnimator::RefreshLEDIndexPattern(){
+void mAnimatorLight::RefreshLEDIndexPattern(){
 
   // AddLog_P(LOG_LEVEL_TEST, PSTR("f::%s"),__FUNCTION__);
 
@@ -1779,15 +1440,15 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
 // ledout.pattern[
 
 //           uint16_t pixels_to_update_count = map(
-//             pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 0,100, 0, pCONT_iLight->light_size_count
+//             pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 0,100, 0, pCONT_iLight->settings.light_size_count
 //           );
 
 
-      SetLEDOutAmountByPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+      // SetLEDOutAmountByPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
 
             // Pick random indexes, from the entire pixel count, but only fill up pattern as needed
             for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){ 
-              ledout.pattern[ledout.index] = random(0,pCONT_iLight->light_size_count); 
+              ledout.pattern[ledout.index] = random(0,pCONT_iLight->settings.light_size_count); 
             }
 
 
@@ -1878,9 +1539,9 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
         break;
       }
     break;
-    case TRANSITION_ORDER_FIXED_ID:
-      // pattern is contained within colour map
-    break;
+    // case TRANSITION_ORDER_FIXED_ID:
+    //   // pattern is contained within colour map
+    // break;
     case TRANSITION_ORDER_CENTRE_OUT_ID:{
       // uint16_t middle_index = length_local/2;
       //0,1,2,3,4,5,4,3,2,1,0
@@ -1889,37 +1550,37 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
       // }
     }
     break;
-    case TRANSITION_ORDER_ROTATE_ID:
-// x = new index 0
-//       [0,1,2,x,4,5] start
-//       [0,1,2] //remember <x
-//       [x,4,5] // shift down
-//       [x,4,5,0,1,2] end
+//     case TRANSITION_ORDER_ROTATE_ID:
+// // x = new index 0
+// //       [0,1,2,x,4,5] start
+// //       [0,1,2] //remember <x
+// //       [x,4,5] // shift down
+// //       [x,4,5,0,1,2] end
 
-// ROTATE IS HANDLED BY NEOPIXEBUS FUNCTIONS, USE THEM!!
+// // ROTATE IS HANDLED BY NEOPIXEBUS FUNCTIONS, USE THEM!!
 
-      uint16_t rotate_amount = 1;
-      // Store last value
-      uint16_t last_index = ledout.pattern[ledout.length-1];
-      // Serial.println();
-      // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
+//       uint16_t rotate_amount = 1;
+//       // Store last value
+//       uint16_t last_index = ledout.pattern[ledout.length-1];
+//       // Serial.println();
+//       // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
 
-      // shift all values by 1
-      for(ledout.index=0;ledout.index<ledout.length/2-1;ledout.index++){ 
-        swap(
-          ledout.pattern[ledout.length/2-ledout.index],
-          ledout.pattern[ledout.length/2+ledout.index]
-        );
-      }
-      // Move into first
+//       // shift all values by 1
+//       for(ledout.index=0;ledout.index<ledout.length/2-1;ledout.index++){ 
+//         swap(
+//           ledout.pattern[ledout.length/2-ledout.index],
+//           ledout.pattern[ledout.length/2+ledout.index]
+//         );
+//       }
+//       // Move into first
 
-      // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
+//       // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
 
-      // Use existing pattern and rotate it
-      // for(ledout.index=0;ledout.index<length_local;ledout.index++){ 
-      //   index_pattern[ledout.index] = ledout.index; 
-      // }
-    break;
+//       // Use existing pattern and rotate it
+//       // for(ledout.index=0;ledout.index<length_local;ledout.index++){ 
+//       //   index_pattern[ledout.index] = ledout.index; 
+//       // }
+//     break;
   }
 
 } //end function "RefreshLEDIndexPattern"
@@ -1927,28 +1588,35 @@ void mRGBAnimator::RefreshLEDIndexPattern(){
 
 // Name:UpdateDesiredColourFromPaletteSelected
 // Task: 
-//
-//
-void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
+/**
+ * This needs redoing, with a flag, to enable how I want the palette presented, and not how its encoded
+ * "palette_pattern"
+ * Gradient (either needs to get from palette, or equally generate it based on palette element count)
+ * Single   (gets each colour in the palette, with ability to ignore indexs if they are present)
+ * */
+void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
 
   // Update pointer of struct
-  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
+  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),mPaletteI->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
   // AddLog_P(LOG_LEVEL_DEBUG_MORE
   
   /**
    * Handle the retrieval of colours from palettes depending on the palette encoding type
    * */
-  switch(pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type){
+  switch(mPaletteI->palettelist.ptr->flags.fMapIDs_Type){
     // default:
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
     //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "default"));
     //   #endif
     // case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
+
     default:
     case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:
-    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:{
+    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
+    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID: ///to be tested
+    {
     //get colour above
 
       //apply to positiion below
@@ -1976,12 +1644,12 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
           for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
 
             // For random, desired pixel from map will also be random
-            desired_pixel = random(0,pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+            desired_pixel = random(0,mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
             
-            RgbTypeColor colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+            RgbTypeColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
             // desired_colour[ledout.pattern[ledout.index]] = colour; 
-            // AddLog_P(LOG_LEVEL_TEST, PSTR("colour=%d,%d,%d"),
+            // AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "colour=%d,%d,%d"),
             // colour.R,
             // colour.G,
             // colour.B);
@@ -1991,7 +1659,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
 #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
           
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
+              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB_Global());
             }
             #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
@@ -2015,20 +1683,26 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
           int16_t pixel_position = -2;
           desired_pixel=0;
           for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
-            RgbTypeColor colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+            RgbTypeColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
             // desired_colour[ledout.pattern[ledout.index]] = colour; 
             // AddLog_P(LOG_LEVEL_TEST, PSTR("colour=%d,%d,%d"),
             // colour.R,
             // colour.G,
+            // colour.B); 
+            
+            // AddLog_P(LOG_LEVEL_TEST, PSTR( "%d colour=%d,%d,%d"),desired_pixel, // DEBUG_INSERT_PAGE_BREAK
+            // colour.R,
+            // colour.G,
             // colour.B);
+
             
             // animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
               
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
            #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
+              animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB_Global());
             }
             #endif //             ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
@@ -2042,32 +1716,32 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
             //   ledout.pattern[ledout.index],desired_pixel,
             //   pCONT_iLight->HueF2N(desired_colour[ledout.pattern[ledout.index]].H),pCONT_iLight->SatF2N(desired_colour[ledout.pattern[ledout.index]].S),pCONT_iLight->BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
-            //   pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr),pixel_position
+            //   mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr),pixel_position
             // );
             #endif
 
-            if(++desired_pixel>=pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr)){desired_pixel=0;}
+            if(++desired_pixel>=mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr)){desired_pixel=0;}
           } //end for
         }break;
-        case TRANSITION_ORDER_FIXED_ID:
+        // case TRANSITION_ORDER_FIXED_ID:
 
-          int16_t pixel_position = -2;
-          //move across all encoded values
-            // HsbColor colour = GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+        //   int16_t pixel_position = -2;
+        //   //move across all encoded values
+        //     // HsbColor colour = GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
-            // if(pixel_position>=0){
-            //   desired_colour[pixel_position] = colour;
-            // }else{
-            //   desired_colour[ledout.pattern[ledout.index]] = colour;
-            // }
+        //     // if(pixel_position>=0){
+        //     //   desired_colour[pixel_position] = colour;
+        //     // }else{
+        //     //   desired_colour[ledout.pattern[ledout.index]] = colour;
+        //     // }
             
-            // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
-            //   ledout.pattern[ledout.index],desired_pixel,
-            //   HueF2N(desired_colour[ledout.pattern[ledout.index]].H),SatF2N(desired_colour[ledout.pattern[ledout.index]].S),BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
-            //   pCONT_iLight->palettelist.ptr->active_pixels_in_map,pixel_position
-            // );    
+        //     // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
+        //     //   ledout.pattern[ledout.index],desired_pixel,
+        //     //   HueF2N(desired_colour[ledout.pattern[ledout.index]].H),SatF2N(desired_colour[ledout.pattern[ledout.index]].S),BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
+        //     //   mPaletteI->palettelist.ptr->active_pixels_in_map,pixel_position
+        //     // );    
 
-        break;
+        // break;
       }//end switch
 
 
@@ -2078,16 +1752,16 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID:{
 
       // Get active pixels in map
-      uint16_t active_pixels_in_map = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //width 2
+      uint16_t active_pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //width 2
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "active_pixels_in_map=%d"),active_pixels_in_map);
+      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "active_pixels_in_map=%d"),active_pixels_in_map);
     #endif// ENABLE_LOG_LEVEL_INFO
 
       // Move across map
       int16_t pixel_position = -2;
       for(uint16_t desired_pixel=0;desired_pixel<active_pixels_in_map;desired_pixel++){
-        RgbcctColor colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,&pixel_position);
+        RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
         
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
         //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "dp%d, pp%d, %d,%d %d"),desired_pixel, pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -2097,7 +1771,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
           // Set output to this "many" colour
           if(pixel_position == 255){
             for(uint16_t temp=0;temp<ledout.length;temp++){ 
-              animation_colours[temp].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
+              animation_colours[temp].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB_Global());
             }            
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set ALL %d,%d %d"),pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -2105,7 +1779,7 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
           }else{
             colour.R = 1;colour.R = 2;colour.R = 3;
             // Serial.println("colour.R = 1;colour.R = 2;colour.R = 3;");
-            animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB());
+            animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB_Global());
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
             #endif
@@ -2124,41 +1798,49 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
       // return;
     }
     break;
+    case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID:
     case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID:
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID:{
 
-      #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID"));
-      #endif
+      //#ifdef ENABLE_LOG_LEVEL_DEBUG
+      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID"));
+      //#endif
 
       uint16_t start_pixel = 0;
       uint16_t end_pixel = 100;
-      RgbTypeColor start_colour = RgbTypeColor(0);
-      RgbTypeColor end_colour = RgbTypeColor(0);
+      RgbcctColor start_colour = RgbcctColor(0);
+      RgbcctColor end_colour = RgbcctColor(0);
       uint16_t desired_pixel = 0;
       int16_t start_pixel_position = -1, end_pixel_position = -1;
-      uint8_t pixels_in_map = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+      uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
 
-      #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "pixels_in_map %d"),pixels_in_map);
-      #endif
+      //#ifdef ENABLE_LOG_LEVEL_DEBUG
+      // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "pixels_in_map %d"),pixels_in_map);
+      //#endif
 
-      for(uint8_t grad_pair_index=0;grad_pair_index<pixels_in_map;grad_pair_index++){
+
+      // Add flag to enable ignoring gradient, and filling as normal palette (here?)
+
+      for(uint8_t grad_pair_index=0;grad_pair_index<pixels_in_map-1;grad_pair_index++){
         
-        start_colour = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel,  &start_pixel_position);
-        end_colour   = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,desired_pixel+1,&end_pixel_position);
+        start_colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,  &start_pixel_position);
+        end_colour   = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel+1,&end_pixel_position);
+
+        
+      // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+      // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
 
 #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-        start_colour = ApplyBrightnesstoDesiredColour(start_colour,pCONT_iLight->getBriRGB());
-        end_colour   = ApplyBrightnesstoDesiredColour(end_colour,pCONT_iLight->getBriRGB());
+        start_colour = ApplyBrightnesstoDesiredColour(start_colour,pCONT_iLight->getBriRGB_Global());
+        end_colour   = ApplyBrightnesstoDesiredColour(end_colour,pCONT_iLight->getBriRGB_Global());
 #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
-        //#ifdef ENABLE_LOG_LEVEL_DEBUG
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
         //  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "s%d,%d %d %d"),pCONT_iLight->HueF2N(start_colour.H),pCONT_iLight->SatF2N(start_colour.S),pCONT_iLight->BrtF2N(start_colour.B),start_pixel_position);
         //  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "e%d,%d %d %d"),HueF2N(end_colour.H),SatF2N(end_colour.S),BrtF2N(end_colour.B),end_pixel_position);
-        //#endif
+        // #endif
 
-        switch(pCONT_iLight->palettelist.ptr->flags.fIndexs_Type){
+        switch(mPaletteI->palettelist.ptr->flags.fIndexs_Type){
           case INDEX_TYPE_DIRECT: break; //remains the same
           case INDEX_TYPE_SCALED_255: 
             start_pixel_position = map(start_pixel_position,0,255,0,ledout.length);
@@ -2170,10 +1852,17 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
             end_pixel_position   = map(end_pixel_position,0,100,0,ledout.length);          
           break;
         }
+
+
+    
+      // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+      // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
+
+
         float progress = 0;
         for(ledout.index=start_pixel_position;ledout.index<end_pixel_position;ledout.index++){
           progress = mSupport::mapfloat(ledout.index,start_pixel_position,end_pixel_position,0,1);
-          animation_colours[ledout.index].DesiredColour = RgbTypeColor::LinearBlend(start_colour, end_colour, progress);
+          animation_colours[ledout.index].DesiredColour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
         }
         desired_pixel++;
       }
@@ -2190,9 +1879,15 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "DONE UpdateDesiredColourFromPaletteSelected fMapIDs_Type "));
   #endif  // LOG_LEVEL_DEBUG_MORE
 
+  //  AddLog_P(LOG_LEVEL_DEBUG, PSTR("colour=%d,%d,%d"),
+  //             animation_colours[0].DesiredColour.R,
+  //             animation_colours[0].DesiredColour.G,
+  //             animation_colours[0].DesiredColour.B
+  //           );
+
   
   // Handle brightness levels == if not set, use default
-  //if(!pCONT_iLight->palettelist.ptr->fOverride_animation_brightness){
+  //if(!mPaletteI->palettelist.ptr->fOverride_animation_brightness){
   // ApplyBrightnesstoDesiredColour(pCONT_iLight->getBriRGB());
   //}
 
@@ -2202,8 +1897,8 @@ void mRGBAnimator::UpdateDesiredColourFromPaletteSelected(void){
 
 // optional fromcolor to merge "FadeToNewColour" and "FadeBetweenColours"
 // If unset (as defined in header) the pCONT_iLight->animation will blend from current pixel colours with getpixel
-// void mRGBAnimator::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_newcolour,  RgbTypeColor fromcolor){ 
-void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
+// void mAnimatorLight::FadeToNewColour(RgbTypeColor targetColor, uint16_t _time_to_newcolour,  RgbTypeColor fromcolor){ 
+void mAnimatorLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "FadeToNewColour"));
@@ -2238,7 +1933,7 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
   #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
 
   //load start
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     animation_colours[pixel].StartingColor = GetPixelColor(pixel);
     animation_colours[pixel].DesiredColour = targetColor_npb;
     //AddLog_P(LOG_LEVEL_TEST, PSTR("targetColor_npb=%d,%d,%d"),targetColor_npb.R,targetColor_npb.G,targetColor_npb.B);
@@ -2251,20 +1946,20 @@ void mRGBAnimator::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
 
 
 
-void mRGBAnimator::StartAnimationAsBlendFromStartingColorToDesiredColor(){ 
+void mAnimatorLight::StartAnimationAsBlendFromStartingColorToDesiredColor(){ 
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::StartAnimationAsBlendFromStartingColorToDesiredColor"));
   #endif
 
-  pCONT_iLight->animation_changed_millis = millis();
+  pCONT_iLight->runtime.animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
   // switch(pCONT_iLight->animation.transition.method_id){
   //   default: 
   //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
   //   case TRANSITION_METHOD_BLEND_ID:   
-    time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+    time_tmp = pCONT_iLight->animation.transition.time_ms; 
   //   break;
   // }
 
@@ -2281,7 +1976,7 @@ void mRGBAnimator::StartAnimationAsBlendFromStartingColorToDesiredColor(){
   }
 
   //load start
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     animation_colours[pixel].StartingColor = GetPixelColor(pixel);
     // animation_colours[pixel].DesiredColour = GetPixelColor(pixel); // set elsewhere
     
@@ -2307,20 +2002,20 @@ void mRGBAnimator::StartAnimationAsBlendFromStartingColorToDesiredColor(){
 /**
  * Begin at "StartingColor" at 0% then return to "DesiredColor" at 100%
  * */
-void mRGBAnimator::StartAnimationAsSwitchingFromStartingColorToDesiredColor(){ 
+void mAnimatorLight::StartAnimationAsSwitchingFromStartingColorToDesiredColor(){ 
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::StartAnimationAsBlendFromStartingColorToDesiredColor"));
   #endif
 
-  pCONT_iLight->animation_changed_millis = millis();
+  pCONT_iLight->runtime.animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
   // switch(pCONT_iLight->animation.transition.method_id){
   //   default: 
   //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
     // case TRANSITION_METHOD_BLEND_ID:  
-     time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+     time_tmp = pCONT_iLight->animation.transition.time_ms; 
   //    break;
   // }
 
@@ -2350,7 +2045,7 @@ void mRGBAnimator::StartAnimationAsSwitchingFromStartingColorToDesiredColor(){
 /**
  * Begin at "StartingColor" at 0% then return to "DesiredColor" at 100%
  * */
-void mRGBAnimator::StartAnimation_AsAnimUpdateMemberFunction(){ 
+void mAnimatorLight::StartAnimation_AsAnimUpdateMemberFunction(){ 
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::StartAnimationAsBlendFromStartingColorToDesiredColor"));
@@ -2358,7 +2053,7 @@ void mRGBAnimator::StartAnimation_AsAnimUpdateMemberFunction(){
 
   #ifndef ENABLE_DEVFEATURE_FLICKERING_TEST3
 
-  pCONT_iLight->animation_changed_millis = millis();
+  pCONT_iLight->runtime.animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;
   // switch(pCONT_iLight->animation.transition.method_id){
@@ -2371,7 +2066,7 @@ void mRGBAnimator::StartAnimation_AsAnimUpdateMemberFunction(){
     
   //    break;
     // case TRANSITION_METHOD_BLEND_ID:   
-    time_tmp = pCONT_iLight->animation.transition.time_ms.val; 
+    time_tmp = pCONT_iLight->animation.transition.time_ms; 
   //   break;
   // }
 
@@ -2417,7 +2112,7 @@ void mRGBAnimator::StartAnimation_AsAnimUpdateMemberFunction(){
 } //end function
 
 
-mRGBAnimator& mRGBAnimator::setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE) {
+mAnimatorLight& mAnimatorLight::setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE) {
     this->anim_function_callback = anim_function_callback;
     return *this;
 }
@@ -2425,15 +2120,15 @@ mRGBAnimator& mRGBAnimator::setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE) {
 
 
 
-bool mRGBAnimator::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
+bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
   //Use starting pixel as temporary buffer, record desired as already set
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     animation_colours[pixel].StartingColor = animation_colours[pixel].DesiredColour;
   } // END for
 
 
-  for(uint16_t indexPixel=0; indexPixel<pCONT_iLight->light_size_count; indexPixel++){
+  for(uint16_t indexPixel=0; indexPixel<pCONT_iLight->settings.light_size_count; indexPixel++){
     
     uint8_t pixel_multiplier_count = 0;
     if(indexPixel == 0){
@@ -2441,7 +2136,7 @@ bool mRGBAnimator::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
       pixel_group.mapped_array_data.index = 0;
     }
 
-    if(setpixel_variable_index_counter>pCONT_iLight->light_size_count-1){ return true; }
+    if(setpixel_variable_index_counter>pCONT_iLight->settings.light_size_count-1){ return true; }
 
     if(pixel_group.flags.fEnabled){
 
@@ -2469,7 +2164,7 @@ bool mRGBAnimator::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
       for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
         animation_colours[setpixel_variable_index_counter++].DesiredColour = animation_colours[indexPixel].StartingColor;
-        if(setpixel_variable_index_counter>pCONT_iLight->light_size_count-1){ return true; }
+        if(setpixel_variable_index_counter>pCONT_iLight->settings.light_size_count-1){ return true; }
       }
 
     }
@@ -2492,21 +2187,21 @@ bool mRGBAnimator::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
 
 
-void mRGBAnimator::TurnLEDsOff(){
+void mAnimatorLight::TurnLEDsOff(){
   //stripbus->ClearTo(0);
-  for(uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for(uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     SetPixelColor(pixel, 0);
   }
-  stripbus->Show();
+  pCONT_iLight->ShowInterface();
 }
 
 
-void mRGBAnimator::SetPixelColor_All(RgbcctColor colour){
+void mAnimatorLight::SetPixelColor_All(RgbcctColor colour){
   //stripbus->ClearTo(0);
-  for(uint16_t pixel = 0; pixel < pCONT_iLight->light_size_count; pixel++){
+  for(uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     SetPixelColor(pixel, colour);
   }
-  stripbus->Show();
+  pCONT_iLight->ShowInterface();
 }
 
 
@@ -2514,7 +2209,7 @@ void mRGBAnimator::SetPixelColor_All(RgbcctColor colour){
 
 
 
-void mRGBAnimator::Append_Hardware_Status_Message(){
+void mAnimatorLight::Append_Hardware_Status_Message(){
 
   // struct STATUSHARDWARE{
   //   char ctr[200];
@@ -2522,7 +2217,7 @@ void mRGBAnimator::Append_Hardware_Status_Message(){
   //   uint8_t importance = 0; //0 low, 1 med, 2 high
   // };
 
-  // int numpixels = pCONT_iLight->light_size_count;
+  // int numpixels = pCONT_iLight->settings.light_size_count;
   // if(numpixels>55){numpixels=55;}
 
   uint32_t colourcount = 0;
@@ -2592,7 +2287,7 @@ void mRGBAnimator::Append_Hardware_Status_Message(){
   
 
 
-void mRGBAnimator::SetRefreshLEDs(){
+void mAnimatorLight::SetRefreshLEDs(){
 
   pCONT_iLight->animation.flags.fForceUpdate = true;
   pCONT_iLight->animation_override.fRefreshAllPixels = true;
@@ -2610,10 +2305,10 @@ void mRGBAnimator::SetRefreshLEDs(){
 
 
 
-void mRGBAnimator::EveryLoop(){
+void mAnimatorLight::EveryLoop(){
 
   //something smarter for delays
-  // pCONT_set->Settings.enable_sleep = (pCONT_iLight->animation.transition.rate_ms.val<pCONT_set->Settings.sleep) ? 0 : 1;
+  // pCONT_set->Settings.enable_sleep = (pCONT_iLight->animation.transition.rate_ms<pCONT_set->Settings.sleep) ? 0 : 1;
 
   if(pCONT_iLight->animation.flags.fEnable_Animation){
   // while(blocking_force_animate_to_complete){
@@ -2621,7 +2316,7 @@ void mRGBAnimator::EveryLoop(){
       pCONT_iLight->animator_controller->UpdateAnimations();
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   // if(stripbus->CanShow()){
-  //     stripbus->Show();
+  //     pCONT_iLight->ShowInterface();
   //   }
 
 // stripbus->IsDirty
@@ -2643,7 +2338,7 @@ void mRGBAnimator::EveryLoop(){
         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Finished")); 
         #endif
         fAnyLEDsOnOffCount = 0;
-        for(int i=0;i<pCONT_iLight->light_size_count;i++){ 
+        for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
           if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
         }          
       }
@@ -2663,7 +2358,7 @@ void mRGBAnimator::EveryLoop(){
 
   if(stripbus->IsDirty()){
     if(stripbus->CanShow()){
-      stripbus->Show();
+      pCONT_iLight->ShowInterface();
     }
   }
 
@@ -2687,7 +2382,7 @@ void mRGBAnimator::EveryLoop(){
 
   if(mTime::TimeReached(&tSavedCheckAnyLEDsOnOff,1000)){
     fAnyLEDsOnOffCount = 0;
-    for(int i=0;i<pCONT_iLight->light_size_count;i++){
+    for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "fAnyLEDsOnOffCount %d"),fAnyLEDsOnOffCount);
       #endif
@@ -2730,15 +2425,15 @@ void mRGBAnimator::EveryLoop(){
 
 
 // Final output, but check for power limit
-void mRGBAnimator::StripUpdate(){
+void mAnimatorLight::StripUpdate(){
 
   // STRIP_SIZE_REPEAT_MAX
 
   // if(settings.strip_size_repeat_animation)
 
   // Calculate output pixel size
-  // uint16_t pixel_output_length = pCONT_iLight->light_size_count;
-  // if(pCONT_iLight->light_size_count>STRIP_SIZE_MAX){
+  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
+  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
   //   pixel_output_length = STRIP_SIZE_MAX;
   // }
   // // Replicate SetPixel for repeated output
@@ -2844,7 +2539,7 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
   //   image.Blt(stripbus, copies * image.PixelCount());
   // }
 
-  stripbus->Show();
+  pCONT_iLight->ShowInterface();
 
 }
 
@@ -2853,19 +2548,19 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 
 
 
-uint8_t mRGBAnimator::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_method){
 
   D_DATA_BUFFER_CLEAR();
   pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr,
     PSTR("{"
       "\"" "ledout"       "\":%d,"
-      "\"" "pCONT_iLight->light_size_count"        "\":%d,"
+      "\"" "pCONT_iLight->settings.light_size_count"        "\":%d,"
       "\"" "STRIP_SIZE_MAX"          "\":%d,"
       "\"" "animator_strip_size"  "\":%d,"
       "\"" "ANIMATOR_SIZE_MAX"         "\":%d"
     "}"),
     ledout.length,
-    pCONT_iLight->light_size_count,
+    pCONT_iLight->settings.light_size_count,
     STRIP_SIZE_MAX,
     animator_strip_size,
     ANIMATOR_SIZE_MAX
@@ -2880,7 +2575,7 @@ uint8_t mRGBAnimator::ConstructJSON_Settings(uint8_t json_method){
 
 
 
-uint8_t mRGBAnimator::ConstructJSON_Animation(uint8_t json_method){
+uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Animation"));
@@ -2899,8 +2594,8 @@ uint8_t mRGBAnimator::ConstructJSON_Animation(uint8_t json_method){
   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
   //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
   //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms.val;
-  //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms.val,1000);
-  //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms.val;
+  //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
+  //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
   //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
   //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
   //   transitionobj[D_JSON_ORDER] = GetTransitionOrderName();
@@ -2920,7 +2615,7 @@ uint8_t mRGBAnimator::ConstructJSON_Animation(uint8_t json_method){
 
 
 
-uint8_t mRGBAnimator::ConstructJSON_Ambilight(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
   // Awaiting total redesign
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -2944,13 +2639,13 @@ uint8_t mRGBAnimator::ConstructJSON_Ambilight(uint8_t json_level){
 
 
 
-uint8_t mRGBAnimator::ConstructJSON_State(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level){
 
-  uint8_t numpixels = pCONT_iLight->light_size_count<100?pCONT_iLight->light_size_count:100;
+  uint8_t numpixels = pCONT_iLight->settings.light_size_count<100?pCONT_iLight->settings.light_size_count:100;
   RgbTypeColor c;
   
   JsonBuilderI->Start();  
-    JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->light_size_count);
+    JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
     JsonBuilderI->Array_Start("rgb");
     for(int i=0;i<numpixels;i++){
       RgbTypeColor c = GetPixelColor(i);
@@ -2966,26 +2661,26 @@ uint8_t mRGBAnimator::ConstructJSON_State(uint8_t json_level){
 
   Tasker_Override_Forcing_Variables_Testing();
   // pCONT_iLight->_briRGB = 255;
-  // flashersettings.function = FLASHER_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID;//FLASHER_FUNCTION_PULSE_RANDOM_ON
-  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
-  // pCONT_iLight->animation.transition.rate_ms.val = 400; // not sure if this will work? I probably have to force a check somewhere
+  // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_EFFECTS_ID;
+  // pCONT_iLight->animation.transition.rate_ms = 400; // not sure if this will work? I probably have to force a check somewhere
   // pCONT_iLight->animation.transition.time_ms.val = 2;
   // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
-  // pCONT_iLight->animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
+  // pCONT_iLight->animation.palette.id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
   // pCONT_iLight->animation.palette_index_range_max_limit = 2;
   // mixer.running_id = 10;
   // mixer.flags.Enabled = false;
 
 
   // pCONT_iLight->_briRGB = 255;
-  // flashersettings.function = FLASHER_FUNCTION_TESTER_ID;//FLASHER_FUNCTION_PULSE_RANDOM_ON
-  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_FLASHER_ID;
-  // pCONT_iLight->animation.transition.rate_ms.val = 400; // not sure if this will work? I probably have to force a check somewhere
+  // flashersettings.function = EFFECTS_FUNCTION_TESTER_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_EFFECTS_ID;
+  // pCONT_iLight->animation.transition.rate_ms = 400; // not sure if this will work? I probably have to force a check somewhere
   // pCONT_iLight->animation.transition.time_ms.val = 350;
   // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
-  // pCONT_iLight->animation.palette_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
+  // pCONT_iLight->animation.palette.id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
   // pCONT_iLight->animation.palette_index_range_max_limit = 2;
   // mixer.running_id = 10;
   // mixer.flags.Enabled = false;
@@ -2994,10 +2689,221 @@ uint8_t mRGBAnimator::ConstructJSON_State(uint8_t json_level){
 
 
 
+void mAnimatorLight::Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
+                                                 RgbcctColor colour_circumference, 
+                                                 uint16_t radius_pixel,
+                                                 uint16_t raduis_size,
+                                                 uint8_t center_repeat_size,
+                                                 bool colour_is_additive,
+                                                 bool values_are_percentage_of_strip_size
+){
+
+
+      RgbcctColor colour_draw = RgbcctColor(0);
+  // animation_colours[index_generate].DesiredColour
+
+        //Draw test background
+         for(uint16_t index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+          animation_colours[index].DesiredColour = RgbcctColor(0,0,30,0,0);//,0,10,0,0);
+        }
+
+        // //Draw test background
+        //  for(uint16_t index=20; index<pCONT_iLight->settings.light_size_count-20; index++ ){
+        //   animation_colours[index].DesiredColour = RgbcctColor(0,0,10,0,0);
+        // }
+
+        // Draw circle
+        // Center pixel, then radius is by precentage of strop size
+        uint16_t index2 = 0;
+        //Get circle start 
+        // uint16_t index_circle_center = 50;
+        float progress = 0;
+        uint16_t start_pixel_position = 0;
+        uint16_t end_pixel_position = 10;
+        RgbcctColor colour_circle_center = RgbcctColor(D_RGB255_ORANGE_LIGHT 0,0);
+        RgbcctColor colour_circle_circumference = RgbcctColor(0,0,0,0,0);
+
+        
+        // AddLog_P(LOG_LEVEL_TEST,PSTR("radius_pixel=%d"),radius_pixel);
+
+        //Make function to draw symbols, by passing colour stream
+        //use signed value to hold index_adjusted
+        int32_t index_generate = 0;
+        uint16_t pixel_position_center, pixel_position_circum, pixel_radius_as_number;
+
+        //Rethink, don't consider the output, just X pixels
+
+        pixel_radius_as_number = 30;
+        uint16_t pixel_center_repeated_as_number = 3; // the repeated colours before blending out
+        pixel_position_center = radius_pixel;
+        pixel_position_circum = radius_pixel+pixel_radius_as_number;
+        for(uint16_t index=0; index<pixel_radius_as_number; index++ ){
+
+          progress = mSupport::mapfloat(index,0,pixel_radius_as_number,0,1);
+
+          //Draw half, larger index side
+          colour_draw = RgbcctColor::LinearBlend(
+                                        colour_circle_center,
+                                        colour_circle_circumference, 
+                                        //RgbColor(255,0,0), RgbColor(0,255,0)
+                                        progress);
+
+                                        
+          Serial.println(colour_draw.R);
+
+          //Only write into colour buffer if valid index. Otherwise, consider this an "overscan"
+          
+          index_generate = radius_pixel+index;  
+          if((index_generate>=0)&&(index_generate<100)){
+            animation_colours[index_generate].DesiredColour += colour_draw;
+          } // if test
+          
+          index_generate = radius_pixel-index;  
+          if((index_generate>=0)&&(index_generate<100)){
+            animation_colours[index_generate].DesiredColour += colour_draw;
+          } // if test
+
+        }
 
 
 
-#endif //USE_MODULE_LIGHTS_ADDRESSABLE
+}
+
+
+void mAnimatorLight::Draw_DesiredColour_LinearGradientMirrored2(
+                                                RgbcctColor colour_center, 
+                                                RgbcctColor colour_circumference, 
+                                                uint16_t radius_pixel,
+                                                uint16_t radius_size, //tail size
+                                                uint8_t center_repeat_size,
+                                                bool colour_is_additive,
+                                                bool values_are_percentage_of_strip_size
+){
+
+  RgbcctColor colour_draw = RgbcctColor(0);
+  // animation_colours[index_generate].DesiredColour
+
+  //Draw test background
+  //   for(uint16_t index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+  //   animation_colours[index].DesiredColour = RgbcctColor(0);//,0,30,0,0);//,0,10,0,0);
+  // }
+
+  // //Draw test background
+  //  for(uint16_t index=20; index<pCONT_iLight->settings.light_size_count-20; index++ ){
+  //   animation_colours[index].DesiredColour = RgbcctColor(0,0,10,0,0);
+  // }
+
+  // Draw circle
+  // Center pixel, then radius is by precentage of strop size
+  float progress = 0;
+  int32_t index_generate = 0;
+  
+  uint16_t pixel_index_lower = radius_pixel-center_repeat_size;
+  uint16_t pixel_index_upper = radius_pixel+center_repeat_size;
+
+  // Draw repeated center region
+  for(uint16_t index=0; index<radius_size; index++ ){
+
+    index_generate = radius_pixel+index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour += colour_draw; } // if test
+
+    index_generate = radius_pixel-index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour += colour_draw; } // if test
+
+  }
+
+  // Draw tails
+  for(uint16_t index=0; index<radius_size; index++ ){
+
+    progress = mSupport::mapfloat(index,0,radius_size,0,1);
+
+    //Draw half, larger index side
+    colour_draw = RgbcctColor::LinearBlend(colour_center, colour_circumference, progress);
+
+    
+    index_generate = pixel_index_lower+index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour += colour_draw; } // if test
+    
+    index_generate = pixel_index_upper-index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour += colour_draw; } // if test
+
+  }
+
+}
+
+void mAnimatorLight::Remove_DesiredColour_LinearGradientMirrored(
+                                                RgbcctColor colour_center, 
+                                                RgbcctColor colour_circumference, 
+                                                uint16_t radius_pixel,
+                                                uint16_t radius_size, //tail size
+                                                uint8_t center_repeat_size,
+                                                bool colour_is_additive,
+                                                bool values_are_percentage_of_strip_size
+){
+
+  RgbcctColor colour_draw = RgbcctColor(0);
+  // animation_colours[index_generate].DesiredColour
+
+  //Draw test background
+  //   for(uint16_t index=0; index<pCONT_iLight->settings.light_size_count; index++ ){
+  //   animation_colours[index].DesiredColour = RgbcctColor(0);//,0,30,0,0);//,0,10,0,0);
+  // }
+
+  // //Draw test background
+  //  for(uint16_t index=20; index<pCONT_iLight->settings.light_size_count-20; index++ ){
+  //   animation_colours[index].DesiredColour = RgbcctColor(0,0,10,0,0);
+  // }
+
+  // Draw circle
+  // Center pixel, then radius is by precentage of strop size
+  float progress = 0;
+  int32_t index_generate = 0;
+  
+  uint16_t pixel_index_lower = radius_pixel-center_repeat_size;
+  uint16_t pixel_index_upper = radius_pixel+center_repeat_size;
+
+  // Draw repeated center region
+  for(uint16_t index=0; index<radius_size; index++ ){
+
+    index_generate = radius_pixel+index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour -= colour_draw; } // if test
+
+    index_generate = radius_pixel-index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour -= colour_draw; } // if test
+
+  }
+
+  // Draw tails
+  for(uint16_t index=0; index<radius_size; index++ ){
+
+    progress = mSupport::mapfloat(index,0,radius_size,0,1);
+
+    //Draw half, larger index side
+    colour_draw = RgbcctColor::LinearBlend(colour_center, colour_circumference, progress);
+
+    
+    index_generate = pixel_index_lower+index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour -= colour_draw; } // if test
+    
+    index_generate = pixel_index_upper-index;  
+    if((index_generate>=0)&&(index_generate<100)){ animation_colours[index_generate].DesiredColour -= colour_draw; } // if test
+
+  }
+
+}
+
+
+// Adds colour with boundary checks
+void mAnimatorLight::DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index){
+
+  // animation_colours[index_generate].DesiredColour
+
+
+}
+
+
+
+#endif //USE_MODULE_LIGHTS_ANIMATOR
 
 
 

@@ -1,6 +1,6 @@
-#include "mRGBAnimator.h"
+#include "mAnimatorLight.h"
 
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
 /*******************************************************************************************************************
@@ -11,7 +11,7 @@
 
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
 
-// void mRGBAnimator::init_NotificationPanel(){
+// void mAnimatorLight::init_NotificationPanel(){
 
 //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
 //     notif.flags.fForcePanelUpdate = true; //clear presets
@@ -28,8 +28,8 @@
 
 // } //end "init_NotificationPanel"
 
-// //void mRGBAnimator::SubTask_HeatingPanel(){
-// void mRGBAnimator::SubTask_NotificationPanel(){
+// //void mAnimatorLight::SubTask_HeatingPanel(){
+// void mAnimatorLight::SubTask_NotificationPanel(){
 
 //   if(mTime::TimeReached(&notif.tSaved.ForceUpdate,120000)||(notif.flags.fForcePanelUpdate)){
 //     notif.flags.fForcePanelUpdate = true;
@@ -192,12 +192,12 @@
 // /** Sets to control per pixel for notification purposes. Examples of setting:
 //  * {"pixel_num":[0],"hue":[0],"brt":[0],  "flasher_ms":[0]  ,"pulser_ms":[1]}
 //  * {"pixel_num":[0,1],"hue":[0],"brt":[0],"flasher_secs":[0],"pulser_secs":[1]}
-//  * {"pixel_num":0,"hue":[0],"brt":[0],    D_JSON_FLASHER:[0]}
-//  * {"pixel_num":"all","hue":[0],"brt":[0],D_JSON_FLASHER:[0]}
+//  * {"pixel_num":0,"hue":[0],"brt":[0],    D_JSON_EFFECTS:[0]}
+//  * {"pixel_num":"all","hue":[0],"brt":[0],D_JSON_EFFECTS:[0]}
 //  * 
 //  * 
 //  * */
-// void mRGBAnimator::parsesub_NotificationPanel(JsonObjectConst obj){ 
+// void mAnimatorLight::parsesub_NotificationPanel(JsonObjectConst obj){ 
 
 //    // Create local dereferenced variable
 //   // JsonObject obj = (*_obj); 
@@ -233,7 +233,7 @@
 //     }white;
 //     #endif
 //     // Set blink mode with val being period
-//     struct FLASHER{
+//     struct EFFECTS{
 //       uint16_t val[STRIP_NOTIFICATION_SIZE];
 //       uint8_t found_idx=0;
 //     }flasher;
@@ -494,29 +494,29 @@
   
 
 //   /**************************************************************************************************
-//   FLASHER: formats "slow/fast",1,[1] (string,int,array of ints)
+//   EFFECTS: formats "slow/fast",1,[1] (string,int,array of ints)
 //   ***************************************************************************************************/
 
-//   if(!obj[D_JSON_FLASHER].isNull()){
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_FLASHER));  
+//   if(!obj[D_JSON_EFFECTS].isNull()){
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_EFFECTS));  
 //     // Arrays
-//     if(obj[D_JSON_FLASHER].is<JsonArray>()){   
-//       JsonArrayConst array = obj[D_JSON_FLASHER];
+//     if(obj[D_JSON_EFFECTS].is<JsonArray>()){   
+//       JsonArrayConst array = obj[D_JSON_EFFECTS];
 //       for(JsonVariantConst v : array) {
 //         int val = v.as<int>();
 //         parsed.flasher.val[parsed.flasher.found_idx++] = val;
-//         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER " JsonArray " " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
+//         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_EFFECTS " JsonArray " " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
 //       }
 //       data_buffer.isserviced++;
 //     }else
-//     if(obj[D_JSON_FLASHER].is<int>()){
-//       int val = obj[D_JSON_FLASHER];
+//     if(obj[D_JSON_EFFECTS].is<int>()){
+//       int val = obj[D_JSON_EFFECTS];
 //       parsed.flasher.val[parsed.flasher.found_idx++] = val;
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER " int" " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_EFFECTS " int" " [i%d:v%d]"),parsed.flasher.found_idx-1,val);    
 //       data_buffer.isserviced++;
 //     }else{
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_FLASHER "Not Found"));
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_EFFECTS "Not Found"));
 //       #endif
 //     }
 //   } //end flasher
@@ -789,7 +789,7 @@
 
 // } // END FUNCTION
 
-// const char* mRGBAnimator::GetNotificationModeNamebyID(uint8_t id, char* buffer){
+// const char* mAnimatorLight::GetNotificationModeNamebyID(uint8_t id, char* buffer){
 //   // return 
 //   //     (id == NOTIF_MODE_OFF_ID          ? D_NOTIF_MODE_OFF_NAME_CTR  :
 //   //     (id == NOTIF_MODE_STATIC_OFF_ID   ? D_NOTIF_MODE_STATIC_OFF_NAME_CTR :
@@ -801,7 +801,7 @@
 //   //     "NoMatch")))))));
 //   return WARNING_NOTHANDLED_CTR;
 // }
-// int8_t mRGBAnimator::GetNotificationModeIDbyName(const char* c){
+// int8_t mAnimatorLight::GetNotificationModeIDbyName(const char* c){
 //   if(c=='\0'){ 
 //     return -1;
 //   }
@@ -832,7 +832,7 @@
 // }
 
 // // Update struct that shows overview, always sends
-// uint8_t mRGBAnimator::ConstructJSON_Notifications(uint8_t json_level){
+// uint8_t mAnimatorLight::ConstructJSON_Notifications(uint8_t json_level){
 
 //   #ifdef ENABLE_LOG_LEVEL_DEBUG
 //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Notifications"));
@@ -892,7 +892,7 @@
 
 
 
-#endif //USE_MODULE_LIGHTS_ADDRESSABLE
+#endif //USE_MODULE_LIGHTS_ANIMATOR
 
 
 

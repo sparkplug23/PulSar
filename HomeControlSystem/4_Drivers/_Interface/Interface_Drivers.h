@@ -199,8 +199,8 @@
 
 
 //     // OPTIONAL: Assign default values here.
-//     // char wifiSSID[32];// = "Skynet2400"; // Leave unset for wireless autoconfig. Note that these values will be lost
-//     // char wifiPass[64];// = "af4d8bc9ab"; // when updating, but that's probably OK because they will be saved in EEPROM.
+//     // char wifiSSID[32];// = ""; // Leave unset for wireless autoconfig. Note that these values will be lost
+//     // char wifiPass[64];// = ""; // when updating, but that's probably OK because they will be saved in EEPROM.
 
 //     // ////////////////////////////////////////////////////////////////////////////////////////////////////
 //     // // These defaults may be overwritten with values saved by the web interface

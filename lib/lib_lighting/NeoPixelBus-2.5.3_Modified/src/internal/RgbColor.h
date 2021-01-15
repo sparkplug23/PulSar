@@ -26,6 +26,7 @@ License along with NeoPixel.  If not, see
 #pragma once
 
 #include <Arduino.h>
+#include "lib8tion/math8.h"
 
 struct HslColor;
 struct HsbColor;
@@ -85,6 +86,40 @@ struct RgbColor
     {
     };
 
+
+
+   /// add one RGB to another, saturating at 0xFF for each channel
+    inline RgbColor& operator+= (const RgbColor& rhs )
+    {
+        // Serial.println("operator+= (const RgbcctColor& rhs )");
+        // delay(4000);
+        R = qadd8( R, rhs.R);
+        G = qadd8( G, rhs.G);
+        B = qadd8( B, rhs.B);
+        // WW = qadd8( WW, rhs.WW);
+        // WC = qadd8( WC, rhs.WC);
+        return *this;
+    }
+
+
+
+   /// add one RGB to another, saturating at 0xFF for each channel
+    inline RgbColor& operator-= (const RgbColor& rhs )
+    {
+        // Serial.println("operator+= (const RgbcctColor& rhs )");
+        // delay(4000);
+        R = qsub8( R, rhs.R);
+        G = qsub8( G, rhs.G);
+        B = qsub8( B, rhs.B);
+        // WW = qadd8( WW, rhs.WW);
+        // WC = qadd8( WC, rhs.WC);
+        return *this;
+    }
+
+
+
+
+
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
@@ -110,6 +145,7 @@ struct RgbColor
     // delta - (0-255) the amount to dim the color
     // ------------------------------------------------------------------------
     void Darken(uint8_t delta);
+    void DarkenDivided(uint8_t dividor);
 
     // ------------------------------------------------------------------------
     // Lighten will adjust the color by the given delta toward white

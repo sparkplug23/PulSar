@@ -485,14 +485,14 @@ void mNextionPanel::WebSave_NextionSettings(void)
   //         animation.palette = arg_value;
   //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteName());
   //       break;
-  //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
+  //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
+  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
   //         flashersettings.function = arg_value;  
-  //         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;  //restart animation/function
+  //         flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;  //restart animation/function
   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
+  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
   //         mixer.running_id = arg_value;          
   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
   //       break;

@@ -1427,7 +1427,7 @@ int mHeating::mapHeatingTempToBrightness(int temp){
 // Send all water sensors by [temp,huebytemp(0-360),brightnessbytemp(0-100)]
 // ds:{temp:0,hue:0,bright:0},
 // us:{temp:0,hue:0,bright:0},
-// FLASHER to be send seperate when programs change state
+// EFFECTS to be send seperate when programs change state
 uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
 
   // StaticJsonDocument<800> doc;
@@ -1469,10 +1469,10 @@ uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
   //     json1[D_JSON_RGB] = tmpctr;
 
   //     switch(device_id){
-  //       case ID_DB18_DS: json1[D_JSON_FLASHER] = GetHeatingRelay(DEVICE_DS_ID); break;
-  //       case ID_DB18_US: json1[D_JSON_FLASHER] = GetHeatingRelay(DEVICE_US_ID); break;
-  //       case ID_DB18_WB: json1[D_JSON_FLASHER] = GetHeatingRelay(DEVICE_WB_ID); break;
-  //       case ID_DB18_IH: json1[D_JSON_FLASHER] = GetHeatingRelay(DEVICE_IH_ID); break;
+  //       case ID_DB18_DS: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_DS_ID); break;
+  //       case ID_DB18_US: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_US_ID); break;
+  //       case ID_DB18_WB: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_WB_ID); break;
+  //       case ID_DB18_IH: json1[D_JSON_EFFECTS] = GetHeatingRelay(DEVICE_IH_ID); break;
   //       default: break; //nothing
   //     }
   //   }

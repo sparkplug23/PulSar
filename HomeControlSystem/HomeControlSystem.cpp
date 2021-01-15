@@ -164,7 +164,7 @@ Flash: [=====     ]  49.8% (used 510260 bytes from 1023984 bytes)
   #ifdef USE_MODULE_LIGHTS_INTERFACE
     mInterfaceLight mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
     mRGBAnimator mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
@@ -279,7 +279,7 @@ void init_class_instances(){
   #ifdef USE_MODULE_LIGHTS_INTERFACE
     pCONT-> mil = &mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
     pCONT-> mrgbani = &mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM

@@ -15,7 +15,7 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
     break;
 
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
-      // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      // #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // pCONT_ladd->
       WebAppend_Root_Draw_Table();
     
@@ -30,7 +30,7 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
     
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
-      //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_FLASHER_ID){
+      //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_EFFECTS_ID){
         WebAppend_Root_RGBPalette();
       //}
       WebAppend_Root_Sliders();  //move webui stuff into here, as "scenes" will soon be replaced by colour[5].. make it a struct, but read/write using bytes when need by pointer of struct
@@ -61,9 +61,11 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 
 //  pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
 
-  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(mPaletteI->palettelist.ptr));
 
-  HsbColor hsb_current = HsbColor(RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
+  HsbColor hsb_current = HsbColor(0);//RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
+
+  // GetColourFromPalette
   
   BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
     "hue",               
@@ -102,7 +104,8 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     "brt_sldr",              
     D_JSON_BRIGHTNESS_RGB,
     0, 100,  // Range 0/1 to 100% 
-    getBriRGB()
+
+    getBriRGB_Global()
   ); 
 
 
@@ -147,7 +150,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
     //   "pwm_cbrt"
     // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-    if(getColorMode() & LCM_CT){
+    if(rgbcct_controller.getColorMode() & LCM_CT){
       BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
         "cct_temp",               
         "col_sldr",
@@ -155,7 +158,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
         "cct_temp",              
         D_JSON_CCT_TEMP,
         153, 500,        // Range color temperature
-        getCT()
+       rgbcct_controller.getCT()
       ); 
       BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
         "cct_brt",               
@@ -164,7 +167,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
         "cct_brt",              
         D_JSON_BRIGHTNESS_CCT,
         0, 100,  // Range 0/1 to 100% 
-        getBriCT()
+        rgbcct_controller.getBriCT()
       ); 
     }
 
@@ -173,7 +176,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   // #endif
 
 
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      #ifdef USE_MODULE_LIGHTS_ANIMATOR
   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
                               100/2,
@@ -182,7 +185,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              getBriRGB() ? D_JSON_ON : D_JSON_OFF //make this a state function
+                              rgbcct_controller.getBriRGB() ? D_JSON_ON : D_JSON_OFF //make this a state function
                               //mSupport::GetStateCtr_P()
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
@@ -202,7 +205,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
   #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
   
-   #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+   #endif // USE_MODULE_LIGHTS_ANIMATOR
 
 }
 
@@ -210,18 +213,18 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 void mInterfaceLight::WebAppend_Root_RGBPalette()
 {
 
-  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 
-  uint8_t length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length
-  uint8_t pal_length = pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr); //pixelsinmap + name + length
+  uint8_t length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
+  uint8_t pal_length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
   
   JsonBuilderI->Array_Start("rgb_pal_title");// Class name
     JsonBuilderI->Level_Start();
     char title_ctr[30];
-    if(pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
-      JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
+    if(mPaletteI->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
+      JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""), mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
     }else{
-      JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr));
+      JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
     }
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
@@ -246,7 +249,7 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
       int16_t pixel_position = -2;
       for (uint16_t i= 0; i < length;i++){
         if(i < pal_length){
-          c = pCONT_iLight->GetColourFromPalette(pCONT_iLight->palettelist.ptr,i,&pixel_position);
+          c = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,i,&pixel_position);
         }else{      
           c = RgbColor(0);//default black
         }
@@ -278,7 +281,7 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
     // JsonBuilderI->Level_End();
 
 
-    HsbColor hsb = RgbColor(tasint_colour.R,tasint_colour.G,tasint_colour.B);
+    HsbColor hsb = RgbColor(active_rgbcct_colour_p->R,active_rgbcct_colour_p->G,active_rgbcct_colour_p->B);
 
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",1);
@@ -334,7 +337,7 @@ void mInterfaceLight::Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request
 void mInterfaceLight::WebAppend_Root_Draw_Table(){
 
   WebAppend_Root_Draw_RGBLive();
-  // if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
     WebAppend_Root_Draw_RGBPalette();
   // }
   WebAppend_Root_Draw_PaletteSelect_Placeholder();
@@ -380,20 +383,20 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
       
       char buffer[20];
       
-      for (uint8_t row_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID; row_id < pCONT_iLight->PALETTELIST_VARIABLE_USER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID; row_id < mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 
-          pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
+          mPaletteI->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
         );
       }
       BufferWriterI->Append_P(PSTR("</optgroup>"));
       BufferWriterI->Append_P(PSTR("<optgroup label='Preset'>"));
-      for (uint8_t row_id = pCONT_iLight->PALETTELIST_VARIABLE_USER_LENGTH_ID; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID; row_id < mPaletteI->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 
-          pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
+          mPaletteI->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
         );
       }
       BufferWriterI->Append_P(PSTR("</optgroup>"));

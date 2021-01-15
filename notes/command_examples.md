@@ -39,6 +39,33 @@
   }
 }
 
+{
+  "colour_order":"GRB",
+  "ColourPalette":10,
+  "PaletteEdit": {
+    "ColourPalette": 10,
+    "Data": [1,2,3,4,5]
+  },
+  "AnimationMode":"Effects",
+  "Effects":{"Function":1},
+  "BrightnesRGB":100,
+  "Transition":{"RateMs":1000,"TimeMs":1000,"Order":"InOrder"}
+}
 
 
 
+
+{
+  "colour_order":"GRB",
+  "ColourPalette":10,
+  "Brightness":100,
+  "PaletteEdit": {
+    "ColourPalette": 10,
+    "Data": [25,2,0,5,5]
+  },
+  "AnimationMode":"Effects",
+  "Effects":{"Function":8},
+  "BrightnesRGB":100,
+  "BrightnessCT":10,
+  "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
+}

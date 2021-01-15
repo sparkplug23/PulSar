@@ -75,10 +75,13 @@ uint8_t mTaskerManager::Instance_Init(){
    * Lights
    * */
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-    if(mil == nullptr){ mil = new mInterfaceLight(); }
+    if(minterface_light == nullptr){ minterface_light = new mInterfaceLight(); }
   #endif  
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    if(mlights_animator == nullptr){ mlights_animator = new mAnimatorLight();}
+  #endif 
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    if(mrgbani == nullptr){ mrgbani = new mRGBAnimator();}
+    if(mlights_addressable == nullptr){ mlights_addressable = new mAddressableLight();}
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
     if(mlights_pwm == nullptr){ mlights_pwm = new mPWMLight(); }
@@ -280,6 +283,9 @@ uint8_t mTaskerManager::InitClassList(){
    * */
   #ifdef D_MODULE_LIGHTS_INTERFACE_ID
     module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_INTERFACE_ID;
+  #endif
+  #ifdef D_MODULE_LIGHTS_ANIMATOR_ID
+    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_ANIMATOR_ID;
   #endif  
   #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
     module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_ADDRESSABLE_ID;
@@ -350,11 +356,22 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #ifdef USE_MODULE_CORE_WEBSERVER
     if(mweb==nullptr){ return false; }
   #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    if(mrgbani==nullptr){ return false; }
-  #endif
+
+  //Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-    if(mil==nullptr){ return false; }
+    if(minterface_light==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    if(mlights_animator==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+    if(mlights_addressable==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_LIGHTS_PWM
+    if(mlights_pwm==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+    if(mlights_wled==nullptr){ return false; }
   #endif
 
   // Sensor
@@ -717,10 +734,13 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
        * Lights
        * */
       #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-        case D_MODULE_LIGHTS_INTERFACE_ID:       result = mil->Tasker(function); break;
+        case D_MODULE_LIGHTS_INTERFACE_ID:       result = minterface_light->Tasker(function); break;
+      #endif
+      #ifdef D_MODULE_LIGHTS_ANIMATOR_ID
+        case D_MODULE_LIGHTS_ANIMATOR_ID:     result = mlights_animator->Tasker(function); break;
       #endif
       #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-        case D_MODULE_LIGHTS_ADDRESSABLE_ID:     result = mrgbani->Tasker(function); break;
+        case D_MODULE_LIGHTS_ADDRESSABLE_ID:     result = mlights_addressable->Tasker(function); break;
       #endif
       #ifdef D_MODULE_LIGHTS_PWM_ID
         case D_MODULE_LIGHTS_PWM_ID:     result = mlights_pwm->Tasker(function); break;

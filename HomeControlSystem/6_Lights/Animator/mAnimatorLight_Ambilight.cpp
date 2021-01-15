@@ -1,6 +1,6 @@
-#include "mRGBAnimator.h"
+#include "mAnimatorLight.h"
 
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
 #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
@@ -12,7 +12,7 @@
 ********************************************************************************************************************/
 
 // Limit ambilight to addressible type, else I will just use "scene"
-void mRGBAnimator::init_Ambilight(){
+void mAnimatorLight::init_Ambilight(){
 
   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
@@ -30,7 +30,7 @@ void mRGBAnimator::init_Ambilight(){
 
 }
 
-void mRGBAnimator::SubTask_Ambilight_Main(){
+void mAnimatorLight::SubTask_Ambilight_Main(){
 
   // Add mode to allow orientations, for when screens rotate so they respect top/bottom
 
@@ -66,7 +66,7 @@ void mRGBAnimator::SubTask_Ambilight_Main(){
 } // END function
 
 
-void mRGBAnimator::Ambilight_Sides(){
+void mAnimatorLight::Ambilight_Sides(){
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::Ambilight_Sides()"));
   #endif
@@ -111,7 +111,7 @@ void mRGBAnimator::Ambilight_Sides(){
 }
 
 
-// void mRGBAnimator::parsesub_ModeAmbilight(){
+// void mAnimatorLight::parsesub_ModeAmbilight(){
 
 //    // Create local dereferenced variable
 //   // JsonObject obj = (*_obj); 
@@ -323,7 +323,7 @@ void mRGBAnimator::Ambilight_Sides(){
 
 // //     pCONT->mso->MessagePrint("ambilightsettings.colour.found_idx");
 // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// //     //pCONT_iLight->light_size_count
+// //     //pCONT_iLight->settings.light_size_count
 // //     //ambilightsettings.colour.found_idx
 // //     for(int i=0;i<index;i++){
 // //         SetPixelColor(i, RgbColor(ambilightsettings.colour.rgb[i].R,ambilightsettings.colour.rgb[i].G,ambilightsettings.colour.rgb[i].B));
@@ -394,7 +394,7 @@ void mRGBAnimator::Ambilight_Sides(){
 // //     }
 
 // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// //     //pCONT_iLight->light_size_count
+// //     //pCONT_iLight->settings.light_size_count
 // //     //ambilightsettings.colour.found_idx
 // //     //  for(int i=0;i<ambilightsettings.colour.found_idx;i++){
 // //     //    SetPixelColor(i,RgbColor(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
@@ -478,7 +478,7 @@ void mRGBAnimator::Ambilight_Sides(){
 // //     }
 
 // //     pCONT->mso->MessagePrintln(ambilightsettings.colour.found_idx);
-// //     //pCONT_iLight->light_size_count
+// //     //pCONT_iLight->settings.light_size_count
 // //     //ambilightsettings.colour.found_idx
 // //     // for(int i=0;i<ambilightsettings.colour.found_idx;i++){
 // //     //   mrgbneo_ani->setPixelColor(i,mrgbneo_ani->Color(ambilightsettings.colour.r[i],ambilightsettings.colour.g[i],ambilightsettings.colour.b[i]));    //turn every third pixel on
@@ -534,7 +534,7 @@ void mRGBAnimator::Ambilight_Sides(){
 
 
 
-#endif //USE_MODULE_LIGHTS_ADDRESSABLE
+#endif //USE_MODULE_LIGHTS_ANIMATOR
 
 
 

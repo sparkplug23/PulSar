@@ -447,7 +447,7 @@ enum FX_MODES{
   FX_MODE_PERCENT,
   // One colour changes
   FX_MODE_RANDOM_COLOR,
-  // Wipe
+  // Wipe/Sweep/Runners 
   FX_MODE_COLOR_WIPE, 
   FX_MODE_COLOR_WIPE_RANDOM,
   FX_MODE_COLOR_SWEEP,

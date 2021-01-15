@@ -1721,7 +1721,89 @@ int mSupport::GetDListIDbyNameCtr(char* destination, size_t destination_size, co
 }
 
 
+/**
+ * New method to allow command names to have multiple options, if seperated by "|"
+ * A related function will also allow retrieving just the first option name, IF multiple exists
+ * */
+int8_t mSupport::GetCommandID( const char* needle, const char* haystack, char* destination, size_t destination_size)
+{
+  // Returns -1 of not found
+  // Returns index and command if found
+  int result = -1;
+  // const char* read = haystack;
+  // char* write = destination;
 
+  // while (true) {
+  //   result++;
+  //   size_t size = destination_size -1;
+  //   write = destination;
+  //   char ch = '.';
+  //   while ((ch != '\0') && (ch != '|')) {
+  //     // ch = pgm_read_byte(read++);
+  //     ch = *read; // untested
+  //     read++;
+  //     if (size && (ch != '|'))  {
+  //       *write++ = ch;
+  //       size--;
+  //     }
+  //   }
+  //   *write = '\0';
+  //   if (!strcasecmp(needle, destination)) {
+  //     break;
+  //   }
+  //   if (0 == ch) {
+  //     result = -1;
+  //     break;
+  //   }
+  // }
+  return result;
+
+}
+/**
+ * Returns true or false if the command exists
+ * */
+bool mSupport::CheckCommand_P(const char* needle, const char* haystack)
+{
+  return GetCommandID_P(needle, haystack)>=0;
+}
+int8_t mSupport::GetCommandID_P(const char* needle, const char* haystack, char* destination, size_t destination_size)
+{
+  // Returns -1 of not found
+  // Returns index and command if found
+  int result = -1;
+  const char* read = haystack;
+  char* write = destination;
+  //tmp fix, internal buffer to be removed
+  if(destination == nullptr){
+    char buffer_tmp[50];
+    destination = buffer_tmp;
+    destination_size = 50;
+  }
+
+  while (true) {
+    result++;
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+    while ((ch != '\0') && (ch != '|')) {
+      ch = pgm_read_byte(read++);
+      if (size && (ch != '|'))  {
+        *write++ = ch;
+        size--;
+      }
+    }
+    *write = '\0';
+    if (!strcasecmp(needle, destination)) {
+      break;
+    }
+    if (0 == ch) {
+      result = -1;
+      break;
+    }
+  }
+  return result;
+
+}
 
 
 
@@ -1760,6 +1842,8 @@ int mSupport::GetCommandCode(char* destination, size_t destination_size, const c
 
 
 
+
+
 int8_t mSupport::GetStateNumber(const char *state_text)
 {
   char command[50];
@@ -1767,20 +1851,19 @@ int8_t mSupport::GetStateNumber(const char *state_text)
 
   if (GetCommandCode(command, sizeof(command), state_text, kOptionOff) >= 0) {
     state_number = STATE_NUMBER_OFF_ID;
-  }
-  else if (GetCommandCode(command, sizeof(command), state_text, kOptionOn) >= 0) {
+  }else 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionOn) >= 0) {
     state_number = STATE_NUMBER_ON_ID;
-  }
-  else if (GetCommandCode(command, sizeof(command), state_text, kOptionToggle) >= 0) {
+  }else 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionToggle) >= 0) {
     state_number = STATE_NUMBER_TOGGLE_ID;
-  }
-  else if (GetCommandCode(command, sizeof(command), state_text, kOptionBlink) >= 0) {
+  }else 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionBlink) >= 0) {
     state_number = STATE_NUMBER_BLINK_ID;
-  }
-  else if (GetCommandCode(command, sizeof(command), state_text, kOptionBlinkOff) >= 0) {
+  }else 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionBlinkOff) >= 0) {
     state_number = STATE_NUMBER_BLINK_OFF_ID;
-  }else{
-    //c_str to number
+  }else{ // c_str to number
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 
@@ -1791,6 +1874,13 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   return state_number;
 
 }
+
+
+
+
+
+
+
 
 
 

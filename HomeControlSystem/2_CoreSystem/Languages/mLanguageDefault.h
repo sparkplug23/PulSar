@@ -208,7 +208,7 @@
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
 //#endif
-//#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+//#ifdef USE_MODULE_LIGHTS_ANIMATOR
   #define D_MODULE_LIGHTS_ADDRESSABLE_CTR              "mRGBAnimator"
   #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "pixels"
 //#endif
@@ -413,8 +413,15 @@
 #define D_ONOFF                 "OnOff"
 #define D_OFFTIME               "Offtime"
 #define D_PASSWORD              "Password"
-#define D_PARSING_NOMATCH       "Parsing Match"
-#define D_PARSING_MATCHED       "Parsing Not Matched"
+#define D_PARSING_NOMATCH       "Parsing NOT Matched "
+
+// #define ENABLE_PARSING_DEBUG_LINE
+
+#ifdef ENABLE_PARSING_DEBUG_LINE
+#define D_PARSING_MATCHED       "Parsing Not Matched" String(__LINE__)
+#else
+#define D_PARSING_MATCHED       "Parsing Matched "
+#endif
 #define D_PORT                  "Port"
 #define D_POWER_FACTOR          "Power Factor"
 #define D_POWERUSAGE            "Power"
@@ -1282,7 +1289,7 @@
 #define D_JSON_DURATION "Duration"
 #define D_JSON_DURATION_RAW "DurationRaw"
 #define D_JSON_ERROR "Error"
-#define D_JSON_FLASHER "Flasher"
+#define D_JSON_EFFECTS "Effects"
 #define D_JSON_FUNCTION "Function"
 
 #define D_JSON_ENABLED "Enabled"
@@ -1446,14 +1453,14 @@
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "GRB"
 
-
+#define D_JSON_PALETTE_EDIT "PaletteEdit"
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 
 
 #define D_JSON_HARDWARE_TYPE "HardwareType"
 #define D_JSON_STRIP_SIZE "LightSize"
-#define D_JSON_RGB_COLOUR_ORDER "colour_order"
+#define D_JSON_RGB_COLOUR_ORDER "ColourOrder"
 #define D_JSON_STRIP_REPEAT "strip_repeat"
 
 #define D_JSON_WS2812       "WS2812"

@@ -28,12 +28,14 @@ License along with NeoPixel.  If not, see
 #include <Arduino.h>
 
 #include "RgbwColor.h"
+#include "lib8tion/math8.h"
 
 struct RgbColor;
 struct RgbwColor;
 struct HslColor;
 struct HsbColor;
 
+#define ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
 // ------------------------------------------------------------------------
 // RgbcctColor represents a color object that is represented by Red, Green, Blue
 // component values and an extra White component.  It contains helpful color 
@@ -128,6 +130,34 @@ struct RgbcctColor
         return (R == B && R == G);
     };
 
+
+   /// add one RgbcctColor to another, saturating at 0xFF for each channel
+    inline RgbcctColor& operator+= (const RgbcctColor& rhs )
+    {
+        R = qadd8( R, rhs.R);
+        G = qadd8( G, rhs.G);
+        B = qadd8( B, rhs.B);
+        WW = qadd8( WW, rhs.WW);
+        WC = qadd8( WC, rhs.WC);
+        return *this;
+    }
+
+
+
+
+   /// add one RgbcctColor to another, saturating at 0xFF for each channel
+    inline RgbcctColor& operator-= (const RgbcctColor& rhs )
+    {
+        R = qsub8( R, rhs.R);
+        G = qsub8( G, rhs.G);
+        B = qsub8( B, rhs.B);
+        WW = qsub8( WW, rhs.WW);
+        WC = qsub8( WC, rhs.WC);
+        return *this;
+    }
+
+
+
     // ------------------------------------------------------------------------
     // Returns if the color components are all zero, the white component maybe 
     // anything
@@ -187,10 +217,56 @@ struct RgbcctColor
     // (0,0,0,0) is black and (255,255,255, 0) and (0,0,0,255) is white
     // Note (255,255,255,255) is extreme bright white
     // ------------------------------------------------------------------------
-    uint8_t R;
-    uint8_t G;
-    uint8_t B;
-    uint8_t WW;
-    uint8_t WC;
+    // enum{
+    // uint8_t R;
+    // uint8_t G;
+    // uint8_t B;
+    // uint8_t WW;
+    // uint8_t WC;
+
+    // Unions allow overlapping of parameters, size of parameters below is only 5 bytes, but can be accessed by multiple ways
+    union {
+		struct {
+            union {
+                uint8_t R;
+                uint8_t red;
+            };
+            union {
+                uint8_t G;
+                uint8_t green;
+            };
+            union {
+                uint8_t B;
+                uint8_t blue;
+            };
+            union {
+                uint8_t WW;
+                uint8_t warm_white;
+            };
+            union {
+                uint8_t WC;
+                uint8_t white_cold;
+            };
+        };
+		uint8_t raw[5];
+	};
+
+    inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    {
+        return raw[x];
+    }
+
+
+#ifdef ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
+
+
+
+
+
+
+
+
+#endif // ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
+
 };
 

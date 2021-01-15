@@ -482,7 +482,7 @@ void mOilFurnace::parse_JSONCommand(JsonObjectConst obj){
 void mOilFurnace::WebAppend_Root_Draw_Table(){
 
   //WebAppend_Root_Draw_RGBLive();
-  // if(animation.mode_id == ANIMATION_MODE_FLASHER_ID){
+  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
   //   WebAppend_Root_Draw_RGBPalette();
   // // }
   // WebAppend_Root_Draw_PaletteSelect_Placeholder();
@@ -505,7 +505,7 @@ void mOilFurnace::WebAppend_Root_Status_Table(){
         case 0: JsonBuilderI->Add("ih","GetAnimationStatusCtr(buffer)"); break;
         // case 1:
         //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
-        //     animation.transition.rate_ms.val/1000, 
+        //     animation.transition.rate_ms/1000, 
         //     animation.transition.time_ms.val/1000
         //   );
         // break;
@@ -536,7 +536,7 @@ void mOilFurnace::WebAppend_Root_Status_Table(){
   
 
   // char colour_button[8];
-  // char button_ids[] = {ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+  // char button_ids[] = {ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
   // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   // ANIMATION_MODE_NOTIFICATIONS_ID, 
   // #endif
@@ -566,7 +566,7 @@ void mOilFurnace::WebAppend_Root_ControlUI(){
   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
   // uint8_t animation_mode_list_ids[] = {
-  //   ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+  //   ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
   //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   //   ANIMATION_MODE_NOTIFICATIONS_ID,
   //   #endif    

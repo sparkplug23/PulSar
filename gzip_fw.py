@@ -11,6 +11,7 @@ def gzip_firmware(source, target, env) -> None:
         print('Not an OTA upload, not GZipping')
         return
         
+    print('ZIPINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNG')
     import gzip
     import io
     import os

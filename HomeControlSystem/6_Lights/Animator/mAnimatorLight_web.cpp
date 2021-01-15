@@ -1,9 +1,9 @@
-#include "mRGBAnimator.h"
+#include "mAnimatorLight.h"
 
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 #ifdef USE_MODULE_CORE_WEBSERVER
 
-int8_t mRGBAnimator::Tasker_Web(uint8_t function){
+int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
   switch(function){    
     case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
@@ -31,17 +31,17 @@ int8_t mRGBAnimator::Tasker_Web(uint8_t function){
 
 }
 
-void mRGBAnimator::WebAppend_Root_ControlUI(){
+void mAnimatorLight::WebAppend_Root_ControlUI(){
 
   char buffer[50];
 
   BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
   uint8_t animation_mode_list_ids[] = {
-    #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-    pCONT_iLight->ANIMATION_MODE_FLASHER_ID, 
-    #endif // ENABLE_PIXEL_FUNCTION_FLASHER
-    pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
+    #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+    pCONT_iLight->ANIMATION_MODE_EFFECTS_ID, 
+    #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+    //pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     ANIMATION_MODE_NOTIFICATIONS_ID,
     #endif    
@@ -66,7 +66,7 @@ void mRGBAnimator::WebAppend_Root_ControlUI(){
 
 
 //append to internal buffer if any root messages table
-void mRGBAnimator::WebAppend_Root_Status_Table(){
+void mAnimatorLight::WebAppend_Root_Status_Table(){
 
   char buffer[50];
   
@@ -77,17 +77,17 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
       switch(row){
         case 0: JsonBuilderI->Add("ih",GetAnimationStatusCtr(buffer, sizeof(buffer))); break;
         case 1:
-          if(!pCONT_iLight->auto_time_off_secs){ //off
+          if(!pCONT_iLight->auto_off_settings.time_decounter_secs){ //off
             JsonBuilderI->Add("ih","Unset");
           }else{
             JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s)\""),
-              pCONT_iLight->auto_time_off_secs,"secs"
+              pCONT_iLight->auto_off_settings.time_decounter_secs,"secs"
             );
           }
         break;
         case 2:
           JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
-            pCONT_iLight->animation.transition.rate_ms.val/1000, 
+            pCONT_iLight->animation.transition.rate_ms/1000, 
             pCONT_iLight->animation.transition.time_ms.val/1000
           );
         break;
@@ -99,8 +99,8 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
         break;
         case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
-        #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-        case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer)); break;
+        #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+        case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
         #endif
         case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
@@ -111,7 +111,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
   
 
   // char colour_button[8];
-  // char button_ids[] = {ANIMATION_MODE_FLASHER_ID, ANIMATION_MODE_SCENE_ID, 
+  // char button_ids[] = {ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
   // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   // ANIMATION_MODE_NOTIFICATIONS_ID, 
   // #endif
@@ -141,9 +141,9 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
 ********************************************************************************************************************/
 
 
-// void mRGBAnimator::WebCommand_Parse(void)
+// void mAnimatorLight::WebCommand_Parse(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mAnimatorLight::WebCommand_Parse"));
 
 //   char tmp[100];
 
@@ -206,7 +206,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
 //   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     pCONT_iLight->animation.palette_id = arg_value;
+//     pCONT_iLight->animation.palette.id = arg_value;
 //     SetRefreshLEDs();
 //   }
 
@@ -214,7 +214,7 @@ void mRGBAnimator::WebAppend_Root_Status_Table(){
 
 
 // Group all these websaves into one handler, separate from webcommand (ie consoles)
-void mRGBAnimator::WebSave_RGBColourSelector(void)
+void mAnimatorLight::WebSave_RGBColourSelector(void)
 {
   
 //   char tmp[100];
@@ -229,17 +229,17 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   if (pCONT_web->pWebServer->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     pCONT_iLight->animation.palette_id = arg_value;
+//     pCONT_iLight->animation.palette.id = arg_value;
 //     update_all = true; //refresh all
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //   }
 
 //   // Secondary edit location, paste to here
 //   //idea: write function that uses id to return pointer to struct
-//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 
 //   // Only continue to write if the palette is editable type
-//   if(!CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr)){
+//   if(!CheckPaletteIsEditable(mPaletteI->palettelist.ptr)){
 //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_ERROR "Palette Not editable, leaving websave function"));
 //     return;
 //   }
@@ -255,16 +255,16 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //       // Colour Add
 //       if(arg_value != COLOUR_MAP_NONE_ID){
 //         arg_value = arg_value < PRESET_COLOUR_MAP_INDEXES_MAX ? arg_value : 0; // Check it doesnt exceed array 
-//         pCONT_iLight->palettelist.ptr->colour_map_id[new_amount++] = arg_value;
+//         mPaletteI->palettelist.ptr->colour_map_id[new_amount++] = arg_value;
 //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d newamount=%d"),arg_ctr,arg_value,new_amount-1);
 //       }else{
 //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%s"),arg_ctr,"COLOUR_MAP_NONE_ID");
-//         pCONT_iLight->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID; //set to unused
+//         mPaletteI->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID; //set to unused
 //       }
 
 //     }else{
 //         //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "SKIPPING hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-//         pCONT_iLight->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID;
+//         mPaletteI->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID;
 //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "NOT hasParam(\"%s\")=%s"),arg_ctr,"COLOUR_MAP_NONE_ID");
 //     }
 
@@ -272,14 +272,14 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 
 //   // if new amount != 0 ie new values, stored new amount
 //   if(new_amount){
-//     pCONT_iLight->palettelist.ptr->colour_map_size = new_amount-1;
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "colour_map_size=%d"),pCONT_iLight->palettelist.ptr->colour_map_size);
+//     mPaletteI->palettelist.ptr->colour_map_size = new_amount-1;
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "colour_map_size=%d"),mPaletteI->palettelist.ptr->colour_map_size);
 //   }
 
 //   // Erase others
-//   for(int erase_id=pCONT_iLight->palettelist.ptr->colour_map_size;erase_id<PALETTELIST_COLOUR_AMOUNT_MAX;erase_id++){
+//   for(int erase_id=mPaletteI->palettelist.ptr->colour_map_size;erase_id<PALETTELIST_COLOUR_AMOUNT_MAX;erase_id++){
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "erase_id %d=%s"),erase_id,"COLOUR_MAP_NONE_ID");
-//     pCONT_iLight->palettelist.ptr->colour_map_id[erase_id] = COLOUR_MAP_NONE_ID; //set to unused
+//     mPaletteI->palettelist.ptr->colour_map_id[erase_id] = COLOUR_MAP_NONE_ID; //set to unused
 //   }
 
 //   memset(tmp,0,sizeof(tmp));
@@ -287,13 +287,13 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   if (pCONT_web->pWebServer->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //     //valid range (change to user "PaletteIsEditable()")
-//     if(pCONT_iLight->palettelist.ptr->id<PALETTELIST_VARIABLE_USER_20_ID){
+//     if(mPaletteI->palettelist.ptr->id<PALETTELIST_VARIABLE_USER_20_ID){
 //       // Copy is variable is string
-//       strlcpy(pCONT_iLight->palettelist.ptr->friendly_name_ctr, 
-//         (!strlen(tmp)) ? pCONT_iLight->palettelist.ptr->friendly_name_ctr : tmp, 
+//       strlcpy(mPaletteI->palettelist.ptr->friendly_name_ctr, 
+//         (!strlen(tmp)) ? mPaletteI->palettelist.ptr->friendly_name_ctr : tmp, 
 //         sizeof(char)*20
 //       );
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%s,%s"),arg_ctr,tmp,pCONT_iLight->palettelist.ptr->friendly_name_ctr);  
+//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%s,%s"),arg_ctr,tmp,mPaletteI->palettelist.ptr->friendly_name_ctr);  
 //     }
 //   }
 
@@ -303,7 +303,7 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 }
 
 
-// void mRGBAnimator::WebSave_RGBControls(AsyncWebServerRequest *request)
+// void mAnimatorLight::WebSave_RGBControls(AsyncWebServerRequest *request)
 // {
 
 
@@ -336,14 +336,14 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
-//   //         pCONT_iLight->animation.transition.rate_ms.val = PROGMEM rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.rate_ms.val);
+//   //         pCONT_iLight->animation.transition.rate_ms = PROGMEM rate_map_secs[arg_value]*1000; //seconds to milliseconds ra"
+//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,pCONT_iLight->animation.transition.rate_ms);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
 //   //         pCONT_iLight->animation.transition.time_ms.val = PROGMEM rate_map_secs[arg_value]*1000; //seconds to milliseconds
 //   //         // If period > rate, increase period to rate
-//   //         pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.time_ms.val>pCONT_iLight->animation.transition.rate_ms.val?pCONT_iLight->animation.transition.rate_ms.val:pCONT_iLight->animation.transition.time_ms.val;
+//   //         pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.time_ms.val>pCONT_iLight->animation.transition.rate_ms?pCONT_iLight->animation.transition.rate_ms:pCONT_iLight->animation.transition.time_ms.val;
 //   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,pCONT_iLight->animation.transition.time_ms.val); 
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD: 
@@ -358,18 +358,18 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE: 
 //   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
-//   //         pCONT_iLight->animation.palette_id = arg_value;
+//   //         pCONT_iLight->animation.palette.id = arg_value;
 //   //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
 //   //       break;
-//   //     #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-//   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_FLASHER: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
+//   //     #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+//   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
+//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 //   //         flashersettings.function = arg_value;  
-//   //         flashersettings.region = FLASHER_REGION_COLOUR_SELECT_ID;  //restart pCONT_iLight->animation/function
+//   //         flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;  //restart pCONT_iLight->animation/function
 //   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"FLASHER");
+//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 //   //         mixer.running_id = arg_value;          
 //   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
 //   //       break;
@@ -396,7 +396,7 @@ void mRGBAnimator::WebSave_RGBColourSelector(void)
  * 
  * 
  * ***********************/
-void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
+void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 {
   //if (!HttpCheckPriviledgedAccess()) { return; }
 
@@ -446,20 +446,20 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
 //   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
-//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
    
 //   // LOAD VALUES 
-//   uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
+//   uint8_t palette_selected_id = mPaletteI->palettelist.ptr->id;
 //   // colours in palette
 //   HsbColor set_colours[20];
 //   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-//     set_colours[i] = preset_colour_map[pCONT_iLight->palettelist.ptr->colour_map_id[i]]; 
+//     set_colours[i] = preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
 
 // // GETCOLOURSFN
 
-//     //if(pCONT_iLight->palettelist.ptr->flags.fColours_from_map){
-//       colour_selected_id[i] = pCONT_iLight->palettelist.ptr->colour_map_id[i];    
+//     //if(mPaletteI->palettelist.ptr->flags.fColours_from_map){
+//       colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
 //     //}else{
 //       // USE * for random colours not within colour_map
 //     //
@@ -510,8 +510,8 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   BufferWriterI->Append_P(HTTP_SCRIPT_MODULE1c, palette_selected_id); //active palette
 
   
-//   element_list_num = CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr) ? 
-//         PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+//   element_list_num = CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
+//         PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(mPaletteI->palettelist.ptr);
 
 //   for (uint8_t menu_id = 0; menu_id < element_list_num; menu_id++) {
 //     BufferWriterI->Append_P(PSTR("sk(%d,%d);"),colour_selected_id[menu_id],menu_id); // active colours
@@ -523,20 +523,20 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
   // BufferWriterI->Append_P(HTTP_FORM_RGB_LOAD_PIXELS);
 
-  // if(CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
+  // if(CheckPaletteIsEditable(&mPaletteI->palettelist.users[pCONT_iLight->animation.palette.id])){
 
   //   BufferWriterI->Append_P(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
   //                             "Edit Name",
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id), //previous name
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             "Enter New Palette Name (maximum 20 characters)",
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id)    // News a new "getfriendlyname option" for when user editable names exist
   //                           );
 
   // }
 
-//     //   pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?
+//     //   mPaletteI->palettelist.ptr->flags.fMapIDs_Type==MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID?
 //     //     GetColourMapNamebyID(colour_selected_id[row_id]):GetEstimatedColourMapNamebyColour()
       
       
@@ -544,7 +544,7 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //     // ID(colour_selected_id[row_id]),
   
 //   // if not users, then only show number of static fields
-//   element_list_num = CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr) ? 
+//   element_list_num = CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
 //         PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(palettelist.ptr);
 
 //   // Send Table
@@ -612,7 +612,7 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //  * Send all needed script asks
 //  * Send all needed javascript asks 
 //  * */
-// void mRGBAnimator::BuildPage_RGBPaletteEditor(char** buffer)
+// void mAnimatorLight::BuildPage_RGBPaletteEditor(char** buffer)
 // {
   
 //   char colour_title_ctr[70];
@@ -623,11 +623,11 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
 //   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
-//   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   //GetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+//   pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
    
 //   // LOAD VALUES 
-//   uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
+//   uint8_t palette_selected_id = mPaletteI->palettelist.ptr->id;
 //   // colours in palette
 //   HsbColor set_colours[20];
 //   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
@@ -636,7 +636,7 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 // // GETCOLOURSFN
 
 //     //if(palettelist.ptr->flags.fColours_from_map){
-//       colour_selected_id[i] = pCONT_iLight->palettelist.ptr->colour_map_id[i];    
+//       colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
 //     //}else{
 //       // USE * for random colours not within colour_map
 //     //
@@ -691,11 +691,11 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
   
 //   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
 //                                                   sizeof(PROGMEM rate_map_secs),
-//                                                   pCONT_iLight->animation.transition.rate_ms.val/1000
+//                                                   pCONT_iLight->animation.transition.rate_ms/1000
 //                                                  );
                                          
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-//     pCONT_iLight->animation.transition.rate_ms.val/1000,
+//     pCONT_iLight->animation.transition.rate_ms/1000,
 //     rate_index,
 //     PROGMEM rate_map_secs[rate_index],
 //     sizeof(PROGMEM rate_map_secs)
@@ -736,15 +736,15 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
 //   // // pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_RGB_LOAD_PIXELS);
   
-//   // // if(CheckPaletteIsEditable(&palettelist.users[pCONT_iLight->animation.palette_id])){
+//   // // if(CheckPaletteIsEditable(&palettelist.users[pCONT_iLight->animation.palette.id])){
 
 //   // //   pCONT_web->WSBufferAppend_P2(buffer, HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
 //   // //                             "Edit Name",
-//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
+//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id), //previous name
 //   // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
 //   // //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
 //   // //                             "Enter New Palette Name (maximum 20 characters)",
-//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+//   // //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id)    // News a new "getfriendlyname option" for when user editable names exist
 //   // //                           );
 
 //   // // }
@@ -834,7 +834,7 @@ void mRGBAnimator::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
 
 
-void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
+void mAnimatorLight::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
 {
   // if (!HttpCheckPriviledgedAccess()) { return; }
 
@@ -871,7 +871,7 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
 //  * Send all needed script asks
 //  * Send all needed javascript asks 
 //  * */
-// void mRGBAnimator::BuildPage_RGBLightSettings(char** buffer)
+// void mAnimatorLight::BuildPage_RGBLightSettings(char** buffer)
 // {
   
 
@@ -923,11 +923,11 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
   
 //   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
 //                                                   sizeof(PROGMEM rate_map_secs),
-//                                                   pCONT_iLight->animation.transition.rate_ms.val/1000
+//                                                   pCONT_iLight->animation.transition.rate_ms/1000
 //                                                  );
                                          
 //   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-//   //   pCONT_iLight->animation.transition.rate_ms.val/1000,
+//   //   pCONT_iLight->animation.transition.rate_ms/1000,
 //   //   rate_index,
 //   //   PROGMEM rate_map_secs[rate_index],
 //   //   sizeof(PROGMEM rate_map_secs)
@@ -986,7 +986,7 @@ void mRGBAnimator::HandlePage_RGBLightSettings(AsyncWebServerRequest *request)
 
 
 
-void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *request)
+void mAnimatorLight::HandleParameters_RGBLightSettings(AsyncWebServerRequest *request)
 {
 
   
@@ -1002,12 +1002,12 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
-************ START OF ANIMATION/FLASHER/MIXER DEFINITIONS ********************************************************************************************
+************ START OF ANIMATION/EFFECTS/MIXER DEFINITIONS ********************************************************************************************
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
 
-// #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+// #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
 
 // /******** Page items *****
 //  * 
@@ -1018,7 +1018,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //  *  
 //  * 
 //  * ***********************/
-// void mRGBAnimator::HandleMixerEditor(void)
+// void mAnimatorLight::HandleMixerEditor(void)
 // {
  
 //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_CONFIGURE_LOGGING));
@@ -1034,7 +1034,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //   uint8_t row_id_selected[PALETTELIST_COLOUR_AMOUNT_MAX];
 //   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){row_id_selected[j] = j;}
 
-//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+//   SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 //   uint8_t palette_selected_id = palettelist.ptr->id;
 
 //   /***
@@ -1129,7 +1129,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //   if (pCONT_web->pWebServer->hasParam("fl")) {
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"%s\")"),"fl");
 //     pCONT_web->WSContentBegin(200, CT_PLAIN);
-//     for (uint8_t row_id = 0; row_id <= FLASHER_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//     for (uint8_t row_id = 0; row_id <= EFFECTS_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //       BufferWriterI->Append_P(
 //         HTTP_MODULE_TEMPLATE_REPLACE3, 
 //         row_id, 
@@ -1222,7 +1222,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 //                               (uint8_t)round(pCONT_iLight->animation.transition.time_ms/1000),    // "ld('rgb_controls?pr=1',x3);" // pr = period time
 //                               pCONT_iLight->animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
 //                               pCONT_iLight->animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
-//                               pCONT_iLight->animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
+//                               pCONT_iLight->animation.palette.id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
 //                               flashersettings.function,                             // "ld('rgb_controls?fl=1',x7);" // fl  = flasher  
 //                               mixer.running_id                                 // "ld('rgb_controls?mi=1',x8);" // mi  = mixer running id                          
 //                             ); // Send lists
@@ -1292,14 +1292,14 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 
 
 
-// void mRGBAnimator::WebPage_Root_SendStyle(){
+// void mAnimatorLight::WebPage_Root_SendStyle(){
 
  
  
 
 // }
 
-// void mRGBAnimator::WebPage_Root_SendBody(){
+// void mAnimatorLight::WebPage_Root_SendBody(){
 
 //   WebSendBody_Liveview();
 //   WebSendBody_Palette();
@@ -1308,7 +1308,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 // }
 
 
-// void mRGBAnimator::WebPage_Root_SendStatus(){
+// void mAnimatorLight::WebPage_Root_SendStatus(){
 
 //   /****
 //    *  Show LED power 
@@ -1341,7 +1341,7 @@ void mRGBAnimator::HandleParameters_RGBLightSettings(AsyncWebServerRequest *requ
 
 
 
-void mRGBAnimator::WebPage_Root_SendInformationModule(){
+void mAnimatorLight::WebPage_Root_SendInformationModule(){
 
   #ifdef ADA_TEST
     char str[10];
@@ -1355,7 +1355,7 @@ void mRGBAnimator::WebPage_Root_SendInformationModule(){
 }
 
 
-void mRGBAnimator::WebPage_Root_AddHandlers(){
+void mAnimatorLight::WebPage_Root_AddHandlers(){
   
   /**
    * Root Page 
@@ -1500,7 +1500,7 @@ void mRGBAnimator::WebPage_Root_AddHandlers(){
 
 
   #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
-void mRGBAnimator::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
   
   JsonBuilderI->Start();
     JsonBuilderI->Level_Start("function");
@@ -1514,7 +1514,7 @@ void mRGBAnimator::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *reques
   
 }
 
-void mRGBAnimator::Web_RGBLightSettings_ListOptions(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_RGBLightSettings_ListOptions(AsyncWebServerRequest *request){
   
   JsonBuilderI->Start();    
     WebAppend_RGBLightSettings_FillOptions_Controls();
@@ -1526,7 +1526,7 @@ void mRGBAnimator::Web_RGBLightSettings_ListOptions(AsyncWebServerRequest *reque
 
 
 
-void mRGBAnimator::Web_RGBLightSettings_Draw(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_RGBLightSettings_Draw(AsyncWebServerRequest *request){
         
   if(pCONT_web->RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
@@ -1541,7 +1541,7 @@ void mRGBAnimator::Web_RGBLightSettings_Draw(AsyncWebServerRequest *request){
 } //end function
 
 
-void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
+void mAnimatorLight::WebAppend_RGBLightSettings_Draw_Animation_Options(){
 
   // create command list
   char dlist[200]; memset(dlist,0,sizeof(dlist));
@@ -1598,7 +1598,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Animation_Options(){
 
 }
 
-void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Flasher_Options(){
+void mAnimatorLight::WebAppend_RGBLightSettings_Draw_Flasher_Options(){
 
   JsonBuilderI->Array_Start("container_2");//flasher_options_container");// Class name
     JsonBuilderI->Level_Start();
@@ -1610,7 +1610,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_Flasher_Options(){
   JsonBuilderI->Array_End();
 }
 
-void mRGBAnimator::WebAppend_RGBLightSettings_Draw_PageButtons(){
+void mAnimatorLight::WebAppend_RGBLightSettings_Draw_PageButtons(){
 
   JsonBuilderI->Array_Start("container_3");//page_button_container");// Class name
     JsonBuilderI->Level_Start();
@@ -1639,7 +1639,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_Draw_PageButtons(){
 
 #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 
-void mRGBAnimator::Web_PaletteEditor_Draw(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_PaletteEditor_Draw(AsyncWebServerRequest *request){
         
   if(pCONT_web->RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
@@ -1652,7 +1652,7 @@ void mRGBAnimator::Web_PaletteEditor_Draw(AsyncWebServerRequest *request){
 } //end function
 
 
-void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
+void mAnimatorLight::WebAppend_PaletteEditor_Draw_Editor_Form(){
 
 
   JsonBuilderI->Array_Start("container_1");//animation_options_container");// Class name
@@ -1688,17 +1688,17 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   uint8_t colour_selected_id[PALETTELIST_COLOUR_AMOUNT_MAX];
   for(int j=0;j<PALETTELIST_COLOUR_AMOUNT_MAX;j++){colour_selected_id[j] = random(0,PALETTELIST_COLOUR_AMOUNT_MAX);}
 
-  //GetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
-  pCONT_iLight->SetPaletteListPtrFromID(pCONT_iLight->animation.palette_id);
+  //GetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
   
   // LOAD VALUES 
-  uint8_t palette_selected_id = pCONT_iLight->palettelist.ptr->id;
+  uint8_t palette_selected_id = mPaletteI->palettelist.ptr->id;
   // colours in palette
   HsbColor set_colours[20];
   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-    set_colours[i] = HsbColor(0);//preset_colour_map[pCONT_iLight->palettelist.ptr->colour_map_id[i]]; 
-    //if(pCONT_iLight->palettelist.ptr->flags.fColours_from_map){
-      colour_selected_id[i] = pCONT_iLight->palettelist.ptr->colour_map_id[i];    
+    set_colours[i] = HsbColor(0);//preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
+    //if(mPaletteI->palettelist.ptr->flags.fColours_from_map){
+      colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
     //}else{
       // USE * for random colours not within colour_map
     //
@@ -1711,14 +1711,14 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   pCONT_web->WebAppend_Button2(PSTR("Load Palette"),"loadpixels","bora");
 
 
-  // if(pCONT_iLight->CheckPaletteIsEditable(&pCONT_iLight->palettelist.users[pCONT_iLight->animation.palette_id])){
+  // if(pCONT_iLight->CheckPaletteIsEditable(&mPaletteI->palettelist.users[pCONT_iLight->animation.palette.id])){
   //   JsonBuilderI->AppendBuffer(HTTP_FORM_TEXTBOX_EDIT_VARIABLE_HANDLE, 
   //                             PSTR("Edit Name"),
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id), //previous name
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id), //previous name
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             WEB_HANDLE_RGB_COLOUR_PALETTE_NAME_EDITOR,
   //                             PSTR("Enter New Palette Name (maximum 20 characters)"),
-  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette_id)    // News a new "getfriendlyname option" for when user editable names exist
+  //                             pCONT_iLight->GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id)    // News a new "getfriendlyname option" for when user editable names exist
   //                           );
   // }
 
@@ -1735,8 +1735,8 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   JsonBuilderI->AppendBuffer("%s",PSTR("{t}"));
 
   // if not users, then only show number of static fields
-  element_list_num = pCONT_iLight->CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr) ? 
-        PALETTELIST_COLOUR_AMOUNT_MAX : pCONT_iLight->GetPixelsInMap(pCONT_iLight->palettelist.ptr);
+  element_list_num = pCONT_iLight->CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
+        PALETTELIST_COLOUR_AMOUNT_MAX : mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
 
         element_list_num = 20;
 
@@ -1781,11 +1781,11 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
   //}
       JsonBuilderI->AppendBuffer("%s",PSTR("{t2}"));
 
-      if(pCONT_iLight->palettelist.ptr->flags.fMapIDs_Type!=MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID){
+      if(mPaletteI->palettelist.ptr->flags.fMapIDs_Type!=MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID){
         JsonBuilderI->AppendBuffer( PSTR("<tr>* Indicates colour is not from selected options, showing nearest colour.</tr>"));
       }
 
-      if(pCONT_iLight->CheckPaletteIsEditable(pCONT_iLight->palettelist.ptr)){
+      if(pCONT_iLight->CheckPaletteIsEditable(mPaletteI->palettelist.ptr)){
         JsonBuilderI->AppendBuffer(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE);
       }else{
         JsonBuilderI->AppendBuffer("%s",HTTP_FORM_END_NOSAVE);
@@ -1818,7 +1818,7 @@ void mRGBAnimator::WebAppend_PaletteEditor_Draw_Editor_Form(){
 
 
 
-void mRGBAnimator::Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request){
   
   JsonBuilderI->Start();
     JsonBuilderI->Level_Start("function");
@@ -1833,7 +1833,7 @@ void mRGBAnimator::Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request){
 }
 
 
-void mRGBAnimator::Web_PaletteEditor_ListOptions(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_PaletteEditor_ListOptions(AsyncWebServerRequest *request){
   
   JsonBuilderI->Start();    
     WebAppend_PaletteEditor_FillOptions_Controls();
@@ -1843,7 +1843,7 @@ void mRGBAnimator::Web_PaletteEditor_ListOptions(AsyncWebServerRequest *request)
   
 }
 
-void mRGBAnimator::WebAppend_PaletteEditor_FillOptions_Controls(){
+void mAnimatorLight::WebAppend_PaletteEditor_FillOptions_Controls(){
 
 
   char buffer[50];
@@ -1922,7 +1922,7 @@ void mRGBAnimator::WebAppend_PaletteEditor_FillOptions_Controls(){
 
   #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
 
-void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request){
+void mAnimatorLight::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request){
 
 //   uint8_t element_list_num = 9;
 //   /***
@@ -1970,12 +1970,12 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
   
 //   uint8_t rate_index = mSupport::FindNearestValueIndexUInt8(PROGMEM rate_map_secs,
 //                                                   sizeof(PROGMEM rate_map_secs),
-//                                                   pCONT_iLight->animation.transition.rate_ms.val/1000
+//                                                   pCONT_iLight->animation.transition.rate_ms/1000
 //                                                  );
 
                                                  
 //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_HTTP "Searched for %d and got index %d for mapped value %d sizeof(%d)"),
-//     pCONT_iLight->animation.transition.rate_ms.val/1000,
+//     pCONT_iLight->animation.transition.rate_ms/1000,
 //     rate_index,
 //     PROGMEM rate_map_secs[rate_index],
 //     sizeof(PROGMEM rate_map_secs)
@@ -2006,7 +2006,7 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
 //                             //   time_index,    // "ld('rgb_controls?pr=1',x3);" // pr = period time
 //                             //   pCONT_iLight->animation.transition.method_id,                          // "ld('rgb_controls?tm=1',x4);" // tm = transition mode
 //                             //   pCONT_iLight->animation.mode_id,                                       // "ld('rgb_controls?am=1',x5);" // am = animaiton mode
-//                             //   pCONT_iLight->animation.palette_id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
+//                             //   pCONT_iLight->animation.palette.id,                                    // "ld('rgb_controls?pa=1',x6);" // pa  = palette
 //                             // //   flashersettings.function,                             // "ld('rgb_controls?fl=1',x7);" // fl  = flasher  
 //                             // //   mixer.running_id                                 // "ld('rgb_controls?mi=1',x8);" // mi  = mixer running id                          
 //                             // // #else
@@ -2020,7 +2020,7 @@ void mRGBAnimator::Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *req
 
 
 
-void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
+void mAnimatorLight::WebAppend_RGBLightSettings_FillOptions_Controls(){
 
   char buffer[50];
   char buffer2[50];
@@ -2072,7 +2072,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
   //         );
   //       }
   //       JsonBuilderI->AppendBuffer("\"");
-  //     JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.rate_ms.val/1000));
+  //     JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.rate_ms/1000));
   //   JsonBuilderI->Level_End();
   // JsonBuilderI->Array_End();
 
@@ -2141,12 +2141,12 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
   JsonBuilderI->Array_End();
 
 
-  #ifdef ENABLE_PIXEL_FUNCTION_FLASHER
+  #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
   // JsonBuilderI->Array_Start("g7");// Class name
   //   JsonBuilderI->Level_Start();
   //     JsonBuilderI->AddKey("eihr");           // function
   //       JsonBuilderI->AppendBuffer("\""); 
-  //       for (uint8_t row_id = 0; row_id < FLASHER_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+  //       for (uint8_t row_id = 0; row_id < EFFECTS_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
   //         JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
   //           row_id, 
   //           pCONT_iLight->GetPaletteFriendlyNameByID(row_id)
@@ -2179,7 +2179,7 @@ void mRGBAnimator::WebAppend_RGBLightSettings_FillOptions_Controls(){
 
 
 
-void mRGBAnimator::WebAppend_Root_Draw_Table(){
+void mAnimatorLight::WebAppend_Root_Draw_Table(){
 
   pCONT_web->WebAppend_Root_Draw_Table_dList_P(8,"rgb_table", kTitle_TableTitles_Root);
   
@@ -2187,20 +2187,20 @@ void mRGBAnimator::WebAppend_Root_Draw_Table(){
 
 
 
-void mRGBAnimator::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRequest *request)
+void mAnimatorLight::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServerRequest *request)
 {
 
-  uint16_t leds_max_to_show = pCONT_iLight->light_size_count<MAX_LIVE_LEDS?pCONT_iLight->light_size_count:MAX_LIVE_LEDS;
-  uint8_t number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  uint16_t leds_max_to_show = pCONT_iLight->settings.light_size_count<MAX_LIVE_LEDS?pCONT_iLight->settings.light_size_count:MAX_LIVE_LEDS;
+  uint8_t number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->settings.light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
 
    
-  // uint8_t number_of_pixels = pCONT_iLight->light_size_count;
-  // if(pCONT_iLight->light_size_count>MAX_LIVE_LEDS){
-  //   number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
+  // uint8_t number_of_pixels = pCONT_iLight->settings.light_size_count;
+  // if(pCONT_iLight->settings.light_size_count>MAX_LIVE_LEDS){
+  //   number_of_pixels = map(pCONT_iLight->liveview.pixel_resolution_percentage,0,100,0,pCONT_iLight->settings.light_size_count); //only serve every n'th LED if count over MAX_LIVE_LEDS
   // }
 
 
-  uint8_t pixels_to_iter = ((pCONT_iLight->light_size_count-1)/number_of_pixels)+1;
+  uint8_t pixels_to_iter = ((pCONT_iLight->settings.light_size_count-1)/number_of_pixels)+1;
 
   char type_ctr[5];
   switch(pCONT_iLight->liveview.show_type){

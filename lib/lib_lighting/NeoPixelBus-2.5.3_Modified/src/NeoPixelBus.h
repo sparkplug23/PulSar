@@ -36,6 +36,9 @@ License along with NeoPixel.  If not, see
 // '_state' flags for internal state
 #define NEO_DIRTY   0x80 // a change was made to pixel data that requires a show
 
+#include "internal/lib8tion/lib8tion.h"
+#include "internal/lib8tion/math8.h"
+
 #include "internal/NeoHueBlend.h"
 
 #include "internal/RgbColor.h"
@@ -44,6 +47,7 @@ License along with NeoPixel.  If not, see
 #include "internal/HtmlColor.h"
 #include "internal/RgbwColor.h"
 #include "internal/RgbcctColor.h"
+#include "internal/RgbcctColor_Controller.h"
 #include "internal/SegmentDigit.h"
 
 

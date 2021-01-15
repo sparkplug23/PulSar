@@ -469,6 +469,9 @@ enum XsnsFunctions {
   FUNC_TEMPLATE_DEVICE_LOAD,  // Read progmem configs if needed, read settings configuration
   FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD, // This is called from the above function, used to parse the object json
   
+  // New trigger events which only modules to react to changes "triggers" from other modules or external sources
+  FUNC_TRIGGER_EVENT_BUTTON_PRESSED,
+  // FUNC_TRIGGER_
   
   
   FUNC_ON_SUCCESSFUL_BOOT, //also used as boot percentage progress divisor
@@ -1241,26 +1244,36 @@ struct DisplaySettings{
 // };
 
 
-#define PALETTE_USER_NAME_LIST_LENGTH 300
+// #define PALETTE_USER_NAME_LIST_LENGTH 300
 struct AnimationSettings{
   // HsbColour map ids
-  uint8_t palette_user_colour_map_ids[400];//20][20]; 
+  uint8_t palette_hsbid_users_colour_map[20*20];//20][20]; 
+  //rgbcct user values
+  uint8_t palette_rgbcct_users_colour_map[5*5];//20][20]; 
+  //generic variable buffer
+  uint8_t palette_encoded_users_colour_map[200];//20][20]; 
   // Change names to be a klist =   // char    palette_user_variable_name_ctr[20][20];
-  char    palette_user_variable_name_list_ctr[PALETTE_USER_NAME_LIST_LENGTH]; //100 less
+
+  //move into devicelist?
+  //hmm, maybe not, device list needs to be moved into settings storage first, currently runtime variable
+  // char    palette_user_variable_name_list_ctr[PALETTE_USER_NAME_LIST_LENGTH]; //100 less
+
+
   // Active pixels in each user palette, can be replaced by setting colour_map is inactive, use function to count active/hold it in ram not memory
   // uint8_t palette_user_amounts[20]; // move to searching not none type id
   uint8_t animation_mode;
   uint8_t animation_palette;
-  uint8_t animation_transition_order;
+  //struct transition
+  uint8_t animation_transition_order; 
   uint8_t animation_transition_method;
   uint16_t animation_transition_time_ms; //TBD save as seconds
   uint32_t animation_transition_rate_ms; //TBD save as seconds
-  uint8_t animation_transition_pixels_to_update_as_percentage;
+  uint8_t transition_pixels_to_update_as_number;
 };
 
 
 // Buffer that stores names of sensors as delimeter list
-#define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  20
+#define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  50
 #ifndef DEVICENAMEBUFFER_NAME_BUFFER_LENGTH // Memory reduction
 #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400 
 #endif // DEVICENAMEBUFFER_NAME_BUFFER_LENGTH

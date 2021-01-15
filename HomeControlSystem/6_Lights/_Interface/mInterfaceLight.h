@@ -1,21 +1,16 @@
-#ifndef _DRIVER_INTERFACE_LIGHTS_H
-#define _DRIVER_INTERFACE_LIGHTS_H 0.1
+#ifndef _DRIVER_INTERFACE_LIGHTS1_H
+#define _DRIVER_INTERFACE_LIGHTS1_H 0.1
 
 #include "0_ConfigUser/mUserConfig.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
-
-// #ifndef USE_MODULE_LIGHTS_ADDRESSABLE
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
-// #endif //  USE_MODULE_LIGHTS_ADDRESSABLE 
-
 
 #ifdef ENABLE_DEVFEATURE_JSONPARSER
 #include "JsonParser.h"
 #endif // ENABLE_DEVFEATURE_JSONPARSER
-
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef RgbColor RgbTypeColor;
@@ -25,19 +20,24 @@
   typedef RgbColor RgbTypeColor;
 #endif
 
-  enum PIXEL_MULTIPLIER_MODE_IDS{
-    PIXEL_MULTIPLIER_MODE_NONE_ID,
-    PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID,
-    PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
-    PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID
-  };
+#include "6_Lights/Palette/mPalette.h"
+
+// #include "6_Lights/RGBCCT/RgbcctType.h"
+
+
+enum PIXEL_MULTIPLIER_MODE_IDS{
+  PIXEL_MULTIPLIER_MODE_NONE_ID,
+  PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID,
+  PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
+  PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID
+};
 
 // TRANSITION_METHOD
-DEFINE_PGM_CTR(PM_TRANSITION_METHOD_NONE_NAME_CTR)    "None";   
-DEFINE_PGM_CTR(PM_TRANSITION_METHOD_BLEND_NAME_CTR)    "Blend";      
-DEFINE_PGM_CTR(PM_TRANSITION_METHOD_INSTANT_NAME_CTR)  "Instant";      
-DEFINE_PGM_CTR(PM_TRANSITION_METHOD_TWINKLE_NAME_CTR)  "Twinkle";     
-DEFINE_PGM_CTR(PM_TRANSITION_METHOD_GLIMMER_NAME_CTR)  "Glimmer";
+// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_NONE_NAME_CTR)    "None";   
+// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_BLEND_NAME_CTR)    "Blend";      
+// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_INSTANT_NAME_CTR)  "Instant";      
+// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_TWINKLE_NAME_CTR)  "Twinkle";     
+// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_GLIMMER_NAME_CTR)  "Glimmer";
 
 
 // order is maybe becoming flasher? mode ie applied animations          //new flasher name
@@ -79,15 +79,7 @@ DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)       D_PIXEL_HARDWARE_TYP
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)       D_PIXEL_HARDWARE_TYPE_WS28XX_CTR;
 
 
-
-
-// struct RgbcctColor{
-//   uint8_t R;
-//   uint8_t G;
-//   uint8_t B;
-//   uint8_t WW;
-//   uint8_t WC;
-// };
+// #define CLEAR_PALETTELIST_WITH_PTR(x) memset(x,0,sizeof(PALETTELIST::PALETTE));
 
 enum LightTypes_IDS{
   LT_BASIC, //relay?
@@ -102,25 +94,25 @@ enum LightTypes_IDS{
 
 
 enum LightSubtypes{ 
-        LST_NONE, 
-        LST_SINGLE, 
-        LST_COLDWARM, 
-        LST_RGB,   
-        LST_RGBW, 
-        LST_RGBWC, 
-        LST_RGBCW
+  LST_NONE, 
+  LST_SINGLE, 
+  LST_COLDWARM, 
+  LST_RGB,   
+  LST_RGBW, 
+  LST_RGBWC, 
+  LST_RGBCW
 };
 
-enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
-  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default
-  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID, //common for WS2811
-  PIXEL_HARDWARE_COLOR_ORDER_BRG_ID, 
-  PIXEL_HARDWARE_COLOR_ORDER_RBG_ID, 
-  PIXEL_HARDWARE_COLOR_ORDER_BGR_ID, 
-  PIXEL_HARDWARE_COLOR_ORDER_GBR_ID,
-  PIXEL_HARDWARE_COLOR_ORDER_GRBW_ID,
-  PIXEL_HARDWARE_COLOR_LENGTH_ID
-};
+// enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
+//   PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default
+//   PIXEL_HARDWARE_COLOR_ORDER_RGB_ID, //common for WS2811
+//   PIXEL_HARDWARE_COLOR_ORDER_BRG_ID, 
+//   PIXEL_HARDWARE_COLOR_ORDER_RBG_ID, 
+//   PIXEL_HARDWARE_COLOR_ORDER_BGR_ID, 
+//   PIXEL_HARDWARE_COLOR_ORDER_GBR_ID,
+//   PIXEL_HARDWARE_COLOR_ORDER_GRBW_ID,
+//   PIXEL_HARDWARE_COLOR_LENGTH_ID
+// };
 
 /**************
  * BLEND - Move between colours with delay
@@ -128,40 +120,41 @@ enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
  * TWINKLE1 - random bulbs flash
  * GLIMMER - random bulbs blend (flash with blend) - could use progress in animation random(progress)
 **************/ 
-enum TRANSITION_METHOD{
-  TRANSITION_METHOD_NONE_ID,
-  TRANSITION_METHOD_BLEND_ID,
-  TRANSITION_METHOD_INSTANT_ID,
-  TRANSITION_METHOD_TWINKLE_ID,
-  TRANSITION_METHOD_GLIMMER_ID, //should be an animation only, on brightness #Idea#105
-  TRANSITION_METHOD_LENGTH_ID
-};   
+// enum TRANSITION_METHOD{
+//   TRANSITION_METHOD_NONE_ID,
+//   TRANSITION_METHOD_BLEND_ID,
+//   TRANSITION_METHOD_INSTANT_ID,
+//   TRANSITION_METHOD_TWINKLE_ID,
+//   TRANSITION_METHOD_GLIMMER_ID, //should be an animation only, on brightness #Idea#105
+//   TRANSITION_METHOD_LENGTH_ID
+// };   
 
-    /**************
+    /** PATTERNS ************
      * RANDOM - LED pixel indexing chosen at random
-     * CENTRE_OUT   - Chosen from center out, showing same pixel on outward pairs (update together)
      * INORDER - first to last pixel index
-     * ROTATE - rotate pixel colours along index
+     * CENTRE_OUT   - Chosen from center out, showing same pixel on outward pairs (update together)
+     * GRADIENT - takes any palette, and stretches the palette across the leds
+     *    -- Full span
+     *    -- Repeated X times   * 
+     * MAPPED -
     **************/ 
-    enum TRANSITION_ORDER{
+
+    enum PALETTE_PATTERN_IDS{ //TRANSITION_ORDER{
       TRANSITION_ORDER_NONE_ID=0,
       TRANSITION_ORDER_RANDOM_ID,
-      TRANSITION_ORDER_CENTRE_OUT_ID, //mirror image fill from center
       TRANSITION_ORDER_INORDER_ID,
-      TRANSITION_ORDER_ROTATE_ID,
-      TRANSITION_ORDER_FIXED_ID, //use fMapIDs_Are_Position_HSB_Pairs
+      TRANSITION_ORDER_CENTRE_OUT_ID,
+      TRANSITION_ORDER_GRADIENT_ID,
       TRANSITION_ORDER_LENGTH_ID
-    }; // rotate should really be a flasher animation only
-    
+    }; 
+
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "3_Network/MQTT/mMQTT.h"
 #include "2_CoreSystem/Time/mTime.h"
 
-#include "6_Lights/_Interface/palettes.h"
-
-#include <NeoPixelBus.h>
-#include <NeoPixelAnimator.h>
+#include "6_Lights/Palette/mPalette_Progmem.h"
 
 #define LST_MAX 5
 
@@ -172,10 +165,10 @@ enum TRANSITION_METHOD{
   
     // Arrays to hold palettes, called via pointer
     // Variable user maps need to be variable  
-    #ifndef D_PALETTE_USER_NAME_CTR
-    #define D_PALETTE_USER_NAME_CTR        "User"   
+    #ifndef D_PALETTE_HSBID_NAME_CTR
+    #define D_PALETTE_HSBID_NAME_CTR        "User"   
     #endif
-    #define PALETTELIST_COLOUR_USERS_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
+    #define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
 
 //#define DEBUG_LIGHT
@@ -286,23 +279,16 @@ const gamma_table_t gamma_table_fast[] = {
 // 458,480,496,518,534,557,579,595,617,635,657,673,695,713,743,
 // 773,793,823,843,873,893,923,943,973,993,1023
 
-// const char kListPWM_TestColours[] PROGMEM =  
-//   "#ff0000" "|" 
-//   "#00ff00" "|" 
-//   "#0000ff" "|" 
-//   "#ffffff" "|"  
-//   "#FFE076" "|" ;
-
   
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR) "scene";
 
 
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_TURN_ON_NAME_CTR )   "Turn On"     ;    
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR )   "Turn Off"     ;    
+DEFINE_PGM_CTR(PM_ANIMATION_MODE_CHANGE_POWER_NAME_CTR )   "Change Power"     ;    
+// DEFINE_PGM_CTR(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR )   "Turn Off"     ;    
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR   )      "Ambilight"  ;                
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_SCENE_NAME_CTR   )          "Scene"      ;             
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_FLASHER_NAME_CTR  )         D_JSON_FLASHER;
+// DEFINE_PGM_CTR(PM_ANIMATION_MODE_SCENE_NAME_CTR   )          "Scene"      ;             
+DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_JSON_EFFECTS;
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS       
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;      
 #endif   
@@ -317,61 +303,36 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
 //     #define D_MODE_SINGLECOLOUR_EVENINGOFF_NAME_CTR      "EVENINGOFF"    
 //     #define D_MODE_SINGLECOLOUR_MIDNIGHTON_NAME_CTR      "MIDNIGHTON"    
 //     #define D_MODE_SINGLECOLOUR_MIDNIGHTOFF_NAME_CTR     "MIDNIGHTOFF"    
-DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)   "ColourSingle"; //COLOURSCENE
-DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR) "PaletteSingle";
-DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTELOOP_NAME_CTR)   "PaletteLoop";
+// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)   "ColourSingle"; //COLOURSCENE
+// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR) "PaletteSingle";
+// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTELOOP_NAME_CTR)   "PaletteLoop";
 //     #define D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR     "FLASHCOLOUR"    
 //     #define D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR  "SUNRISE_SINGLE"  
 //     #define D_MODE_SINGLECOLOUR_SUNRISE_DUAL_NAME_CTR    "SUNRISE_DUAL" 
 
 
 
-  #define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
+#define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
 
 
-    enum RGB_VIEW_SHOW_TYPE_IDS{
-      RGB_VIEW_SHOW_TYPE_NONE_ID=0,
-      RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID,
-      RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID,
-      RGB_VIEW_SHOW_TYPE_FOLLOW_PALETTE_ID,
+enum RGB_VIEW_SHOW_TYPE_IDS{
+  RGB_VIEW_SHOW_TYPE_NONE_ID=0,
+  RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID,
+  RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID,
+  RGB_VIEW_SHOW_TYPE_FOLLOW_PALETTE_ID,
 
-      RGB_VIEW_SHOW_TYPE_LENGTH_ID
-    };
-  
-    enum fMapIDs_Type_IDS{
-      MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID=0,
-      MAPIDS_TYPE_HSBCOLOUR_NOINDEX_ID,
-      MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID,
-      MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID, //phase out
-      
-      MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID,
-      MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID,
-      
-      MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID,
-      MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID,
-      MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID, //phase out, assume max index IS set all
-
-      MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID,
-
-      MAPIDS_TYPE_RGBCOLOUR_LENGTH_ID
-    };
-
-    enum fIndexs_Type_IDS{
-      INDEX_TYPE_NONE = 0,
-      INDEX_TYPE_DIRECT,
-      INDEX_TYPE_SCALED_255,
-      INDEX_TYPE_SCALED_100 
-    };
+  RGB_VIEW_SHOW_TYPE_LENGTH_ID
+};
 
 
-class mInterfaceLight{ //name reverse, as Interface is the linking/grouping factor
+
+class mInterfaceLight{
   public:
     mInterfaceLight(){};
 
-    // void Module_Init();
-
-    uint8_t force_strip_update_test = false;
-
+    /**
+     * Module settings other tasks/module may need
+     * */
     typedef union {
       uint8_t data; // allows full manipulating
       struct { 
@@ -383,109 +344,209 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       };
     } SETTINGS_FLAGS;
 
-
     struct SETTINGS{
       SETTINGS_FLAGS flags;
-      uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
+      
+      //phase out
+      // uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
 
+
+      // uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
+      uint16_t light_size_count = 1;
+      uint8_t pwm_offset = 0;                 // Offset in color buffer
     }settings;
 
+    #define D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE 7
+    typedef union {
+      uint16_t data; // allows full manipulating using union memory overlap
+      struct { 
+        /** 3 bits of memory = 9 combinations
+         *  0 - channel 0 eg [R----]
+         *  1 - channel 1 eg [-R---]
+         *  2 - channel 2 eg [--R--]
+         *  3 - channel 3 eg [---R-]
+         *  4 - channel 4 eg [----R]
+         *  5 - reserved
+         *  6 - reserved
+         *  7 - reserved
+         *  8 - not active eg -----
+         * */
+        union{
+          uint16_t red : 3;        // bit 0-2
+          uint16_t r   : 3;        // bit 0-2
+        };
+        union{
+          uint16_t green : 3;      // bit 3-5
+          uint16_t g     : 3;      // bit 3-5
+        };
+        union{
+          uint16_t blue : 3;       // bit 6-8
+          uint16_t b : 3;       // bit 6-8
+        };
+        union{
+          uint16_t white_warm : 3; // bit 9-11
+          uint16_t w : 3; // bit 9-11
+        };
+        union{
+          uint16_t white_cold : 3; // bit 12-14
+          uint16_t c : 3; // bit 12-14
+        };
+        uint16_t reserved : 1;   // bit 15
+      };
+    } HARDWARE_ELEMENT_COLOUR_ORDER;
 
-    //#ifdef ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-    NeoPixelAnimator* animator_controller = nullptr;
-    //#endif // ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE
-
-  void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
-
-// New feature, turning off will overwrite animation struct on "on" will restore to previous
-
-  typedef union {
-    uint16_t data; // allows full manipulating
-    struct { 
-      // enable animations (pause)
-      uint16_t fEnable_Animation : 1;
-      uint16_t ColourComponentsUpdatedButNotYetApplied : 1; // new colours, not yet applied
+    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order[2];
+    // FUTURE, using range values (0-50 = this, 51-100 = that) or wled segment style
 
 
-      uint16_t fForceUpdate : 1; 
-      uint16_t fRunning : 1;//= false;
-      uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
+    typedef union {
+      uint16_t data; // allows full manipulating
+      struct { 
+        // enable animations (pause)
+        uint16_t fEnable_Animation : 1;
+        uint16_t ColourComponentsUpdatedButNotYetApplied : 1; // new colours, not yet applied
 
-      
-      uint16_t NewAnimationRequiringCompleteRefresh : 1; 
-      
-      uint16_t ftime_use_map : 1;//= true;
-      uint16_t frate_use_map : 1;//= true;
+        uint16_t fForceUpdate : 1; 
+        uint16_t fRunning : 1;//= false;
+        uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
 
-      uint16_t brightness_applied_during_colour_generation : 1;
-      // This emulates aging of traditional lights, making them less uniform
-      uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
+        uint16_t NewAnimationRequiringCompleteRefresh : 1; 
+        
+        uint16_t ftime_use_map : 1;//= true;
+        uint16_t frate_use_map : 1;//= true;
 
-      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
-      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+        uint16_t brightness_applied_during_colour_generation : 1;
+        // This emulates aging of traditional lights, making them less uniform
+        uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
 
-      uint8_t use_gamma_for_brightness : 1;
+        uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
+        uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
 
-      // Reserved
-      uint16_t reserved : 4;
-    };
-  } ANIMATION_FLAGS;
+        uint8_t use_gamma_for_brightness : 1;
+
+        // Reserved
+        uint16_t reserved : 4;
+      };
+    } ANIMATION_FLAGS;
 
 
-
-    struct ANIMATIONSETTINGS{
-      //mode = turn on/off/scene/pallette
-      uint8_t mode_id; //update mode
-      //palette - stores colour patterns for single led setting
-      uint8_t palette_id; 
-      // flag that limits the range of the pixel colour map
-      // 0 = not to be used
-      uint8_t palette_index_range_max_limit = 0; 
-      uint8_t palette_index_range_as_percentage = 0;
-
+    struct ANIMATION_SETTINGS{
+      /**
+       * Flags
+       * */
       ANIMATION_FLAGS flags;
-
-      struct TRANSITIONSETTINGS{
+      /**
+       * Effects (Scenes & Flasher), Ambilight, Adalight
+       * */
+      uint8_t mode_id;
+      /**
+       * Palette (Options on getting from palette)
+       * */
+      struct PALETTE{
+        uint8_t id; 
+        uint8_t pattern; //Single, Gradient 
+        /**
+         * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
+         * Value '0': is unused
+         * */
+        uint8_t index_range_max_limit = 0; 
+        uint8_t index_range_as_percentage = 0;
+      }palette;
+      /**
+       * Transition settings
+       * */
+      struct TRANSITION_SETTINGS{
+        /**
+         * Pixel order (eg Random, InOrder)
+         * */
         uint8_t order_id;
+        /**
+         * Change method (eg Blend, Instant)
+         * */
         uint8_t method_id;
-
-        struct PIXELS_TO_UPDATE_AS_PERCENTAGE{
-          uint8_t val;
-          uint8_t map_id = 2;  
-        }pixels_to_update_as_percentage; //phase out, use function to get what it is from a number
-
-        struct PIXELS_TO_UPDATE_AS_NUMBER{
-          uint16_t val;
-          uint8_t map_id = 2;  
-        }pixels_to_update_as_number; //move this to be the primary way its stored
-
-
-
-        struct TIME{
-          uint16_t val = 5000;
-          uint8_t  map_id = 2;
-        }time_ms;
-        struct RATE{
-          uint16_t val = 5000;
-          uint8_t  map_id = 2;
-        }rate_ms;
-      
+        /**
+         * Pixels to change up to maximum of segment
+         * */
+        uint16_t pixels_to_update_as_number;
+        /**
+         * Refresh rate, calculate new colours
+         * */
+        uint16_t rate_ms = 5000;
+        /**
+         * Time to new colours
+         * */
+        uint16_t time_ms = 5000;  
       }transition;
+      /**
+       * WLED Test Variables 
+       * */
+      uint16_t start_index;
+      uint16_t stop_index; //segment invalid if stop == 0
+      uint8_t speed; 
+      uint8_t intensity;
+      uint8_t options; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
+      uint8_t grouping;
+      uint8_t spacing;
+      void setOption(uint8_t n, bool val)
+      {
+        if (val) {
+          options |= 0x01 << n;
+        } else
+        {
+          options &= ~(0x01 << n);
+        }
+      }
+      bool getOption(uint8_t n)
+      {
+        return ((options >> n) & 0x01);
+      }
+      bool isSelected()
+      {
+        return getOption(0);
+      }
+      bool isActive()
+      {
+        return stop_index > start_index;
+      }
+      uint16_t length()
+      {
+        return stop_index - start_index;
+      }
+      uint16_t groupLength()
+      {
+        return grouping + spacing;
+      }
+      uint16_t virtualLength()
+      {
+        uint16_t groupLen = groupLength();
+        uint16_t vLength = (length() + groupLen - 1) / groupLen;
+        // if (options & MIRROR)
+        //   vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+        return vLength;
+      }   
     };
     // store the current state
-    ANIMATIONSETTINGS animation;
-    // store animation to swtich to
-    ANIMATIONSETTINGS animation_stored;
-    // hold when to switch to animation_stored
-    struct ANIMATION_CONFIG_RUNTIME{
-      uint8_t  fWaiting = false;
-      // For ms or sec delay (until execution) time
-      uint32_t delay_time_ms   = 0; //0 if not set
-      uint32_t delay_time_secs = 0;
-    }animation_stored_runtime;
+    ANIMATION_SETTINGS animation;
+    // store animation to return to, use override when possible
+    ANIMATION_SETTINGS animation_stored;
 
+    #define MAX_NUM_SEGMENTS 2
+    ANIMATION_SETTINGS animation_segment[MAX_NUM_SEGMENTS];
+    struct SEGMENT_RUNTIME{
+      uint8_t _segment_index = 0;
+      uint8_t _segment_index_palette_last = 99;
+    };
+
+    // segment _segments[MAX_NUM_SEGMENTS];
+    //  = { // SRAM footprint: 24 bytes per element
+    //   // start, stop, speed, intensity, palette, mode, options, grouping, spacing, opacity (unused), color[]
+    //   { 0, 7, DEFAULT_SPEED, 128, 0, DEFAULT_MODE, NO_OPTIONS, 1, 0, 255, {DEFAULT_COLOR}}
+    // };
+
+    //Temp array, to be later absorbed like wled
+    #define D_EFFECTS_DATA_BUFFER_SIZE 100
+    uint8_t effects_data_buffer[D_EFFECTS_DATA_BUFFER_SIZE];
     
-    uint32_t animation_changed_millis = 0;
 
     const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
@@ -497,30 +558,33 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
       uint16_t time_ms = 1000; //on boot
     }animation_override; // ie "oneshot" variables that get checked and executed one time only
     
+    NeoPixelAnimator* animator_controller = nullptr;
+    void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
+
+    // Values not ever saved
+    struct RUNTIME_VALUES{
+      uint32_t animation_changed_millis = 0;
+    }runtime;
+
     /**************
-     * TURN_ON - fade ON, returns to previous lighting array
-     * TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
+     * CHANGE_POWER - TURN_ON - fade ON, returns to previous lighting array.  TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
      * NOTHING - to be named "off", does nothing, simply remains off
      * AMBILIHGT - keep, dell screen, set directly
      * PRESETS - animation from a group of colour patterns
-     * FLASHER - christmad themes, standard 8, shimmering/twinkling 
-     * SCENE - scene names might be same as presets? or preset subset of scene? scene might best be named "direct"
+     * EFFECTS - christmad themes, standard 8, shimmering/twinkling. Now also SCENE - scene names might be same as presets? or preset subset of scene? scene might best be named "direct"
     **************/ 
     enum ANIMATION_MODE{
       ANIMATION_MODE_NONE_ID = 0,
-      ANIMATION_MODE_TURN_ON_ID,   //merge on/off into "SET_POWER"
-      ANIMATION_MODE_TURN_OFF_ID,
-      ANIMATION_MODE_SCENE_ID,
-      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      ANIMATION_MODE_CHANGE_POWER_ID = 0,
+      //#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
       ANIMATION_MODE_AMBILIGHT_ID,
-      #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      //#ifdef ENABLE_PIXEL_FUNCTION_FLASHER
-      ANIMATION_MODE_FLASHER_ID,
-      //#endif // ENABLE_PIXEL_FUNCTION_FLASHER
-      //user option, cant comment out but can disable elsewhere
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-        ANIMATION_MODE_NOTIFICATIONS_ID,
-      #endif
+      //#endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      //#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      ANIMATION_MODE_EFFECTS_ID,
+      //#endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+      //#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+      ANIMATION_MODE_NOTIFICATIONS_ID,
+      //#endif
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       ANIMATION_MODE_MANUAL_SETPIXEL_ID,
       #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
@@ -530,20 +594,7 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     const char* GetAnimationModeName(char* buffer, uint16_t buflen);
     const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
 
-    
-    // PHASE OUT, renaming LightState
-    /**************
-     * ANIMATION_PROFILE - As function argument of "SetAnimationProfile"
-     * This sets numerous aspects of animation struct to cause set animations to happen:
-     * TURN_OFF - will fade leds off
-     * TURN_ON  - will fade leds on
-    **************/ 
-    // enum ANIMATION_PROFILE_IDS{
-    //   ANIMATION_PROFILE_TURN_OFF_ID=0,
-    //   ANIMATION_PROFILE_TURN_ON_ID,
-    //   ANIMATION_PROFILE_NOTHING_ID,
-    //   ANIMAITON_PROFILE_LENGTH_ID    
-    // };
+  
     enum LIHGT_POWER_STATE_IDS{
       LIGHT_POWER_STATE_OFF_ID=0,
       LIGHT_POWER_STATE_ON_ID,
@@ -569,118 +620,140 @@ class mInterfaceLight{ //name reverse, as Interface is the linking/grouping fact
     void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
     void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    void CommandSet_SingleColourMode_ID(uint8_t value);
+    
+    // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
+    // void CommandSet_SingleColourMode_ID(uint8_t value);
+    // #endif// ENABLE_DEVFEATURE_PHASING_SCENE_OUT
     void CommandSet_PaletteID(uint8_t value);
     void CommandSet_AnimationModeID(uint8_t value);
-    void CommandSet_HardwareColourTypeID(uint8_t value);
+    void CommandSet_HardwareColourOrderTypeByStr(const char* value);
     void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_LightsCountToUpdateAsNumber(uint16_t value);
     void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value);
     void CommandSet_TransitionOrderID(uint8_t value);
-    void CommandSet_SceneColour_Raw(uint8_t* values);
-    void CommandSet_Flag_EnabledAnimation(uint8_t value);
+    void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+    void CommandSet_EnabledAnimation_Flag(uint8_t value);
+    void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
+    void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
     
+    /******************************************************************************************************************************
+    ****************** CommandGet_x *************************************************************************************************************
+    ******************************************************************************************************************************/
 
+    // int8_t GetTransitionMethodIDbyName(const char* c);     
+    // const char* GetTransitionMethodName(char* buffer, uint8_t buflen);
+    // const char* GetTransitionMethodNameByID(uint8_t id, char* buffer, uint8_t buflen);
+
+    int8_t GetTransitionOrderIDbyName(const char* c);     
+    const char* GetTransitionOrderName(char* buffer, uint8_t buflen);
+    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
+
+    
+// #ifndef ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
+//     uint16_t getCT10bits();
+//     void setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
+//     void getCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
+//     void getCTRange(uint16_t *ct_min_range, uint16_t *ct_max_range) ;
+//     uint16_t getHue();
+//     uint8_t  getSat();
+//     uint8_t getColorMode();
+
+//      uint8_t setBriRGB(uint8_t bri_rgb);
+//     uint8_t setBriRGB_As_Percentage(uint8_t bri_rgb);
+
+//     void getXY(float *x, float *y);
+//     void setBri(uint8_t bri);
+   
+//  uint8_t setBriCT(uint8_t bri_ct);
+//     uint8_t getBriRGB();
+//     void setDimmer(uint8_t dimmer);
+//     void setCT(uint16_t ct);
+//     void setCW(uint8_t c, uint8_t w, bool free_range = false);
+//     uint8_t setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
+//     void setHS(uint16_t hue, uint8_t sat);
+//     void setChannelsRaw(uint8_t *channels);
+//     void setChannels(uint8_t *channels);
+//     void RgbToHsb(uint8_t r, uint8_t g, uint8_t b, uint16_t *r_hue, uint8_t *r_sat, uint8_t *r_bri);
+//     void HsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *r_g, uint8_t *r_b);
+//     void RgbToXy(uint8_t i_r, uint8_t i_g, uint8_t i_b, float *r_x, float *r_y);
+//     void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
+//     void setSubType(uint8_t sub_type);
+//     bool CommandSet_RGBCT_Linked(bool ct_rgb_linked);
+//     void setAlexaCTRange(bool alexa_ct_range);
+//     bool isCTRGBLinked();
+//     bool setPWMMultiChannel(bool pwm_multi_channels);
+//     bool isPWMMultiChannel(void);
+//     void debugLogs();
+//     void loadSettings();
+//     void changeCTB(uint16_t new_ct, uint8_t briCT);
+//     void changeDimmer(uint8_t dimmer, uint32_t mode = 0);
+//     void changeBri(uint8_t bri);
+//     void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
+//     void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
+//     void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);   
+   
+//     power_t LightPower(void);
+//     power_t LightPowerIRAM(void);
+//     uint8_t LightDevice(void);
+//     uint8_t setColorMode(uint8_t cm);
+//     void addRGBMode();
+//     void addCTMode();
+//     void getRGB(uint8_t *r, uint8_t *g, uint8_t *b);
+//     void getCW(uint8_t *rc, uint8_t *rw);
+//     void getActualRGBCW(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *c, uint8_t *w);
+//     uint8_t getChannels(uint8_t *channels);
+//     void getChannelsRaw(uint8_t *channels);
+//     void getHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri);
+//     uint8_t getBri(void);
+//     uint8_t getBriCT();
+//     static inline uint8_t DimmerToBri(uint8_t dimmer);
+//     static uint8_t BriToDimmer(uint8_t bri);
+//     uint8_t getDimmer(uint32_t mode = 0);
+//     uint16_t getCT();
+// #endif // ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
+
+    int8_t GetPixelHardwareTypeIDbyName(const char* c);
+    const char* GetPixelHardwareTypeName(char* buffer);
+    const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
+
+
+void SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index = 0, bool flag_replicate_for_total_pixel_length = false);
+RgbcctColor GetPixelColourHardwareInterface(uint16_t index = 0);
+void ShowInterface();
+
+
+    /******************************************************************************************************************************
+    ****************** unsorted *************************************************************************************************************
+    ******************************************************************************************************************************/
+
+
+
     
     void Settings_Default();  
 
     void BootMessage();
 
-    // RgbcctColor current_color_main;
-
-    int     hue_test = 0;
-
     void EveryLoop();
 
+    void SubTask_AutoOff();
+    struct AUTO_OFF_SETTINGS{
+      uint16_t time_decounter_secs = 0;
+      uint32_t tSaved = 0;
+    }auto_off_settings;
     
-      uint16_t auto_time_off_secs = 0;
-      // uint32_t tSavedAutoOff = 0;
-    uint32_t tSavedAutoOff = 0;
+    uint32_t RgbColorto32bit(RgbColor rgb);
     
-uint32_t RgbColorto32bit(RgbColor rgb);
+    RgbcctColor GetActiveFirstColourFromCurrentPalette();
     
+    void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
+    void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
 
-    // enum MODE_SINGLECOLOUR_PARTS{STEP1=1,STEP2,STEP3,STEP4,STEP5,DONE};
-
-
+    RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
-    typedef union {
-      uint8_t data; // allows full manipulating
-      struct { 
-        uint8_t running : 1;
-        uint8_t generate_new_colours : 1;
-        uint8_t colours_need_applied : 1;
-        uint8_t update_colour_on_input_command : 1;
-        // uint8_t running : 1;
-        
-        // Reserved
-        uint8_t reserved : 4;
-      };
-    } MODE_SINGLECOLOUR_CONFIG_FLAGS;
-    struct MODE_SINGLECOLOUR_CONFIG{
-      uint8_t name_id;
-      RgbcctColor colour;
-      MODE_SINGLECOLOUR_CONFIG_FLAGS flag;
-      uint8_t fActive = false; // isrunning
-      uint8_t parts = 0;//DONE; //parts aka index
-      uint32_t tStart;
-      uint32_t tOnTime;
-      uint8_t update = true;  // to replace "NOCHANGE"
-    };
-    // hold current set scene
-    struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour;
-    // hold scene to switch to later
-    struct MODE_SINGLECOLOUR_CONFIG mode_singlecolour_stored;
-
-    
-    timereached_t mode_singlecolour_tSaved;
-
-    
-      RgbcctColor tasint_colour;
-      
-void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
-
-
-void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
-
-
-
-    // hold when to switch to scene_stored
-    struct SCENE_CONFIG_RUNTIME{
-      uint8_t  fWaiting = false;
-      // For ms or sec delay (until execution) time
-      uint32_t delay_time_ms   = 0; //0 if not set
-      uint32_t delay_time_secs = 0;
-    }scene_stored_runtime;
-
-
-
-
-
-    uint8_t kitchen_preset_set_id;
-    struct SCENE_PRESETS{
-      RgbTypeColor colour; 
-      uint16_t time_ms=1000;
-    };
-    //change to scenes users
-    struct SCENE_PRESETS scene_preset_dayon;
-    // struct SCENE_PRESETS scene_preset_dayoff;
-    // struct SCENE_PRESETS scene_preset_eveningon;
-    // struct SCENE_PRESETS scene_preset_eveningoff;
-    // struct SCENE_PRESETS scene_preset_nighton;
-    // struct SCENE_PRESETS scene_preset_nightoff;
-    struct SCENE_PRESETS* presenttmp;
-
-
-
-
-
-
-void Template_Load();
-
+    void Template_Load();
 
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
@@ -688,245 +761,38 @@ void Template_Load();
     int8_t Tasker_Web(uint8_t function);
     #include "6_Lights/_Interface/mInterfaceLight_Web.h"
 
-    enum RELAY_IDS{RELAY_0_ID=0,RELAY_1_ID,RELAY_2_ID,RELAY_3_ID};
-
     int8_t Tasker(uint8_t function);
     void Init(void);
 
-    
-  // are RGB and CT linked, i.e. if we set CT then RGB channels are off
-  bool     _ct_rgb_linked = true;
-  bool     _pwm_multi_channels = false;    // treat each channel as independant dimmer
-
-
-    uint16_t getCT10bits();
-    void setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
-    void getCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
-    void getCTRange(uint16_t *ct_min_range, uint16_t *ct_max_range) ;
-
 
     void WebAppend_Root_Buttons();
+    void WebAppend_Root_Draw_Table();
+    void WebCommand_Parse();
+    void WebAppend_Root_Draw_RGBLive();
+    void WebAppend_Root_Draw_RGBTable(uint8_t rows = 8);
 
-    struct FADE_SETTINGS{
-      bool running = false;
-      uint32_t start_ms = 0;
-      uint32_t end_ms = 0;
-      uint16_t duration_ms = 0;
+    void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
 
-    }fade;
-
-
-
-  //inline 
-  // bool isCTRGBLinked();
-  // bool setPWMMultiChannel(bool pwm_multi_channels);
-  // bool isPWMMultiChannel(void);
-
-
-// class LightStateClass {
-//   private:
-   
-//   public:
-//     LightStateClass() {
-//       //AddLog_P2(LOG_LEVEL_DEBUG_MORE, "LightStateClass::Constructor RGB raw (%d %d %d) HS (%d %d) bri (%d)", _r, _g, _b, _hue, _sat, _bri);
-//     }
-
-
-void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
-
-
-uint16_t getHue();
-uint8_t  getSat();
-
-// CT min and max
-const uint16_t CT_MIN = 153;          // 6500K
-const uint16_t CT_MAX = 500;          // 2000K
-// Ranges used for Alexa
-const uint16_t CT_MIN_ALEXA = 200;    // also 5000K
-const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
-
-    uint16_t _hue = 0;  // 0..359
-    uint8_t  _sat = 255;  // 0..255
-    uint8_t  _briRGB = 255;  // 0..255
-
+    
     struct BRIGHTNESS_RGB_BOUNDARIES{
       uint8_t  lower = 0;  // 0..255
       uint8_t  upper = 255;  // 0..255
     }brtRGB_limits;
 
-
-
-
-    // dimmer is same as _bri but with a range of 0%-100%
-    // uint8_t  _r = 255;  // 0..255
-    // uint8_t  _g = 255;  // 0..255
-    // uint8_t  _b = 255;  // 0..255
-
-    uint8_t  _subtype = 0;  // local copy of Light.subtype, if we need multiple lights
-    uint16_t _ct = CT_MIN;  // 153..500, default to 153 (cold white)
-    // uint8_t  _wc = 255;  // white cold channel
-    // uint8_t  _ww = 0;    // white warm channel
-    uint8_t  _briCT = 255;
-
-    uint8_t  _color_mode = LCM_RGB; // RGB by default
-    // Please note that you can still set CT to 153..500, but any
-    // value below _ct_min_range or above _ct_max_range not change the CT
-    uint16_t _ct_min_range = CT_MIN;   // the minimum CT rendered range
-    uint16_t _ct_max_range = CT_MAX;   // the maximum CT rendered range
-
-    /**************
-     * Predefined SCENES by name
-     * SCENES are colours defined as one colour for all pixels
-    **************/ 
-   // These scenes should be palettes "single type"(day/night) and "multi type"(waking up)
-    enum SCENES{
-      //MODE_SINGLECOLOUR_NOCHANGE_ID=0,    // REMOVING mode, as I dont want to change it, but add "nochange" within existing modes
-      // MODE_SINGLECOLOUR_DAYON_ID=1,
-      // MODE_SINGLECOLOUR_DAYOFF_ID,
-      // MODE_SINGLECOLOUR_EVENINGON_ID,
-      // MODE_SINGLECOLOUR_EVENINGOFF_ID,
-      // MODE_SINGLECOLOUR_MIDNIGHTON_ID,
-      // MODE_SINGLECOLOUR_MIDNIGHTOFF_ID,
-      MODE_SINGLECOLOUR_COLOURSCENE_ID,
-      MODE_SINGLECOLOUR_PALETTE_SINGLE_ID,     //use palette as colours
-      MODE_SINGLECOLOUR_FADE_OFF_ID,
-      MODE_SINGLECOLOUR_FLASHCOLOUR_ID,
-      // MODE_SINGLECOLOUR_WHITEON_ID,
-      // MODE_SINGLECOLOUR_SUNRISE_SINGLE_ID,     // From dark blue to sky blue (cyan)
-      // MODE_SINGLECOLOUR_SUNRISE_DUAL_ID,       // From dark blue, sunrise orange, sky blue (cyan)
-      // MODE_SINGLECOLOUR_SUNRISE_AMBILIGHT_ID,
-      MODE_SINGLECOLOUR_LENGTH_ID
-    };
-    int8_t GetSceneIDbyName(const char* c);
-    const char* GetSceneName(char* buffer, uint8_t buflen);
-    const char* GetSceneNameByID(uint8_t id, char* buffer, uint8_t buflen);
-
-    int8_t GetTransitionMethodIDbyName(const char* c);     
-    const char* GetTransitionMethodName(char* buffer, uint8_t buflen);
-    const char* GetTransitionMethodNameByID(uint8_t id, char* buffer, uint8_t buflen);
-
-    int8_t GetTransitionOrderIDbyName(const char* c);     
-    const char* GetTransitionOrderName(char* buffer, uint8_t buflen);
-    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen);
-
-
-    uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
-    // void parsesub_ModeScene(JsonObjectConst obj);
     
-    void SubTask_SingleColour();
-    void init_Scenes();
-
-
-  uint8_t current_color[LST_MAX]; // r,r,b,cw,ww
-  uint8_t last_colour[LST_MAX];
 
 
 
 
-  uint8_t entry_color[LST_MAX];
+    uint8_t light_power_state = 0;
+    uint8_t light_power_Saved = 0;
+    uint8_t subtype = 0;                    // LST_ subtype
+    uint8_t device = 0;
+    bool pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
+    bool     fade_initialized = false;      // dont't fade at startup
+    uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
+    uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
 
-
-
-  uint8_t new_color[LST_MAX];
-  uint8_t color_remap[LST_MAX];
-
-  
-void SubTask_AutoOff();
-
-
-  uint8_t light_power_state = 0;
-  uint8_t light_power_Saved = 0;
-
-
-// struct LIGHT {
-  uint32_t strip_timer_counter = 0;  // Bars and Gradient
-  // power_t power = 0;                      // Power<x> for each channel if SetOption68, or boolean if single light
-
-  uint16_t wakeup_counter = 0;
-
-  // enum COLOUR_IDS{
-  //   COLOUR_RED_ID=0,
-  //   COLOUR_GREEN_ID,
-  //   COLOUR_BLUE_ID,
-  //   COLOUR_WHITE_ID,
-  //   COLOUR_WARM_WHITE_ID,
-  //   COLOUR_LENGTH_ID
-  // };
-
-uint32_t tSavedTest= 0;
-uint32_t tSavedTest2 = 0;
-
-  // uint8_t entry_color[LST_MAX];
-  // uint8_t current_color[LST_MAX]; // r,g,b,cw,ww
-  // uint8_t new_color[LST_MAX];
-  // uint8_t last_color[LST_MAX];
-  // uint8_t color_remap[LST_MAX];
-
-  //Store RGB part of colour as HSB space
-  // HsbColor hsb_colour;
-  
-
-void RecalculateHsbfromRgb();
-void RecalculateRgbfromHsb();
-void SetColour_CCT(uint16_t val);
-void SetColour_CBrt(uint16_t val);
-
-
-// uint16_t auto_time_off_secs = 0; 
-
-  uint8_t wheel = 0;
-  uint8_t random2 = 0;
-  uint8_t subtype = 0;                    // LST_ subtype
-  uint8_t device = 0;
-  uint8_t old_power = 1;
-  uint8_t wakeup_active = 0;
-  uint8_t wakeup_dimmer = 0;
-  uint8_t fixed_color_index = 1;
-  uint8_t pwm_offset = 0;                 // Offset in color buffer
-  // uint8_t max_scheme = LS_MAX -1;
-
-  bool update = true;
-  bool pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
-
-  bool     fade_initialized = false;      // dont't fade at startup
-  bool     fade_running = false;
-// #ifdef USE_DEVICE_GROUPS
-//   uint8_t  last_scheme = 0;
-//   bool     devgrp_no_channels_out = false; // don't share channels with device group (e.g. if scheme set by other device)
-// #ifdef USE_DGR_LIGHT_SEQUENCE
-//   uint8_t  sequence_offset = 0;            // number of channel changes this light is behind the master
-//   uint8_t * channels_fifo;
-// #endif  // USE_DGR_LIGHT_SEQUENCE
-// #endif  // USE_DEVICE_GROUPS
-// #ifdef USE_LIGHT_PALETTE
-//   uint8_t  palette_count = 0;            // palette entry count
-//   uint8_t * palette;                     // dynamically allocated palette color array
-// #endif  // USE_LIGHT_PALETTE
-  uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
-  uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
-// } Light;
-
-
-void SetPWMChannelSweepRange();
-
-uint8_t test_index = 0;
-
-
-//void mat3x3(const float *mat33, const float *vec3, float *res3);
-
-// uint16_t pwm_tester_val = 0;
-// uint8_t pwm_tester_dir = 0;
-// uint32_t tSavedTest3=0;
-
-// uint16_t pwm_channel_test[5];
-
-
-void WebCommand_Parse();
-
-
-void WebAppend_Root_Draw_RGBLive();
-
-void WebAppend_Root_Draw_RGBTable(uint8_t rows = 8);
 
     struct LIVEVIEW_SETTINGS{
       uint8_t show_type = RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID;
@@ -936,35 +802,6 @@ void WebAppend_Root_Draw_RGBTable(uint8_t rows = 8);
     }liveview;
 
 
-
-
-  uint8_t channels[5]; //rgbwcww
-  
-
-power_t LightPower(void);
-power_t LightPowerIRAM(void);
-uint8_t LightDevice(void);
-uint8_t setColorMode(uint8_t cm);
-void addRGBMode();
-void addCTMode();
-void getRGB(uint8_t *r, uint8_t *g, uint8_t *b);
-void getCW(uint8_t *rc, uint8_t *rw);
-void getActualRGBCW(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *c, uint8_t *w);
-uint8_t getChannels(uint8_t *channels);
-void getChannelsRaw(uint8_t *channels);
-void getHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri);
-uint8_t getBri(void);
-uint8_t getBriCT();
-static inline uint8_t DimmerToBri(uint8_t dimmer);
-static uint8_t BriToDimmer(uint8_t bri);
-uint8_t getDimmer(uint32_t mode = 0);
-
-//     inline 
-uint16_t getCT();// const {
-//       return _ct; // 153..500, or CT_MIN..CT_MAX
-//     }
-
-
     struct PALETTE_VIEW_SETTINGS{
       uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
       uint8_t height_as_percentage = 15;
@@ -972,427 +809,50 @@ uint16_t getCT();// const {
     }palette_view;
 
 
-//     // get the CT value within the range into a 10 bits 0..1023 value
-//     uint16_t getCT10bits() const {
-//       return mapvalue(_ct, _ct_min_range, _ct_max_range, 0, 1023);
-//     }
-
-//     inline void setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) {
-//       _ct_min_range = ct_min_range;
-//       _ct_max_range = ct_max_range;
-//     }
-
-//     inline void getCTRange(uint16_t *ct_min_range, uint16_t *ct_max_range) const {
-//       if (ct_min_range) { *ct_min_range = _ct_min_range; }
-//       if (ct_max_range) { *ct_max_range = _ct_max_range; }
-//     }
-
-void getXY(float *x, float *y);
-void setBri(uint8_t bri);
-uint8_t setBriRGB(uint8_t bri_rgb);
-uint8_t setBriRGB_As_Percentage(uint8_t bri_rgb);
+    void init_Animations();
+    void changeChannels(uint8_t *channels);
+    uint16_t change8to10(uint8_t v);
+    uint8_t change10to8(uint16_t v);
 
 
-uint8_t setBriCT(uint8_t bri_ct);
-uint8_t getBriRGB();
-void setDimmer(uint8_t dimmer);
-void setCT(uint16_t ct);
-void setCW(uint8_t c, uint8_t w, bool free_range = false);
-uint8_t setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-void setHS(uint16_t hue, uint8_t sat);
-void setChannelsRaw(uint8_t *channels);
-void setChannels(uint8_t *channels);
-void RgbToHsb(uint8_t r, uint8_t g, uint8_t b, uint16_t *r_hue, uint8_t *r_sat, uint8_t *r_bri);
-void HsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *r_g, uint8_t *r_b);
-void RgbToXy(uint8_t i_r, uint8_t i_g, uint8_t i_b, float *r_x, float *r_y);
-void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
-// void mat3x3(const float *mat33, const float *vec3, float *res3);
-// void RgbToXy(uint8_t i_r, uint8_t i_g, uint8_t i_b, float *r_x, float *r_y);
-// void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
-void setSubType(uint8_t sub_type);
-bool CommandSet_RGBCT_Linked(bool ct_rgb_linked);
-void setAlexaCTRange(bool alexa_ct_range);
-bool isCTRGBLinked();
-bool setPWMMultiChannel(bool pwm_multi_channels);
-bool isPWMMultiChannel(void);
-void debugLogs();
-void loadSettings();
-void changeCTB(uint16_t new_ct, uint8_t briCT);
-void changeDimmer(uint8_t dimmer, uint32_t mode = 0);
-void changeBri(uint8_t bri);
-void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
-void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);
+    #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+    uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
+    uint16_t ledGammaReverse_internal(uint16_t vg, const struct gamma_table_t *gt_ptr);
+    uint16_t ledGamma10_10(uint16_t v);
+    uint16_t ledGamma10(uint8_t v);
+    uint8_t ledGamma(uint8_t v);
+    void calcGammaMultiChannels(uint16_t cur_col_10[5]);
+    void calcGammaBulbs(uint16_t cur_col_10[5]);
+    bool isChannelGammaCorrected(uint32_t channel);
+    uint16_t fadeGamma(uint32_t channel, uint16_t v);
+    uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
+    #endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 
-    
-  void init_Animations();
+    RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
+    bool LightModuleInit(void);
 
-void saveSettings();
-void changeChannels(uint8_t *channels);
-uint16_t change8to10(uint8_t v);
-uint8_t change10to8(uint16_t v);
+    float    HueN2F(uint16_t hue);
+    float    SatN2F(uint8_t sat);
+    float    BrtN2F(uint8_t brt);
+    uint16_t HueF2N(float hue);
+    uint8_t  SatF2N(float sat);
+    uint8_t  BrtF2N(float brt);
 
+    RgbTypeColor GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2);
+    HsbColor GetHSBColour();
+    uint32_t WebColorFromColourMap(uint8_t i);
+    // uint32_t WebColorFromColourType(RgbwColor rgb);
+    uint32_t WebColorFromColourType(RgbColor rgb);
 
+    RgbTypeColor Color32bit2RgbColour(uint32_t colour32bit);
 
-
-#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
-uint16_t ledGammaReverse_internal(uint16_t vg, const struct gamma_table_t *gt_ptr);
-uint16_t ledGamma10_10(uint16_t v);
-uint16_t ledGamma10(uint8_t v);
-uint8_t ledGamma(uint8_t v);
-void calcGammaMultiChannels(uint16_t cur_col_10[5]);
-void calcGammaBulbs(uint16_t cur_col_10[5]);
-bool isChannelGammaCorrected(uint32_t channel);
-uint16_t fadeGamma(uint32_t channel, uint16_t v);
-uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
-#endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-
-void LightPwmOffset(uint32_t offset);
-bool LightModuleInit(void);
-void LightCalcPWMRange(void);
-void LightUpdateColorMapping(void);
-uint8_t LightGetDimmer(uint8_t dimmer);
-void LightSetDimmer(uint8_t dimmer);
-void LightGetHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri);
-void LightGetXY(float *X, float *Y);
-void LightHsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *r_g, uint8_t *r_b);
-uint8_t LightGetBri(uint8_t device);
-void LightSetBri(uint8_t device, uint8_t bri);
-uint16_t LightGetColorTemp(void);
-void LightSetSignal(uint16_t lo, uint16_t hi, uint16_t value);
-char* LightGetColor(char* scolor, boolean force_hex = false);
-void LightPowerOn(void);
-void LightState(uint8_t append);
-void LightPreparePower(power_t channels = 0xFFFFFFFF);
-void LightSetPaletteEntry(void);
-void LightCycleColor(int8_t direction);
-void LightSetPower(void);
-void LightAnimate(void);
-bool LightApplyFade(void);
-void LightApplyPower(uint8_t new_color[LST_MAX], power_t power);
-bool isChannelCT(uint32_t channel);
-
-uint8_t flag_test = true;
-
-uint8_t* GetColour_RGB();    // r,g,b only
-uint8_t* GetColour_RGBCT();  // r,g,b,white and warm white
-uint8_t* GetColour_CT();     // white and warm white
-uint8_t* GetColour_White();         // white
-uint8_t* GetColour_WarmWhite();     // warm white
-// uint8_t* GetColour_HSB();
-uint8_t* GetColour_Hue();
-uint8_t* GetColour_Sat();
-uint8_t* GetColour_Brightness();
-
-void WebAppend_Root_Draw_Table();
-
-void SetColour_RGB();    // r,g,b only
-void SetColour_RGBCT();  // r,g,b,white and warm white
-void SetColour_CT();     // white and warm white
-void SetColour_White();         // white
-void SetColour_WarmWhite();     // warm white
-void SetColour_HSB();
-
-float    HueN2F(uint16_t hue);
-float    SatN2F(uint8_t sat);
-float    BrtN2F(uint8_t brt);
-uint16_t HueF2N(float hue);
-uint8_t  SatF2N(float sat);
-uint8_t  BrtF2N(float brt);
-
-RgbTypeColor GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2);
-HsbColor GetHSBColour();
-
-
-
-
-// void parsesub_ModeAnimation(JsonObjectConst obj);
-
-void SetHSBColour();
-void SetColour_HSB(HsbColor hsb);
-HsbColor GetColour_HSB(void);
-void SetColour_Hue(uint16_t hue);
-void SetColour_Sat(uint8_t  sat);
-void SetColour_Brt(uint8_t  brt);
-
-
-// uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
-uint16_t light_size_count = 1;
-
-
-
-  uint32_t WebColorFromColourMap(uint8_t i);
-  // uint32_t WebColorFromColourType(RgbwColor rgb);
-  uint32_t WebColorFromColourType(RgbColor rgb);
-  
-RgbTypeColor Color32bit2RgbColour(uint32_t colour32bit);
-
-  
-    const uint8_t* GetDefaultColourPaletteUserIDs_P(uint8_t id);
-    uint8_t  GetDefaultColourPaletteUserIDsCount(uint8_t id);
-
-
-void UpdateSetOutputs();
-
-
-uint8_t getColorMode();
-
-
-  
-int8_t GetPixelHardwareTypeIDbyName(const char* c);
-const char* GetPixelHardwareTypeName(char* buffer);
-const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
-
-
-
-
-    
-    void init_PresetColourPalettes(); 
-    // First bytes stores length 
-    void init_ColourPalettes_Autumn_Red();
-    void init_ColourPalettes_Autumn();
-    void init_ColourPalettes_Winter();
-    void init_ColourPalettes_Pastel();
-    void init_ColourPalettes_Ocean_01();
-    void init_ColourPalettes_Rainbow();
-    void init_ColourPalettes_RainbowInverted();
-    void init_ColourPalettes_Holloween_OP();
-    void init_ColourPalettes_Holloween_OGP();
-    void init_ColourPalettes_Shelf_Hearts();
-    void init_ColourPalettes_Gradient_01();
-    void init_ColourPalettes_Gradient_02();
-    void init_ColourPalettes_Berry_Green();
-    void init_ColourPalettes_Christmas_01();
-    void init_ColourPalettes_Christmas_02();
-    void init_ColourPalettes_Christmas_03();
-    void init_ColourPalettes_Christmas_04();
-    void init_ColourPalettes_Christmas_05();
-    void init_ColourPalettes_Christmas_06();
-    void init_ColourPalettes_Christmas_07();
-    void init_ColourPalettes_Christmas_08();
-    void init_ColourPalettes_Christmas_09();
-    void init_ColourPalettes_Christmas_10();
-    void init_ColourPalettes_Christmas_11();
-    void init_ColourPalettes_Christmas_12();
-    void init_ColourPalettes_Christmas_13();
-    void init_ColourPalettes_Christmas_14();
-    void init_ColourPalettes_Christmas_15();
-    void init_ColourPalettes_Christmas_16();
-    void init_ColourPalettes_Custom_User_01();
-    void init_ColourPalettes_Sunrise_01();
-
-
-    enum SHELFFLIES_HEART_INDEX{ //right to left
-      SHELFFLIES_HEART_INDEX1=1,
-      SHELFFLIES_HEART_INDEX2=6,
-      SHELFFLIES_HEART_INDEX3=10,
-      SHELFFLIES_HEART_INDEX4=16,
-      SHELFFLIES_HEART_INDEX5=21,
-      SHELFFLIES_HEART_INDEX6=25,
-      SHELFFLIES_HEART_INDEX7=31
-    };
-
-
-    /**************
-     * COLOUR Designs by name
-     * PALETTE are different colours by pixel
-    **************/                            
-    int8_t GetPaletteIDbyName(const char* c);
-    const char* GetPaletteName(char* buffer, uint8_t buflen);  
-    const char* GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen);
-    const char* GetPaletteFriendlyName(char* buffer, uint8_t buflen);
-
-  // #define D_PALETTE_USER_DEFAULT_NAME_CTR "User"
-
-  enum PALETTELIST_VARIABLE_USER_IDS{ // 20 TOTAL variable and can be deleted by the user, saved in memory
-    PALETTELIST_VARIABLE_USER_01_ID = 0,
-    PALETTELIST_VARIABLE_USER_02_ID,
-    PALETTELIST_VARIABLE_USER_03_ID,
-    PALETTELIST_VARIABLE_USER_04_ID,
-    PALETTELIST_VARIABLE_USER_05_ID,
-    PALETTELIST_VARIABLE_USER_06_ID,
-    PALETTELIST_VARIABLE_USER_07_ID,
-    PALETTELIST_VARIABLE_USER_08_ID,
-    PALETTELIST_VARIABLE_USER_09_ID,
-    PALETTELIST_VARIABLE_USER_10_ID, 
-    PALETTELIST_VARIABLE_USER_11_ID, 
-    PALETTELIST_VARIABLE_USER_12_ID,  
-    PALETTELIST_VARIABLE_USER_13_ID, 
-    PALETTELIST_VARIABLE_USER_14_ID, 
-    PALETTELIST_VARIABLE_USER_15_ID, 
-    PALETTELIST_VARIABLE_USER_16_ID, 
-    PALETTELIST_VARIABLE_USER_17_ID, 
-    PALETTELIST_VARIABLE_USER_18_ID, 
-    PALETTELIST_VARIABLE_USER_19_ID, 
-    PALETTELIST_VARIABLE_USER_20_ID, 
-    // Count of total handlers and starting point for other modules
-    PALETTELIST_VARIABLE_USER_LENGTH_ID 
-  };
-  enum PALETTELIST_STATIC_IDS{
-    // Shelf Lights ie has some static leds
-    PALETTELIST_STATIC_SHELF_HEARTS_ID = PALETTELIST_VARIABLE_USER_LENGTH_ID,
-    // Special patterns
-    PALETTELIST_STATIC_HOLLOWEEN_OP_ID,
-    PALETTELIST_STATIC_HOLLOWEEN_OGP_ID,
-    PALETTELIST_STATIC_RAINBOW_ID,
-    PALETTELIST_STATIC_RAINBOW_INVERTED_ID,
-    PALETTELIST_STATIC_PASTEL_ID, //PASTEL
-    PALETTELIST_STATIC_WINTER_ID,
-    PALETTELIST_STATIC_AUTUMN_ID,
-    PALETTELIST_STATIC_AUTUMN_RED_ID,
-    PALETTELIST_STATIC_GRADIENT_01_ID,
-    PALETTELIST_STATIC_GRADIENT_02_ID,
-    PALETTELIST_STATIC_BERRY_GREEN_ID,
-    PALETTELIST_STATIC_CHRISTMAS_01_ID,
-    PALETTELIST_STATIC_CHRISTMAS_02_ID,
-    PALETTELIST_STATIC_CHRISTMAS_03_ID,
-    PALETTELIST_STATIC_CHRISTMAS_04_ID,
-    PALETTELIST_STATIC_CHRISTMAS_05_ID,
-    PALETTELIST_STATIC_CHRISTMAS_06_ID,
-    PALETTELIST_STATIC_CHRISTMAS_07_ID,
-    PALETTELIST_STATIC_CHRISTMAS_08_ID,
-    PALETTELIST_STATIC_CHRISTMAS_09_ID,
-    PALETTELIST_STATIC_CHRISTMAS_10_ID,
-    PALETTELIST_STATIC_CHRISTMAS_11_ID,
-    PALETTELIST_STATIC_CHRISTMAS_12_ID,
-    PALETTELIST_STATIC_CHRISTMAS_13_ID,
-    PALETTELIST_STATIC_CHRISTMAS_14_ID,
-    PALETTELIST_STATIC_CHRISTMAS_15_ID,
-    PALETTELIST_STATIC_CHRISTMAS_16_ID,
-    PALETTELIST_STATIC_SUNRISE_01_ID,
-    PALETTELIST_STATIC_OCEAN_01_ID,
-    PALETTELIST_STATIC_CUSTOM_USER_01_ID,
-
-    // Count of total handlers and starting point for other modules
-    PALETTELIST_STATIC_LENGTH_ID 
-  };
-
-    #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
-
-    
-    typedef union {
-      uint16_t data; // allows full manipulating
-      struct { 
-        //random palettes will require estimations of nearest hues
-        //uint16_t fColours_from_mapTBR : 1;
-         // randomise between the hue and saturation values
-        uint16_t fRandomise_Between_Colour_Pairs : 1;
-         // Scaled between first and second colour, ignores the rest
-        //uint16_t fLinearBlend_Between_Colour_Pairs : 1; //in gradient?
-        // Enable the brightness parameter from colourmap, scale with animation.brightness
-        uint16_t fUse_Brightness_From_ColourMap_As_Ratio_Of_Global_Brightness : 1; 
-        // Use mapped IDs as RGB values, {R,G,B...}
-        //uint16_t fMapIDs_Are_RGB_TripletsTBR : 1; 
-        // (max 255 length string, if string>255, assume percentage)
-        //uint16_t fIndexs_Are_Percentage : 1;
-        // Override Saturation and randomise, skewed high for visual similarity.
-        uint16_t fOverride_Saturation_To_Random : 1;
-        // Blends colours between indexs (used for fMapIDs_Type=4)
-        //uint16_t fIndexs_Are_Gradient : 1;
-        // Hold type of map
-        uint16_t fMapIDs_Type : 4; //9 possible types
-          // 0 - HsbColors directly, no index eg {hsb_color_map1, hsb_color_map2, hsb_color_map3,...}
-          // 1 - HsbColors with indexes {index1,hsb_color_map1, index1,hsb_color_map1,...}
-          // 2 - RgbColors only, triplets eg {R1,G1,B1, R2,G2,B2,...}
-          // 3 - RgbColors triplets with indexed eg {index1,R1,G1,B1, index2,R2,G2,B2,...}
-          // 4 - RgbColors triplets with indexed and largest index sets all as option eg {index1,R1,G1,B1, index2,R2,G2,B2,... MAX,R_all,G_all,B_all}
-          // 5 - HsbColors only
-          // 6 - HsbColors only
-          // 7 - HsbColors only      
-          // phase down to be only RGB, HSB?  
-        uint16_t fIndexs_Type : 2;
-        // 0 - exact
-        // 1 - gradient range 0-255
-        // 2 - gradient range 0-100%
-        // 3 - reserved
-        // Reserved
-        uint16_t reserved : 7;
-      };
-    } PALETTE_FLAGS;
-
-    // Consider template split
-    struct PALETTELIST{
-      struct PALETTE{ //6 bytes per palette
-        // 8 bits
-        PALETTE_FLAGS flags;        
-        // enum: Used to call for ctr of friendly name
-        uint8_t id = 0;
-        // Pointer to name
-        char* friendly_name_ctr = nullptr;
-        // Map IDs
-        uint8_t* colour_map_id; 
-        // Active pixels
-        uint8_t colour_map_size = 0;
-      };
-      PALETTE *ptr;
-      // Can be edited
-      PALETTE users[20];
-      // Add static palettes here
-      PALETTE holloween_op;
-      PALETTE holloween_ogp;
-      PALETTE winter;
-      PALETTE autumn;
-      PALETTE autumn_red;
-      PALETTE rainbow;
-      PALETTE rainbow_inverted;
-      PALETTE pastel;
-      PALETTE ocean_01;
-      PALETTE shelf_hearts;
-      PALETTE gradient_01;
-      PALETTE gradient_02;
-      PALETTE sunrise_01;
-      PALETTE berry_green;
-      PALETTE christmas_01;
-      PALETTE christmas_02;
-      PALETTE christmas_03;
-      PALETTE christmas_04;
-      PALETTE christmas_05;
-      PALETTE christmas_06;
-      PALETTE christmas_07;
-      PALETTE christmas_08;
-      PALETTE christmas_09;
-      PALETTE christmas_10;
-      PALETTE christmas_11;
-      PALETTE christmas_12;
-      PALETTE christmas_13;
-      PALETTE christmas_14;
-      PALETTE christmas_15;
-      PALETTE christmas_16;
-      PALETTE custom_user_01;
-    }palettelist;
-
-
-    const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
-    const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen);
-    int8_t      GetColourMapIDbyName(const char* c);
-    int8_t GetNearestColourMapIDFromColour(HsbColor hsb);
-
-    void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, uint8_t* colour_ids, uint8_t colour_ids_len);
-
-    const char* GetPaletteNameFriendlyFirstByID(uint8_t id, char* buffer, uint8_t buflen);
-    const char* GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8_t buflen);    
-
-    uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit = 0);
-    HsbColor GetHsbColour(uint8_t id);
-      
+    void UpdateSetOutputs();  
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
 
-              
-    RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position = nullptr);
-
-    PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
-          
-    void setdefault_PresetColourPalettes_UserFill(uint8_t id);
-    void init_PresetColourPalettes_UserFill(uint8_t id);
-    void setdefault_PresetColourPalettes_UserFill(PALETTELIST::PALETTE *ptr, const uint8_t* colour_ids, const uint8_t colour_ids_len); //declare
-
-    int8_t CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr);
-    void SetPaletteListPtrFromID(uint8_t id);
-
+    
+    uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
     uint8_t ConstructJSON_Debug(uint8_t json_method = 0);
@@ -1438,6 +898,70 @@ const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
 
         // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     #endif
+
+    
+// void CommandSet_ColourTemp(uint16_t ct)
+// {
+  
+//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//   // #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+// /* Color Temperature (https://developers.meethue.com/documentation/core-concepts)
+//  * ct = 153 = 6500K = Cold = CCWW = FF00
+//  * ct = 600 = 2000K = Warm = CCWW = 00FF  */
+//   // don't set CT if not supported
+//   if ((_LST_COLDWARM != _subtype) && (_LST_RGBCW != _subtype)) {
+//     return;
+//   }
+//   changeCTB(ct, getBriCT());
+// }
+
+
+
+
+
+    uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
+      return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
+    }
+    uint8_t getBriRGB_Global(){
+      return _briRGB_Global;
+    }
+    void setBriRGB_Global(uint8_t bri_rgb) {
+      _briRGB_Global = bri_rgb;
+    }
+    void setBriCT_Global(uint8_t bri_ct) {
+      _briCT_Global = bri_ct;
+    }
+
+private:
+
+// #ifndef ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
+//     // CT min and max
+//     const uint16_t CT_MIN = 153;          // 6500K
+//     const uint16_t CT_MAX = 500;          // 2000K
+//     // Ranges used for Alexa
+//     const uint16_t CT_MIN_ALEXA = 200;    // also 5000K
+//     const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
+
+//     uint16_t _hue = 0;  // 0..359
+//     uint8_t  _sat = 255;  // 0..255
+//     // are RGB and CT linked, i.e. if we set CT then RGB channels are off
+//     bool     _ct_rgb_linked = true;
+//     bool     _pwm_multi_channels = false;    // treat each channel as independant dimmer
+//     uint8_t  _subtype = 0;  // local copy of Light.subtype, if we need multiple lights
+//     uint16_t _ct = CT_MIN;  // 153..500, default to 153 (cold white)
+//     uint8_t  _color_mode = LCM_RGB; // RGB by default
+// #endif // ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
+
+    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
+    uint16_t _ct_min_range = 153;   // the minimum CT rendered range
+    uint16_t _ct_max_range = 500;   // the maximum CT rendered range
+
+
+  // I need to keep brightness on its own, with functions for it  
+    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
+    uint8_t  _briCT_Global = 255;
 
 
 

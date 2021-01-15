@@ -8,13 +8,10 @@
 .clang_complete
 .gcc-flags.json
 .cache
-##sonoff/user_config_override.h
 build
 firmware.map
 FutureIdeas.txt
 HomeControlSystem/0_ConfigUser/mUserConfigSecret.h
-RevisionHistory.txt
-##FutureIdeas.txt
 
 ## Visual Studio Code specific ######
 .vscode

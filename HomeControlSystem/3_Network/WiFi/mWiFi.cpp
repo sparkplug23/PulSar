@@ -16,7 +16,7 @@ int8_t mWiFi::Tasker(uint8_t function){
 //   Serial.println("WiFi.status()");
 
 
-//     WiFi.begin("Skynet2400", "af4d8bc9ab");
+//     WiFi.begin("", "");
 
 //     while (WiFi.status() != WL_CONNECTED) {
 //         delay(500);

@@ -3,6 +3,34 @@ All notable changes to this project will be documented in this file.
 
 Section Next, will always be "Development", which with copy and paste will become the version below it as Released (uploaded to github)
 
+
+## [Unreleased] - Development
+
+## [B0.84.84.114]
+### Added
+- first addition of WLED effects
+- five variable rgbcct colour palettes, with scenes now selecting from them when static
+- New "sunrise" effects added, although not completed
+- Added operator functions to neopixellib for adding/subtracting colours to `RgbColor` and `RgbcctColor`
+
+### Breaking Changed
+- `WebServer` will remain disabled for most devices until it gets another optimised refactor
+- `Scenes` as a stand alone mode will be removed, or remain as a mode that will configure `Effects` into the right format
+- `Scene` Commands will no longer work, and will require using effect `Solid Palette` and `Solid RGBCCT` for the h801 hardware
+
+### Changed
+- move rgb variable user names to be part of device list 
+- `internal_scene_colour` is now an pointer, which points to a user variable RgbcctColor. This can be switched, with a new variable tracking which is active (needs to change with palette.id setting)
+- `Scene` and `Flasher` to become a new ``AnimationMode`` (ex. `Palettes`, `Effects`, `Animations`)
+- `Effects` is the new animation of any effects
+
+### Fixed
+- 
+
+### Removed
+- none
+
+
 ## [Unreleased] - Development
 
 ## [B0.83.80.109]

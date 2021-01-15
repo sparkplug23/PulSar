@@ -204,7 +204,7 @@
 //   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
 //   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
 // //#endif
-// //#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+// //#ifdef USE_MODULE_LIGHTS_ANIMATOR
 //   #define D_MODULE_LIGHTS_ADDRESSABLE_CTR              "mRGBAnimator"
 //   #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "pixels"
 // //#endif
@@ -1135,10 +1135,10 @@
 // // #define D_NEOPIXEL_RGB "RGB"
 // // #define D_NEOPIXEL_HSB "HSB"
 // // #define D_NEOPIXEL_TIME "Time"
-// // #define D_NEOPIXEL_FLASHER "Flasher"
+// // #define D_NEOPIXEL_EFFECTS "Flasher"
 
 // // Class names (only defined if they exist)
-// // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+// // #ifdef USE_MODULE_LIGHTS_ANIMATOR
 //   #define D_CLASS_NAME_MRGBANIMATOR "mRGBAnimator::"
 // // #endif
 
@@ -1436,7 +1436,7 @@
 // #define D_JSON_DURATION "Duration"
 // #define D_JSON_DURATION_RAW "DurationRaw"
 // #define D_JSON_ERROR "Error"
-// #define D_JSON_FLASHER "Flasher"
+// #define D_JSON_EFFECTS "Flasher"
 // #define D_JSON_FUNCTION "Function"
 
 // #define D_JSON_ENABLED "Enabled"

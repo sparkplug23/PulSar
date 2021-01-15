@@ -25,12 +25,16 @@
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
+//--------------------------------[Global configs used when testing]-------------------------------------
+
+#define DISABLE_WEBSERVER
+
 //--------------------------------[Enable Device]-------------------------------------
 
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/
-#define DEVICE_RGBROOF                                
+// #define DEVICE_RGBROOF                                
 // #define DEVICE_RGBDELL
 // #define DEVICE_RGBCRYSTAL1
 //#define DEVICE_RGBCRYSTAL2
@@ -39,14 +43,15 @@
 // #define DEVICE_RGBMICRO2 //projector                  
 //#define DEVICE_RGBMICRO3 //bedroom string esp01
 //#define DEVICE_RGBMICRO4 //gazebo
-// #define DEVICE_RGBBEDLIGHT                            
+#define DEVICE_RGBBEDLIGHT                            
 //#define DEVICE_RGBBEDLIGHT_TEST                            
 // #define DEVICE_RGBDESK
 //#define DEVICE_RGBCOOKER
 //#define DEVICE_RGBUTILITY
 // #define DEVICE_RGBFRIDGE              
 // #define DEVICE_RGBBEDROOMFLOOR
-//#define DEVICE_H801_TESTER
+// #define DEVICE_H801_TESTER
+// #define DEVICE_H801_TESTER_NODEMCU
 //#define DEVICE_RGBCUSTOM_USER_01
 // #define DEVICE_TESTER_RGBW
 
@@ -268,7 +273,7 @@
 
   // #define ENABLE_DEVFEATURE_BREAK_ADDLOG
 
-  // #define ENABLE_PIXEL_FUNCTION_FLASHER
+  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
 //  #define USE_PUBSUB_V1
 
@@ -291,9 +296,9 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
-  //#define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  //#define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   //#define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
   #define ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW    "v79.31.22+" 
@@ -329,8 +334,8 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":43,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_//Scene "\","
+    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
     "\"" D_JSON_BRIGHTNESS       "\":0,"
     "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
@@ -362,13 +367,20 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define USE_MODULE_LIGHTS_WLED_EFFECTS
-#define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
+  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
+  #define USE_MODULE_CONTROLLER_STATUS_LEDS
+  #define DISABLE_WEBSERVER
+  
+// RAM:   [=====     ]  50.6% (used 41448 bytes from 81920 bytes)
+// Flash: [=====     ]  50.7% (used 519416 bytes from 1023984 bytes)
 
   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
   
-  #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_SWITCHES
   // #define USE_MODULE_SENSORS_ANALOG
 
   #define USE_MODULE_TEMPLATE
@@ -378,8 +390,8 @@
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
     
-      "\"D2\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","
+      // "\"D2\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","
 
       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
     "},"
@@ -398,15 +410,18 @@
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
-      "\"Function\":1" //slow glow
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":10000,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":0,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+    "},"
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
     "\"BrightnessRGB\":100"
   "}";
 
@@ -441,7 +456,7 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   // Advanced options  
   //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
@@ -473,8 +488,8 @@
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
@@ -496,7 +511,7 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
   #define USE_SK6812_METHOD_DEFAULT
@@ -531,8 +546,8 @@
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_//Scene  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
@@ -551,7 +566,7 @@
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
 
   #define ENABLE_PIXEL_FUNCTION_AMBILIGHT
@@ -583,8 +598,8 @@
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_//Scene  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
@@ -605,7 +620,7 @@
   // #define USE_MODULE_SENSORS_MOTION
 
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   
   #define USE_MODULE_TEMPLATE
@@ -634,8 +649,8 @@
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
@@ -667,11 +682,12 @@
   #define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 11
    
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define DISABLE_WEBSERVER
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -697,13 +713,13 @@
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
-    "\"TimeMs\":30000,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
+    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+    "\"TimeMs\":5000,"
+    "\"ColourPalette\":19," //c12    43 is the colours for this christmas
     "\"BrightnessRGB\":100"
   "}";
 
@@ -725,7 +741,7 @@
 
   // #define ENABLE_DEVFEATURE_BREAK_ADDLOG
 
-  // #define ENABLE_PIXEL_FUNCTION_FLASHER
+  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
 //  #define USE_PUBSUB_V1
 
@@ -748,11 +764,11 @@
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
-  //#define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  //#define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   //#define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
   #define ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW    "v79.31.22+" 
@@ -788,8 +804,8 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"" D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":43,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_SCENE "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_//Scene "\","
+    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB "\":[120,100,0]" "}," //this set the brightness
     "\"" D_JSON_BRIGHTNESS       "\":0,"
     "\"" D_JSON_BRIGHTNESS_RGB          "\":0"
   "}";
@@ -818,7 +834,7 @@
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE)   
@@ -842,7 +858,7 @@
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":30,\"" D_JSON_RATE "\":60,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 18\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
     "\"" D_JSON_BRIGHTNESS     "\":60"
   "}";
 #endif
@@ -903,7 +919,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
   #define STRIP_SIZE_MAX 50// 750   *15 //changing gazebo to be 12v
 
@@ -931,11 +947,11 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define DISBALE_TEST_SECTION
 
-  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
 
@@ -962,8 +978,8 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
     // "\"" D_JSON_BRIGHTNESS       "\":0,"
     // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
 
@@ -990,7 +1006,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 /*
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   // #define ENABLE_BUG_TRACING
   // #define USE_DEBUG_LINE
@@ -1036,17 +1052,17 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 01\","
-    // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_SCENE "\","
+    // "\"" D_JSON_ANIMATIONMODE             "\":\"" D_JSON_//Scene "\","
     "\"" D_JSON_ANIMATIONMODE             "\":\"" "Flasher" "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
+    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB "\":[15,90,50]" "},"
     "\"" D_JSON_BRIGHTNESS       "\":0"
   "}";
 */
 #endif
 
 
-//rgbmicro2/set/light/scene
-//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBOUTSIDETREE
   #define DEVICENAME_CTR          "rgboutsidetree"
   #define DEVICENAME_FRIENDLY_CTR "Outside Tree"
@@ -1128,7 +1144,7 @@ use black etherhetn czble in dads rooms for it
   #define DISABLE_WEBSERVER 
   
   #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
   //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
   #define STRIP_SIZE_MAX 1050// 750   *15 //changing gazebo to be 12v
@@ -1142,9 +1158,9 @@ use black etherhetn czble in dads rooms for it
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
-  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
 
@@ -1171,8 +1187,8 @@ use black etherhetn czble in dads rooms for it
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":43,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    // "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    // "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
     // "\"" D_JSON_BRIGHTNESS       "\":0,"
     // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
 
@@ -1201,8 +1217,8 @@ use black etherhetn czble in dads rooms for it
 #endif
 
 
-//rgbmicro2/set/light/scene
-//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBOUTSIDETREE_TESTER
   #define DEVICENAME_CTR          "rgboutsidetree_tester"
   #define DEVICENAME_FRIENDLY_CTR "Outside Tree Tester"
@@ -1257,7 +1273,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
   #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
 
@@ -1285,11 +1301,11 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define DISBALE_TEST_SECTION
 
-  // #define ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
+  // #define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
   // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
   //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
 
@@ -1316,8 +1332,8 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_SCENE_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
     // "\"" D_JSON_BRIGHTNESS       "\":0,"
     // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
 
@@ -1365,7 +1381,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
   #define STRIP_SIZE_MAX 150
 
@@ -1375,7 +1391,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   
 
   #define USE_MODULE_TEMPLATE
@@ -1404,8 +1420,8 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":30,\"RateMs\":2000},"
@@ -1418,8 +1434,8 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 
 
 
-//rgbmicro2/set/light/scene
-//{"SceneName":"COLOURSCENE","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBBACKDOORWREATH
   #define DEVICENAME_CTR          "rgbbackdoorwreath"
   #define DEVICENAME_FRIENDLY_CTR "RGB Backdoor Wreath"
@@ -1461,7 +1477,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
   #define STRIP_SIZE_MAX 100
 
@@ -1471,7 +1487,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE)   
@@ -1496,8 +1512,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":30,\"RateMs\":2000},"
@@ -1524,8 +1540,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
+  #define DISABLE_WEBSERVER
+
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
   
   #define USE_MODULE_TEMPLATE
@@ -1540,6 +1559,66 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":1,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+#endif
+
+#ifdef DEVICE_H801_TESTER_NODEMCU // for PWM dev // build version that uses 2 of the nodemcu leds as pwm channels
+  #define DEVICENAME_CTR          "h801_tester_nodemcu"
+  #define DEVICENAME_FRIENDLY_CTR "H801 Tester Strip Nodemcu"
+    
+  // #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_DEVFEATURE_PHASING_//Scene_OUT
+
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"2\":\""  D_GPIO_FUNCTION_PWM1_CTR "\"," //d4
+      "\"16\":\""  D_GPIO_FUNCTION_PWM2_CTR "\"," //d0
+      "\"D1\":\""  D_GPIO_FUNCTION_PWM3_CTR "\","
+      "\"D2\":\""  D_GPIO_FUNCTION_PWM4_CTR "\","
+      "\"D6\":\""  D_GPIO_FUNCTION_PWM5_CTR "\""
+    
+      // "\"D2\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","
+
+      // "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1552,7 +1631,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"//Scene\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
 
@@ -1576,7 +1655,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define DISABLE_TEMPORARY_RGBANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
 
   // #define USE_MODULE_SENSORS_MOTION
@@ -1637,10 +1716,13 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
+
   #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_PWM
-  
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1654,6 +1736,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
   
  
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1661,14 +1744,16 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    "\"" D_JSON_STRIP_SIZE       "\":1,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
-    "\"" D_JSON_BRIGHTNESS     "\":0"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
+  
     
 #endif
 
@@ -1686,7 +1771,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 2 
 
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_PWM
   
   #define USE_MODULE_TEMPLATE
@@ -1701,6 +1787,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
+  
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1708,13 +1796,14 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    "\"" D_JSON_STRIP_SIZE       "\":1,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
-    "\"" D_JSON_BRIGHTNESS     "\":0"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
   
 #endif
@@ -1782,8 +1871,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1808,7 +1897,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
   //     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":4,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
   //     "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
-  //     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_FLASHER "\","
+  //     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
   //     "\"" D_JSON_BRIGHTNESS     "\":10,"
   //     "\"" D_JSON_BRIGHTNESS_RGB        "\":10"
   //   "}";
@@ -1825,8 +1914,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":1,\"RateMs\":60000},"
@@ -1850,7 +1939,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1875,7 +1964,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
       "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
       "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
       "\"" D_JSON_COLOUR_PALETTE "\":\"User 19\"," //purple/pink/red (at sunset orange?)
-      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+      "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
       "\"" D_JSON_BRIGHTNESS     "\":14"
     "}";
 
@@ -1888,11 +1977,12 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 1
 
   
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define DISABLE_WEBSERVER
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1917,7 +2007,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
   //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
   //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
   //   "\"" D_JSON_BRIGHTNESS     "\":100"
   // "}";
   #define STRIP_SIZE_MAX 33
@@ -1933,14 +2023,14 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
     "\"TimeMs\":30000,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
-    "\"BrightnessRGB\":100"
+    "\"ColourPalette\":25," //c12    43 is the colours for this christmas
+    "\"BrightnessRGB\":70"
   "}";
 
 
@@ -1953,11 +2043,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 1
 
   
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1982,7 +2072,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
   //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
   //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
   //   "\"" D_JSON_BRIGHTNESS     "\":100"
   // "}";
   #define STRIP_SIZE_MAX 100
@@ -1998,8 +2088,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
@@ -2018,11 +2108,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define SETTINGS_HOLDER 1
 
   
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2047,7 +2137,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
   //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
   //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
   //   "\"" D_JSON_BRIGHTNESS     "\":100"
   // "}";
   #define STRIP_SIZE_MAX 25
@@ -2063,8 +2153,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
@@ -2082,11 +2172,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2111,7 +2201,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
   //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
   //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
   //   "\"" D_JSON_BRIGHTNESS     "\":100"
   // "}";
   #define STRIP_SIZE_MAX 25
@@ -2127,8 +2217,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
@@ -2149,8 +2239,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID   UO_TIME_MAP_SECS_1_ID
   #define DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID   UO_RATE_MAP_SECS_1_ID
   #define DEFAULT_LIGHTING_ANIMATION_PALETTE_ID          UO_PALETTELIST_STATIC_AUTUMN_RED_ID
-  #define DEFAULT_LIGHTING_ANIMATION_MODE_ID             UO_ANIMATION_MODE_FLASHER_ID
-  #define DEFAULT_LIGHTING_FLASHER_FUNCTION_ID           UO_FLASHER_FUNCTION_SLOW_GLOW_ID
+  #define DEFAULT_LIGHTING_ANIMATION_MODE_ID             UO_ANIMATION_MODE_EFFECTS_ID
+  #define DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID           UO_EFFECTS_FUNCTION_SLOW_GLOW_ID
   #define DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID   UO_PIXELS_UPDATE_PERCENTAGE_50_ID
   #define DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE         100
 #endif
@@ -2165,8 +2255,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID   UO_TIME_MAP_SECS_1_ID
   #define DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID   UO_RATE_MAP_SECS_1_ID
   #define DEFAULT_LIGHTING_ANIMATION_PALETTE_ID          UO_PALETTELIST_STATIC_AUTUMN_RED_ID
-  #define DEFAULT_LIGHTING_ANIMATION_MODE_ID             UO_ANIMATION_MODE_FLASHER_ID
-  #define DEFAULT_LIGHTING_FLASHER_FUNCTION_ID           UO_FLASHER_FUNCTION_SLOW_GLOW_ID
+  #define DEFAULT_LIGHTING_ANIMATION_MODE_ID             UO_ANIMATION_MODE_EFFECTS_ID
+  #define DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID           UO_EFFECTS_FUNCTION_SLOW_GLOW_ID
   #define DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID   UO_PIXELS_UPDATE_PERCENTAGE_50_ID
   #define DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE         100
 #endif
@@ -2258,7 +2348,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\"," //GRBW
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"USER_18\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
   // #define PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
@@ -2439,7 +2529,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   
   // #define USE_MODULE_SENSORS_DOORCHIME
   #define DOORALERT_PAYLOAD_CTR   "frontdoorbell"
@@ -2469,8 +2559,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_FLASHER "\","
-    // "\"" D_JSON_SCENE_COLOUR   "\":{"
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_EFFECTS "\","
+    // "\"" D_JSON_//Scene_COLOUR   "\":{"
     //       "\"" D_JSON_HSB    "\":[330,100,100]" 
     //     "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
@@ -2723,7 +2813,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_SENSORS_BME
   
@@ -2757,13 +2847,13 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_//Scene  "\","
+    "\"" D_JSON_//Scene_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[25,90,100]" 
           // "\"" D_JSON_RGBW    "\":[0,0,0,255]" 
         "},"
-        "\"AnimationMode\":\"Scene\","
-        "\"SceneName\":\"ColourSingle\","
+        "\"AnimationMode\":\"//Scene\","
+        "\"//SceneName\":\"ColourSingle\","
         "\"hue\":20,"
         "\"sat\":90,"
         "\"cct_temp\":600,"
@@ -2894,7 +2984,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_SENSORS_MOTION
   
 
-  #define ENABLE_PIXEL_FUNCTION_FLASHER
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
   // Test ultrasonic oilfurnace code
   // #define USE_BUILD_TYPE_CUSTOM
   // #define USE_MODULE_CUSTOM_OILFURNACE
@@ -2911,7 +3001,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
   
   #define USE_MODULE_TEMPLATE
@@ -2964,8 +3054,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_FLASHER  "\","
-    "\"" D_JSON_FLASHER "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
@@ -3335,7 +3425,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    
 //   #define USE_BUILD_TYPE_LIGHTING
 //   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
   
 //   #define USE_MODULE_SENSORS_MOTION
 
@@ -3362,8 +3452,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 //     "\"" D_JSON_HARDWARE_TYPE  "\":\""  D_JSON_WS2812 "\","
 //     "\"" D_JSON_STRIP_SIZE     "\":"    "50"          ","
 //     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-//     "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-//     "\"" D_JSON_SCENE_COLOUR   "\":{"
+//     "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_//Scene  "\","
+//     "\"" D_JSON_//Scene_COLOUR   "\":{"
 //           "\"" D_JSON_HSB    "\":[30,80,100]" 
 //         "},"
 //     "\"" D_JSON_BRIGHTNESS     "\":"    "50"
@@ -3444,12 +3534,12 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   #define USE_MODULE_SENSORS_BME
 
-  #define DISABLE_PIXEL_FUNCTION_FLASHER
+  #define DISABLE_PIXEL_FUNCTION_EFFECTS
   #define ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  #define USE_MODULE_LIGHTS_ADDRESSABLE  
+  #define USE_MODULE_LIGHTS_ANIMATOR  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3480,8 +3570,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_//Scene  "\","
+    "\"" D_JSON_//Scene_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
@@ -3561,7 +3651,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   // #define USE_BUILD_TYPE_LIGHTING
   // #define USE_MODULE_LIGHTS_INTERFACE //temp fix
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE  
+  // #define USE_MODULE_LIGHTS_ANIMATOR  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3600,8 +3690,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\""  D_JSON_GRB    "\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_SCENE  "\","
-    "\"" D_JSON_SCENE_COLOUR   "\":{"
+    "\"" D_JSON_ANIMATIONMODE           "\":\""  D_JSON_//Scene  "\","
+    "\"" D_JSON_//Scene_COLOUR   "\":{"
           "\"" D_JSON_HSB    "\":[15,95,0]" 
         "},"
     "\"" D_JSON_BRIGHTNESS       "\":0,"
@@ -3720,7 +3810,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Scene\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"//Scene\","
     "\"" D_JSON_BRIGHTNESS     "\":0"
   "}";
 #endif
@@ -3834,7 +3924,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
   #define USE_MODULE_SENSORS_BME
   #define D_DEVICE_SENSOR_CLIMATE "Outside"
@@ -3867,7 +3957,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"User 10\","
-    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_FLASHER "\","
+    "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
     "\"" D_JSON_BRIGHTNESS     "\":5"
   "}";
 
@@ -4355,7 +4445,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #ifdef DEVICE_KITCHENLIGHT4
   #define DEVICENAME_CTR          "kitchenlight4"
-  #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 4 Cupboard"
+  #define DEVICENAME_FRIENDLY_CTR "Kitchen Lgt 4 Cupboard P"
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1

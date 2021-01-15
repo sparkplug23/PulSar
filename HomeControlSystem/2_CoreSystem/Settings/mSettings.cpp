@@ -72,13 +72,13 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
   uint16_t new_buffer_length = buffer_length+strlen(name_ctr);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("AddDeviceName(%s,%d,%d) %d index=%d"), 
-    name_ctr, 
-    class_id, 
-    device_id, 
-    buffer_length, 
-    index
-  );
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("AddDeviceName(%s,%d,%d) %d index=%d"), 
+  //   name_ctr, 
+  //   class_id, 
+  //   device_id, 
+  //   buffer_length, 
+  //   index
+  // );
     #endif// ENABLE_LOG_LEVEL_INFO
   //AddLog_P(LOG_LEVEL_INFO,PSTR("name_bufferB=%s"), buffer);
 
@@ -86,7 +86,7 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
   if(new_buffer_length<DEVICENAMEBUFFER_NAME_BUFFER_LENGTH){
     buffer_length+=sprintf(buffer+buffer_length, "%s|", name_ctr); 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR("AddDeviceName ADDED + \"%s\""),name_ctr); 
+    // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("AddDeviceName ADDED + \"%s\""),name_ctr); 
     #endif // ENABLE_LOG_LEVEL_INFO
   }
 
@@ -95,9 +95,9 @@ int8_t mSettings::AddDeviceName(const char* name_ctr, int16_t class_id, int8_t d
   Settings.device_name_buffer.device_id[index] = device_id;
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("name_bufferE=%s"), buffer);
-  AddLog_Array(LOG_LEVEL_DEBUG,PSTR("class_id"),Settings.device_name_buffer.class_id,(int16_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
-  AddLog_Array(LOG_LEVEL_DEBUG,PSTR("device_id"),Settings.device_name_buffer.device_id,(int8_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("name_bufferE=%s"), buffer);
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE,PSTR("class_id"),Settings.device_name_buffer.class_id,(int16_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE,PSTR("device_id"),Settings.device_name_buffer.device_id,(int8_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
     #endif// ENABLE_LOG_LEVEL_INFO
 
 }
@@ -1817,7 +1817,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.animation_settings.animation_transition_time_ms = 10000; //TBD save as seconds
   Settings.animation_settings.animation_transition_rate_ms = 10000; //TBD save as seconds
   // Settings.animation_settings.animation_transition_pixels_to_update_as_number = 1;
-  Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = 100;
+  // Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = 100;
 
   Settings.light_settings.light_fade = 0;
   Settings.light_settings.light_speed = 20;
@@ -1850,6 +1850,41 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   // for (uint8_t j = 0; j < 5; j++) {
   //   Settings.light_settings.rgbwwTable[j] = 255;
   // }
+
+  // uint8_t init_colours[25] = {
+  //   255, 0, 0, 0, 0,
+  //   0, 255, 0, 0, 0,
+  //   0, 0, 255, 0, 0,
+  //   255, 0, 255, 0, 0,
+  //   0, 255, 255, 0, 0
+  // };
+  uint8_t init_colours[25] = {
+    255,0,0,255,0,
+    0,255,0,127,255,
+    0,0,255,0,127,
+    255,0,255,0,0,
+    255,255,0,1,2
+  };
+
+  memcpy(Settings.animation_settings.palette_rgbcct_users_colour_map, init_colours, sizeof(init_colours));
+  
+  uint8_t init_colours2[30] = {
+    // map_size, map_id_type, 0, 0, 0,
+    5*5, 9, 0, 0, 0,
+     255,0,0,255,0,
+    0,255,0,127,255,
+    0,0,255,0,127,
+    255,0,255,0,0,
+    255,255,0,1,2
+    // 1,0,0,255,0,
+    // 0,2,0,127,255,
+    // 0,0,3,255,127,
+    // 4,0,4,0,0,
+    // 5,5,0,1,2
+  };
+
+  memcpy(Settings.animation_settings.palette_encoded_users_colour_map, init_colours2, sizeof(init_colours2));
+  
 
 }
 

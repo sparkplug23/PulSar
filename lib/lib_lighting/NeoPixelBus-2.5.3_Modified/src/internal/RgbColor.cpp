@@ -199,6 +199,88 @@ void RgbColor::Lighten(uint8_t delta)
 	}
 }
 
+
+uint8_t RgbColor::CalculateBrightness() const
+{
+    uint8_t colorB = (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);
+    // if (WW > colorB)
+    // {
+    //     return WW;
+    // }
+    // else if (WC > colorB)
+    // {
+    //     return WC;
+    // }
+    // else
+    // {
+        return colorB;
+    // }
+}
+
+void RgbColor::Darken(uint8_t delta)
+{
+    if (R > delta)
+    {
+        R -= delta;
+    }
+    else
+    {
+        R = 0;
+    }
+
+    if (G > delta)
+    {
+        G -= delta;
+    }
+    else
+    {
+        G = 0;
+    }
+
+    if (B > delta)
+    {
+        B -= delta;
+    }
+    else
+    {
+        B = 0;
+    }
+
+}
+
+
+//DarkenDivided
+//creates a non linear dimming (2) 100 50 25 12 6 3 2 1 0
+void RgbColor::DarkenDivided(uint8_t dividor)
+{
+    if (R > dividor)
+    {
+        R /= dividor;
+    }
+    else
+    {
+        R = 0;
+    }
+
+    if (G > dividor)
+    {
+        G /= dividor;
+    }
+    else
+    {
+        G = 0;
+    }
+
+    if (B > dividor)
+    {
+        B /= dividor;
+    }
+    else
+    {
+        B = 0;
+    }
+
+}
 RgbColor RgbColor::LinearBlend(const RgbColor& left, const RgbColor& right, float progress)
 {
 	return RgbColor( left.R + ((right.R - left.R) * progress),

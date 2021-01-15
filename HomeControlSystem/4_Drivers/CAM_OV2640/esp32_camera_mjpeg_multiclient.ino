@@ -47,8 +47,8 @@
 #include "camera_pins.h"
 
 
-  #define SSID1 "Skynet2400"
-  #define PWD1 "af4d8bc9ab"
+  #define SSID1 ""
+  #define PWD1 ""
 
 /*
   Next one is an include with wifi credentials.

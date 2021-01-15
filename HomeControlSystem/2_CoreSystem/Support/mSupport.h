@@ -3,6 +3,10 @@
 #define _MSUPPORT_H_
 
 
+//using class, to save known sun position, maybe in support? azimuth, elevation, isvalid, age
+
+
+
 #include "0_ConfigUser/mUserConfig.h"
 
 
@@ -498,8 +502,12 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
 // Force a float value between two ranges, and adds or substract the range until we fit
 float ModulusRangef(float f, float a, float b);
 
+static bool CheckCommand_P(const char* needle, const char* haystack);
+static int8_t GetCommandID(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
+static int8_t GetCommandID_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 
-    int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
+
+  int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     
 
     int8_t GetStateNumber(const char *state_text);

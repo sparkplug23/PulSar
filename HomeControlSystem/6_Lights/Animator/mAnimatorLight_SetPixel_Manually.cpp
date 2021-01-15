@@ -1,16 +1,16 @@
-#include "mRGBAnimator.h"
+#include "mAnimatorLight.h"
 
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
 #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
 
-void mRGBAnimator::SubTask_Manual_SetPixel(){
+void mAnimatorLight::SubTask_Manual_SetPixel(){
 
   // AddLog_P(LOG_LEVEL_TEST, PSTR("SubTask_Manual_SetPixel"));
 
-  //  pCONT_iLight->animation.transition.rate_ms.val = 1000;
+  //  pCONT_iLight->animation.transition.rate_ms = 1000;
   //  pCONT_iLight->animation.transition.time_ms.val = 0;
 
   // SubTask_Flasher_Animate_Function_Slow_Glow();
@@ -89,7 +89,7 @@ void mRGBAnimator::SubTask_Manual_SetPixel(){
 }
 
 
-uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
   JsonBuilderI->Start();
 
@@ -109,7 +109,7 @@ uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
     // JsonBuilderI->Level_Start(D_JSON_MODE);
     //   JsonBuilderI->Add(D_JSON_RUNNING_ID, mixer.running_id);
-    //   JsonBuilderI->Array_AddArray(D_JSON_TIME_ON_SECS, mixer.mode.time_on_secs, FLASHER_FUNCTION_MIXER_MAX);
+    //   JsonBuilderI->Array_AddArray(D_JSON_TIME_ON_SECS, mixer.mode.time_on_secs, EFFECTS_FUNCTION_MIXER_MAX);
     //   JsonBuilderI->Add(D_JSON_TIME_ON_SECS "_Active", mixer.mode.time_on_secs_active);
     //   JsonBuilderI->Add("run_time_duration_scaler_as_percentage", mixer.run_time_duration_scaler_as_percentage);
     // JsonBuilderI->Level_End();
@@ -121,7 +121,7 @@ uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
       uint16_t pixels_added = 0;
 
       JsonBuilderI->Array_Start("PixelsOn");
-      for(uint16_t i=0;i<light_size_count;i++){ 
+      for(uint16_t i=0;i<settings.light_size_count;i++){ 
         if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
           JsonBuilderI->Add(i); 
           if(pixels_added++>50){
@@ -134,16 +134,16 @@ uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
 
     //   JsonBuilderI->Array_Start("ifenabled_forced_brightness_level_percentage");
-    //   for(uint8_t i=0;i<FLASHER_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].ifenabled_forced_brightness_level_percentage); }
+    //   for(uint8_t i=0;i<EFFECTS_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].ifenabled_forced_brightness_level_percentage); }
     //   JsonBuilderI->Array_End(); 
     //   JsonBuilderI->Array_Start("pixels_to_update_as_percentage");
-    //   for(uint8_t i=0;i<FLASHER_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].pixels_to_update_as_percentage); }
+    //   for(uint8_t i=0;i<EFFECTS_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].pixels_to_update_as_percentage); }
     //   JsonBuilderI->Array_End();
     //   JsonBuilderI->Array_Start("transition_time");
-    //   for(uint8_t i=0;i<FLASHER_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].transition.time); }
+    //   for(uint8_t i=0;i<EFFECTS_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].transition.time); }
     //   JsonBuilderI->Array_End();
     //   JsonBuilderI->Array_Start("transition_rate");
-    //   for(uint8_t i=0;i<FLASHER_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].transition.rate); }
+    //   for(uint8_t i=0;i<EFFECTS_FUNCTION_MIXER_MAX;i++){ JsonBuilderI->Add(mixer.group[i].transition.rate); }
     //   JsonBuilderI->Array_End();
 
 
@@ -192,7 +192,7 @@ uint8_t mRGBAnimator::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
 #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
-#endif //USE_MODULE_LIGHTS_ADDRESSABLE
+#endif //USE_MODULE_LIGHTS_ANIMATOR
 
 
 

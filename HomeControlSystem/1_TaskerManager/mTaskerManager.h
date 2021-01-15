@@ -317,28 +317,36 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   #define D_MODULE_LIGHTS_INTERFACE_ID 140
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_INTERFACE_CTR)              "mInterfaceLight";
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR)              "lightinterface";
-  #define pCONT_iLight pCONT->mil
+  #define pCONT_iLight pCONT->minterface_light
+#endif
+#ifdef USE_MODULE_LIGHTS_ANIMATOR // previosly addressible, will not include any hardware going forward
+  #include "6_Lights/Animator/mAnimatorLight.h"
+  class mAnimatorLight;
+  #define D_MODULE_LIGHTS_ANIMATOR_ID 141
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ANIMATOR_CTR)              "mAnimatorLight";
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR)     "pixels";
+  #define pCONT_lAni pCONT->mlights_animator
 #endif
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  #include "6_Lights/AddressableLights/mRGBAnimator.h"
-  class mRGBAnimator;
-  #define D_MODULE_LIGHTS_ADDRESSABLE_ID 141
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_CTR)              "RGBAdressable";
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)              "pixels";
-  #define pCONT_ladd pCONT->mrgbani
+  #include "6_Lights/Hardware/Addressable/mAddressableLight.h"
+  class mAddressableLight;
+  #define D_MODULE_LIGHTS_ADDRESSABLE_ID 142
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_CTR)            "mRGBAdressable";
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)   "addressable";
+  #define pCONT_ladd pCONT->mlights_addressable
 #endif
 #ifdef USE_MODULE_LIGHTS_PWM
-  #include "6_Lights/PWMLights/mPWMLight.h"
+  #include "6_Lights/Hardware/PWM/mPWMLight.h"
   class mPWMLight;
-  #define D_MODULE_LIGHTS_PWM_ID 142
+  #define D_MODULE_LIGHTS_PWM_ID 143
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_CTR)              D_MODULE_LIGHTS_PWM_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)              D_MODULE_LIGHTS_PWM_FRIENDLY_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)     D_MODULE_LIGHTS_PWM_FRIENDLY_CTR;
   #define pCONT_lPWM pCONT->mlights_pwm
 #endif
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
   #include "6_Lights/WLEDEffects/mWLEDEffects.h"
   class mWLEDEffects;
-  #define D_MODULE_LIGHTS_WLED_EFFECTS_ID 143
+  #define D_MODULE_LIGHTS_WLED_EFFECTS_ID 144
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_CTR)              D_MODULE_LIGHTS_WLED_EFFECTS_CTR;
   DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR)     D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR;
   #define pCONT_lwled pCONT->mlights_wled
@@ -705,10 +713,13 @@ class mTaskerManager{
    * Lights
    * */
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-    mInterfaceLight *mil = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+    mInterfaceLight *minterface_light = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    mAnimatorLight *mlights_animator = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    mRGBAnimator *mrgbani = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+    mAddressableLight *mlights_addressable = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
     mPWMLight *mlights_pwm = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
