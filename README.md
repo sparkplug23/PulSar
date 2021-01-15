@@ -57,6 +57,12 @@ Since this project is still under development, it requires extra steps for other
 
 4) The file named ```platformio.ini``` has a variable named `default_envs`. Each (on a new line) device in the format `esp_8266_<devicename>` will be compiled. At least one must be provided, but multiple devices can be built and flashed at once.
 
+```cpp
+default_envs = 
+    esp_8266_customuser_example_serial
+    ; esp_8266_customuser_example_ota
+```
+
 5) The file named ```platformio_env8266.ini``` must contain the environment named in the previous step (ie `esp_8266_<devicename>`). For serial flashing, the minimal environment should have these as a minimum.
 
 ```cpp
