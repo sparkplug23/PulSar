@@ -674,7 +674,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // // arg_value = map(arg_value, 0,100, 0,255);
-//     if(isCTRGBLinked()){
+//     if(Get_RGBCT_Linked()){
 //         CommandSet_RGBCT_Linked(false);
 //     }else{
 //         CommandSet_RGBCT_Linked(true);

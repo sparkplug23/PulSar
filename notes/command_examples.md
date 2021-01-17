@@ -65,7 +65,7 @@
   },
   "AnimationMode":"Effects",
   "Effects":{"Function":8},
-  "BrightnesRGB":100,
-  "BrightnessCT":10,
+  "BrightnessRGB":100,
+  "BrightnessCCT":10,
   "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
 }

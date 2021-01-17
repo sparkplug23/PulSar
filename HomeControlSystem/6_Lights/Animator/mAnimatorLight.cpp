@@ -1361,6 +1361,18 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColour(RgbcctColor full_rang
 
 }
 
+RgbcctColor mAnimatorLight::ApplyRGBCCTBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
+
+  RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
+  colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightnessRGB);
+  colour_adjusted_with_brightness.G  = mapvalue(full_range_colour.G,  0,255, 0,brightnessRGB);
+  colour_adjusted_with_brightness.B  = mapvalue(full_range_colour.B,  0,255, 0,brightnessRGB);
+  colour_adjusted_with_brightness.WW = mapvalue(full_range_colour.WW, 0,255, 0,brightnessCCT);
+  colour_adjusted_with_brightness.WC = mapvalue(full_range_colour.WC, 0,255, 0,brightnessCCT);
+  return colour_adjusted_with_brightness;
+
+}
+
 
 RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
   

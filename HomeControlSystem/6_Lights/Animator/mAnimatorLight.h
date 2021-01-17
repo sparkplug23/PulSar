@@ -968,6 +968,7 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
 void ApplyBrightnesstoDesiredColour(uint8_t brightness);
 
 RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
+RgbcctColor ApplyRGBCCTBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
 
 
 

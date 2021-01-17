@@ -519,7 +519,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     DEBUG_LINE;
     switch_index = target_tasker ? target_tasker : module_settings.list[i];
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
         switch_index, 
         GetTaskName(function, buffer_taskname),
         GetModuleFriendlyName(switch_index));

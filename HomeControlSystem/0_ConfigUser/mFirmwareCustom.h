@@ -421,7 +421,7 @@
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
     "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRwGB\":100"
   "}";
 
   
@@ -1512,11 +1512,11 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     #else
     "\"" D_JSON_STRIP_SIZE       "\":1,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":0,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":8},"//\"Solid RGBCCT\"},"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
 

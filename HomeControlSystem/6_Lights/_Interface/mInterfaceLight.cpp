@@ -75,9 +75,9 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
   //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue());
-    JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBriRGB());
+    JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+    JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
+    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(animation.transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
@@ -202,35 +202,72 @@ void mInterfaceLight::Init(void) //LightInit(void)
   //   CommandSet_RGBCT_Linked(ct_rgb_linked);
   // }
 
-  // CommandSet_RGBCT_Linked(false); //temp
-  rgbcct_controller.CommandSet_RGBCT_Linked(false);
-  // setCT(CT_MIN);
-  rgbcct_controller.setCT(153);//CT_MIN);
+  DEBUG_LINE_HERE;
 
-  if ((LST_SINGLE <= subtype) && pwm_multi_channels) {
-    // we treat each PWM channel as an independant one, hence we switch to
-    // setPWMMultiChannel(true);
-    rgbcct_controller.setPWMMultiChannel(true);
-    device = pCONT_set->devices_present - subtype + 1; // adjust if we also have relays
-  } else if (!rgbcct_controller.isCTRGBLinked()) {
-    // if RGBW or RGBCW, and SetOption37 >= 128, we manage RGB and W separately
-    device--;   // we take the last two devices as lights
-  }
 
-  // LightCalcPWMRange();
-  #ifdef DEBUG_LIGHT
-    AddLog_P(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
-      pwm_multi_channels, subtype, device, pCONT_set->devices_present);
-  #endif
 
+
+  /***
+   * Configure RgbcctController Instance
+   * */
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
   rgbcct_controller.setSubType(subtype);
-  rgbcct_controller.Sync();    // calculate the initial values (#8058)
-
-  // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
-
-  if (LST_SINGLE == subtype) {
-    //pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
+  rgbcct_controller.setApplyBrightnessToOutput(false);
+  if(pCONT_set->Settings.light_settings.type == LT_WS2812){ //RGB only
+    rgbcct_controller.setColorMode(LCM_RGB);
+  }else{
+    rgbcct_controller.setColorMode(LCM_BOTH);
   }
+  rgbcct_controller.Sync();    // calculate the initial values (#8058)
+  // RGB parts
+  rgbcct_controller.setRGB(1,2,3);
+  // CCT parts
+  rgbcct_controller.setRGBCCTLinked(false);
+  rgbcct_controller.setCCT(153);
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // if ((LST_SINGLE <= subtype) && pwm_multi_channels) {
+  //   // we treat each PWM channel as an independant one, hence we switch to
+  //   // setPWMMultiChannel(true);
+  //   rgbcct_controller.setPWMMultiChannel(true);
+  //   device = pCONT_set->devices_present - subtype + 1; // adjust if we also have relays
+  // } else if (!rgbcct_controller.getRGBCCTLinked()) {
+  //   // if RGBW or RGBCW, and SetOption37 >= 128, we manage RGB and W separately
+  //   device--;   // we take the last two devices as lights
+  // }
+
+  // DEBUG_LINE_HERE;
+  // // LightCalcPWMRange();
+  // #ifdef DEBUG_LIGHT
+  //   AddLog_P(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
+  //     pwm_multi_channels, subtype, device, pCONT_set->devices_present);
+  // #endif
+
+
+  // DEBUG_LINE_HERE;
+  // // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
+
+  // if (LST_SINGLE == subtype) {
+  //   //pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
+  // }
   // if (Settings.light_settings.type < LT_PWM6) {           // PWM
   //   for (uint32_t i = 0; i < Settings.light_settings.type; i++) {
   //     Settings.pwm_value[i] = 0;        // Disable direct PWM control
@@ -241,25 +278,21 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // }
 
   // Set light mode
-  if(pCONT_set->Settings.light_settings.type == LT_WS2812){ //RGB only
-    rgbcct_controller.setColorMode(LCM_RGB);
-  }else{
-    rgbcct_controller.setColorMode(LCM_BOTH);
-  }
+  
 
 
-  uint32_t max_scheme = max_scheme;
-  if (subtype < LST_RGB) {
-    max_scheme = LS_POWER;
-  }
-  if ((LS_WAKEUP == pCONT_set->Settings.light_settings.light_scheme) || (pCONT_set->Settings.light_settings.light_scheme > max_scheme)) {
-    pCONT_set->Settings.light_settings.light_scheme = LS_POWER;
-  }
-  pCONT_set->power = 1;
+  // uint32_t max_scheme = max_scheme;
+  // if (subtype < LST_RGB) {
+  //   max_scheme = LS_POWER;
+  // }
+  // if ((LS_WAKEUP == pCONT_set->Settings.light_settings.light_scheme) || (pCONT_set->Settings.light_settings.light_scheme > max_scheme)) {
+  //   pCONT_set->Settings.light_settings.light_scheme = LS_POWER;
+  // }
+  // pCONT_set->power = 1;
   
   
   // if (pCONT_set->Settings.flag4.fade_at_startup) {
-    fade_initialized = true;      // consider fade intialized starting from black
+    // fade_initialized = true;      // consider fade intialized starting from black
   // }
 
 //   pCONT_set->Settings.light_settings.type = LT_BASIC;                    // Use basic PWM control if SetOption15 = 0
@@ -405,8 +438,25 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
 
 // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test.R, colour_test.G, colour_test.B, colour_test.WW, colour_test.WC);
 // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
-// AddLog_Array(LOG_LEVEL_TEST, "colour_test", colour_test, 5);
+// AddLog_Array(LOG_LEVEL_TEST, "palette_rgbcct_users", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5);
 
+
+
+// uint8_t r, g, b;
+// uint16_t hue = 0;
+// uint8_t sat = 50;
+
+//      rgbcct_controller.HsToRgb(hue, sat, &r, &g, &b, true);
+//      AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 1);
+
+//      rgbcct_controller.HsToRgb(hue, sat, &r, &g, &b, 0);
+//      AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 0);
+
+
+
+      // flag_test^=1;
+      // AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS RGB raw (%d %d %d) HS (%d %d) bri (%d)"), R, G, B, _hue, _sat, _briRGB);
+      // #endif
 
 
       // AddLog_P(LOG_LEVEL_TEST, PSTR("fMapIDs_Type=%d"),palettelist.rgbcct_users[0].flags.fMapIDs_Type);
@@ -464,7 +514,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
 
       //Temp fix until proper monitoring of on/off states
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
-      light_power_state = rgbcct_controller.getBri()?1:0;
+      light_power_state = rgbcct_controller.getBrightness255()?1:0;
       //AddLog_P(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
     
@@ -711,11 +761,11 @@ void mInterfaceLight::SubTask_AutoOff(){
 
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
-  colour->R  = mapvalue(colour->R,  0, 255, 0, rgbcct_controller.getBriRGB());
-  colour->G  = mapvalue(colour->G,  0, 255, 0, rgbcct_controller.getBriRGB());
-  colour->B  = mapvalue(colour->B,  0, 255, 0, rgbcct_controller.getBriRGB());
-  colour->WW = mapvalue(colour->WW, 0, 255, 0, rgbcct_controller.getBriCT());
-  colour->WC = mapvalue(colour->WC, 0, 255, 0, rgbcct_controller.getBriCT());
+  colour->R  = mapvalue(colour->R,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
+  colour->G  = mapvalue(colour->G,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
+  colour->B  = mapvalue(colour->B,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
+  colour->WW = mapvalue(colour->WW, 0, 255, 0, rgbcct_controller.getBrightnessCCT255());
+  colour->WC = mapvalue(colour->WC, 0, 255, 0, rgbcct_controller.getBrightnessCCT255());
 
 }
 
@@ -764,11 +814,11 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
-  JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue());
-  JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat());
+  JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
+  JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBriRGB());
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, rgbcct_controller.getBriCT());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, rgbcct_controller.getBrightnessCCT255());
 
 
   // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
@@ -787,6 +837,20 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
   char buffer[30];
   
   JsonBuilderI->Start();
+
+  JsonBuilderI->Level_Start("RgbcctController");
+  
+    JsonBuilderI->Level_Start("raw");
+      JsonBuilderI->Add("R", rgbcct_controller.R); 
+      JsonBuilderI->Add("G", rgbcct_controller.G); 
+      JsonBuilderI->Add("B", rgbcct_controller.B); 
+      JsonBuilderI->Add("WW", rgbcct_controller.WW); 
+      JsonBuilderI->Add("WC", rgbcct_controller.WC); 
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
+
+  JsonBuilderI->Level_End();
 
   // JsonBuilderI->Level_Start("singlecolour");
   //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);
@@ -1103,5 +1167,58 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
 #endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 
+//     /********THINGS TO REMOVE*************************************************************************************************************************
+//      * ********************************************************************************************************************************
+//      * ********************************************************************************************************************************
+//      * ****** Dimmer as brightness, probably remove and handle with interface **************************************************************************************************************************
+//      * ********************************************************************************************************************************
+//      * ********************************************************************************************************************************/
+
+//       uint8_t DimmerToBri(uint8_t dimmer) {
+//         return map(dimmer, 0, 100, 0, 255);  // 0..255
+//       }
+
+//       uint8_t BriToDimmer(uint8_t bri) {
+//         uint8_t dimmer = map(bri, 0, 255, 0, 100);
+//         // if brightness is non zero, force dimmer to be non-zero too
+//         if ((dimmer == 0) && (bri > 0)) { dimmer = 1; }
+//         return dimmer;
+//       }
+
+//       uint8_t getDimmer(uint32_t mode) {
+//         uint8_t bri;
+//         switch (mode) {
+//           case 1:
+//             bri = getBriRGB();
+//             break;
+//           case 2:
+//             bri = getBriCT();
+//             break;
+//           default:
+//             bri = getBri();
+//             break;
+//         }
+//         return BriToDimmer(bri);
+//       }
+
+      
+
+// // set all 5 channels at once.
+// // Channels are: R G B CW WW
+// // Brightness is automatically recalculated to adjust channels to the desired values
+// void changeChannels(uint8_t *channels) {
+//   // if (pwm_multi_channels) {
+//   //   setChannelsRaw(channels);
+//   // } else if (LST_COLDWARM == subtype) {
+//   //   // remap channels 0-1 to 3-4 if cold/warm
+//   //   uint8_t remapped_channels[5] = {0,0,0,channels[0],channels[1]};
+//   //   setChannels(remapped_channels);
+//   // } else {
+//   //   setChannels(channels);
+//   // }
+
+//   // saveSettings();
+//   UpdateInternalColour();
+// }
 
 #endif // USE_DRIVER

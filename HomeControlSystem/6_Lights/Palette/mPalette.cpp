@@ -54,6 +54,7 @@ void mPalette::init_PresetColourPalettes(){
     init_PresetColourPalettes_User_Generic_Fill(0);
   }
 
+  DEBUG_LINE_HERE;
   /**
    *  Static 
    * */
@@ -103,6 +104,7 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Gradient_SunLevel_Group01_06();
   init_ColourPalettes_Gradient_SunLevel_Group01_07();
 
+  DEBUG_LINE_HERE;
 }
 
 
@@ -1081,14 +1083,16 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
 const char* mPalette::GetPaletteName(char* buffer, uint8_t buflen){
   
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  return GetPaletteNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
+  return GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
+  // return GetPaletteNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
   // #else
   // return GetPaletteNameByID(0, buffer, buflen);
   // #endif
 } 
 const char* mPalette::GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen){  
   PALETTELIST::PALETTE *ptr = GetPalettePointerByID(id);
-  return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;
+  return GetPaletteFriendlyNameByID(id, buffer, buflen);
+  // return ptr->friendly_name_ctr!=nullptr?ptr->friendly_name_ctr:WARNING_NOTHANDLED_CTR;
 }
 
 

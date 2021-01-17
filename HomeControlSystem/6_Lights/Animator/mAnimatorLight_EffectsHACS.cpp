@@ -39,7 +39,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
 
         // Global brightness is already applied, and will be known as "max range"
         // Min range will be another map change here
-        uint8_t max_brightness = pCONT_iLight->rgbcct_controller.getBriRGB();
+        uint8_t max_brightness = pCONT_iLight->rgbcct_controller.getBrightnessRGB255();
         uint8_t min_brightness = flashersettings.brightness_min;
         uint8_t random_brightness = 0;
 
@@ -182,10 +182,26 @@ void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour(const
  * Requires new colour calculation each call
  */
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function_Solid_RGBCCT"));
   // Set palette pointer
   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
   // Set up colours
+  // Brightness is generated internally, and rgbcct solid palettes are output values
+  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+
+  AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
+  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+    animation_colours_rgbcct.DesiredColour = ApplyRGBCCTBrightnesstoDesiredColour(
+      animation_colours_rgbcct.DesiredColour, 
+      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
+      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+    );
+  }
+
+  AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
   animation_colours_rgbcct.StartingColor = pCONT_iLight->GetPixelColourHardwareInterface();
   // Call the animator to blend from previous to new
   this->setAnimFunctionCallback(
@@ -395,7 +411,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
         colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
         if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-          colour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->rgbcct_controller.getBriRGB());
+          colour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->rgbcct_controller.getBrightnessRGB255());
         }
 
 
@@ -573,7 +589,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
       // }
 
-      pCONT_iLight->rgbcct_controller.setBriRGB_As_Percentage(flashersettings.brightness_min);
+      pCONT_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
 
 
       UpdateDesiredColourFromPaletteSelected();
@@ -647,7 +663,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness
       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
       // }
 
-      pCONT_iLight->rgbcct_controller.setBriRGB_As_Percentage(flashersettings.brightness_min);
+      pCONT_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
 
 
       UpdateDesiredColourFromPaletteSelected();
@@ -1120,7 +1136,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_TwinkleSingleColourRandom(const An
 
   // As integer so the if statement checks will not fail due to rounding errors
   uint8_t progress_percentage = param.progress*100; 
-  uint8_t brightness_as_percentage = map(pCONT_iLight->rgbcct_controller.getBriRGB(), 0,255, 0,100);
+  uint8_t brightness_as_percentage = map(pCONT_iLight->rgbcct_controller.getBrightnessRGB255(), 0,255, 0,100);
   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
 
   /*

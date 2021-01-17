@@ -75,7 +75,7 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
   
   if(jtok = obj[PM_JSON_HUE]){ // Assume range 0-359
-    CommandSet_Hue_360(jtok.getInt());
+    CommandSet_ActiveSolidPalette_Hue_360(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
@@ -83,14 +83,14 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   if(jtok = obj[PM_JSON_SAT]){ // Assume range 0-100
-    CommandSet_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    CommandSet_ActiveSolidPalette_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), getSat());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_SAT_255]){ // alternate full range 0-255
-    CommandSet_Sat_255(jtok.getInt());
+    CommandSet_ActiveSolidPalette_Sat_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT_255)), getSat());
@@ -143,14 +143,14 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
-    CommandSet_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
+    CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
-    CommandSet_ColourTemp(jtok.getInt());
+    CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
@@ -158,7 +158,7 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
-    rgbcct_controller.CommandSet_RGBCT_Linked(jtok.getInt());
+    CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
@@ -715,7 +715,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
       }
 
       animation_override.time_ms = 1000; //force fast rate to turn on
-      rgbcct_controller.changeBrt255(255);
+      rgbcct_controller.setBrightness255(255);
       animation.flags.fForceUpdate = true;
       //pCONT_ladd->first_set = 1;//set all
 
@@ -754,7 +754,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
           animation.flags.fForceUpdate = true;
           animation_override.time_ms = 1000; //force fast rate to turn on
 
-          rgbcct_controller.changeBrt255(0);
+          rgbcct_controller.setBrightness255(0);
 
           
 
@@ -769,7 +769,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
         //   animation.flags.fForceUpdate = true;
         //   animation_override.time_ms = 1000; //force fast rate to turn on
 
-        //   rgbcct_controller.changeBrt255(0);
+        //   rgbcct_controller.setBrightness255(0);
 
         //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
         //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
@@ -797,11 +797,13 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Hue_360(uint16_t hue_new){
-    rgbcct_controller.changeHue(hue_new);
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue());
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
+void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
+  Serial.println("HER"); Serial.flush();
+  rgbcct_controller.setHue360(hue_new);
+  animation.flags.fForceUpdate = true;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
 /******************************************************************************************************************************
@@ -810,10 +812,11 @@ void mInterfaceLight::CommandSet_Hue_360(uint16_t hue_new){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Sat_255(uint8_t sat_new){
-  rgbcct_controller.changeSat(sat_new);
+void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
+  rgbcct_controller.setSat255(sat_new);
+  animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat());
+  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -824,10 +827,11 @@ void mInterfaceLight::CommandSet_Sat_255(uint8_t sat_new){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
-  rgbcct_controller.changeBrt255(brt_new);
+  rgbcct_controller.setBrightness255(brt_new);
+  animation.flags.fForceUpdate = true;
   setBriRGB_Global(brt_new);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBri());
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -838,10 +842,12 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
-  rgbcct_controller.changeBriRGB(bri);
+  rgbcct_controller.setBrightnessRGB255(bri);
+  _briRGB_Global = bri;
+  animation.flags.fForceUpdate = true;
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBri());
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -852,10 +858,12 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
-  rgbcct_controller.setBriCT(bri);
+  rgbcct_controller.setBrightnessCCT255(bri);
+  _briCT_Global = bri;
+  animation.flags.fForceUpdate = true;
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBriCT());
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBrightnessCCT255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -866,12 +874,30 @@ void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_ColourTemp(uint16_t ct) {
-  rgbcct_controller.CommandSet_ColourTemp(ct);
+void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
+  rgbcct_controller.setCCT(ct);
+  animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.LightGetColorTemp());
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** CommandSet_RGBCT_Linked *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked) {
+  rgbcct_controller.setRGBCCTLinked(ct_rgb_linked);
+  animation.flags.fForceUpdate = true;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+
 
 
 
@@ -882,7 +908,8 @@ void mInterfaceLight::CommandSet_ColourTemp(uint16_t ct) {
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
-  rgbcct_controller.setChannelsRaw(values);      
+  rgbcct_controller.setChannelsRaw(values);    
+  animation.flags.fForceUpdate = true;  
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[30];
   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
@@ -1181,6 +1208,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   memcpy(palette_buffer,buffer,buflen);
 
   // rgbcct_controller.UpdateFromExternalBuffer();
+  animation.flags.fForceUpdate = true;
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
@@ -1197,6 +1225,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   memcpy(palette_buffer,buffer,buflen);
 
   rgbcct_controller.UpdateFromExternalBuffer();
+  animation.flags.fForceUpdate = true;
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
     // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
@@ -1218,6 +1247,8 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   //update the init process of variables
 
   mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);
+
+  DEBUG_LINE_HERE;
 
 
   }

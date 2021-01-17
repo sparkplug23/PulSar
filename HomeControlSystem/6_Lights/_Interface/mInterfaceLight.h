@@ -537,6 +537,8 @@ class mInterfaceLight{
       uint8_t _segment_index_palette_last = 99;
     };
 
+    bool flag_test= false;
+
     // segment _segments[MAX_NUM_SEGMENTS];
     //  = { // SRAM footprint: 24 bytes per element
     //   // start, stop, speed, intensity, palette, mode, options, grouping, spacing, opacity (unused), color[]
@@ -611,16 +613,21 @@ class mInterfaceLight{
 
     void CommandSet_PixelHardwareTypeID(uint8_t value);
     void CommandSet_LightPowerState(uint8_t value);
-    void CommandSet_Hue_360(uint16_t value);
-    void CommandSet_Sat_255(uint8_t value);
+
+    // Global and shared with activergb
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);
     void CommandSet_BrtCT_255(uint8_t bri);
-    void CommandSet_ColourTemp(uint16_t ct);
+
+    void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
+    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
+    void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
+    bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
+    void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+
     void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
     void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    
     // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
     // void CommandSet_SingleColourMode_ID(uint8_t value);
     // #endif// ENABLE_DEVFEATURE_PHASING_SCENE_OUT
@@ -631,7 +638,6 @@ class mInterfaceLight{
     void CommandSet_LightsCountToUpdateAsNumber(uint16_t value);
     void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value);
     void CommandSet_TransitionOrderID(uint8_t value);
-    void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
     void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
@@ -667,7 +673,7 @@ class mInterfaceLight{
 //     void getXY(float *x, float *y);
 //     void setBri(uint8_t bri);
    
-//  uint8_t setBriCT(uint8_t bri_ct);
+//  uint8_t SetBrightnessCCT255(uint8_t bri_ct);
 //     uint8_t getBriRGB();
 //     void setDimmer(uint8_t dimmer);
 //     void setCT(uint16_t ct);
@@ -683,7 +689,7 @@ class mInterfaceLight{
 //     void setSubType(uint8_t sub_type);
 //     bool CommandSet_RGBCT_Linked(bool ct_rgb_linked);
 //     void setAlexaCTRange(bool alexa_ct_range);
-//     bool isCTRGBLinked();
+//     bool Get_RGBCT_Linked();
 //     bool setPWMMultiChannel(bool pwm_multi_channels);
 //     bool isPWMMultiChannel(void);
 //     void debugLogs();
