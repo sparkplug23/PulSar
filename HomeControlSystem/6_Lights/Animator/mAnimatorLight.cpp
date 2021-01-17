@@ -27,7 +27,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function){
       init();
       break;
   }
-
+//return 0;
   if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
   
   switch(function){

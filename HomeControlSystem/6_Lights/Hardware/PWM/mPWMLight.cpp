@@ -90,6 +90,7 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   uint16_t cur_col;
   uint16_t pin_num;
   uint16_t pwm_value;
+  //uint16_t val_1=0,val_2=0;
 
   // now apply the actual PWM values, adjusted and remapped 10-bits range
   if (pCONT_set->Settings.light_settings.type < LT_PWM6) {
@@ -98,11 +99,23 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
         // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
         cur_col = cur_col_10[i + pCONT_iLight->settings.pwm_offset]; //leak chance
         if(!pCONT_iLight->rgbcct_controller.isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max
+         //val_1 = cur_col;
           cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   // shrink to the range of pwm_min..pwm_max
+          //val_2 = cur_col;
+         
+        
         }
         pin_num = pCONT_pins->Pin(GPIO_PWM1_ID, i);
         pwm_value = bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - cur_col : cur_col;
-        // Serial.printf("%d pin_num=%d, %d/%d, %d\n\r", i, pin_num, cur_col, pCONT_set->Settings.pwm_range, pwm_value);
+        //Serial.printf("%d pin_num=%d, %d/%d, %d\n\r", i, pin_num, cur_col, pCONT_set->Settings.pwm_range, pwm_value);
+
+         /*Serial.printf("%d pin_num=%d, %d/%d, %d    %d,%d    min/ax %d,%d\n\r", i, pin_num, 
+          cur_col, pCONT_set->Settings.pwm_range, 
+          pwm_value,
+          val_1,val_2,
+          pCONT_iLight->pwm_min,pCONT_iLight->pwm_max);*/
+
+
         analogWrite(pin_num, pwm_value);
       } //pin used
     } //subtype

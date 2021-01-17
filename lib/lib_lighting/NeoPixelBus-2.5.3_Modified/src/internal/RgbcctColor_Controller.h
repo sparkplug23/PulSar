@@ -573,8 +573,16 @@ public:
 
   // is the channel a regular PWM or ColorTemp control
   bool isChannelCCT(uint32_t channel) {
-    if ((LIGHT_TYPE_COLDWARM_ID == _subtype) && (1 == channel)) { return true; }   // PMW reserved for CT
-    if ((LIGHT_TYPE_RGBCW_ID == _subtype) && (4 == channel)) { return true; }   // PMW reserved for CT
+    // if ((LIGHT_TYPE_COLDWARM_ID == _subtype) && (1 == channel)) { return true; }   // PMW reserved for CT
+    // if ((LIGHT_TYPE_RGBCW_ID == _subtype) && (4 == channel)) { return true; }   // PMW reserved for CT
+
+  //    if (
+  //   // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
+  //   (pCONT_set->Settings.flag4.pwm_ct_mode)) {
+  //   if ((LST_COLDWARM == subtype) && (1 == channel)) { return true; }   // PMW reserved for CT
+  //   if ((LST_RGBCW == subtype) && (4 == channel)) { return true; }   // PMW reserved for CT
+  // }
+  // return false;
     return false;
   }
 
@@ -659,25 +667,6 @@ public:
 
   bool isPWMMultiChannel(void) {
     return _pwm_multi_channels;
-  }
-
-  // compute actual PWM min/max values from DimmerRange
-  // must be called when DimmerRange is changed or LedTable
-  void LightCalcPWMRange(void) {
-    uint16_t pwm_min=0, pwm_max=1023;
-
-    // pwm_min = change8to10(DimmerToBri(pCONT_set->Settings.dimmer_hw_min));   // default 0
-    // pwm_max = change8to10(DimmerToBri(pCONT_set->Settings.dimmer_hw_max));   // default 100
-    // if (pCONT_set->Settings.light_correction) {
-    //   pwm_min = ledGamma10_10(pwm_min);       // apply gamma correction
-    //   pwm_max = ledGamma10_10(pwm_max);       // 0..1023
-    // }
-    // pwm_min = pwm_min > 0 ? mapvalue(pwm_min, 1, 1023, 1, settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
-    // pwm_max = mapvalue(pwm_max, 1, 1023, 1, settings.pwm_range);  // pwm_max cannot be zero
-
-    pwm_min = pwm_min;
-    pwm_max = pwm_max;
-    //AddLog_P2(LOG_LEVEL_TEST, PSTR("LightCalcPWMRange %d %d - %d %d"), settings.dimmer_hw_min, settings.dimmer_hw_max, pwm_min, pwm_max);
   }
 
 };

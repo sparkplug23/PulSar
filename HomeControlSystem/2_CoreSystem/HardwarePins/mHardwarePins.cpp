@@ -1134,8 +1134,8 @@ void mHardwarePins::GpioInit(void)
 
 
 // leave as default for testing
-  // analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
-  // analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
+  analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
+  analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
 
 #ifdef USE_SPI
   spi_flg = ((((pin[GPIO_SPI_CS] < 99) && (pin[GPIO_SPI_CS] > 14)) || (pin[GPIO_SPI_CS] < 12)) || (((pin[GPIO_SPI_DC] < 99) && (pin[GPIO_SPI_DC] > 14)) || (pin[GPIO_SPI_DC] < 12)));

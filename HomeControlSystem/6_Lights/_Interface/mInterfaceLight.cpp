@@ -255,7 +255,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // }
 
   // DEBUG_LINE_HERE;
-  // // LightCalcPWMRange();
+  LightCalcPWMRange();
   // #ifdef DEBUG_LIGHT
   //   AddLog_P(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
   //     pwm_multi_channels, subtype, device, pCONT_set->devices_present);
@@ -263,7 +263,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
 
   // DEBUG_LINE_HERE;
-  // // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
+  // Serial.println("UpdateFinalColourComponents DONE"); Serial.flush();
 
   // if (LST_SINGLE == subtype) {
   //   //pCONT_set->Settings.light_settings.light_color[0] = 255;      // One channel only supports Dimmer but needs max color
@@ -277,7 +277,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   //   }
   // }
 
-  // Set light mode
+  // // Set light mode
   
 
 
@@ -292,10 +292,10 @@ void mInterfaceLight::Init(void) //LightInit(void)
   
   
   // if (pCONT_set->Settings.flag4.fade_at_startup) {
-    // fade_initialized = true;      // consider fade intialized starting from black
+  //   fade_initialized = true;      // consider fade intialized starting from black
   // }
 
-//   pCONT_set->Settings.light_settings.type = LT_BASIC;                    // Use basic PWM control if SetOption15 = 0
+  // pCONT_set->Settings.light_settings.type = LT_BASIC;                    // Use basic PWM control if SetOption15 = 0
 
   // if (pCONT_set->Settings.flag.pwm_control) {          // SetOption15 - Switch between commands PWM or COLOR/DIMMER/CT/CHANNEL
   //   for (uint32_t i = 0; i < MAX_PWMS; i++) {
@@ -411,12 +411,29 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
     *******************/
     case FUNC_LOOP:
       EveryLoop();
+
+     /*       
+if(pwm_test++>100){
+  pwm_test = 50;
+}
+
+Serial.printf("pwm=%d\n\r",pwm_test);
+
+        analogWrite(15, map(pwm_test,0,100,0,1023));
+        */
     break;
+    case FUNC_EVERY_SECOND_TP250MS_WINDOW:{
+
+
+    }break;
     case FUNC_EVERY_SECOND:{
 
       // if(test_hue++ > 359){
       //   test_hue = 0;
       // }
+      //LightCalcPWMRange();
+
+
 
       // rgbcct_controller.setHS(test_hue,255);
 
@@ -499,6 +516,17 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
 // }
 
 
+//   uint16_t tmp_colour[5];
+
+//   tmp_colour[0] = pCONT_iLight->change8to10(pwm_test);
+//   tmp_colour[1] = pCONT_iLight->change8to10(0);
+//   tmp_colour[2] = pCONT_iLight->change8to10(1023-pwm_test);
+//   tmp_colour[3] = pCONT_iLight->change8to10(0);
+//   tmp_colour[4] = pCONT_iLight->change8to10(0); 
+
+//   // AddLog_Array(LOG_LEVEL_TEST,PSTR("tmp_colour"),tmp_colour,(uint16_t)5);
+
+//   pCONT_lPWM->LightSetPWMOutputsArray10bit(tmp_colour);
 
 
 
@@ -1021,6 +1049,27 @@ uint8_t mInterfaceLight::change10to8(uint16_t v) {
  * Gamma correction
 \*********************************************************************************************/
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+
+  // compute actual PWM min/max values from DimmerRange
+  // must be called when DimmerRange is changed or LedTable
+  void mInterfaceLight::LightCalcPWMRange(void) {
+    uint16_t _pwm_min=0, _pwm_max=1023;
+
+    _pwm_min = change8to10(0);//DimmerToBri(pCONT_set->Settings.dimmer_hw_min));   // default 0
+    _pwm_max = change8to10(255);//DimmerToBri(pCONT_set->Settings.dimmer_hw_max));   // default 100
+    // if (pCONT_set->Settings.light_correction) {
+      _pwm_min = ledGamma10_10(_pwm_min);       // apply gamma correction
+      _pwm_max = ledGamma10_10(_pwm_max);       // 0..1023
+    // }
+    _pwm_min = _pwm_min > 0 ? mapvalue(_pwm_min, 1, 1023, 1, pCONT_set->Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
+    _pwm_max = mapvalue(_pwm_max, 1, 1023, 1, pCONT_set->Settings.pwm_range);  // _pwm_max cannot be zero
+
+     pCONT_iLight->pwm_min = _pwm_min;
+     pCONT_iLight->pwm_max = _pwm_max;
+    // AddLog_P2(LOG_LEVEL_TEST, PSTR("LightCalcPWMRange %d %d - %d %d"), settings.dimmer_hw_min, settings.dimmer_hw_max, pwm_min, pwm_max);
+  }
+
 // Calculate the gamma corrected value for LEDS
 uint16_t mInterfaceLight::ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr) {
   uint16_t from_src = 0;

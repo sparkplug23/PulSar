@@ -538,6 +538,7 @@ class mInterfaceLight{
     };
 
     bool flag_test= false;
+    uint16_t    pwm_test = 0;
 
     // segment _segments[MAX_NUM_SEGMENTS];
     //  = { // SRAM footprint: 24 bytes per element
@@ -567,6 +568,8 @@ class mInterfaceLight{
     struct RUNTIME_VALUES{
       uint32_t animation_changed_millis = 0;
     }runtime;
+
+void LightCalcPWMRange();
 
     /**************
      * CHANGE_POWER - TURN_ON - fade ON, returns to previous lighting array.  TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
