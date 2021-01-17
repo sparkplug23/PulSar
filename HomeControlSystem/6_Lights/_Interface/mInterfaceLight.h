@@ -569,6 +569,7 @@ class mInterfaceLight{
       uint32_t animation_changed_millis = 0;
     }runtime;
 
+
 void LightCalcPWMRange();
 
     /**************
