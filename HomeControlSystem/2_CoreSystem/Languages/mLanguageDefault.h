@@ -314,6 +314,10 @@
   #define D_MODULE_CUSTOM_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
 //#endif
 
+// currently fanpwm
+  #define D_MODULE_CUSTOM_FAN_CTR              "mFan"
+  #define D_MODULE_CUSTOM_FAN_FRIENDLY_CTR              "fan"
+
 
 /**
  * Common list - These are D_<exact letters in string> that are Capital first
@@ -1210,6 +1214,7 @@
 #define D_JSON_SWITCH "Switch"
 #define D_JSON_SYNC "Sync"
 #define D_JSON_SYSTEM "System"
+#define D_JSON_SYSTEM_RESTART "SystemRestart"
 #define D_JSON_TEMPERATURE "Temperature"
 #define D_JSON_TEMPERATURE_UNIT "TempUnit"
 #define D_JSON_TEMPLATE_USED "TemplateUsed"
@@ -1485,6 +1490,7 @@
 #define D_JSON_STATE "State"
 #define D_JSON_POWER "Power"
 #define D_JSON_FANSPEED "FanSpeed"
+#define D_JSON_FANSPEED_MANUAL "FanSpeed_Manual"
 #define D_JSON_FANPWM "FanPWM"
 #define D_JSON_POWERONSTATE "PowerOnState"
 #define D_JSON_PULSETIME "PulseTime"
