@@ -20,12 +20,12 @@ Libraries used with TBD are:
 - [OneWire](https://github.com/PaulStoffregen/OneWire)
 - [rc-switch](https://github.com/sui77/rc-switch)
 
+><sup>1</sup>Modified libraries include changes that make them operationally different to the original version, these changes are required for better integration with this project.
+
 ## Inspiration
 Projects which gave me invaluable ideas of code that aided development:
 - [Tasmota](https://github.com/arendst/Tasmota/releases/latest)
 - [WLED](https://github.com/Aircoookie/WLED)
-
-><sup>1</sup>Modified libraries include changes that make them operationally different to the original version, these changes are required for better integration with this project.
 
 ## Features already supported by the project
 
