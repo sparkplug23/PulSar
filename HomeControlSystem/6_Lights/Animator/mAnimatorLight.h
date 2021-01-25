@@ -474,7 +474,7 @@ void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
     EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
     EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,    
     EFFECTS_FUNCTION_TESTER_ID,
-    // Length of HACS effects
+    // Length of TBD effects
     EFFECTS_FUNCTION_LENGTH_ID
   };                           
   // WLED functions I am merging, will use the 'ID' to select which animator to use, as I migrate between animator methods        

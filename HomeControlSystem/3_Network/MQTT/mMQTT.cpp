@@ -154,7 +154,7 @@ void mMQTT::MqttConnected(void)
     pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic,WILLMESSAGE_ONCONNECT_CTR,true); // onconnect message
   DEBUG_LINE;
     #ifdef USE_MQTT_RETAINED_VERSION_HISTORY_CHECK // for checking version history
-      pubsub->subscribe(("hacs_firmware/set/settings/firmware")); //PSTR failure
+      pubsub->subscribe(("TBD_firmware/set/settings/firmware")); //PSTR failure
     #endif
 DEBUG_LINE;
     // Group name for setting all devices
@@ -564,8 +564,8 @@ void mMQTT::parse_JSONCommand(){
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "system"));    
   //   //isserviced += parsesub_MQTTSettingsCommand();
   // }else
-  // if(strstr(data_buffer.topic.ctr,"hacs_firmware/information")){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "hacs_firmware/information"));    
+  // if(strstr(data_buffer.topic.ctr,"TBD_firmware/information")){
+  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "TBD_firmware/information"));    
   //   //isserviced += parsesub_FirmwareInformation();
   // }else
   // {

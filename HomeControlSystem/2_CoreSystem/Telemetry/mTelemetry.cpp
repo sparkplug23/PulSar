@@ -453,7 +453,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_POWERRETAIN,    pCONT_set->Settings.flag_system.mqtt_power_retain);
     JsonBuilderI->Add(PM_JSON_BAUDRATE,       (uint16_t)115200);
     JsonBuilderI->Add(PM_JSON_SETTINGS_HOLDER,pCONT_set->Settings.cfg_holder);
-    JsonBuilderI->Add(PM_JSON_OTAURL,         "http://something.org/hacs/release/minimal.bin");
+    JsonBuilderI->Add(PM_JSON_OTAURL,         "http://something.org/TBD/release/minimal.bin");
     JsonBuilderI->Add_FV(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
     JsonBuilderI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
     JsonBuilderI->Add(PM_JSON_STARTUPUTC,     "2019-12-10T21:35:44");

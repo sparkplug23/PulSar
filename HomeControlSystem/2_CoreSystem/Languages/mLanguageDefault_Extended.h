@@ -526,7 +526,7 @@
 // #define D_ERASED_SECTOR "Erased sector"
 
 // // xdrv_02_webserver.ino
-// #define D_NOSCRIPT "JavaScript Needed"//"To use HACS, please enable JavaScript"
+// #define D_NOSCRIPT "JavaScript Needed"//"To use TBD, please enable JavaScript"
 // #define D_MINIMAL_FIRMWARE_PLEASE_UPGRADE "MINIMAL firmware<br/>please upgrade"
 // #define D_WEBSERVER_ACTIVE_ON "Web server active on"
 // #define D_WEBSERVER "WebServer"

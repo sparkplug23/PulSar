@@ -142,7 +142,7 @@ const uint32_t PROJECT_VERSION_MINIMAL = ((FIRMWARE_VERSION_TYPE_MINIMAL & 0x03)
 // #endif
 
 
-#define PROJECT_NAME_CTR "Home Automation Control System (HACS)"
+#define PROJECT_NAME_CTR "Home Automation Control System (TBD)"
 // #ifndef DEVICENAME_FRIENDLY_CTR
 //   #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
 // #endif

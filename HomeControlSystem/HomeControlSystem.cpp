@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2020, Michael G. Doone
+   Copyright (c) 2020, my_name_here
    All rights reserved.
 */
 
@@ -10,7 +10,8 @@
 #define NO_GLOBAL_MDNS
 #include "1_TaskerManager/mTaskerManager.h"
 
-// #define USE_DECLARE_AT_COMPILE_TO_DEBUG
+// #define USE_DECLARE_AT_COMPILE_TO_DEBU
+//G
 
 // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
 

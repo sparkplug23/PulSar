@@ -3,7 +3,7 @@
   Nick O'Leary
   http://knolleary.net
 
-  Edited by Michael G. Doone
+  Edited by my_name_here
   List of changes:
   - Removed callback function (non static nature caused frequent exception errors)
   - Add "ppublish" which prefixes the topic using "prefixtopic". This is set using

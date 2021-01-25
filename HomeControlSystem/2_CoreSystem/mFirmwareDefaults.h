@@ -62,7 +62,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 
 // /*********************************************************************************************\
-//  * [hacs-lighting.bin]
+//  * [TBD-lighting.bin]
 //  * Provide an image with useful supported sensors enabled
 // \*********************************************************************************************/
 
