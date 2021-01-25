@@ -38,7 +38,7 @@ Projects which gave me invaluable ideas of code that aided development:
 ## Features under development for future integration
 
 ## Notes
-- HACS is pronounced as "Hex/Hacks". This name is a placeholder, and is likely to change later in development.
+- This project name is a placeholder, and will change later in development.
 - Written with VSCode IDE and PlatformIO.
 - [x]<sup>1</sup> extra comment.
 
