@@ -365,11 +365,6 @@ void mAnimatorLight::parse_JSONCommand(void){
   //   }
   // }
 
-  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  // parsesub_NotificationPanel(obj);
-  // #endif // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
-
   //pCONT_iLight->animation.flags.fForceUpdate = true;
   
   if(data_buffer.isserviced){ //update string, move to shared place
@@ -377,6 +372,10 @@ void mAnimatorLight::parse_JSONCommand(void){
    //add flag on this, so its not always forced
    // SetRefreshLEDs(); // implement in 1 second 
   }
+
+  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  parsesub_Notifications(obj);
+  #endif // USE_TASK_RGBLIGHTING_NOTIFICATIONS
 
 
 // #endif // USE_DEVFEATURE_DISABLE_PROGMEM_TEST

@@ -1,14 +1,13 @@
 #ifndef _MNEXTIONPANEL2_H
 #define _MNEXTIONPANEL2_H 0.2
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
 
-#include <ArduinoJson.h>
-#include "1_TaskerManager/mTaskerManager.h"
-class mTaskerManager;
+// #include <ArduinoJson.h>
+// class mTaskerManager;
 
 #ifdef ESP32
 #define SERIAL_NEXTION_RX Serial2 //only in 32
@@ -64,13 +63,13 @@ class mNextionPanel{
 
     
 
-int8_t Tasker(uint8_t function, JsonObjectConst obj);
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
+// int8_t Tasker(uint8_t function, JsonObjectConst obj);
+// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+// void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
 
 
-void parsesub_Commands(JsonObjectConst obj);
-void parsesub_SetMulti(JsonObjectConst obj);
+// void parsesub_Commands(JsonObjectConst obj);
+// void parsesub_SetMulti(JsonObjectConst obj);
 
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
@@ -182,7 +181,7 @@ uint32_t tTest = millis();
     int8_t Tasker(uint8_t function);
     void init(void);
 
-    uvoid parse_JSONCommand();
+    void parse_JSONCommand();
 
     #define LONG_PRESS_DURATION 500
     uint8_t fEnableImmediateButtonTime = false;

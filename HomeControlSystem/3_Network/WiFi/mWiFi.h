@@ -1,7 +1,7 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H 0.4
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 // #define ENABLE_WIFI_DEVELOPMENT
 
@@ -10,7 +10,7 @@
 #endif
 
 #ifdef ENABLE_USER_CONFIG_OVERRIDE 
-  #include "0_ConfigUser/mUserConfigSecret.h"
+  #include "0_ConfigUser/mUserConfig_Secret.h"
 #endif
 #include "2_CoreSystem/Logging/mLogging.h"
 

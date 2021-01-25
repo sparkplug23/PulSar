@@ -1,12 +1,9 @@
 #ifndef _mSensorsAnalog_H
 #define _mSensorsAnalog_H 1.0
 
-#include "0_ConfigUser/mUserConfig.h"
-
-#ifdef USE_MODULE_SENSORS_ANALOG
-
 #include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef USE_MODULE_SENSORS_ANALOG
 
 class mSensorsAnalog{
   public:
@@ -32,9 +29,12 @@ class mSensorsAnalog{
     // uint8_t fEnableSensor = false;
     // pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
     
+    
+    #ifdef USE_MODULE_CORE_WEBSERVER
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
     void WebSend_JSON_Root_Table(AsyncWebServerRequest *request);
+    #endif// USE_MODULE_CORE_WEBSERVER
 
     uint8_t PIR_Detected(uint8_t sensor_id);
     const char* PIR_Detected_Ctr(uint8_t sensor_id);

@@ -1,24 +1,44 @@
 #ifndef mInterfaceController_H2
 #define mInterfaceController_H2 1.1
 
-// ORDER NEEDS FIXED FOR WHAT TO INCLUDE AND WHEN
-
+#define D_USER_MICHAEL
 
 #include <Arduino.h>
 #include <stdint.h>
 #include <string.h>
 
-#ifdef ENABLE_DEVFEATURE_JSONPARSER
+//#ifdef ENABLE_DEVFEATURE_JSONPARSER
 #include "JsonParser.h"
-#endif // ENABLE_DEVFEATURE_JSONPARSER
+//#endif // ENABLE_DEVFEATURE_JSONPARSER
 
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "0_ConfigUser/mUserConfig.h"           //DEFAULTS
-#include "0_ConfigUser/mUserConfigSecret.h"            // Override previos declarations
-//ifdef use custom
-#include "0_ConfigUser/mFirmwareCustom.h"     //overrides defaults
-//endif
+
+// Minimal base configurations required for stable operation
+#include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
+// Optional user configs, which override defaults
+
+#ifndef D_USER_MICHAEL // Include my personally named secret file
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"
+#include "0_ConfigUser/mUserConfig_Secret.h"
+#endif // D_USER_MICHAEL // Include my personally named secret file
+
+#ifdef D_USER_MICHAEL // Include my personally named secret file
+#include "0_ConfigUser/mFirmwareCustom_Secret_Michael.h"
+#include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
+#endif // D_USER_MICHAEL
+
+
+
+// #ifdef D_USER_MICHAEL // Include my personally named secret file
+// #include "0_ConfigUser/mFirmwareCustom_Secret_Michael.h"
+// #include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
+// #else
+// #include "0_ConfigUser/mFirmwareCustom_Secret.h"
+// #include "0_ConfigUser/mUserConfig_Secret.h"
+// #endif // D_USER_MICHAEL
+
+
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 #include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "2_CoreSystem/mHardwareTemplates.h"                // Hardware configuration
@@ -63,7 +83,6 @@ enum FUNCTION_RESULT_IDS{
 };
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "0_ConfigUser/mFirmwareCustom.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 
@@ -530,13 +549,13 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR)      "ifan";
   #define pCONT_ifan                                           pCONT->mifan
 #endif
-#ifdef USE_MODULE_CUSTOM_PWM_FAN
-  #include "9_Controller/PWMFan/mPWMFan.h"
-  class mPWMFan;
-  #define D_MODULE_CUSTOM_PWM_FAN_ID                            180
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_PWMFAN_CTR)               "mPWMFan";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_PWMFAN_FRIENDLY_CTR)      "pwmfan";
-  #define pCONT_mpwmfan                                         pCONT->mpwmfan
+#ifdef USE_MODULE_CUSTOM_FAN
+  #include "9_Controller/Fan/mFan.h"
+  class mFan;
+  #define D_MODULE_CUSTOM_FAN_ID                        180
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_CTR)               D_MODULE_CUSTOM_FAN_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR)      D_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
+  #define pCONT_mfan                                     pCONT->mfan
 #endif
 
 
@@ -757,8 +776,8 @@ class mTaskerManager{
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
     mSonoffIFan* mifan = nullptr;
   #endif
-  #ifdef USE_MODULE_CUSTOM_PWM_FAN
-    mPWMFan* mpwmfan = nullptr;
+  #ifdef USE_MODULE_CUSTOM_FAN
+    mFan* mfan = nullptr;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     mIRtransceiver* mir = nullptr;

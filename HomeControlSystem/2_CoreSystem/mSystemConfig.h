@@ -1,11 +1,11 @@
-#ifndef MSYSTEMCONFIG_H
-#define MSYSTEMCONFIG_H
+#ifndef MSYSTEMCONFIG2_H
+#define MSYSTEMCONFIG2_H
 
 // File contains settings for the project that should not be edited by user
 
 #include "stdint.h"
 // DEVICE named defines that set modules to use below
-#include "0_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"
 
 enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   FIRMWARE_VERSION_TYPE_RELEASE_ID = 0,  FIRMWARE_VERSION_TYPE_RELEASE_CANDIDATE_ID,
@@ -14,9 +14,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_BETA_ID
 #define FIRMWARE_VERSION_MAJOR    0
-#define FIRMWARE_VERSION_MINOR    84
-#define FIRMWARE_VERSION_CORE     91
-#define FIRMWARE_VERSION_MODULE   122
+#define FIRMWARE_VERSION_MINOR    85
+#define FIRMWARE_VERSION_CORE     96
+#define FIRMWARE_VERSION_MODULE   126
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           10//                (random(1,1000))

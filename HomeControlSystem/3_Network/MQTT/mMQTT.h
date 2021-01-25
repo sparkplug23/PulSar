@@ -2,7 +2,8 @@
 #define _MMQTT 0.7
 
 #include <stdint.h>
-#include "0_ConfigUser/mUserConfig.h"
+
+#include "2_CoreSystem/mGlobalMacros.h"
 
 // Using MQTT to hold latest version of firmware
 // Topic = group_all/
@@ -122,7 +123,7 @@ struct handler {
 #include "PubSubClient.h"
 class mPubSubClient;
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Support/mSupport.h"
 class mSupport;
 

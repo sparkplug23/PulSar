@@ -2,9 +2,7 @@
 #ifndef _MBUTTON_H_
 #define _MBUTTON_H_
 
-
-
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_BUTTONS
 

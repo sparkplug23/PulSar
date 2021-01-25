@@ -25,16 +25,6 @@
 // #define ESP8266
 
 
-//https://github.com/arendst/Tasmota/blob/v8.1.0/BUILDS.md
-// tasmota.bin	http://thehackbox.org/tasmota/release/tasmota.bin	567k	8.1.0	20191225 14:20
-// tasmota-sensors.bin	http://thehackbox.org/tasmota/release/tasmota-sensors.bin	588k	8.1.0	20191225 14:20
-// tasmota-minimal.bin	http://thehackbox.org/tasmota/release/tasmota-minimal.bin	373k	8.1.0	20191225 14:20
-// tasmota-lite.bin	http://thehackbox.org/tasmota/release/tasmota-lite.bin	463k	8.1.0	20191225 14:20
-// tasmota-knx.bin	http://thehackbox.org/tasmota/release/tasmota-knx.bin	577k	8.1.0	20191225 14:20
-// tasmota-ircustom.bin	http://thehackbox.org/tasmota/release/tasmota-ircustom.bin	661k	8.1.0	20191225 14:20
-// tasmota-ir.bin	http://thehackbox.org/tasmota/release/tasmota-ir.bin	548k	8.1.0	20191225 14:20
-// tasmota-display.bin	http://thehackbox.org/tasmota/release/tasmota-display.bin	552k	8.1.0	20191225 14:20
-
 
 /*********************************************************************************************\
  * Function declarations
@@ -57,8 +47,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 }
 #endif
 
-#include "0_ConfigUser/mUserConfig.h"
-#include "0_ConfigUser/mFirmwareCustom.h"
+#include "2_CoreSystem/mBaseConfig.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"
 
 /*********************************************************************************************\
  * Default global defines

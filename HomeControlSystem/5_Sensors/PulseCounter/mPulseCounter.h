@@ -1,7 +1,7 @@
 #ifndef mPulseCounter_H
 #define mPulseCounter_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
 

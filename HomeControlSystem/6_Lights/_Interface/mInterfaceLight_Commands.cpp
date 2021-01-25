@@ -3,6 +3,21 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 
+int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
+
+  // Check if instruction is for me
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
 
 void mInterfaceLight::parse_JSONCommand(void){
 
@@ -1314,17 +1329,18 @@ const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, 
   return buffer;
 } 
 int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
+
   if(c=='\0'){
     return -1;
   }
-  if(strstr_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)){ return ANIMATION_MODE_NONE_ID; }
+  if(strcmp_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)==0){ return ANIMATION_MODE_NONE_ID; }
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  if(strstr_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
+  if(strcmp_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)==0){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
   #endif
   #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
   #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-  if(strstr_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)){        return ANIMATION_MODE_EFFECTS_ID; }
+  if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_EFFECTS_ID; }
   return -1;
 }
 

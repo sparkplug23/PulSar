@@ -1,7 +1,7 @@
 #ifndef _MGARAGELIGHTS_H
 #define _MGARAGELIGHTS_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT //move into lights? pir activated light, equally a driver of lights..but it senses
 // make light activation method of motion

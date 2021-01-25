@@ -1,7 +1,7 @@
 #ifndef _MRELAYS_H
 #define _MRELAYS_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 

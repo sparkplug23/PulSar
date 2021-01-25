@@ -1,7 +1,7 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 /*
 go with a singleton if you really need one global instance, better and safer than extern
@@ -1714,6 +1714,9 @@ char my_hostname[33];                       // Composed Wifi hostname
 // char mqtt_topic[33];                        // Composed MQTT topic
 
 
+void CommandSet_SystemRestartID(uint8_t value);
+
+
 // #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
 // struct DATA_BUFFER{
@@ -1771,7 +1774,7 @@ struct FIRMWARE_VERSION{
 // #ifndef _MIOINTERFACE
 // #define _MIOINTERFACE
 
-// #include "0_ConfigUser/mUserConfig.h"
+// #include "2_CoreSystem/mBaseConfig.h"
 
 // #warning "mIOInterface EOL"
 

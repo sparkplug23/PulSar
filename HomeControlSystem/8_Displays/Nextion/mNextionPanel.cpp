@@ -44,7 +44,7 @@ void mNextionPanel::pre_init(void){
 
   // Check if pins are hardware serial
   if(true){
-    swSer = new SoftwareSerial(D5,D6);//R-T, false, 256);
+    swSer = new SoftwareSerial(14,12);//D5,D6);//R-T, false, 256);
     swSer->begin(NEXTION_BAUD);
   }
   
@@ -179,215 +179,6 @@ int8_t mNextionPanel::Tasker(uint8_t function){
 }
 
 
-int8_t mNextionPanel::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
-
-
-int8_t mNextionPanel::CheckAndExecute_JSONCommands(JsonObjectConst obj){
-
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parsesub_TopicCheck_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
-
-  AddLog_P(LOG_LEVEL_INFO,PSTR("mDoorBell::parsesub_TopicCheck_JSONCommand"));
-
-  uint8_t name_num=-1,state=-1;    
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Incoming Namespace (replace /device/ with /group/ for group commands)
-// '[...]/device/command' -m 'dim=50' = nextionSendCmd("dim=50")
-// '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
-// '[...]/device/command/page' -m '1' = nextionSendCmd("page 1")
-// '[...]/device/command/lcdupdate' -m 'http://192.168.0.10/local/HASwitchPlate.tft' = nextionStartOtaDownload("http://192.168.0.10/local/HASwitchPlate.tft")
-// '[...]/device/command/lcdupdate' -m '' = nextionStartOtaDownload("lcdFirmwareUrl")
-// '[...]/device/command/espupdate' -m 'http://192.168.0.10/local/HASwitchPlate.ino.d1_mini.bin' = espStartOta("http://192.168.0.10/local/HASwitchPlate.ino.d1_mini.bin")
-// '[...]/device/command/espupdate' -m '' = espStartOta("espFirmwareUrl")
-// '[...]/device/command/p[1].b[4].txt' -m '' = nextionGetAttr("p[1].b[4].txt")
-// '[...]/device/command/p[1].b[4].txt' -m '"Lights On"' = nextionSetAttr("p[1].b[4].txt", "\"Lights On\"")
-// uint8_t mNextionPanel::parse_JSONCommand(){
-
-  // Check if instruction is for me
-  // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
-  //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  //   fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
-  //   fOpenHABDataStreamActive = true;
-  // }else{
-  //   return 0; // not meant for here
-  // }
-
-
-
-  
-//these need to be subtopic functions
-
-
-
-  // if(strstr(data_buffer.topic.ctr,"/commands")){ 
-  // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
-  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/commands",sizeof("/commands")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
-    #endif
-    isserviced += parsesub_Commands(obj);
-  }else 
-   // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
-  if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
-    #endif
-    isserviced += parsesub_SetMulti(obj);
-  }else{
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
-  }  
-  
-  
-  // if(strstr(data_buffer.topic.ctr,"/set_single")){
-    
-  //   StaticJsonDocument<300> doc;
-  //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  //   JsonObject obj = doc.as<JsonObject>();
-
-  //   if((!obj["attribute"].isNull())&&(!obj["value"].isNull())){ 
-  //     const char* attribute = obj["attribute"];
-  //     const char* value = obj["value"];
-  //     nextionSetAttr(attribute,value);
-  //   }
-
-  // }else
-  // // Get element (ask, no value)
-  // if(strstr(data_buffer.topic.ctr,"/get_single")){
-    
-  //   StaticJsonDocument<300> doc;
-  //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  //   JsonObject obj = doc.as<JsonObject>();
-
-  //   if(!obj["attribute"].isNull()){ 
-  //     const char* attribute = obj["attribute"];
-  //     nextionGetAttr(attribute);
-  //   }
-
-  // }else
-  // // Get element (ask, no value)
-  // if(strstr(data_buffer.topic.ctr,"/nextion/flash_message")){
-  //   isserviced += parsesub_FlashMessage();
-  // }
-
-  // else if (strTopic == (mqttCommandTopic + "/lcdupdate") || strTopic == (mqttGroupCommandTopic + "/lcdupdate"))
-  // { // '[...]/device/command/lcdupdate' -m 'http://192.168.0.10/local/HASwitchPlate.tft' 
-  //== nextionStartOtaDownload("http://192.168.0.10/local/HASwitchPlate.tft")
-  //   if (strPayload == ""){
-  //     nextionStartOtaDownload(lcdFirmwareUrl);
-  //   }else{
-  //     nextionStartOtaDownload(strPayload);
-  //   }
-  // }
-  // else if (strTopic == (mqttCommandTopic + "/espupdate") || strTopic == (mqttGroupCommandTopic + "/espupdate"))
-  // { // '[...]/device/command/espupdate' -m 'http://192.168.0.10/local/HASwitchPlate.ino.d1_mini.bin' 
-  // == espStartOta("http://192.168.0.10/local/HASwitchPlate.ino.d1_mini.bin")
-  //   if (strPayload == ""){
-  //     espStartOta(espFirmwareUrl);
-  //   }else{
-  //     espStartOta(strPayload);
-  //   }
-  // }
-
-  data_buffer.isserviced += isserviced;
- 
-//  
-
-
-
-}
-
-
-
-
-int8_t mNextionPanel::parsesub_Commands(JsonObjectConst obj){
-
-  char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
-  
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
-
-    if(!obj["page"].isNull()){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "page"));    
-      settings.page = obj["page"];
-      sprintf(command_ctr,"page %d",settings.page);
-      nextionSendCmd(command_ctr);
-    }else
-    if(!obj["command"].isNull()){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "command"));    
-      const char* command = obj["command"];
-      nextionSendCmd(command);
-    }else
-    if(!obj["statusupdate"].isNull()){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
-      uint8_t statusupdate = obj["statusupdate"];
-      sprintf(command_ctr,"statusupdate %d",statusupdate);
-      mqtthandler_settings_teleperiod.flags.SendNow = true;
-    }else
-    if(!obj["brightness"].isNull()){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
-      uint8_t brightness = obj["brightness"];
-      //nextionSetAttr("dim", String(brightness));
-      //sprintf(command_ctr,"dims=%d",brightness);
-      nextionSendCmd("dims=dim");
-    }else
-    if(!obj["lcdreboot"].isNull()){ 
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
-      uint8_t lcdreboot = obj["lcdreboot"];
-      nextionReset();
-    }else
-    if(!obj["onoff"].isNull()){ 
-      const char* onoff = obj["onoff"];
-      if(strstr(onoff,"ON")){
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"onoff",D_ON);    
-        nextionSendCmd("dim=dims");
-      }else
-      if(strstr(onoff,"OFF")){
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));     
-        nextionSendCmd("dims=dim");
-        nextionSetAttr("dim", "0");
-      }
-    }else{
-      AddLog_P(LOG_LEVEL_INFO,PSTR("ELSE FOUND"));
-    }
-
-}
-
-
-
-int8_t mNextionPanel::parsesub_SetMulti(JsonObjectConst obj){
-
-  AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
-
-  if(!obj["commands"].isNull()){
-    JsonArrayConst array = obj["commands"];
-    for(JsonVariantConst val : array) {
-      nextionSendCmd(val.as<const char*>());
-    }
-  }
-  
-}
 
 
 /**********************************************************************************************************************************************************
@@ -557,135 +348,135 @@ void mNextionPanel::mqttDisconnected(){
 
 void mNextionPanel::MQTTSend_PressEvent(){
 
-  // if(!mTime::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
-  //   // Debounce and only send once per event (ie ignore release trigger following immediate trigger)
-  //   return;
-  // }
+  // // if(!mTime::TimeReached(&tSaved_MQTTSend_PressEvent,200)){
+  // //   // Debounce and only send once per event (ie ignore release trigger following immediate trigger)
+  // //   return;
+  // // }
   
-  screen_press.page = nextionReturnBuffer[1];
-  screen_press.event = nextionReturnBuffer[2];
-  uint32_t tSavedTimeSincePressOn = abs(millis() - screen_press.tSavedButtonONEvent);
+  // screen_press.page = nextionReturnBuffer[1];
+  // screen_press.event = nextionReturnBuffer[2];
+  // uint32_t tSavedTimeSincePressOn = abs(millis() - screen_press.tSavedButtonONEvent);
 
-  StaticJsonDocument<100> doc;
-  JsonObject rootobj = doc.to<JsonObject>();
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+  // StaticJsonDocument<100> doc;
+  // JsonObject rootobj = doc.to<JsonObject>();
+  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
 
-  char event_ctr[20];
-  memset(event_ctr,0,sizeof(event_ctr));
-  sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
-  rootobj["event"] = event_ctr;
-  rootobj["value"] = (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS";
-  rootobj["duration"] = tSavedTimeSincePressOn;
+  // char event_ctr[20];
+  // memset(event_ctr,0,sizeof(event_ctr));
+  // sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
+  // rootobj["event"] = event_ctr;
+  // rootobj["value"] = (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS";
+  // rootobj["duration"] = tSavedTimeSincePressOn;
 
-  memset(&data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr));
-  data_buffer.payload.len = measureJson(rootobj)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
+  // memset(&data_buffer.topic.ctr,0,sizeof(data_buffer.topic.ctr));
+  // data_buffer.payload.len = measureJson(rootobj)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
-  tSaved_MQTTSend_PressEvent = millis();
+  // tSaved_MQTTSend_PressEvent = millis();
 
-  pCONT_mqtt->ppublish("status/nextion/event/press",data_buffer.payload.ctr,0);
+  // pCONT_mqtt->ppublish("status/nextion/event/press",data_buffer.payload.ctr,0);
 
 }
 
 void mNextionPanel::MQTTSend_LongPressEvent(){
 
-  screen_press.page = nextionReturnBuffer[1];
-  screen_press.event = nextionReturnBuffer[2];
+  // screen_press.page = nextionReturnBuffer[1];
+  // screen_press.event = nextionReturnBuffer[2];
 
-  StaticJsonDocument<100> doc;
-  JsonObject rootobj = doc.to<JsonObject>();
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+  // StaticJsonDocument<100> doc;
+  // JsonObject rootobj = doc.to<JsonObject>();
+  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
 
-  char event_ctr[20];
-  memset(event_ctr,0,sizeof(event_ctr));
-  sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
-  rootobj["event"] = event_ctr;
-  rootobj["value"] = "LONG_PRESS";
-  rootobj["duration_threshold"] = LONG_PRESS_DURATION;
+  // char event_ctr[20];
+  // memset(event_ctr,0,sizeof(event_ctr));
+  // sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
+  // rootobj["event"] = event_ctr;
+  // rootobj["value"] = "LONG_PRESS";
+  // rootobj["duration_threshold"] = LONG_PRESS_DURATION;
 
-  D_DATA_BUFFER_CLEAR();
-  data_buffer.payload.len = measureJson(rootobj)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
+  // D_DATA_BUFFER_CLEAR();
+  // data_buffer.payload.len = measureJson(rootobj)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
-  pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
-  pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
+  // pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+  // pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
 
 }
 
 
 
-int8_t mNextionPanel::parsesub_FlashMessage(){
+// int8_t mNextionPanel::parsesub_FlashMessage(){
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
+//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
 
-  #ifdef JSONDOCUMENT_STATIC
-    StaticJsonDocument<800> doc;
-  #else
-    DynamicJsonDocument doc(600);
-  #endif
-  DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
-    Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
-    return 0;
-  }
-  JsonObject obj = doc.as<JsonObject>();
+//   // #ifdef JSONDOCUMENT_STATIC
+//   //   StaticJsonDocument<800> doc;
+//   // #else
+//   //   DynamicJsonDocument doc(600);
+//   // #endif
+//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+//   // if(error){
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+//   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
+//   //   return 0;
+//   // }
+//   // JsonObject obj = doc.as<JsonObject>();
 
-  int8_t tmp_id = 0;
+//   // int8_t tmp_id = 0;
   
 
-  if(!obj["message"].isNull()){ 
-    const char* messagectr = obj["message"];
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
-    sprintf(flash_message.message,"%s",messagectr);
-  }
+//   // if(!obj["message"].isNull()){ 
+//   //   const char* messagectr = obj["message"];
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
+//   //   sprintf(flash_message.message,"%s",messagectr);
+//   // }
 
-  if(!obj["time_secs"].isNull()){ 
-    uint8_t time = obj["time_secs"];
-    flash_message.cShowSeconds = time>60?60:time;
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
-  }
+//   // if(!obj["time_secs"].isNull()){ 
+//   //   uint8_t time = obj["time_secs"];
+//   //   flash_message.cShowSeconds = time>60?60:time;
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
+//   // }
 
-  if(!obj["background_colour"].isNull()){ 
-    uint32_t background_colour = obj["background_colour"];
-    flash_message.background_colour = background_colour;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
-  }
+//   // if(!obj["background_colour"].isNull()){ 
+//   //   uint32_t background_colour = obj["background_colour"];
+//   //   flash_message.background_colour = background_colour;
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
+//   // }
 
-  if(!obj["font_colour"].isNull()){ 
-    uint32_t font_colour = obj["font_colour"];
-    flash_message.font_colour = font_colour;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
-  }
+//   // if(!obj["font_colour"].isNull()){ 
+//   //   uint32_t font_colour = obj["font_colour"];
+//   //   flash_message.font_colour = font_colour;
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
+//   // }
   
 
 
-  flash_message.page = PAGE_ERROR_ID;
+//   // flash_message.page = PAGE_ERROR_ID;
 
-  //Save page
-  settings.page_saved = settings.page;
-  //Go to message page
-  Command_SetPage(flash_message.page);
+//   // //Save page
+//   // settings.page_saved = settings.page;
+//   // //Go to message page
+//   // Command_SetPage(flash_message.page);
 
-  flash_message.cShowSeconds = 3;
+//   // flash_message.cShowSeconds = 3;
 
   
-  // char display_ctr[100];memset(display_ctr,0,sizeof(display_ctr));
-  // // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
-  // sprintf(display_ctr,"%s",flash_message.message);
+//   // // char display_ctr[100];memset(display_ctr,0,sizeof(display_ctr));
+//   // // // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
+//   // // sprintf(display_ctr,"%s",flash_message.message);
         
-    SetAttribute_FontColour(flash_message.page,1,flash_message.font_colour);
-    SetAttribute_BackgroundColour(flash_message.page,1,flash_message.background_colour);
-    SetAttribute_Txt(flash_message.page,1,flash_message.message);
+//   //   SetAttribute_FontColour(flash_message.page,1,flash_message.font_colour);
+//   //   SetAttribute_BackgroundColour(flash_message.page,1,flash_message.background_colour);
+//   //   SetAttribute_Txt(flash_message.page,1,flash_message.message);
 
 
 
 
    
-  flash_message.isrunning = true;  
+//   // flash_message.isrunning = true;  
 
-  return 0;
-}
+//   return 0;
+// }
 
 
 
@@ -771,232 +562,232 @@ void mNextionPanel::nextionProcessInput()
   // Command reference: https://www.itead.cc/wiki/Nextion_Instruction_Set#Format_of_Device_Return_Data
   // tl;dr, command byte, command data, 0xFF 0xFF 0xFF
 
-  //Serial.println("nextionProcessInput");
-  StaticJsonDocument<100> doc;
-  JsonObject rootobj = doc.to<JsonObject>();
-  char event_ctr[30];
-  //https://www.itead.cc/wiki/Nextion_Instruction_Set
+  // //Serial.println("nextionProcessInput");
+  // StaticJsonDocument<100> doc;
+  // JsonObject rootobj = doc.to<JsonObject>();
+  // char event_ctr[30];
+  // //https://www.itead.cc/wiki/Nextion_Instruction_Set
 
-  // first instructions byte
-  switch(nextionReturnBuffer[0]){
-    case NEXTION_COMMAND_INVALID_INSTRUCTION:
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
-    break;
+  // // first instructions byte
+  // switch(nextionReturnBuffer[0]){
+  //   case NEXTION_COMMAND_INVALID_INSTRUCTION:
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
+  //   break;
 
-  }
-  
-
-  if (nextionReturnBuffer[0] == 0x65)
-  { // Handle incoming touch command
-    // 0x65+Page ID+Component ID+TouchEvent+End
-    // Return this data when the touch event created by the user is pressed.
-    // Definition of TouchEvent: Press Event 0x01, Release Event 0X00
-    // Example: 0x65 0x00 0x02 0x01 0xFF 0xFF 0xFF
-    // Meaning: Touch Event, Page 0, Object 2, Press
-    String nextionPage = String(nextionReturnBuffer[1]);
-    String nextionButtonID = String(nextionReturnBuffer[2]);
-    byte nextionButtonAction = nextionReturnBuffer[3];
-
-    screen_press.page = nextionReturnBuffer[1];
-    screen_press.event = nextionReturnBuffer[2];
-
-    if (nextionButtonAction == 0x01) // ON=PRESSED
-    {
-      screen_press.tSavedButtonONEvent = millis();
-      screen_press.fEnableImmediateButtonTime = true; 
-
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
-              
-      memset(event_ctr,0,sizeof(event_ctr));
-      sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
-        rootobj["event"] = event_ctr;
-        rootobj["value"] = D_JSON_ON;
-
-      D_DATA_BUFFER_CLEAR();
-      data_buffer.payload.len = measureJson(rootobj)+1;
-      serializeJson(doc,data_buffer.payload.ctr);
-
-      pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
-      pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
-
-    }
-    if (nextionButtonAction == 0x00) // OFF - LET_GO
-    {
-      screen_press.tSavedButtonOFFEvent = millis();
-      screen_press.fEnableImmediateButtonTime = false; //start timer
-      screen_press.tSavedButtonONDurationEvent = screen_press.tSavedButtonOFFEvent - screen_press.tSavedButtonONEvent;
-      screen_press.duration = screen_press.tSavedButtonONDurationEvent;
-      
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
-              
-      memset(event_ctr,0,sizeof(event_ctr));
-      sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
-      rootobj["event"] = event_ctr;
-      rootobj["value"] = D_JSON_OFF;
-      rootobj["duration"] = screen_press.tSavedButtonONDurationEvent;
-
-      D_DATA_BUFFER_CLEAR();
-      data_buffer.payload.len = measureJson(rootobj)+1;
-      serializeJson(doc,data_buffer.payload.ctr);
-
-      if(!fEnableIgnoreNextOffEvent){
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
-        pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
-        pCONT_mqtt->ppublish("status/nextion/event/end",data_buffer.payload.ctr,0);
-        MQTTSend_PressEvent();
-      }else{
-        fEnableIgnoreNextOffEvent = false;// reset to listen to next event
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
-      }
-
-
-      // Now see if this object has a .val that might have been updated.  Works for sliders,
-      // two-state buttons, etc, throws a 0x1A error for normal buttons which we'll catch and ignore
-      // mqttGetSubtopic = "/p[" + nextionPage + "].b[" + nextionButtonID + "].val";
-      // mqttGetSubtopicJSON = "p[" + nextionPage + "].b[" + nextionButtonID + "].val";
-      // nextionGetAttr("p[" + nextionPage + "].b[" + nextionButtonID + "].val");
-    }
-  }
-  else if (nextionReturnBuffer[0] == 0x66)
-  { // Handle incoming "sendme" page number
-    // 0x66+PageNum+End
-    // Example: 0x66 0x02 0xFF 0xFF 0xFF
-    // Meaning: page 2
-    String nextionPage = String(nextionReturnBuffer[1]);
-    
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
-
-    if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
-    { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
-      settings.page = nextionPage.toInt();
-      String mqttPageTopic = mqttStateTopic + "/page";      
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
-      //mqttClient.publish(mqttPageTopic, nextionPage);
-      pCONT_mqtt->ppublish("status/nextion/event4",nextionPage.c_str(),0);
-    }
-  }
-  else if (nextionReturnBuffer[0] == 0x67)
-  { // Handle touch coordinate data
-    // 0X67+Coordinate X High+Coordinate X Low+Coordinate Y High+Coordinate Y Low+TouchEvent+End
-    // Example: 0X67 0X00 0X7A 0X00 0X1E 0X01 0XFF 0XFF 0XFF
-    // Meaning: Coordinate (122,30), Touch Event: Press
-    // issue Nextion command "sendxy=1" to enable this output
-    uint16_t xCoord = nextionReturnBuffer[1];
-    xCoord = xCoord * 256 + nextionReturnBuffer[2];
-    uint16_t yCoord = nextionReturnBuffer[3];
-    yCoord = yCoord * 256 + nextionReturnBuffer[4];
-    String xyCoord = String(xCoord) + ',' + String(yCoord);
-    byte nextionTouchAction = nextionReturnBuffer[5];
-    if (nextionTouchAction == 0x01)
-    {  
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
-      String mqttTouchTopic = mqttStateTopic + "/touchOn";
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
-      pCONT_mqtt->ppublish("status/nextion/xyCoord",xyCoord.c_str(),0);
-    }
-    else if (nextionTouchAction == 0x00)
-    {
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
-      String mqttTouchTopic = mqttStateTopic + "/touchOff";
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
-      pCONT_mqtt->ppublish("status/nextion/event6",xyCoord.c_str(),0);
-    }
-  }
-  else if (nextionReturnBuffer[0] == 0x70)
-  { // Handle get string return
-    // 0x70+ASCII string+End
-    // Example: 0x70 0x41 0x42 0x43 0x44 0x31 0x32 0x33 0x34 0xFF 0xFF 0xFF
-    // Meaning: String data, ABCD1234
-    String getString;
-    for (int i = 1; i < nextionReturnIndex - 3; i++)
-    { // convert the payload into a string
-      getString += (char)nextionReturnBuffer[i];
-    }
-    
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
-  
-    if (mqttGetSubtopic == "")
-    { // If there's no outstanding request for a value, publish to mqttStateTopic
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
-      pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
-    }
-    else
-    { // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
-      String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;      
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
-      pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
-      mqttGetSubtopic = "";
-    }
-  }
-  else if (nextionReturnBuffer[0] == 0x71)
-  { // Handle get int return
-    // 0x71+byte1+byte2+byte3+byte4+End (4 byte little endian)
-    // Example: 0x71 0x7B 0x00 0x00 0x00 0xFF 0xFF 0xFF
-    // Meaning: Integer data, 123
-    unsigned long getInt = nextionReturnBuffer[4];
-    getInt = getInt * 256 + nextionReturnBuffer[3];
-    getInt = getInt * 256 + nextionReturnBuffer[2];
-    getInt = getInt * 256 + nextionReturnBuffer[1];
-    String getString = String(getInt);
-    //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
-
-    if (lcdVersionQueryFlag)
-    {
-      lcdVersion = getInt;
-      lcdVersionQueryFlag = false;
-      ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
-    }
-    else if (mqttGetSubtopic == "")
-    {
-      //mqttClient.publish(mqttStateTopic, getString);
-      pCONT_mqtt->ppublish("status/nextion/event9",getString.c_str(),0);
-    }
-    // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
-    else
-    {
-      String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
-      //mqttClient.publish(mqttReturnTopic, getString);
-      pCONT_mqtt->ppublish("status/nextion/event10",getString.c_str(),0);
-      String mqttButtonJSONEvent = String(F("{\"event\":\"")) + mqttGetSubtopicJSON + String(F("\", \"value\":")) + getString + String(F("}"));
-      //mqttClient.publish(mqttStateJSONTopic, mqttButtonJSONEvent);
-      pCONT_mqtt->ppublish("status/nextion/event11",mqttButtonJSONEvent.c_str(),0);
-      mqttGetSubtopic = "";
-    }
-  }
-  else if (nextionReturnBuffer[0] == 0x63 && nextionReturnBuffer[1] == 0x6f && nextionReturnBuffer[2] == 0x6d && nextionReturnBuffer[3] == 0x6f && nextionReturnBuffer[4] == 0x6b)
-  { // Catch 'comok' response to 'connect' command: https://www.itead.cc/blog/nextion-hmi-upload-protocol
-    String comokField;
-    uint8_t comokFieldCount = 0;
-    byte comokFieldSeperator = 0x2c; // ","
-
-    for (uint8_t i = 0; i <= nextionReturnIndex; i++)
-    { // cycle through each byte looking for our field seperator
-      if (nextionReturnBuffer[i] == comokFieldSeperator)
-      { // Found the end of a field, so do something with it.  Maybe.
-        if (comokFieldCount == 2)
-        {
-          nextionModel = comokField;
-          ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
-        }
-        comokFieldCount++;
-        comokField = "";
-      }
-      else
-      {
-        comokField += String(char(nextionReturnBuffer[i]));
-      }
-    }
-  }
-
-  // else if (nextionReturnBuffer[0] == 0x1A)
-  // { // Catch 0x1A error, possibly from .val query against things that might not support that request
-  //   // 0x1A+End
-  //   // ERROR: Variable name invalid
-  //   // We'll be triggering this a lot due to requesting .val on every component that sends us a Touch Off
-  //   // Just reset mqttGetSubtopic and move on with life.
-  //   mqttGetSubtopic = "";
   // }
-  nextionReturnIndex = 0; // Done handling the buffer, reset index back to 0
+  
+
+  // if (nextionReturnBuffer[0] == 0x65)
+  // { // Handle incoming touch command
+  //   // 0x65+Page ID+Component ID+TouchEvent+End
+  //   // Return this data when the touch event created by the user is pressed.
+  //   // Definition of TouchEvent: Press Event 0x01, Release Event 0X00
+  //   // Example: 0x65 0x00 0x02 0x01 0xFF 0xFF 0xFF
+  //   // Meaning: Touch Event, Page 0, Object 2, Press
+  //   String nextionPage = String(nextionReturnBuffer[1]);
+  //   String nextionButtonID = String(nextionReturnBuffer[2]);
+  //   byte nextionButtonAction = nextionReturnBuffer[3];
+
+  //   screen_press.page = nextionReturnBuffer[1];
+  //   screen_press.event = nextionReturnBuffer[2];
+
+  //   if (nextionButtonAction == 0x01) // ON=PRESSED
+  //   {
+  //     screen_press.tSavedButtonONEvent = millis();
+  //     screen_press.fEnableImmediateButtonTime = true; 
+
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
+              
+  //     memset(event_ctr,0,sizeof(event_ctr));
+  //     sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
+  //       rootobj["event"] = event_ctr;
+  //       rootobj["value"] = D_JSON_ON;
+
+  //     D_DATA_BUFFER_CLEAR();
+  //     data_buffer.payload.len = measureJson(rootobj)+1;
+  //     serializeJson(doc,data_buffer.payload.ctr);
+
+  //     pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+  //     pCONT_mqtt->ppublish("status/nextion/event/start",data_buffer.payload.ctr,0);
+
+  //   }
+  //   if (nextionButtonAction == 0x00) // OFF - LET_GO
+  //   {
+  //     screen_press.tSavedButtonOFFEvent = millis();
+  //     screen_press.fEnableImmediateButtonTime = false; //start timer
+  //     screen_press.tSavedButtonONDurationEvent = screen_press.tSavedButtonOFFEvent - screen_press.tSavedButtonONEvent;
+  //     screen_press.duration = screen_press.tSavedButtonONDurationEvent;
+      
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
+              
+  //     memset(event_ctr,0,sizeof(event_ctr));
+  //     sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
+  //     rootobj["event"] = event_ctr;
+  //     rootobj["value"] = D_JSON_OFF;
+  //     rootobj["duration"] = screen_press.tSavedButtonONDurationEvent;
+
+  //     D_DATA_BUFFER_CLEAR();
+  //     data_buffer.payload.len = measureJson(rootobj)+1;
+  //     serializeJson(doc,data_buffer.payload.ctr);
+
+  //     if(!fEnableIgnoreNextOffEvent){
+  //       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
+  //       pCONT_mqtt->ppublish("status/nextion/event",data_buffer.payload.ctr,0);
+  //       pCONT_mqtt->ppublish("status/nextion/event/end",data_buffer.payload.ctr,0);
+  //       MQTTSend_PressEvent();
+  //     }else{
+  //       fEnableIgnoreNextOffEvent = false;// reset to listen to next event
+  //       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
+  //     }
+
+
+  //     // Now see if this object has a .val that might have been updated.  Works for sliders,
+  //     // two-state buttons, etc, throws a 0x1A error for normal buttons which we'll catch and ignore
+  //     // mqttGetSubtopic = "/p[" + nextionPage + "].b[" + nextionButtonID + "].val";
+  //     // mqttGetSubtopicJSON = "p[" + nextionPage + "].b[" + nextionButtonID + "].val";
+  //     // nextionGetAttr("p[" + nextionPage + "].b[" + nextionButtonID + "].val");
+  //   }
+  // }
+  // else if (nextionReturnBuffer[0] == 0x66)
+  // { // Handle incoming "sendme" page number
+  //   // 0x66+PageNum+End
+  //   // Example: 0x66 0x02 0xFF 0xFF 0xFF
+  //   // Meaning: page 2
+  //   String nextionPage = String(nextionReturnBuffer[1]);
+    
+  //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
+
+  //   if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
+  //   { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
+  //     settings.page = nextionPage.toInt();
+  //     String mqttPageTopic = mqttStateTopic + "/page";      
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
+  //     //mqttClient.publish(mqttPageTopic, nextionPage);
+  //     pCONT_mqtt->ppublish("status/nextion/event4",nextionPage.c_str(),0);
+  //   }
+  // }
+  // else if (nextionReturnBuffer[0] == 0x67)
+  // { // Handle touch coordinate data
+  //   // 0X67+Coordinate X High+Coordinate X Low+Coordinate Y High+Coordinate Y Low+TouchEvent+End
+  //   // Example: 0X67 0X00 0X7A 0X00 0X1E 0X01 0XFF 0XFF 0XFF
+  //   // Meaning: Coordinate (122,30), Touch Event: Press
+  //   // issue Nextion command "sendxy=1" to enable this output
+  //   uint16_t xCoord = nextionReturnBuffer[1];
+  //   xCoord = xCoord * 256 + nextionReturnBuffer[2];
+  //   uint16_t yCoord = nextionReturnBuffer[3];
+  //   yCoord = yCoord * 256 + nextionReturnBuffer[4];
+  //   String xyCoord = String(xCoord) + ',' + String(yCoord);
+  //   byte nextionTouchAction = nextionReturnBuffer[5];
+  //   if (nextionTouchAction == 0x01)
+  //   {  
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
+  //     String mqttTouchTopic = mqttStateTopic + "/touchOn";
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+  //     pCONT_mqtt->ppublish("status/nextion/xyCoord",xyCoord.c_str(),0);
+  //   }
+  //   else if (nextionTouchAction == 0x00)
+  //   {
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
+  //     String mqttTouchTopic = mqttStateTopic + "/touchOff";
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+  //     pCONT_mqtt->ppublish("status/nextion/event6",xyCoord.c_str(),0);
+  //   }
+  // }
+  // else if (nextionReturnBuffer[0] == 0x70)
+  // { // Handle get string return
+  //   // 0x70+ASCII string+End
+  //   // Example: 0x70 0x41 0x42 0x43 0x44 0x31 0x32 0x33 0x34 0xFF 0xFF 0xFF
+  //   // Meaning: String data, ABCD1234
+  //   String getString;
+  //   for (int i = 1; i < nextionReturnIndex - 3; i++)
+  //   { // convert the payload into a string
+  //     getString += (char)nextionReturnBuffer[i];
+  //   }
+    
+  //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
+  
+  //   if (mqttGetSubtopic == "")
+  //   { // If there's no outstanding request for a value, publish to mqttStateTopic
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
+  //     pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
+  //   }
+  //   else
+  //   { // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
+  //     String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;      
+  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
+  //     pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
+  //     mqttGetSubtopic = "";
+  //   }
+  // }
+  // else if (nextionReturnBuffer[0] == 0x71)
+  // { // Handle get int return
+  //   // 0x71+byte1+byte2+byte3+byte4+End (4 byte little endian)
+  //   // Example: 0x71 0x7B 0x00 0x00 0x00 0xFF 0xFF 0xFF
+  //   // Meaning: Integer data, 123
+  //   unsigned long getInt = nextionReturnBuffer[4];
+  //   getInt = getInt * 256 + nextionReturnBuffer[3];
+  //   getInt = getInt * 256 + nextionReturnBuffer[2];
+  //   getInt = getInt * 256 + nextionReturnBuffer[1];
+  //   String getString = String(getInt);
+  //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
+
+  //   if (lcdVersionQueryFlag)
+  //   {
+  //     lcdVersion = getInt;
+  //     lcdVersionQueryFlag = false;
+  //     ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
+  //   }
+  //   else if (mqttGetSubtopic == "")
+  //   {
+  //     //mqttClient.publish(mqttStateTopic, getString);
+  //     pCONT_mqtt->ppublish("status/nextion/event9",getString.c_str(),0);
+  //   }
+  //   // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
+  //   else
+  //   {
+  //     String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
+  //     //mqttClient.publish(mqttReturnTopic, getString);
+  //     pCONT_mqtt->ppublish("status/nextion/event10",getString.c_str(),0);
+  //     String mqttButtonJSONEvent = String(F("{\"event\":\"")) + mqttGetSubtopicJSON + String(F("\", \"value\":")) + getString + String(F("}"));
+  //     //mqttClient.publish(mqttStateJSONTopic, mqttButtonJSONEvent);
+  //     pCONT_mqtt->ppublish("status/nextion/event11",mqttButtonJSONEvent.c_str(),0);
+  //     mqttGetSubtopic = "";
+  //   }
+  // }
+  // else if (nextionReturnBuffer[0] == 0x63 && nextionReturnBuffer[1] == 0x6f && nextionReturnBuffer[2] == 0x6d && nextionReturnBuffer[3] == 0x6f && nextionReturnBuffer[4] == 0x6b)
+  // { // Catch 'comok' response to 'connect' command: https://www.itead.cc/blog/nextion-hmi-upload-protocol
+  //   String comokField;
+  //   uint8_t comokFieldCount = 0;
+  //   byte comokFieldSeperator = 0x2c; // ","
+
+  //   for (uint8_t i = 0; i <= nextionReturnIndex; i++)
+  //   { // cycle through each byte looking for our field seperator
+  //     if (nextionReturnBuffer[i] == comokFieldSeperator)
+  //     { // Found the end of a field, so do something with it.  Maybe.
+  //       if (comokFieldCount == 2)
+  //       {
+  //         nextionModel = comokField;
+  //         ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
+  //       }
+  //       comokFieldCount++;
+  //       comokField = "";
+  //     }
+  //     else
+  //     {
+  //       comokField += String(char(nextionReturnBuffer[i]));
+  //     }
+  //   }
+  // }
+
+  // // else if (nextionReturnBuffer[0] == 0x1A)
+  // // { // Catch 0x1A error, possibly from .val query against things that might not support that request
+  // //   // 0x1A+End
+  // //   // ERROR: Variable name invalid
+  // //   // We'll be triggering this a lot due to requesting .val on every component that sends us a Touch Off
+  // //   // Just reset mqttGetSubtopic and move on with life.
+  // //   mqttGetSubtopic = "";
+  // // }
+  // nextionReturnIndex = 0; // Done handling the buffer, reset index back to 0
 }
 
 
@@ -1858,10 +1649,10 @@ void mNextionPanel::configSaveCallback()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void mNextionPanel::configSave()
 { // Save the custom parameters to config.json
-  nextionSetAttr("p[0].b[1].txt", "\"Saving\\rconfig\"");
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
-  DynamicJsonDocument jsonConfigValues(1024);
-  // jsonConfigValues["mqttServer"] = mqttServer;
+  // nextionSetAttr("p[0].b[1].txt", "\"Saving\\rconfig\"");
+  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
+  // DynamicJsonDocument jsonConfigValues(1024);
+  // // jsonConfigValues["mqttServer"] = mqttServer;
   // jsonConfigValues["mqttPort"] = mqttPort;
   // jsonConfigValues["mqttUser"] = mqttUser;
   // jsonConfigValues["mqttPassword"] = mqttPassword;
@@ -1927,85 +1718,85 @@ void mNextionPanel::configClearSaved()
 
 uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
-  D_DATA_BUFFER_CLEAR();
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // D_DATA_BUFFER_CLEAR();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  root["espVersion"] = nextionVersion;
-  root["updateEspAvailable"] = updateEspAvailable ? "true" : "false";
-  root["updateLcdAvailable"] = updateLcdAvailable ? "true" : "false";
-  root["lcdConnected"] = lcdConnected ? "true" : "false";
-  root["lcdVersion"] = lcdVersion;
-  root["heapFree"] = ESP.getFreeHeap();
-  #ifdef ESP8266
-    root["heapFragmentation"] = ESP.getHeapFragmentation();
-    root["heapFree"] = ESP.getCoreVersion();
-  #endif
-  data_buffer.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
-return 1;
+  // root["espVersion"] = nextionVersion;
+  // root["updateEspAvailable"] = updateEspAvailable ? "true" : "false";
+  // root["updateLcdAvailable"] = updateLcdAvailable ? "true" : "false";
+  // root["lcdConnected"] = lcdConnected ? "true" : "false";
+  // root["lcdVersion"] = lcdVersion;
+  // root["heapFree"] = ESP.getFreeHeap();
+  // #ifdef ESP8266
+  //   root["heapFragmentation"] = ESP.getHeapFragmentation();
+  //   root["heapFree"] = ESP.getCoreVersion();
+  // #endif
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
+return 0;
 }
 
 uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 
-  D_DATA_BUFFER_CLEAR();
+  // D_DATA_BUFFER_CLEAR();
 
-  uint8_t ischanged=false;
+  // uint8_t ischanged=false;
 
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  ischanged = 1;//climate.sens1.ischanged_over_threshold;
+  // ischanged = 1;//climate.sens1.ischanged_over_threshold;
 
-  // if(ischanged||pCONT_mqtt->fSendAllData||pCONT_mqtt->fSendSingleFunctionData){ 
-  //   JsonObject sens1 = root.createNestedObject(D_JSON_SENS1);
-  //     sens1[D_JSON_TEMP] = climate.sens1.temperature;
-  //     sens1[D_JSON_HUM] = climate.sens1.humidity;
-  //     sens1[D_JSON_PRESSURE] = climate.sens1.pressure;
-  //     sens1[D_JSON_ALTITUDE] = climate.sens1.altitude;
+  // // if(ischanged||pCONT_mqtt->fSendAllData||pCONT_mqtt->fSendSingleFunctionData){ 
+  // //   JsonObject sens1 = root.createNestedObject(D_JSON_SENS1);
+  // //     sens1[D_JSON_TEMP] = climate.sens1.temperature;
+  // //     sens1[D_JSON_HUM] = climate.sens1.humidity;
+  // //     sens1[D_JSON_PRESSURE] = climate.sens1.pressure;
+  // //     sens1[D_JSON_ALTITUDE] = climate.sens1.altitude;
 
-  //   JsonObject method = root.createNestedObject(D_JSON_ISCHANGEDMETHOD);
-  //     method[D_JSON_TYPE] = D_JSON_SIGNIFICANTLY; //or "any"
-  //     method[D_JSON_AGE] = round(abs(millis()-climate.sens1.ischangedtLast)/1000);
+  // //   JsonObject method = root.createNestedObject(D_JSON_ISCHANGEDMETHOD);
+  // //     method[D_JSON_TYPE] = D_JSON_SIGNIFICANTLY; //or "any"
+  // //     method[D_JSON_AGE] = round(abs(millis()-climate.sens1.ischangedtLast)/1000);
   
-  // }
+  // // }
 
-  data_buffer.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
-  return 1;
+  return 0;
 
 }
 
 
 uint8_t mNextionPanel::ConstructJSON_EnergyStats(uint8_t json_level){
 
-  D_DATA_BUFFER_CLEAR();
+  // D_DATA_BUFFER_CLEAR();
 
-  uint8_t ischanged=false;
+  // uint8_t ischanged=false;
 
-  DynamicJsonDocument doc(250);
-  JsonObject root = doc.to<JsonObject>();
+  // DynamicJsonDocument doc(250);
+  // JsonObject root = doc.to<JsonObject>();
 
-  ischanged = 1;//climate.sens1.ischanged_over_threshold;
+  // ischanged = 1;//climate.sens1.ischanged_over_threshold;
 
-  // if(ischanged||pCONT_mqtt->fSendAllData||pCONT_mqtt->fSendSingleFunctionData){ 
-  //   JsonObject sens1 = root.createNestedObject(D_JSON_SENS1);
-  //     sens1[D_JSON_TEMP] = climate.sens1.temperature;
-  //     sens1[D_JSON_HUM] = climate.sens1.humidity;
-  //     sens1[D_JSON_PRESSURE] = climate.sens1.pressure;
-  //     sens1[D_JSON_ALTITUDE] = climate.sens1.altitude;
+  // // if(ischanged||pCONT_mqtt->fSendAllData||pCONT_mqtt->fSendSingleFunctionData){ 
+  // //   JsonObject sens1 = root.createNestedObject(D_JSON_SENS1);
+  // //     sens1[D_JSON_TEMP] = climate.sens1.temperature;
+  // //     sens1[D_JSON_HUM] = climate.sens1.humidity;
+  // //     sens1[D_JSON_PRESSURE] = climate.sens1.pressure;
+  // //     sens1[D_JSON_ALTITUDE] = climate.sens1.altitude;
 
-  //   JsonObject method = root.createNestedObject(D_JSON_ISCHANGEDMETHOD);
-  //     method[D_JSON_TYPE] = D_JSON_SIGNIFICANTLY; //or "any"
-  //     method[D_JSON_AGE] = round(abs(millis()-climate.sens1.ischangedtLast)/1000);
+  // //   JsonObject method = root.createNestedObject(D_JSON_ISCHANGEDMETHOD);
+  // //     method[D_JSON_TYPE] = D_JSON_SIGNIFICANTLY; //or "any"
+  // //     method[D_JSON_AGE] = round(abs(millis()-climate.sens1.ischangedtLast)/1000);
   
-  // }
+  // // }
 
-  data_buffer.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
+  // data_buffer.payload.len = measureJson(root)+1;
+  // serializeJson(doc,data_buffer.payload.ctr);
 
-  return 1;
+  return 0;
 
 }
 
@@ -2048,25 +1839,25 @@ void mNextionPanel::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
   
-  mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
-  mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_EnergyStats;
+  // mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
+  // mqtthandler_ptr->tSavedLastSent = millis();
+  // mqtthandler_ptr->flags.PeriodicEnabled = false;
+  // mqtthandler_ptr->flags.SendNow = true;
+  // mqtthandler_ptr->tRateSecs = 60; 
+  // mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  // mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  // mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
+  // mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_EnergyStats;
   
-  mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 10; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
-  mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_EnergyStats;
+  // mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
+  // mqtthandler_ptr->tSavedLastSent = millis();
+  // mqtthandler_ptr->flags.PeriodicEnabled = false;
+  // mqtthandler_ptr->flags.SendNow = true;
+  // mqtthandler_ptr->tRateSecs = 10; 
+  // mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  // mqtthandler_ptr->postfix_topic = postfix_topic_energystats;
+  // mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_EnergyStats;
 
 } //end "MQTTHandler_Init"
 
@@ -2100,38 +1891,38 @@ void mNextionPanel::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+  struct handler<mNextionPanel>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DISPLAYS_NEXTION_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
   );
-  uint8_t flag_handle_all = false, handler_found = false
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
+  // uint8_t flag_handle_all = false, handler_found = false
+  // if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
 
-  do{
+  // do{
 
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      case MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID:   handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_ifchanged; break;
-      case MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID:  handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
+  //   switch(mqtt_handler_id){
+  //     case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
+  //     case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
+  //     case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
+  //     case MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID:   handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_ifchanged; break;
+  //     case MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID:  handler_found=true; mqtthandler_ptr=&mqtthandler_energystats_teleperiod; break;
+  //     default: handler_found=false; break; // nothing 
+  //   } // switch
 
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT_mqtt->MQTTHandler_Command(*this,D_MODULE_DISPLAYS_NEXTION_ID,mqtthandler_ptr); }
+  //   // Pass handlers into command to test and (ifneeded) execute
+  //   if(handler_found){ pCONT_mqtt->MQTTHandler_Command(*this,D_MODULE_DISPLAYS_NEXTION_ID,mqtthandler_ptr); }
 
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
+  //   // stop searching
+  //   if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
 
-  }while(flag_handle_all);
+  // }while(flag_handle_all);
 
 }
 

@@ -69,3 +69,26 @@
   "BrightnessCCT":10,
   "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
 }
+
+
+{
+  "ColourPalette":33,
+  "AnimationMode":"Effects",
+  "Effects":{"Function":1},
+  "BrightnessRGB":100,
+  "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
+}
+
+{
+  "Notifications": {
+    "PixelNum": [0,1,2,3],
+    "Mode":[1,3,4,5],
+    "Brightness":10,
+    "TimeSecs":[8,10],
+    "Colour":[
+      [255,0,0],[0,255,0],[0,0,255],[255,0,255]
+    ]
+  }
+}
+
+

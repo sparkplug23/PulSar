@@ -1,24 +1,17 @@
 #ifndef _DRIVER_INTERFACE_LIGHTS1_H
 #define _DRIVER_INTERFACE_LIGHTS1_H 0.1
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
-#ifdef ENABLE_DEVFEATURE_JSONPARSER
+//#ifdef ENABLE_DEVFEATURE_JSONPARSER
 #include "JsonParser.h"
-#endif // ENABLE_DEVFEATURE_JSONPARSER
+//#endif // ENABLE_DEVFEATURE_JSONPARSER
 
-#if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
-  typedef RgbColor RgbTypeColor;
-#elif defined(PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL)
-  typedef RgbwColor RgbTypeColor;
-#else
-  typedef RgbColor RgbTypeColor;
-#endif
 
 #include "6_Lights/Palette/mPalette.h"
 
@@ -294,7 +287,7 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;
 #endif   
 #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
-#endif ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
   
 //     #define D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
 //     #define D_MODE_SINGLECOLOUR_DAYON_NAME_CTR           "DAYON"    
@@ -850,13 +843,13 @@ void ShowInterface();
     uint8_t  SatF2N(float sat);
     uint8_t  BrtF2N(float brt);
 
-    RgbTypeColor GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2);
+    RgbcctColor GetRandomColour(RgbcctColor colour1, RgbcctColor colour2);
     HsbColor GetHSBColour();
     uint32_t WebColorFromColourMap(uint8_t i);
     // uint32_t WebColorFromColourType(RgbwColor rgb);
     uint32_t WebColorFromColourType(RgbColor rgb);
 
-    RgbTypeColor Color32bit2RgbColour(uint32_t colour32bit);
+    RgbcctColor Color32bit2RgbColour(uint32_t colour32bit);
 
     void UpdateSetOutputs();  
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);

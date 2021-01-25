@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_CORE_WEBSERVER
 
 int8_t mInterfaceLight::Tasker_Web(uint8_t function){
 
@@ -109,7 +109,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   ); 
 
 
-  // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
+  // #ifdef USE_WS28XX_FEATURE_4_PIXEL_TYPE
   // Can I use "ORANGE" with RGB as warm white? 
   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT,  // Cold Warm
   //   "scn_clr_temp",             // a - Unique HTML id
@@ -130,48 +130,48 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
   //   WEB_HANDLE_SCENE_COLOUR_WHITE_SLIDER
   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-  if(settings.flags.enable_cct_channel_sliders){
-    BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
-    // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
-    //   "pwm_cct",             // a - Unique HTML id
-    //   "#fff", "#ff0",  // White to Yellow
-    //   1,               // sl1
-    //   153, 500,        // Range color temperature
-    //   LightGetColorTemp(),
-    //   "pwm_cct"
-    // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
+  // if(settings.flags.enable_cct_channel_sliders){
+  //   BufferWriterI->Append_P(PSTR("<div> CCT Controls</div>"));// BrtF2N(animation.brightness))
+  //   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Cold Warm
+  //   //   "pwm_cct",             // a - Unique HTML id
+  //   //   "#fff", "#ff0",  // White to Yellow
+  //   //   1,               // sl1
+  //   //   153, 500,        // Range color temperature
+  //   //   LightGetColorTemp(),
+  //   //   "pwm_cct"
+  //   // );         // t0 - Value id releated to lc("t0", value) and WebGetArg("t0", tmp, sizeof(tmp));
 
-    // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-    //   "pwm_cbrt",               // c - Unique HTML id
-    //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-    //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-    //   0, 100,  // Range 0/1 to 100%
-    //   _briCT,
-    //   "pwm_cbrt"
-    // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+  //   // BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+  //   //   "pwm_cbrt",               // c - Unique HTML id
+  //   //   PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  //   //   4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+  //   //   0, 100,  // Range 0/1 to 100%
+  //   //   _briCT,
+  //   //   "pwm_cbrt"
+  //   // );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
 
-    if(rgbcct_controller.getColorMode() & LCM_CT){
-      BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-        "cct_temp",               
-        "col_sldr",
-        "#fff", "#ff0",  // White to Yellow
-        "cct_temp",              
-        D_JSON_CCT_TEMP,
-        153, 500,        // Range color temperature
-       rgbcct_controller.getCT()
-      ); 
-      BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
-        "cct_brt",               
-        "col_sldr",
-        PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
-        "cct_brt",              
-        D_JSON_BRIGHTNESS_CCT,
-        0, 100,  // Range 0/1 to 100% 
-        rgbcct_controller.getBriCT()
-      ); 
-    }
+  //   if(rgbcct_controller.getColorMode() & LCM_CT){
+  //     BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+  //       "cct_temp",               
+  //       "col_sldr",
+  //       "#fff", "#ff0",  // White to Yellow
+  //       "cct_temp",              
+  //       D_JSON_CCT_TEMP,
+  //       153, 500,        // Range color temperature
+  //      rgbcct_controller.getCT()
+  //     ); 
+  //     BufferWriterI->Append_P(PM_SLIDER_BACKGROUND_SINGLE_LINEAR_GRADIENT_JSON_KEY,  // Slider - Colour A to B with gradient
+  //       "cct_brt",               
+  //       "col_sldr",
+  //       PSTR("#000"), PSTR("#eee"),//"#fff",    // Black to White
+  //       "cct_brt",              
+  //       D_JSON_BRIGHTNESS_CCT,
+  //       0, 100,  // Range 0/1 to 100% 
+  //       rgbcct_controller.getBriCT()
+  //     ); 
+  //   }
 
-  } // enable cct controls
+  // } // enable cct controls
 
   // #endif
 

@@ -1,10 +1,10 @@
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "0_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 // #define USE_MODULE_SENSORS_PZEM004T_MODBUS

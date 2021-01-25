@@ -95,7 +95,7 @@ bool mInterfaceLight::LightModuleInit(void)
         pCONT_set->Settings.light_settings.type++; 
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
         AddLog_P(LOG_LEVEL_DEBUG,PSTR("LightModuleInit PWM%d"),i);    
-      #endif ENABLE_LOG_LEVEL_COMMANDS    
+      #endif // ENABLE_LOG_LEVEL_COMMANDS    
       }  // Use Dimmer/Color control for all PWM as SetOption15 = 1
     }
   }
@@ -255,7 +255,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // }
 
   // DEBUG_LINE_HERE;
-  LightCalcPWMRange();
+  //LightCalcPWMRange();
   // #ifdef DEBUG_LIGHT
   //   AddLog_P(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
   //     pwm_multi_channels, subtype, device, pCONT_set->devices_present);
@@ -594,21 +594,6 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 
 
 
-int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
-
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
 
 // SetPixelHardwareInterface
 /**
@@ -708,7 +693,7 @@ void mInterfaceLight::EveryLoop(){
 
   if(pCONT_set->Settings.light_settings.type == LT_WS2812){ 
     
-    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("Invalid Light LT_WS2812"));
+    // AddLog_P(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_WS2812 %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
@@ -720,8 +705,7 @@ void mInterfaceLight::EveryLoop(){
       #endif
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID:
-        SubTask_NotificationPanel();
-        // light_power_state = true;
+        pCONT_lAni->SubTask_Notifications();
       break;
       #endif
       #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT // Basic colours around boxed objects
@@ -825,11 +809,11 @@ uint8_t mInterfaceLight::BrtF2N(float brt){
 
 
 // Generate random colour between two hsb colours
-RgbTypeColor mInterfaceLight::GetRandomColour(RgbTypeColor colour1, RgbTypeColor colour2){
+RgbcctColor mInterfaceLight::GetRandomColour(RgbcctColor colour1, RgbcctColor colour2){
   // int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
   // int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
   // int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
-  return RgbTypeColor(0);//HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
+  return RgbcctColor(0);//HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
 }
 
 
@@ -994,7 +978,7 @@ void mInterfaceLight::BootMessage(){
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog_P(LOG_LEVEL_INFO, PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
-  #endif ENABLE_LOG_LEVEL_COMMANDS
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
 
@@ -1011,8 +995,8 @@ uint32_t mInterfaceLight::WebColorFromColourType(RgbColor rgb)
   return tcolor;
 }
 
-RgbTypeColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
-  RgbTypeColor rgb;
+RgbcctColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
+  RgbcctColor rgb;
   // #if RgbTypeColor == RgbwColor
     rgb.R = colour32bit >> 24; //RGB
     rgb.G = colour32bit >> 16; //RGB

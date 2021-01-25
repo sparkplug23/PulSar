@@ -1,7 +1,7 @@
 
 #include "mSwitches.h"
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
@@ -319,6 +319,8 @@ void mSwitches::SwitchLoop(void)
   }
 }
 
+
+    #ifdef USE_MODULE_CORE_WEBSERVER
 void mSwitches::WebAppend_Root_Draw_Table(){
 
   const char kTitle_TableTitles_Root[] = 
@@ -357,6 +359,7 @@ void mSwitches::WebAppend_Root_Status_Table(){
   JsonBuilderI->Array_End();
   
 }
+    #endif// USE_MODULE_CORE_WEBSERVER
 
 
 bool mSwitches::IsSwitchActive(uint8_t id){

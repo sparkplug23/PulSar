@@ -1,7 +1,7 @@
 #ifndef _MULTRASONICSENSOR_H
 #define _MULTRASONICSENSOR_H 0.7
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
 

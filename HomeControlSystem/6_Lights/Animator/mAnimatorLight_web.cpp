@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 #ifdef USE_MODULE_CORE_WEBSERVER
-
+x
 int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
   switch(function){    

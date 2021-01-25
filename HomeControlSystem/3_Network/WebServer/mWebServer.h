@@ -1,7 +1,7 @@
 #ifndef _MWEBSERVER_H
 #define _MWEBSERVER_H 0.3
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CORE_WEBSERVER
 
@@ -961,14 +961,14 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 //         "if(json[c][i].hasOwnProperty('evl')){"
 //           "document.getElementById(c).value=json[c][i].evl;"  
 //         "}"
-//         "if(json[c][i].hasOwnProperty('ihr')){" //innerHTML with tasmota replace function eg = HR(); HR sent elsewhere
+//         "if(json[c][i].hasOwnProperty('ihr')){" //innerHTML with  replace function eg = HR(); HR sent elsewhere
 //           "document.getElementsByClassName(c)[id].innerHTML=ihr(json[c][i].ihr);" 
 //         "}"
-//         "if(json[c][i].hasOwnProperty('eihr')){" //innerHTML with tasmota replace function eg = HR(); HR sent elsewhere
+//         "if(json[c][i].hasOwnProperty('eihr')){" //innerHTML with  replace function eg = HR(); HR sent elsewhere
 //           // "console.log('iihr',ihr(json[c][i].eihr));"
 //           "document.getElementById(c).innerHTML=ihr(json[c][i].eihr);" 
 //         "}"
-//         "if(json[c][i].hasOwnProperty('evl')){" //innerHTML with tasmota replace function eg = HR(); HR sent elsewhere
+//         "if(json[c][i].hasOwnProperty('evl')){" //innerHTML with  replace function eg = HR(); HR sent elsewhere
 //           "document.getElementById(c).value=json[c][i].evl;"//ihr(json[c][i].iihr);" 
 //           "console.log('value',document.getElementById(c).value);"
 //         "}"

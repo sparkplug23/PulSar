@@ -4,7 +4,8 @@
 // MapConfig serves the purpose of feeding the template methods until successful saving of states are archieved
 // In the near future, this mode will be tested by feeding the template via http command
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
+// #include "2_CoreSystem/mBaseConfig.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
 

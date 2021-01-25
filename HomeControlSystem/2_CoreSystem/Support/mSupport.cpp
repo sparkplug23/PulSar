@@ -2077,21 +2077,6 @@ void mSupport::PerformEverySecond(void)
 // #ifndef FIRMWARE_MINIMAL
 //           if (RtcSettings.ota_loader) {
 //             // OTA File too large so try OTA minimal version
-//             // Replace tasmota                                         with tasmota-minimal
-//             // Replace tasmota-DE                                      with tasmota-minimal
-//             // Replace tasmota.bin                                     with tasmota-minimal.bin
-//             // Replace tasmota.xyz                                     with tasmota-minimal.xyz
-//             // Replace tasmota.bin.gz                                  with tasmota-minimal.bin.gz
-//             // Replace tasmota.xyz.gz                                  with tasmota-minimal.xyz.gz
-//             // Replace tasmota.ino.bin                                 with tasmota-minimal.ino.bin
-//             // Replace tasmota.ino.bin.gz                              with tasmota-minimal.ino.bin.gz
-//             // Replace http://domus1:80/api/arduino/tasmota.bin        with http://domus1:80/api/arduino/tasmota-minimal.bin
-//             // Replace http://domus1:80/api/arduino/tasmota.bin.gz     with http://domus1:80/api/arduino/tasmota-minimal.bin.gz
-//             // Replace http://domus1:80/api/arduino/tasmota-DE.bin.gz  with http://domus1:80/api/arduino/tasmota-minimal.bin.gz
-//             // Replace http://domus1:80/api/ard-uino/tasmota-DE.bin.gz with http://domus1:80/api/ard-uino/tasmota-minimal.bin.gz
-//             // Replace http://192.168.2.17:80/api/arduino/tasmota.bin  with http://192.168.2.17:80/api/arduino/tasmota-minimal.bin
-//             // Replace http://192.168.2.17/api/arduino/tasmota.bin.gz  with http://192.168.2.17/api/arduino/tasmota-minimal.bin.gz
-
 //             char *bch = strrchr(mqtt_data, '/');                       // Only consider filename after last backslash prevent change of urls having "-" in it
 //             if (bch == nullptr) { bch = mqtt_data; }                   // No path found so use filename only
 // /*

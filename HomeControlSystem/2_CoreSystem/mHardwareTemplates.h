@@ -1,9 +1,9 @@
-#ifndef _mHardwareTemplates_H_
-#define _mHardwareTemplates_H_
+#ifndef _mHardwareTemplates2_H_
+#define _mHardwareTemplates2_H_
 
 #include "stdint.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
 /**********GPIO FUNCTIONS CONFIG**********************************************************************************/

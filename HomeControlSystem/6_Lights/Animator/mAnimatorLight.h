@@ -1,11 +1,12 @@
 #ifndef _AnimatorDALIGHTNEOPIXEL_H
 #define _AnimatorDALIGHTNEOPIXEL_H 7.0
 
-#include "2_CoreSystem/mFirmwareDefaults.h"   // New final firmware defines for modules desired
-#include "0_ConfigUser/mFirmwareCustom.h"   // New final firmware defines for modules desired
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+
+#include "6_Lights/_Interface/mInterfaceLight.h"
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -23,11 +24,10 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "6_Lights/Palette/mPalette_Progmem.h"
-#include "0_ConfigUser/mUserConfig.h"
+// #include "2_CoreSystem/mBaseConfig.h"
 #include "mAnimatorLight_web.h"
-#include "1_TaskerManager/mTaskerManager.h"
+// #include "6_Lights/_Interface/mInterfaceLight.h"
 
-#include "6_Lights/_Interface/mInterfaceLight.h"
 
 // Default enables, unless I add disable versions
 #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS 
@@ -38,9 +38,18 @@
 // #define ENABLE_PIXEL_FUNCTION_EFFECTS
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
 
+
+#if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
+  typedef RgbColor RgbTypeColor;
+#elif defined(USE_WS28XX_FEATURE_4_PIXEL_TYPE)
+  typedef RgbwColor RgbTypeColor;
+#else
+  typedef RgbColor RgbTypeColor;
+#endif
+
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef NeoRgbFeature selectedNeoFeatureType;
-#elif defined(PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL)   //includes 4th channel of white, pixel order variable still important
+#elif defined(USE_WS28XX_FEATURE_4_PIXEL_TYPE)   //includes 4th channel of white, pixel order variable still important
   // typedef NeoGrbwFeature selectedNeoFeatureType; 
   typedef NeoRgbwFeature selectedNeoFeatureType;
 #else
@@ -968,7 +977,11 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
 void ApplyBrightnesstoDesiredColour(uint8_t brightness);
 
 RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
-RgbcctColor ApplyRGBCCTBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
+
+
+RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
+RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
+
 
 
 
@@ -1083,10 +1096,6 @@ void RefreshLEDIndexPattern();
 
 
 
-
-RgbcctColor ApplyBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightness);
-
-
 void StripUpdate();
 
 
@@ -1198,37 +1207,46 @@ void SetPixelColor_All(RgbcctColor colour);
 
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     #ifndef STRIP_NOTIFICATION_SIZE
-      #define STRIP_NOTIFICATION_SIZE (STRIP_SIZE_MAX>20?20:STRIP_SIZE_MAX) // Set max if not defined as 20
+      #define STRIP_NOTIFICATION_SIZE (STRIP_SIZE_MAX>12?12:STRIP_SIZE_MAX) // Set max if not defined as 20
     #endif
 
-    // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    void init_NotificationPanel();
-    // #endif
-
-    void SubTask_NotificationPanel();
+    void init_Notifications();
     void SubTask_Notifications();
+    void parsesub_Notifications(JsonParserObject obj);
     
     const char* GetNotificationModeNamebyID(uint8_t id, char* buffer);
     int8_t      GetNotificationModeIDbyName(const char* c);
-    enum NOTIF_MODE{NOTIF_MODE_OFF_ID=0,
-                    NOTIF_MODE_STATIC_OFF_ID,
-                    NOTIF_MODE_STATIC_ON_ID,
-                    NOTIF_MODE_FADE_OFF_ID,
-                    NOTIF_MODE_FADE_ON_ID,
-                    NOTIF_MODE_BLINKING_OFF_ID,
-                    NOTIF_MODE_BLINKING_ON_ID,
-                    NOTIF_MODE_PULSING_OFF_ID,
-                    NOTIF_MODE_PULSING_ON_ID};
+    enum NOTIF_MODE{
+      NOTIF_MODE_STATIC_OFF_ID=0,
+      NOTIF_MODE_STATIC_ON_ID,
+      NOTIF_MODE_FADE_OFF_ID,
+      NOTIF_MODE_FADE_ON_ID,
+      NOTIF_MODE_BLINKING_ID,
+      NOTIF_MODE_PULSING_ID,
+      NOTIF_MODE_LENGTH_ID
+      };
+
+    enum SIMPLE_EFFECT_ON_COLOUR_IDS{
+      SIMPLE_EFFECT_ON_COLOUR_LINEAR_BLEND_ID=0,
+      SIMPLE_EFFECT_ON_COLOUR_LINEAR_BLEND_AND_BACK_ID,
+      SIMPLE_EFFECT_ON_COLOUR_BLINK5050_ID,
+      SIMPLE_EFFECT_ON_COLOUR_BLINK1090_ID,
+      SIMPLE_EFFECT_ON_COLOUR_STATIC_ON_ID,
+      SIMPLE_EFFECT_ON_COLOUR_FADE_ON_ID,
+      SIMPLE_EFFECT_ON_COLOUR_LENGTH_IDS
+    };
+
+    #define D_NOTIFICATION_PROGRESS_RANGE 100
+    #define D_NOTIFICATION_PROGRESS_RANGE_F 100.0f
     
     typedef union {
       uint8_t data; // allows full manipulating
       struct { 
         
-      uint8_t fForcePanelUpdate : 1;//= false;
-      uint8_t fShowPanelUpdate  : 1;//= false;
-      uint8_t fEnableTimeoutAll : 1;//   = false;
-      uint8_t fWhenOnlyWhiteExistsSetBrightnessOfHSBtoZero : 1;
-
+        uint8_t fForcePanelUpdate : 1;//= false;
+        uint8_t fShowPanelUpdate  : 1;//= false;
+        uint8_t fEnableTimeoutAll : 1;//   = false;
+      
         // Reserved
         uint8_t reserved : 4;
       };
@@ -1241,26 +1259,50 @@ void SetPixelColor_All(RgbcctColor colour);
         uint32_t Timeout = millis();
         uint32_t AutoOff = millis();
         uint32_t tSavedForceUpdate=millis();
-        uint32_t tSavedUpdateHeatingPanel;
         uint32_t tNotifPanelTimeout;
       }tSaved;
       struct PIXELN{
-        uint8_t  mode = NOTIF_MODE_OFF_ID; // Type of light pattern
-        uint16_t period_ms = 1000; // Time between fully on and off
-        uint8_t  transition_progess = 0; // Used for pulsing only   || reuse for fade progress
-        uint16_t fade_time_ms = 1000;
-        // HsbColor colour; // colour of the led
-        // #ifdef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL
-        //   uint8_t colourWhite;
-        // #endif
+        /**
+         * Using full Rgbcct, with possible Rgbw only to save 1 byte per notif pixel
+         * */        
         RgbcctColor colour;
-        uint32_t tSavedUpdate; // millis last updated
-        uint16_t tRateUpdate = 10; // time between updating
+        /**
+         * Using full 255 range
+         * */
+        uint8_t brightness;
+        /**
+         * Using full 255 range
+         * */
+        uint8_t progress = 0;
+        /**
+         * Mode
+         * */
+        uint8_t  mode = NOTIF_MODE_STATIC_OFF_ID;
+        /**
+         * Mode
+         * */    
+        uint16_t period_ms = 1000;
+        /**
+         * Speed 0-255, relative to period
+         * */       
+        uint8_t speed = 0;
+        /**
+         * Trigger times
+         * */   
+        uint32_t tSavedUpdate;
+        uint16_t tRateUpdate = 10;
+        /**
+         * Seconds until auto turn off
+         * */   
         uint16_t auto_time_off_secs = 0; // reset pixel to off
       }pixel[STRIP_NOTIFICATION_SIZE];
     }notif;
-    void parsesub_NotificationPanel(JsonObjectConst _obj);
+
 #endif
+
+
+RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
+
 
 /**************
  * 

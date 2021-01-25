@@ -1,7 +1,7 @@
 #ifndef _MMOTIONSENSOR_H
 #define _MMOTIONSENSOR_H 1.0
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_MOTION
 

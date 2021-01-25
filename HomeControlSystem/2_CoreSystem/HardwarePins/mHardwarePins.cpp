@@ -942,7 +942,7 @@ void mHardwarePins::GpioInit(void)
   if (!ValidModule(pCONT_set->Settings.module)) {
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_MODULE "!ValidModule"));
-    #endif ENABLE_LOG_LEVEL_INFO
+    #endif // ENABLE_LOG_LEVEL_INFO
     uint8_t module = MODULE;
     if (!ValidModule(MODULE)) { module = MODULE_NODEMCU_ID; }
     pCONT_set->Settings.module = module;
@@ -950,7 +950,7 @@ void mHardwarePins::GpioInit(void)
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule"));
-    #endif ENABLE_LOG_LEVEL_INFO
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
   SetModuleType();
 

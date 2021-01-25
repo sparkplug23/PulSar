@@ -1,7 +1,7 @@
 #ifndef _M_PALETTE_H
 #define _M_PALETTE_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 

@@ -1,7 +1,7 @@
 /*
   mLanguageDefault.h - Base language defines
 
-  Copyright (C) 2020 Michael Doone
+  Copyright (C) 2020 my_name_here
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -1368,11 +1368,11 @@
 #define D_JSON_AGED_COLOURING "AgedColouring"
 
 #define D_JSON_ON "On"
-#define D_JSON_ONTIME "ontime"
+// #define D_JSON_ONTIME "ontime"
 #define D_JSON_ONOFF "OnOff"
 #define D_JSON_ONOFF_NAME "OnOffName"
 #define D_JSON_OFF "Off"
-#define D_JSON_OFFTIME "offtime"
+// #define D_JSON_OFFTIME "offtime"
 #define D_JSON_ORDER "Order"
 #define D_JSON_OUTLIERS "Outliers"
 #define D_JSON_PACKETS "Packets"

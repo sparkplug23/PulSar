@@ -230,7 +230,7 @@ void mAnimatorLight::init(void){
 
 
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    init_NotificationPanel();
+    init_Notifications();
   #endif
   #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
@@ -1349,7 +1349,7 @@ void mAnimatorLight::ApplyBrightnesstoDesiredColour(uint8_t brightness){
 }
 
 
-RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightness){
+RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness){
 
   RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightness);
@@ -1361,7 +1361,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColour(RgbcctColor full_rang
 
 }
 
-RgbcctColor mAnimatorLight::ApplyRGBCCTBrightnesstoDesiredColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
+RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
 
   RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightnessRGB);
@@ -1399,7 +1399,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   }
   #endif // ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
 
-  return ApplyBrightnesstoDesiredColour(full_range_colour, new_brightness_255);
+  return ApplyBrightnesstoRgbcctColour(full_range_colour, new_brightness_255);
 
 }
 
@@ -1783,7 +1783,7 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
           // Set output to this "many" colour
           if(pixel_position == 255){
             for(uint16_t temp=0;temp<ledout.length;temp++){ 
-              animation_colours[temp].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB_Global());
+              animation_colours[temp].DesiredColour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->getBriRGB_Global());
             }            
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set ALL %d,%d %d"),pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -1791,7 +1791,7 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
           }else{
             colour.R = 1;colour.R = 2;colour.R = 3;
             // Serial.println("colour.R = 1;colour.R = 2;colour.R = 3;");
-            animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->getBriRGB_Global());
+            animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->getBriRGB_Global());
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
             #endif
@@ -1843,8 +1843,8 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
       // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
 
 #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-        start_colour = ApplyBrightnesstoDesiredColour(start_colour,pCONT_iLight->getBriRGB_Global());
-        end_colour   = ApplyBrightnesstoDesiredColour(end_colour,pCONT_iLight->getBriRGB_Global());
+        start_colour = ApplyBrightnesstoRgbcctColour(start_colour,pCONT_iLight->getBriRGB_Global());
+        end_colour   = ApplyBrightnesstoRgbcctColour(end_colour,pCONT_iLight->getBriRGB_Global());
 #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
         // #ifdef ENABLE_LOG_LEVEL_DEBUG

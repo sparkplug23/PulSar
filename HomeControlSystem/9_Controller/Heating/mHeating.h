@@ -1,7 +1,7 @@
 #ifndef MHEATING_H
 #define MHEATING_H 0.4
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 

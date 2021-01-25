@@ -1,10 +1,10 @@
 #ifndef _DRIVER_ENERGY_H
 #define _DRIVER_ENERGY_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #include "2_CoreSystem/mFirmwareDefaults.h"
-#include "0_ConfigUser/mFirmwareCustom.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #include "2_CoreSystem/mSystemConfig.h"
 
 // #define USE_MODULE_DRIVERS_ENERGY

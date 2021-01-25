@@ -50,7 +50,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
         // Change only selected pixel brightness levels
         for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
           random_brightness = random(min_brightness,max_brightness);          
-          animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(
+          animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoRgbcctColour(
                                                                               animation_colours[ledout.pattern[ledout.index]].DesiredColour,
                                                                               random_brightness);
         }
@@ -193,7 +193,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
   AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
-    animation_colours_rgbcct.DesiredColour = ApplyRGBCCTBrightnesstoDesiredColour(
+    animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
       pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
@@ -411,7 +411,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
         colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
         if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-          colour = ApplyBrightnesstoDesiredColour(colour,pCONT_iLight->rgbcct_controller.getBrightnessRGB255());
+          colour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->rgbcct_controller.getBrightnessRGB255());
         }
 
 
@@ -608,11 +608,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
 
       uint16_t index_random = random(0,pCONT_iLight->settings.light_size_count);
 
-      #ifndef PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL //tmp fix
+      //#ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE //tmp fix
+      //HsbColor hsb = RgbColor(GetPixelColor(index_random));
+      //#else
       HsbColor hsb = RgbColor(GetPixelColor(index_random));
-      #else
-      HsbColor hsb = RgbColor(GetPixelColor(index_random));
-      #endif
+      //#endif
 
       uint8_t brightness_now = mapvalue(pCONT_iLight->BrtF2N(hsb.B),0,100,0,255);
 
@@ -1015,12 +1015,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off()
 //if already on, dont change the colour
             if(!animation_colours[random_pixel_index].DesiredColour.CalculateBrightness()){// if off, allow new colour 
               if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-                colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB_Global());
+                colour_random = ApplyBrightnesstoRgbcctColour(colour_random,pCONT_iLight->getBriRGB_Global());
               }
               animation_colours[random(0,10)].DesiredColour = colour_random;//RgbColor(0,0,255);//
             }else{
               
-              animation_colours[index].DesiredColour.DarkenDivided(2);//Darken(10);// = GetPixelColor(index);
+              animation_colours[index].DesiredColour.Darken(2);//Darken(10);// = GetPixelColor(index);
             }
            
           // }
@@ -1251,7 +1251,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(co
           desired_pixel = random(0,mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
           // get colour from palette
           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
-          flash_colour = ApplyBrightnesstoDesiredColour(flash_colour,flashed_brightness);
+          flash_colour = ApplyBrightnesstoRgbcctColour(flash_colour,flashed_brightness);
           SetPixelColor(
             random(0,pCONT_iLight->settings.light_size_count), 
             flash_colour

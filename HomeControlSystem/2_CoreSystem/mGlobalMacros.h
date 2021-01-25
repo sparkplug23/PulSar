@@ -2,6 +2,12 @@
 #ifndef _GLOBAL_MACROS_H_
 #define _GLOBAL_MACROS_H_ 1
 
+#ifdef ESP8266
+#include <avr/pgmspace.h>
+#endif // ESP8266
+#ifdef ESP32
+#define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
+#endif
 
 #define DEFINE_PGM_CTR(X) \
   const char X[] PROGMEM =

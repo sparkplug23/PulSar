@@ -1,11 +1,10 @@
 #ifndef _USE_MODULE_DRIVERS_PWM_H
 #define _USE_MODULE_DRIVERS_PWM_H 0.3
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_PWM
 
-#include "1_TaskerManager/mTaskerManager.h"
 
 #include <string.h>
 #include <strings.h>
@@ -16,14 +15,14 @@ class mPWM{
   public:
     mPWM(){};
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);   
+    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
     int8_t Tasker_Web(uint8_t function);
 
-    #define WEB_HANDLE_PWM_SLIDER "pwm_fan_speed"
+    #define WEB_HANDLE_PWM_SLIDER "fan_speed"
     
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parse_JSONCommand(JsonObjectConst obj);
+// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+// void parse_JSONCommand(JsonObjectConst obj);
 
 uint16_t test_val = 0;
 uint8_t dir = 0;

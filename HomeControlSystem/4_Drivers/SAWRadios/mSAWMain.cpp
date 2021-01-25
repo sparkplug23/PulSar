@@ -1,7 +1,7 @@
 #include "4_Drivers/SAWRadios/mSAWMain.h"
 
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 #ifdef USE_SAW_TRANSCEIVER
 //Updates to progress library to version 3
 // mSAWTransceive = SawRadios must only contain basic "core" functions --

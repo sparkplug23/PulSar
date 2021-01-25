@@ -306,149 +306,149 @@ int8_t mPWM::Tasker(uint8_t function){
 } // END Tasker
 
 
-int8_t mPWM::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
-int8_t mPWM::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+// int8_t mPWM::Tasker(uint8_t function, JsonObjectConst obj){
+//   switch(function){
+//     case FUNC_JSON_COMMAND_OBJECT:
+//       parse_JSONCommand(obj);
+//     break;
+//     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+//       return CheckAndExecute_JSONCommands(obj);
+//     break;
+//   }
+// }
+// int8_t mPWM::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//       parse_JSONCommand(obj);
+//       return FUNCTION_RESULT_HANDLED_ID;
+//   }else{
+//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+//   }
 
-}
-void mPWM::parse_JSONCommand(JsonObjectConst obj){
+// }
+// void mPWM::parse_JSONCommand(JsonObjectConst obj){
 
   
 
-  if(obj.containsKey(D_JSON_FANSPEED)){
-    int speed = obj[D_JSON_FANSPEED];
-    test_val = speed;
-    if(speed>0){
-      analogWrite(pin, test_val);
-    }else
-    if(speed==1023){
-      digitalWrite(pin, HIGH);      
-    }else{
-      digitalWrite(pin, LOW);
-    }
-    // if(speed>3){
-    //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
-    //   speed=0; //default off
-    // }      
-    // SonoffIFanSetFanspeed(speed, false);
-    // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-    // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-    // isserviced++;
-  }
+//   if(obj.containsKey(D_JSON_FANSPEED)){
+//     int speed = obj[D_JSON_FANSPEED];
+//     test_val = speed;
+//     if(speed>0){
+//       analogWrite(pin, test_val);
+//     }else
+//     if(speed==1023){
+//       digitalWrite(pin, HIGH);      
+//     }else{
+//       digitalWrite(pin, LOW);
+//     }
+//     // if(speed>3){
+//     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+//     //   speed=0; //default off
+//     // }      
+//     // SonoffIFanSetFanspeed(speed, false);
+//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+//     // isserviced++;
+//   }
   
   
 
-}
+// }
 
 
 
 
-int8_t mPWM::Tasker_Web(uint8_t function){
+// int8_t mPWM::Tasker_Web(uint8_t function){
 
-  switch(function){
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:{
+//   switch(function){
+//     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
 
-      // create command list
-      // char dlist[100]; memset(dlist,0,sizeof(dlist));
-      // pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
-      // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       // create command list
+//       // char dlist[100]; memset(dlist,0,sizeof(dlist));
+//       // pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
+//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
 
-      uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
+//       uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
           
-      // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Fan Controls"),"");
+//       // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Fan Controls"),"");
 
-      char button_value_ctr[10];
-      char button_key_ctr[50];
-      char button_text_ctr[30];
+//       char button_value_ctr[10];
+//       char button_key_ctr[50];
+//       char button_text_ctr[30];
 
-      // BufferWriterI->Append_P(PSTR("{t}<tr>"));
+//       // BufferWriterI->Append_P(PSTR("{t}<tr>"));
 
-      if(settings.fShowManualSlider){
-        BufferWriterI->Append_P(PSTR("<div> Fan Speed </div>"), test_val);
-        BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-          WEB_HANDLE_PWM_SLIDER,               // c - Unique HTML id
-          PSTR("#000"), PSTR("#eee"),   // Black to White
-          4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-          0, 1023,  // Range 0/1 to 100%
-          test_val,
-          WEB_HANDLE_PWM_SLIDER
-        );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
-      }
+//       if(settings.fShowManualSlider){
+//         BufferWriterI->Append_P(PSTR("<div> Fan Speed </div>"), test_val);
+//         BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
+//           WEB_HANDLE_PWM_SLIDER,               // c - Unique HTML id
+//           PSTR("#000"), PSTR("#eee"),   // Black to White
+//           4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
+//           0, 1023,  // Range 0/1 to 100%
+//           test_val,
+//           WEB_HANDLE_PWM_SLIDER
+//         );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
+//       }
 
-        // for(uint8_t button_id=0;button_id<5;button_id++){
-        //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
-        //                             100/(button_id==0?1:4),
-        //                             button_id==0?"4":"", 
-        //                             "buttonh",
-        //                             pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
-        //                             pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
-        //                             pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
-        //                             ""
-        //                         );
-        //   // LightPower button gets its own row
-        //   if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
-        // }
-      // BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+//         // for(uint8_t button_id=0;button_id<5;button_id++){
+//         //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
+//         //                             100/(button_id==0?1:4),
+//         //                             button_id==0?"4":"", 
+//         //                             "buttonh",
+//         //                             pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
+//         //                             pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
+//         //                             pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
+//         //                             ""
+//         //                         );
+//         //   // LightPower button gets its own row
+//         //   if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
+//         // }
+//       // BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
-    }break; 
-    case FUNC_WEB_COMMAND:
-      WebCommand_Parse();      
-    break;
-  }
+//     }break; 
+//     case FUNC_WEB_COMMAND:
+//       WebCommand_Parse();      
+//     break;
+//   }
 
-}
+// }
 
 
 
-void mPWM::WebCommand_Parse(void)
-{
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+// void mPWM::WebCommand_Parse(void)
+// {
+//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
 
-  char tmp[100];
+//   char tmp[100];
 
-  uint8_t  arg_value = 0;
- if(pCONT_web->request_web_command == nullptr){
-  Serial.println("nullptr"); 
-  return; 
-}
+//   uint8_t  arg_value = 0;
+//  if(pCONT_web->request_web_command == nullptr){
+//   Serial.println("nullptr"); 
+//   return; 
+// }
 
-  char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
+//   char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
   
-  sprintf_P(arg_ctr,PSTR(WEB_HANDLE_PWM_SLIDER));
-  if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-    pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-    arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-    test_val = arg_value;
+//   sprintf_P(arg_ctr,PSTR(WEB_HANDLE_PWM_SLIDER));
+//   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
+//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
+//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
+//     test_val = arg_value;
 
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-      analogWrite(pin, test_val);
-    // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-    // SetRefreshLEDs();
-  }
+//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//       analogWrite(pin, test_val);
+//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//     // SetRefreshLEDs();
+//   }
 
-}
+// }
 
 
 

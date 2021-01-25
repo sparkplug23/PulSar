@@ -1,31 +1,7 @@
-
-// KEEP - useful
-
-//   sonoff.h - Master header file for Sonoff-Tasmota
-
-//   Copyright (C) 2019  Theo Arends
-
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-//#ifdef ESP8266
 #ifndef _MSWITCHES_H_
 #define _MSWITCHES_H_
 
-
-
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
@@ -42,7 +18,7 @@
 
 
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 
 #include "2_CoreSystem/Time/mTime.h"
@@ -142,8 +118,11 @@ class mSwitches{
     
 Ticker* TickerSwitch = nullptr;
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
     void WebAppend_Root_Draw_Table();
     void WebAppend_Root_Status_Table();
+
+    #endif// USE_MODULE_CORE_WEBSERVER
 
     uint32_t tSavedSwitchProbe = millis();
     uint32_t switch_debounce = 0;          // Switch debounce timer

@@ -4,7 +4,7 @@
   Copyright (c) 2016 Hristo Gochkov. All rights reserved.
   This file is part of the esp8266 core for Arduino environment.
 
-  Modified by Michael Doone to remove as much dependency on Strings as possible
+  Modified by my_name_here to remove as much dependency on Strings as possible
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

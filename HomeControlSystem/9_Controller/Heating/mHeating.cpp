@@ -1142,8 +1142,8 @@ uint8_t mHeating::ConstructJSON_ClimateTemps(uint8_t json_level){
 
   for(int dht_id=0;dht_id<2;dht_id++){
     JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
-      JsonBuilderI->Add(D_JSON_TEMP, pCONT->msdht->sensor[dht_id].instant.temperature);
-      JsonBuilderI->Add(D_JSON_HUM, pCONT->msdht->sensor[dht_id].instant.humidity);
+      JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT->msdht->sensor[dht_id].instant.temperature);
+      JsonBuilderI->Add(D_JSON_HUMIDITY, pCONT->msdht->sensor[dht_id].instant.humidity);
       JsonBuilderI->Add(D_JSON_ISVALID, pCONT->msdht->sensor[dht_id].instant.isvalid);
       JsonBuilderI->Add(D_JSON_ISCHANGED, pCONT->msdht->sensor[dht_id].instant.ischanged);
       // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;

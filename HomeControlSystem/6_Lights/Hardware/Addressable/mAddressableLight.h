@@ -3,7 +3,7 @@
 
 // Functions in here will be identical between hardware types, with get, set, configs that init the interface and animator level depending on the hardware type
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 

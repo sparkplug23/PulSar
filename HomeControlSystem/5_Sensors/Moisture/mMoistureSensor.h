@@ -1,7 +1,7 @@
 #ifndef _MMOISTURESENSOR_H
 #define _MMOISTURESENSOR_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_MOISTURE
 

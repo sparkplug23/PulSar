@@ -145,8 +145,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
     if(mifan == nullptr){ mifan = new mSonoffIFan(); }
   #endif
-  #ifdef USE_MODULE_CUSTOM_PWM_FAN
-    if(mpwmfan == nullptr){ mpwmfan = new mPWMFan(); }
+  #ifdef USE_MODULE_CUSTOM_FAN
+    if(mfan == nullptr){ mfan = new mFan(); }
   #endif
 
 }
@@ -312,8 +312,8 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_SONOFF_IFAN_ID;
   #endif
-  #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_PWM_FAN_ID;
+  #ifdef D_MODULE_CUSTOM_FAN_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_FAN_ID;
   #endif
   #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
@@ -435,8 +435,8 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
     if(mifan==nullptr){ return false; }
   #endif
-  #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-    if(mpwmfan==nullptr){ return false; }
+  #ifdef D_MODULE_CUSTOM_FAN_ID
+    if(mfan==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mod==nullptr){ return false; }
@@ -697,8 +697,8 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
         case D_MODULE_CUSTOM_SONOFF_IFAN_ID:      result = mifan->Tasker(function); break;
       #endif
-      #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-        case D_MODULE_CUSTOM_PWM_FAN_ID:      result = mpwmfan->Tasker(function); break;
+      #ifdef D_MODULE_CUSTOM_FAN_ID
+        case D_MODULE_CUSTOM_FAN_ID:      result = mfan->Tasker(function); break;
       #endif
 
 
@@ -992,8 +992,8 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
       case D_MODULE_CUSTOM_SONOFF_IFAN_ID:        return PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR;
     #endif
-    #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-      case D_MODULE_CUSTOM_PWM_FAN_ID:        return PM_MODULE_CUSTOM_PWMFAN_FRIENDLY_CTR;
+    #ifdef D_MODULE_CUSTOM_FAN_ID
+      case D_MODULE_CUSTOM_FAN_ID:        return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
     #endif
 
 
@@ -1149,8 +1149,8 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
       case D_MODULE_CUSTOM_SONOFF_IFAN_ID:         return PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR;  
     #endif
-    #ifdef D_MODULE_CUSTOM_PWM_FAN_ID
-      case D_MODULE_CUSTOM_PWM_FAN_ID:         return PM_MODULE_CUSTOM_PWMFAN_FRIENDLY_CTR;  
+    #ifdef D_MODULE_CUSTOM_FAN_ID
+      case D_MODULE_CUSTOM_FAN_ID:         return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;  
     #endif
 
 

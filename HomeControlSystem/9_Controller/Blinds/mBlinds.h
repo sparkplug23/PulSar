@@ -1,7 +1,7 @@
 #ifndef _MBLINDS_H
 #define _MBLINDS_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_BLINDS
 

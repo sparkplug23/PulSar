@@ -1,7 +1,7 @@
 #ifndef _mExerciseBike_H
 #define _mExerciseBike_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE //move into lights? pir activated light, equally a driver of lights..but it senses
 // make light activation method of motion

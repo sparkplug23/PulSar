@@ -5,6 +5,8 @@
 
 // From my computer
 
+#define D_USER_MICHAEL // maybe undef later?
+
 #define NO_GLOBAL_MDNS
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -200,8 +202,8 @@ Flash: [=====     ]  49.8% (used 510260 bytes from 1023984 bytes)
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
     mSonoffIFan mifan;
   #endif
-  #ifdef USE_MODULE_CUSTOM_PWM_FAN
-    mPWMFan mpwmfan;
+  #ifdef USE_MODULE_CUSTOM_FAN
+    mFan mfan;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     mIRtransceiver mir;
@@ -315,8 +317,8 @@ void init_class_instances(){
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
     pCONT-> mifan;
   #endif
-  #ifdef USE_MODULE_CUSTOM_PWM_FAN
-    pCONT-> mpwmfan;
+  #ifdef USE_MODULE_CUSTOM_FAN
+    pCONT-> mfan;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     pCONT-> mir;

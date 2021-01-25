@@ -1,7 +1,7 @@
 #ifndef _MODULE_CONTROLLER_STATUS_LEDS_H
 #define _MODULE_CONTROLLER_STATUS_LEDS_H 0.1
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 /**
  * This module will allow status leds, control of basic digitalio pins/pwm for controlling leds using pwm driver

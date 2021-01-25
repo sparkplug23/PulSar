@@ -1,7 +1,7 @@
 #ifndef _MRADIATORFAN_H
 #define _MRADIATORFAN_H 0.3
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef USE_MODULE_CUSTOM_RADIATORFAN
 

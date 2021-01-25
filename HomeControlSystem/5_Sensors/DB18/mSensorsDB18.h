@@ -1,7 +1,7 @@
 #ifndef MSENSORSDB_H
 #define MSENSORSDB_H 0.3
 
-#include "0_ConfigUser/mUserConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_DS18B20
 

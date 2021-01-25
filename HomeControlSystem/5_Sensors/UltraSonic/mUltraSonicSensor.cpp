@@ -551,6 +551,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
 } // END Tasker
 
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
 void mUltraSonicSensor::WebAppend_Root_Status_Table_Draw(){
   
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
@@ -586,6 +587,7 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
   JsonBuilderI->Array_End();
 
 }
+    #endif// USE_MODULE_CORE_WEBSERVER
 
 
 void mUltraSonicSensor::SubTask_DetectMotion(){
@@ -660,7 +662,7 @@ void mUltraSonicSensor::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ultrasonic")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return; // not meant for here

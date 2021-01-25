@@ -206,6 +206,10 @@ const char* mMotionSensor::PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uin
 
 
 void mMotionSensor::EveryLoop(){
+
+  // pinMode(12, INPUT_PULLUP);
+
+  // Serial.println(digitalRead(12));
   
 
   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
@@ -214,9 +218,14 @@ void mMotionSensor::EveryLoop(){
       //if(pCONT->mt->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
       pir_detect[sensor_id].state = PIR_Detected(sensor_id);
+
+
+
       if(pir_detect[sensor_id].state){
         pir_detect[sensor_id].tDetectTime = millis(); 
 //        pir_detect[sensor_id].detected_time_of_day_seconds = pCONT_time->GetTimeOfDay_Seconds();
+
+AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
         
         pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNow();
         
