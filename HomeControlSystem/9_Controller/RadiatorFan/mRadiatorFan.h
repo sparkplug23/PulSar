@@ -1,14 +1,9 @@
 #ifndef _MRADIATORFAN_H
 #define _MRADIATORFAN_H 0.3
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-
-
-#include "1_TaskerManager/mTaskerManager.h"
-#include <ArduinoJson.h>
-#include "1_TaskerManager/mTaskerManager.h"
 
 
 #define FAN_RELAY_PIN RELAY_0_PIN 
@@ -51,8 +46,10 @@ void SubTasker_MQTTSender();
     void MQQTSendFanStatus();
     void parse_JSONCommand();
 
-    void AddToJsonObject_AddHardware(JsonObject root);
+    // void AddToJsonObject_AddHardware(JsonObject root);
     void Append_Hardware_Status_Message();
+
+    int8_t CheckAndExecute_JSONCommands();
 
 
     

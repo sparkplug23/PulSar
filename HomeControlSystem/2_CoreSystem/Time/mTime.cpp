@@ -21,6 +21,13 @@ int8_t mTime::Tasker(uint8_t function){
     
     case FUNC_LOOP: {
 
+      // Temp fix for ticker not working
+      #ifdef ESP32
+      if(mTime::TimeReached(&tSavedTicker_ESP32, 1000)){
+        RtcSecond();
+      }
+      #endif //ESP32
+
       uint8_t show_time_rate = 60; // default
       if(uptime.seconds_nonreset<2*60){ show_time_rate = 1; } // first 2 minutes
       if(uptime.seconds_nonreset<10*60){ show_time_rate = 10; } // first 10 minutes
@@ -1190,24 +1197,6 @@ const char* mTime::GetDOWShortctr(uint8_t Wday, char* buffer){
  *          Timezone by Jack Christensen (https://github.com/JChristensen/Timezone)
 \*********************************************************************************************/
 
-// const uint32_t SECS_PER_MIN = 60UL;
-// const uint32_t SECS_PER_HOUR = 3600UL;
-// const uint32_t SECS_PER_DAY = SECS_PER_HOUR * 24UL;
-// const uint32_t MINS_PER_HOUR = 60UL;
-
-// #define LEAP_YEAR(Y)  (((1970+Y)>0) && !((1970+Y)%4) && (((1970+Y)%100) || !((1970+Y)%400)))
-
-// extern "C" {
-// #include "sntp.h"
-// }
-// #include <Ticker.h>
-
-// Ticker TickerRtc;
-
-// static const uint8_t kDaysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
-// static const char kMonthNamesEnglish[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-
 uint32_t UtcTime(void)
 {
   // return Rtc.utc_time;
@@ -1663,6 +1652,7 @@ void mTime::RtcInit(void)
   Rtc.utc_time = 0;
   BreakTime(Rtc.utc_time, RtcTime);
   
+  #ifdef ESP8266
   TickerRtc = new Ticker();
 
   TickerRtc->attach(1, 
@@ -1670,6 +1660,7 @@ void mTime::RtcInit(void)
       this->RtcSecond();
     }
   );
+  #endif // ESP8266
 
 
 }
@@ -1684,7 +1675,7 @@ void mTime::WifiPollNtp() {
   if(pCONT_set->global_state.wifi_down){ 
     
     
-    AddLog_P(LOG_LEVEL_TEST, PSTR("global_state.wifi_down"));
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
     
     return ; }
     

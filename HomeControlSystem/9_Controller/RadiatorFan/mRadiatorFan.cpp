@@ -24,11 +24,23 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
   //   fan.ischanged = true;
   //   fan.savedstate = FAN_ACTIVE();
   // }
-
+  
+  /************
+   * INIT SECTION * 
+  *******************/
   switch(function){
+    case FUNC_PRE_INIT:
+      // pre_init();  
+      break;
     case FUNC_INIT:
       init();
-    break;
+      break;
+  }
+
+  switch(function){
+    // case FUNC_INIT:
+    //   init();
+    // break;
     case FUNC_LOOP: 
 
   // Count activity
@@ -45,7 +57,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(abs(millis()-tCheckForMaxTemp)>=60000*10){tCheckForMaxTemp=millis();
 
-      pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
+     pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
 
       // int tempsensorid;
       // if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
@@ -73,16 +85,67 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
   #endif
 
     break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
     case FUNC_MQTT_SENDER:
-     // SubTasker_MQTTSender();
+      MQTTHandler_Sender();
     break;
-    case FUNC_JSON_COMMAND:
-     // parse_JSONCommand();
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
     break;
+    #endif //USE_MQTT
+    // Other stuff
+    case FUNC_STATUS_MESSAGE_APPEND:
+      Append_Hardware_Status_Message();
+    break;
+    // case FUNC_MQTT_SENDER:
+    //  // SubTasker_MQTTSender();
+    // break;
+    // case FUNC_JSON_COMMAND:
+    //  // parse_JSONCommand();
+    // break;
   }
 
 
 }
+
+
+int8_t mRadiatorFan::CheckAndExecute_JSONCommands(){
+
+  // Check if instruction is for me
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+
+
 
 void mRadiatorFan::SubTasker_MQTTSender(){
 
@@ -137,44 +200,44 @@ void mRadiatorFan::ConstructJSON_FanStatus(){
 
 }
 
-void mRadiatorFan::parse_JSONCommand(){
+// void mRadiatorFan::parse_JSONCommand(){
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/radiatorfan")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RADIATORFAN));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/radiatorfan")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RADIATORFAN));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   }else{
+//     return; // not meant for here
+//   }
 
-  // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  // JsonObject root = doc.as<JsonObject>();
+//   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+//   // JsonObject root = doc.as<JsonObject>();
 
-  // uint8_t onoff = root["onoff"];
+//   // uint8_t onoff = root["onoff"];
 
-  // switch(onoff){
-  //   case 1: FAN_ON(); break;
-  //   case 0: default: FAN_OFF(); break;
-  // }
+//   // switch(onoff){
+//   //   case 1: FAN_ON(); break;
+//   //   case 0: default: FAN_OFF(); break;
+//   // }
 
-  //if onoff set, remember change mode, or set via mode
+//   //if onoff set, remember change mode, or set via mode
 
-  fan.ischanged=true;
-  //pCONT->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");pCONT->mso->MessagePrintln(onoff);
+//   fan.ischanged=true;
+//   //pCONT->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");pCONT->mso->MessagePrintln(onoff);
 
-}
+// }
 
 
-void mRadiatorFan::AddToJsonObject_AddHardware(JsonObject root){
+// void mRadiatorFan::AddToJsonObject_AddHardware(JsonObject root){
 
-  // JsonObject obj = root.createNestedObject("fan");
-  //   obj["type"] = "FAN-SPST-relay";
-  //   obj["function"] = "on|off";
-  //   obj["unpoweredstate"] = "POWER_OFF-NO";
-  //   obj["pin"] = 0;
+//   // JsonObject obj = root.createNestedObject("fan");
+//   //   obj["type"] = "FAN-SPST-relay";
+//   //   obj["function"] = "on|off";
+//   //   obj["unpoweredstate"] = "POWER_OFF-NO";
+//   //   obj["pin"] = 0;
 
-}
+// }
 
 
 void mRadiatorFan::Append_Hardware_Status_Message(){
@@ -334,38 +397,17 @@ void mRadiatorFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
+  struct handler<mRadiatorFan>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_RADIATORFAN_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
   );
-  uint8_t flag_handle_all = false, handler_found = false
-  if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-  //use pointer array
-
-  do{
-
-    switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      default: handler_found=false; break; // nothing 
-    } // switch
-
-    // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_RADIATORFAN_ID,mqtthandler_ptr); }
-
-    // stop searching
-    if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  }while(flag_handle_all);
 
 }
 

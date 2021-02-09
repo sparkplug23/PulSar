@@ -184,6 +184,9 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
   char name_tofind_with_delimeter[50];
   snprintf(name_tofind_with_delimeter,sizeof(name_tofind_with_delimeter),"%s|",name_tofind);
 
+
+    // AddLog_P(LOG_LEVEL_INFO,PSTR("Name_tofind_with_delimeter = %s"),name_tofind_with_delimeter);
+
   // Search for substring
   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
 
@@ -216,22 +219,46 @@ int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, int8_t device_id, 
       if(limit_result_to_class_ids){
         if(pCONT_set->Settings.device_name_buffer.class_id[delimeter_count] == class_id){
           delimeter_within_class_count++;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("%s found wclass_count %s %d %d"),haystack,read,delimeter_within_class_count,Settings.device_name_buffer.class_id[delimeter_count]);
-        
-        
-    #endif ENABLE_LOG_LEVEL_INFO
-    }
+          // #ifdef ENABLE_LOG_LEVEL_INFO
+          // // AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,Settings.device_name_buffer.class_id[delimeter_count]);
+          // AddLog_P(LOG_LEVEL_TEST,
+          //   PSTR(
+          //     "Searching \"%s\"\n\r"
+          //     "Found \"%s\" @ index %d\n\r"
+          //     "del count/index pos %d\n\r"
+          //   ),         
+          //   name_tofind,
+          //   p_start_of_found,
+          //   p_start_of_found - read, // pointer distance
+          //   delimeter_within_class_count
+          // );
+          // #endif // ENABLE_LOG_LEVEL_INFO
+        }
       }else{
         delimeter_within_class_count++;        
       }
       delimeter_count++;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("%s found %s %d"),haystack,read,delimeter_count);
+      // AddLog_P(LOG_LEVEL_INFO,PSTR("%s found %s %d"),haystack,read,delimeter_count);
     #endif // ENABLE_LOG_LEVEL_INFO
     }
     read++; //move pointer along
   }
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+          // AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,Settings.device_name_buffer.class_id[delimeter_count]);
+          AddLog_P(LOG_LEVEL_TEST,
+            PSTR(
+              "\n\rSearching \"%s\"\n\r"
+              "Found \"%s\" @ index %d\n\r"
+              "del count/index pos %d\n\r"
+            ),         
+            name_tofind,
+            p_start_of_found,
+            p_start_of_found - haystack, // pointer distance
+            delimeter_within_class_count
+          );
+          #endif // ENABLE_LOG_LEVEL_INFO
 
   return delimeter_within_class_count;
 }

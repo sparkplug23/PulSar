@@ -69,31 +69,31 @@ class mSensorsDB18{
     // #endif
 
 
-    #ifdef DEVICE_RADIATORFAN
-      #define SENSOR1_NAME "inside"
-      DeviceAddress ADDRESS_S1 = {0x28,0xAA,0xE7,0x99,0x1D,0x13,0x02,0x2B};
-      #define SENSOR2_NAME "outside"
-      DeviceAddress ADDRESS_S2 = {0x28,0xAA,0xDD,0x65,0x1D,0x13,0x02,0x71};
-      #define DB18_SENSOR_MAX 2
-    #endif
-    #ifdef DEVICE_OILFURNACE
-      // #define SENSOR1_NAME "inflow"
-      // DeviceAddress ADDRESS_S1 = {0x28,0xAA,0x43,0x03,0x1E,0x13,0x02,0x19};
-      // #define SENSOR2_NAME "outflow"
-      // DeviceAddress ADDRESS_S2 = {0x28,0xFF,0xA9,0x78,0x35,0x16,0x04,0xF0};
-      // #define SENSOR3_NAME "outside"
-      // DeviceAddress ADDRESS_S3 = {0x28,0x8F,0x51,0x07,0x33,0x14,0x01,0xBD};
-      // #define SENSOR4_NAME "tank1"      // Dual sensors as backup
-      // DeviceAddress ADDRESS_S4 = {0x28,0xFF,0x64,0x1D,0xCD,0xC9,0xA8,0xCB};
-      // #define SENSOR5_NAME "tank2"      // Dual sensors as backup
-      // DeviceAddress ADDRESS_S5 = {0x28,0xFF,0x64,0x1D,0xCD,0xF8,0xF8,0xF9};
-      // #define DB18_SENSOR_MAX 5
-    #endif
-    #ifdef DEVICE_COFFEE
-      #define SENSOR1_NAME "heater"
-      DeviceAddress ADDRESS_S1 = {0x28,0xFF,0xD0,0xFF,0xC1,0x17,0x04,0xE6};
-      #define DB18_SENSOR_MAX 1
-    #endif
+    // #ifdef DEVICE_RADIATORFAN
+    //   #define SENSOR1_NAME "inside"
+    //   DeviceAddress ADDRESS_S1 = {0x28,0xAA,0xE7,0x99,0x1D,0x13,0x02,0x2B};
+    //   #define SENSOR2_NAME "outside"
+    //   DeviceAddress ADDRESS_S2 = {0x28,0xAA,0xDD,0x65,0x1D,0x13,0x02,0x71};
+    //   #define DB18_SENSOR_MAX 2
+    // #endif
+    // #ifdef DEVICE_OILFURNACE
+    //   // #define SENSOR1_NAME "inflow"
+    //   // DeviceAddress ADDRESS_S1 = {0x28,0xAA,0x43,0x03,0x1E,0x13,0x02,0x19};
+    //   // #define SENSOR2_NAME "outflow"
+    //   // DeviceAddress ADDRESS_S2 = {0x28,0xFF,0xA9,0x78,0x35,0x16,0x04,0xF0};
+    //   // #define SENSOR3_NAME "outside"
+    //   // DeviceAddress ADDRESS_S3 = {0x28,0x8F,0x51,0x07,0x33,0x14,0x01,0xBD};
+    //   // #define SENSOR4_NAME "tank1"      // Dual sensors as backup
+    //   // DeviceAddress ADDRESS_S4 = {0x28,0xFF,0x64,0x1D,0xCD,0xC9,0xA8,0xCB};
+    //   // #define SENSOR5_NAME "tank2"      // Dual sensors as backup
+    //   // DeviceAddress ADDRESS_S5 = {0x28,0xFF,0x64,0x1D,0xCD,0xF8,0xF8,0xF9};
+    //   // #define DB18_SENSOR_MAX 5
+    // #endif
+    // #ifdef DEVICE_COFFEE
+    //   #define SENSOR1_NAME "heater"
+    //   DeviceAddress ADDRESS_S1 = {0x28,0xFF,0xD0,0xFF,0xC1,0x17,0x04,0xE6};
+    //   #define DB18_SENSOR_MAX 1
+    // #endif
     // https://www.rapidtables.com/convert/number/ascii-hex-bin-dec-converter.html
     
     
@@ -137,6 +137,9 @@ class mSensorsDB18{
     #define DONE_NOTCOMPLETE true
     #define REQUIRE_COMPLETE true
     #define DONTREQUIRE_COMPLETE false
+
+    
+int8_t FindStructIndexByAddressID(int8_t address_id);
 
     // uint8_t GetCorrectedDeviceIDforGetDeviceName(uint8_t id_desired);
     

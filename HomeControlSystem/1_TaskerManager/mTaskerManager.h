@@ -557,6 +557,14 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR)      D_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
   #define pCONT_mfan                                     pCONT->mfan
 #endif
+#ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+  #include "9_Controller/SensorColours/mSensorColours.h"
+  class mSensorColours;
+  #define D_MODULE_CUSTOM_SENSORCOLOURS_ID                        181
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_CTR)               D_MODULE_CUSTOM_SENSORCOLOURS_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR)      D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
+  #define pCONT_msenscol                                     pCONT->msenscol
+#endif
 
 
 DEFINE_PGM_CTR(PM_FUNC_POINTER_INIT_CTR)                            D_FUNC_POINTER_INIT_CTR;
@@ -778,6 +786,9 @@ class mTaskerManager{
   #endif
   #ifdef USE_MODULE_CUSTOM_FAN
     mFan* mfan = nullptr;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+    mSensorColours* msenscol = nullptr;
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     mIRtransceiver* mir = nullptr;

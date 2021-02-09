@@ -272,7 +272,12 @@ uint32_t WifiGetNtp(void);
 
     #define LEAP_YEAR(Y)  (((1970+Y)>0) && !((1970+Y)%4) && (((1970+Y)%100) || !((1970+Y)%400)))
     
+    #ifdef ESP8266
     Ticker* TickerRtc = nullptr;
+    #endif //esp8266
+    #ifdef ESP32
+    uint32_t tSavedTicker_ESP32 = millis();
+    #endif // ESP32
 
     uint8_t kDaysInMonth[12];// = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
     // char kMonthNamesEnglish[37];// = "JanFebMarAprMayJunJulAugSepOctNovDec";

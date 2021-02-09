@@ -447,7 +447,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
       // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test1=%d,%d,%d,%d,%d"), rgbcct_controller.R, rgbcct_controller.G, rgbcct_controller.B, rgbcct_controller.WW, rgbcct_controller.WC);
       // // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test2=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
 
-      // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(10));
+      // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15));
 
       // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
 
@@ -456,6 +456,9 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test.R, colour_test.G, colour_test.B, colour_test.WW, colour_test.WC);
 // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
 // AddLog_Array(LOG_LEVEL_TEST, "palette_rgbcct_users", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5);
+
+
+AddLog_Array(LOG_LEVEL_TEST, "palette_encoded_users_colour_map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 30);
 
 
 
@@ -1014,6 +1017,57 @@ uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
   return (rgb.R << 16) | (rgb.G << 8) | rgb.B;
 }
 
+/********************************************************************************************************************
+*******************************************************************************************************************
+*******************************************************************************************************************
+************* Generate colour values that are maps ******************************************************************************************************
+*******************************************************************************************************************
+*******************************************************************************************************************
+*******************************************************************************************************************
+*******************************************************************************************************************/
+
+RgbColor mInterfaceLight::GetColourValueUsingMaps(float value, 
+                                            uint8_t map_style_id,
+                                            float value_min, float value_max, //not need for some mappings
+                                            bool map_is_palette_id
+                                          ){
+
+  // map_style_id can use some internal ones here, or else scale and get from palettes
+
+  // Heating rainbow with brighter red end
+  uint16_t hue = 0;
+  uint8_t  sat = 0;
+  uint8_t  brt = 0;
+
+  // if(map is water temperature in celcius ie have different range styles) then convert into rainbow gradient
+
+    // Generate Hue and Brt values
+    if(value<20){
+      hue = 240;
+      brt = 10;
+    }else
+    if((value>=20)&&(value<50)){
+      hue = mSupport::mapfloat(value, 20,50, 180,0);
+      brt = mSupport::mapfloat(value, 20,50, 10,100);
+    }else
+    if((value>=50)&&(value<60)){      
+      hue = mSupport::mapfloat(value, 50,60, 359,345);
+      brt = 100;
+    }else
+    if(value>=60){
+      hue = 340;
+      brt = 100;
+    }
+
+    RgbColor colour = HsbColor(HueN2F(hue),1.0f,BrtN2F(brt));
+
+    // colour = RgbColor((int)value, 2, 3);
+
+    return colour;
+
+
+
+}
 
 
 

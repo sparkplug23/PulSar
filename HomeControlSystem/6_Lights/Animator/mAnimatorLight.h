@@ -140,6 +140,7 @@ DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR)      "S
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR)             "FLASH_TWINKLE_RANDOM";                   
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR)         "FLASH_TWINKLE_SEQUENTIAL";                          
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_GLIMMER_RANDOM_NAME_CTR)             "FLASH_GLIMMER_RANDOM"; 
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FIREPLACE_01_NAME_CTR)                     "FirePlace01";     
 DEFINE_PGM_CTR(PM_EFFECTS_REGION_SLOW_FADE_NAME_CTR)                          "SLOW_FADE";
 DEFINE_PGM_CTR(PM_EFFECTS_REGION_TWINKLE_FLASH_NAME_CTR)                      "TWINKLE_FLASH";
 DEFINE_PGM_CTR(PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)                      D_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR;
@@ -188,7 +189,9 @@ class mAnimatorLight{
       #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
         typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
       #else          
-        typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType;
+        typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType; // 1st
+        // typedef NeoEsp32Rmt7Ws2812xMethod selectedNeoSpeedType; //test A
+
         // typedef NeoEsp32Rmt7800KbpsMethod selectedNeoSpeedType;
         //  typedef NeoEsp32I2s1800KbpsMethod selectedNeoSpeedType;
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
@@ -202,22 +205,22 @@ class mAnimatorLight{
   
     // Group of ifndef's to allow defaults to be set, and users to set defaults using basic numbers
     #ifdef STRIP_SIZE_MAX
-      #ifndef STRIP_REPEAT_OUTPUT_MAX
-        #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
-      #endif
+      // #ifndef STRIP_REPEAT_OUTPUT_MAX
+      //   #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
+      // #endif
     #else
       #define STRIP_SIZE_MAX 50 //default length of 50
     #endif
     
-    #ifndef STRIP_SIZE_REPEAT_MAX
-      #define STRIP_SIZE_REPEAT_MAX 50 //default length of 50
-    #endif
+    // #ifndef STRIP_SIZE_REPEAT_MAX
+    //   #define STRIP_SIZE_REPEAT_MAX 50 //default length of 50
+    // #endif
     #ifndef STRIP_OUTPUT_REPEATED_LENGTH
       #define STRIP_OUTPUT_REPEATED_LENGTH 20
     #endif
-    #ifndef STRIP_REPEAT_OUTPUT_MAX
-      #define STRIP_REPEAT_OUTPUT_MAX 200
-    #endif
+    // #ifndef STRIP_REPEAT_OUTPUT_MAX
+    //   #define STRIP_REPEAT_OUTPUT_MAX 200
+    // #endif
     #ifndef ANIMATOR_SIZE_MAX
       #ifdef ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
         #define ANIMATOR_SIZE_MAX 1//STRIP_SIZE_MAX
@@ -474,6 +477,7 @@ void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
     EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
     EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,    
     EFFECTS_FUNCTION_TESTER_ID,
+    EFFECTS_FUNCTION_FIREPLACE_01_ID, // solid colours, 1 100%, moving from previous to next
     // Length of TBD effects
     EFFECTS_FUNCTION_LENGTH_ID
   };                           
@@ -614,6 +618,8 @@ void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
   void SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
   void SubTask_Flasher_Animate_Function_Fade_Gradient();
   void SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+
+  void SubTask_Flasher_Animate_Function_FirePlace_01();
 
 
   void SubTask_Flasher_Animate_Function_Tester();

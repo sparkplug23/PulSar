@@ -7,6 +7,7 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
     return 0;
   #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
   #ifdef DISABLE_NETWORK
+  // #ifndef ENABLE_DEVFEATURE_
     return 0;
   #endif
 
@@ -22,25 +23,32 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
     switch(function){
       case FUNC_LOOP:
 
+#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
 // AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.connected=%d"),Mqtt.connected);
 
         if(Mqtt.connected){
           EveryLoop();
         }
+#endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       break;
+#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
       case FUNC_EVERY_50_MSECOND:
         if(Mqtt.connected){
           pubsub->loop();
         }
       break;
+#endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       case FUNC_EVERY_SECOND:
+      
+#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
         if(pCONT_wif->WifiCheckIpConnected()){
           // AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
-          CheckConnection();
+           CheckConnection();
         }else{
           // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
 
         }
+#endif
       break;
       case FUNC_EVERY_MINUTE:
         //DiscoverServer();
@@ -95,6 +103,7 @@ void mMQTT::init(void){
 void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
 
 // DEBUG_LINE_HERE;
+        AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
@@ -409,8 +418,8 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
     // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
-      AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
+      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
@@ -511,6 +520,9 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
 
 // DEBUG_LINE_HERE;
+#ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+return;
+#endif
 
   // Send mqtt from all modules
   pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
@@ -679,11 +691,11 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
 
   //// AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
     if (!pubsub->connected()) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-        connection_maintainer.flag_require_reconnection = true;
-        return 0;
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
+      #endif// ENABLE_LOG_LEVEL_INFO
+      connection_maintainer.flag_require_reconnection = true;
+      return false;
     }
 
     if(strlen(payload)<1){

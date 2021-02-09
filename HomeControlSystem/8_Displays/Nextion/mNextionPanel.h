@@ -4,7 +4,10 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
+#define ESP32
 
+
+//#include <ArduinoJson.h>
 
 // #include <ArduinoJson.h>
 // class mTaskerManager;
@@ -17,6 +20,9 @@
 // #define SERIAL_NEXTION_RX Serial
 // #define SERIAL_NEXTION_TX Serial
 #endif
+
+#define USE_HARDWARE_SERIAL_TEMP
+
 
 #define NEXTION_BAUD 38400
 
@@ -50,40 +56,28 @@
 // #else
 // #define BAUD_RATE 57600
 // #endif
-#define USE_NEXTION_SOFTWARE_SERIAL
+//#define USE_NEXTION_SOFTWARE_SERIAL
 
 
 
 class mNextionPanel{
-  private:
-    //#define D_MODULE_TOPIC_NAME "nextion"
   public:
-    mNextionPanel();
+    mNextionPanel(){};
     void pre_init();
-
-    
-
-// int8_t Tasker(uint8_t function, JsonObjectConst obj);
-// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-// void parsesub_TopicCheck_JSONCommand(JsonObjectConst obj);
-
-
-// void parsesub_Commands(JsonObjectConst obj);
-// void parsesub_SetMulti(JsonObjectConst obj);
 
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
-// Reminder: the buffer size optimizations here, in particular the isrBufSize that only accommodates
-// a single 8N1 word, are on the basis that any char written to the loopback SoftwareSerial adapter gets read
-// before another write is performed. Block writes with a size greater than 1 would usually fail. 
+  // Reminder: the buffer size optimizations here, in particular the isrBufSize that only accommodates
+  // a single 8N1 word, are on the basis that any char written to the loopback SoftwareSerial adapter gets read
+  // before another write is performed. Block writes with a size greater than 1 would usually fail. 
 
-#ifdef USE_NEXTION_SOFTWARE_SERIAL 
-SoftwareSerial* swSer;
-#endif
+  #ifdef USE_NEXTION_SOFTWARE_SERIAL 
+  SoftwareSerial* swSer;
+  #endif
 
-#ifndef NEXTION_DEFAULT_PAGE_NUMBER
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2
-#endif
+  #ifndef NEXTION_DEFAULT_PAGE_NUMBER
+    #define NEXTION_DEFAULT_PAGE_NUMBER 2
+  #endif
 
   int8_t pin_tx = -1;
   int8_t pin_rx = -1;
@@ -181,7 +175,7 @@ uint32_t tTest = millis();
     int8_t Tasker(uint8_t function);
     void init(void);
 
-    void parse_JSONCommand();
+    // void parse_JSONCommand();
 
     #define LONG_PRESS_DURATION 500
     uint8_t fEnableImmediateButtonTime = false;
@@ -228,8 +222,8 @@ uint32_t tTest = millis();
     uint8_t nextionReturnIndex = 0;                     // Index for nextionReturnBuffer
     uint8_t nextionActivePage = 1;                      // Track active LCD page
     bool lcdConnected = false;                          // Set to true when we've heard something from the LCD
-    char wifiConfigPass[9];                             // AP config password, always 8 chars + NUL
-    char wifiConfigAP[19];                              // AP config SSID, nextionNode + 3 chars
+    // char wifiConfigPass[9];                             // AP config password, always 8 chars + NUL
+    // char wifiConfigAP[19];                              // AP config SSID, nextionNode + 3 chars
     bool shouldSaveConfig = false;                      // Flag to save json config to SPIFFS
     bool nextionReportPage0 = false;                    // If false, don't report page 0 sendme
     const unsigned long updateCheckInterval = 43200000; // Time in msec between update checks (12 hours)
@@ -261,7 +255,7 @@ uint32_t tTest = millis();
     const unsigned long reConnectTimeout = 15;          // Timeout for WiFi reconnection attempts in seconds
     byte espMac[6];                                     // Byte array to store our MAC address
     // const uint16_t mqttMaxPacketSize = 4096;            // Size of buffer for incoming MQTT message
-    // String mqttClientId;                                // Auto-generated MQTT ClientID
+    String mqttClientId;                                // Auto-generated MQTT ClientID
     String mqttGetSubtopic;                             // MQTT subtopic for incoming commands requesting .val
     String mqttGetSubtopicJSON;                         // MQTT object buffer for JSON status when requesting .val
     String mqttStateTopic;                              // MQTT topic for outgoing panel interactions
@@ -312,6 +306,11 @@ void WebCommand_Parse(void);
     #define D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR "Variable/Attribute name invalid"
 
 
+
+
+    int8_t CheckAndExecute_JSONCommands();
+    void    parse_JSONCommand();
+
     void mqttConnected();
     void mqttDisconnected();
     void mqttCallback(String &strTopic, String &strPayload);
@@ -359,10 +358,10 @@ void WebCommand_Parse(void);
     char* utf8ascii2(char *s);
 
     
-void HandleUpgradeFirmwareStart(void);
-void HandleUploadDone(void);
-void HandleUploadLoop(void);
-void HandlePreflightRequest(void);
+  void HandleUpgradeFirmwareStart(void);
+  void HandleUploadDone(void);
+  void HandleUploadLoop(void);
+  void HandlePreflightRequest(void);
 
 
 

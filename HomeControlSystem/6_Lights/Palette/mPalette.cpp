@@ -67,10 +67,12 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Holloween_OP();
   init_ColourPalettes_Holloween_OGP();
   init_ColourPalettes_Hot_Neon_Pink_With_Navy();
+  init_ColourPalettes_Single_Fire_01();
   init_ColourPalettes_Shelf_Hearts();
   init_ColourPalettes_Pastel();
   init_ColourPalettes_Gradient_01();
   init_ColourPalettes_Gradient_02();
+  init_ColourPalettes_Gradient_Fire_01();
   init_ColourPalettes_Gradient_Pastel_Tones_Purple();
   init_ColourPalettes_Berry_Green();
   init_ColourPalettes_Christmas_01();
@@ -139,6 +141,16 @@ void mPalette::init_ColourPalettes_Hot_Neon_Pink_With_Navy(){
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
 }
 
+void mPalette::init_ColourPalettes_Single_Fire_01(){
+  palettelist.ptr     = &palettelist.single_fire_01;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_SINGLE_FIRE_01_ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_SINGLE_FIRE_01_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+
 void mPalette::init_ColourPalettes_Pastel(){
   palettelist.ptr     = &palettelist.pastel;    
   CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
@@ -175,6 +187,16 @@ void mPalette::init_ColourPalettes_Gradient_02(){
   palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_GRADIENT_02_COLOUR_MAP_IDS);
   palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_GRADIENT_02_COLOUR_MAP_IDS;
   palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_GRADIENT_02_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID;
+}
+
+void mPalette::init_ColourPalettes_Gradient_Fire_01(){
+  palettelist.ptr     = &palettelist.gradient_fire_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_GRADIENT_FIRE_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_STATIC_GRADIENT_FIRE_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_FIRE_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_STATIC_GRADIENT_FIRE_01_NAME_CTR;
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID;
 }
@@ -614,11 +636,29 @@ void mPalette::init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id){
 
 void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
 
+  /**
+   * [0] pixel_size, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
+   * [1] map_type      eg (6=rgb no_index, )
+   * [2] 
+   * [3]
+   * [4]
+   * [5->length] Encoded palette colour values
+   * */
+
   palettelist.ptr     = &palettelist.encoded_users;
   palettelist.ptr->id = id+PALETTELIST_VARIABLE_GENERIC_01_ID;
 
-  palettelist.ptr->colour_map_size = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] < 100 ?  pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] : 0; 
+  //colour map size be calculated by map type * pixel count?
+
+  // palettelist.ptr->colour_map_size = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] < 100 ?  pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] : 0; 
   palettelist.ptr->flags.fMapIDs_Type = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[1]; 
+
+  uint8_t pixel_width = GetPixelsWithByMapIDType(palettelist.ptr->flags.fMapIDs_Type);
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("pixel_width %d"),pixel_width);
+  palettelist.ptr->colour_map_size = pixel_width*pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0];
+  
+
+
   // palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   // palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID;
 
@@ -629,7 +669,16 @@ void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
   // to be moved into devicelist
   palettelist.ptr->friendly_name_ctr = nullptr;//pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;//&palettelist_variable_users_ctr[ptr->id][0];
   
-  AddLog_P(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill"));
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill %d"),palettelist.ptr->colour_map_id[0]);
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill size %d"),palettelist.ptr->colour_map_size);
+
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("pixels in map test size %d"),GetPixelsInMap(palettelist.ptr));
+  
+  //     RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15),0);
+
+  //     AddLog_P(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
+
+
 }
 
 
@@ -697,6 +746,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_HOLLOWEEN_OP_ID:    return &palettelist.holloween_op;
     case PALETTELIST_STATIC_HOLLOWEEN_OGP_ID:   return &palettelist.holloween_ogp;
     case PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY_ID:    return &palettelist.hot_pink_neon_with_navy;
+    case PALETTELIST_STATIC_SINGLE_FIRE_01_ID:    return &palettelist.single_fire_01;
     case PALETTELIST_STATIC_RAINBOW_ID:         return &palettelist.rainbow;
     case PALETTELIST_STATIC_RAINBOW_INVERTED_ID:return &palettelist.rainbow_inverted;
     case PALETTELIST_STATIC_PASTEL_ID:          return &palettelist.pastel;
@@ -706,6 +756,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_OCEAN_01_ID:        return &palettelist.ocean_01;
     case PALETTELIST_STATIC_GRADIENT_01_ID:     return &palettelist.gradient_01;
     case PALETTELIST_STATIC_GRADIENT_02_ID:     return &palettelist.gradient_02;
+    case PALETTELIST_STATIC_GRADIENT_FIRE_01_ID:     return &palettelist.gradient_fire_01;
     case PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE_ID:     return &palettelist.gradient_pastel_tones_purple;
     case PALETTELIST_STATIC_BERRY_GREEN_ID:     return &palettelist.berry_green;
     case PALETTELIST_STATIC_SUNRISE_01_ID:      return &palettelist.sunrise_01;
@@ -754,6 +805,7 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
 {
 
   RgbcctColor colour = RgbcctColor(0);
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
   uint8_t palette_elements[ptr->colour_map_size];
   uint16_t index_relative = 0; // get expected pixel position
   uint16_t expected_pixel_count = 0; // get expected pixel position
@@ -768,6 +820,9 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }else
   if(ptr->id < PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID){
+    memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+  }else
+  if(ptr->id < PALETTELIST_VARIABLE_GENERIC_LENGTH_ID){
     memcpy(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
   }else{ // progmem
     memcpy_P(&palette_elements,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
@@ -1096,10 +1151,36 @@ const char* mPalette::GetPaletteNameByID(uint8_t id, char* buffer, uint8_t bufle
 }
 
 
+uint8_t mPalette::GetPixelsWithByMapIDType(uint8_t fMapIDs_Type){
+  uint16_t pixel_width = 0;
+
+  switch(fMapIDs_Type){
+    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: pixel_width = 1; break;
+    case MAPIDS_TYPE_HSBCOLOUR_NOINDEX_ID: pixel_width = 1; break;
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID: pixel_width = 2; break;
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID: pixel_width = 2; break;
+    case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID: pixel_width = 3; break;
+    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID: pixel_width = 5; break;
+    case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID: pixel_width = 6; break;
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID: pixel_width = 4; break;
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID: pixel_width = 4; break;
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID: pixel_width = 2; break;
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID: pixel_width = 4; break;
+  }
+
+  return pixel_width;
+}
+
+
 uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit){
   uint16_t pixel_width = 0;
   uint16_t pixel_length = 0;
   switch(ptr->flags.fMapIDs_Type){
+    default:
+    
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("ERROR pixel_length=%d"),pixel_length);
+
+    break;
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: pixel_width = 1; break;
     case MAPIDS_TYPE_HSBCOLOUR_NOINDEX_ID: pixel_width = 1; break;
     case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID: pixel_width = 2; break;
@@ -1121,6 +1202,7 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
 
   // if(pixel_width){ //so we can divide if not 0
     pixel_length = ptr->colour_map_size/pixel_width; 
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("pixel_length=%d %d %d"),pixel_length,ptr->colour_map_size,pixel_width);
   // }else{
   //   pixel_length = ptr->colour_map_size/pixel_width
   // }
@@ -1139,6 +1221,7 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
 uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
 
   uint8_t new_size = 0;
+  PALETTELIST::PALETTE *ptr_tmp = GetPalettePointerByID(palette_id);
 
   if(palette_id<PALETTELIST_VARIABLE_HSBID_LENGTH_ID){
     //Count until "not set value"  
@@ -1158,14 +1241,23 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
       }
       new_size = pixel_active; // new count from local stored memory this time
 
+  
+  ptr_tmp->colour_map_size = new_size;
+
 
   }else
   if((palette_id>=PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
-    new_size = 5; // only 1*5
-  }
 
-  PALETTELIST::PALETTE *ptr_tmp = GetPalettePointerByID(palette_id);
+    new_size = 5; // only 1*5
+    
+
   ptr_tmp->colour_map_size = new_size;
+
+  }else
+  if((palette_id>=PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
+
+    new_size = ptr_tmp->colour_map_size; // currently refreshed when init is triggered, about this may need changing, leaving unchanged for now
+  }
 
   return new_size;
 }

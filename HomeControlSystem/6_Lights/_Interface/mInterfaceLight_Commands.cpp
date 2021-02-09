@@ -22,7 +22,7 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
 void mInterfaceLight::parse_JSONCommand(void){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands"));
+  // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands"));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   #ifdef USE_MODULE_LIGHTS_PWM
@@ -264,7 +264,6 @@ void mInterfaceLight::parse_JSONCommand(void){
     #endif // ENABLE_LOG_LEVEL_DEBUG       
   }
  
-  
   if(jtok = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_COLOUR_PALETTE]){
 
     JsonParserToken jtok_data = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_DATA];
@@ -278,7 +277,7 @@ void mInterfaceLight::parse_JSONCommand(void){
         jtok_data.nextOne(); //skip start of object
         colour_array[index] = jtok_data.getInt();
       }
-
+      
       CommandSet_PaletteColour_RGBCCT_Raw_By_ID(jtok.getInt(), colour_array, sizeof(colour_array));
       data_buffer.isserviced++;
 
@@ -287,7 +286,6 @@ void mInterfaceLight::parse_JSONCommand(void){
       #endif // ENABLE_LOG_LEVEL_DEBUG
     }
   }
-
 
   if(jtok = obj[PM_JSON_ANIMATIONMODE]){
     if(jtok.isStr()){
@@ -1197,15 +1195,18 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 
 void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen){
 
-      AddLog_P(LOG_LEVEL_TEST, PSTR("START[%d|%d] fMapIDs_Type=%d"),
-      palette_id,mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID,
-      mPaletteI->palettelist.rgbcct_users[0].flags.fMapIDs_Type);
+      // AddLog_P(LOG_LEVEL_TEST, PSTR("START[%d|%d] fMapIDs_Type=%d"),
+      // palette_id,mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID,
+      // mPaletteI->palettelist.rgbcct_users[0].flags.fMapIDs_Type);
 
   // Serial.flush();
   // delay(3000);
 
   // Check if palette can be edited
-  if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ return; }
+  if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ 
+      AddLog_P(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
+      return; 
+  }
 
   // Convert id into array index if needed
   uint8_t palette_id_adjusted_to_array_index = 0;
@@ -1213,7 +1214,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   uint8_t* palette_buffer = nullptr;
 
   if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID){
-    AddLog_P(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     palette_id_adjusted_to_array_index = palette_id;
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID)*palette_id_adjusted_to_array_index];
     // Clear the entire new colour to the "unset" values
@@ -1227,7 +1228,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
-    AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
 // palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
 
 
@@ -1244,26 +1245,25 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
     // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
-// palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
-
+    
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID;    
     palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
+
+    
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
     
     // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
     
-    //memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
+    // Clear old buffer space
+    memset(palette_buffer,0,100); //200 now   
+    // Write new palette data into buffer space
+    memcpy(palette_buffer,buffer,buflen);
+    // Parse buffer data to correctly set data parameters
+    mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);
 
-    
-  // Add to select correct buffer depending on palette type
-  memcpy(palette_buffer,buffer,buflen);
-
-  // rgbcct_controller.UpdateFromExternalBuffer();
-  //update the init process of variables
-
-  mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);
-
-  DEBUG_LINE_HERE;
+    // DEBUG_LINE_HERE;
 
 
   }
@@ -1272,11 +1272,14 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   // Update new length stored in palettelist
   mPaletteI->GetColourMapSizeByPaletteID(palette_id);
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_Array(LOG_LEVEL_COMMANDS, "changed colour", palette_buffer, buflen);
-  AddLog_Array(LOG_LEVEL_COMMANDS, "hsbid all", pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map, 20*2);
-  AddLog_Array(LOG_LEVEL_COMMANDS, "rgbcct all", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5*5);
-  #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "changed colour", palette_buffer, buflen);
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "hsbid map", pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map, 20*2);
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "rgbcct map", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5*5);
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "encoded map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 25);
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "colour id map", mPaletteI->palettelist.ptr->colour_map_id, 25);
+  // AddLog_P(LOG_LEVEL_COMMANDS, "colour map size %d", mPaletteI->palettelist.ptr->colour_map_size);
+  // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   // Serial.flush();
   // delay(3000);

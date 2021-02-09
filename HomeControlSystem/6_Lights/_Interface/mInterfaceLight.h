@@ -855,6 +855,9 @@ void ShowInterface();
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
 
     
+    RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+
+    
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

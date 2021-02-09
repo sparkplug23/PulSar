@@ -19,6 +19,12 @@ void mAddressableLight::SetPixelColorHardware(uint16_t index, RgbcctColor colour
     // }
   }else{
     pCONT_lAni->stripbus->SetPixelColor(index,colour_hardware); // Index is default
+
+    
+
+
+
+
   }
 
 }

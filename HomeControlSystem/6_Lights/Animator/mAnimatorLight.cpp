@@ -159,7 +159,13 @@ void mAnimatorLight::pre_init(void){
 void mAnimatorLight::init(void){ 
     
   // if pixel size changes, free and init again
-  uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  uint16_t strip_size_tmp = STRIP_SIZE_MAX;
+  #ifdef STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;
+  #endif
+  // uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  
+  
   ledout.length = STRIP_SIZE_MAX; 
   
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
@@ -596,6 +602,9 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
       break;
       case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
         SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+      break;
+      case EFFECTS_FUNCTION_FIREPLACE_01_ID:
+        SubTask_Flasher_Animate_Function_FirePlace_01();
       break;
 
 
@@ -1668,15 +1677,14 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
 
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
 
-#ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-          
+            #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
             if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
               animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB_Global());
             }
             #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
 
             // #ifdef ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
-            // AddLog_P(LOG_LEVEL_DEBUG, PSTR("colour=%d,%d,%d brt_set=%d"),
+            // AddLog_P(LOG_LEVEL_INFO, PSTR("colour=%d,%d,%d brt_set=%d"),
             //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.R,
             //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.G,
             //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.B,
@@ -1731,6 +1739,12 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
             //   mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr),pixel_position
             // );
             #endif
+            // AddLog_P(LOG_LEVEL_INFO, PSTR("colour=%d,%d,%d brt_set=%d"),
+            //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.R,
+            //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.G,
+            //   animation_colours[ledout.pattern[ledout.index]].DesiredColour.B,
+            //   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation
+            // );
 
             if(++desired_pixel>=mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr)){desired_pixel=0;}
           } //end for
@@ -2369,8 +2383,9 @@ void mAnimatorLight::EveryLoop(){
 
 
   if(stripbus->IsDirty()){
-    if(stripbus->CanShow()){
-      pCONT_iLight->ShowInterface();
+    if(stripbus->CanShow()){ 
+      StripUpdate();
+      // pCONT_iLight->ShowInterface();
     }
   }
 
@@ -2547,11 +2562,41 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 }
 #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
+
+  pCONT_iLight->ShowInterface();
+
   // for (auto copies = 0; copies < 3; copies++) {
   //   image.Blt(stripbus, copies * image.PixelCount());
   // }
+  
+  /**
+   * Replicate output if enabled
+   * 
+   * */
+  #ifdef STRIP_REPEAT_OUTPUT_MAX
+  uint16_t internal_length = pCONT_iLight->settings.light_size_count;
+  uint16_t external_length = STRIP_OUTPUT_REPEATED_LENGTH;
 
-  pCONT_iLight->ShowInterface();
+  uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
+  if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
+    pixel_output_length = STRIP_SIZE_MAX;
+  }
+  // Replicate SetPixel for repeated output
+  #ifdef STRIP_REPEAT_OUTPUT_MAX
+  pixel_output_length = STRIP_REPEAT_OUTPUT_MAX;  
+  #endif // STRIP_REPEAT_OUTPUT_MAX
+
+  // AddLog_P(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
+  // Replicate SetPixel for repeated output
+  #ifdef STRIP_REPEAT_OUTPUT_MAX
+  int pixels_existing_index = 0;
+  for(int i=0;i<STRIP_REPEAT_OUTPUT_MAX;i++){
+    SetPixelColor(i,GetPixelColor(pixels_existing_index++));
+    if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
+  }
+  #endif // STRIP_REPEAT_OUTPUT_MAX
+  #endif // STRIP_REPEAT_OUTPUT_MAX
+
 
 }
 

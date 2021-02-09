@@ -35,6 +35,7 @@ int8_t mWiFi::Tasker(uint8_t function){
 
 //   WiFi.disconnect(true);
 
+  //Serial.println(WiFi.localIP());
 
 // }
   #ifdef DISABLE_FOR_FAULTY_ESP32_FLICKERING
@@ -44,7 +45,27 @@ int8_t mWiFi::Tasker(uint8_t function){
 
   switch(function){
     case FUNC_INIT:
+      #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
       WifiConnect();
+      #endif// ENABLE_DEVFEATURE_FLICKER_TESTING
+
+      #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+      WiFi.mode(WIFI_STA);
+      WiFi.begin("Skynet2400", "af4d8bc9ab");
+
+      while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+      }
+
+      Serial.println("");
+      Serial.println("WiFi connected");
+      Serial.println("IP address: ");
+      Serial.println(WiFi.localIP());
+      WifiSetState(0);
+
+    #endif
+
     break;
     case FUNC_LOOP: 
     
@@ -52,6 +73,8 @@ int8_t mWiFi::Tasker(uint8_t function){
     case FUNC_EVERY_SECOND:
       // AddLog_P(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
 
+//  Serial.println(WiFi.localIP());
+      #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
 
       // #ifdef ESP32
     // #ifdef ENABLE_LOG_LEVEL_INFO
@@ -64,6 +87,7 @@ int8_t mWiFi::Tasker(uint8_t function){
         pCONT_set->wifi_state_flag = WIFI_RESTART;
       }
             
+      #endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
@@ -522,14 +546,18 @@ uint16_t mWiFi::WifiLinkCount()
 void mWiFi::WifiSetState(uint8_t state)
 {
 
-//check for change in state
-if(connection.fConnected != state){
-  if(state){ //new state 
-    pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
-  }else{
-    pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+  //check for change in state
+  if(connection.fConnected != state){
+    if(state){ //new state 
+    // pinMode(2,OUTPUT);
+    // digitalWrite(2,LOW);
+      pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
+    }else{
+    // pinMode(2,OUTPUT);
+    // digitalWrite(2,HIGH);
+      pCONT->Tasker_Interface(FUNC_WIFI_DISCONNECTED);
+    }
   }
-}
 
   connection.fConnected = state;
 
@@ -829,6 +857,16 @@ void mWiFi::WifiCheck(uint8_t param)
   #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
     // return;
   #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
+
+  
+  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING2
+      //return;
+  #endif
+  // #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING2
+  //   if(pCONT_time->uptime.seconds_nonreset<60){
+  //     return;
+  //   }
+  // #endif
   
   #ifdef ENABLE_WIFI_DEVELOPMENT
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);

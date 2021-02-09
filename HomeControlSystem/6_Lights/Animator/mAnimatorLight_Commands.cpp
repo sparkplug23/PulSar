@@ -395,7 +395,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value){
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   char buffer[30];
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_EFFECTS, D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
+  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_EFFECTS, D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -405,7 +405,8 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f){
   if(f=='\0') return -2;
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_RGBCCT_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR)){ return EFFECTS_FUNCTION_SEQUENTIAL_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_RGBCCT_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_01_ID; }
   return -1;
 
 }
@@ -418,6 +419,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
     case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
     case EFFECTS_FUNCTION_SOLID_RGBCCT_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR);  break;
+    case EFFECTS_FUNCTION_FIREPLACE_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_01_NAME_CTR);  break;
   }
   return buffer;
 }

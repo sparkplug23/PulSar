@@ -5,6 +5,21 @@
 /***
  * Primary entry point to heating: 
  *  - All sub cpp files called from here, tasker in here
+ * 
+Step 1 - heating water by temps again
+Step 2 - room heating ONLY by time, since temps for entire house cant be relied on
+Step 3 - Optional special heating controls 
+  - "Downstairs -> Warm water"
+  - "Downstairs -> Shower"
+  - "Downstairs -> Bath"
+
+  Optional water
+  - Manual (not linked), Auto Priority (Hot water first, then house), Auto Secondary (Top up hot water after radiators enough for shower, but not bath)
+  - Options
+    - 30, 40, 50 (as buttons)
+
+
+
  * */
 
 
@@ -1523,12 +1538,10 @@ void mHeating::SetHeater(uint8_t device, uint8_t state){
   }
 
   #ifdef ENABLE_RELAY_CONTROLS
-
     SetHeatingRelay(device,state);
-
   #else
-    //Serial.println(F("SetHeater Disabled for debugging!"));
-    //pCONT->mqt->pubsub->publish("heating/alert","Heating DISABLED for testing!");}
+    AddLog_P(LOG_LEVEL_WARN, PSTR("ENABLE_RELAY_CONTROLS is disabled"));
+    pCONT_mqtt->Send_Prefixed_P("/debug/alert", PSTR("Heating DISABLED for testing! SetHeatingRelay(%d,%d)"), device, state);
   #endif
 
 } // end function

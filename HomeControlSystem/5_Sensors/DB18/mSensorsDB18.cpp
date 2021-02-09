@@ -63,7 +63,7 @@ void mSensorsDB18::Pre_Init(){
 
 void mSensorsDB18::Init(void){
 
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
+  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
 
   // sensor group 1 exists
   uint8_t sensor_group_count = 0;
@@ -121,7 +121,7 @@ void mSensorsDB18::Init(void){
 
 
   if(!sensor_count){    
-    AddLog_P(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
+    // AddLog_P(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
     return;
   }
 
@@ -264,6 +264,22 @@ uint8_t mSensorsDB18::ConstructJSON_Settings(uint8_t json_level){
 
   return JsonBuilderI->End();
 
+
+}
+
+int8_t mSensorsDB18::FindStructIndexByAddressID(int8_t address_id){
+
+  int8_t struct_index_id = -1;
+
+  if(address_id == -1){ return -1; } // invalid/unset id
+
+  for(uint8_t ii=0;ii<DB18_SENSOR_MAX;ii++){
+    if(address_id == sensor[ii].address_id){
+      return ii;
+    }
+  }
+
+  return -1;
 
 }
 
@@ -558,6 +574,10 @@ void mSensorsDB18::EveryLoop(){
 
     if(!db18_sensors_active){ // Retry init if failed
       Init(); //search again
+      // set a cooldown period if sensor was not found of X seconds
+      if(db18_sensors_active==0){ //still no sensor found, wait
+        tSavedMeasureSensor = millis()+10000; //30 seocnds backoff
+      }
     }else{
       // AddLog_P(LOG_LEVEL_DEBUG,PSTR("SplitTask_UpdateSensors"));
         for(uint8_t sensor_group_id=0;

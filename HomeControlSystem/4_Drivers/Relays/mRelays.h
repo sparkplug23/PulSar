@@ -1,11 +1,10 @@
 #ifndef _MRELAYS_H
 #define _MRELAYS_H 0.1
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
-#include "1_TaskerManager/mTaskerManager.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #include "3_Network/MQTT/mMQTT.h"

@@ -318,6 +318,8 @@
   #define D_MODULE_CUSTOM_FAN_CTR              "mFan"
   #define D_MODULE_CUSTOM_FAN_FRIENDLY_CTR              "fan"
 
+#define D_MODULE_CUSTOM_SENSORCOLOURS_CTR "mSensorColours"
+#define D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR "sensor_colours"
 
 /**
  * Common list - These are D_<exact letters in string> that are Capital first

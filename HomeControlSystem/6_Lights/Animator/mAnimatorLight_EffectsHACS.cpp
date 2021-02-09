@@ -170,6 +170,61 @@ void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour(const
 
 }
 
+
+/**************************************************************************************************************************************************************
+***************************************************************************************************************************************************************
+********* Function_Slow_Glow *************************************************************************************************************************
+***************************************************************************************************************************************************************
+***************************************************************************************************************************************************************/
+
+
+/****
+ * Changes pixels randomly to new colour, with slow blending
+ * Requires new colour calculation each call
+ */
+void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_01(){
+  // So colour region does not need to change each loop to prevent colour crushing
+  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+  // Pick new colours
+  //Display on all pixels
+  UpdateDesiredColourFromPaletteSelected();
+
+  HsbColor colour_in = HsbColor(0);
+ 
+  //Overwrite random brightness on special range
+  for(uint16_t index=256;index<300;index++){
+
+    colour_in = animation_colours[index].DesiredColour;
+
+    if(colour_in.B==0){ //if colour was off, I need to set the colour to a defined value or it willl turn up brightness to show white
+      colour_in.H = 0.0f;
+      colour_in.S = 1.0f;
+    }
+    colour_in.B = pCONT_iLight->BrtN2F(random(0,10)*10);
+
+    // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
+  
+    animation_colours[random(256,299)].DesiredColour = colour_in;
+
+    // animation_colours[random(40,49)].DesiredColour = colour_in;
+
+  }
+  
+
+
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  UpdateStartingColourWithGetPixel();
+  // Call the animator to blend from previous to new
+  this->setAnimFunctionCallback(
+    [this](const AnimationParam& param){
+      this->AnimUpdateMemberFunction_BlendStartingToDesiredColour(param);
+    }
+  );
+}
+
+
 /**************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************
 ********* Function_Solid_RGBCCT ie New Scene mode for cct strips **********************************************************************************************

@@ -6,6 +6,24 @@ Section Next, will always be "Development", which with copy and paste will becom
 
 ## [Unreleased] - Development
 
+## [B0.86.0.0]
+### Added
+- 
+
+### Breaking Changed
+- 
+
+### Changed
+- 
+
+### Fixed
+- Error with `encoded_custom` palette parsing
+
+### Removed
+- none
+
+## [Unreleased] - Development
+
 ## [B0.84.84.114]
 ### Added
 - first addition of WLED effects

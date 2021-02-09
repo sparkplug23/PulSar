@@ -73,6 +73,7 @@
     #define D_RGB255_CYAN            0, 255, 255,
     #define D_RGB255_CYAN_FADED2      0, 100, 100,
     #define D_RGB255_CYAN_FADED3      0, 60, 60,
+    #define D_RGB255_BLACK      0, 0, 0,
 
 
 
@@ -510,8 +511,8 @@
     #ifndef D_PALETTE_SHELF_HEARTS_NAME_CTR
     #define D_PALETTE_SHELF_HEARTS_NAME_CTR        "Shelf Hearts"   
     #endif
-    #define WARM_WHITE_RGB_SHELF  247, 162, 97, // warm white
-    #define WARM_WHITE_RGB_SHELF_HEART  D_RGB255_PINK_WARM // pink
+    #define WARM_WHITE_RGB_SHELF  D_RGB255_PINK_WARM
+    #define WARM_WHITE_RGB_SHELF_HEART  D_RGB255_PURPLE_BLUE
     const char PM_PALETTE_SHELF_HEARTS_NAME_CTR[] PROGMEM = D_PALETTE_SHELF_HEARTS_NAME_CTR;
     const uint8_t colour_map_shelf_hearts_id[] PROGMEM = { //position/colour pairs {pos0,col0, pos1,col1, pos2,col2, ... pos255,col} ie set all
       WARM_WHITE_RGB_SHELF
@@ -1039,6 +1040,50 @@
  * */
 
 
+    /** GRADIENT_FIRE
+     * Warmer sunrise, blue with yellows midway
+     * DARKEST, basically night
+     * */
+    #ifndef D_PALETTE_STATIC_GRADIENT_FIRE_01_NAME_CTR
+    #define D_PALETTE_STATIC_GRADIENT_FIRE_01_NAME_CTR        "Gradient Fire 01|Gradient Flame 01"   
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+    DEF_PGM_CTR  (PM_PALETTE_STATIC_GRADIENT_FIRE_01_NAME_CTR)        D_PALETTE_STATIC_GRADIENT_FIRE_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_STATIC_GRADIENT_FIRE_01_COLOUR_MAP_IDS)
+    { //grad range 0-255, R,G,B,WW,CW
+      0,   255,   0,   0,  0, 0,
+      100, 0, 255, 0,  0, 0,
+      200, 0, 0, 255, 0, 0,
+      // 127, 30, 24, 82, 0, 0, //CENTRE
+      // 135, 20, 14, 82, 0, 0,
+      // 145,   20, 14, 82, 0, 0,
+      255,   255,   30,   0,  0, 0,   
+    };
+
+    
+    
+    #ifndef D_PALETTE_SINGLE_FIRE_01_NAME_CTR
+    #define D_PALETTE_SINGLE_FIRE_01_NAME_CTR        "Single Fire 01|Single Flame 01"     
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+    DEF_PGM_CTR  (PM_PALETTE_SINGLE_FIRE_01_NAME_CTR)        D_PALETTE_SINGLE_FIRE_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP_IDS)
+    { // 0-255, R,G,B
+      D_RGB255_RED
+      D_RGB255_RED_ALT
+      D_RGB255_ORANGE_DEEP  
+      D_RGB255_RED
+      D_RGB255_RED
+      D_RGB255_ORANGE_DEEP  
+      D_RGB255_RED
+      D_RGB255_ORANGE_DEEP  
+      25, 2, 0   
+    };
+
+
+
+
+
     /** GRADIENT_SUNLEVEL_GROUP01
      * Warmer sunrise, blue with yellows midway
      * DARKEST, basically night
@@ -1057,8 +1102,6 @@
       135, 20, 14, 82, 0, 0,
       145,   20, 14, 82, 0, 0,
       255,   0,   0,   0,  0, 0,   
-
-
     };
 
     /** GRADIENT_SUNLEVEL_GROUP01

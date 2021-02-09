@@ -24,6 +24,8 @@
 
 #include "jsmn.h"
 
+#include "Arduino.h"
+
 #define JSMN_STRICT     // force strict mode
 
 const uint32_t JSMN_START_MAX = (1U << JSMN_START_B) - 1;
@@ -127,8 +129,18 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
   for (; parser->pos < len && js[parser->pos] != '\0'; parser->pos++) {
     char c = js[parser->pos];
 
+    #ifdef USE_DEBUG_JSMN
+    Serial.printf("%02d %c\n\r",parser->pos,js[parser->pos]);
+    #endif // USE_DEBUG_JSMN
+
     /* Quote: end of string */
+
+
+    // this will not allow a single quote of any kind mid string, as it will match and assume end
     if (c == '\"') {
+    #ifdef USE_DEBUG_JSMN
+      Serial.println("Quote: end of string");
+    #endif // USE_DEBUG_JSMN
       if (tokens == NULL) {
         return 0;
       }
@@ -144,10 +156,18 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
     /* Backslash: Quoted symbol expected */
     if (c == '\\' && parser->pos + 1 < len) {
       int i;
+    #ifdef USE_DEBUG_JSMN
+      Serial.println("Backslash: Quoted symbol expected");
+    #endif// USE_DEBUG_JSMN
       parser->pos++;
+      // Serial.print(js[parser->pos]);
+      // Serial.println(js[parser->pos+1]);
       switch (js[parser->pos]) {
       /* Allowed escaped symbols */
       case '\"':
+    #ifdef USE_DEBUG_JSMN
+      Serial.println("Backslash: Quoted symbol expected FOUND \"");
+    #endif// USE_DEBUG_JSMN
       case '/':
       case '\\':
       case 'b':
@@ -158,6 +178,9 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
         break;
       /* Allows escaped symbol \uXXXX */
       case 'u':
+    #ifdef USE_DEBUG_JSMN
+      Serial.println("Backslash: Quoted symbol expected CASE U");
+    #endif// USE_DEBUG_JSMN
         parser->pos++;
         for (i = 0; i < 4 && parser->pos < len && js[parser->pos] != '\0';
              i++) {
@@ -174,11 +197,21 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
         break;
       /* Unexpected symbol */
       default:
+    #ifdef USE_DEBUG_JSMN
+      Serial.println("Backslash: Quoted symbol expected default");
+    #endif// USE_DEBUG_JSMN
         parser->pos = start;
         return JSMN_ERROR_INVAL;
       }
     }
+    
+    #ifdef USE_DEBUG_JSMN
+  Serial.printf("parser->pos%d = start%d\n\r", parser->pos,start);
+    #endif // USE_DEBUG_JSMN
   }
+    #ifdef USE_DEBUG_JSMN
+  Serial.printf("parser->pos%d = start%d", parser->pos,start);
+    #endif// USE_DEBUG_JSMN
   parser->pos = start;
   return JSMN_ERROR_PART;
 }
@@ -397,12 +430,22 @@ void json_unescape(char* string) {
 	for (uint32_t i = 0; (c = string[i]) != 0; i++) {
 		if ('\\' == c) {
 			c = string[++i];
+      
+    #ifdef USE_DEBUG_JSMN
+  Serial.printf("outlength=%d\t c=%c\n\r", outlength,c);
+    #endif// USE_DEBUG_JSMN
 			switch (c) {
         case 0:
+    #ifdef USE_DEBUG_JSMN
+  Serial.printf("RETURN\n\r");
+    #endif// USE_DEBUG_JSMN
           return;   // end of stream
         case '\"':
         case '/':
         case '\\':
+    #ifdef USE_DEBUG_JSMN
+         Serial.printf("case %c\n\r",c);
+    #endif// USE_DEBUG_JSMN
           string[outlength++] = c;
           break;
 
@@ -443,11 +486,33 @@ void json_unescape(char* string) {
           break;
 
         default:
+      
+    #ifdef USE_DEBUG_JSMN  
+  Serial.printf("DEF outlength=%d\t c=%c\n\r", outlength,c);
+    #endif// USE_DEBUG_JSMN
           break;
 			}
 		}
 		else {
 			string[outlength++] = c;
+    #ifdef USE_DEBUG_JSMN
+      Serial.printf("outlength=%d\t c=%c %s\n\r", outlength,c,string);
+    #endif// USE_DEBUG_JSMN
 		}
 	}
+
+//add null
+
+  #ifdef USE_DEBUG_JSMN
+  Serial.printf("outlength=%d\t strlen=%d\n\r", outlength,strlen(string));
+  #endif// USE_DEBUG_JSMN
+  
+  if(outlength!=strlen(string)){
+    #ifdef USE_DEBUG_JSMN
+    Serial.printf("Add null\n\r");
+    #endif// USE_DEBUG_JSMN
+    uint8_t difference = abs(strlen(string)-outlength);
+		string[outlength] = 0;
+  }
+
 }

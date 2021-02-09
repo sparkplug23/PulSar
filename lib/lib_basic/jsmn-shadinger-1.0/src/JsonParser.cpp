@@ -472,6 +472,7 @@ void JsonParser::postProcess(size_t json_len) {
     }
 
     if (tok.type == JSMN_STRING) {
+      // Serial.printf("tok.size=%d\n\r", tok.size);
       if (tok.size == 1) { tok.type = JSMN_KEY; }
       else { json_unescape(&_json[tok.start]); }
     } else if (tok.type == JSMN_PRIMITIVE) {

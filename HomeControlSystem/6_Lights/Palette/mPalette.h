@@ -92,9 +92,11 @@ class mPalette{
     void init_ColourPalettes_Holloween_OP();
     void init_ColourPalettes_Holloween_OGP();
     void init_ColourPalettes_Hot_Neon_Pink_With_Navy();
+    void init_ColourPalettes_Single_Fire_01();
     void init_ColourPalettes_Shelf_Hearts();
     void init_ColourPalettes_Gradient_01();
     void init_ColourPalettes_Gradient_02();
+    void init_ColourPalettes_Gradient_Fire_01();
     void init_ColourPalettes_Gradient_Pastel_Tones_Purple();
     void init_ColourPalettes_Berry_Green();
     void init_ColourPalettes_Christmas_01();
@@ -240,6 +242,7 @@ class mPalette{
     PALETTELIST_STATIC_SUNRISE_04_ID,
     PALETTELIST_STATIC_SUNSET_01_ID,
     PALETTELIST_STATIC_SUNSET_02_ID,
+    PALETTELIST_STATIC_GRADIENT_FIRE_01_ID,
     /**
      * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
      * Effect will go through these to form a rising/falling sun
@@ -270,6 +273,7 @@ class mPalette{
 
     PALETTELIST_STATIC_OCEAN_01_ID,
     PALETTELIST_STATIC_CUSTOM_USER_01_ID,
+    PALETTELIST_STATIC_SINGLE_FIRE_01_ID,
 
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
@@ -345,6 +349,7 @@ class mPalette{
       PALETTE holloween_op;
       PALETTE holloween_ogp;
       PALETTE hot_pink_neon_with_navy;
+      PALETTE single_fire_01;
       PALETTE winter;
       PALETTE autumn;
       PALETTE autumn_red;
@@ -355,6 +360,7 @@ class mPalette{
       PALETTE shelf_hearts;
       PALETTE gradient_01;
       PALETTE gradient_02;
+      PALETTE gradient_fire_01;
       PALETTE gradient_pastel_tones_purple;
       PALETTE sunrise_01;
       PALETTE sunrise_02;
@@ -415,6 +421,7 @@ class mPalette{
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
  uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit = 0);
     
+uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
               
     RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
 

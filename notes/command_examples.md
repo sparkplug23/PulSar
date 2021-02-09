@@ -25,7 +25,7 @@
   "SceneName":"ColourSingle",
   "Brightness":100,
   "BrightnessCCT":10,
-  "colour_order":"RGB",
+  "ColourOrder":"RGB",
   "Transition":{"RateMs":1000,"TimeMs":1000,"Order":"InOrder"},
   "Scene":{"Colour":[255,150,0,0,255]},
 }
@@ -40,7 +40,7 @@
 }
 
 {
-  "colour_order":"GRB",
+  "ColourOrder":"GRB",
   "ColourPalette":10,
   "PaletteEdit": {
     "ColourPalette": 10,
@@ -54,9 +54,25 @@
 
 
 
+//Example Kitchen H801
+{
+  "ColourOrder":"GRB",
+  "ColourPalette":10,
+  "Hue":350,
+  "Sat":100,
+  "AnimationMode":"Effects",
+  "Effects":{"Function":8},
+  "BrightnessRGB":100,
+  "BrightnessCCT":10,
+  "CCT_Temp":600,
+  "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
+}
+
+
+
 
 {
-  "colour_order":"GRB",
+  "ColourOrder":"GRB",
   "ColourPalette":10,
   "Brightness":100,
   "PaletteEdit": {
@@ -78,6 +94,7 @@
   "BrightnessRGB":100,
   "Transition":{"RateMs":1000,"TimeMs":980,"Order":"Random"}
 }
+
 
 {
   "Notifications": {

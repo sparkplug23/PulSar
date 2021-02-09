@@ -148,6 +148,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CUSTOM_FAN
     if(mfan == nullptr){ mfan = new mFan(); }
   #endif
+  #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+    if(msenscol == nullptr){ msenscol = new mSensorColours(); }
+  #endif
 
 }
 
@@ -315,6 +318,9 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_CUSTOM_FAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_FAN_ID;
   #endif
+  #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_SENSORCOLOURS_ID;
+  #endif
   #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
   #endif
@@ -438,6 +444,9 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #ifdef D_MODULE_CUSTOM_FAN_ID
     if(mfan==nullptr){ return false; }
   #endif
+  #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+    if(msenscol==nullptr){ return false; }
+  #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mod==nullptr){ return false; }
   #endif
@@ -549,6 +558,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
           // #endif
 
           //#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          //#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
 
             result = mwif->Tasker(function); 
 
@@ -589,7 +599,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
         case D_MODULE_CORE_TIME_ID:       
         
           
-          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING2
           result = mt->Tasker(function); 
           
           #endif
@@ -598,9 +608,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
       #ifdef D_MODULE_NETWORK_MQTT_ID
         case D_MODULE_NETWORK_MQTT_ID:    
-          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING2
            result = mqt->Tasker(function);  
-           #endif
+          #endif
            
            break;
       #endif
@@ -699,6 +709,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
       #ifdef D_MODULE_CUSTOM_FAN_ID
         case D_MODULE_CUSTOM_FAN_ID:      result = mfan->Tasker(function); break;
+      #endif
+      #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+        case D_MODULE_CUSTOM_SENSORCOLOURS_ID:      result = msenscol->Tasker(function); break;
       #endif
 
 
@@ -995,6 +1008,9 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #ifdef D_MODULE_CUSTOM_FAN_ID
       case D_MODULE_CUSTOM_FAN_ID:        return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
     #endif
+    #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+      case D_MODULE_CUSTOM_SENSORCOLOURS_ID:        return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
+    #endif
 
 
 
@@ -1151,6 +1167,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_CUSTOM_FAN_ID
       case D_MODULE_CUSTOM_FAN_ID:         return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;  
+    #endif
+    #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+      case D_MODULE_CUSTOM_SENSORCOLOURS_ID:         return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;  
     #endif
 
 
