@@ -8,6 +8,7 @@
 .clang_complete
 .gcc-flags.json
 .cache
+# .pio
 build
 firmware.map
 FutureIdeas.txt
