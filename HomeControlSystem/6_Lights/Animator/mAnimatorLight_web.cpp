@@ -631,7 +631,7 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   // colours in palette
 //   HsbColor set_colours[20];
 //   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-//     set_colours[i] = HsbColor(0);//preset_colour_map[palettelist.ptr->colour_map_id[i]]; 
+//     set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[palettelist.ptr->colour_map_id[i]]; 
 
 // // GETCOLOURSFN
 
@@ -1696,7 +1696,7 @@ void mAnimatorLight::WebAppend_PaletteEditor_Draw_Editor_Form(){
   // colours in palette
   HsbColor set_colours[20];
   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-    set_colours[i] = HsbColor(0);//preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
+    set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
     //if(mPaletteI->palettelist.ptr->flags.fColours_from_map){
       colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
     //}else{

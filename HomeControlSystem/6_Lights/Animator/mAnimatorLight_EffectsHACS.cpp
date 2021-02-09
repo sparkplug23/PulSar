@@ -85,7 +85,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Fade_Gradient(){
                                           pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100))  
                                           );
   RgbTypeColor colour_random = RgbTypeColor(255,0,0); 
-  HsbColor colour_random_adjusted = HsbColor(0);
+  HsbColor colour_random_adjusted = HsbColor(RgbColor(0));
   uint8_t gradient_end_percentage = 75;
   uint16_t strip_size_gradient = pCONT_iLight->settings.light_size_count*(gradient_end_percentage/100.0f);
   uint16_t strip_size_single   = pCONT_iLight->settings.light_size_count*(75/100.0f);
@@ -189,7 +189,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_01(){
   //Display on all pixels
   UpdateDesiredColourFromPaletteSelected();
 
-  HsbColor colour_in = HsbColor(0);
+  HsbColor colour_in = HsbColor(RgbColor(0));
  
   //Overwrite random brightness on special range
   for(uint16_t index=256;index<300;index++){
@@ -2242,7 +2242,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //                                           pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100))  
 //                                           );
 //   RgbTypeColor colour_random = RgbTypeColor(255,0,0); 
-//   HsbColor colour_random_adjusted = HsbColor(0);
+//   HsbColor colour_random_adjusted = HsbColor(RgbColor(0));
 //   uint8_t gradient_end_percentage = 75;
 //   uint16_t strip_size_gradient = pCONT_iLight->settings.light_size_count*(gradient_end_percentage/100.0f);
 //   uint16_t strip_size_single   = pCONT_iLight->settings.light_size_count*(75/100.0f);

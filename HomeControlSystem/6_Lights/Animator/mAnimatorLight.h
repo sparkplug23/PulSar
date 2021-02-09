@@ -189,7 +189,11 @@ class mAnimatorLight{
       #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
         typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
       #else          
-        typedef NeoEsp32Rmt1800KbpsMethod selectedNeoSpeedType; // 1st
+        // typedef NeoEsp32Rmt7800KbpsMethod selectedNeoSpeedType; // 1st
+        
+        typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType; //esp32 workss
+
+        // typedef Neo800KbpsMethod selectedNeoSpeedType;
         // typedef NeoEsp32Rmt7Ws2812xMethod selectedNeoSpeedType; //test A
 
         // typedef NeoEsp32Rmt7800KbpsMethod selectedNeoSpeedType;

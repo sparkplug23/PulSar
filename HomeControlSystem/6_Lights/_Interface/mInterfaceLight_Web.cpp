@@ -63,7 +63,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 
   BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(mPaletteI->palettelist.ptr));
 
-  HsbColor hsb_current = HsbColor(0);//RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
+  HsbColor hsb_current = HsbColor(RgbColor(0));//RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
 
   // GetColourFromPalette
   

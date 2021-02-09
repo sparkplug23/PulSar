@@ -103,7 +103,7 @@ void mMQTT::init(void){
 void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
 
 // DEBUG_LINE_HERE;
-        AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
+       // AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
