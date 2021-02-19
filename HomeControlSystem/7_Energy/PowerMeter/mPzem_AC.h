@@ -1,20 +1,21 @@
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
+// #include "2_CoreSystem/mBaseConfig.h"
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#include "2_CoreSystem/mSystemConfig.h"
+// #include "2_CoreSystem/mFirmwareDefaults.h"
+// #include "0_ConfigUser/mFirmwareCustom_Secret.h"
+// #include "2_CoreSystem/mSystemConfig.h"
 
-// #define USE_MODULE_SENSORS_PZEM004T_MODBUS
+// // #define USE_MODULE_SENSORS_PZEM004T_MODBUS
 
 #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
 
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
 
-#include "1_TaskerManager/mTaskerManager.h"
+// #include "1_TaskerManager/mTaskerManager.h"
 
 
 class mPzem_AC{
@@ -73,7 +74,10 @@ class mPzem_AC{
       float power_factor;
       float energy;  
     }pzem_modbus[MAX_ENERGY_SENSORS];
-    
+
+
+
+
     void ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer);
 
     uint8_t active_phases = 0;

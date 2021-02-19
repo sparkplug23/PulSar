@@ -29,6 +29,9 @@ void mPzem_AC::Init(void)
   } else {
     pCONT_set->energy_flg = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
   }
+
+  
+
 }
 
 
@@ -174,6 +177,8 @@ int8_t mPzem_AC::Tasker(uint8_t function){
       Pre_Init();
     break;
   }
+
+  // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
 
   // Only continue to remaining functions if sensor has been detected and enabled
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }

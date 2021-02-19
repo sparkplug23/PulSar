@@ -316,13 +316,29 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   // class mSAWProtocol;
   // #define mSAWProtocol_ID 25
 #endif
+#ifdef USE_MODULE_DRIVERS_SDCARD
+  #include "4_Drivers/SD/mSDCard.h"
+  class mSDCard;
+  #define            D_MODULE_DRIVERS_SDCARD_ID       47
+  #define            pCONT_sdcard                        pCONT->msdcard
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SDCARD_CTR)           D_MODULE_DRIVERS_SDCARD_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR)  D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR;
+#endif
+#ifdef USE_MODULE_DRIVERS_GPS
+  #include "4_Drivers/GPS/mGPS.h"
+  class mGPS;
+  #define            D_MODULE_DRIVERS_GPS_ID       48
+  #define            pCONT_gps                        pCONT->mgps
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_GPS_CTR)           D_MODULE_DRIVERS_GPS_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR)  D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
+#endif
 
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_DRIVERS_ENERGY
   #include "7_Energy/_Interface/mEnergy.h"
   class mEnergy;
-  #define            D_MODULE_DRIVERS_ENERGY_ID                   42
+  #define            D_MODULE_DRIVERS_ENERGY_ID                   130
   #define            pCONT_iEnergy                                pCONT->mdenergy  
   DEFINE_PGM_CTR(PM_INTERFACE_ENERGY_MODULE_CTR)              "mEnergy";
   DEFINE_PGM_CTR(PM_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR)     "energy";
@@ -763,6 +779,14 @@ class mTaskerManager{
   #ifdef USE_MODULE_DRIVERS_RELAY
     mRelays* mry = nullptr;
   #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+    mSDCard* msdcard = nullptr;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_GPS
+    mGPS* mgps = nullptr;
+  #endif
+
+
   #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
     mPWM* mpwm = nullptr;
   #endif

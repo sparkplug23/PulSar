@@ -53,20 +53,6 @@ void mAnimatorLight::parse_JSONCommand(void){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-  
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_BRIGHTNESS_MIN]){ 
-    CommandSet_Flasher_Brightness_Min(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_BRIGHTNESS_MAX]){ 
-    CommandSet_Flasher_Brightness_Max(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MIN]){ 
     CommandSet_Flasher_Alternate_Brightness_Min(jtok.getInt());
@@ -174,6 +160,34 @@ void mAnimatorLight::parse_JSONCommand(void){
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   #endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+
+  
+  if(jtok = obj[PM_JSON_BRIGHTNESS_MIN]){ 
+    CommandSet_Brightness_Min(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_MAX]){ 
+    CommandSet_Brightness_Max(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+
+  if(jtok = obj[PM_JSON_PALETTE_GENERATION].getObject()[PM_JSON_RANDOMISE_BRIGHTNESS_MODE]){
+    CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+
 
 
   if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
@@ -468,6 +482,29 @@ void mAnimatorLight::CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t v
 }
 
   /********************************************************************************************************************************
+  ********** Palette_Generation_Randomise_Brightness_Enable ******************************************************************************************************
+  ********************************************************************************************************************************/
+
+
+void mAnimatorLight::CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value){
+
+  //instead of simple on and off, it will contain a list of modes
+  
+    // 0, 1, 2
+    // 0 = off, 1 = between range, 2 = switch between max and min randomly, 3 = switch between max and min alternatively 
+
+  pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = value;
+  
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_PALETTE_GENERATION, D_JSON_RANDOMISE_BRIGHTNESS_MODE)), value);
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+}
+
+
+
+
+  /********************************************************************************************************************************
   **********Flasher Region ******************************************************************************************************
   ********************************************************************************************************************************/
 
@@ -484,7 +521,7 @@ void mAnimatorLight::CommandSet_Flasher_Flags_Movement_Direction(uint8_t value){
   **********Flasher Region ******************************************************************************************************
   ********************************************************************************************************************************/
 
-void mAnimatorLight::CommandSet_Flasher_Brightness_Min(uint8_t value){
+void mAnimatorLight::CommandSet_Brightness_Min(uint8_t value){
   
   flashersettings.brightness_min = value;
   
@@ -498,7 +535,7 @@ void mAnimatorLight::CommandSet_Flasher_Brightness_Min(uint8_t value){
   **********Flasher Region ******************************************************************************************************
   ********************************************************************************************************************************/
 
-void mAnimatorLight::CommandSet_Flasher_Brightness_Max(uint8_t value){
+void mAnimatorLight::CommandSet_Brightness_Max(uint8_t value){
   
   flashersettings.brightness_max = value;
   

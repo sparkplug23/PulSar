@@ -1,17 +1,21 @@
 #ifndef _DRIVER_ENERGY_H
 #define _DRIVER_ENERGY_H 0.1
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#include "2_CoreSystem/mSystemConfig.h"
+// #include "2_CoreSystem/mBaseConfig.h"
 
-// #define USE_MODULE_DRIVERS_ENERGY
+// #include "2_CoreSystem/mFirmwareDefaults.h"
+// #include "0_ConfigUser/mFirmwareCustom_Secret.h"
+// #include "2_CoreSystem/mSystemConfig.h"
+
+// // #define USE_MODULE_DRIVERS_ENERGY
 
 #ifdef USE_MODULE_DRIVERS_ENERGY
 
-#include "1_TaskerManager/mTaskerManager.h"
+// #include "1_TaskerManager/mTaskerManager.h"
+
+#define ENABLE_PARAMETER_THRESHOLDS
 
 
 
@@ -25,6 +29,7 @@ DEFINE_PGM_CTR(PM_DLIM_LIST_TABLE_HEADERS)
 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR) "energystats";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR) "thresholdlimits";
 
 
 #include "3_Network/MQTT/mMQTT.h"
@@ -44,8 +49,78 @@ class mEnergy{
 
     int8_t Tasker(uint8_t function);//, uint8_t optional_id = 0);
     
-int8_t Tasker(uint8_t function, JsonObjectConst obj);
+// int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
+
+    #ifdef ENABLE_PARAMETER_THRESHOLDS
+
+    typedef union {
+      uint16_t data; // allows full manipulating
+      struct { 
+        // Send over mqtt if value transitions ANY thresholds
+        uint16_t mqtt_report_threshold_transition : 1;
+        /**
+         * Threshold limit units 
+         * 0 - default : amps, volts, watts
+         * 1 - milli (1/thousand)
+         * */
+        uint16_t limit_units : 1; 
+
+
+      };
+    } PARAMETER_THRESHOLD_FLAGS;
+    
+    struct PARAMETER_THRESHOLDS{
+      PARAMETER_THRESHOLD_FLAGS flags;
+      struct VOLTAGE{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }voltage;
+      struct CURRENT{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }current;
+      struct ACTIVE_POWER{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }active_power;
+      struct FREQUENCY{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }frequency;
+      struct POWER_FACTOR{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }power_factor;
+      struct ENERGY{
+        float upper_limit;
+        float lower_limit;
+        uint16_t over_limit_seconds_counter;
+        uint16_t over_limit_seconds_trigger_value;
+        uint8_t over_limit_seconds_trigger_value_exceeded = false;
+      }energy;
+    }parameter_thresholds[MAX_ENERGY_SENSORS];
+
+    void UpdateThresholdLimits();
+
+
+    #endif
+    
 
     void WebCommand_Parse();
     
@@ -209,6 +284,7 @@ void Settings_Save();
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
     uint8_t ConstructJSON_EnergyStats(uint8_t json_method = 0);
+    uint8_t ConstructJSON_ThresholdLimits(uint8_t json_method);
 
   
   //#ifdef USE_CORE_MQTT 
@@ -227,10 +303,15 @@ void Settings_Save();
     struct handler<mEnergy> mqtthandler_sensor_ifchanged;
     struct handler<mEnergy> mqtthandler_sensor_teleperiod;
     
+    struct handler<mEnergy> mqtthandler_thresholdlimits_ifchanged; //will contain alert status
+    struct handler<mEnergy> mqtthandler_thresholdlimits_teleperiod;
+    
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID,
+      MQTT_HANDLER_MODULE_THRESHOLDLIMITS_IFCHANGED_ID,
+      MQTT_HANDLER_MODULE_THRESHOLDLIMITS_TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 

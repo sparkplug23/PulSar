@@ -122,6 +122,14 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_RELAY
     if(mry == nullptr){ mry = new mRelays(); }
   #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+    if(msdcard == nullptr){ msdcard = new mSDCard(); }
+  #endif
+  #ifdef USE_MODULE_DRIVERS_GPS
+    if(mgps == nullptr){ mgps = new mGPS(); }
+  #endif
+
+
   #ifdef USE_MODULE_DRIVERS_PWM
     if(mpwm == nullptr){ mpwm = new mPWM(); }
   #endif
@@ -280,6 +288,12 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_DRIVERS_ENERGY_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_ENERGY_ID;
   #endif
+  #ifdef D_MODULE_DRIVERS_SDCARD_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SDCARD_ID;
+  #endif
+  #ifdef D_MODULE_DRIVERS_GPS_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_GPS_ID;
+  #endif
 
   /**
    * Lighting
@@ -426,6 +440,13 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #ifdef USE_MODULE_DRIVERS_RELAY
     if(mry==nullptr){ return false; }
   #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+    if(msdcard==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_DRIVERS_GPS
+    if(mgps==nullptr){ return false; }
+  #endif
+
   #ifdef USE_MODULE_DRIVERS_PWM
     if(mpwm==nullptr){ return false; }
   #endif
@@ -691,6 +712,17 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
         // result = mry->Tasker(function);
          break;
       #endif
+      #ifdef D_MODULE_DRIVERS_SDCARD_ID
+        case D_MODULE_DRIVERS_SDCARD_ID:    
+          result = msdcard->Tasker(function);
+        break;
+      #endif
+      #ifdef D_MODULE_DRIVERS_GPS_ID
+        case D_MODULE_DRIVERS_GPS_ID:    
+          result = mgps->Tasker(function);
+        break;
+      #endif
+
       #ifdef D_MODULE_DRIVERS_PWM_ID
         case D_MODULE_DRIVERS_PWM_ID:    
         
@@ -1000,6 +1032,12 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #ifdef D_MODULE_DRIVERS_PWM_ID
       case D_MODULE_DRIVERS_PWM_ID:        return PM_MODULE_DRIVERS_PWM_CTR;
     #endif
+    #ifdef D_MODULE_DRIVERS_SDCARD_ID
+      case D_MODULE_DRIVERS_SDCARD_ID:        return PM_MODULE_DRIVERS_SDCARD_CTR;
+    #endif
+    #ifdef D_MODULE_DRIVERS_GPSID
+      case D_MODULE_DRIVERS_GPS_ID:        return PM_MODULE_DRIVERS_GPS_CTR;
+    #endif
 
     // Custom
     #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
@@ -1067,6 +1105,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_DRIVERS_RELAY_ID
       case D_MODULE_DRIVERS_RELAY_ID:         return PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR; 
+    #endif
+    #ifdef D_MODULE_DRIVERS_GPS_ID
+      case D_MODULE_DRIVERS_GPS_ID:         return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; 
     #endif
     #ifdef D_MODULE_DRIVERS_PWM_ID
       case D_MODULE_DRIVERS_PWM_ID:         return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; 

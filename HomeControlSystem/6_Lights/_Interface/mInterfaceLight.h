@@ -777,10 +777,10 @@ void ShowInterface();
     void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
 
     
-    struct BRIGHTNESS_RGB_BOUNDARIES{
-      uint8_t  lower = 0;  // 0..255
-      uint8_t  upper = 255;  // 0..255
-    }brtRGB_limits;
+    // struct BRIGHTNESS_RGB_BOUNDARIES{
+    //   uint8_t  lower = 0;  // 0..255
+    //   uint8_t  upper = 255;  // 0..255
+    // }brtRGB_limits;
 
     
 

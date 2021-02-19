@@ -883,12 +883,13 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     void CommandSet_Flasher_FunctionID(uint8_t value);
     void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value);
     void CommandSet_Flasher_Flags_Movement_Direction(uint8_t value);
-    void CommandSet_Flasher_Brightness_Min(uint8_t value);
-    void CommandSet_Flasher_Brightness_Max(uint8_t value);
     void CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value);
     void CommandSet_Flasher_Alternate_Brightness_Max(uint8_t value);
     void CommandSet_Flasher_Alternate_RandomAmountPercentage(uint8_t value);
     void CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPaletteColours(uint8_t value);
+
+    void CommandSet_Brightness_Min(uint8_t value);
+    void CommandSet_Brightness_Max(uint8_t value);
     
   #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
 
@@ -899,6 +900,13 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
   void CommandSet_PixelGrouping_Flag_Multiplier(uint8_t value);
   void CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* value, uint8_t length);
   #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+
+  
+
+void CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value);
+void CommandSet_BrightnessRGB_Limits_Lower(uint8_t value);
+void CommandSet_BrightnessRGB_Limits_Upper(uint8_t value);
+  
 
 
     

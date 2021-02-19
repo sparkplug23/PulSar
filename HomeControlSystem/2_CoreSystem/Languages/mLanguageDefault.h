@@ -194,6 +194,11 @@
   #define D_MODULE_DRIVERS_PWM_CTR           "pwm"
   #define D_MODULE_DRIVERS_PWM_FRIENDLY_CTR  "pwm"
 //#endif
+  #define D_MODULE_DRIVERS_SDCARD_CTR           "sdcard"
+  #define D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR  "sdcard"
+
+  #define D_MODULE_DRIVERS_GPS_CTR           "GPS"
+  #define D_MODULE_DRIVERS_GPS_FRIENDLY_CTR  "gps"
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
@@ -1032,6 +1037,7 @@
 #define D_LOG_MEMORY "MEM: "       // 
 #define D_LOG_ASYNC "ASC: "
 #define D_LOG_TEST "TST: "
+#define D_LOG_SDCARD "SDC: "
 
 
 //SDM220
@@ -1311,6 +1317,7 @@
 #define D_JSON_BRIGHTNESS_CCT  "BrightnessCCT"
 #define D_JSON_BRIGHTNESS_CCT255  "BrightnessCCT255"
 #define D_JSON_RANDOM_AMOUNT "RandomAmount"
+#define D_JSON_RANDOMISE_BRIGHTNESS_MODE "RandomiseBrightnessMode"
 
 #define D_JSON_RUNNING_ID "RunningID"
 
@@ -1461,6 +1468,7 @@
 #define D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR "GRB"
 
 #define D_JSON_PALETTE_EDIT "PaletteEdit"
+#define D_JSON_PALETTE_GENERATION "PaletteGeneration"
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 

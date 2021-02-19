@@ -390,6 +390,7 @@ void mInterfaceLight::parse_JSONCommand(void){
   }
 
   mqtthandler_debug_teleperiod.flags.SendNow = true;
+  mqtthandler_scene_teleperiod.flags.SendNow = true;
   animation.flags.fForceUpdate = true;
 
 }
