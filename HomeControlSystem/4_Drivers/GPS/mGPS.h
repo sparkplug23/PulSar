@@ -273,6 +273,9 @@
 #include "SD_MMC.h"
 
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR) "gpspacket_minimal";
+
+
 class mGPS{
 
   private:
@@ -337,6 +340,7 @@ void WebAppend_Root_Status_Table();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_method = 0);
 
   
   //#ifdef USE_CORE_MQTT 
@@ -348,6 +352,8 @@ void WebAppend_Root_Status_Table();
     struct handler<mGPS>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
+    struct handler<mGPS> mqtthandler_gpspacket_minimal_teleperiod;
+
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mGPS> mqtthandler_settings_teleperiod;
     
@@ -355,7 +361,13 @@ void WebAppend_Root_Status_Table();
     struct handler<mGPS> mqtthandler_sensor_ifchanged;
     struct handler<mGPS> mqtthandler_sensor_teleperiod;
     
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    // const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    // Extra module only handlers
+    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
+      MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
+      //later also send byte packet method for testing over mqtt
+      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
+    };
 
 
 };

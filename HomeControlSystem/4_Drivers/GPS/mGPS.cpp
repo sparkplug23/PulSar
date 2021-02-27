@@ -1,434 +1,16 @@
 #include "mGPS.h"
 
-//  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
+// For now, lets use polling for gps data until I get the rest working for it
+// I might want to move this into the "controller" method, or simply require it needs other drivers? cross-drivers, does this make sense??
+// Using that, a uart ISR can work to get the data, with maybe using the optional FreeRTOS method for triggering a parse event after message is complete? see how gps lib works
+
+
+// I will inject my gps data in a formatted (searchable) way into the rss/sd card data stream, matlab later will find the nearest, the interopolate from either points beside it
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
 gps_fix  fixcpp;// = nullptr; // This holds on to the latest values
-
-
-
-// void mGPS::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-//     Serial.printf("Listing directory: %s\n", dirname);
-
-//     File root = fs.open(dirname);
-//     if(!root){
-//         Serial.println("Failed to open directory");
-//         return;
-//     }
-//     if(!root.isDirectory()){
-//         Serial.println("Not a directory");
-//         return;
-//     }
-
-//     File file = root.openNextFile();
-//     while(file){
-//         if(file.isDirectory()){
-//             Serial.print("  DIR : ");
-//             Serial.println(file.name());
-//             if(levels){
-//                 listDir(fs, file.name(), levels -1);
-//             }
-//         } else {
-//             Serial.print("  FILE: ");
-//             Serial.print(file.name());
-//             Serial.print("  SIZE: ");
-//             Serial.println(file.size());
-//         }
-//         file = root.openNextFile();
-//     }
-// }
-
-// void mGPS::createDir(fs::FS &fs, const char * path){
-//     Serial.printf("Creating Dir: %s\n", path);
-//     if(fs.mkdir(path)){
-//         Serial.println("Dir created");
-//     } else {
-//         Serial.println("mkdir failed");
-//     }
-// }
-
-// void mGPS::removeDir(fs::FS &fs, const char * path){
-//     Serial.printf("Removing Dir: %s\n", path);
-//     if(fs.rmdir(path)){
-//         Serial.println("Dir removed");
-//     } else {
-//         Serial.println("rmdir failed");
-//     }
-// }
-
-// void mGPS::readFile(fs::FS &fs, const char * path){
-//     Serial.printf("Reading file: %s\n", path);
-
-//     File file = fs.open(path);
-//     if(!file){
-//         Serial.println("Failed to open file for reading");
-//         return;
-//     }
-
-//     Serial.print("Read from file: ");
-//     while(file.available()){
-//         Serial.write(file.read());
-//     }
-// }
-
-// void mGPS::writeFile(fs::FS &fs, const char * path, const char * message){
-//     Serial.printf("Writing file: %s\n", path);
-
-//     File file = fs.open(path, FILE_WRITE);
-//     if(!file){
-//         Serial.println("Failed to open file for writing");
-//         return;
-//     }
-//     if(file.print(message)){
-//         Serial.println("File written");
-//     } else {
-//         Serial.println("Write failed");
-//     }
-// }
-
-// void mGPS::appendFile(fs::FS &fs, const char * path, const char * message){
-//     Serial.printf("Appending to file: %s\n", path);
-
-//     File file = fs.open(path, FILE_APPEND);
-//     if(!file){
-//         Serial.println("Failed to open file for appending");
-//         return;
-//     }
-//     if(file.print(message)){
-//         Serial.println("Message appended");
-//     } else {
-//         Serial.println("Append failed");
-//     }
-// }
-
-// void mGPS::renameFile(fs::FS &fs, const char * path1, const char * path2){
-//     Serial.printf("Renaming file %s to %s\n", path1, path2);
-//     if (fs.rename(path1, path2)) {
-//         Serial.println("File renamed");
-//     } else {
-//         Serial.println("Rename failed");
-//     }
-// }
-
-// void mGPS::deleteFile(fs::FS &fs, const char * path){
-//     Serial.printf("Deleting file: %s\n", path);
-//     if(fs.remove(path)){
-//         Serial.println("File deleted");
-//     } else {
-//         Serial.println("Delete failed");
-//     }
-// }
-
-// void mGPS::testFileIO(fs::FS &fs, const char * path){
-//     File file = fs.open(path);
-//     static uint8_t buf[512];
-//     size_t len = 0;
-//     uint32_t start = millis();
-//     uint32_t end = start;
-//     if(file){
-//         len = file.size();
-//         size_t flen = len;
-//         start = millis();
-//         while(len){
-//             size_t toRead = len;
-//             if(toRead > 512){
-//                 toRead = 512;
-//             }
-//             file.read(buf, toRead);
-//             len -= toRead;
-//         }
-//         end = millis() - start;
-//         Serial.printf("%u bytes read for %u ms\n", flen, end);
-//         file.close();
-//     } else {
-//         Serial.println("Failed to open file for reading");
-//     }
-
-
-//     file = fs.open(path, FILE_WRITE);
-//     if(!file){
-//         Serial.println("Failed to open file for writing");
-//         return;
-//     }
-
-//     size_t i;
-//     start = millis();
-//     for(i=0; i<2048; i++){
-//         file.write(buf, 512);
-//     }
-//     end = millis() - start;
-//     Serial.printf("%u bytes written for %u ms\n", 2048 * 512, end);
-//     file.close();
-// }
-
-// // void setup(){
-// //     Serial.begin(115200);
-// // }
-
-// // void loop(){
-
-// //   Serial.println(millis());
-
-// // }
-
-
-
-/*********************************************************************************************\
-  Sonoff iFan02 and iFan03
-\*********************************************************************************************/
-
-/*********************************************************************************************/
-
-// bool mGPS::IsModuleIfan(void)
-// {
-//   return ((SONOFF_IFAN02 == my_module_type) || (SONOFF_IFAN03 == my_module_type));
-// }
-
-// uint8_t mGPS::MaxFanspeed(void)
-// {
-//   return MAX_FAN_SPEED;
-// }
-
-// uint8_t mGPS::GetFanspeed(void)
-// {
-//   if (ifan_fanspeed_timer) {
-//     return ifan_fanspeed_goal;                     // Do not show sequence fanspeed
-//   } else {
-//     /* Fanspeed is controlled by relay 2, 3 and 4 as in Sonoff 4CH.
-//       000x = 0
-//       001x = 1
-//       011x = 2
-//       101x = 3 (ifan02) or 100x = 3 (ifan03)
-//     */
-//     uint8_t fanspeed = (uint8_t)( pCONT_set->power &0xF) >> 1;
-//     if (fanspeed) { fanspeed = (fanspeed >> 1) +1; }  // 0, 1, 2, 3
-//     return fanspeed;
-//   }
-// }
-
-
-// // Probably to be handled using "light_interface?"
-// // uint8_t mGPS::GetLightState(void)
-// // {
-// //   return pCONT_mry->CommandGet_Relay_Power(0);
-// // }
-// // void mGPS::SetLightState(uint8_t state)
-// // {
-// //   pCONT_mry->CommandSet_Relay_Power(state);
-// // }
-
-// /*********************************************************************************************/
-
-// void mGPS::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
-// {
-//   ifan_fanspeed_timer = 0;                         // Stop any sequence
-//   ifan_fanspeed_goal = fanspeed;
-
-//   uint8_t fanspeed_now = GetFanspeed();
-
-//   // if (fanspeed == fanspeed_now) { return; }
-
-//   // uint8_t fans;// = kIFan02Speed[fanspeed];
-//   // // if (SONOFF_IFAN03 == my_module_type) {
-//   // //   if (sequence) {
-//   // //     fanspeed = kIFan03Sequence[fanspeed_now][ifan_fanspeed_goal];
-//   // //     if (fanspeed != ifan_fanspeed_goal) {
-//   // //       if (0 == fanspeed_now) {
-//   // //         ifan_fanspeed_timer = 20;                // Need extra time to power up fan
-//   // //       } else {
-//   // //         ifan_fanspeed_timer = 2;
-//   // //       }
-//   // //     }
-//   // //   }
-//   //   fans = kIFan03Speed[fanspeed];
-//   // // }
-//   // for (uint32_t i = 2; i < 5; i++) {
-//   //   uint8_t state = (fans &1) + POWER_OFF_NO_STATE;  // Add no publishPowerState
-//   //   // pCONT_mry->ExecuteCommandPower(i, state, SRC_IGNORE);     // Use relay 2, 3 and 4
-//   //   fans >>= 1;
-//   // }
-
-// }
-
-// /*********************************************************************************************/
-
-// // void mGPS::SonoffIfanReceived(void)
-// // {
-// //   char svalue[32];
-
-// //   uint8_t mode = serial_in_buffer[3];
-// //   uint8_t action = serial_in_buffer[6];
-
-// //   if (4 == mode) {
-// //     if (action < 4) {
-// //       // AA 55 01 04 00 01 00 06 - Fan 0
-// //       // AA 55 01 04 00 01 01 07 - Fan 1
-// //       // AA 55 01 04 00 01 02 08 - Fan 2
-// //       // AA 55 01 04 00 01 03 09 - Fan 3
-// //       if (action != GetFanspeed()) {
-// //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
-// //         ExecuteCommand(svalue, SRC_REMOTE);
-// // #ifdef USE_BUZZER
-// //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
-// // #endif
-// //       }
-// //     } else {
-// //       // AA 55 01 04 00 01 04 0A - Light
-// //       ExecuteCommandPower(1, POWER_TOGGLE, SRC_REMOTE);
-// //     }
-// //   }
-// //   if (6 == mode) {
-// //     // AA 55 01 06 00 01 01 09 - Buzzer
-// //     Settings.flag3.buzzer_enable = !Settings.flag3.buzzer_enable;  // SetOption67 - Enable buzzer when available
-// //   }
-// //   if (7 == mode) {
-// //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// // #ifdef USE_BUZZER
-// //     BuzzerEnabledBeep(4, 1);                       // Beep four times
-// // #endif
-// //   }
-
-// //   // Send Acknowledge - Copy first 5 bytes, reset byte 6 and store crc in byte 7
-// //   // AA 55 01 04 00 00 05
-// //   serial_in_buffer[5] = 0;                      // Ack
-// //   serial_in_buffer[6] = 0;                      // Crc
-// //   for (uint32_t i = 0; i < 7; i++) {
-// //     if ((i > 1) && (i < 6)) { serial_in_buffer[6] += serial_in_buffer[i]; }
-// //     Serial.write(serial_in_buffer[i]);
-// //   }
-// // }
-
-// // bool mGPS::SonoffIfanSerialInput(void)
-// // {
-// //   if (SONOFF_IFAN03 == my_module_type) {
-// //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
-// //       serial_in_byte_counter = 0;
-// //       ifan_receive_flag = true;
-// //     }
-// //     if (ifan_receive_flag) {
-// //       serial_in_buffer[serial_in_byte_counter++] = serial_in_byte;
-// //       if (serial_in_byte_counter == 8) {
-// //         // AA 55 01 01 00 01 01 04 - Wifi long press - start wifi setup
-// //         // AA 55 01 01 00 01 02 05 - Rf and Wifi short press
-// //         // AA 55 01 04 00 01 00 06 - Fan 0
-// //         // AA 55 01 04 00 01 01 07 - Fan 1
-// //         // AA 55 01 04 00 01 02 08 - Fan 2
-// //         // AA 55 01 04 00 01 03 09 - Fan 3
-// //         // AA 55 01 04 00 01 04 0A - Light
-// //         // AA 55 01 06 00 01 01 09 - Buzzer
-// //         // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// //         AddLogSerial(LOG_LEVEL_DEBUG);
-// //         uint8_t crc = 0;
-// //         for (uint32_t i = 2; i < 7; i++) {
-// //           crc += serial_in_buffer[i];
-// //         }
-// //         if (crc == serial_in_buffer[7]) {
-// //           SonoffIfanReceived();
-// //           ifan_receive_flag = false;
-// //           return true;
-// //         }
-// //       }
-// //       serial_in_byte = 0;
-// //     }
-// //     return false;
-// //   }
-// // }
-
-// /*********************************************************************************************\
-//  * Commands
-// \*********************************************************************************************/
-
-// void mGPS::CmndFanspeed(void)
-// {
-//   // if (XdrvMailbox.data_len > 0) {
-//   //   if ('-' == XdrvMailbox.data[0]) {
-//   //     XdrvMailbox.payload = (int16_t)GetFanspeed() -1;
-//   //     if (XdrvMailbox.payload < 0) { XdrvMailbox.payload = MAX_FAN_SPEED -1; }
-//   //   }
-//   //   else if ('+' == XdrvMailbox.data[0]) {
-//   //     XdrvMailbox.payload = GetFanspeed() +1;
-//   //     if (XdrvMailbox.payload > MAX_FAN_SPEED -1) { XdrvMailbox.payload = 0; }
-//   //   }
-//   // }
-//   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < MAX_FAN_SPEED)) {
-//   //   SonoffIFanSetFanspeed(XdrvMailbox.payload, true);
-//   // }
-//   // ResponseCmndNumber(GetFanspeed());
-// }
-
-// /*********************************************************************************************/
-
-void mGPS::init(void)
-{
-  
-  // analogWriteFreq(25000);
-  // if (SONOFF_IFAN03 == my_module_type) {
-  //   SetSerial(9600, TS_SERIAL_8N1);
-  // }
-  // return false;  // Continue init chain
-
-  
-    // if(!SD_MMC.begin()){
-    //     Serial.println("Card Mount Failed");
-    //     return;
-    // }
-    // uint8_t cardType = SD_MMC.cardType();
-
-    // if(cardType == CARD_NONE){
-    //     Serial.println("No SD_MMC card attached");
-    //     return;
-    // }
-
-    // Serial.print("SD_MMC Card Type: ");
-    // if(cardType == CARD_MMC){
-    //     Serial.println("MMC");
-    // } else if(cardType == CARD_SD){
-    //     Serial.println("SDSC");
-    // } else if(cardType == CARD_SDHC){
-    //     Serial.println("SDHC");
-    // } else {
-    //     Serial.println("UNKNOWN");
-    // }
-
-    // uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
-    // Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
-
-    // listDir(SD_MMC, "/", 0);
-    // createDir(SD_MMC, "/mydir");
-    // listDir(SD_MMC, "/", 0);
-    // //removeDir(SD_MMC, "/mydir");
-    // listDir(SD_MMC, "/", 2);
-    // writeFile(SD_MMC, "/hello.txt", "Hello ");
-    // appendFile(SD_MMC, "/hello.txt", "World!\n");
-    // readFile(SD_MMC, "/hello.txt");
-    // //deleteFile(SD_MMC, "/foo.txt");
-    // renameFile(SD_MMC, "/hello.txt", "/foo.txt");
-    // readFile(SD_MMC, "/foo.txt");
-    // testFileIO(SD_MMC, "/test.txt");
-    // Serial.printf("Total space: %lluMB\n", SD_MMC.totalBytes() / (1024 * 1024));
-    // Serial.printf("Used space: %lluMB\n", SD_MMC.usedBytes() / (1024 * 1024));
-
-
-}
-
-// void mGPS::SonoffIfanUpdate(void)
-// {
-//   // if (SONOFF_IFAN03 == my_module_type) {
-//     if (ifan_fanspeed_timer) {
-//       ifan_fanspeed_timer--;
-//       if (!ifan_fanspeed_timer) {
-//         SonoffIFanSetFanspeed(ifan_fanspeed_goal, false);
-//       }
-//     }
-//   // }
-
-//   // if (ifan_restart_flag && (4 == pCONT_time->uptime.seconds_nonreset) && (SONOFF_IFAN02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
-//   //   ifan_restart_flag = false;
-//   //   SetDevicePower(1, SRC_RETRY);      // Sync with default power on state microcontroller being Light ON and Fan OFF
-//   //   SetDevicePower(pCONT_set->power, SRC_RETRY);  // Set required power on state
-//   // }
-// }
+gps_fix  fix_saved;// = nullptr; // This holds on to the latest values
 
 static NMEAGPS   gps;
 static void GPSisr( uint8_t c )
@@ -437,6 +19,13 @@ static void GPSisr( uint8_t c )
 
 } // GPSisr
 
+
+// /*********************************************************************************************/
+
+void mGPS::init(void)
+{
+  
+}
 
 
 
@@ -532,7 +121,9 @@ void mGPS::pre_init(){
   //   DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
 
   // gpsPort.attachInterrupt( GPSisr );
-  gpsPort.begin(9600);
+  gpsPort.begin(115200);
+
+  fixcpp.init();
 
   
   //  Configure the GPS.  These are commands for MTK GPS devices.  Other
@@ -568,6 +159,38 @@ int8_t mGPS::Tasker(uint8_t function){
     case FUNC_LOOP:{
 
 
+      uint32_t time = millis();
+          
+      while (gps->available( gpsPort )) {
+        fixcpp = gps->read();
+
+        if(fixcpp.status > gps_fix::STATUS_NONE ){
+
+          //save tmp solution when valid
+          fix_saved = fixcpp;
+
+          // DEBUG_PORT.print( F("Location: ") );
+          if (fixcpp.valid.location) {
+            DEBUG_PORT.print( fixcpp.latitude(), 6 );
+            DEBUG_PORT.print( ',' );
+            DEBUG_PORT.print( fixcpp.longitude(), 6 );
+            DEBUG_PORT.print( ',' );
+            DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
+          }
+
+          // DEBUG_PORT.print( F(", Altitude: ") );
+          if (fixcpp.valid.altitude)
+            DEBUG_PORT.print( fixcpp.altitude() );
+
+          DEBUG_PORT.println();
+        }
+
+        if(time > 1000){
+          break;
+        }
+
+      }
+
         
 // #ifdef ENABLE_DEVFEATURE_GPSTEST1
 
@@ -595,12 +218,12 @@ int8_t mGPS::Tasker(uint8_t function){
 //   }
 
 // if(gps->available( gpsPort )){
-//   if(Serial2.available()){
-//     while (Serial2.available( )) {
-//       char in = Serial2.read();
-//       Serial.print(in);
-//     }
-//   }
+  // if(Serial2.available()){
+  //   while (Serial2.available( )) {
+  //     char in = Serial2.read();
+  //     Serial.print(in);
+  //   }
+  // }
 // }
 
 uint32_t timeout = millis();
@@ -679,12 +302,12 @@ uint32_t timeout = millis();
 
 
         // Serial.print( millis() );
-        AddLog_P(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
-        // // if (fix.valid.location) {
-          DEBUG_PORT.print( fixcpp.latitude(), 6 );
-          DEBUG_PORT.print( ',' );
-          DEBUG_PORT.print( fixcpp.longitude(), 6 );
-        // }
+        // AddLog_P(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
+        // // // if (fix.valid.location) {
+        //   DEBUG_PORT.print( fixcpp.latitude(), 6 );
+        //   DEBUG_PORT.print( ',' );
+        //   DEBUG_PORT.print( fixcpp.longitude(), 6 );
+        // // }
   
     // fix = gps->read();
     // //   DEBUG_PORT.print( fix.latitude(), 6 );
@@ -775,6 +398,96 @@ uint32_t timeout = millis();
 // }
 
 
+/**
+ * This will replace what PIC32 had, must also include the sample number? instead of sample, lets encode esp32 millis as extra parameter
+ * The RSS samples of 50 rss will now also append millis from here, so when it appends the time from the ISR, add millis into it (so make special ISR for UART2)
+ * Instead of "ConstructJSON_" I will also create a "ConstructRAWBytePacked_" for the sd method
+ * */
+uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
+
+  char buffer[30];
+  
+  JsonBuilderI->Start();  
+
+    JsonBuilderI->Level_Start("Location");
+      JsonBuilderI->Add("latitudeL", fix_saved.latitudeL()); 
+      JsonBuilderI->Add("latitude", fix_saved.latitude());
+      JsonBuilderI->Add("longitudeL", fix_saved.longitudeL());
+      JsonBuilderI->Add("longitude", fix_saved.longitude());
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Level_Start("Altitude");
+      JsonBuilderI->Add("altitude_cm", fix_saved.altitude_cm()); 
+      JsonBuilderI->Add("altitude", fix_saved.altitude());
+      JsonBuilderI->Add("altitude_ft", fix_saved.altitude_ft());
+    JsonBuilderI->Level_End();
+
+
+    JsonBuilderI->Level_Start("Speed");
+      JsonBuilderI->Add("speed_mkn", fix_saved.speed_mkn()); 
+      JsonBuilderI->Add("speed", fix_saved.speed());
+      JsonBuilderI->Add("speed_kph", fix_saved.speed_kph());
+      JsonBuilderI->Add("speed_metersph", fix_saved.speed_metersph());
+      JsonBuilderI->Add("speed_mph", fix_saved.speed_mph());
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Level_Start("Heading");
+      JsonBuilderI->Add("heading_cd", fix_saved.heading_cd()); 
+      JsonBuilderI->Add("heading", fix_saved.heading());
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Level_Start("geoidHt");
+      JsonBuilderI->Add("geoidHeight_cm", fix_saved.geoidHeight_cm()); 
+      JsonBuilderI->Add("geoidHeight", fix_saved.geoidHeight());
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Add("satellites", fix_saved.satellites); 
+
+    JsonBuilderI->Level_Start("Dilution");
+      JsonBuilderI->Add("hdop", fix_saved.hdop); 
+      JsonBuilderI->Add("vdop", fix_saved.vdop);
+      JsonBuilderI->Add("pdop", fix_saved.pdop);
+      JsonBuilderI->Add("lat_err", fix_saved.lat_err());
+      JsonBuilderI->Add("lon_err", fix_saved.lon_err());
+      JsonBuilderI->Add("alt_err", fix_saved.alt_err());
+      JsonBuilderI->Add("spd_err", fix_saved.spd_err());
+      JsonBuilderI->Add("hdg_err", fix_saved.hdg_err());
+      JsonBuilderI->Add("spd_err", fix_saved.spd_err());
+      JsonBuilderI->Add("time_err", fix_saved.time_err());
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Level_Start("Millis");
+
+      JsonBuilderI->Add("GGA",millis()-fix_saved.active_millis.GGA);
+      JsonBuilderI->Add("GLL",millis()-fix_saved.active_millis.GLL);
+      JsonBuilderI->Add("GSA",millis()-fix_saved.active_millis.GSA);
+      JsonBuilderI->Add("GST",millis()-fix_saved.active_millis.GST);
+      JsonBuilderI->Add("GSV",millis()-fix_saved.active_millis.GSV);
+      JsonBuilderI->Add("RMC",millis()-fix_saved.active_millis.RMC);
+      JsonBuilderI->Add("VTG",millis()-fix_saved.active_millis.VTG);
+      JsonBuilderI->Add("ZDA",millis()-fix_saved.active_millis.ZDA);
+
+
+    JsonBuilderI->Level_End();
+
+
+
+
+    /*
+  
+  #ifdef GPS_FIX_LOCATION_DMS
+    DMS_t latitudeDMS;
+    DMS_t longitudeDMS;
+  #endif
+
+*/
+
+
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+  return JsonBuilderI->End();
+
+}
+
 
 uint8_t mGPS::ConstructJSON_Settings(uint8_t json_method){
 
@@ -815,6 +528,17 @@ void mGPS::MQTTHandler_Init(){
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Settings;
+
+
+  mqtthandler_ptr = &mqtthandler_gpspacket_minimal_teleperiod; //also ifchanged together
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_GPSPacket_Minimal;
 
   
 //   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
@@ -863,12 +587,14 @@ void mGPS::MQTTHandler_Set_TelePeriod(){
 void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID
+    MQTT_HANDLER_SETTINGS_ID,
+    MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID
     //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
   };
   
   struct handler<mGPS>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_gpspacket_minimal_teleperiod
     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 

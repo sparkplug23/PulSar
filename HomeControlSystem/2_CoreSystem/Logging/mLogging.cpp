@@ -586,18 +586,24 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
  * Response data handling
 \*********************************************************************************************/
 
+// return if response was sent, else use leds?
 int Response_mP(const char* format, ...)     // Content send snprintf_P char data
 {
-  // This uses char strings. Be aware of sending %% if % is needed
-  // va_list args;
-  // va_start(args, format);
-  // int len = vsnprintf_P(pCONT_set->response_msg, sizeof(pCONT_set->response_msg), format, args);
-  // va_end(args);
 
-  // //Share on serial/telnet
+if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
+
+memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
+
+  // This uses char strings. Be aware of sending %% if % is needed
+  va_list args;
+  va_start(args, format);
+  int len = vsnprintf_P(pCONT_set->response_msg, RESPONSE_MESSAGE_BUFFER_SIZE, format, args);
+  va_end(args);
+
+  //Share on serial/telnet
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
-  // //Send via mqtt
-  // pCONT->mqt->ppublish(PSTR("status/result"),pCONT_set->response_msg,false);
+  //Send via mqtt
+  pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
 
   return 0;// len;
 }

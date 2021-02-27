@@ -141,18 +141,16 @@ void mTime::init(void){
 
 bool mTime::CheckOrStartNTPService(){
 
-#ifndef DISABLE_FOR_FAULTY_ESP32_FLICKERING
   if(pCONT_wif->WifiCheckIpConnected()){
     // If just connected, and not already started
     if(!settings.timeclient_is_started){ 
       // timeClient->begin();
-      Serial.println("CheckOrStartNTPService TRUE");
+      //Serial.println("CheckOrStartNTPService TRUE");
       settings.timeclient_is_started = true;
     }
   }else{    
-    Serial.println("CheckOrStartNTPService False");
+    //Serial.println("CheckOrStartNTPService False");
   }
-#endif
 
   if(!settings.timeclient_is_started){
     fTimeSet = false;

@@ -199,6 +199,10 @@
 
   #define D_MODULE_DRIVERS_GPS_CTR           "GPS"
   #define D_MODULE_DRIVERS_GPS_FRIENDLY_CTR  "gps"
+
+  #define D_MODULE_DRIVERS_SERIAL_UART_CTR           "serialuart"
+  #define D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR  "serialuart"
+  
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"

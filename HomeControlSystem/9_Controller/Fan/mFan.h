@@ -3,7 +3,7 @@
 
 // PWM Fan and Sonoff Fan to be brought together? One fan controller, different output methods
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CUSTOM_FAN
 

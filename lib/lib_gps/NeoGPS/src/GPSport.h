@@ -149,7 +149,7 @@
     #define GPS_PORT_NAME "NeoSerial1"
   #else
     #define gpsPort Serial2
-    #define GPS_PORT_NAME "Serial1"
+    #define GPS_PORT_NAME "Serial2"
   #endif
 
 #else

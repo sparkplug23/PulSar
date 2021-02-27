@@ -246,12 +246,12 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_COMMAND:
-
-    break;  
-      //case FUNC_SERIAL:
-      //result = SonoffIfanSerialInput();
-      //break;
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -280,119 +280,60 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
 } // END Tasker
 
 
-int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
-  switch(function){
-    case FUNC_JSON_COMMAND_OBJECT:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-      return CheckAndExecute_JSONCommands(obj);
-    break;
-  }
-}
-int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
-  // Check if instruction is for me
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-      parse_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-void mSonoffIFan::parse_JSONCommand(JsonObjectConst obj){
-
-  
-
-  if(obj.containsKey(D_JSON_LIGHTPOWER)){
-    int light = obj[D_JSON_LIGHTPOWER];
-    if(light == 2){
-      SetLightState(!GetLightState());
-    }else{
-      SetLightState(light);      
-    }
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
-    Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
-  
-  }
+// int8_t mSonoffIFan::Tasker_Web(uint8_t function){
 
 
-  if(obj.containsKey(D_JSON_FANSPEED)){
-    int speed = obj[D_JSON_FANSPEED];
-    if(speed>3){
-      Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
-      speed=0; //default off
-    }      
-    SonoffIFanSetFanspeed(speed, false);
-    AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-    Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-  
-  }
-  
-  
+//   switch(function){
+//     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
 
-}
+//       // create command list
+//       char dlist[100]; memset(dlist,0,sizeof(dlist));
+//       pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
+//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
+//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
 
-
-
-
-int8_t mSonoffIFan::Tasker_Web(uint8_t function){
-
-
-  switch(function){
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:{
-
-      // create command list
-      char dlist[100]; memset(dlist,0,sizeof(dlist));
-      pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
-      pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-      pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-
-      uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
+//       uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
           
-      BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Ceiling Fan Controls","");
+//       BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Ceiling Fan Controls","");
 
-      char button_value_ctr[10];
-      char button_key_ctr[50];
-      char button_text_ctr[30];
+//       char button_value_ctr[10];
+//       char button_key_ctr[50];
+//       char button_text_ctr[30];
 
-      BufferWriterI->Append_P(PSTR("{t}<tr>"));
-        for(uint8_t button_id=0;button_id<5;button_id++){
-          /*
+//       BufferWriterI->Append_P(PSTR("{t}<tr>"));
+//         for(uint8_t button_id=0;button_id<5;button_id++){
+//           /*
           
-"<td{sw1}%d
-%%'{cs}%s
-'{bc}'%s
-'{djk}%s
-'{va}%s
-'>%s%s
-{bc2}";
+// "<td{sw1}%d
+// %%'{cs}%s
+// '{bc}'%s
+// '{djk}%s
+// '{va}%s
+// '>%s%s
+// {bc2}";
 
-          */
-          BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2, 
-                                    100/(button_id==0?1:4),
-                                    button_id==0?"4":"", 
-                                    "buttonh",
-                                    pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
-                                    pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
-                                    pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
-                                    ""
-                                );
-          // LightPower button gets its own row
-          if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
-        }
-      BufferWriterI->Append_P(PSTR("</tr>{t2}"));
+//           */
+//           BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2, 
+//                                     100/(button_id==0?1:4),
+//                                     button_id==0?"4":"", 
+//                                     "buttonh",
+//                                     pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
+//                                     pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
+//                                     pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
+//                                     ""
+//                                 );
+//           // LightPower button gets its own row
+//           if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
+//         }
+//       BufferWriterI->Append_P(PSTR("</tr>{t2}"));
 
-    }break;
-  }
+//     }break;
+//   }
 
-}
+// }
 
 
 

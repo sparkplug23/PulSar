@@ -9,40 +9,6 @@ extern "C" {
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function){
 
-// if(wifi_counter_tester>180){
-//   // Serial.println("UpTime");
-
-//  if(WiFi.status() != WL_CONNECTED){
-//   Serial.println("WiFi.status()");
-
-
-//     WiFi.begin("", "");
-
-//     while (WiFi.status() != WL_CONNECTED) {
-//         delay(500);
-//         Serial.print(".");
-//     }
-
-// //     Serial.println("");
-// //     Serial.println("WiFi connected.");
-// //     Serial.println("IP address: ");
-//     Serial.println(WiFi.localIP());
-
-//   }
-
-// }else
-// if(wifi_counter_tester>300){
-
-//   WiFi.disconnect(true);
-
-  //Serial.println(WiFi.localIP());
-
-// }
-  #ifdef DISABLE_FOR_FAULTY_ESP32_FLICKERING
-    return 0;
-  #endif
-
-
   switch(function){
     case FUNC_INIT:
       #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING

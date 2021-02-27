@@ -2,12 +2,7 @@
 
 int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
 
-
-  #ifdef DISABLE_FOR_FAULTY_ESP32_FLICKERING
-    return 0;
-  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
   #ifdef DISABLE_NETWORK
-  // #ifndef ENABLE_DEVFEATURE_
     return 0;
   #endif
 
@@ -24,7 +19,7 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
       case FUNC_LOOP:
 
 #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
-// AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.connected=%d"),Mqtt.connected);
+AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.connected=%d"),Mqtt.connected);
 
         if(Mqtt.connected){
           EveryLoop();
@@ -42,10 +37,10 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
       
 #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
         if(pCONT_wif->WifiCheckIpConnected()){
-          // AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
+          AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
            CheckConnection();
         }else{
-          // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
+          AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
 
         }
 #endif

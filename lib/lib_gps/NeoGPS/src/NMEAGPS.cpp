@@ -941,6 +941,7 @@ bool NMEAGPS::parseGSV( char chr )
 
 bool NMEAGPS::parseRMC( char chr )
 {
+  active_millis.RMC = millis();
   
   // Serial.printf("parseRMC %c %d\n\r",chr,fieldIndex);
   #ifdef NMEAGPS_PARSE_RMC

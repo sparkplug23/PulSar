@@ -230,11 +230,13 @@ void mFan::SonoffIfanUpdate(void)
 
 void mFan::pre_init(){
   
+  #ifndef ENABLE_DEVFEATURE_FANTYPE_IFAN03
   if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
     pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
     pinMode(pin, OUTPUT);
     settings.fEnableModule = true;
   }
+  #endif
 
 }
 

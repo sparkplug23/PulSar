@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_CUSTOM_FAN
 
 
-int8_t mFan::CheckAndExecute_JSONCommands(){
+int8_t mSonoffIFan::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_FAN_FRIENDLY_CTR)>=0){
@@ -19,7 +19,7 @@ int8_t mFan::CheckAndExecute_JSONCommands(){
 
 }
 
-void mFan::parse_JSONCommand(void){
+void mSonoffIFan::parse_JSONCommand(void){
 
   char buffer[50];
 
@@ -85,6 +85,65 @@ void mFan::parse_JSONCommand(void){
 
 
 
+// int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
+//   switch(function){
+//     case FUNC_JSON_COMMAND_OBJECT:
+//       parse_JSONCommand(obj);
+//     break;
+//     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
+//       return CheckAndExecute_JSONCommands(obj);
+//     break;
+//   }
+// }
+// int8_t mSonoffIFan::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+
+//   // Check if instruction is for me
+//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
+//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//       parse_JSONCommand(obj);
+//       return FUNCTION_RESULT_HANDLED_ID;
+//   }else{
+//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+//   }
+
+// }
+// void mSonoffIFan::parse_JSONCommand(JsonObjectConst obj){
+
+  
+
+//   if(obj.containsKey(D_JSON_LIGHTPOWER)){
+//     int light = obj[D_JSON_LIGHTPOWER];
+//     if(light == 2){
+//       SetLightState(!GetLightState());
+//     }else{
+//       SetLightState(light);      
+//     }
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+//     Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
+  
+//   }
+
+
+//   if(obj.containsKey(D_JSON_FANSPEED)){
+//     int speed = obj[D_JSON_FANSPEED];
+//     if(speed>3){
+//       Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+//       speed=0; //default off
+//     }      
+//     SonoffIFanSetFanspeed(speed, false);
+//     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+  
+//   }
+  
+  
+
+// }
+
+
+
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -92,7 +151,7 @@ void mFan::parse_JSONCommand(void){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mFan::CommandSet_FanSpeed_Manual(uint16_t value){
+void mSonoffIFan::CommandSet_FanSpeed_Manual(uint16_t value){
 
   analogWrite(pin, value);
 

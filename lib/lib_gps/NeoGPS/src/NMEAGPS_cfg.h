@@ -302,7 +302,7 @@
 // Sometimes, a little extra space is needed to parse an intermediate form.
 // This config items enables extra space.
 
-//#define NMEAGPS_PARSING_SCRATCHPAD
+#define NMEAGPS_PARSING_SCRATCHPAD
 
 //------------------------------------------------------
 // If you need to know the exact UTC time at *any* time,

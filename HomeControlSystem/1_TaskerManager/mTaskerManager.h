@@ -332,6 +332,14 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_DRIVERS_GPS_CTR)           D_MODULE_DRIVERS_GPS_CTR;
   DEFINE_PGM_CTR(PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR)  D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
 #endif
+#ifdef USE_MODULE_DRIVERS_SERIAL_UART
+  #include "4_Drivers/SerialUART/mSerialUART.h"
+  class mSerialUART;
+  #define            D_MODULE_DRIVERS_SERIAL_UART_ID       49
+  #define            pCONT_serial                        pCONT->mserial
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_CTR)           D_MODULE_DRIVERS_SERIAL_UART_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR)  D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
+#endif
 
 
 // Energy (Range 130-139)
@@ -562,7 +570,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   class mSonoffIFan;
   #define D_MODULE_CUSTOM_SONOFF_IFAN_ID                             179
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_CTR)               "mSonoffIFan";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR)      "ifan";
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR)      "fan";
   #define pCONT_ifan                                           pCONT->mifan
 #endif
 #ifdef USE_MODULE_CUSTOM_FAN
@@ -689,6 +697,9 @@ class mTaskerManager{
     // External function to get instance
     static mTaskerManager* GetInstance();
 
+    void uart_intr_handle_u2(void *arg);
+
+
     // HardwarePins
     mHardwarePins *mod = nullptr;
     // interface_handler<mHardwarePins> interfacehandler_logging;
@@ -784,6 +795,9 @@ class mTaskerManager{
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     mGPS* mgps = nullptr;
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+    mSerialUART* mserial = nullptr;
   #endif
 
 

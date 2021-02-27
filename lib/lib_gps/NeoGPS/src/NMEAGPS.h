@@ -116,14 +116,17 @@ public:
       {
         if (processing_style == PS_POLLING){
           // Serial.printf("processing_style=%d\n\r",processing_style);
-          if(port.available()>5){
-            // Serial.printf("port.available()=%d\n\r",port.available());
-          }
+          // if(port.available()>5){
+          //   // Serial.printf("port.available()=%d\n\r",port.available());
+          // }
           while (port.available()){
             handle( port.read() );
     // Serial.print( F("handle: ") );
           }
         }
+        // if(_available()){
+        //   Serial.println("available");
+        // }
         return _available();
       }
     uint8_t available() const volatile { return _available(); };
@@ -228,6 +231,20 @@ public:
       char mfr_id[3];
     #endif
 
+
+    // Add millis() count for when the above parser occur and are valid, so I know age of NMEA message
+    #ifdef NMEAGPS_PARSE_SAVE_MILLIS
+    struct ACTIVE_MILLIS{
+      uint32_t GGA;
+      uint32_t GLL;
+      uint32_t GSA;
+      uint32_t GST;
+      uint32_t GSV;
+      uint32_t RMC;
+      uint32_t VTG;
+      uint32_t ZDA;
+    }active_millis;
+    #endif
     //.......................................................................
     //  Various parsing statistics
 
@@ -241,6 +258,16 @@ public:
               ok     = 0L;
               errors = 0L;
               chars  = 0L;
+
+              // active_millis.GGA = millis();
+              // active_millis.GLL = millis();
+              // active_millis.GSA = millis();
+              // active_millis.GST = millis();
+              // active_millis.GSV = millis();
+              // active_millis.RMC = millis();
+              // active_millis.VTG = millis();
+              // active_millis.ZDA = millis();
+
             }
       } statistics;
     #endif

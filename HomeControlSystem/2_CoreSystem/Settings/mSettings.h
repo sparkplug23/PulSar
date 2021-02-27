@@ -1742,7 +1742,8 @@ void CommandSet_SystemRestartID(uint8_t value);
 #endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
-// char response_msg[100];
+#define RESPONSE_MESSAGE_BUFFER_SIZE 100
+char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE];
 
 
 const char* GetTelePeriodJsonLevelCtr(char* buffer);

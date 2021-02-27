@@ -4,6 +4,9 @@
 /* Null, because instance will be initialized on demand. */
 mTaskerManager* mTaskerManager::instance = nullptr;
 
+void mTaskerManager::uart_intr_handle_u2(void *arg){
+
+}
 
 mTaskerManager* mTaskerManager::GetInstance(){
   if (instance == nullptr){
@@ -127,6 +130,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     if(mgps == nullptr){ mgps = new mGPS(); }
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+    if(mserial == nullptr){ mserial = new mSerialUART(); }
   #endif
 
 
@@ -294,6 +300,9 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_DRIVERS_GPS_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_GPS_ID;
   #endif
+  #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SERIAL_UART_ID;
+  #endif
 
   /**
    * Lighting
@@ -445,6 +454,9 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     if(mgps==nullptr){ return false; }
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+    if(mserial==nullptr){ return false; }
   #endif
 
   #ifdef USE_MODULE_DRIVERS_PWM
@@ -720,6 +732,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #ifdef D_MODULE_DRIVERS_GPS_ID
         case D_MODULE_DRIVERS_GPS_ID:    
           result = mgps->Tasker(function);
+        break;
+      #endif
+      #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+        case D_MODULE_DRIVERS_SERIAL_UART_ID:    
+          result = mserial->Tasker(function);
         break;
       #endif
 
@@ -1035,8 +1052,11 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #ifdef D_MODULE_DRIVERS_SDCARD_ID
       case D_MODULE_DRIVERS_SDCARD_ID:        return PM_MODULE_DRIVERS_SDCARD_CTR;
     #endif
-    #ifdef D_MODULE_DRIVERS_GPSID
+    #ifdef D_MODULE_DRIVERS_GPS_ID
       case D_MODULE_DRIVERS_GPS_ID:        return PM_MODULE_DRIVERS_GPS_CTR;
+    #endif
+    #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+      case D_MODULE_DRIVERS_SERIAL_UART_ID:        return PM_MODULE_DRIVERS_SERIAL_UART_CTR;
     #endif
 
     // Custom
@@ -1109,6 +1129,12 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #ifdef D_MODULE_DRIVERS_GPS_ID
       case D_MODULE_DRIVERS_GPS_ID:         return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; 
     #endif
+    #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+      case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
+    #endif
+    // #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+    //   case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
+    // #endif
     #ifdef D_MODULE_DRIVERS_PWM_ID
       case D_MODULE_DRIVERS_PWM_ID:         return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; 
     #endif

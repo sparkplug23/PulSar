@@ -1,14 +1,11 @@
 #ifndef _MCEILINGFAN_H
 #define _MCEILINGFAN_H 0.3
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 
-#include "1_TaskerManager/mTaskerManager.h"
-
-
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 
 #include <string.h>
 #include <strings.h>
@@ -36,13 +33,15 @@ class mSonoffIFan {
   public:
     mSonoffIFan(){};
     int8_t Tasker(uint8_t function);
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);   
+    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
 int8_t Tasker_Web(uint8_t function);
 
 // const char kSonoffIfanCommands[] PROGMEM = "|"  // No prefix
 //   D_CMND_FANSPEED;
 
+    int8_t CheckAndExecute_JSONCommands(void);
+    void parse_JSONCommand(void);
 // void (* const SonoffIfanCommand[])(void) PROGMEM = {
 //   &CmndFanspeed };
 
@@ -52,8 +51,8 @@ bool ifan_receive_flag = false;
 bool ifan_restart_flag = true;
 
 
-int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-void parse_JSONCommand(JsonObjectConst obj);
+// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+// void parse_JSONCommand(JsonObjectConst obj);
 
 void init();
 

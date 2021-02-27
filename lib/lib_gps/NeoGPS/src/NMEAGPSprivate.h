@@ -230,6 +230,7 @@
     bool parseVTG( char chr );
     bool parseZDA( char chr );
 
+
     //.......................................................................
     // Depending on the NMEA sentence type, parse one field of an expected type.
 
