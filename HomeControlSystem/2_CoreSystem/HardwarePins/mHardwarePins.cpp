@@ -1115,7 +1115,7 @@ void mHardwarePins::GpioInit(void)
 
 //start each pin
 
-  if ((2 == GetPin(GPIO_SERIAL_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) {
+  if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) {
     //#ifdef DISABLE_SERIAL_ALTERNATE_TX
     #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
@@ -1480,6 +1480,10 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PWM5_CTR)==0){  return GPIO_PWM5_ID; }
 
   
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
+
+  
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_CTR)==0){  return GPIO_LEDLNK_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_INV_CTR)==0){  return GPIO_LEDLNK_INV_ID; }
 
@@ -1641,7 +1645,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 //   GPIO_CNTR3_NP_ID,
 //   GPIO_CNTR4_ID,
 //   GPIO_CNTR4_NP_ID,
-//   GPIO_SERIAL_TX_ID,            // Serial interface
+//   GPIO_HWSERIAL0_TX_ID,            // Serial interface
 //   GPIO_SERIAL_RX_ID,            // Serial interface
 // #ifdef USE_I2C
 //   GPIO_I2C_SCL_ID,        // I2C SCL

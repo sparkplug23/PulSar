@@ -415,6 +415,8 @@ class mInterfaceLight{
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
 
+        uint16_t Limit_Upper_Brightness_With_BrightnessRGB : 1;
+
         uint8_t use_gamma_for_brightness : 1;
 
         // Reserved

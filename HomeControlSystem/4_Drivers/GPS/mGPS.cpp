@@ -25,6 +25,8 @@ static void GPSisr( uint8_t c )
 void mGPS::init(void)
 {
   
+  averaging = new AVERAGING_DATA<float>(100);
+  
 }
 
 
@@ -159,6 +161,7 @@ int8_t mGPS::Tasker(uint8_t function){
     case FUNC_LOOP:{
 
 
+
       uint32_t time = millis();
           
       while (gps->available( gpsPort )) {
@@ -185,7 +188,7 @@ int8_t mGPS::Tasker(uint8_t function){
           DEBUG_PORT.println();
         }
 
-        if(time > 1000){
+        if(abs(millis()-time) > 1000){
           break;
         }
 
@@ -301,6 +304,33 @@ uint32_t timeout = millis();
     case FUNC_EVERY_SECOND: {
 
 
+  averaging->Add(1);
+
+      //  AVERAGING_DATA<float> averaging_data(10);
+
+        // for(int i=0;i<10;i++){
+        //   averaging_data[i] = i;
+        // }
+
+        averaging->SetBoundaryLimits(0,300);
+        bool result = averaging->Add(123);
+        Serial.println(result);
+        // result = averaging_data.Add(456);
+        // Serial.println(result);
+
+        for(int i=0;i<10;i++){
+          Serial.print(averaging->data[i]);
+          Serial.println();
+          }
+
+        // AddLog_Array(LOG_LEVEL_TEST, PSTR("test"), averaging_data[0], 10);
+
+        // SERIAL_PRINT_ARRAY("averaging_data",&averaging,10);
+
+        Serial.println(averaging->Mean());
+
+      //  averaging_data[1];
+
         // Serial.print( millis() );
         // AddLog_P(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
         // // // if (fix.valid.location) {
@@ -409,6 +439,18 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+    JsonBuilderI->Level_Start("Millis");
+      JsonBuilderI->Add("GGA",millis()-gps->active_millis.GGA);
+      JsonBuilderI->Add("GLL",millis()-gps->active_millis.GLL);
+      JsonBuilderI->Add("GSA",millis()-gps->active_millis.GSA);
+      JsonBuilderI->Add("GST",millis()-gps->active_millis.GST);
+      JsonBuilderI->Add("GSV",millis()-gps->active_millis.GSV);
+      JsonBuilderI->Add("RMC",millis()-gps->active_millis.RMC);
+      JsonBuilderI->Add("VTG",millis()-gps->active_millis.VTG);
+      JsonBuilderI->Add("ZDA",millis()-gps->active_millis.ZDA);
+    JsonBuilderI->Level_End();
+
+
     JsonBuilderI->Level_Start("Location");
       JsonBuilderI->Add("latitudeL", fix_saved.latitudeL()); 
       JsonBuilderI->Add("latitude", fix_saved.latitude());
@@ -456,19 +498,6 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
       JsonBuilderI->Add("time_err", fix_saved.time_err());
     JsonBuilderI->Level_End();
 
-    JsonBuilderI->Level_Start("Millis");
-
-      JsonBuilderI->Add("GGA",millis()-fix_saved.active_millis.GGA);
-      JsonBuilderI->Add("GLL",millis()-fix_saved.active_millis.GLL);
-      JsonBuilderI->Add("GSA",millis()-fix_saved.active_millis.GSA);
-      JsonBuilderI->Add("GST",millis()-fix_saved.active_millis.GST);
-      JsonBuilderI->Add("GSV",millis()-fix_saved.active_millis.GSV);
-      JsonBuilderI->Add("RMC",millis()-fix_saved.active_millis.RMC);
-      JsonBuilderI->Add("VTG",millis()-fix_saved.active_millis.VTG);
-      JsonBuilderI->Add("ZDA",millis()-fix_saved.active_millis.ZDA);
-
-
-    JsonBuilderI->Level_End();
 
 
 

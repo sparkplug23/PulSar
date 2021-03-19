@@ -18,6 +18,8 @@
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
 
+#include "2_CoreSystem/Support/AveragingData.h"
+
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #include "0_ConfigUser/mUserConfig_Secret.h"
@@ -340,6 +342,14 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_CTR)           D_MODULE_DRIVERS_SERIAL_UART_CTR;
   DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR)  D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
 #endif
+#ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #include "4_Drivers/ShellyDimmer/mShellyDimmer.h"
+  class mShellyDimmer;
+  #define            D_MODULE_DRIVERS_SHELLY_DIMMER_ID        50
+  #define            pCONT_shelly_dimmer                      pCONT->mshelly_dimmer 
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR)         D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR)  D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
+#endif
 
 
 // Energy (Range 130-139)
@@ -422,14 +432,6 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR)     D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR;
   #define pCONT_msanalog                                    pCONT->msanalog
 #endif
-#ifdef USE_MODULE_SENSORS_DOORCHIME
-  #include "5_Sensors/DoorBell/mDoorBell.h"
-  class mDoorBell;
-  #define D_MODULE_SENSORS_DOORBELL_ID 123
-  DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOORBELL_CTR)              "mDoorBell";
-  DEFINE_PGM_CTR(PM_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR)              "doorbell";
-  #define pCONT_mdb                                           pCONT->mdb
-#endif
 #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
   #include "7_Energy/PowerMeter/mPzem_AC.h"
   class mPzem_AC;  
@@ -509,7 +511,7 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 #endif
 
 
-// Specefic Bespoke Modules (Range 170-189)
+// Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CUSTOM_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
   class mBlinds;
@@ -581,13 +583,29 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR)      D_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
   #define pCONT_mfan                                     pCONT->mfan
 #endif
+#ifdef USE_MODULE_CUSTOM_TREADMILL
+  #include "9_Controller/Treadmill/mTreadmill.h"
+  class mTreadmill;
+  #define D_MODULE_CUSTOM_TREADMILL_ID                        181
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_TREADMILL_CTR)               D_MODULE_CUSTOM_TREADMILL_CTR;
+  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR)      D_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;
+  #define pCONT_mtreadmill                                    pCONT->mtreadmill
+#endif
 #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
   #include "9_Controller/SensorColours/mSensorColours.h"
   class mSensorColours;
-  #define D_MODULE_CUSTOM_SENSORCOLOURS_ID                        181
+  #define D_MODULE_CUSTOM_SENSORCOLOURS_ID                        182
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_CTR)               D_MODULE_CUSTOM_SENSORCOLOURS_CTR;
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR)      D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
   #define pCONT_msenscol                                     pCONT->msenscol
+#endif
+#ifdef USE_MODULE_CONTROLLER_DOORCHIME
+  #include "9_Controller/DoorBell/mDoorBell.h"
+  class mDoorBell;
+  #define D_MODULE_CONTROLLER_DOORBELL_ID 123
+  DEFINE_PGM_CTR(PM_MODULE_CONTROLLER_DOORBELL_CTR)              "mDoorBell";
+  DEFINE_PGM_CTR(PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR)              "doorbell";
+  #define pCONT_mdb                                           pCONT->mdb
 #endif
 
 
@@ -799,6 +817,9 @@ class mTaskerManager{
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
     mSerialUART* mserial = nullptr;
   #endif
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+    mShellyDimmer* mshelly_dimmer = nullptr;
+  #endif 
 
 
   #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
@@ -813,7 +834,7 @@ class mTaskerManager{
   #ifdef USE_MODULE_SENSORS_DOOR
     mDoorSensor *mds = nullptr;
   #endif
-  #ifdef USE_MODULE_SENSORS_DOORCHIME
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     mDoorBell *mdb = nullptr;
   #endif
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
@@ -824,6 +845,9 @@ class mTaskerManager{
   #endif
   #ifdef USE_MODULE_CUSTOM_FAN
     mFan* mfan = nullptr;
+  #endif
+  #ifdef USE_MODULE_CUSTOM_TREADMILL
+    mTreadmill* mtreadmill = nullptr;
   #endif
   #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
     mSensorColours* msenscol = nullptr;
@@ -868,7 +892,7 @@ class mTaskerManager{
   // template<typename T>
   // int8_t Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker);
   // Overload
-  int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0);
+  int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0, bool flags_is_executing_rule = false);
 
   // std::variant< int, std::string > GetClassObjectbyID(uint8_t id);
   // void TaskerTest();
@@ -898,6 +922,45 @@ class mTaskerManager{
   uint8_t fExitTaskerWithCompletion = false;
 
   uint8_t switch_index = 0;
+
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+  
+    #define D_MAX_RULES 10
+
+    struct RULES{
+      bool enabled = true;
+      struct EVENT{
+        uint16_t trigger_function_id = 999; // not active
+        struct SOURCE{
+          uint16_t module_id;
+          uint16_t function_id;
+          //advanced method
+          uint16_t encoding = 0; // unspecified
+          uint8_t *param_buffer = nullptr;
+          uint8_t buffer_len = 0;
+          //simple method
+          uint8_t index;
+          uint8_t state;
+        }source;
+        struct DESTINATION{
+          uint16_t module_id;
+          uint16_t function_id;
+          //advanced method
+          uint16_t encoding = 0; // unspecified
+          uint8_t *param_buffer = nullptr;
+          uint8_t buffer_len = 0;
+          //simple method
+          uint8_t index;
+          uint8_t state;
+        }destination;
+      }event;
+    }rules[D_MAX_RULES];
+    uint8_t rules_active_index = 0;
+
+    void Tasker_Rules_Interface(uint16_t function);
+    void Tasker_Rules_Init();
+
+#endif // ENABLE_DEVFEATURE_RULE_ENGINE
 
 };
 

@@ -202,6 +202,9 @@
 
   #define D_MODULE_DRIVERS_SERIAL_UART_CTR           "serialuart"
   #define D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR  "serialuart"
+
+  #define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR "shellydimmer"
+  #define D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "shellydimmer"
   
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
@@ -231,7 +234,7 @@
 
 
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
-  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
+  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "light"
 //#endif
 // Sensors (Range 120-169
 //#ifdef USE_MODULE_SENSORS_BUTTONS
@@ -246,7 +249,7 @@
   #define D_MODULE_SENSORS_ANALOG_CTR              "mSensorsAnalog"
   #define D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR              "analog"
 //#endif
-//#ifdef USE_MODULE_SENSORS_DOORCHIME
+//#ifdef USE_MODULE_CONTROLLER_DOORCHIME
   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
   #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
 //#endif
@@ -329,6 +332,13 @@
 
 #define D_MODULE_CUSTOM_SENSORCOLOURS_CTR "mSensorColours"
 #define D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR "sensor_colours"
+
+#define D_MODULE_CUSTOM_TREADMILL_CTR "mTreadmill"
+#define D_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR "treadmill"
+
+#define D_MODULE_CONTROLLER_DOORBELL_CTR "doorbell"
+#define D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR "doorbell"
+
 
 /**
  * Common list - These are D_<exact letters in string> that are Capital first
@@ -858,8 +868,12 @@
 #define D_GPIO_FUNCTION_LEDLNK_INV_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
 #define D_GPIO_FUNCTION_DOOR_OPEN_CTR       "Door Open"
 #define D_GPIO_FUNCTION_DOOR_LOCK_CTR       "Door Lock"
-#define D_GPIO_FUNCTION_SERIAL_DEBUG_TX_ID "Serial Debug TX"
-#define D_GPIO_FUNCTION_SERIAL_DEBUG_RX_ID "Serial Debug RX"
+#define D_GPIO_FUNCTION_SERIAL_DEBUG_TX_CTR "Serial Debug TX"
+#define D_GPIO_FUNCTION_SERIAL_DEBUG_RX_CTR "Serial Debug RX"
+
+#define D_GPIO_FUNCTION_HWSERIAL0_TX_CTR "HWSERIAL0_TX"
+#define D_GPIO_FUNCTION_HWSERIAL0_RX_CTR "HWSERIAL0_RX"
+
 #define D_GPIO_FUNCTION_LED1_CTR           D_GPIO_FUNCTION_LED_CTR "1"
 #define D_GPIO_FUNCTION_LED2_CTR           D_GPIO_FUNCTION_LED_CTR "2"
 #define D_GPIO_FUNCTION_LED3_CTR           D_GPIO_FUNCTION_LED_CTR "3"
@@ -1347,7 +1361,7 @@
 #define D_JSON_ISCHANGED "ischanged"
 #define D_JSON_ISCHANGEDMETHOD "IsChangedMethod"
 #define D_JSON_ISRUNNING "isrunning"
-#define D_JSON_ISVALID "isvalid"
+#define D_JSON_ISVALID "IsValid"
 #define D_JSON_CAPTURE_UPSECONDS "CaptureUpSeconds"
 #define D_JSON_IMPORTANCE "importance"
 #define D_JSON_INORDER "InOrder"
@@ -1480,6 +1494,8 @@
 #define D_JSON_HARDWARE_TYPE "HardwareType"
 #define D_JSON_STRIP_SIZE "LightSize"
 #define D_JSON_RGB_COLOUR_ORDER "ColourOrder"
+#define D_JSON_RGB_CLOCK "RGBClock"
+#define D_JSON_MANUAL_NUMBER "ManualNumber"
 #define D_JSON_STRIP_REPEAT "strip_repeat"
 
 #define D_JSON_WS2812       "WS2812"
@@ -1507,6 +1523,8 @@
 #define D_JSON_FANSPEED_MANUAL "FanSpeed_Manual"
 #define D_JSON_FANPWM "FanPWM"
 #define D_JSON_POWERONSTATE "PowerOnState"
+#define D_JSON_POWER_STATE "PowerState"
+#define D_JSON_POWER_STATE_NAME "PowerStateName"
 #define D_JSON_PULSETIME "PulseTime"
 #define D_JSON_BLINKTIME "BlinkTime"
 #define D_JSON_BLINKCOUNT "BlinkCount"

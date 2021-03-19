@@ -189,6 +189,7 @@ void mSensorsINA219::EveryLoop(){
   
 }
 
+    #ifdef USE_MODULE_CORE_WEBSERVER
 void mSensorsINA219::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[30];
@@ -249,6 +250,7 @@ void mSensorsINA219::WebAppend_Root_Status_Table_Data(){
 
 }
 
+    #endif // USE_MODULE_CORE_WEBSERVER
 
 // New function that breaks things up into switch statements
 // Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID
@@ -256,7 +258,17 @@ void mSensorsINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_com
 
   uint16_t addr = ina219_addresses[sensor_id];
 
+  // Add sensor class operator overload? that += actually averages?
+
   sensor[sensor_id].bus_voltage_mv = GetBusVoltage_mV(addr);
+
+  //Average storing
+  // I should save all these into a temporary struct, then choose whether to save (copy) or merge (average)
+  // but for now, lazy way
+  sensor_averages[0].bus_voltage_mv += sensor[sensor_id].bus_voltage_mv;
+  sensor_averages[0].bus_voltage_mv /= 2; // running average of 2
+
+
   sensor[sensor_id].shunt_voltage_mv = GetShuntVoltage_mV(addr);   
   sensor[sensor_id].direct_current_ma = GetCurrent_mA(addr);
   sensor[sensor_id].direct_power_mw = GetPower_mW(addr);

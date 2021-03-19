@@ -284,6 +284,11 @@ uint32_t WifiGetNtp(void);
 
 void BreakTime(uint32_t time_input, datetime_t &tm);
 
+uint8_t hour(uint32_t time);
+uint8_t minute(uint32_t time);
+uint8_t second(uint32_t time);
+int hourFormat12(time_t t);
+
 struct RTC {
   uint32_t utc_time = 0;
   uint32_t local_time = 0;

@@ -232,6 +232,8 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
         // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
         pir_detect[sensor_id].isactive = true;
 
+        pCONT->Tasker_Interface(FUNC_EVENT_MOTION_STARTED_ID);
+
         if(pCONT_time->UpTime()>60){
           if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
             pCONT->Tasker_Interface(FUNC_SET_POWER_ON_ID);
@@ -248,6 +250,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
         if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
           pCONT->Tasker_Interface(FUNC_SET_POWER_OFF_ID);
         }
+        pCONT->Tasker_Interface(FUNC_EVENT_MOTION_ENDED_ID);
 
       }
       // char buffer[20];

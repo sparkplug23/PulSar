@@ -108,4 +108,19 @@
   }
 }
 
+//fireplace example
 
+{
+  "Transition": {
+    "TimeMs": 400,
+    "RateMs": 100,
+    "PixelUpdatePerc": 10,
+    "Order": "Random"
+  },
+  "AnimationMode": "Effects",
+  "Effects": {
+    "Function": "FirePlace01"
+  },
+  "ColourPalette": "Single Fire 01",
+  "BrightnessRGB": 0
+}

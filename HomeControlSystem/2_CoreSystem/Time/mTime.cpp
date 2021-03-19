@@ -5,10 +5,6 @@ int8_t mTime::Tasker(uint8_t function){
 
 // return 0;
 
-  // #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-  //   return 0;
-  // #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
-
   switch(function){
     case FUNC_INIT:
       init();
@@ -1420,6 +1416,36 @@ uint32_t mTime::RtcMillis(void) {
 //   tm.day_of_month = time + 1;         // day of month
 //   tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
 // }
+
+/**
+ * Breaking time to return parts of time
+ * */
+uint8_t mTime::hour(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.hour;
+}
+uint8_t mTime::minute(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.minute;
+}
+uint8_t mTime::second(uint32_t time){
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  return time_temp.second;
+}
+int mTime::hourFormat12(time_t time) { // the hour for the given time in 12 hour format
+  // refreshCache(t);
+  datetime_t time_temp;
+  BreakTime(time, time_temp);
+  if( time_temp.hour == 0 )
+    return 12; // 12 midnight
+  else if( time_temp.hour  > 12)
+    return time_temp.hour - 12 ;
+  else
+    return time_temp.hour ;
+}
 
 void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
 {

@@ -130,7 +130,7 @@ void mAnimatorLight::parse_JSONCommand(void){
 
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-    CommandSet_Mixer_Flags_Enabled(jtok.getInt());
+    // CommandSet_Mixer_Flags_Enabled(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
@@ -145,7 +145,7 @@ void mAnimatorLight::parse_JSONCommand(void){
   // }
 
   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
-    CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
+    // CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
@@ -153,7 +153,7 @@ void mAnimatorLight::parse_JSONCommand(void){
   }
 
   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-    CommandSet_Mixer_RunningID(jtok.getInt());
+    // CommandSet_Mixer_RunningID(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
@@ -186,8 +186,19 @@ void mAnimatorLight::parse_JSONCommand(void){
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+  #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+  if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
+    lcd_display_show_number = jtok.getInt();
+    // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
 
 
+  
+
+  #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
 
   if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
@@ -658,13 +669,13 @@ void mAnimatorLight::CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* valu
   ********************************************************************************************************************************/
 
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
- void mAnimatorLight:: CommandSet_Mixer_Flags_Enabled
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-    mixer.flags.Enabled = jtok.getInt();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  }
+//  void mAnimatorLight:: CommandSet_Mixer_Flags_Enabled
+//   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
+//     mixer.flags.Enabled = jtok.getInt();
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
+//     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   }
    
   /********************************************************************************************************************************
   **********Flasher Region ******************************************************************************************************
@@ -677,28 +688,28 @@ void mAnimatorLight::CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* valu
   //   #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
   // }
 
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){
-  void mAnimatorLight::  CommandSet_Mixer_RunTimeScalerPercentage 
-    mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  }
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){
+  // void mAnimatorLight::  CommandSet_Mixer_RunTimeScalerPercentage 
+  //   mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
+  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // }
   /********************************************************************************************************************************
   **********Flasher Region ******************************************************************************************************
   ********************************************************************************************************************************/
 
 
-  if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-    void mAnimatorLight::
-    CommandSet_Mixer_RunningID(jtok.getInt());
-    uint8_t val = jtok.getInt();
-    mixer.running_id = val;
-    LoadMixerGroupByID(val);
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  }
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
+  //   void mAnimatorLight::
+  //   CommandSet_Mixer_RunningID(jtok.getInt());
+  //   uint8_t val = jtok.getInt();
+  //   mixer.running_id = val;
+  //   LoadMixerGroupByID(val);
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // }
   #endif //ENABLE_PIXEL_FUNCTION_MIXER
 
 

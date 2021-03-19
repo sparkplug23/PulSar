@@ -833,6 +833,12 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
 
   JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+
+  
+  // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_colour_order);
+  // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
+
+
   JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, rgbcct_controller.getBrightnessCCT255());
 
 
@@ -861,6 +867,13 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
       JsonBuilderI->Add("B", rgbcct_controller.B); 
       JsonBuilderI->Add("WW", rgbcct_controller.WW); 
       JsonBuilderI->Add("WC", rgbcct_controller.WC); 
+    JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("type");
+      JsonBuilderI->Add("R", hardware_element_colour_order[0].r); 
+      JsonBuilderI->Add("G", hardware_element_colour_order[0].g); 
+      JsonBuilderI->Add("B", hardware_element_colour_order[0].b); 
+      JsonBuilderI->Add("WW", hardware_element_colour_order[0].w); 
+      JsonBuilderI->Add("WC", hardware_element_colour_order[0].c); 
     JsonBuilderI->Level_End();
 
     JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
@@ -928,7 +941,7 @@ void mInterfaceLight::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;

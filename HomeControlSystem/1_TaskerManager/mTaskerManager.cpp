@@ -55,7 +55,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_DOOR
     if(mds == nullptr){ mds = new mDoorSensor(); }
   #endif
-  #ifdef USE_MODULE_SENSORS_DOORCHIME
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     if(mdb == nullptr){ mdb = new mDoorBell(); }
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
@@ -134,6 +134,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
     if(mserial == nullptr){ mserial = new mSerialUART(); }
   #endif
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+    if(mshelly_dimmer == nullptr){ mshelly_dimmer = new mShellyDimmer(); }
+  #endif
 
 
   #ifdef USE_MODULE_DRIVERS_PWM
@@ -161,6 +164,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CUSTOM_FAN
     if(mfan == nullptr){ mfan = new mFan(); }
+  #endif
+  #ifdef USE_MODULE_CUSTOM_TREADMILL
+    if(mtreadmill == nullptr){ mtreadmill = new mTreadmill(); }
   #endif
   #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
     if(msenscol == nullptr){ msenscol = new mSensorColours(); }
@@ -252,8 +258,8 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_SENSORS_DOOR_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DOOR_ID;
   #endif
-  #ifdef D_MODULE_SENSORS_DOORBELL_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DOORBELL_ID;
+  #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CONTROLLER_DOORBELL_ID;
   #endif
   #ifdef D_MODULE_SENSORS_MOTION_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_MOTION_ID;
@@ -302,6 +308,9 @@ uint8_t mTaskerManager::InitClassList(){
   #endif
   #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
     module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SERIAL_UART_ID;
+  #endif
+  #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
   #endif
 
   /**
@@ -355,6 +364,9 @@ uint8_t mTaskerManager::InitClassList(){
   #endif
   #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_EXERCISEBIKE_ID;
+  #endif
+  #ifdef D_MODULE_CUSTOM_TREADMILL_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_TREADMILL_ID;
   #endif
   // #ifdef D_MOILTANK_MODULE_ID
   //   module_settings.list[module_settings.count++] = D_MOILTANK_MODULE_ID;
@@ -458,6 +470,9 @@ uint8_t mTaskerManager::CheckPointersPass(){
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
     if(mserial==nullptr){ return false; }
   #endif
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+    if(mshelly_dimmer==nullptr){ return false; }
+  #endif
 
   #ifdef USE_MODULE_DRIVERS_PWM
     if(mpwm==nullptr){ return false; }
@@ -504,7 +519,7 @@ uint8_t mTaskerManager::CheckPointersPass(){
  * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. If !0, a specific tasker will be called and this function will exit after completion
  * */
 
-int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker){
+int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
 // }
 // template<typename T>
 // int8_t mTaskerManager::Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker = 0){
@@ -548,6 +563,15 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
+  
+  #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+  
+// For now, this function is called always, later it will only happen without a set range of function_inputs
+  if(flags_is_executing_rule != true){
+    Tasker_Rules_Interface(function);
+  }
+  #endif
+
   DEBUG_LINE;
 
   uint8_t fModule_present = false;
@@ -558,6 +582,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
   for(uint8_t i=0;i<module_settings.count;i++){
     // If target_tasker != 0, then use it, else, use indexed array
 
+// Serial.printf("%s\n\r",pCONT_mqtt->MqttIsConnected()?"con":"NOT CONNECTED");
     DEBUG_LINE;
     switch_index = target_tasker ? target_tasker : module_settings.list[i];
     #ifdef ENABLE_ADVANCED_DEBUGGING
@@ -590,12 +615,8 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
           // #else
           // #endif
 
-          //#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
-          //#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+          result = mwif->Tasker(function); 
 
-            result = mwif->Tasker(function); 
-
-          //#endif
         
         break;
       #endif
@@ -630,35 +651,21 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
       #ifdef D_MODULE_CORE_TIME_ID
         case D_MODULE_CORE_TIME_ID:       
-        
-          
-          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING2
           result = mt->Tasker(function); 
-          
-          #endif
-          
         break;
       #endif
       #ifdef D_MODULE_NETWORK_MQTT_ID
         case D_MODULE_NETWORK_MQTT_ID:    
-          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING2
-           result = mqt->Tasker(function);  
-          #endif
-           
-           break;
+          result = mqt->Tasker(function);  
+        break;
       #endif
       #ifdef D_MODULE_NETWORK_WEBSERVER_ID
         case D_MODULE_NETWORK_WEBSERVER_ID:  result = mweb->Tasker(function); break;
       #endif
       #ifdef D_MODULE_CORE_TELEMETRY_ID
-      case D_MODULE_CORE_TELEMETRY_ID:    
-      
-          #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
-          
-          result = mtel->Tasker(function); 
-          #endif
-          
-          break;
+        case D_MODULE_CORE_TELEMETRY_ID:    
+        result = mtel->Tasker(function); 
+        break;
       #endif
       #ifdef D_MODULE_CORE_HARDWAREPINS_ID
         case D_MODULE_CORE_HARDWAREPINS_ID:  
@@ -673,9 +680,6 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       //Sensors
       #ifdef D_MODULE_SENSORS_DOOR_ID
         case D_MODULE_SENSORS_DOOR_ID:       result = mds->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DOORBELL_ID
-        case D_MODULE_SENSORS_DOORBELL_ID:   result = mdb->Tasker(function); break;
       #endif
       #ifdef D_MODULE_SENSORS_MOTION_ID
         case D_MODULE_SENSORS_MOTION_ID:     result = mms->Tasker(function); break;
@@ -739,6 +743,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
           result = mserial->Tasker(function);
         break;
       #endif
+      #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+        case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:    
+          result = mshelly_dimmer->Tasker(function);
+        break;
+      #endif
 
       #ifdef D_MODULE_DRIVERS_PWM_ID
         case D_MODULE_DRIVERS_PWM_ID:    
@@ -752,7 +761,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
 
 
-      // Customs
+      // Customs to be named "Controllers or Systems"
       #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
         case D_MODULE_CUSTOM_SONOFF_IFAN_ID:      result = mifan->Tasker(function); break;
       #endif
@@ -761,6 +770,12 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       #endif
       #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
         case D_MODULE_CUSTOM_SENSORCOLOURS_ID:      result = msenscol->Tasker(function); break;
+      #endif
+      #ifdef D_MODULE_CUSTOM_TREADMILL_ID
+        case D_MODULE_CUSTOM_TREADMILL_ID:      result = mtreadmill->Tasker(function); break;
+      #endif
+      #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
+        case D_MODULE_CONTROLLER_DOORBELL_ID:   result = mdb->Tasker(function); break;
       #endif
 
 
@@ -1058,6 +1073,9 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
       case D_MODULE_DRIVERS_SERIAL_UART_ID:        return PM_MODULE_DRIVERS_SERIAL_UART_CTR;
     #endif
+    #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+      case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:        return PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
+    #endif
 
     // Custom
     #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
@@ -1065,6 +1083,9 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     #endif
     #ifdef D_MODULE_CUSTOM_FAN_ID
       case D_MODULE_CUSTOM_FAN_ID:        return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
+    #endif
+    #ifdef D_MODULE_CUSTOM_TREADMILL_ID
+      case D_MODULE_CUSTOM_TREADMILL_ID:        return PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;
     #endif
     #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
       case D_MODULE_CUSTOM_SENSORCOLOURS_ID:        return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
@@ -1132,6 +1153,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
       case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
     #endif
+    #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+      case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:        return PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
+    #endif
     // #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
     //   case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
     // #endif
@@ -1174,8 +1198,8 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
         return D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR; 
       break;
     #endif
-    #ifdef D_MODULE_SENSORS_DOORBELL_ID
-      case D_MODULE_SENSORS_DOORBELL_ID:        return PM_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR; 
+    #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
+      case D_MODULE_CONTROLLER_DOORBELL_ID:        return PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR; 
     #endif
     #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
       case D_MODULE_SENSORS_PZEM004T_MODBUS_ID:     return PM_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR; 
@@ -1235,6 +1259,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #ifdef D_MODULE_CUSTOM_FAN_ID
       case D_MODULE_CUSTOM_FAN_ID:         return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;  
     #endif
+    #ifdef D_MODULE_CUSTOM_TREADMILL_ID
+      case D_MODULE_CUSTOM_TREADMILL_ID:         return PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;  
+    #endif
     #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
       case D_MODULE_CUSTOM_SENSORCOLOURS_ID:         return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;  
     #endif
@@ -1259,6 +1286,119 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
 
 
 
+/**
+ * 
+ * Linking
+ * 
+ * */
 
+  // struct SOURCE_PARAMETERS{
+    
+  // }source_parameters;
+/**
+ *  Case 1: Switch 1, then Relay 1
+ * 
+ *  source_id=switches, param1=switch index, destination_id = relays, param1 = relay1, param2 = state
+ * 
+ * */
+
+// All events here will only trigger based of function calls, when those occur happen throughout code
+void mTaskerManager::Tasker_Rules_Interface(uint16_t function_input){
+
+
+//maybe need to return rule(s) handled then leave taasker_interface
+
+
+  // for (
+    int rule_index=0;//rule_index<1;rule_index++){
+
+    // Check this rule must act of the function
+    if(rules[rule_index].event.source.function_id == function_input){
+
+      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface rule%d"),rule_index);
+
+      rules_active_index = rule_index;
+
+      Tasker_Interface(
+        rules[rule_index].event.destination.function_id, // function the previous trigger is linked to
+        rules[rule_index].event.destination.module_id, //target module
+        true  // runnig a rule, so don't call this loop back into this function
+      );
+
+    }
+
+
+  // }
+
+
+
+
+
+
+
+
+
+
+  
+}
+
+void mTaskerManager::Tasker_Rules_Init(){
+
+  // struct BUTTON_PRESSED_EVENT{
+  //   uint8_t index = 0;
+  //   uint8_t state_now = 0;
+  //   uint8_t state_prev = 0;
+  //   uint8_t press_type = 0; //single (0), multiple (1-10), long (11)
+  // }button_event;
+
+
+  //test 1: switch 1 = relay 1, switch 2 = relay 2
+
+  rules[0].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
+  rules[0].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
+  // rules[0].event.source.encoding = 0; // type switch
+  // rules[0].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
+  rules[0].event.source.index = 0;
+  rules[0].event.source.state = 2; //toggle
+  #ifdef D_MODULE_DRIVERS_RELAY_ID
+  rules[0].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
+  rules[0].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  rules[0].event.destination.index = 0;
+  rules[0].event.destination.state = 2; //toggle
+  #endif // D_MODULE_DRIVERS_RELAY_ID
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  rules[0].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
+  rules[0].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  rules[0].event.destination.index = 0;
+  rules[0].event.destination.state = 2; //toggle
+  #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
+  
+  // rules[1].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
+  // rules[1].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
+  // // rules[1].event.source.encoding = 0; // type switch
+  // // rules[1].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
+  // rules[1].event.source.index = 1;
+  // rules[1].event.source.state = 2; //toggle
+  // #ifdef D_MODULE_DRIVERS_RELAY_ID
+  // rules[1].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
+  // rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  // rules[1].event.destination.index = 0;
+  // rules[1].event.destination.state = 2; //toggle
+  // #endif // D_MODULE_DRIVERS_RELAY_ID
+  // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  // rules[1].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
+  // rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  // rules[1].event.destination.index = 1;
+  // rules[1].event.destination.state = 2; //toggle
+  // #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
+  
+
+
+
+
+
+
+  
+}
 
 

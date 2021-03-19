@@ -18,6 +18,13 @@
 #include <NMEAGPS.h>
 
 //=========
+#define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
+          Serial.printf("\n\r%s=",NAME); \
+          for(int i=0;i<LENGTH;i++){\
+          Serial.print(VALUE[i]);\
+          Serial.printf(",");\
+          }\
+          Serial.println();
 
 #include <GPSport.h>
 
@@ -290,7 +297,7 @@ class mGPS{
     
 NMEAGPS*  gps = nullptr; // This parses the GPS characters
 // gps_fix*  fix_p = nullptr; // This holds on to the latest values
-
+AVERAGING_DATA<float>* averaging;
 
 // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
 // void parse_JSONCommand(JsonObjectConst obj);

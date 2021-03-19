@@ -198,7 +198,7 @@ Flash: [=====     ]  49.8% (used 510260 bytes from 1023984 bytes)
   #ifdef USE_MODULE_SENSORS_DOOR
     mDoorSensor mds;
   #endif
-  #ifdef USE_MODULE_SENSORS_DOORCHIME
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     mDoorBell mdb;
   #endif
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
@@ -313,7 +313,7 @@ void init_class_instances(){
   #ifdef USE_MODULE_SENSORS_DOOR
     pCONT-> mds;
   #endif
-  #ifdef USE_MODULE_SENSORS_DOORCHIME
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     pCONT-> mdb;
   #endif
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
@@ -457,9 +457,9 @@ void setup(void)
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-    #endif
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
+  #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   // load
   // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
@@ -488,6 +488,10 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);
+
+  #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+  pCONT->Tasker_Rules_Init();
+  #endif
   
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
@@ -708,7 +712,6 @@ void loop(void)
 //       //Failed to receive item
 //       Serial.printf("Failed to receive item\n");
 //     }
-
 
 
 

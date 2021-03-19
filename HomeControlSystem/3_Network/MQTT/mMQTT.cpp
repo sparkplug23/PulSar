@@ -14,36 +14,27 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
 
   if(pCONT_set->Settings.flag_system.mqtt_enabled){
 
-
     switch(function){
       case FUNC_LOOP:
-
-#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
-AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.connected=%d"),Mqtt.connected);
 
         if(Mqtt.connected){
           EveryLoop();
         }
-#endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       break;
-#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
       case FUNC_EVERY_50_MSECOND:
         if(Mqtt.connected){
           pubsub->loop();
         }
       break;
-#endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       case FUNC_EVERY_SECOND:
-      
-#ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
+    
         if(pCONT_wif->WifiCheckIpConnected()){
-          AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
+          // AddLog_P(LOG_LEVEL_TEST, PSTR("IS connceted"));
            CheckConnection();
         }else{
-          AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
+          // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT connceted"));
 
         }
-#endif
       break;
       case FUNC_EVERY_MINUTE:
         //DiscoverServer();
@@ -98,21 +89,22 @@ void mMQTT::init(void){
 void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
 
 // DEBUG_LINE_HERE;
-       // AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
+      //  AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.CheckConnection=%d Reconnecting"),Mqtt.retry_counter);
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
+      AddLog_P(LOG_LEVEL_TEST, PSTR("!MqttIsConnected"));
       pCONT_set->global_state.mqtt_down = 1;
       if (!Mqtt.retry_counter) {        
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //     AddLog_P(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
+    // #endif// ENABLE_LOG_LEVEL_INFO
         MqttReconnect();
       } else {
         Mqtt.retry_counter--;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.retry_counter=%d"),Mqtt.retry_counter);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //     AddLog_P(LOG_LEVEL_TEST, PSTR("Mqtt.retry_counter=%d"),Mqtt.retry_counter);
+    // #endif// ENABLE_LOG_LEVEL_INFO
       }
     } else {
       pCONT_set->global_state.mqtt_down = 0;
@@ -141,6 +133,14 @@ bool mMQTT::MqttIsConnected(){
 
 void mMQTT::MqttConnected(void)
 {
+  
+//     AddLog_P(LOG_LEVEL_INFO, S_LOG_MQTT, PSTR(D_CONNECTED));
+    Mqtt.connected = true;
+    
+    // AddLog_P(LOG_LEVEL_WARN, S_LOG_MQTT, PSTR("Mqtt.retry_counter = 0; disabled"));
+    Mqtt.retry_counter = 0;
+
+
   DEBUG_LINE;
   DEBUG_PRINT_FUNCTION_NAME;
     DEBUG_LINE;
@@ -189,8 +189,12 @@ DEBUG_LINE;
 
 //   if (Mqtt.allowed) {
 //     AddLog_P(LOG_LEVEL_INFO, S_LOG_MQTT, PSTR(D_CONNECTED));
-    Mqtt.connected = true;
-    Mqtt.retry_counter = 0;
+    // Mqtt.connected = true;
+    
+    // AddLog_P(LOG_LEVEL_WARN, S_LOG_MQTT, PSTR("Mqtt.retry_counter = 0; disabled"));
+    // Mqtt.retry_counter = 0;
+
+
 //     Mqtt.connect_count++;
 
 //     GetTopic_P(stopic, TELE, mqtt_topic, S_LWT);
@@ -418,21 +422,6 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
     #endif// ENABLE_LOG_LEVEL_INFO
     // }
 
-    // #ifndef ENABLE_DEVFEATURE_JSONPARSER
-    // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-    // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-
-    // if(!error){
-    //   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC, doc.as<JsonObjectConst>());
-    // }else{
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR)); Serial.flush();
-    // #endif// ENABLE_LOG_LEVEL_INFO
-    //   return;
-    // }
-    // #endif // ENABLE_DEVFEATURE_JSONPARSER
-
-
     #ifdef ENABLE_DEVFEATURE_JSONPARSER
     //  char parsing_buffer[data_buffer.payload.len+1];
     //   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len);
@@ -473,33 +462,6 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
       // }
       
     //   else{
-  
-  
-    // pCONT_iLight->parse_JSONCommandJP(&parser);
-
-
-    //     AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError success")); Serial.flush();
-
-    //     JsonParserToken val = root[PSTR(D_JSON_NAME)].getObject()[PSTR("test")];
-    //     if (val) {
-    //       // SettingsUpdateText(SET_TEMPLATE_NAME, val.getStr());
-
-    //       AddLog_P(LOG_LEVEL_TEST, PSTR("JP Tested \"%s\""), val.getStr());
-
-    //     }
-
-
-
-    //   }
-
-      
-        
-
-
-
-
-
-
 
     #endif // ENABLE_DEVFEATURE_JSONPARSER
 
@@ -514,10 +476,6 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
 void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
 
-// DEBUG_LINE_HERE;
-#ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-return;
-#endif
 
   // Send mqtt from all modules
   pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
@@ -779,16 +737,16 @@ boolean mMQTT::psubscribe(const char* topic) {
 const char* mMQTT::state_ctr(void){
   DEBUG_PRINT_FUNCTION_NAME;
     switch(pubsub->state()){
-        case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");
-        case MQTT_CONNECTION_LOST:          return PSTR("Connecttion Lost");
-        case MQTT_CONNECT_FAILED:           return PSTR("Connect Failed");
-        case MQTT_DISCONNECTED:             return PSTR("Disconnected");
-        case MQTT_CONNECTED:                return PSTR("Connected");
-        case MQTT_CONNECT_BAD_PROTOCOL:     return PSTR("Bad Protocol");
-        case MQTT_CONNECT_BAD_CLIENT_ID:    return PSTR("Bad Client ID");
-        case MQTT_CONNECT_UNAVAILABLE:      return PSTR("Unavailable");
-        case MQTT_CONNECT_BAD_CREDENTIALS:  return PSTR("Bad Credentials");
-        case MQTT_CONNECT_UNAUTHORIZED:     return PSTR("Unauthorized");
+      case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");
+      case MQTT_CONNECTION_LOST:          return PSTR("Connecttion Lost");
+      case MQTT_CONNECT_FAILED:           return PSTR("Connect Failed");
+      case MQTT_DISCONNECTED:             return PSTR("Disconnected");
+      case MQTT_CONNECTED:                return PSTR("Connected");
+      case MQTT_CONNECT_BAD_PROTOCOL:     return PSTR("Bad Protocol");
+      case MQTT_CONNECT_BAD_CLIENT_ID:    return PSTR("Bad Client ID");
+      case MQTT_CONNECT_UNAVAILABLE:      return PSTR("Unavailable");
+      case MQTT_CONNECT_BAD_CREDENTIALS:  return PSTR("Bad Credentials");
+      case MQTT_CONNECT_UNAUTHORIZED:     return PSTR("Unauthorized");
     }
 }
 

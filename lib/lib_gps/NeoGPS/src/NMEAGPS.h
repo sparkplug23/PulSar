@@ -231,6 +231,7 @@ public:
       char mfr_id[3];
     #endif
 
+  #define NMEAGPS_PARSE_SAVE_MILLIS
 
     // Add millis() count for when the above parser occur and are valid, so I know age of NMEA message
     #ifdef NMEAGPS_PARSE_SAVE_MILLIS

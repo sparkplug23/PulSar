@@ -264,6 +264,7 @@ class JsonBuilder{
 };
 
 #define JsonBuilderI JsonBuilder::GetInstance()
+#define JBI JsonBuilderI
 
 
 

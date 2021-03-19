@@ -15,7 +15,14 @@ int8_t mSwitches::Tasker(uint8_t function){
       SwitchLoop();
     break;
     case FUNC_EVERY_SECOND:
+
+    // pinMode(13,INPUT);
+    // pinMode(5,INPUT);
     
+        // Serial.printf("PinUsed[29]\t\tpin=%d\n\r",pCONT_pins->GetPin(29));
+        // Serial.printf("PinUsed[30]\t\tpin=%d\n\r",pCONT_pins->GetPin(30));
+        // Serial.printf("PinUsed[291]\t\tpin=%d\n\r",pCONT_pins->PinUsed(GPIO_SWT1_NP_ID));
+        // Serial.printf("PinUsed[302]\t\tpin=%d\n\r",pCONT_pins->PinUsed(GPIO_SWT2_NP_ID));
       // pinMode(13,INPUT);
       // pinMode(5,INPUT);
       // AddLog_P(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
@@ -81,29 +88,47 @@ void mSwitches::SwitchInit(void)
   settings.switches_found = 0;    
   for(uint8_t pin_id=GPIO_SWT1_ID;pin_id<GPIO_SWT1_ID+(MAX_SWITCHES*4);pin_id++){
 
+        // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_SWT1_ID+(MAX_SWITCHES*4));
     if(pCONT_pins->PinUsed(pin_id)){
+        // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
       
       switches[settings.switches_found].pin = pCONT_pins->GetPin(pin_id);
 
       // Standard pin, active high, with pulls 
-      if(IsWithinRange(pin_id, GPIO_SWT1_ID, GPIO_SWT1_ID+MAX_SWITCHES)){
+      if(
+        (pin_id >= GPIO_SWT1_ID)&&
+        (pin_id < GPIO_SWT1_ID+MAX_SWITCHES)
+      ){
         pinMode(switches[settings.switches_found].pin, INPUT_PULLUP);
         switches[settings.switches_found].active_state_value = HIGH;
       }else
       // Inverted pin, active low, with pulls
-      if(IsWithinRange(pin_id, GPIO_SWT1_INV_ID, GPIO_SWT1_INV_ID+MAX_SWITCHES)){
+      if(
+        (pin_id >= GPIO_SWT1_INV_ID)&&
+        (pin_id < GPIO_SWT1_INV_ID+MAX_SWITCHES)
+      ){
         pinMode(switches[settings.switches_found].pin, INPUT_PULLUP);
         switches[settings.switches_found].active_state_value = LOW;
       }else
       // Standard pin, active high, NO pulls
-      if(IsWithinRange(pin_id, GPIO_SWT1_NP_ID, GPIO_SWT1_NP_ID+MAX_SWITCHES)){
+      if(
+        (pin_id >= GPIO_SWT1_NP_ID)&&
+        (pin_id < GPIO_SWT1_NP_ID+MAX_SWITCHES)
+      ){
+        // Serial.printf("GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
         pinMode(switches[settings.switches_found].pin, INPUT);
         switches[settings.switches_found].active_state_value = HIGH;
       }else
       // 
-      if(IsWithinRange(pin_id, GPIO_SWT1_INV_NP_ID, GPIO_SWT1_INV_NP_ID+MAX_SWITCHES)){
+      if(
+        (pin_id >= GPIO_SWT1_INV_NP_ID)&&
+        (pin_id < GPIO_SWT1_INV_NP_ID+MAX_SWITCHES)
+      ){
         pinMode(switches[settings.switches_found].pin, INPUT);
         switches[settings.switches_found].active_state_value = LOW;
+      }else{
+        // Serial.printf("NO MATCH GPIO_SWT1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+
       }
 
       // Set global now so doesn't change the saved power state on first switch check
@@ -151,7 +176,6 @@ void mSwitches::SwitchProbe(void)
     // if (pCONT_pins->PinUsed(GPIO_SWT1_ID,i)) {      
     if(switches[i].pin != -1){
       
-
       // Olimex user_switch2.c code to fix 50Hz induced pulses
       if (1 == digitalRead(switches[i].pin)) {
 
@@ -214,6 +238,9 @@ void mSwitches::SwitchHandler(uint8_t mode)
       (switches[i].pin != -1) 
       
        || (mode)) {
+
+// Serial.printf("switches[%d].pin=%d \t %d\n\r",i,switches[i].pin,digitalRead(switches[i].pin));
+
 
       if (switches[i].holdwallswitch) {
         switches[i].holdwallswitch--;
@@ -290,6 +317,8 @@ void mSwitches::SwitchHandler(uint8_t mode)
         mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
         if (switchflag < 3) {
+          pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED);
+          #ifndef ENABLE_DEVFEATURE_RULE_ENGINE
           #ifdef USE_MODULE_DRIVERS_RELAY
           // AddLog_P(LOG_LEVEL_TEST,PSTR("ExecuteCommandPower")); 
           // if(is_linked_to_internal_relay){}
@@ -297,6 +326,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
           // pCONT_mry->ExecuteCommandPower(linked_internal_relay_id, switchflag, SRC_SWITCH);
           pCONT_mry->ExecuteCommandPower(i, switchflag, SRC_SWITCH);
           #endif    
+          #endif // ENABLE_DEVFEATURE_RULE_ENGINE
         }
 
         switches[i].lastwallswitch = button;
@@ -404,6 +434,16 @@ uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
+
+    JsonBuilderI->Add("pin0", switches[0].pin);
+    JsonBuilderI->Add("pin1", switches[1].pin);
+    JsonBuilderI->Add("pin2", switches[2].pin);
+    JsonBuilderI->Add("read0", digitalRead(switches[0].pin));
+    JsonBuilderI->Add("read1", digitalRead(switches[1].pin));
+    JsonBuilderI->Add("read2", digitalRead(switches[2].pin));
+
+
+    
   return JsonBuilderI->End();
 
 }
@@ -451,7 +491,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1;//60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

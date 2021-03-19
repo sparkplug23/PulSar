@@ -230,7 +230,7 @@
 //   #define D_MODULE_SENSORS_ANALOG_CTR              "mSensorsAnalog"
 //   #define D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR              "analog"
 // //#endif
-// //#ifdef USE_MODULE_SENSORS_DOORCHIME
+// //#ifdef USE_MODULE_CONTROLLER_DOORCHIME
 //   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
 //   #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
 // //#endif

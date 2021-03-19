@@ -11,26 +11,24 @@ int8_t mWiFi::Tasker(uint8_t function){
 
   switch(function){
     case FUNC_INIT:
-      #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
       WifiConnect();
-      #endif// ENABLE_DEVFEATURE_FLICKER_TESTING
 
-      #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-      WiFi.mode(WIFI_STA);
-      WiFi.begin("Skynet2400", "af4d8bc9ab");
+    //   #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
+    //   WiFi.mode(WIFI_STA);
+    //   WiFi.begin("Skynet2400", "af4d8bc9ab");
 
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-      }
+    //   while (WiFi.status() != WL_CONNECTED) {
+    //     delay(500);
+    //     Serial.print(".");
+    //   }
 
-      Serial.println("");
-      Serial.println("WiFi connected");
-      Serial.println("IP address: ");
-      Serial.println(WiFi.localIP());
-      WifiSetState(0);
+    //   Serial.println("");
+    //   Serial.println("WiFi connected");
+    //   Serial.println("IP address: ");
+    //   Serial.println(WiFi.localIP());
+    //   WifiSetState(0);
 
-    #endif
+    // #endif
 
     break;
     case FUNC_LOOP: 
@@ -40,7 +38,6 @@ int8_t mWiFi::Tasker(uint8_t function){
       // AddLog_P(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
 
 //  Serial.println(WiFi.localIP());
-      #ifndef ENABLE_DEVFEATURE_FLICKER_TESTING
 
       // #ifdef ESP32
     // #ifdef ENABLE_LOG_LEVEL_INFO
@@ -53,7 +50,6 @@ int8_t mWiFi::Tasker(uint8_t function){
         pCONT_set->wifi_state_flag = WIFI_RESTART;
       }
             
-      #endif// ENABLE_DEVFEATURE_FLICKER_TESTING
       //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
@@ -820,19 +816,6 @@ void mWiFi::WifiCheckIp(void)
 void mWiFi::WifiCheck(uint8_t param)
 {
 
-  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-    // return;
-  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
-
-  
-  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING2
-      //return;
-  #endif
-  // #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING2
-  //   if(pCONT_time->uptime.seconds_nonreset<60){
-  //     return;
-  //   }
-  // #endif
   
   #ifdef ENABLE_WIFI_DEVELOPMENT
   AddLog_P(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);

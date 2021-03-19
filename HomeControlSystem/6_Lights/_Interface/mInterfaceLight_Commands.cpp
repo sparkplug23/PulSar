@@ -6,7 +6,7 @@
 int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_CTR)>=0){
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -1172,11 +1172,11 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
   }
 
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
-      pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
-  }
-  #endif
+  // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
+  //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
+  // }
+  // #endif
   #ifdef ENABLE_PALETTE_FORCED_MODE
   //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
   #endif

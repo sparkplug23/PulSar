@@ -48,6 +48,8 @@ class mRelays{
     int8_t CheckAndExecute_JSONCommands();
     void   parse_JSONCommand(void);
 
+    void RulesEvent_Set_Power();
+
     #define RELAYS_MAX_COUNT 4
 
     // enum RELAY_IDS{

@@ -213,7 +213,14 @@ class mSensorsINA219{
       float direct_power_mw;
       
     }sensor[MAX_SENSORS];
-        
+
+    // Temp method, averaged
+    struct SENSOR_AVERAGES{
+      float bus_voltage_mv = 0;
+    }sensor_averages[MAX_SENSORS];
+
+
+
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   

@@ -65,8 +65,8 @@ int mUltraSonicSensor::GetDurationReading(void){
   float duration=0;
 
   // Clears the trigPin
-  // digitalWrite(pin_trig, LOW);
-  // delayMicroseconds(2);
+  digitalWrite(pin_trig, LOW);
+  delayMicroseconds(2);
   // Sets the ULTRA_TRIG_PIN on HIGH state for 10 micro seconds
   digitalWrite(pin_trig, HIGH);
   delayMicroseconds(10);

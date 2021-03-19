@@ -135,7 +135,6 @@ bool IsWithinLimits(T lower, T value, T upper){
   if((value>lower)&&(value<upper)){
     return true;
   }
-  // return midpoint if above was not true
   return false;
 }
 

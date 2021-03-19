@@ -682,7 +682,7 @@ const __FlashStringHelper *NMEAGPS::string_for( nmea_msg_t msg ) const
 
 bool NMEAGPS::parseField(char chr)
 {
-  // Serial.printf("n%d",nmeaMessage);//parseField");
+  // Serial.printf("n%d\n\r",nmeaMessage);//parseField");
     switch (nmeaMessage) {
 
       #if defined(NMEAGPS_PARSE_GGA)
@@ -729,9 +729,14 @@ bool NMEAGPS::parseField(char chr)
 
 bool NMEAGPS::parseGGA( char chr )
 {
+  active_millis.GGA = millis();
+  // Serial.printf("NMEAGPS::parseGGA %d\n\r",active_millis.GGA);//parseField");
   #ifdef NMEAGPS_PARSE_GGA
     switch (fieldIndex) {
-        case  1: return parseTime( chr );
+        case  1: 
+        Serial.printf("NMEAGPS::parseGGA parseTime %d\n\r",active_millis.GGA);
+        
+        return parseTime( chr );
         PARSE_LOC(2);
         case  6: return parseFix( chr );
         case  7: return parseSatellites( chr );

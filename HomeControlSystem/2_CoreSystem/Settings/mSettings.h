@@ -531,6 +531,13 @@ enum XsnsFunctions {
   FUNC_RULES_PROCESS, FUNC_SERIAL, FUNC_FREE_MEM, FUNC_BUTTON_PRESSED,
   FUNC_SET_POWER_ON_ID,
   FUNC_SET_POWER_OFF_ID,
+
+  // Events (new internal triggers, if something happens trigger another... this will become rules)
+  // Ie if this event below happens, then have another ID which is called to run the triggered event
+  FUNC_EVENT_MOTION_STARTED_ID,
+  FUNC_EVENT_MOTION_ENDED_ID,
+
+
   // Energy
   FUNC_ENERGY_RESET,
   // Calls to run drivers when sensors change rather than waiting on loop
@@ -582,6 +589,12 @@ enum XsnsFunctions {
 
   // Debuging functions
   FUNC_DEBUG_CONFIGURE,
+
+  /**
+   * Group of "Events" functions, which are called when sections of the code execute
+   * */
+  FUNC_EVENT_INPUT_STATE_CHANGED,
+  FUNC_EVENT_SET_POWER,
 
 
   FUNC_FINALLY_END_OF_LOOP // Ran at the end of each loop, used to reset flags that should have been handled eg motion

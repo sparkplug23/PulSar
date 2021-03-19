@@ -105,7 +105,15 @@ int8_t mRelays::Tasker(uint8_t function){
     break;
     case FUNC_SET_POWER_ON_ID:
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
-    break;    
+    break;     
+    /************
+     * RULES SECTION * 
+    *******************/
+    case FUNC_EVENT_SET_POWER:
+      RulesEvent_Set_Power();
+
+      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVENT_SET_POWER"));
+    break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -145,6 +153,28 @@ void mRelays::SubTask_Every_Minute(){
 
 
 }
+
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+
+void mRelays::RulesEvent_Set_Power(){
+
+  
+      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+
+      uint8_t relay_index = pCONT->rules[pCONT->rules_active_index].event.destination.index;
+
+      uint8_t relay_state = pCONT->rules[pCONT->rules_active_index].event.destination.state;
+
+
+          pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
+
+
+
+
+}
+#endif // ENABLE_DEVFEATURE_RULE_ENGINE
+
+
 
 void mRelays::SubTask_Relay_Timed_Seconds(){
   
@@ -331,7 +361,17 @@ void mRelays::parse_JSONCommand(void){
     }
   }
 
+  // Primary method since v0.86.14.21
+  if(jtok = obj[PM_JSON_POWER_STATE]){
+    if(jtok.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok.getStr());
+    }else 
+    if(jtok.isNum()){
+      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+    }
+  }
 
+  // PHASE OUT by version 0.87
   if(jtok = obj[PM_JSON_ONOFF]){
     if(jtok.isStr()){
       state = pCONT_sup->GetStateNumber(jtok.getStr());
@@ -340,6 +380,9 @@ void mRelays::parse_JSONCommand(void){
       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
     }
   }
+
+
+  
 
 
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
@@ -906,8 +949,12 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
       if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
         JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+        //phase onoff out
           JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
           JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+
+          JsonBuilderI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
+          JsonBuilderI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
           JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
           JsonBuilderI->Level_Start_P(PM_JSON_LAST);
             snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
@@ -981,7 +1028,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 600; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -991,20 +1038,20 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 600; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 600; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
 
   
@@ -1013,7 +1060,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 600; 
+  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;

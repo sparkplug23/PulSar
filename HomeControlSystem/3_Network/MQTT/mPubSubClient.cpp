@@ -351,6 +351,8 @@ uint16_t mPubSubClient::readPacket(uint8_t* lengthLength) {
 
 boolean mPubSubClient::loop() {
 
+    // Serial.println("mPubSubClient::loop()");
+
     if(abs(millis()-stats.tSavedPacketsSent)>=60000){ stats.tSavedPacketsSent=millis();
       stats.packets_sent_per_minute += (stats.packets_sent_counter-stats.packets_sent_per_minute_saved);
       stats.packets_sent_per_minute /= 2; // averaging last two minutes
