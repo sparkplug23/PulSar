@@ -268,6 +268,8 @@ public:
     // template<typename T>
     // void Debug_Printf(T format, )
 
+    void handleTelnet();
+
     enum DEBUG_OUTPUT_IDS{
       DEBUG_OUTPUT_HARDWARE_ID=0,
       DEBUG_OUTPUT_SOFTWARE_ID
@@ -308,11 +310,26 @@ public:
 
     void StartTelnetServer();
 
-    #define TELNET_PORT 23
+    #define TELNET_PORT 24
 
-    WiFiServer* server = nullptr;
-    WiFiClient* clientptr;
-    WiFiClient client;
+    // WiFiServer* server = nullptr;
+    // WiFiClient* clientptr;
+    // WiFiClient client;
+
+    
+// WiFiServer server(24);
+// // Initialize the client library
+// WiFiClient client;
+
+// declare telnet server (do NOT put in setup())
+WiFiServer* TelnetServer;//(24);
+WiFiClient Telnet;
+
+bool telnet_started = false;
+
+
+
+
     
 };
 

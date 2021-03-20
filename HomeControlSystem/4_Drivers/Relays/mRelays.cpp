@@ -109,11 +109,13 @@ int8_t mRelays::Tasker(uint8_t function){
     /************
      * RULES SECTION * 
     *******************/
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
     case FUNC_EVENT_SET_POWER:
       RulesEvent_Set_Power();
 
       AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVENT_SET_POWER"));
     break;
+#endif// ENABLE_DEVFEATURE_RULE_ENGINE
     /************
      * MQTT SECTION * 
     *******************/
@@ -455,6 +457,7 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
     return;
   }
 
+#ifdef ENABLE_DEVFEATURE_RELAY_DISABLING_SCHEDULE_CHECKS
     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"),
     settings.flags.enabled_relays_allowed_time_window_checks);
     
@@ -464,12 +467,14 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
     
   // Add checks to see if relay is restricted from controls (locked by time)
   // flag to enable these checks
+
   if(settings.flags.enabled_relays_allowed_time_window_checks){
     
     if(!IsRelayTimeWindowAllowed(num)){
       return;
     }
   }
+  #endif // ENABLE_DEVFEATURE_RELAY_DISABLING_SCHEDULE_CHECKS
 
   if(CommandGet_Relay_Power(num)==state){
     relay_status[num].ischanged = false;
@@ -656,34 +661,34 @@ DEBUG_LINE;
   // }
   // else {
 
-#ifdef USE_NETWORK_MDNS
-    #ifdef USE_VIRTUAL_REMOTE_URL_RELAY
+// #ifdef USE_NETWORK_MDNS
+//     #ifdef USE_VIRTUAL_REMOTE_URL_RELAY
 
-      char remote_url[100];
-      // URL
-      // sprintf(remote_url, "http://%s/json_command.json", VIRTUAL_DEVICE_MDNS_NAME);
-      //MQTT
-      sprintf(remote_url, "%s/set/relays", VIRTUAL_DEVICE_MDNS_NAME);
+//       char remote_url[100];
+//       // URL
+//       // sprintf(remote_url, "http://%s/json_command.json", VIRTUAL_DEVICE_MDNS_NAME);
+//       //MQTT
+//       sprintf(remote_url, "%s/set/relays", VIRTUAL_DEVICE_MDNS_NAME);
 
-      power_t state = rpower &1;
-      uint8_t state_level = bitRead(rel_inverted, 0) ? !state : state;
+//       power_t state = rpower &1;
+//       uint8_t state_level = bitRead(rel_inverted, 0) ? !state : state;
 
-      // State  is controlled remotely, so we can only toggle, until I use HTTP_GET to remain in sync
-      char remote_command[100];
-      sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
+//       // State  is controlled remotely, so we can only toggle, until I use HTTP_GET to remain in sync
+//       char remote_command[100];
+//       sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
 
-      AddLog_P(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
+//       AddLog_P(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
 
-      pCONT_mqtt->ppublish(remote_url,remote_command,false);
+//       pCONT_mqtt->ppublish(remote_url,remote_command,false);
 
-      // AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html);
-      // response->addHeader("Server","ESP Async Web Server");
-      // request->send(response);
+//       // AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html);
+//       // response->addHeader("Server","ESP Async Web Server");
+//       // request->send(response);
 
-      return; // not local control
+//       return; // not local control
 
-#endif // #ifdef USE_NETWORK_MDNS
-    #endif
+// #endif // #ifdef USE_NETWORK_MDNS
+    // #endif
 
 
 
@@ -957,9 +962,9 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
           JsonBuilderI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
           JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
           JsonBuilderI->Level_Start_P(PM_JSON_LAST);
-            snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
+            snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
             JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
-            snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
+            snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
             JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
           JsonBuilderI->Level_End();
         JsonBuilderI->Level_End();

@@ -48,7 +48,11 @@ class mRelays{
     int8_t CheckAndExecute_JSONCommands();
     void   parse_JSONCommand(void);
 
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
     void RulesEvent_Set_Power();
+
+#endif// ENABLE_DEVFEATURE_RULE_ENGINE
+
 
     #define RELAYS_MAX_COUNT 4
 

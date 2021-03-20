@@ -565,6 +565,8 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
   
   #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+
+// I dont think i want this in here, as not only do I need to pass a trigger event, I might need to pass (or change a struct) tp include matching values
   
 // For now, this function is called always, later it will only happen without a set range of function_inputs
   if(flags_is_executing_rule != true){
@@ -645,7 +647,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
         
           // #ifdef DISBALE_TEST_SECTION
           
-          result = msup->Tasker(function); 
+          result = mso->Tasker(function); 
           // #endif
            break;
       #endif
@@ -1286,6 +1288,7 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
 
 
 
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
 /**
  * 
  * Linking
@@ -1309,8 +1312,8 @@ void mTaskerManager::Tasker_Rules_Interface(uint16_t function_input){
 //maybe need to return rule(s) handled then leave taasker_interface
 
 
-  // for (
-    int rule_index=0;//rule_index<1;rule_index++){
+  for (
+    int rule_index=0;rule_index<2;rule_index++){
 
     // Check this rule must act of the function
     if(rules[rule_index].event.source.function_id == function_input){
@@ -1319,16 +1322,29 @@ void mTaskerManager::Tasker_Rules_Interface(uint16_t function_input){
 
       rules_active_index = rule_index;
 
-      Tasker_Interface(
-        rules[rule_index].event.destination.function_id, // function the previous trigger is linked to
-        rules[rule_index].event.destination.module_id, //target module
-        true  // runnig a rule, so don't call this loop back into this function
-      );
+      // Also check switch_index against rule index
+      if(rules[rule_index].event.source.index == Event.index){
+        AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Event.index rule%d"),Event.index);
+        AddLog_P(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
+        
+        
+      // char message[50];
+      // memset(message,0,sizeof(message));
+      // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
+      // pCONT_mqtt->ppublish("status/debug/rules",message,false); //reconnect message
+
+        Tasker_Interface(
+          rules[rule_index].event.destination.function_id, // function the previous trigger is linked to
+          rules[rule_index].event.destination.module_id, //target module
+          true  // runnig a rule, so don't call this loop back into this function
+        );
+
+      }
 
     }
 
 
-  // }
+  }
 
 
 
@@ -1373,24 +1389,24 @@ void mTaskerManager::Tasker_Rules_Init(){
   rules[0].event.destination.state = 2; //toggle
   #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
   
-  // rules[1].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-  // rules[1].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-  // // rules[1].event.source.encoding = 0; // type switch
-  // // rules[1].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
-  // rules[1].event.source.index = 1;
-  // rules[1].event.source.state = 2; //toggle
-  // #ifdef D_MODULE_DRIVERS_RELAY_ID
-  // rules[1].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
-  // rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  // rules[1].event.destination.index = 0;
-  // rules[1].event.destination.state = 2; //toggle
-  // #endif // D_MODULE_DRIVERS_RELAY_ID
-  // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-  // rules[1].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-  // rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  // rules[1].event.destination.index = 1;
-  // rules[1].event.destination.state = 2; //toggle
-  // #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
+  rules[1].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
+  rules[1].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
+  // rules[1].event.source.encoding = 0; // type switch
+  // rules[1].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
+  rules[1].event.source.index = 1;
+  rules[1].event.source.state = 2; //toggle
+  #ifdef D_MODULE_DRIVERS_RELAY_ID
+  rules[1].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
+  rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  rules[1].event.destination.index = 0;
+  rules[1].event.destination.state = 2; //toggle
+  #endif // D_MODULE_DRIVERS_RELAY_ID
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  rules[1].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
+  rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
+  rules[1].event.destination.index = 1;
+  rules[1].event.destination.state = 2; //toggle
+  #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
   
 
 
@@ -1402,3 +1418,5 @@ void mTaskerManager::Tasker_Rules_Init(){
 }
 
 
+
+#endif// ENABLE_DEVFEATURE_RULE_ENGINE

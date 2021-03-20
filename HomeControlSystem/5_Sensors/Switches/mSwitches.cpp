@@ -317,7 +317,12 @@ void mSwitches::SwitchHandler(uint8_t mode)
         mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
         if (switchflag < 3) {
+          //update the event
+          #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+          pCONT->Event_Reset();
+          pCONT->Event_Add(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED);
+          #endif // ENABLE_DEVFEATURE_RULE_ENGINE
           #ifndef ENABLE_DEVFEATURE_RULE_ENGINE
           #ifdef USE_MODULE_DRIVERS_RELAY
           // AddLog_P(LOG_LEVEL_TEST,PSTR("ExecuteCommandPower")); 

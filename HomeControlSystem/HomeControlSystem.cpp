@@ -501,48 +501,11 @@ void setup(void)
 
   #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
 
-
-// #ifdef USE_DEVFEATURE_UART_TEST
-//   UART_Setup();
-//   Serial.begin(115200);
-//   Serial.println("Booting UART0");
-
-//   // delay(3000);
-
-//   //   buffer_queue = xQueueCreate( 10, sizeof( buffer_test ) );
-//  	//   if( buffer_queue == 0 )
-//   // 	{
-//   //     // Serial.println();
-//   //     Serial.println("buffer_queue FAILED!"); delay(4000);
-//   // 		// Failed to create the queue.
-//   //     memset(&buffer_test,0,sizeof(buffer_test));
-//   //     memcpy(buffer_test, "failed", sizeof("failed")-1);
-//   // 	}else{
-//   //     Serial.println("buffer_queue SUCCESS!"); delay(4000);
-
-//   //     memset(&buffer_test,0,sizeof(buffer_test));
-//   //     memcpy(buffer_test, "success", sizeof("success")-1);
-//   //   }
-
-
-//     // buf_handle = xRingbufferCreate(BUF_HANDLE_LENGTH, RINGBUF_TYPE_BYTEBUF);
-//     // if (buf_handle == NULL) {
-//     //   Serial.printf("Failed to create ring buffer\n\r");
-//     // }else{
-      
-//     //   Serial.printf("SUCCESS to create ring buffer\n\r");
-//     // }
-    
-    
-
-
-
-
-
-
-// #endif // USE_DEVFEATURE_UART_TEST
+  // Currently requires calling here, to be fixed
+  // pCONT_sto->StartTelnetServer();
 
 }
+
 
 
 // /********************************************************************************************/
@@ -734,8 +697,22 @@ void loop(void)
 
 // #endif // USE_DEVFEATURE_UART_TEST
 
+  // handleTelnet();
+  // Telnet.println("uptime: ");
+// if(server.hasClient()){
+//   Serial.println("hascient");
+//   if(client.connect(server,80)){
+//     client.println("hello");
+//   }
+// }
 
-
+// pCONT_sto->handleTelnet();
+// if(pCONT_sto->telnet_started){
+//   pCONT_sto->Telnet.println("uptimenew: ");
+// }
+      // if(pCONT_sto->client.connected()) {
+      //   pCONT_sto->client.println("test\r\n");//, mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+      // }
 
 
 

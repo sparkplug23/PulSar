@@ -2,12 +2,7 @@
 
 
 void mLogging::init(void){
-  StartTelnetServer();
-}
-
-void mLogging::StartTelnetServer(){
-  server = new WiFiServer(TELNET_PORT);  // set port here
-  server->begin();
+  // StartTelnetServer();
 }
 
 
@@ -15,13 +10,20 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
 
   switch(function){
     case FUNC_INIT:
-      init();
+      // init();
+      StartTelnetServer();
     break;
     case FUNC_LOOP: 
-    
+    // Serial.println("mLogging::Tasker");
+      // if(!Telnet) StartTelnetServer();
+      if(telnet_started){      handleTelnet();    }
+      // pCONT_sto->Telnet.println("FUNC_LOOP: ");
+    break;
+    case FUNC_EVERY_SECOND:
+      // Serial.println("mLogging::Tasker");
     break;
     case FUNC_WIFI_CONNECTED:
-      StartTelnetServer();
+      // StartTelnetServer();
     break;
   }
 
@@ -48,7 +50,22 @@ void AddLog_P(
   // if(fDebugOutputMode==DEBUG_OUTPUT_SOFTWARE_ID){return;}
   // if(!fDebugSerialMode){return;}
 
-  #ifndef DISABLE_SERIAL_LOGGING
+  // if(pCONT_sto->Telnet!=nullptr){
+    //   if(!pCONT_sto->client.connected()) {
+      
+    //     pCONT_sto->client = pCONT_sto->server->available();
+    //   }
+//     if(pCONT_time->uptime.seconds_nonreset>30){
+  // pCONT_sto->Telnet.println("AddLog_P: ");
+//     //   if(pCONT_sto->client.connected()) {
+//     //     pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+//     //   }
+//     // }
+//     // }else{
+// }
+    //   Serial.println("Telnet else");
+    // }
+
 
   #ifdef DEBUG_FOR_FAULT
     pCONT_set->Settings.seriallog_level = LOG_LEVEL_ALL;
@@ -114,6 +131,8 @@ void AddLog_P(
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
   char level_buffer[10];
+  
+  #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
   if (loglevel <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
@@ -140,6 +159,7 @@ void AddLog_P(
 
     if(pCONT_set->Settings.seriallog_level == LOG_LEVEL_ALL){ SERIAL_DEBUG.flush(); } 
   } 
+  #endif //DISABLE_SERIAL_LOGGING
 
   #ifdef ENABLE_SERIAL_FLUSH
     SERIAL_DEBUG.flush(); 
@@ -148,16 +168,26 @@ void AddLog_P(
   // SERIAL_DEBUG.printf("%s %d\r\n","telnet",millis());
   // LOG : TELNET
   #ifdef ENABLE_TELNET_LOGGING // off by default for performance
-  if (loglevel <= pCONT_set->Settings.telnetlog_level) {
-    if(pCONT_sto->server!=nullptr){ // needs ignored before it has been started!
-      if(!pCONT_sto->client.connected()) {
-        pCONT_sto->client = pCONT_sto->server->available();
-      }
-      if(pCONT_sto->client.connected()) {
-        pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
-      }
+  // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
+    // if(pCONT_sto->server!=nullptr){ // needs ignored before it has been started!
+    
+  if(pCONT_sto->Telnet){
+    //   if(!pCONT_sto->client.connected()) {
+      
+    //     pCONT_sto->client = pCONT_sto->server->available();
+    //   }
+    
+  pCONT_sto->Telnet.printf(
+    // "uptime2: ");
+    //   if(pCONT_sto->client.connected()) {
+    //     pCONT_sto->client.printf(
+      "%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    //   }
+    // }
     }
-  }
+
+
+  // }
   #endif
 
   // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
@@ -189,11 +219,31 @@ void AddLog_P(
   
   // SERIAL_DEBUG.printf("%s %d\r\n","end",millis());
 
-  #endif
 
 }
 
 
+
+void mLogging::handleTelnet(){
+  if(!TelnetServer) return; //not configured yet
+  if (TelnetServer->hasClient()){
+  	// client is connected
+    if (!Telnet || !Telnet.connected()){
+      if(Telnet) Telnet.stop();          // client disconnected
+      Telnet = TelnetServer->available(); // ready for new client
+    } else {
+      TelnetServer->available().stop();  // have client, block new conections
+    }
+  }
+
+  if (Telnet && Telnet.connected() && Telnet.available()){
+    // client input processing
+    while(Telnet.available())
+      char c = Telnet.read();//dump values
+      // Serial.write(Telnet.read()); // pass through
+      // do other stuff with client input here
+  } 
+}
 
 
 // For sending without network during uploads
@@ -333,16 +383,28 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   }
 
   // LOG : TELNET
-  if (loglevel <= pCONT_set->Settings.telnetlog_level) {
-    if((pCONT_sto!=NULL)&&(pCONT_sto->server!=NULL)){
-      if(!pCONT_sto->client.connected()) {
-        pCONT_sto->client = pCONT_sto->server->available();
-      }
-      if(pCONT_sto->client.connected()) {
-        pCONT_sto->client.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
-      }
+  // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
+  //   if((pCONT_sto!=NULL)&&(pCONT_sto->server!=NULL)){
+  //     if(!pCONT_sto->client.connected()) {
+  //       pCONT_sto->client = pCONT_sto->server->available();
+  //     }
+  //     if(pCONT_sto->client.connected()) {
+  //       pCONT_sto->client.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  //     }
+  //   }
+  // }
+  if(pCONT_sto->Telnet){
+    //   if(!pCONT_sto->client.connected()) {
+      
+    //     pCONT_sto->client = pCONT_sto->server->available();
+    //   }
+    
+  pCONT_sto->Telnet.println("uptime: ");
+    //   if(pCONT_sto->client.connected()) {
+    //     pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    //   }
+    // }
     }
-  }
 
   // LOG : WEBSERVER
   #ifdef USE_MODULE_CORE_WEBSERVER
@@ -619,6 +681,21 @@ int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char 
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "Response_P %s"),pCONT_set->response_msg);
   return 0;// len + mlen;
 }
+
+
+void mLogging::StartTelnetServer(){
+  
+  // TelnetServer.begin();
+
+
+  TelnetServer = new WiFiServer(TELNET_PORT);  // set port here
+  TelnetServer->begin();
+
+  telnet_started = true;
+  // if(seriallog)
+  // AddLog_P(LOG_LEVEL_INFO, PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
+}
+
 
 
 //enum LoggingLevels {LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, 
