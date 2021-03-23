@@ -407,9 +407,15 @@ enum EmulationOptions {EMUL_NONE, EMUL_WEMO, EMUL_HUE, EMUL_MAX};
 
 enum TopicOptions { CMND, STAT, TELE, nu1, RESULT_OR_CMND, RESULT_OR_STAT, RESULT_OR_TELE };
 
+// Change these to have matching words
 enum ExecuteCommandPowerOptions { POWER_OFF, POWER_ON, POWER_TOGGLE, POWER_BLINK, POWER_BLINK_STOP,
                                   POWER_OFF_NO_STATE = 8, POWER_ON_NO_STATE, POWER_TOGGLE_NO_STATE,
                                   POWER_SHOW_STATE = 16 };
+// enum POWER_COMMAND_IDS{
+//   POWER_COMMAND_OFF_ID,
+//   POWER_COMMAND_ON_ID,
+//   POWER_COMMAND_TOGGLE_ID,
+// };
                                   
 enum PowerOnStateOptions { 
   POWER_ALL_OFF, 
@@ -593,12 +599,16 @@ enum XsnsFunctions {
   /**
    * Group of "Events" functions, which are called when sections of the code execute
    * */
-  FUNC_EVENT_INPUT_STATE_CHANGED,
-  FUNC_EVENT_SET_POWER,
+  FUNC_EVENT_INPUT_STATE_CHANGED_ID,
+  FUNC_EVENT_SET_POWER_ID,
 
 
   FUNC_FINALLY_END_OF_LOOP // Ran at the end of each loop, used to reset flags that should have been handled eg motion
 };
+
+
+
+
 
 enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, SRC_BACKLOG, SRC_SERIAL, SRC_WEBGUI, SRC_WEBCOMMAND, SRC_WEBCONSOLE, SRC_PULSETIMER,
                      SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
@@ -774,6 +784,7 @@ uint8_t *settings_buffer = nullptr;
 uint32_t rtc_reboot_crc = 0;
 #endif // ESP8266
 
+int16_t GetFunctionIDbyFriendlyName(const char* c);
 
 void SettingsLoad_CheckSuccessful();
 
@@ -1210,6 +1221,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint8_t function_template_parse_success : 2;          // bit 1              - SetOption1  - Control button multipress
     uint8_t decimal_precision : 2;        // bit 2,3   4 levels [0,1,2,3]
     uint8_t mdns_started_succesfully: 1;
+    uint8_t rules_template_parse_success : 1;
   };
 } SysBitfield_BootStatus;
 

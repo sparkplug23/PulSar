@@ -29,6 +29,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif //USE_MODULE_CORE_WEBSERVER
   if(mso  == nullptr){ mso  = new mLogging(); }
   if(mtel == nullptr){ mtel = new mTelemetry(); }
+
+
+  if(mrules == nullptr){ mrules = new mRuleEngine();}//100); }
   
   // Sensors
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
@@ -172,6 +175,7 @@ uint8_t mTaskerManager::Instance_Init(){
     if(msenscol == nullptr){ msenscol = new mSensorColours(); }
   #endif
 
+
 }
 
 void mTaskerManager::Init_InterfaceHandler(){
@@ -220,6 +224,14 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_CORE_SUPPORT_ID
     module_settings.list[module_settings.count++] = D_MODULE_CORE_SUPPORT_ID;
   #endif
+  #ifdef D_MODULE_CORE_HARDWAREPINS_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CORE_HARDWAREPINS_ID;
+  #endif
+  #ifdef D_MODULE_CORE_RULES_ID
+    module_settings.list[module_settings.count++] = D_MODULE_CORE_RULES_ID;
+  #endif
+
+
   #ifdef D_MODULE_NETWORK_WEBSERVER_ID
     module_settings.list[module_settings.count++] = D_MODULE_NETWORK_WEBSERVER_ID;
   #endif
@@ -234,9 +246,6 @@ uint8_t mTaskerManager::InitClassList(){
   #endif
   #ifdef D_MODULE_SENSORS_ANALOG_ID
     module_settings.list[module_settings.count++] = D_MODULE_SENSORS_ANALOG_ID;
-  #endif
-  #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_HARDWAREPINS_ID;
   #endif
 
   // Sensors
@@ -558,6 +567,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   }else
   if(function==FUNC_PRE_INIT){
     InitClassList();
+    // InitRules();
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "FUNC_PRE_INIT  GetClassCount %d"),module_settings.count);
     #endif// ENABLE_LOG_LEVEL_INFO
@@ -679,6 +689,18 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
           // #endif
           break;
       #endif
+      #ifdef D_MODULE_CORE_RULES_ID
+        case D_MODULE_CORE_RULES_ID:  
+        
+          // #ifdef DISBALE_TEST_SECTION
+          result = mrules->Tasker(function); 
+          
+          
+          // #endif
+          break;
+      #endif
+
+
       //Sensors
       #ifdef D_MODULE_SENSORS_DOOR_ID
         case D_MODULE_SENSORS_DOOR_ID:       result = mds->Tasker(function); break;
@@ -1035,6 +1057,13 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
     case D_MODULE_CORE_SETTINGS_ID:    return PM_MODULE_CORE_SETTINGS_CTR;
     case D_MODULE_CORE_SUPPORT_ID:     return PM_MODULE_CORE_SUPPORT_CTR;
     case D_MODULE_CORE_HARDWAREPINS_ID:     return PM_MODULE_CORE_HARDWAREPINS_CTR;
+    #ifdef D_MODULE_CORE_RULES_ID
+      case D_MODULE_CORE_RULES_ID:        return PM_MODULE_CORE_RULES_CTR;
+    #endif
+
+
+
+
     #ifdef D_MODULE_CUSTOM_HEATING_ID
       case D_MODULE_CUSTOM_HEATING_ID:         return PM_MODULE_CUSTOM_HEATING_CTR;
     #endif
@@ -1101,6 +1130,20 @@ PGM_P mTaskerManager::GetClassName(uint8_t task){
 
 
 
+int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
+
+  if(c=='\0'){
+    return -1;
+  }
+  if(strcasecmp_P(c,PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)==0){ return D_MODULE_DRIVERS_RELAY_ID; }
+
+
+  if(strcasecmp_P(c,PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR)==0){ return D_MODULE_SENSORS_SWITCHES_ID; }
+
+
+  return -1;
+}
+
 
 
 
@@ -1125,6 +1168,9 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
     #endif
     #ifdef D_MODULE_CORE_TIME_ID
       case D_MODULE_CORE_TIME_ID:             return PM_MODULE_CORE_TIME_FRIENDLY_CTR; 
+    #endif
+    #ifdef D_MODULE_CORE_RULES_ID
+      case D_MODULE_CORE_RULES_ID:        return PM_MODULE_CORE_RULES_FRIENDLY_CTR;
     #endif
 // Displays (30-39)
     #ifdef D_MODULE_DISPLAYS_NEXTION_ID
@@ -1286,137 +1332,3 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
 }
   
 
-
-
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
-/**
- * 
- * Linking
- * 
- * */
-
-  // struct SOURCE_PARAMETERS{
-    
-  // }source_parameters;
-/**
- *  Case 1: Switch 1, then Relay 1
- * 
- *  source_id=switches, param1=switch index, destination_id = relays, param1 = relay1, param2 = state
- * 
- * */
-
-// All events here will only trigger based of function calls, when those occur happen throughout code
-void mTaskerManager::Tasker_Rules_Interface(uint16_t function_input){
-
-
-//maybe need to return rule(s) handled then leave taasker_interface
-
-
-  for (
-    int rule_index=0;rule_index<2;rule_index++){
-
-    // Check this rule must act of the function
-    if(rules[rule_index].event.source.function_id == function_input){
-
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface rule%d"),rule_index);
-
-      rules_active_index = rule_index;
-
-      // Also check switch_index against rule index
-      if(rules[rule_index].event.source.index == Event.index){
-        AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Event.index rule%d"),Event.index);
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
-        
-        
-      // char message[50];
-      // memset(message,0,sizeof(message));
-      // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
-      // pCONT_mqtt->ppublish("status/debug/rules",message,false); //reconnect message
-
-        Tasker_Interface(
-          rules[rule_index].event.destination.function_id, // function the previous trigger is linked to
-          rules[rule_index].event.destination.module_id, //target module
-          true  // runnig a rule, so don't call this loop back into this function
-        );
-
-      }
-
-    }
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-  
-}
-
-void mTaskerManager::Tasker_Rules_Init(){
-
-  // struct BUTTON_PRESSED_EVENT{
-  //   uint8_t index = 0;
-  //   uint8_t state_now = 0;
-  //   uint8_t state_prev = 0;
-  //   uint8_t press_type = 0; //single (0), multiple (1-10), long (11)
-  // }button_event;
-
-
-  //test 1: switch 1 = relay 1, switch 2 = relay 2
-
-  rules[0].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-  rules[0].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-  // rules[0].event.source.encoding = 0; // type switch
-  // rules[0].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
-  rules[0].event.source.index = 0;
-  rules[0].event.source.state = 2; //toggle
-  #ifdef D_MODULE_DRIVERS_RELAY_ID
-  rules[0].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
-  rules[0].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  rules[0].event.destination.index = 0;
-  rules[0].event.destination.state = 2; //toggle
-  #endif // D_MODULE_DRIVERS_RELAY_ID
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-  rules[0].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-  rules[0].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  rules[0].event.destination.index = 0;
-  rules[0].event.destination.state = 2; //toggle
-  #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
-  
-  rules[1].event.source.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-  rules[1].event.source.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-  // rules[1].event.source.encoding = 0; // type switch
-  // rules[1].event.source.param_buffer = reinterpret_cast<uint8_t*>(&button_event);
-  rules[1].event.source.index = 1;
-  rules[1].event.source.state = 2; //toggle
-  #ifdef D_MODULE_DRIVERS_RELAY_ID
-  rules[1].event.destination.module_id = D_MODULE_DRIVERS_RELAY_ID;
-  rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  rules[1].event.destination.index = 0;
-  rules[1].event.destination.state = 2; //toggle
-  #endif // D_MODULE_DRIVERS_RELAY_ID
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-  rules[1].event.destination.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-  rules[1].event.destination.function_id = FUNC_EVENT_SET_POWER;
-  rules[1].event.destination.index = 1;
-  rules[1].event.destination.state = 2; //toggle
-  #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
-  
-
-
-
-
-
-
-  
-}
-
-
-
-#endif// ENABLE_DEVFEATURE_RULE_ENGINE

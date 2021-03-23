@@ -30,7 +30,9 @@
 #include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
 #endif // D_USER_MICHAEL
 
-
+#ifdef ENABLE_DEVFEATURE_RULE_ENGINE_ADVANCED
+#include "2_CoreSystem/RuleEngine/mRuleEngine.h"
+#endif
 
 // #ifdef D_USER_MICHAEL // Include my personally named secret file
 // #include "0_ConfigUser/mFirmwareCustom_Secret_Michael.h"
@@ -224,6 +226,19 @@ class mTime;
 #define            pCONT_time                               pCONT->mt
 DEFINE_PGM_CTR(PM_MODULE_CORE_TIME_CTR)                     "mTime";
 DEFINE_PGM_CTR(PM_MODULE_CORE_TIME_FRIENDLY_CTR)            "time";
+
+
+#ifdef USE_MODULE_CORE_RULES
+#include "2_CoreSystem/RuleEngine/mRuleEngine.h"
+class mRuleEngine;
+#define            D_MODULE_CORE_RULES_ID 6
+#define            pCONT_rules                               pCONT->mrules
+DEFINE_PGM_CTR(PM_MODULE_CORE_RULES_CTR)                     "mRules";
+DEFINE_PGM_CTR(PM_MODULE_CORE_RULES_FRIENDLY_CTR)            "rules";
+#endif // USE_MODULE_CORE_RULES
+
+
+
 
 // Network (20-29)
 
@@ -700,6 +715,12 @@ DEFINE_PGM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_DEBUG
 
 
 
+DEFINE_PGM_CTR(PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR;
+DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)   D_FUNC_EVENT_SET_POWER_CHANGED_CTR;
+
+
+
+
 
 class mTaskerManager{
 
@@ -736,7 +757,7 @@ class mTaskerManager{
     mTime *mt = nullptr;
     mMQTT *mqt = nullptr;
 
-
+    mRuleEngine* mrules = nullptr;
 
     mWiFi *mwif = nullptr;
     mTelemetry *mtel = nullptr;
@@ -910,10 +931,10 @@ class mTaskerManager{
   struct CLASS_ID{
     uint8_t list[CLASS_ID_MAX];
     uint8_t module_type[CLASS_ID_MAX];
-    #ifdef DEBUG_EXECUTION_TIME
-    uint16_t execution_time_average_ms[CLASS_ID_MAX];
-    uint16_t execution_time_max_ms[CLASS_ID_MAX];
-    #endif
+    // #ifdef DEBUG_EXECUTION_TIME
+    // uint16_t execution_time_average_ms[CLASS_ID_MAX];
+    // uint16_t execution_time_max_ms[CLASS_ID_MAX];
+    // #endif
     uint8_t count = 0;
   }module_settings; 
 
@@ -922,77 +943,10 @@ class mTaskerManager{
   uint8_t fExitTaskerWithCompletion = false;
 
   uint8_t switch_index = 0;
-
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
   
-    #define D_MAX_RULES 10
+  int16_t GetModuleIDbyFriendlyName(const char* c);
 
-    struct RULES{
-      bool enabled = true;
-      struct EVENT{
-        uint16_t trigger_function_id = 999; // not active
-        struct SOURCE{
-          uint16_t module_id;
-          uint16_t function_id;
-          //advanced method
-          uint16_t encoding = 0; // unspecified
-          uint8_t *param_buffer = nullptr;
-          uint8_t buffer_len = 0;
-          //simple method
-          uint8_t index;
-          uint8_t state;
-        }source;
-        struct DESTINATION{
-          uint16_t module_id;
-          uint16_t function_id;
-          //advanced method
-          uint16_t encoding = 0; // unspecified
-          uint8_t *param_buffer = nullptr;
-          uint8_t buffer_len = 0;
-          //simple method
-          uint8_t index;
-          uint8_t state;
-        }destination;
-      }event;
-    }rules[D_MAX_RULES];
-    uint8_t rules_active_index = 0;
-
-    // Rules to match above, now the storage of the event itself so it can be matched
-    struct EVENT_TRIGGERED{
-
-      // what should be passed into the rules for checking against source, needed for multiple button/sensors
-      uint16_t module_id;
-      uint16_t function_id;
-      //advanced method
-      // uint16_t encoding = 0; // unspecified
-      // uint8_t *param_buffer = nullptr;
-      // uint8_t buffer_len = 0;
-      //simple method
-      uint8_t index; //ie sensor number
-      uint8_t state;
-
-
-    }Event;
-
-    void Event_Reset(){
-      Event.module_id = 0;
-      Event.function_id = 0;
-      Event.index = 0;
-      Event.state = 0;
-    };
-    void Event_Add(uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
-      Event.module_id = _module_id;
-      // function_id = _function_id;
-      Event.index = _index;
-      Event.state = _state;
-    };
-
-
-
-    void Tasker_Rules_Interface(uint16_t function);
-    void Tasker_Rules_Init();
-
-#endif // ENABLE_DEVFEATURE_RULE_ENGINE
+  #include "1_TaskerManager/mTaskerManager_RuleEngine.h"
 
 };
 

@@ -305,80 +305,54 @@ void mSettings::Function_Template_Load(){
   #endif
 
   boot_status.function_template_parse_success = 0;
+  boot_status.rules_template_parse_success = 0;
 
-  #ifdef USE_FUNCTION_TEMPLATE
-  // load from progmem
-  // uint16_t progmem_size = sizeof(FUNCTION_TEMPLATE);
-  // progmem_size = progmem_size>1500?1500:progmem_size;
-  // create parse buffer
-  // char buffer[progmem_size];
-  // Read into local
-  // memcpy_P(buffer,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
-
-  
+  #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
   D_DATA_BUFFER_CLEAR();
   memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_TEST, PSTR("FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ENABLE_LOG_LEVEL_INFO
 
-// #ifdef ENABLE_DEVFEATURE_ARDUINOJSON
-//   StaticJsonDocument<2000> doc;//(1500);
-//   DeserializationError error = deserializeJson(doc, buffer);
-
-//   if(error){
-//     boot_status.function_template_parse_success = 2;
-//     // Serial.println(error.c_str());
-
-//     switch (error.code()) {
-//     case DeserializationError::Ok:
-//         Serial.print(F("Deserialization succeeded"));
-//         break;
-//     case DeserializationError::InvalidInput:
-//         Serial.print(F("Invalid input!"));
-//         break;
-//     case DeserializationError::NoMemory:
-//         Serial.print(F("Not enough memory"));
-//         break;
-//     default:
-//         Serial.print(F("Deserialization failed"));
-//         break;
-// }
-
-
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    
-//     // delay(3000);
-    
-//     return;
-//   }
-//   JsonObjectConst obj = doc.as<JsonObject>();
-
-//  // json_object_const = obj;
-
-//   // clear old buffer
-//   pCONT_set->ClearAllDeviceName();
-
-//   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_OBJECT, doc.as<JsonObjectConst>());
-
-// #endif// ENABLE_DEVFEATURE_ARDUINOJSON
-
-
-  // pCONT_set->ClearAllDeviceName();
-
-   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);//_OBJECT, doc.as<JsonObjectConst>());
-
-//  parse_JSONCommand();
-
-
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
   boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
 
+
+  #ifdef USE_RULES_TEMPLATE
+  // Read into local
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_TEST, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  #endif // ENABLE_LOG_LEVEL_INFO
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  boot_status.rules_template_parse_success = 1;
+  #endif //USE_RULES_TEMPLATE
+
   
+}
+
+int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
+
+  if(c=='\0'){
+    return -1;
+  }
+  if(strcasecmp_P(c,PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return FUNC_EVENT_INPUT_STATE_CHANGED_ID; }
+
+
+  if(strcasecmp_P(c,PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)==0){ return FUNC_EVENT_SET_POWER_ID; }
+
+
+  return -1;
 }
 
 
@@ -411,7 +385,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
       // }
 
     break;
-    case FUNC_EVERY_SECOND:
+    case FUNC_EVERY_SECOND:{
 
     // Function_Template_Load();
 
@@ -421,8 +395,83 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
       //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
        // AddLog_P(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
-    break;
+     } break;
     case FUNC_EVERY_FIVE_SECOND:{
+
+
+#ifdef ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
+
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  #endif // ENABLE_LOG_LEVEL_INFO
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  
+
+  D_DATA_BUFFER_CLEAR();
+
+  // char buffer_unescaped[100];
+  
+  // pCONT_sup->GetTextIndexed(
+  //   buffer_unescaped, 
+  //   sizeof(buffer_unescaped), 
+  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
+  //   pCONT_rules->jsonbuffer.data
+  // ); 
+
+  // for(int i=0;i<strlen(buffer_unescaped);i++){
+  //   // if(buffer_unescaped[i] == '\"'){
+  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
+  //   // }else{    
+  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
+  //   // }
+  // }
+  
+  // char buffer_unescaped[100];
+  
+  pCONT_sup->GetTextIndexed(
+    data_buffer.payload.ctr, 
+    sizeof(data_buffer.payload.ctr), 
+    pCONT_rules->rules[0].command.json_commands_dlist_id, 
+    pCONT_rules->jsonbuffer.data
+  ); 
+  data_buffer.payload.len += strlen(data_buffer.payload.ctr);
+
+  // for(int i=0;i<strlen(buffer_unescaped);i++){
+  //   // if(buffer_unescaped[i] == '\"'){
+  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
+  //   // }else{    
+  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
+  //   // }
+  // }
+  
+
+  // sprintf(data_buffer.payload.ctr,"\"");
+  
+  // pCONT_sup->GetTextIndexed(
+  //   data_buffer.payload.ctr+strlen(data_buffer.payload.ctr), 
+  //   sizeof(data_buffer.payload.ctr), 
+  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
+  //   pCONT_rules->jsonbuffer.data
+  // ); 
+  // sprintf(data_buffer.payload.ctr+strlen(data_buffer.payload.ctr),"\"");
+
+  AddLog_P(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID1=%s"),data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  
+  // snprintf(data_buffer.payload.ctr,pCONT_rules->rules[0].command.);
+  // // memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
+  // data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+#endif // ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
+
+
 
       // int8_t device_id;
       // int8_t class_id = D_MODULE_DRIVERS_RELAY_ID;

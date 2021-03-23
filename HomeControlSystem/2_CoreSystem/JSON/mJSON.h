@@ -47,9 +47,9 @@ class JsonBuilder{
     JsonBuilder(){};
     
     struct WRITER_POINTERS{
-        char*     buffer = nullptr;
-        uint16_t  buffer_size = 0;
-        uint16_t* length = nullptr;
+      char*     buffer = nullptr;
+      uint16_t  buffer_size = 0;
+      uint16_t* length = nullptr;
     }writer;
 
   public:

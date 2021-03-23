@@ -105,7 +105,7 @@ class mSwitches{
       uint8_t switch_state_buf; //[MAX_SWITCHES] = { 0 };
       uint8_t switch_virtual;   //[MAX_SWITCHES]; 
 
-      uint8_t is_linked_to_internal_relay = false;
+      // uint8_t is_linked_to_internal_relay = false;
       int8_t linked_internal_relay_id = -1; // -1 inactive
 
       // uint32_t tDetectTime;

@@ -142,6 +142,8 @@
 #define D_FUNC_WEB_SYSTEM_INFO_CTR                          "WEB_SYSTEM_INFO"
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
+#define   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "StateChanged"
+#define   D_FUNC_EVENT_SET_POWER_CHANGED_CTR   "SetPower"
 
 // Module names
 #define D_MODULE_CORE_HARDWAREPINS_CTR            "mHardwarePins"
@@ -160,6 +162,10 @@
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
+
+#define D_MODULE_CORE_RULES_CTR            "Rules"
+#define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
+
 //#ifdef USE_MODULE_CORE_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"

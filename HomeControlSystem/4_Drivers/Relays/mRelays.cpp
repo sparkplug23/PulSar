@@ -109,13 +109,11 @@ int8_t mRelays::Tasker(uint8_t function){
     /************
      * RULES SECTION * 
     *******************/
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
-    case FUNC_EVENT_SET_POWER:
+    #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+    case FUNC_EVENT_SET_POWER_ID:
       RulesEvent_Set_Power();
-
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVENT_SET_POWER"));
     break;
-#endif// ENABLE_DEVFEATURE_RULE_ENGINE
+    #endif// ENABLE_DEVFEATURE_RULE_ENGINE
     /************
      * MQTT SECTION * 
     *******************/
@@ -160,18 +158,21 @@ void mRelays::SubTask_Every_Minute(){
 
 void mRelays::RulesEvent_Set_Power(){
 
-  
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
-
-      uint8_t relay_index = pCONT->rules[pCONT->rules_active_index].event.destination.index;
-
-      uint8_t relay_state = pCONT->rules[pCONT->rules_active_index].event.destination.state;
-
-
-          pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
+  // struct RELAY_EVENT_PARAMETERS{
+  //   uint8_t index;
+  //   uint8_t state;
+  //   uint8_t state;
+  // }rule_event_layout;
 
 
+  AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
+  uint8_t relay_index = pCONT->mrules->rules[pCONT->mrules->rules_active_index].command.device_id;
+
+  uint8_t relay_state = pCONT->mrules->rules[pCONT->mrules->rules_active_index].command.value.data[0];
+
+
+  pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
 
 }
 #endif // ENABLE_DEVFEATURE_RULE_ENGINE

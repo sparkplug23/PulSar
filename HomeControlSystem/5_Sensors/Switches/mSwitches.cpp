@@ -319,18 +319,9 @@ void mSwitches::SwitchHandler(uint8_t mode)
         if (switchflag < 3) {
           //update the event
           #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
-          pCONT->Event_Reset();
-          pCONT->Event_Add(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
-          pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED);
-          #endif // ENABLE_DEVFEATURE_RULE_ENGINE
-          #ifndef ENABLE_DEVFEATURE_RULE_ENGINE
-          #ifdef USE_MODULE_DRIVERS_RELAY
-          // AddLog_P(LOG_LEVEL_TEST,PSTR("ExecuteCommandPower")); 
-          // if(is_linked_to_internal_relay){}
-          // if(linked_internal_relay_id>=0)
-          // pCONT_mry->ExecuteCommandPower(linked_internal_relay_id, switchflag, SRC_SWITCH);
-          pCONT_mry->ExecuteCommandPower(i, switchflag, SRC_SWITCH);
-          #endif    
+          pCONT->mrules->Reset();
+          pCONT->mrules->Add_All(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
+          pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
           #endif // ENABLE_DEVFEATURE_RULE_ENGINE
         }
 
@@ -470,7 +461,7 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
         JsonBuilderI->Add("holdwallswitch", switches[sensor_id].holdwallswitch);
         JsonBuilderI->Add("switch_state_buf", switches[sensor_id].switch_state_buf);
         JsonBuilderI->Add("switch_virtual", switches[sensor_id].switch_virtual);
-        JsonBuilderI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
+        // JsonBuilderI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
         JsonBuilderI->Add("linked_internal_relay_id", switches[sensor_id].linked_internal_relay_id);
       JsonBuilderI->Level_End();
       
