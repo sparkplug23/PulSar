@@ -133,9 +133,9 @@ class mShellyDimmer{
       bool hardware_serial_active = false;
     } Shd;
 
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+#ifdef USE_MODULE_CORE_RULES
 void RulesEvent_Set_Power();
-#endif // ENABLE_DEVFEATURE_RULE_ENGINE
+#endif // USE_MODULE_CORE_RULES
 
 
     uint16_t checksum(uint8_t *buf, int len);

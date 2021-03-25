@@ -30,7 +30,7 @@
 #include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
 #endif // D_USER_MICHAEL
 
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE_ADVANCED
+#ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
 #endif
 
@@ -714,7 +714,7 @@ DEFINE_PGM_CTR(PM_FUNC_WEB_SYSTEM_INFO_CTR)                         D_FUNC_WEB_S
 DEFINE_PGM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_DEBUG_CONFIGURE_CTR;
 
 
-
+DEFINE_PGM_CTR(PM_FUNC_EVENT_MOTION_STARTED_CTR)  D_FUNC_EVENT_MOTION_STARTED_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)   D_FUNC_EVENT_SET_POWER_CHANGED_CTR;
 
@@ -757,7 +757,9 @@ class mTaskerManager{
     mTime *mt = nullptr;
     mMQTT *mqt = nullptr;
 
+    #ifdef USE_MODULE_CORE_RULES
     mRuleEngine* mrules = nullptr;
+    #endif // USE_MODULE_CORE_RULES
 
     mWiFi *mwif = nullptr;
     mTelemetry *mtel = nullptr;
@@ -945,8 +947,6 @@ class mTaskerManager{
   uint8_t switch_index = 0;
   
   int16_t GetModuleIDbyFriendlyName(const char* c);
-
-  #include "1_TaskerManager/mTaskerManager_RuleEngine.h"
 
 };
 

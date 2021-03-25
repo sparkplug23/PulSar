@@ -20,7 +20,7 @@ class mRuleEngine{
     // RuleEngine(){};
     
   public:
-    #define D_MAX_RULES 10
+    #define D_MAX_RULES 5
 
     uint8_t* data = nullptr;
     uint16_t _dataLen = 0;
@@ -29,7 +29,7 @@ class mRuleEngine{
     struct JSONCOMMANDS{
       char data[255] = {0}; //use | delims
       uint8_t bytes_used = 0;
-      int8_t delims_used = -1;
+      int8_t delims_used = 0;
 
     }jsonbuffer;
 
@@ -45,28 +45,28 @@ class mRuleEngine{
     // };
     mRuleEngine(){};
 
-    ~mRuleEngine(){
-      deallocateData();
-    };
+    // ~mRuleEngine(){
+    //   deallocateData();
+    // };
 
-    bool allocateData(uint16_t len){
-      // Serial.println("allocateData");
-      if (data && _dataLen == len) return true; //already allocated
-      deallocateData();
-      data = new (std::nothrow) byte[len];
-      if (!data) return false; //allocation failed
-      _dataLen = len;
-      for(int i=0;i<_dataLen;i++){data[i] = 0;}
-      _dataUsedLen = 0;
-      //   memset(data, 0, len*sizeof(TYPE));
-      return true;
-    }
+    // bool allocateData(uint16_t len){
+    //   // Serial.println("allocateData");
+    //   if (data && _dataLen == len) return true; //already allocated
+    //   deallocateData();
+    //   data = new (std::nothrow) byte[len];
+    //   if (!data) return false; //allocation failed
+    //   _dataLen = len;
+    //   for(int i=0;i<_dataLen;i++){data[i] = 0;}
+    //   _dataUsedLen = 0;
+    //   //   memset(data, 0, len*sizeof(TYPE));
+    //   return true;
+    // }
 
-    void deallocateData(){
-      delete[] data;
-      data = nullptr;
-      _dataLen = 0;
-    };
+    // void deallocateData(){
+    //   delete[] data;
+    //   data = nullptr;
+    //   _dataLen = 0;
+    // };
 
     // // External function to get instance
     // static RuleEngine* GetInstance();
@@ -181,11 +181,26 @@ class mRuleEngine{
     void Encoding( uint8_t encoding){
       event_triggered.value.encoding = encoding;
     };
+    //create arg version
+    void New_Event(uint16_t _module_id=0, uint8_t _device_id=0, uint8_t data1=0, uint8_t data2=0){
+      Reset();
+      event_triggered.module_id = _module_id;
+      event_triggered.device_id = _device_id;
+      event_triggered.value.data[0] = data1;
+      event_triggered.value.data[1] = data2;
+      event_triggered.value.encoding = 0; //bytes
+      event_triggered.value.length = 1; //bytes
+
+
+    }
 
     
     void parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event);
 
     
+    void Tasker_Rules_Interface(uint16_t function);
+    // void Tasker_Rules_Init();
+
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
 
 

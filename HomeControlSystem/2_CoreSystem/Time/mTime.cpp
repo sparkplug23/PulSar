@@ -434,7 +434,7 @@ const char* mTime::ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uin
 time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
 
   bool includes_week = false;
-  time_short_t time_s = {0, 0, 0, 0};
+  time_short_t time_s = {255, 255, 255, 255}; //invalid time of 255 max range
 
   if(strstr(time_ctr, "D")){
     //wwDHH:MM:SS // 11 bytes
@@ -591,30 +591,26 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
   int32_t time_until_start = RtcTime.Dseconds-start_sod; 
   int32_t time_until_end = end_sod-RtcTime.Dseconds;
 
+  //if times are equal, return early as false
+  if(start_sod == end_sod) return false;
+
   //need to add check if start>end, then add 24 hours
   if(end_sod < start_sod){
     end_sod += SECS_PER_DAY;
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
   }
 
-  // #ifdef SERIAL_DEBUG_HIGH_LEVEL
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
-      start->hour,start->minute,start->second,time_until_start,
-      RtcTime.Dseconds,
-      time_until_end,end->hour,end->minute,end->second
-    ); 
-    
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d<%02d (%02d) | %02d<%02d (%02d)"),
-    //   start_sod,RtcTime.Dseconds,(start_sod < RtcTime.Dseconds?1:0),
-    //   RtcTime.Dseconds,end_sod,(RtcTime.Dseconds < end_sod)?1:0
-    // );
-    #endif// ENABLE_LOG_LEVEL_INFO
-    
-   if((start_sod < RtcTime.Dseconds)&&(RtcTime.Dseconds < end_sod)){ //now>start AND now<END
-     return 1;
-   }
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+    start->hour,start->minute,start->second,time_until_start,
+    RtcTime.Dseconds,
+    time_until_end,end->hour,end->minute,end->second
+  );
+  #endif// ENABLE_LOG_LEVEL_INFO
+  
+  if((start_sod < RtcTime.Dseconds)&&(RtcTime.Dseconds < end_sod)){ //now>start AND now<END
+    return 1;
+  }
   return 0;
 
 }

@@ -142,6 +142,7 @@
 #define D_FUNC_WEB_SYSTEM_INFO_CTR                          "WEB_SYSTEM_INFO"
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
+#define D_FUNC_EVENT_MOTION_STARTED_CTR "MotionStarted"
 #define   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "StateChanged"
 #define   D_FUNC_EVENT_SET_POWER_CHANGED_CTR   "SetPower"
 

@@ -104,11 +104,11 @@ int8_t mShellyDimmer::Tasker(uint8_t function){
     /************
      * RULES SECTION * 
     *******************/
-    case FUNC_EVENT_SET_POWER:
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_POWER_ID:
       RulesEvent_Set_Power();
-
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVENT_SET_POWER"));
     break;
+    #endif// USE_MODULE_CORE_RULES
     /************
      * MQTT SECTION * 
     *******************/
@@ -141,22 +141,24 @@ int8_t mShellyDimmer::Tasker(uint8_t function){
 } // END Tasker
 
 
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+#ifdef USE_MODULE_CORE_RULES
 
 void mShellyDimmer::RulesEvent_Set_Power(){
 
   
       AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
-      uint8_t relay_index = pCONT->rules[pCONT->rules_active_index].event.destination.index;
+      uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
-      uint8_t relay_state = pCONT->rules[pCONT->rules_active_index].event.destination.state;
+      uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+
+      uint8_t brightness_on_value = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1];
 
       if(relay_state==2){
         if(Shd.req_brightness){
           Shd.req_brightness = 0;
         }else{
-          Shd.req_brightness = 1000;
+          Shd.req_brightness = map(brightness_on_value,0,100,0,1000);
         }
       }
 
@@ -171,7 +173,7 @@ void mShellyDimmer::RulesEvent_Set_Power(){
 
 
 }
-#endif // ENABLE_DEVFEATURE_RULE_ENGINE
+#endif // USE_MODULE_CORE_RULES
 
 
 uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_method){

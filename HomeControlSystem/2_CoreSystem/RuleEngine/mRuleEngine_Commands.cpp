@@ -1,6 +1,7 @@
 
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
 
+#ifdef USE_MODULE_CORE_RULES
 
 int8_t mRuleEngine::CheckAndExecute_JSONCommands(){
 
@@ -116,6 +117,30 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
+    if(jtok = jobj["Value"]){
+      if(jtok.isStr()){
+        if((matched_id = pCONT_sup->GetStateNumber(jtok.getStr()))>=0){
+          event->value.data[1] = matched_id;
+          event->value.length++;// = 0;
+          event->value.encoding = ENCODING_BYTES_ID;
+          data_buffer.isserviced++;
+        }
+      }else
+      if(jtok.isNum()){
+        event->value.data[1] = jtok.getInt();
+        event->value.length++;// = 0;
+        event->value.encoding = ENCODING_BYTES_ID;
+        data_buffer.isserviced++;
+      }
+
+      // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
+
+      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
+      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      // #endif // ENABLE_LOG_LEVEL_DEBUG
+    
+    }//end trigger
 
     if(jtok = jobj["JsonCommands"]){
 
@@ -132,7 +157,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
           pCONT_sup->AppendDList(jsonbuffer.data,jtok.getStr());
 
 
-          event->json_commands_dlist_id = 0;//jsonbuffer.delims_used;
+          event->json_commands_dlist_id = jsonbuffer.delims_used;
 
           jsonbuffer.delims_used++;
 
@@ -283,3 +308,4 @@ void mRuleEngine::parse_JSONCommand(){
 
 
 
+#endif // USE_MODULE_CORE_RULES

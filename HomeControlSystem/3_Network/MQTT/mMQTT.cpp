@@ -7,6 +7,9 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
   #endif
 
   switch(function){
+    /************
+     * INIT SECTION * 
+    *******************/
     case FUNC_INIT:
       init();
     break;
@@ -15,6 +18,9 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
   if(pCONT_set->Settings.flag_system.mqtt_enabled){
 
     switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
       case FUNC_LOOP:
 
         if(Mqtt.connected){
@@ -43,6 +49,15 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
       case FUNC_UPTIME_10_MINUTES:
         flag_uptime_reached_reduce_frequency = true;
       break;
+      /************
+       * COMMANDS SECTION * 
+      *******************/
+      case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+        CheckAndExecute_JSONCommands();
+      break;
+      case FUNC_JSON_COMMAND_ID:
+        parse_JSONCommand();
+      break;  
     } // END switch
 
   }//enabled mqtt_enabled
@@ -52,6 +67,114 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
 
 
 
+int8_t mMQTT::CheckAndExecute_JSONCommands(){
+
+  // Check if instruction is for me
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_NETWORK_MQTT_FRIENDLY_CTR)>=0){
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_NETWORK_MQTT_FRIENDLY_CTR));
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+    parse_JSONCommand();
+    return FUNCTION_RESULT_HANDLED_ID;
+  }else{
+    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+  }
+
+}
+
+
+void mMQTT::parse_JSONCommand(void){
+
+
+AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand"));
+
+  // Need to parse on a copy
+  char parsing_buffer[data_buffer.payload.len+1];
+  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
+  JsonParser parser(parsing_buffer);
+  JsonParserObject obj = parser.getRootObject();   
+  if (!obj) { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    #endif// ENABLE_LOG_LEVEL_INFO
+    return;
+  }  
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  // if(parser.)
+
+  // if(obj)
+ 
+  // uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
+
+  if(jtok = obj["MQTTSend"]){
+    // if(jtok.isStr()){
+    //   relay_id = GetRelayIDbyName(jtok.getStr());
+    // }else 
+    // if(jtok.isNum()){
+    //   relay_id  = jtok.getInt();
+    // }
+    AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
+    JsonParserToken jtok_topic = jtok.getObject()["Topic"];
+    JsonParserToken jtok_payload = jtok.getObject()["Payload"];
+
+    AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+    AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+    
+
+    char topic_ctr[100] = {0};
+    char payload_ctr[300] = {0};
+
+    snprintf(topic_ctr, sizeof(topic_ctr), jtok_topic.getStr());
+    snprintf(payload_ctr, sizeof(payload_ctr), jtok_payload.getStr());
+
+    // char payload2_ctr[300] = {0};
+
+    // char buffer_unescaped[200] = {0};
+    char buffer_escaped[200] = {0};
+    uint8_t len  = 0;
+    for(int i=0;i<strlen(payload_ctr);i++){
+        if(payload_ctr[i] == '~'){
+        len+=sprintf(buffer_escaped+len,"\"");
+        }else{    
+        buffer_escaped[len++] = payload_ctr[i];
+        }
+    }
+
+    // mSupport
+
+
+    // jtok_topic.size()
+
+    AddLog_P(LOG_LEVEL_TEST,PSTR("Topic=%s"),topic_ctr);
+    AddLog_P(LOG_LEVEL_TEST,PSTR("Payload=%s"),payload_ctr);
+    AddLog_P(LOG_LEVEL_TEST,PSTR("buffer_escaped=%s"),buffer_escaped);
+
+    // ppublish(jtok_topic.getStr(),jtok_payload.getStr(),false);
+    pubsub->publish(topic_ctr,buffer_escaped,false);
+
+  }else{
+
+    AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand !MQTTSend"));
+  
+  }
+
+  //Search for json sending
+  //{"MQTT"}
+  /**
+   * {"MQTTSend":{"Topic":"kitchenlight4/set/relay","Payload":"{\"PowerName\":0,\"PowerState\":2}"}}
+   * for light, later use a TCP socket for cross comms? though, I would need IP
+   * 
+   * subscribe
+   * 
+
+   */
+
+
+}//end function
 
 
 
@@ -511,33 +634,33 @@ void mMQTT::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 
 //<devicename>/set/<function>/<subfunction>
 //<devicename>/status/<function>/<subfunction>
-void mMQTT::parse_JSONCommand(){
+// void mMQTT::parse_JSONCommand(){
 
-  // // Check if instruction is for me
-  // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/mqtt")>=0){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND " mqtt"));
-  //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  // }else{
-  //   return; // not meant for here
-  // }
+//   // // Check if instruction is for me
+//   // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/mqtt")>=0){
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND " mqtt"));
+//   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   // }else{
+//   //   return; // not meant for here
+//   // }
 
   
     
-  // //new topic names must include pixels
+//   // //new topic names must include pixels
   
-  // if(strstr(data_buffer.topic.ctr,"/system")){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "system"));    
-  //   //isserviced += parsesub_MQTTSettingsCommand();
-  // }else
-  // if(strstr(data_buffer.topic.ctr,"TBD_firmware/information")){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "TBD_firmware/information"));    
-  //   //isserviced += parsesub_FirmwareInformation();
-  // }else
-  // {
-  //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "INVALID"));    
-  // } 
+//   // if(strstr(data_buffer.topic.ctr,"/system")){
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "system"));    
+//   //   //isserviced += parsesub_MQTTSettingsCommand();
+//   // }else
+//   // if(strstr(data_buffer.topic.ctr,"TBD_firmware/information")){
+//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "TBD_firmware/information"));    
+//   //   //isserviced += parsesub_FirmwareInformation();
+//   // }else
+//   // {
+//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC "INVALID"));    
+//   // } 
 
-} // END function
+// } // END function
 
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")

@@ -318,11 +318,11 @@ void mSwitches::SwitchHandler(uint8_t mode)
 
         if (switchflag < 3) {
           //update the event
-          #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+          #ifdef USE_MODULE_CORE_RULES
           pCONT->mrules->Reset();
           pCONT->mrules->Add_All(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
-          #endif // ENABLE_DEVFEATURE_RULE_ENGINE
+          #endif // USE_MODULE_CORE_RULES
         }
 
         switches[i].lastwallswitch = button;

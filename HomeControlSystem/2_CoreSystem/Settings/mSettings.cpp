@@ -348,6 +348,8 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
   }
   if(strcasecmp_P(c,PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return FUNC_EVENT_INPUT_STATE_CHANGED_ID; }
 
+  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
+
 
   if(strcasecmp_P(c,PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)==0){ return FUNC_EVENT_SET_POWER_ID; }
 

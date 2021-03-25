@@ -155,6 +155,9 @@ class mMQTT{
 
     // char lwt_message_ondisconnect_ctr[50];#
   
+int8_t CheckAndExecute_JSONCommands();
+// void parse_JSONCommand(void);
+
 
     // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
     // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);

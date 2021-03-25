@@ -86,118 +86,47 @@ int8_t mSecurityLight::Tasker(uint8_t function){
       // SubTask_Light();
 
     break;
-    //#ifdef USE_MODULE_NETWORKS_MQTT
-    // case FUNC_MQTT_HANDLERS_INIT:
-    // case FUNC_MQTT_HANDLERS_RESET:
-    //   MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    // break;
-    // case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-    //   MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
-    // break;
-    // case FUNC_MQTT_SENDER:
-    //   MQTTHandler_Sender(); //optional pass parameter
-    // break;
-    //#endif
+    case FUNC_EVERY_MINUTE:
+
+    
+    enabled_by_time = pCONT->mt->CheckBetween_Day_DateTimes(&light_control_garden.enabled_starttime,&light_control_garden.enabled_endtime);
+
+
+    break;    // Use the motion to monitor the pins, but then have this control the relay by first checking time
+    case FUNC_EVENT_MOTION_STARTED_ID:
+
+      AddLog_P(LOG_LEVEL_TEST,PSTR("Security light FUNC_EVENT_MOTION_STARTED_ID %d"),pCONT_rules->event_triggered.device_id);
+
+      Event_Motion();
+
+
+    break;
+
+
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init(); 
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif //USE_MQTT
   }
 
 } // END function
 
 
-int8_t mSecurityLight::CheckAndExecute_JSONCommands(){
-
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-
-void mSecurityLight::parse_JSONCommand(void){
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    return;
-  }  
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-
-  // int8_t device_id = -1;
-  // int8_t isserviced=-1;
-
-  // if((device_id = pCONT->mry->GetRelayIDbyName(obj[D_JSON_DEVICE]))>=0){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
-  //   Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
-  // }else{
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
-  //   // Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
-  //   return ; // Unknown device, can't execute
-  // }
-
-  // switch(device_id){
-  //   case LIGHT_DRIVEWAY_ID: light_control_ptr = &light_control_driveway; break;
-  //   case LIGHT_GARDEN_ID: light_control_ptr = &light_control_garden; break;
-  // }
-
-  // if(obj.containsKey(D_JSON_TIME_ON)){
-  //   light_control_ptr->seconds_on = obj[D_JSON_TIME_ON];
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,light_control_ptr->seconds_on);
-  //   Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON,light_control_ptr->seconds_on);
-  //   isserviced++;
-  // }
-
-  // if(obj.containsKey(D_JSON_ONOFF)){
-  //   const char* onoff = obj[D_JSON_ONOFF];
-  //   if(strstr(onoff,"ON")){ 
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"ON\""));
-  //     SetLight(device_id,ON);
-  //     isserviced++;
-  //   }else if(strstr(onoff,"OFF")){
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
-  //     SetLight(device_id,OFF);
-  //     isserviced++;
-  //   }else{
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
-  //   }
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ONOFF,onoff);
-  //   Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ONOFF,onoff);
-  //   isserviced++;
-  // }
-
-}
-
-void mSecurityLight::SubTask_Light(){
-
-/*
-new switch case method/mode
-
-enum AUTOMATIC_LIGHT_MODE{ //should this be in lights instead? probably most if not all of this class can be merged with light, simply having the output as relays
-and the lights "automatic" inside the interface
-
-manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and_day_dust_by_time
-
-
-}
-
-
-
-
-*/
+void mSecurityLight::Event_Motion(){
 
 
   // Automatic
@@ -228,15 +157,49 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
   // }
 
   
-
     //garden
-    // if(pir_detect.isactive && light_control_garden.fEnableAutomaticLight){
-    //   if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_garden.enabled_starttime,&light_control_garden.enabled_endtime)){
-    //     SetLight(LIGHT_GARDEN_ID,TIMED_ON);
-    //   }else{
-    //     SetLight(LIGHT_GARDEN_ID,OFF);
-    //   }
-    // }
+    // if(pir_detect.isactive && 
+    // if(light_control_garden.fEnableAutomaticLight){
+      if(pCONT_rules->event_triggered.device_id == 1){
+      if(light_control_garden.timed_within_limits){
+        SetLight(LIGHT_GARDEN_ID,TIMED_ON);
+      }else{
+        SetLight(LIGHT_GARDEN_ID,OFF);
+      }
+      }
+    // } 
+    if(pCONT_rules->event_triggered.device_id == 0){
+      if(light_control_driveway.timed_within_limits){
+        SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
+      }else{
+        SetLight(LIGHT_DRIVEWAY_ID,OFF);
+      }
+      }
+
+
+
+}
+
+
+void mSecurityLight::SubTask_Light(){
+
+/*
+new switch case method/mode
+
+enum AUTOMATIC_LIGHT_MODE{ //should this be in lights instead? probably most if not all of this class can be merged with light, simply having the output as relays
+and the lights "automatic" inside the interface
+
+manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and_day_dust_by_time
+
+
+}
+
+
+
+
+*/
+
+
 
 //  schedule list of ontimes?
 
@@ -282,6 +245,8 @@ manual, automatic_local_motion, automatic_time_of_day, automatic_with_motion_and
 // move timers on to be part of relay struct/class?
 void mSecurityLight::SetLight(uint8_t light_id, uint8_t state){
 
+  //just set relays like heating does
+
 //   int8_t relay_id;
 // // THIS IS BAD< PHASE OU TTO WORK WITH OTEHER LIGHTS
 // //this should all be in interface light
@@ -306,29 +271,6 @@ void mSecurityLight::SetLight(uint8_t light_id, uint8_t state){
 //   }
 
 }
-
-/*********************************************************************************************
-* MQTT ******************************************************************
-*************************************************************************************************/
-
-
-// NEW METHOD -- first senders then on internals
-// void mSecurityLight::SubTasker_MQTTSender(){
-
-//   if(abs(millis()-tSavedForceUpdate)>(1000*10)){tSavedForceUpdate = millis();Serial.println("tSavedForceUpdate");
-//     fForceMQTTUpdate = true;
-//   }
-
-//   if(abs(millis()-tSavedTick)>1000){tSavedTick = millis();//Serial.println("MQTTSendLightStatesIfChanged");
-
-//   }
-
-//   MQTTSendLightStatesIfChanged();
-
-//   fForceMQTTUpdate = false;
-
-// }
-
 
 
 uint8_t mSecurityLight::ConstructJSON_Settings(uint8_t json_method){
@@ -434,6 +376,7 @@ uint8_t mSecurityLight::ConstructJSON_LightStates(uint8_t json_level){
 
 void mSecurityLight::MQTTHandler_Init(){
 
+  struct handler<mSecurityLight>* mqtthandler_ptr;
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
@@ -464,25 +407,25 @@ void mSecurityLight::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSecurityLight::ConstructJSON_Sensor;
 
-  mqtthandler_ptr = &mqtthandler_lightstate_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;//postfix_topic_lightstate;
-  mqtthandler_ptr->ConstructJSON_function = &mSecurityLight::ConstructJSON_LightStates;
+  // mqtthandler_ptr = &mqtthandler_lightstate_teleperiod;
+  // mqtthandler_ptr->tSavedLastSent = millis();
+  // mqtthandler_ptr->flags.PeriodicEnabled = true;
+  // mqtthandler_ptr->flags.SendNow = true;
+  // mqtthandler_ptr->tRateSecs = 60; 
+  // mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  // mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  // mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;//postfix_topic_lightstate;
+  // mqtthandler_ptr->ConstructJSON_function = &mSecurityLight::ConstructJSON_LightStates;
 
-  mqtthandler_ptr = &mqtthandler_lightstate_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSecurityLight::ConstructJSON_LightStates;
+  // mqtthandler_ptr = &mqtthandler_lightstate_ifchanged;
+  // mqtthandler_ptr->tSavedLastSent = millis();
+  // mqtthandler_ptr->flags.PeriodicEnabled = true;
+  // mqtthandler_ptr->flags.SendNow = true;
+  // mqtthandler_ptr->tRateSecs = 60; 
+  // mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  // mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LIGHTSTATE_CTR;
+  // mqtthandler_ptr->ConstructJSON_function = &mSecurityLight::ConstructJSON_LightStates;
 
 } //end "MQTTHandler_Init"
 
@@ -492,8 +435,8 @@ void mSecurityLight::MQTTHandler_Set_fSendNow(){
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   mqtthandler_sensor_teleperiod.flags.SendNow = true;
-  mqtthandler_lightstate_ifchanged.flags.SendNow = true;
-  mqtthandler_lightstate_teleperiod.flags.SendNow = true;
+  // mqtthandler_lightstate_ifchanged.flags.SendNow = true;
+  // mqtthandler_lightstate_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
@@ -502,7 +445,7 @@ void mSecurityLight::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_lightstate_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  // mqtthandler_lightstate_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
 } //end "MQTTHandler_Set_TelePeriod"
 
@@ -510,44 +453,23 @@ void mSecurityLight::MQTTHandler_Set_TelePeriod(){
 
 void mSecurityLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  // uint8_t mqtthandler_list_ids[] = {
-  //   MQTT_HANDLER_SETTINGS_ID, 
-  //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-  //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  // };
+  uint8_t mqtthandler_list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
   
-  // struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
-  //   &mqtthandler_settings_teleperiod,
-  //   &mqtthandler_sensor_ifchanged,
-  //   &mqtthandler_sensor_teleperiod
-  // };
+  struct handler<mSecurityLight>* mqtthandler_list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
 
-  // pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
-  //   mqtthandler_list_ptr, mqtthandler_list_ids,
-  //   sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-  //   mqtt_handler_id
-  // );
-  // uint8_t flag_handle_all = false, handler_found = false
-  // if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-  // do{
-
-  //   switch(mqtt_handler_id){
-  //     case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-  //     case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-  //     case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-  //     case MQTT_HANDLER_MODULE_LIGHTSTATE_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_ifchanged; break;
-  //     case MQTT_HANDLER_MODULE_LIGHTSTATE_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_teleperiod; break;
-  //     default: handler_found=false; break; // nothing 
-  //   } // switch
-
-  //   // Pass handlers into command to test and (ifneeded) execute
-  //   if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_SECURITYLIGHT_ID,mqtthandler_ptr); }
-
-  //   // stop searching
-  //   if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-  // }while(flag_handle_all);
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_SECURITYLIGHT_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids,
+    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    mqtt_handler_id
+  );
 
 }
 

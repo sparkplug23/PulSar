@@ -488,10 +488,6 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);
-
-  #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
-  pCONT->Tasker_Rules_Init();
-  #endif
   
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);

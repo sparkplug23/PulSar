@@ -1,13 +1,10 @@
 #ifndef _MGARAGELIGHTS_H
 #define _MGARAGELIGHTS_H 0.1
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT //move into lights? pir activated light, equally a driver of lights..but it senses
 // make light activation method of motion
-
-#include "1_TaskerManager/mTaskerManager.h"
-
 
 #include "5_Sensors/PIR/mMotionSensor.h"
 
@@ -44,8 +41,11 @@ class mSecurityLight{
     struct LIGHT_CONTROL{
       int16_t seconds_on = 0;
       uint8_t ischanged = false;
+      bool timed_within_limits = false;
       // For automatic on board triggering without wifi
       uint8_t fEnableAutomaticLight = true;
+
+      
       struct time_short enabled_starttime;
       struct time_short enabled_endtime;
     };
@@ -64,22 +64,21 @@ class mSecurityLight{
     // struct pir_detect pir_detect_copy;
 
 
-
+    void Event_Motion();
     void SubTask_Light();
 
 
-uint8_t ConstructJSON_Settings(uint8_t json_method);
-uint8_t ConstructJSON_Sensor(uint8_t json_level);
-uint8_t ConstructJSON_LightStates(uint8_t json_level);
+    uint8_t ConstructJSON_Settings(uint8_t json_method);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level);
+    uint8_t ConstructJSON_LightStates(uint8_t json_level);
 
-  
+      
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mSecurityLight>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
@@ -96,8 +95,8 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
     };
 
     // const char* postfix_topic_lightstate = "state";
-    struct handler<mSecurityLight> mqtthandler_lightstate_ifchanged;
-    struct handler<mSecurityLight> mqtthandler_lightstate_teleperiod;
+    // struct handler<mSecurityLight> mqtthandler_lightstate_ifchanged;
+    // struct handler<mSecurityLight> mqtthandler_lightstate_teleperiod;
   //#endif
 
 

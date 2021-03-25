@@ -48,10 +48,10 @@ class mRelays{
     int8_t CheckAndExecute_JSONCommands();
     void   parse_JSONCommand(void);
 
-#ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+#ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
 
-#endif// ENABLE_DEVFEATURE_RULE_ENGINE
+#endif// USE_MODULE_CORE_RULES
 
 
     #define RELAYS_MAX_COUNT 4
@@ -120,6 +120,7 @@ class mRelays{
 
     struct RELAY_STATUS{
     // #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+    #define D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT 1 // not yet working >1 for commands, needs a better jsoncommand method
       /**
        * 0 = not running
        * 1 = turn off then set to 0 to be off
@@ -145,13 +146,14 @@ class mRelays{
         // Monday = bit0, Sunday = bit6, bit7 (MSB) = day_of_week enabled
         uint8_t days_of_week_enabled_bitpacked = 0x00;
         uint8_t enabled = false;
-      }scheduled[3];
+      }scheduled[D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT];
       struct SCHEDULED_ENABLED_TIME_PERIODS{
         struct time_short ontime;
         struct time_short offtime;
         uint8_t enabled = false;
-      }enabled_ranges[3];
+      }enabled_ranges[D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT];
     // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
+
 
       // 0 minutes if off
       // 1+ minutes, is 0+, so time_minutes_on is really "time_minutes_on-1"
@@ -163,7 +165,9 @@ class mRelays{
 
     }relay_status[RELAYS_CONNECTED];
     
-bool IsRelayTimeWindowAllowed(uint8_t relay_id);
+bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
+
+void SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_index = 0);
 
 void SubTask_Every_Minute();
 
@@ -171,7 +175,7 @@ void SubTask_Every_Minute();
     /**
      * Commands
      */
-    void CommandSet_Timer_Decounter(uint8_t time_secs, uint8_t relay_id = 0);
+    void CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id = 0);
 
 
 

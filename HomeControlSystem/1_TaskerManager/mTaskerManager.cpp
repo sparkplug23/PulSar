@@ -30,9 +30,10 @@ uint8_t mTaskerManager::Instance_Init(){
   if(mso  == nullptr){ mso  = new mLogging(); }
   if(mtel == nullptr){ mtel = new mTelemetry(); }
 
-
+  #ifdef USE_MODULE_CORE_RULES
   if(mrules == nullptr){ mrules = new mRuleEngine();}//100); }
-  
+  #endif // USE_MODULE_CORE_RULES
+
   // Sensors
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
     if(mspm == nullptr){ mspm = new mPzem_AC(); }
@@ -574,13 +575,13 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   }
 
   
-  #ifdef ENABLE_DEVFEATURE_RULE_ENGINE
+  #ifdef USE_MODULE_CORE_RULES
 
 // I dont think i want this in here, as not only do I need to pass a trigger event, I might need to pass (or change a struct) tp include matching values
   
 // For now, this function is called always, later it will only happen without a set range of function_inputs
   if(flags_is_executing_rule != true){
-    Tasker_Rules_Interface(function);
+    pCONT_rules->Tasker_Rules_Interface(function);
   }
   #endif
 
@@ -1135,10 +1136,19 @@ int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
   if(c=='\0'){
     return -1;
   }
+  #ifdef D_MODULE_DRIVERS_RELAY_ID
   if(strcasecmp_P(c,PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)==0){ return D_MODULE_DRIVERS_RELAY_ID; }
+  #endif // D_MODULE_DRIVERS_RELAY_ID
+  #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+  if(strcasecmp_P(c,PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR)==0){ return D_MODULE_DRIVERS_SHELLY_DIMMER_ID; }
+  #endif // D_MODULE_DRIVERS_RELAY_ID
 
-
+  #ifdef USE_MODULE_SENSORS_SWITCHES
   if(strcasecmp_P(c,PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR)==0){ return D_MODULE_SENSORS_SWITCHES_ID; }
+  #endif //USE_MODULE_SENSORS_SWITCHES
+  #ifdef USE_MODULE_SENSORS_MOTION
+  if(strcasecmp_P(c,PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)==0){ return D_MODULE_SENSORS_MOTION_ID; }
+  #endif //USE_MODULE_SENSORS_MOTION
 
 
   return -1;
