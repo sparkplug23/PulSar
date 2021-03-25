@@ -11,7 +11,7 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
   switch(function){
     case FUNC_INIT:
       // init();
-      StartTelnetServer();
+      // StartTelnetServer();
     break;
     case FUNC_LOOP: 
     // Serial.println("mLogging::Tasker");
@@ -23,7 +23,7 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
       // Serial.println("mLogging::Tasker");
     break;
     case FUNC_WIFI_CONNECTED:
-      // StartTelnetServer();
+      StartTelnetServer();
     break;
   }
 
@@ -686,6 +686,8 @@ int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char 
 void mLogging::StartTelnetServer(){
   
   // TelnetServer.begin();
+
+  // if(pCONT_set->global_state.network_down) return;
 
 
   TelnetServer = new WiFiServer(TELNET_PORT);  // set port here

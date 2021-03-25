@@ -1349,6 +1349,36 @@ struct SettingsMQTT{
 
 };
 
+#ifdef ESP32
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+  uint32_t data;
+  struct {
+    uint32_t stream : 1;
+    uint32_t mirror : 1;
+    uint32_t flip : 1;
+    uint32_t rtsp : 1;
+    uint32_t spare4 : 1;
+    uint32_t spare5 : 1;
+    uint32_t spare6 : 1;
+    uint32_t spare7 : 1;
+    uint32_t spare8 : 1;
+    uint32_t spare9 : 1;
+    uint32_t spare10 : 1;
+    uint32_t spare11 : 1;
+    uint32_t spare12 : 1;
+    uint32_t spare13 : 1;
+    uint32_t spare14 : 1;
+    uint32_t spare15 : 1;
+    uint32_t spare16 : 1;
+    uint32_t spare17 : 1;
+    uint32_t spare18 : 1;
+    uint32_t contrast : 3;
+    uint32_t brightness : 3;
+    uint32_t saturation : 3;
+    uint32_t resolution : 4;
+  };
+} WebCamCfg;
+#endif // esp32
 
 
 struct SYSCFG {
@@ -1492,6 +1522,12 @@ struct SYSCFG {
 
   // SysBitfield4  flag4;                     // TEMP FIX
 // TO SORT
+
+#ifdef ESP32
+
+  WebCamCfg     webcam_config;             // 44C
+
+#endif
 
 
   // E00 - FFF (4095 ie eeprom size) free locations

@@ -289,11 +289,11 @@
 #define USE_ARDUINO_OTA                          // Add optional support for Arduino OTA (+13k code)
 
 // -- HTTP ----------------------------------------
-// #ifndef DISABLE_WEBSERVER
-//   #define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
-//   #define WEB_PORT             80                // Web server Port for User and Admin mode
-//   #define WEB_USERNAME         "admin"           // Web server Admin mode user name
-// #endif
+#ifndef DISABLE_WEBSERVER
+  #define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
+  #define WEB_PORT             80                // Web server Port for User and Admin mode
+  #define WEB_USERNAME         "admin"           // Web server Admin mode user name
+#endif
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
