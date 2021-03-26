@@ -18,7 +18,7 @@ class mCameraOV2640{
     int8_t pin = -1;
     struct SETTINGS{
       uint8_t fEnableModule = false;
-      uint8_t fShowManualSlider = false;
+      uint8_t caminit = false;
     }settings;
 
     void EveryLoop(void);

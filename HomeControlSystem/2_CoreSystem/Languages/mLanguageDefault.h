@@ -377,6 +377,7 @@
 #define D_COUNT                 "Count"
 #define D_COUNTER               "Counter"
 #define D_CURRENT               "Current"          
+#define D_CYCLE "Cycle"
 #define D_DATA                  "Data"
 #define D_DARKLIGHT             "Dark"
 #define D_DEBUG                 "Debug"

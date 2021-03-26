@@ -498,6 +498,8 @@ DEFINE_PGM_CTR(kOptionOn)         "ON|"  "1|" D_ON "|" D_TRUE "|" D_START "|" D_
 DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" D_ADMIN ;
 DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
 DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
+DEFINE_PGM_CTR(kOptionIncrement)        "Increment|" "Increase|+|plus|" D_CYCLE ;
+DEFINE_PGM_CTR(kOptionDecrement)        "Decrement|" "Decrease|-|minus";
 
 // xdrv_02_webserver.ino
 // #ifdef USE_MODULE_CORE_WEBSERVER

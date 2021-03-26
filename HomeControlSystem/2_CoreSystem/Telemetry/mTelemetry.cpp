@@ -464,12 +464,14 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
 uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
   char buffer[30];
   JsonBuilderI->Start();
+    JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
+    JsonBuilderI->Add(PM_JSON_VERSIONNAME,     pCONT_set->firmware_version.current.name_ctr);
+
+
     JsonBuilderI->Add(PM_JSON_SERIAL,          pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
-    JsonBuilderI->Add(PM_JSON_VERSIONNAME,     pCONT_set->firmware_version.current.name_ctr);
     JsonBuilderI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
     JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
-    JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
     JsonBuilderI->Add(PM_JSON_BUILDTIME,       __TIME__);
     // JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
     JsonBuilderI->Add(PM_JSON_VERSIONNUMBER,   PROJECT_VERSION);

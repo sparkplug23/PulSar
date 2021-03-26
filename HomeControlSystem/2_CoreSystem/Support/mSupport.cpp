@@ -1863,7 +1863,15 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   }else 
   if (GetCommandCode(command, sizeof(command), state_text, kOptionBlinkOff) >= 0) {
     state_number = STATE_NUMBER_BLINK_OFF_ID;
-  }else{ // c_str to number
+  } 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionIncrement) >= 0) {
+    state_number = STATE_NUMBER_INCREMENT_ID;
+  } 
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionDecrement) >= 0) {
+    state_number = STATE_NUMBER_DECREMENT_ID;
+  }
+  
+  else{ // c_str to number
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 

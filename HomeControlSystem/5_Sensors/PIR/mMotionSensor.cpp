@@ -234,7 +234,9 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
         // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
         pir_detect[sensor_id].isactive = true;
 
+        #ifdef USE_MODULE_CORE_RULES
         pCONT_rules->New_Event(D_MODULE_SENSORS_MOTION_ID, sensor_id);
+        #endif
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_STARTED_ID);
 
         if(pCONT_time->UpTime()>60){
@@ -254,7 +256,9 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
           pCONT->Tasker_Interface(FUNC_SET_POWER_OFF_ID);
         }
 
+        #ifdef USE_MODULE_CORE_RULES
         pCONT_rules->New_Event(D_MODULE_SENSORS_MOTION_ID, sensor_id);
+        #endif
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_ENDED_ID);
 
       }

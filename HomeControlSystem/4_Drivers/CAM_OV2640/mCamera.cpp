@@ -123,11 +123,29 @@ bool HttpCheckPriviledgedAccess(bool);
 // extern ESP8266WebServer *Webserver;
 // extern mWebServer *Webserver;
 
-#define BOUNDARY "e8b8c539-047d-4777-a985-fbba6edff11e"
+// #define BOUNDARY "e8b8c539-047d-4777-a985-fbba6edff11e"
 
 
-
+//TASMOTA
 // CAMERA_MODEL_AI_THINKER default template pins
+// #define PWDN_GPIO_NUM     32
+// #define RESET_GPIO_NUM    -1
+// #define XCLK_GPIO_NUM      0
+// #define SIOD_GPIO_NUM     26
+// #define SIOC_GPIO_NUM     27
+
+// #define Y9_GPIO_NUM       35
+// #define Y8_GPIO_NUM       34
+// #define Y7_GPIO_NUM       39
+// #define Y6_GPIO_NUM       36
+// #define Y5_GPIO_NUM       21
+// #define Y4_GPIO_NUM       19
+// #define Y3_GPIO_NUM       18
+// #define Y2_GPIO_NUM        5
+// #define VSYNC_GPIO_NUM    25
+// #define HREF_GPIO_NUM     23
+// #define PCLK_GPIO_NUM     22
+
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
@@ -145,7 +163,6 @@ bool HttpCheckPriviledgedAccess(bool);
 #define VSYNC_GPIO_NUM    25
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
-
 
 
 #ifndef MAX_PICSTORE
@@ -805,9 +822,9 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
     Wc.client.flush();
     Wc.client.setTimeout(3);
     AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Start stream"));
-    Wc.client.print("HTTP/1.1 200 OK\r\n"
-      "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
-      "\r\n");
+    // Wc.client.print("HTTP/1.1 200 OK\r\n"
+    //   "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
+    //   "\r\n");
     Wc.stream_active = 2;
   }
   if (2 == Wc.stream_active) {
@@ -840,7 +857,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
       Wc.stream_active=0;
       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Send fail"));
     }*/
-    Wc.client.print("\r\n--" BOUNDARY "\r\n");
+    // Wc.client.print("\r\n--" BOUNDARY "\r\n");
 
 #ifdef COPYFRAME
     if (tmp_picstore.buff) { free(tmp_picstore.buff); }
@@ -1025,99 +1042,6 @@ AddLog_P(LOG_LEVEL_TEST, PSTR("mCameraOV2640::pre_init"));
 
 }
 
-
-int8_t mCameraOV2640::Tasker(uint8_t function){
-
-  /************
-   * INIT SECTION * 
-  *******************/
-  if(function == FUNC_PRE_INIT){
-    pre_init();
-  }else
-  if(function == FUNC_INIT){
-    init();
-  }
-
-  // Only continue in to tasker if module was configured properly
-  // if(!Settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP:
-//  EveryLoop();
-    break;
-    case FUNC_EVERY_SECOND:  
-      // Poll();    
-// WcStreamControl();
-      // WcSetStreamserver(1);
-
-      setup_cam();
-      
-    break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-    //   CheckAndExecute_JSONCommands();
-    // break;
-    // case FUNC_JSON_COMMAND_ID:
-    //   parse_JSONCommand();
-    // break;
-    // case FUNC_SET_DEVICE_POWER:
-    //   SetPower();
-    // break;
-    /************
-     * RULES SECTION * 
-    *******************/
-    #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
-      RulesEvent_Set_Power();
-    break;
-    #endif// USE_MODULE_CORE_RULES
-
-    
-//     case FUNC_WEB_ADD_HANDLER:
-//       WcPicSetup();
-//       break;
-
-
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
-    break;
-    #endif //USE_MQTT
-
-  }
-  
-//     // case FUNC_COMMAND:
-//     //   result = DecodeCommand(kWCCommands, WCCommand);
-//     //   break;
-
-
-  /************
-   * WEBPAGE SECTION * 
-  *******************/
-  
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
-
-} // END Tasker
 
 
 
@@ -1379,29 +1303,359 @@ void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 OV2640 cam;
 
-// WebServer server(80);
+WebServer server(80);
 
-// // ===== rtos task handles =========================
-// // Streaming is implemented with 3 tasks:
-// TaskHandle_t tMjpeg;   // handles client connections to the webserver
-// TaskHandle_t tCam;     // handles getting picture frames from the camera and storing them locally
-// TaskHandle_t tStream;  // actually streaming frames to all connected clients
+// ===== rtos task handles =========================
+// Streaming is implemented with 3 tasks:
+TaskHandle_t tMjpeg;   // handles client connections to the webserver
+TaskHandle_t tCam;     // handles getting picture frames from the camera and storing them locally
+TaskHandle_t tStream;  // actually streaming frames to all connected clients
 
-// // frameSync semaphore is used to prevent streaming buffer as it is replaced with the next frame
-// SemaphoreHandle_t frameSync = NULL;
+// frameSync semaphore is used to prevent streaming buffer as it is replaced with the next frame
+SemaphoreHandle_t frameSync = NULL;
 
-// // Queue stores currently connected clients to whom we are streaming
-// QueueHandle_t streamingClients;
+// Queue stores currently connected clients to whom we are streaming
+QueueHandle_t streamingClients;
 
-// // We will try to achieve 25 FPS frame rate
-// const int FPS = 14;
+// We will try to achieve 25 FPS frame rate
+const int FPS = 14;
 
-// // We will handle web client requests every 50 ms (20 Hz)
-// const int WSINTERVAL = 100;
+// We will handle web client requests every 50 ms (20 Hz)
+const int WSINTERVAL = 100;
+
+void handleJPGSstream(void);
+void SubTask_GrabCameraFrames(void* pvParameters);
+void SubTask_StreamCameraFrames(void * pvParameters);
 
 
-// // ======== Server Connection Handler Task ==========================
-// void mjpegCB(void* pvParameters) {
+// Commonly used variables:
+volatile size_t camSize;    // size of the current frame, byte
+volatile char* camBuf;      // pointer to the current frame
+
+
+/**
+ * Memory allocator that takes advantage of PSRAM if present 
+ * */
+char* allocateMemory(char* aPtr, size_t aSize) {
+
+  //  Since current buffer is too smal, free it
+  if (aPtr != NULL) free(aPtr);
+
+  size_t freeHeap = ESP.getFreeHeap();
+  char* ptr = NULL;
+
+  // If memory requested is more than 2/3 of the currently free heap, try PSRAM immediately
+  if ( aSize > freeHeap * 2 / 3 ) {
+    if ( psramFound() && ESP.getFreePsram() > aSize ) {
+      ptr = (char*) ps_malloc(aSize);
+    }
+  }
+  else {
+    //  Enough free heap - let's try allocating fast RAM as a buffer
+    ptr = (char*) malloc(aSize);
+    //  If allocation on the heap failed, let's give PSRAM one more chance:
+    if ( ptr == NULL && psramFound() && ESP.getFreePsram() > aSize) {
+      ptr = (char*) ps_malloc(aSize);
+    }
+  }
+
+  // Finally, if the memory pointer is NULL, we were not able to allocate any memory, and that is a terminal condition.
+  if (ptr == NULL) {
+    // ESP.restart();
+    // temporarily disable camera to retry other measures
+  }
+  return ptr;
+}
+
+
+/**
+ * RTOS task to grab frames from the camera 
+ * */
+void SubTask_GrabCameraFrames(void* pvParameters) {
+
+  Serial.println("SubTask_GrabCameraFrames1"); Serial.flush();
+  TickType_t xLastWakeTime;
+
+  //  A running interval associated with currently desired frame rate
+  const TickType_t xFrequency = pdMS_TO_TICKS(1000 / FPS);
+
+  // Mutex for the critical section of swithing the active frames around
+  portMUX_TYPE xSemaphore = portMUX_INITIALIZER_UNLOCKED;
+
+  //  Pointers to the 2 frames, their respective sizes and index of the current frame
+  char* fbs[2] = { NULL, NULL };
+  size_t fSize[2] = { 0, 0 };
+  int ifb = 0;
+
+  //=== loop() section  ===================
+  xLastWakeTime = xTaskGetTickCount();
+
+  Serial.println("SubTask_GrabCameraFrames2"); Serial.flush();
+  for (;;) {
+
+    //  Grab a frame from the camera and query its size
+    cam.run();
+    size_t s = cam.getSize();
+
+    //  If frame size is more that we have previously allocated - request  125% of the current frame space
+    if (s > fSize[ifb]) {
+      fSize[ifb] = s * 4 / 3;
+      fbs[ifb] = allocateMemory(fbs[ifb], fSize[ifb]);
+    }
+
+    //  Copy current frame into local buffer
+    char* b = (char*) cam.getfb();
+    memcpy(fbs[ifb], b, s);
+
+    //  Let other tasks run and wait until the end of the current frame rate interval (if any time left)
+    taskYIELD();
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+    //  Only switch frames around if no frame is currently being streamed to a client
+    //  Wait on a semaphore until client operation completes
+    xSemaphoreTake( frameSync, portMAX_DELAY );
+
+    //  Do not allow interrupts while switching the current frame
+    portENTER_CRITICAL(&xSemaphore);
+    camBuf = fbs[ifb];
+    camSize = s;
+    ifb++;
+    ifb &= 1;  // this should produce 1, 0, 1, 0, 1 ... sequence
+    portEXIT_CRITICAL(&xSemaphore);
+
+    //  Let anyone waiting for a frame know that the frame is ready
+    xSemaphoreGive( frameSync );
+
+    //  Technically only needed once: let the streaming task know that we have at least one frame
+    //  and it could start sending frames to the clients, if any
+    xTaskNotifyGive( tStream );
+
+    //  Immediately let other (streaming) tasks run
+    taskYIELD();
+    yield();
+
+    //  If streaming task has suspended itself (no active clients to stream to)
+    //  there is no need to grab frames from the camera. We can save some juice
+    //  by suspedning the tasks
+    if ( eTaskGetState( tStream ) == eSuspended ) {
+      vTaskSuspend(NULL);  // passing NULL means "suspend yourself"
+    }
+  }
+}
+
+
+
+// ==== STREAMING ======================================================
+const char HEADER[] = "HTTP/1.1 200 OK\r\n" \
+                      "Access-Control-Allow-Origin: *\r\n" \
+                      "Content-Type: multipart/x-mixed-replace; boundary=123456789000000000000987654321\r\n";
+const char BOUNDARY[] = "\r\n--123456789000000000000987654321\r\n";
+const char CTNTTYPE[] = "Content-Type: image/jpeg\r\nContent-Length: ";
+const int hdrLen = strlen(HEADER);
+const int bdrLen = strlen(BOUNDARY);
+const int cntLen = strlen(CTNTTYPE);
+
+
+
+// ==== Handle connection request from clients ===============================
+void handleJPGSstream(void)
+{
+  Serial.println("handleJPGSstream0"); Serial.flush();
+  //  Can only acommodate 10 clients. The limit is a default for WiFi connections
+  if ( !uxQueueSpacesAvailable(streamingClients) ) return;
+
+  Serial.println("handleJPGSstream1"); Serial.flush();
+
+  //  Create a new WiFi Client object to keep track of this one
+  // WiFiClient* client = new WiFiClient();
+  // *client = server.client();
+
+  WiFiClient client;// = new WiFiClient();
+  client = server.client();
+
+  //  Immediately send this client a header
+  // client->write(HEADER, hdrLen);
+  // client->write(BOUNDARY, bdrLen);
+
+  client.write(HEADER, hdrLen);
+  client.write(BOUNDARY, bdrLen);
+
+  Serial.println("handleJPGSstream2"); Serial.flush();
+  // Push the client to the streaming queue
+  xQueueSend(streamingClients, (void *) &client, 0);
+
+  // Wake up streaming tasks, if they were previously suspended:
+  Serial.println("handleJPGSstream3"); Serial.flush();
+  if ( eTaskGetState( tCam ) == eSuspended ) vTaskResume( tCam );
+  Serial.println("handleJPGSstream4"); Serial.flush();
+  if ( eTaskGetState( tStream ) == eSuspended ) vTaskResume( tStream );
+  Serial.println("handleJPGSstream5"); Serial.flush();
+}
+
+
+// ==== Actually stream content to all connected clients ========================
+void SubTask_StreamCameraFrames(void * pvParameters) {
+
+  char buf[16];
+  TickType_t xLastWakeTime;
+  TickType_t xFrequency;
+
+  //  Wait until the first frame is captured and there is something to send to clients
+  ulTaskNotifyTake( pdTRUE,          /* Clear the notification value before exiting. */
+                    portMAX_DELAY ); /* Block indefinitely. */
+
+  xLastWakeTime = xTaskGetTickCount();
+  for (;;) {
+    // Default assumption we are running according to the FPS
+    xFrequency = pdMS_TO_TICKS(1000 / FPS);
+
+    //  Only bother to send anything if there is someone watching
+    UBaseType_t activeClients = uxQueueMessagesWaiting(streamingClients);
+    if ( activeClients ) {
+      // Adjust the period to the number of connected clients
+      xFrequency /= activeClients;
+
+      //  Since we are sending the same frame to everyone,
+      //  pop a client from the the front of the queue
+      WiFiClient *client;
+      xQueueReceive (streamingClients, (void*) &client, 0);
+
+      //  Check if this client is still connected.
+
+      if (!client->connected()) {
+        //  delete this client reference if s/he has disconnected
+        //  and don't put it back on the queue anymore. Bye!
+        delete client;
+      }
+      else {
+
+        //  Ok. This is an actively connected client.
+        //  Let's grab a semaphore to prevent frame changes while we
+        //  are serving this frame
+        xSemaphoreTake( frameSync, portMAX_DELAY );
+
+        client->write(CTNTTYPE, cntLen);
+        sprintf(buf, "%d\r\n\r\n", camSize);
+        client->write(buf, strlen(buf));
+        client->write((char*) camBuf, (size_t)camSize);
+        client->write(BOUNDARY, bdrLen);
+
+        // Since this client is still connected, push it to the end
+        // of the queue for further processing
+        xQueueSend(streamingClients, (void *) &client, 0);
+
+        //  The frame has been served. Release the semaphore and let other tasks run.
+        //  If there is a frame switch ready, it will happen now in between frames
+        xSemaphoreGive( frameSync );
+        taskYIELD();
+        yield();
+      }
+    }
+    else {
+      //  Since there are no connected clients, there is no reason to waste battery running
+      vTaskSuspend(NULL);
+    }
+    //  Let other tasks run after serving every client
+    taskYIELD();
+    yield();
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+  }
+}
+
+
+
+const char JHEADER[] = "HTTP/1.1 200 OK\r\n" \
+                       "Content-disposition: inline; filename=capture.jpg\r\n" \
+                       "Content-type: image/jpeg\r\n\r\n";
+const int jhdLen = strlen(JHEADER);
+
+// ==== Serve up one JPEG frame =============================================
+void handleJPG(void)
+{
+  WiFiClient client = server.client();
+
+  if (!client.connected()) return;
+  cam.run();
+  client.write(JHEADER, jhdLen);
+  client.write((char*)cam.getfb(), cam.getSize());
+
+
+}
+
+
+// ==== Handle invalid URL requests ============================================
+void handleNotFound()
+{
+  String message = "Server is running!\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  server.send(200, "text / plain", message);
+}
+
+
+// ======== Server Connection Handler Task ==========================
+void SubTask_StartServerHandlerTask1(void* pvParameters) {
+  TickType_t xLastWakeTime;
+  const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
+
+  // Creating frame synchronization semaphore and initializing it
+  frameSync = xSemaphoreCreateBinary();
+  xSemaphoreGive( frameSync );
+
+  // Creating a queue to track all connected clients
+  streamingClients = xQueueCreate( 10, sizeof(WiFiClient*) );
+
+  //=== setup section  ==================
+
+  //  Creating RTOS task for grabbing frames from the camera
+  xTaskCreatePinnedToCore(
+    SubTask_GrabCameraFrames,        // callback
+    "cam",        // name
+    4096,         // stacj size
+    NULL,         // parameters
+    2,            // priority
+    &tCam,        // RTOS task handle
+    APP_CPU);     // core
+
+  //  Creating task to push the stream to all connected clients
+  xTaskCreatePinnedToCore(
+    SubTask_StreamCameraFrames,
+    "strmCB",
+    4 * 1024,
+    NULL,
+    2,
+    &tStream,
+    APP_CPU);
+
+  //  Registering webserver handling routines
+  server.on("/vid", handleJPGSstream);
+  server.on("/pic", handleJPG);
+  server.onNotFound(handleNotFound);
+
+  //  Starting webserver
+  server.begin();
+
+  //=== loop() section  ===================
+  xLastWakeTime = xTaskGetTickCount();
+  for (;;) {
+    server.handleClient();
+
+    //  After every server client handling request, we let other tasks run and then pause
+    taskYIELD();
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+  }
+}
+
+/**
+ * New init method, which removes the need for create
+ * */ 
+// ======== Server Connection Handler Task ==========================
+// void SubTask_StartServerHandlerTask2(void* pvParameters) {
 //   TickType_t xLastWakeTime;
 //   const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
 
@@ -1416,7 +1670,7 @@ OV2640 cam;
 
 //   //  Creating RTOS task for grabbing frames from the camera
 //   xTaskCreatePinnedToCore(
-//     camCB,        // callback
+//     SubTask_GrabCameraFrames,        // callback
 //     "cam",        // name
 //     4096,         // stacj size
 //     NULL,         // parameters
@@ -1426,17 +1680,17 @@ OV2640 cam;
 
 //   //  Creating task to push the stream to all connected clients
 //   xTaskCreatePinnedToCore(
-//     streamCB,
+//     SubTask_StreamCameraFrames,
 //     "strmCB",
 //     4 * 1024,
-//     NULL, //(void*) handler,
+//     NULL,
 //     2,
 //     &tStream,
 //     APP_CPU);
 
 //   //  Registering webserver handling routines
-//   server.on("/mjpeg/1", HTTP_GET, handleJPGSstream);
-//   server.on("/jpg", HTTP_GET, handleJPG);
+//   server.on("/vid", handleJPGSstream);
+//   server.on("/pic", handleJPG);
 //   server.onNotFound(handleNotFound);
 
 //   //  Starting webserver
@@ -1454,252 +1708,9 @@ OV2640 cam;
 // }
 
 
-// // Commonly used variables:
-// volatile size_t camSize;    // size of the current frame, byte
-// volatile char* camBuf;      // pointer to the current frame
 
 
-// // ==== RTOS task to grab frames from the camera =========================
-// void camCB(void* pvParameters) {
-
-//   TickType_t xLastWakeTime;
-
-//   //  A running interval associated with currently desired frame rate
-//   const TickType_t xFrequency = pdMS_TO_TICKS(1000 / FPS);
-
-//   // Mutex for the critical section of swithing the active frames around
-//   portMUX_TYPE xSemaphore = portMUX_INITIALIZER_UNLOCKED;
-
-//   //  Pointers to the 2 frames, their respective sizes and index of the current frame
-//   char* fbs[2] = { NULL, NULL };
-//   size_t fSize[2] = { 0, 0 };
-//   int ifb = 0;
-
-//   //=== loop() section  ===================
-//   xLastWakeTime = xTaskGetTickCount();
-
-//   for (;;) {
-
-//     //  Grab a frame from the camera and query its size
-//     cam.run();
-//     size_t s = cam.getSize();
-
-//     //  If frame size is more that we have previously allocated - request  125% of the current frame space
-//     if (s > fSize[ifb]) {
-//       fSize[ifb] = s * 4 / 3;
-//       fbs[ifb] = allocateMemory(fbs[ifb], fSize[ifb]);
-//     }
-
-//     //  Copy current frame into local buffer
-//     char* b = (char*) cam.getfb();
-//     memcpy(fbs[ifb], b, s);
-
-//     //  Let other tasks run and wait until the end of the current frame rate interval (if any time left)
-//     taskYIELD();
-//     vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
-//     //  Only switch frames around if no frame is currently being streamed to a client
-//     //  Wait on a semaphore until client operation completes
-//     xSemaphoreTake( frameSync, portMAX_DELAY );
-
-//     //  Do not allow interrupts while switching the current frame
-//     portENTER_CRITICAL(&xSemaphore);
-//     camBuf = fbs[ifb];
-//     camSize = s;
-//     ifb++;
-//     ifb &= 1;  // this should produce 1, 0, 1, 0, 1 ... sequence
-//     portEXIT_CRITICAL(&xSemaphore);
-
-//     //  Let anyone waiting for a frame know that the frame is ready
-//     xSemaphoreGive( frameSync );
-
-//     //  Technically only needed once: let the streaming task know that we have at least one frame
-//     //  and it could start sending frames to the clients, if any
-//     xTaskNotifyGive( tStream );
-
-//     //  Immediately let other (streaming) tasks run
-//     taskYIELD();
-
-//     //  If streaming task has suspended itself (no active clients to stream to)
-//     //  there is no need to grab frames from the camera. We can save some juice
-//     //  by suspedning the tasks
-//     if ( eTaskGetState( tStream ) == eSuspended ) {
-//       vTaskSuspend(NULL);  // passing NULL means "suspend yourself"
-//     }
-//   }
-// }
-
-
-// // ==== Memory allocator that takes advantage of PSRAM if present =======================
-// char* allocateMemory(char* aPtr, size_t aSize) {
-
-//   //  Since current buffer is too smal, free it
-//   if (aPtr != NULL) free(aPtr);
-
-
-//   size_t freeHeap = ESP.getFreeHeap();
-//   char* ptr = NULL;
-
-//   // If memory requested is more than 2/3 of the currently free heap, try PSRAM immediately
-//   if ( aSize > freeHeap * 2 / 3 ) {
-//     if ( psramFound() && ESP.getFreePsram() > aSize ) {
-//       ptr = (char*) ps_malloc(aSize);
-//     }
-//   }
-//   else {
-//     //  Enough free heap - let's try allocating fast RAM as a buffer
-//     ptr = (char*) malloc(aSize);
-
-//     //  If allocation on the heap failed, let's give PSRAM one more chance:
-//     if ( ptr == NULL && psramFound() && ESP.getFreePsram() > aSize) {
-//       ptr = (char*) ps_malloc(aSize);
-//     }
-//   }
-
-//   // Finally, if the memory pointer is NULL, we were not able to allocate any memory, and that is a terminal condition.
-//   if (ptr == NULL) {
-//     ESP.restart();
-//   }
-//   return ptr;
-// }
-
-
-// // ==== STREAMING ======================================================
-// const char HEADER[] = "HTTP/1.1 200 OK\r\n" \
-//                       "Access-Control-Allow-Origin: *\r\n" \
-//                       "Content-Type: multipart/x-mixed-replace; boundary=123456789000000000000987654321\r\n";
-// const char BOUNDARY[] = "\r\n--123456789000000000000987654321\r\n";
-// const char CTNTTYPE[] = "Content-Type: image/jpeg\r\nContent-Length: ";
-// const int hdrLen = strlen(HEADER);
-// const int bdrLen = strlen(BOUNDARY);
-// const int cntLen = strlen(CTNTTYPE);
-
-
-// // ==== Handle connection request from clients ===============================
-// void handleJPGSstream(void)
-// {
-//   //  Can only acommodate 10 clients. The limit is a default for WiFi connections
-//   if ( !uxQueueSpacesAvailable(streamingClients) ) return;
-
-
-//   //  Create a new WiFi Client object to keep track of this one
-//   WiFiClient* client = new WiFiClient();
-//   *client = server.client();
-
-//   //  Immediately send this client a header
-//   client->write(HEADER, hdrLen);
-//   client->write(BOUNDARY, bdrLen);
-
-//   // Push the client to the streaming queue
-//   xQueueSend(streamingClients, (void *) &client, 0);
-
-//   // Wake up streaming tasks, if they were previously suspended:
-//   if ( eTaskGetState( tCam ) == eSuspended ) vTaskResume( tCam );
-//   if ( eTaskGetState( tStream ) == eSuspended ) vTaskResume( tStream );
-// }
-
-
-// // ==== Actually stream content to all connected clients ========================
-// void streamCB(void * pvParameters) {
-//   char buf[16];
-//   TickType_t xLastWakeTime;
-//   TickType_t xFrequency;
-
-//   //  Wait until the first frame is captured and there is something to send
-//   //  to clients
-//   ulTaskNotifyTake( pdTRUE,          /* Clear the notification value before exiting. */
-//                     portMAX_DELAY ); /* Block indefinitely. */
-
-//   xLastWakeTime = xTaskGetTickCount();
-//   for (;;) {
-//     // Default assumption we are running according to the FPS
-//     xFrequency = pdMS_TO_TICKS(1000 / FPS);
-
-//     //  Only bother to send anything if there is someone watching
-//     UBaseType_t activeClients = uxQueueMessagesWaiting(streamingClients);
-//     if ( activeClients ) {
-//       // Adjust the period to the number of connected clients
-//       xFrequency /= activeClients;
-
-//       //  Since we are sending the same frame to everyone,
-//       //  pop a client from the the front of the queue
-//       WiFiClient *client;
-//       xQueueReceive (streamingClients, (void*) &client, 0);
-
-//       //  Check if this client is still connected.
-
-//       if (!client->connected()) {
-//         //  delete this client reference if s/he has disconnected
-//         //  and don't put it back on the queue anymore. Bye!
-//         delete client;
-//       }
-//       else {
-
-//         //  Ok. This is an actively connected client.
-//         //  Let's grab a semaphore to prevent frame changes while we
-//         //  are serving this frame
-//         xSemaphoreTake( frameSync, portMAX_DELAY );
-
-//         client->write(CTNTTYPE, cntLen);
-//         sprintf(buf, "%d\r\n\r\n", camSize);
-//         client->write(buf, strlen(buf));
-//         client->write((char*) camBuf, (size_t)camSize);
-//         client->write(BOUNDARY, bdrLen);
-
-//         // Since this client is still connected, push it to the end
-//         // of the queue for further processing
-//         xQueueSend(streamingClients, (void *) &client, 0);
-
-//         //  The frame has been served. Release the semaphore and let other tasks run.
-//         //  If there is a frame switch ready, it will happen now in between frames
-//         xSemaphoreGive( frameSync );
-//         taskYIELD();
-//       }
-//     }
-//     else {
-//       //  Since there are no connected clients, there is no reason to waste battery running
-//       vTaskSuspend(NULL);
-//     }
-//     //  Let other tasks run after serving every client
-//     taskYIELD();
-//     vTaskDelayUntil(&xLastWakeTime, xFrequency);
-//   }
-// }
-
-
-
-// const char JHEADER[] = "HTTP/1.1 200 OK\r\n" \
-//                        "Content-disposition: inline; filename=capture.jpg\r\n" \
-//                        "Content-type: image/jpeg\r\n\r\n";
-// const int jhdLen = strlen(JHEADER);
-
-// // ==== Serve up one JPEG frame =============================================
-// void handleJPG(void)
-// {
-//   WiFiClient client = server.client();
-
-//   if (!client.connected()) return;
-//   cam.run();
-//   client.write(JHEADER, jhdLen);
-//   client.write((char*)cam.getfb(), cam.getSize());
-// }
-
-
-// // ==== Handle invalid URL requests ============================================
-// void handleNotFound()
-// {
-//   String message = "Server is running!\n\n";
-//   message += "URI: ";
-//   message += server.uri();
-//   message += "\nMethod: ";
-//   message += (server.method() == HTTP_GET) ? "GET" : "POST";
-//   message += "\nArguments: ";
-//   message += server.args();
-//   message += "\n";
-//   server.send(200, "text / plain", message);
-// }
-
-
+void startCameraServer();
 
 // ==== SETUP method ==================================================================
 void mCameraOV2640::setup_cam()
@@ -1742,15 +1753,69 @@ void mCameraOV2640::setup_cam()
   config.jpeg_quality = 12;
   config.fb_count = 2;
 
-#if defined(CAMERA_MODEL_ESP_EYE)
-  pinMode(13, INPUT_PULLUP);
-  pinMode(14, INPUT_PULLUP);
-#endif
-
   if (cam.init(config) != ESP_OK) {
     Serial.println("Error initializing the camera");
     // delay(10000);
     // ESP.restart();
+
+  }else{
+    
+    settings.caminit = true;
+
+    // Start mainstreaming RTOS task
+    // xTaskCreatePinnedToCore(
+    //   SubTask_StartServerHandlerTask1,
+    //   "mjpeg",
+    //   4 * 1024,
+    //   NULL,
+    //   2,
+    //   &tMjpeg,
+    //   APP_CPU
+    // );
+
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
+
+    // Creating frame synchronization semaphore and initializing it
+    frameSync = xSemaphoreCreateBinary();
+    xSemaphoreGive( frameSync );
+
+    // Creating a queue to track all connected clients
+    streamingClients = xQueueCreate( 10, sizeof(WiFiClient*) );
+
+    //=== setup section  ==================
+
+    //  Creating RTOS task for grabbing frames from the camera
+    xTaskCreatePinnedToCore(
+      SubTask_GrabCameraFrames,        // callback
+      "cam",        // name
+      4096,         // stacj size
+      NULL,         // parameters
+      2,            // priority
+      &tCam,        // RTOS task handle
+      APP_CPU);     // core
+
+    //  Creating task to push the stream to all connected clients
+    xTaskCreatePinnedToCore(
+      SubTask_StreamCameraFrames,
+      "strmCB",
+      4 * 1024,
+      NULL,
+      2,
+      &tStream,
+      APP_CPU);
+
+    //  Registering webserver handling routines
+    server.on("/vid", handleJPGSstream);
+    server.on("/pic", handleJPG);
+    server.onNotFound(handleNotFound);
+
+    //  Starting webserver
+    server.begin();
+
+  }
+
+
   }
 
 
@@ -1773,20 +1838,128 @@ void mCameraOV2640::setup_cam()
 //   Serial.println("/mjpeg/1");
 
 
-//   // Start mainstreaming RTOS task
-//   xTaskCreatePinnedToCore(
-//     mjpegCB,
-//     "mjpeg",
-//     4 * 1024,
-//     NULL,
-//     2,
-//     &tMjpeg,
-//     APP_CPU);
-}
 
 
 // void loop() {
 //   vTaskDelay(1000);
 // }
+
+
+int8_t mCameraOV2640::Tasker(uint8_t function){
+
+  /************
+   * INIT SECTION * 
+  *******************/
+  if(function == FUNC_PRE_INIT){
+    pre_init();
+  }else
+  if(function == FUNC_INIT){
+    init();
+  }
+
+  // Only continue in to tasker if module was configured properly
+  // if(!Settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP:
+//  EveryLoop();
+
+if(settings.caminit){
+  
+    server.handleClient();
+}
+
+    break;
+    case FUNC_EVERY_SECOND:  
+      // Poll();    
+// WcStreamControl();
+      // WcSetStreamserver(1);
+
+
+AddLog_P(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
+
+      // setup_cam();
+
+    break;
+    case FUNC_EVERY_MINUTE:
+
+      if(!settings.caminit && (pCONT_time->uptime.seconds_nonreset>60)){
+        setup_cam();
+      }
+
+
+
+
+    break;
+    case FUNC_WIFI_CONNECTED:
+      setup_cam();
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+    //   CheckAndExecute_JSONCommands();
+    // break;
+    // case FUNC_JSON_COMMAND_ID:
+    //   parse_JSONCommand();
+    // break;
+    // case FUNC_SET_DEVICE_POWER:
+    //   SetPower();
+    // break;
+    /************
+     * RULES SECTION * 
+    *******************/
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_POWER_ID:
+      RulesEvent_Set_Power();
+    break;
+    #endif// USE_MODULE_CORE_RULES
+
+    
+//     case FUNC_WEB_ADD_HANDLER:
+//       WcPicSetup();
+//       break;
+
+
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif //USE_MQTT
+
+  }
+  
+//     // case FUNC_COMMAND:
+//     //   result = DecodeCommand(kWCCommands, WCCommand);
+//     //   break;
+
+
+  /************
+   * WEBPAGE SECTION * 
+  *******************/
+  
+  #ifdef USE_MODULE_CORE_WEBSERVER
+  return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
+
+} // END Tasker
+
+
 
 #endif // USE_MODULE_DRIVERS_CAMERA_OV2640
