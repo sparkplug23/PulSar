@@ -1768,6 +1768,7 @@ bool mSupport::CheckCommand_P(const char* needle, const char* haystack)
 }
 int8_t mSupport::GetCommandID_P(const char* needle, const char* haystack, char* destination, size_t destination_size)
 {
+  if((needle == nullptr)||(haystack == nullptr)) return false;
   // Returns -1 of not found
   // Returns index and command if found
   int result = -1;

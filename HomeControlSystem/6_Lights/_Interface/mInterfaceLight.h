@@ -161,6 +161,9 @@ enum LightSubtypes{
     #ifndef D_PALETTE_HSBID_NAME_CTR
     #define D_PALETTE_HSBID_NAME_CTR        "User"   
     #endif
+    #ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
+    #define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   
+    #endif
     #define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
 

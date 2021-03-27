@@ -149,9 +149,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_PWM
     if(mpwm == nullptr){ mpwm = new mPWM(); }
   #endif
-  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    if(slgt == nullptr){ slgt = new mSecurityLight(); }
-  #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mnext == nullptr){ mnext = new mNextionPanel(); }
   #endif
@@ -372,9 +369,6 @@ uint8_t mTaskerManager::InitClassList(){
   #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
   #endif
-  #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_SECURITYLIGHT_ID;
-  #endif
   #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
     module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_OILFURNACE_ID;
   #endif
@@ -495,9 +489,6 @@ uint8_t mTaskerManager::CheckPointersPass(){
 
   #ifdef USE_MODULE_DRIVERS_PWM
     if(mpwm==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    if(slgt==nullptr){ return false; }
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     if(mnext==nullptr){ return false; }
@@ -795,10 +786,6 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
          break;
       #endif
-      #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-        case D_MODULE_CUSTOM_SECURITYLIGHT_ID:     result = slgt->Tasker(function); break;
-      #endif
-
 
       // Customs to be named "Controllers or Systems"
       #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
@@ -1320,9 +1307,6 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
       case D_MODULE_CUSTOM_HEATING_ID:
         return PM_MODULE_CUSTOM_HEATING_FRIENDLY_CTR; 
       break;
-    #endif
-    #ifdef D_MODULE_CUSTOM_SECURITYLIGHT_ID
-      case D_MODULE_CUSTOM_SECURITYLIGHT_ID:         return PM_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR; 
     #endif
     #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
       case D_MODULE_CUSTOM_RADIATORFAN_ID:

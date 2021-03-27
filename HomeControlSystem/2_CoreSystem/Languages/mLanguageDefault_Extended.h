@@ -282,10 +282,6 @@
 //   #define D_MODULE_CUSTOM_HEATING_CTR              "mHeating"
 //   #define D_MODULE_CUSTOM_HEATING_FRIENDLY_CTR              "heating"
 // //#endif
-// //#ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-//   #define D_MODULE_CUSTOM_SECURITYLIGHT_CTR              "mGarageLights"
-//   #define D_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR              "garagelights"
-// //#endif
 // //#ifdef USE_MODULE_CUSTOM_RADIATORFAN
 //   #define D_MODULE_CUSTOM_RADIATORFAN_CTR              "mRadiatorFan"
 //   #define D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"

@@ -549,14 +549,6 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_HEATING_CTR)              "mHeating";
   DEFINE_PGM_CTR(PM_MODULE_CUSTOM_HEATING_FRIENDLY_CTR)              "heating";
 #endif
-#ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-  #include "9_Controller/SecurityLight/mSecurityLight.h"
-  class mSecurityLight;
-  #define D_MODULE_CUSTOM_SECURITYLIGHT_ID 174
-  #define            pCONT_slgt                               pCONT->slgt
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_CTR)              "mSecurityLight";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SECURITYLIGHT_FRIENDLY_CTR)              "securitylight";
-#endif
 #ifdef USE_MODULE_CUSTOM_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"
   class mRadiatorFan;
@@ -858,9 +850,6 @@ class mTaskerManager{
 
   #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
     mPWM* mpwm = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    mSecurityLight* slgt = nullptr;
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
     mMotionSensor *mms = nullptr;

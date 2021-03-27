@@ -1097,6 +1097,16 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     }
   }
 
+  // Check for default user names 
+  for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID-PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);ii++){
+    memset(name_ctr,0,sizeof(name_ctr));
+    sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
+    // Default names
+    if(strcmp(c,name_ctr)==0){
+      return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID+ii;
+    }
+  }
+
   // Finally, check if palette name was simply its index as string
   uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
   if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH_ID)){

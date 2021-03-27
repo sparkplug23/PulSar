@@ -77,7 +77,6 @@ The modules are used to measure aspects of the surrounding environment, currentl
 - OilTank (ie. using the ultrasonic sensor to estimate volume) [pn. change to just tank, so water can also be measured]
 - Radiator Fan (ie. use temperature sensor for enclosed radiators to activate ducted fans for improved room heating)
 - Scheduler (TBD. A method of holding tasks to be run at a later or exact time)
-- Security Light (ie. Motion sensors to activate internal relay during desired times of day with optional ambient light sensor)
 
 ## Features under development for future integration
 - TBA
