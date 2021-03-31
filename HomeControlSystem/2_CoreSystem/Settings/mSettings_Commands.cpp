@@ -74,7 +74,7 @@ void mSettings::parse_JSONCommand(){
     // Search across all module names
     for(int module_list_id=0;module_list_id<pCONT->GetClassCount();module_list_id++){
 
-      module_id = pCONT->mTasksIDs[module_list_id];
+      module_id = module_list_id;//pCONT->mTasksIDs[module_list_id];
       // module_settings.list[module_list_id];
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));

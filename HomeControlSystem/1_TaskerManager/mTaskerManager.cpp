@@ -17,236 +17,414 @@ mTaskerManager* mTaskerManager::GetInstance(){
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::Instance_Init(){
   
-  mTasks.push_back(new mMQTT());
-  mTasksIDs.push_back(D_MODULE_NETWORK_MQTT_ID);
-
-  mTasks.push_back(new mHardwarePins());
-  mTasksIDs.push_back(D_MODULE_CORE_HARDWAREPINS_ID);
-
-  mTasks.push_back(new mTime());
-  mTasksIDs.push_back(D_MODULE_CORE_TIME_ID);
-
-  mTasks.push_back(new mSettings());
-  mTasksIDs.push_back(D_MODULE_CORE_SETTINGS_ID);
-
-  mTasks.push_back(new mSupport());
-  mTasksIDs.push_back(D_MODULE_CORE_SUPPORT_ID);
-
-  mTasks.push_back(new mWiFi());
-  mTasksIDs.push_back(D_MODULE_NETWORK_WIFI_ID);
-
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  mTasks.push_back(new mWebServer());
-  mTasksIDs.push_back(D_MODULE_NETWORK_WEBSERVER_ID);
-  #endif //USE_MODULE_CORE_WEBSERVER
-
-  mTasks.push_back(new mLogging());
-  mTasksIDs.push_back(D_MODULE_CORE_LOGGING_ID);
-
-  mTasks.push_back(new mTelemetry());
-  mTasksIDs.push_back(D_MODULE_CORE_TELEMETRY_ID);
-
-  #ifdef USE_MODULE_CORE_RULES
-  mTasks.push_back(new mRuleEngine());
-  mTasksIDs.push_back(D_MODULE_CORE_RULES_ID);
-  #endif // USE_MODULE_CORE_RULES
-
-  // Sensors
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-  mTasks.push_back(new mPzem_AC());
-  mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_DHT
-  mTasks.push_back(new mSensorsDHT());
-  mTasksIDs.push_back(D_MODULE_SENSORS_DHT_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_BME
-  mTasks.push_back(new mSensorsBME());
-  mTasksIDs.push_back(D_MODULE_SENSORS_BME_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-  mTasks.push_back(new mSensorsDB18());
-  mTasksIDs.push_back(D_MODULE_SENSORS_DB18S20_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_INA219
-  mTasks.push_back(new mSensorsINA219());
-  mTasksIDs.push_back(D_MODULE_SENSORS_INA219_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-  mTasks.push_back(new mMotionSensor());
-  mTasksIDs.push_back(D_MODULE_SENSORS_MOTION_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-  mTasks.push_back(new mMoistureSensor());
-  mTasksIDs.push_back(D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_DOOR
-  mTasks.push_back(new mDoorSensor());
-  mTasksIDs.push_back(D_MODULE_SENSORS_DOOR_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-  mTasks.push_back(new mPulseCounter());
-  mTasksIDs.push_back(D_MODULE_SENSORS_PULSECOUNTER_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-  mTasks.push_back(new mButtons());
-  mTasksIDs.push_back(D_MODULE_SENSORS_BUTTONS_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_SWITCHES
-  mTasks.push_back(new mSwitches());
-  mTasksIDs.push_back(D_MODULE_SENSORS_SWITCHES_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_ANALOG
-  mTasks.push_back(new mSensorsAnalog());
-  mTasksIDs.push_back(D_MODULE_SENSORS_ANALOG_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-  mTasks.push_back(new mPzem_AC());
-  mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
-  #endif
-
-  /**
-   * Lights
-   * */
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  mTasks.push_back(new mInterfaceLight());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_INTERFACE_ID);
-  #endif  
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  mTasks.push_back(new mAnimatorLight());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_ANIMATOR_ID);
+  // Core
+  #ifdef USE_MODULE_CORE_HARDWAREPINS
+  mTasks[EM_MODULE_CORE_HARDWAREPINS_ID] = new mHardwarePins();
   #endif 
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  mTasks.push_back(new mAddressableLight());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_ADDRESSABLE_ID);
+  #ifdef USE_MODULE_CORE_SETTINGS
+  mTasks[EM_MODULE_CORE_SETTINGS_ID] = new mSettings();
+  #endif 
+  #ifdef USE_MODULE_CORE_SUPPORT
+  mTasks[EM_MODULE_CORE_SUPPORT_ID] = new mSupport();
+  #endif 
+  #ifdef USE_MODULE_CORE_LOGGING
+  mTasks[EM_MODULE_CORE_LOGGING_ID] = new mLogging();
+  #endif 
+  #ifdef USE_MODULE_CORE_TELEMETRY
+  mTasks[EM_MODULE_CORE_TELEMETRY_ID] = new mTelemetry();
+  #endif 
+  #ifdef USE_MODULE_CORE_TIME
+  mTasks[EM_MODULE_CORE_TIME_ID] = new mTime();
+  #endif 
+  // Network
+  #ifdef USE_MODULE_NETWORK_WIFI
+  mTasks[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();
+  #endif 
+  #ifdef USE_MODULE_NETWORK_MQTT
+  mTasks[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
+  #endif 
+  #ifdef USE_MODULE_CORE_WEBSERVER
+  mTasks[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebserver();
   #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-  mTasks.push_back(new mPWMLight());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
-  #endif
-  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-  mTasks.push_back(new mWLEDEffects());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_WLED_EFFECTS_ID);
-  #endif
-
-  /**
-   * Drivers
-   * */
-  #if defined(USE_MODULE_CUSTOM_IRTRANSMITTER) || defined (USE_IR_RECEIVER)
-    // #ifdef ESP32
-  #endif
-  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined(USE_MODULE_DRIVERS_RF433MHZ)
-    mSAWTransceive mst;
-    mSAWMain msm;
-    mSAWProtocol msp;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-  mTasks.push_back(new mRadiatorFan());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_RADIATORFAN_ID);
-  #endif
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-  mTasks.push_back(new mBlinds());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_BLINDS_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_HBRIDGE
-  mTasks.push_back(new mHBridge());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_HBRIDGE_ID);
-  #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-  mTasks.push_back(new mUltraSonicSensor());
-  mTasksIDs.push_back(D_MODULE_SENSORS_ULTRASONIC_ID);
-  #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-  mTasks.push_back(new mOilFurnace());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_OILFURNACE_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-  mTasks.push_back(new mIRtransceiver());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_IRTRANSCEIVER_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-  mTasks.push_back(new mRelays());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_RELAY_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-  mTasks.push_back(new mSDCard());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_SDCARD_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-  mTasks.push_back(new mGPS());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_GPS_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-  mTasks.push_back(new mSerialUART());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_SERIAL_UART_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-  mTasks.push_back(new mShellyDimmer());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_SHELLY_DIMMER_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-  mTasks.push_back(new mCameraOV2640());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_CAMERA_OV2640_ID);
-  #endif
-  #ifdef USE_MODULE_DRIVERS_LEDS
-  mTasks.push_back(new mStatusLEDs());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_STATUS_LEDS_ID);
-  #endif // USE_MODULE_DRIVERS_LEDS
-
-
-  #ifdef USE_MODULE_DRIVERS_PWM
-  mTasks.push_back(new mPWM());
-  mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
+  // Displays
+  #ifdef USE_MODULE_DISPLAYS_INTERFACE
+    mTasks[EM_MODULE_DISPLAYS_NEXTION_ID] = new X();
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-  mTasks.push_back(new mNextionPanel());
-  mTasksIDs.push_back(D_MODULE_DISPLAYS_NEXTION_ID);
+    mTasks[EM_MODULE_DISPLAYS_NEXTION_ID] = new X();
   #endif
+  // Drivers (Range 40-129)
+  #ifdef USE_MODULE_DRIVERS_INTERFACE
+    mTasks[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_HBRIDGE
+    mTasks[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+    mTasks[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RELAY
+    mTasks[EM_MODULE_DRIVERS_RELAY_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_PWM
+    mTasks[EM_MODULE_DRIVERS_PWM_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RF433MHZ
+    mTasks[EM_MSAW_MODULE_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+    mTasks[EM_MODULE_DRIVERS_SDCARDID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_GPS
+    mTasks[EM_MODULE_DRIVERS_GPS_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+    mTasks[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+    mTasks[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
+    mTasks[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_LEDS
+    mTasks[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new X();
+  #endif
+  // Energy
   #ifdef USE_MODULE_DRIVERS_ENERGY
-  mTasks.push_back(new mEnergy());
-  mTasksIDs.push_back(D_MODULE_DRIVERS_ENERGY_ID);
+    mTasks[EM_MODULE_DRIVERS_ENERGY_ID] = new X();
   #endif
-
+  // Lights
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+    mTasks[EM_MODULE_LIGHTS_INTERFACE_ID] = new mInterfaceLight();
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    mTasks[EM_MODULE_LIGHTS_ANIMATOR_ID] = new mAnimatorLight();
+  #endif
+  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+    mTasks[EM_MODULE_LIGHTS_ADDRESSABLE_ID] = new mAddressableLight();
+  #endif
+  #ifdef USE_MODULE_LIGHTS_PWM
+    mTasks[EM_MODULE_LIGHTS_PWM_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+    mTasks[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new X();
+  #endif
+  // Sensors
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+    mTasks[EM_MODULE_SENSORS_BUTTONS_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_SWITCHES
+    mTasks[EM_MODULE_SENSORS_SWITCHES_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_ANALOG
+    mTasks[EM_MODULE_SENSORS_ANALOG_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+    mTasks[EM_MODULE_SENSORS_PZEM004T_MODBUS_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_DHT
+    mTasks[EM_MODULE_SENSORS_DHT_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_BME
+    mTasks[EM_MODULE_SENSORS_BME_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_DS18B20
+    mTasks[EM_MODULE_SENSORS_DB18S20_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_INA219
+    mTasks[EM_MODULE_SENSORS_INA219_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_ULTRASONICS
+    mTasks[EM_MODULE_SENSORS_ULTRASONIC_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_DOOR
+    mTasks[EM_MODULE_SENSORS_DOOR_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOTION
+    mTasks[EM_MODULE_SENSORS_MOTION_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_MOISTURE
+    mTasks[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
+    mTasks[EM_MODULE_SENSORS_PULSECOUNTER_ID] = new X();
+  #endif
   // Controllers
+  #ifdef USE_MODULE_CUSTOM_BLINDS
+    mTasks[EM_MODULE_CUSTOM_BLINDS_ID] = new X();
+  #endif
   #ifdef USE_MODULE_CUSTOM_HEATING
-  mTasks.push_back(new mHeating());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_HEATING_ID);
+    mTasks[EM_MODULE_CUSTOM_HEATING_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+    mTasks[EM_MODULE_CUSTOM_RADIATORFAN_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
+    mTasks[EM_MODULE_CUSTOM_IRTRANSMITTER_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_CUSTOM_OILFURNACE
+    mTasks[EM_MODULE_CUSTOM_OILFURNACE_ID] = new X();
   #endif
   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-  mTasks.push_back(new mExerciseBike());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_EXERCISEBIKE_ID);
+    mTasks[EM_MODULE_CUSTOM_EXERCISEBIKE_ID] = new X();
   #endif
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-  mTasks.push_back(new mSonoffIFan());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_SONOFF_IFAN_ID);
+    mTasks[EM_MODULE_CUSTOM_SONOFF_IFAN_ID] = new X();
   #endif
   #ifdef USE_MODULE_CUSTOM_FAN
-  mTasks.push_back(new mFan());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_FAN_ID);
+    mTasks[EM_MODULE_CUSTOM_FAN_ID] = new X();
   #endif
   #ifdef USE_MODULE_CUSTOM_TREADMILL
-  mTasks.push_back(new mTreadmill());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_TREADMILL_ID);
+    mTasks[EM_MODULE_CUSTOM_TREADMILL_ID] = new X();
   #endif
   #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
-  mTasks.push_back(new mSensorColours());
-  mTasksIDs.push_back(D_MODULE_CUSTOM_SENSORCOLOURS_ID);
+    mTasks[EM_MODULE_CUSTOM_SENSORCOLOURS_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-  mTasks.push_back(new mDoorBell());
-  mTasksIDs.push_back(D_MODULE_CONTROLLER_DOORBELL_ID);
+    mTasks[EM_MODULE_CONTROLLER_DOORBELL_ID] = new X();
   #endif
 
-  for(auto& task:mTasksIDs){
-    Serial.printf("task:mTasksIDs=%d\n\r",mTasksIDs[task]); Serial.flush();
-  }
+  // for(auto& task:mTasksIDs){
+  //   Serial.printf("task:mTasksIDs=%d\n\r",mTasksIDs[task]); Serial.flush();
+  // }
 
 
 }
 
 
+// // Checks if defined pointers are NOT nullptr and therefore initiated
+// uint8_t mTaskerManager::Instance_Init(){
+  
+//   mTasks[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
+
+//   mTasks[] = new mHardwarePins());
+//   mTasksIDs.push_back(D_MODULE_CORE_HARDWAREPINS_ID);
+
+//   mTasks.push_back(new mTime());
+//   mTasksIDs.push_back(D_MODULE_CORE_TIME_ID);
+
+//   mTasks.push_back(new mSettings());
+//   mTasksIDs.push_back(D_MODULE_CORE_SETTINGS_ID);
+
+//   mTasks.push_back(new mSupport());
+//   mTasksIDs.push_back(D_MODULE_CORE_SUPPORT_ID);
+
+//   mTasks.push_back(new mWiFi());
+//   mTasksIDs.push_back(D_MODULE_NETWORK_WIFI_ID);
+
+//   #ifdef USE_MODULE_CORE_WEBSERVER
+//   mTasks.push_back(new mWebServer());
+//   mTasksIDs.push_back(D_MODULE_NETWORK_WEBSERVER_ID);
+//   #endif //USE_MODULE_CORE_WEBSERVER
+
+//   mTasks.push_back(new mLogging());
+//   mTasksIDs.push_back(D_MODULE_CORE_LOGGING_ID);
+
+//   mTasks.push_back(new mTelemetry());
+//   mTasksIDs.push_back(D_MODULE_CORE_TELEMETRY_ID);
+
+//   #ifdef USE_MODULE_CORE_RULES
+//   mTasks.push_back(new mRuleEngine());
+//   mTasksIDs.push_back(D_MODULE_CORE_RULES_ID);
+//   #endif // USE_MODULE_CORE_RULES
+
+//   // Sensors
+//   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+//   mTasks.push_back(new mPzem_AC());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DHT
+//   mTasks.push_back(new mSensorsDHT());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_DHT_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BME
+//   mTasks.push_back(new mSensorsBME());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_BME_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DS18B20
+//   mTasks.push_back(new mSensorsDB18());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_DB18S20_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_INA219
+//   mTasks.push_back(new mSensorsINA219());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_INA219_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOTION
+//   mTasks.push_back(new mMotionSensor());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_MOTION_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOISTURE
+//   mTasks.push_back(new mMoistureSensor());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DOOR
+//   mTasks.push_back(new mDoorSensor());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_DOOR_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
+//   mTasks.push_back(new mPulseCounter());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_PULSECOUNTER_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BUTTONS
+//   mTasks.push_back(new mButtons());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_BUTTONS_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_SWITCHES
+//   mTasks.push_back(new mSwitches());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_SWITCHES_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_ANALOG
+//   mTasks.push_back(new mSensorsAnalog());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_ANALOG_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+//   mTasks.push_back(new mPzem_AC());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
+//   #endif
+
+//   /**
+//    * Lights
+//    * */
+//   #ifdef USE_MODULE_LIGHTS_INTERFACE
+//   mTasks.push_back(new mInterfaceLight());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_INTERFACE_ID);
+//   #endif  
+//   #ifdef USE_MODULE_LIGHTS_ANIMATOR
+//   mTasks.push_back(new mAnimatorLight());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_ANIMATOR_ID);
+//   #endif 
+//   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+//   mTasks.push_back(new mAddressableLight());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_ADDRESSABLE_ID);
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_PWM
+//   mTasks.push_back(new mPWMLight());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+//   mTasks.push_back(new mWLEDEffects());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_WLED_EFFECTS_ID);
+//   #endif
+
+//   /**
+//    * Drivers
+//    * */
+//   #if defined(USE_MODULE_CUSTOM_IRTRANSMITTER) || defined (USE_IR_RECEIVER)
+//     // #ifdef ESP32
+//   #endif
+//   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined(USE_MODULE_DRIVERS_RF433MHZ)
+//     mSAWTransceive mst;
+//     mSAWMain msm;
+//     mSAWProtocol msp;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+//   mTasks.push_back(new mRadiatorFan());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_RADIATORFAN_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_BLINDS
+//   mTasks.push_back(new mBlinds());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_BLINDS_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_HBRIDGE
+//   mTasks.push_back(new mHBridge());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_HBRIDGE_ID);
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_ULTRASONICS
+//   mTasks.push_back(new mUltraSonicSensor());
+//   mTasksIDs.push_back(D_MODULE_SENSORS_ULTRASONIC_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_OILFURNACE
+//   mTasks.push_back(new mOilFurnace());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_OILFURNACE_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+//   mTasks.push_back(new mIRtransceiver());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_IRTRANSCEIVER_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//   mTasks.push_back(new mRelays());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_RELAY_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_SDCARD
+//   mTasks.push_back(new mSDCard());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_SDCARD_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_GPS
+//   mTasks.push_back(new mGPS());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_GPS_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+//   mTasks.push_back(new mSerialUART());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_SERIAL_UART_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+//   mTasks.push_back(new mShellyDimmer());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_SHELLY_DIMMER_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
+//   mTasks.push_back(new mCameraOV2640());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_CAMERA_OV2640_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_LEDS
+//   mTasks.push_back(new mStatusLEDs());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_STATUS_LEDS_ID);
+//   #endif // USE_MODULE_DRIVERS_LEDS
+
+
+//   #ifdef USE_MODULE_DRIVERS_PWM
+//   mTasks.push_back(new mPWM());
+//   mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
+//   #endif
+//   #ifdef USE_MODULE_DISPLAYS_NEXTION
+//   mTasks.push_back(new mNextionPanel());
+//   mTasksIDs.push_back(D_MODULE_DISPLAYS_NEXTION_ID);
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_ENERGY
+//   mTasks.push_back(new mEnergy());
+//   mTasksIDs.push_back(D_MODULE_DRIVERS_ENERGY_ID);
+//   #endif
+
+//   // Controllers
+//   #ifdef USE_MODULE_CUSTOM_HEATING
+//   mTasks.push_back(new mHeating());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_HEATING_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+//   mTasks.push_back(new mExerciseBike());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_EXERCISEBIKE_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+//   mTasks.push_back(new mSonoffIFan());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_SONOFF_IFAN_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_FAN
+//   mTasks.push_back(new mFan());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_FAN_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_TREADMILL
+//   mTasks.push_back(new mTreadmill());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_TREADMILL_ID);
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+//   mTasks.push_back(new mSensorColours());
+//   mTasksIDs.push_back(D_MODULE_CUSTOM_SENSORCOLOURS_ID);
+//   #endif
+//   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+//   mTasks.push_back(new mDoorBell());
+//   mTasksIDs.push_back(D_MODULE_CONTROLLER_DOORBELL_ID);
+//   #endif
+
+//   for(auto& task:mTasksIDs){
+//     Serial.printf("task:mTasksIDs=%d\n\r",mTasksIDs[task]); Serial.flush();
+//   }
+
+
+// }
+
+
 uint16_t mTaskerManager::GetClassCount(){
-  return mTasksIDs.size();
+  return EM_MODULE_LENGTH_ID;//mTasksIDs.size();
 }
 
 
@@ -695,9 +873,9 @@ int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
 
   if(c=='\0'){ return -1; }
 
-  for(int ii=0;ii<mTasks.size();ii++){
+  for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, mTasks[ii]->GetModuleFriendlyName())){
-      return mTasksIDs[ii];
+      return ii;//mTasksIDs[ii];
     }    
   }
   return -1;
@@ -706,15 +884,18 @@ int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
 
 int16_t mTaskerManager::GetVectorIndexbyModuleID(uint8_t id_search)
 {
-
-  uint8_t counter = 0;
-  for(auto& id:mTasksIDs)
-  {
-    if(id == id_search){
-      return counter;
-    }   
-    counter++; 
+  if(id_search < GetClassCount()){
+    return id_search;
   }
+
+  // uint8_t counter = 0;
+  // for(auto& id:mTasksIDs)
+  // {
+  //   if(id == id_search){
+  //     return counter;
+  //   }   
+  //   counter++; 
+  // }
   return -1;
 
 }

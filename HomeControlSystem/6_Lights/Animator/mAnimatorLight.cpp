@@ -1366,7 +1366,7 @@ void mAnimatorLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_ANIMATOR_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_LIGHTS_ANIMATOR_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

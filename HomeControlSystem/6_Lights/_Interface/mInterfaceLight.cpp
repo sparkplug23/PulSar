@@ -182,15 +182,15 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // Default user names for palette
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID);ii++){ 
     sprintf(buffer, "User Test %02d", ii);
-    pCONT_set->AddDeviceName(buffer,D_MODULE_LIGHTS_INTERFACE_ID,ii);
+    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID);ii++){ 
     sprintf(buffer, "Solid Rgbcct %02d", ii);
-    pCONT_set->AddDeviceName(buffer,D_MODULE_LIGHTS_INTERFACE_ID,ii);
+    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID);ii++){ 
     sprintf(buffer, "Encoded %02d", ii);
-    pCONT_set->AddDeviceName(buffer,D_MODULE_LIGHTS_INTERFACE_ID,ii);
+    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
 
   #ifdef USE_MODULE_LIGHTS_PWM
@@ -984,7 +984,7 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_LIGHTS_INTERFACE_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_LIGHTS_INTERFACE_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids, 
     sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
     mqtt_handler_id

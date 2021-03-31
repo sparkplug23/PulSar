@@ -67,7 +67,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_LOGGING
 #define USE_MODULE_CORE_TELEMETRY
 #define USE_MODULE_CORE_TIME
-#define USE_MODULE_CORE_RULES
+// #define USE_MODULE_CORE_RULES
 
 #define USE_MODULE_NETWORK_WIFI
 #define USE_MODULE_NETWORK_MQTT
