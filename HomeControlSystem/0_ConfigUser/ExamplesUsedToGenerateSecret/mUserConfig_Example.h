@@ -28,7 +28,7 @@
  * This MUST BE CHANGED for ANY parameters in this file to overwrite those saved in settings
 \*********************************************************************************************/
 #ifndef SETTINGS_HOLDER
-#define SETTINGS_HOLDER             4631              // [Reset 1] Change this value (max 32000) to load SECTION1 configuration parameters to flash
+#define SETTINGS_HOLDER             4632              // [Reset 1] Change this value (max 32000) to load SECTION1 configuration parameters to flash
 #endif
 
 #define SERIALD Serial //serial debug

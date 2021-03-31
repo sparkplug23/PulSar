@@ -81,9 +81,9 @@ struct AVE{
 // uint8_t GetFanspeed(void);
 // void SetFanspeed(uint8_t fanspeed, bool sequence);
 // void SonoffIfanReceived(void);
-// bool SonoffIfanSerialInput(void);
+// bool SerialInput(void);
 // void CmndFanspeed(void);
-// void SonoffIfanUpdate(void);
+// void SpeedRefresh(void);
 
 
     // #define CEILINGFAN_TOGGLE  0xA55595

@@ -116,8 +116,11 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 #endif
 #include <Ticker.h>
 
+#include "1_TaskerManager/mTaskerInterface.h"
 
-class mTime{
+class mTime :
+  public mTaskerInterface
+{
 
   private:
   public:
@@ -127,6 +130,12 @@ class mTime{
     void initUpTime();
     void UpdateUpTime();
     int8_t Tasker(uint8_t function);
+
+    static const char* PM_MODULE_CORE_TIME_CTR;
+    static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
+
 
     uint32_t uptime_seconds_nonreset = 0; //test new uptime with comparison of breaktime
     uint32_t boottime_epoch;

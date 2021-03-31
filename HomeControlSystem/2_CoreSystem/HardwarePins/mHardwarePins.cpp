@@ -1,5 +1,10 @@
 #include "mHardwarePins.h"
 
+const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_CTR = D_MODULE_CORE_HARDWAREPINS_CTR;
+const char* mHardwarePins::PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR = D_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR;
+
+
+
 void mHardwarePins::Template_Load(){
 
 
@@ -11,6 +16,9 @@ void mHardwarePins::Template_Load(){
 
 int8_t mHardwarePins::Tasker(uint8_t function){
 
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
+  // Serial.printf("works=%d\n\r",works);
+  
   if(function == FUNC_TEMPLATE_MODULE_LOAD){
     Template_Load();
   }
@@ -378,6 +386,18 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else if(strcmp(c,"D5")==0){ pin = 14; }
   else if(strcmp(c,"D8")==0){ pin = 15; }
   else if(strcmp(c,"D0")==0){ pin = 16; }
+  else if(strcmp(c,"LBI")==0){ 
+
+    #ifdef LED_BUILTIN
+    pin = LED_BUILTIN; 
+    #else
+    pin = -1;
+    #endif
+    
+    
+  }
+
+
   // numbered
   else if(strcmp(c,"0")==0){ pin = 0; }
   else if(strcmp(c,"1")==0){ pin = 1; }
@@ -1318,10 +1338,10 @@ void mHardwarePins::GpioInit(void)
 // #endif
     }
   }
-  if (PinUsed(GPIO_LEDLNK_ID)) {
-    pinMode(Pin(GPIO_LEDLNK_ID), OUTPUT);
-    digitalWrite(Pin(GPIO_LEDLNK_ID), pCONT_set->ledlnk_inverted);
-  }
+  // if (PinUsed(GPIO_LEDLNK_ID)) {
+  //   pinMode(Pin(GPIO_LEDLNK_ID), OUTPUT);
+  //   digitalWrite(Pin(GPIO_LEDLNK_ID), pCONT_set->ledlnk_inverted);
+  // }
 
 #ifdef USE_WS2812
 
@@ -1484,8 +1504,8 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
 
   
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_CTR)==0){  return GPIO_LEDLNK_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_INV_CTR)==0){  return GPIO_LEDLNK_INV_ID; }
+  //else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_CTR)==0){  return GPIO_LEDLNK_ID; }
+  //else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_INV_CTR)==0){  return GPIO_LEDLNK_INV_ID; }
 
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_DOOR_OPEN_CTR)==0){  return GPIO_DOOR_OPEN_ID; }
@@ -1837,7 +1857,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
     
     case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
 
-    case GPIO_LEDLNK_INV_ID: return PM_GPIO_FUNCTION_LEDLNK_INV_CTR;
+//    case GPIO_LEDLNK_INV_ID: return PM_GPIO_FUNCTION_LEDLNK_INV_CTR;
 
   }
 }

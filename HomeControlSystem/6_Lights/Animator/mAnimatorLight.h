@@ -50,8 +50,8 @@
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef NeoRgbFeature selectedNeoFeatureType;
 #elif defined(USE_WS28XX_FEATURE_4_PIXEL_TYPE)   //includes 4th channel of white, pixel order variable still important
-  typedef NeoGrbwFeature selectedNeoFeatureType; 
-  // typedef NeoRgbwFeature selectedNeoFeatureType;
+  // typedef NeoGrbwFeature selectedNeoFeatureType; 
+  typedef NeoRgbwFeature selectedNeoFeatureType;
 #else
   typedef NeoRgbFeature selectedNeoFeatureType;
 #endif
@@ -152,7 +152,9 @@ DEFINE_PGM_CTR(PM_EFFECTS_REGION_ANIMATE_NAME_CTR)                            D_
 // #define ANIM_CALLBACK_SIGNATURE std::function<void(const AnimationParam& param)> callback
 #define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
 
-class mAnimatorLight{
+class mAnimatorLight :
+  public mTaskerInterface
+{
   private:
   public:
     mAnimatorLight(){};
@@ -955,6 +957,10 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     int8_t Tasker(uint8_t function);
     int8_t Tasker_Web(uint8_t function);
 
+    static const char* PM_MODULE_LIGHTS_ANIMATOR_CTR;
+    static const char* PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ANIMATOR_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
 
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);

@@ -10,7 +10,11 @@
 
 #include "ArduinoJson.h"
 
-class mMoistureSensor{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mMoistureSensor :
+  public mTaskerInterface
+{
   public:
     // Constructor
     mMoistureSensor(){};

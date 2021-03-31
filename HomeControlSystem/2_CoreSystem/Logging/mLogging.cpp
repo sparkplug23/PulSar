@@ -1,6 +1,10 @@
 #include "2_CoreSystem/Logging/mLogging.h"
 
 
+const char* mLogging::PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
+const char* mLogging::PM_MODULE_CORE_LOGGING_FRIENDLY_CTR = D_MODULE_CORE_LOGGING_FRIENDLY_CTR;
+
+
 void mLogging::init(void){
   // StartTelnetServer();
 }
@@ -8,6 +12,8 @@ void mLogging::init(void){
 
 int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
 
+// Serial.println("logging");
+//   DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       // init();
@@ -654,7 +660,7 @@ int Response_mP(const char* format, ...)     // Content send snprintf_P char dat
 
 if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
 
-memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
+  memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
 
   // This uses char strings. Be aware of sending %% if % is needed
   va_list args;

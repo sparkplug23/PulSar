@@ -17,7 +17,11 @@
 
 #define AUTO_FIND_DB_SENSOR
 
-class mSensorsDB18{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mSensorsDB18 :
+  public mTaskerInterface
+{
 
   private:
   public:

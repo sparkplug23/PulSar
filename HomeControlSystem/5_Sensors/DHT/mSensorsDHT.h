@@ -16,7 +16,12 @@ class DHTesp;
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #endif //USE_MODULE_CORE_WEBSERVER
-class mSensorsDHT{
+
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mSensorsDHT :
+  public: mTaskerInterface
+{
 
   private:
   public:

@@ -891,7 +891,7 @@
 // #define D_GPIO_FUNCTION_NETWORK_STATUS_LED_CTR "Network Status LED"
 
 // #define D_GPIO_FUNCTION_LEDLNK_CTR          D_GPIO_FUNCTION_LED_CTR "_Link"
-// #define D_GPIO_FUNCTION_LEDLNK_INV_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
+// #define D_GPIO_FUNCTION_LED1_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
 
 // #define D_GPIO_FUNCTION_DOOR_OPEN_CTR       "Door Open"
 // #define D_GPIO_FUNCTION_DOOR_LOCK_CTR       "Door Lock"

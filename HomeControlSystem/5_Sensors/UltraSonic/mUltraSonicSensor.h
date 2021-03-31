@@ -20,8 +20,10 @@
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/averaged";
 
-class mUltraSonicSensor{
+#include "1_TaskerManager/mTaskerInterface.h"
 
+class mUltraSonicSensor{
+  : public mTaskerInterface.h
   public:
     //#define D_MODULE_TOPIC_NAME "ultrasonic"
 

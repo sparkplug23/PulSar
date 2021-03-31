@@ -138,9 +138,11 @@ enum {
 #define INA219_REG_CALIBRATION (0x05)
 
 
+#include "1_TaskerManager/mTaskerInterface.h"
 
-
-class mSensorsINA219{
+class mSensorsINA219 :
+  public mTaskerInterface
+{
   private:
   public:
     mSensorsINA219(){};

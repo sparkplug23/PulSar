@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <vector>
+
 //#ifdef ENABLE_DEVFEATURE_JSONPARSER
 #include "JsonParser.h"
 //#endif // ENABLE_DEVFEATURE_JSONPARSER
@@ -66,6 +68,8 @@
   #define SupportHardware SupportESP32
 #endif
 
+
+#include "1_TaskerManager/mTaskerNameList.h"
 
 
 // #include <variant>
@@ -155,107 +159,84 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 
 #define D_TARGET_TASKER_NONE 0
 
-
-// New method?
-// typedef union {
-//   uint8_t data;
-//   struct {
-//     uint8_t PeriodicEnabled : 1; 
-//     uint8_t SendNow         : 1;
-//     uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes
-//     uint8_t reserved : 4; 
-//   };
-// }Interface_Handler_Flags;
-
-// template <typename Class>
-// struct interface_handler {
-//   Interface_Handler_Flags flags;
-//   const char*   pm_name_ctr;
-//   const char*   pm_friendly_name_ctr;
-//   uint16_t      module_id = 0;
-//   uint8_t       module_subtype_id = 0; //lighting, energy, sensor, custom, core
-//   uint8_t       (Class::*Tasker)(uint8_t function); // member-function to sender with one args
-// };
+//Consider moving unique number inside the class, then further references to it must be called via array index (with reverse lookup)
+//This would remove the need to have GetVectorIndex below, and IDs can be used directly
+// D_MODULE_x_ID would need to be an enum list above this line
+//Notice, vector.push_back order would need to align with this, making the use of arrays a better idea
+enum MODULE_IDS{
+  EM_MODULE_CORE_HARDWAREPINS_ID=0,
+  EM_MODULE_CORE_SETTINGS_ID,
 
 
-
-// uint8_t (* const list[])(uint8_t) = {}
-
-
+  EM_MODULE_LENGTH_ID
+};
 
 // CoreSystem (Range 0-29)
-#include "2_CoreSystem/HardwarePins/mHardwarePins.h"
-class mHardwarePins;
-#define            D_MODULE_CORE_HARDWAREPINS_ID               0 //index wont be needed?
-#define            D_MODULE_CORE_HARDWAREPINS_SUBTYPE_ID       MODULE_SUBTYPE_CORE_ID
-#define            pCONT_pins                                  pCONT->mod
-DEFINE_PGM_CTR(PM_MODULE_CORE_HARDWAREPINS_CTR)            "mHardwarePins";
-DEFINE_PGM_CTR(PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR)   "hardwarepins";
-
-#include "2_CoreSystem/Settings/mSettings.h"
-class mSettings;
-#define            D_MODULE_CORE_SETTINGS_ID                   1
-#define            pCONT_set                               pCONT->mset
-DEFINE_PGM_CTR(PM_MODULE_CORE_SETTINGS_CTR)                "mSettings";
-DEFINE_PGM_CTR(PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR)       "settings";
-
-#include "2_CoreSystem/Support/mSupport.h"
-class mSupport;
-#define            D_MODULE_CORE_SUPPORT_ID                     2
-#define            pCONT_sup                                pCONT->msup
-DEFINE_PGM_CTR(PM_MODULE_CORE_SUPPORT_CTR)                  "mSupport";
-DEFINE_PGM_CTR(PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR)         "support";
-
-#include "2_CoreSystem/Logging/mLogging.h"
-class mLogging;
-#define            D_MODULE_CORE_LOGGING_ID                    3
-#define            pCONT_sto                                 pCONT->mso
-DEFINE_PGM_CTR(PM_MODULE_CORE_LOGGING_CTR)                 "mLogging";
-DEFINE_PGM_CTR(PM_MODULE_CORE_LOGGING_FRIENDLY_CTR)        "logging";
-
-#include "2_CoreSystem/Telemetry/mTelemetry.h"
-class mTelemetry;
-#define            D_MODULE_CORE_TELEMETRY_ID                   4
-#define            pCONT_tel                                pCONT->mtel
-DEFINE_PGM_CTR(PM_MODULE_CORE_TELEMETRY_CTR)                "mTelemetry";
-DEFINE_PGM_CTR(PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR)       "telemetry";
-
-#include "2_CoreSystem/Time/mTime.h"
-class mTime;
-#define            D_MODULE_CORE_TIME_ID 5
-#define            pCONT_time                               pCONT->mt
-DEFINE_PGM_CTR(PM_MODULE_CORE_TIME_CTR)                     "mTime";
-DEFINE_PGM_CTR(PM_MODULE_CORE_TIME_FRIENDLY_CTR)            "time";
-
+#ifdef USE_MODULE_CORE_HARDWAREPINS
+  #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
+  class                                             mHardwarePins;
+  #define   D_MODULE_CORE_HARDWAREPINS_ID           0
+  #define   D_MODULE_CORE_HARDWAREPINS_SUBTYPE_ID   MODULE_SUBTYPE_CORE_ID
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->mTasks[EM_MODULE_CORE_HARDWAREPINS_ID])
+#endif 
+#ifdef USE_MODULE_CORE_SETTINGS
+  #include "2_CoreSystem/Settings/mSettings.h"
+  class                                             mSettings;
+  #define   D_MODULE_CORE_SETTINGS_ID               1
+  #define   pCONT_set                               static_cast<mSettings*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_SETTINGS_ID)])
+#endif 
+#ifdef USE_MODULE_CORE_SUPPORT
+  #include "2_CoreSystem/Support/mSupport.h"
+  class                                             mSupport;
+  #define   D_MODULE_CORE_SUPPORT_ID                2
+  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_SUPPORT_ID)])
+#endif 
+#ifdef USE_MODULE_CORE_LOGGING
+  #include "2_CoreSystem/Logging/mLogging.h"
+  class                                             mLogging;
+  #define   D_MODULE_CORE_LOGGING_ID                3
+  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_LOGGING_ID)])
+#endif 
+#ifdef USE_MODULE_CORE_TELEMETRY
+  #include "2_CoreSystem/Telemetry/mTelemetry.h"
+  class                                             mTelemetry;
+  #define   D_MODULE_CORE_TELEMETRY_ID              4
+  #define   pCONT_tel                               static_cast <mTelemetry*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_TELEMETRY_ID)])
+#endif 
+#ifdef USE_MODULE_CORE_TIME
+  #include "2_CoreSystem/Time/mTime.h"
+  class                                             mTime;
+  #define   D_MODULE_CORE_TIME_ID                   5
+  #define   pCONT_time                              static_cast <mTime*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_TIME_ID)])
+#endif 
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
 class mRuleEngine;
 #define            D_MODULE_CORE_RULES_ID 6
 #define            pCONT_rules                               pCONT->mrules
-DEFINE_PGM_CTR(PM_MODULE_CORE_RULES_CTR)                     "mRules";
-DEFINE_PGM_CTR(PM_MODULE_CORE_RULES_FRIENDLY_CTR)            "rules";
 #endif // USE_MODULE_CORE_RULES
-
 
 
 
 // Network (20-29)
 
+#ifdef USE_MODULE_NETWORK_WIFI
 #include "3_Network/WiFi/mWiFi.h"
 class mWiFi;
 #define D_MODULE_NETWORK_WIFI_ID 20
 DEFINE_PGM_CTR(PM_MODULE_NETWORK_WIFI_CTR)              "mWiFi";
 DEFINE_PGM_CTR(PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR)              "wifi";
-#define pCONT_wif pCONT->mwif
-
+#define pCONT_wif static_cast <mWiFi*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_NETWORK_WIFI_ID)])//mTaskerManager::GetInstance()->mwif
+#endif 
+#ifdef USE_MODULE_NETWORK_MQTT
 #include "3_Network/MQTT/mMQTT.h"
 class mMQTT;
 #define D_MODULE_NETWORK_MQTT_ID 21
 DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_CTR)              "mMQTT";
 DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //changing to mqtt required total rewrite
-#define pCONT_mqtt pCONT->mqt
-
+#define pCONT_mqtt static_cast <mMQTT*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_NETWORK_MQTT_ID)])//pCONT->mqt
+#endif 
 #ifdef USE_MODULE_CORE_WEBSERVER
   #include "3_Network/WebServer/mWebServer.h"
   class mWebServer;
@@ -264,6 +245,8 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR)              "webserver";
   #define pCONT_web pCONT->mweb
 #endif
+
+
 
 
 // Displays (30-39)
@@ -374,6 +357,15 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   DEFINE_PGM_CTR(PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR)  D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
 #endif
 
+#ifdef USE_MODULE_DRIVERS_LEDS
+#include "4_Drivers/LEDs/mLEDs.h"
+class mStatusLEDs;
+#define            D_MODULE_DRIVERS_STATUS_LEDS_ID 52
+#define            pCONT_status_leds                              pCONT->mstatus_leds
+DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_CTR)                     D_MODULE_DRIVERS_STATUS_LEDS_CTR;
+DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR)            D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR;
+#endif //USE_MODULE_DRIVERS_LEDS
+
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_DRIVERS_ENERGY
@@ -389,43 +381,33 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
 // Lights (Range 140-169)
 #ifdef USE_MODULE_LIGHTS_INTERFACE
   #include "6_Lights/_Interface/mInterfaceLight.h"
-  class mInterfaceLight;
-  #define D_MODULE_LIGHTS_INTERFACE_ID 140
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_INTERFACE_CTR)              "mInterfaceLight";
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR)              "lightinterface";
-  #define pCONT_iLight pCONT->minterface_light
+  class                                         mInterfaceLight;
+  #define D_MODULE_LIGHTS_INTERFACE_ID          140
+  #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_LIGHTS_INTERFACE_ID)])
 #endif
-#ifdef USE_MODULE_LIGHTS_ANIMATOR // previosly addressible, will not include any hardware going forward
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/Animator/mAnimatorLight.h"
-  class mAnimatorLight;
-  #define D_MODULE_LIGHTS_ANIMATOR_ID 141
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ANIMATOR_CTR)              "mAnimatorLight";
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR)     "pixels";
-  #define pCONT_lAni pCONT->mlights_animator
+  class                                         mAnimatorLight;
+  #define D_MODULE_LIGHTS_ANIMATOR_ID           141
+  #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_LIGHTS_ANIMATOR_ID)])
 #endif
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   #include "6_Lights/Hardware/Addressable/mAddressableLight.h"
-  class mAddressableLight;
-  #define D_MODULE_LIGHTS_ADDRESSABLE_ID 142
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_CTR)            "mRGBAdressable";
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)   "addressable";
-  #define pCONT_ladd pCONT->mlights_addressable
+  class                                         mAddressableLight;
+  #define D_MODULE_LIGHTS_ADDRESSABLE_ID        142
+  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_LIGHTS_ADDRESSABLE_ID)])
 #endif
 #ifdef USE_MODULE_LIGHTS_PWM
   #include "6_Lights/Hardware/PWM/mPWMLight.h"
-  class mPWMLight;
-  #define D_MODULE_LIGHTS_PWM_ID 143
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_CTR)              D_MODULE_LIGHTS_PWM_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_PWM_FRIENDLY_CTR)     D_MODULE_LIGHTS_PWM_FRIENDLY_CTR;
-  #define pCONT_lPWM pCONT->mlights_pwm
+  class                                         mPWMLight;
+  #define D_MODULE_LIGHTS_PWM_ID                143
+  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_LIGHTS_PWM_ID)])
 #endif
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
   #include "6_Lights/WLEDEffects/mWLEDEffects.h"
-  class mWLEDEffects;
-  #define D_MODULE_LIGHTS_WLED_EFFECTS_ID 144
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_CTR)              D_MODULE_LIGHTS_WLED_EFFECTS_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR)     D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR;
-  #define pCONT_lwled pCONT->mlights_wled
+  class                                         mWLEDEffects;
+  #define D_MODULE_LIGHTS_WLED_EFFECTS_ID       144
+  #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->mTasks[pCONT->GetVectorIndexbyModuleID(D_MODULE_LIGHTS_WLED_EFFECTS_ID)])
 #endif
 
 
@@ -515,8 +497,8 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   #include "5_Sensors/PIR/mMotionSensor.h"
   class mMotionSensor;
   #define D_MODULE_SENSORS_MOTION_ID 131
-  DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_CTR)                D_MODULE_SENSORS_MOTION_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)       D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
+  // DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_CTR)                D_MODULE_SENSORS_MOTION_CTR;
+  // DEFINE_PGM_CTR(PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)       D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
@@ -623,6 +605,8 @@ DEFINE_PGM_CTR(PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR)              "system"; //cha
   #define pCONT_mdb                                           pCONT->mdb
 #endif
 
+#define pModule(X) mTasks[GetVectorIndexbyModuleID(X)]
+
 
 DEFINE_PGM_CTR(PM_FUNC_POINTER_INIT_CTR)                            D_FUNC_POINTER_INIT_CTR;
 DEFINE_PGM_CTR(PM_FUNC_TEMPLATE_LOAD_CTR)                           D_FUNC_TEMPLATE_LOAD_CTR;
@@ -718,11 +702,11 @@ DEFINE_PGM_CTR(PM_FUNC_EVENT_MOTION_STARTED_CTR)  D_FUNC_EVENT_MOTION_STARTED_CT
 DEFINE_PGM_CTR(PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)   D_FUNC_EVENT_SET_POWER_CHANGED_CTR;
 
-
-
-
+#include  "1_TaskerManager/mTaskerInterface.h"
 
 class mTaskerManager{
+
+  friend class mTaskerInterface;
 
   private:
     /* Prevent others from being created */
@@ -730,183 +714,192 @@ class mTaskerManager{
     mTaskerManager(mTaskerManager&& other) = delete;
     /* Private constructor to prevent instancing. */
     mTaskerManager(){};
+
+    // mTaskerInterface* mTasks[50];
+
+
     /* Here will be the instance stored. */
     static mTaskerManager* instance;
   public:
     // External function to get instance
     static mTaskerManager* GetInstance();
 
-    void uart_intr_handle_u2(void *arg);
+    int16_t GetVectorIndexbyModuleID(uint8_t id_search);
 
+    std::vector<mTaskerInterface*> mTasks;
+    std::vector<uint8_t> mTasksIDs;
 
-    // HardwarePins
-    mHardwarePins *mod = nullptr;
-    // interface_handler<mHardwarePins> interfacehandler_logging;
-    // Settings
-    mSettings *mset = nullptr;    
-    // interface_handler<mSettings> interfacehandler_settings;
-    // Support
-    mSupport *msup = nullptr;
-    // interface_handler<mSupport> interfacehandler_support;
-    // Logging
-    mLogging *mso = nullptr;
-    // interface_handler<mLogging> interfacehandler_logging;
+    // // HardwarePins
+    // mHardwarePins *mod = nullptr;
+    // // interface_handler<mHardwarePins> interfacehandler_logging;
+    // // Settings
+    // mSettings *mset = nullptr;    
+    // // interface_handler<mSettings> interfacehandler_settings;
+    // // Support
+    // mSupport *msup = nullptr;
+    // // interface_handler<mSupport> interfacehandler_support;
+    // // Logging
+    // mLogging *mso = nullptr;
+    // // interface_handler<mLogging> interfacehandler_logging;
     
 
 
-    mTime *mt = nullptr;
-    mMQTT *mqt = nullptr;
+    // mTime *mt = nullptr;
+    // mMQTT *mqt = nullptr;
 
-    #ifdef USE_MODULE_CORE_RULES
-    mRuleEngine* mrules = nullptr;
-    #endif // USE_MODULE_CORE_RULES
+  //   #ifdef USE_MODULE_CORE_RULES
+  //   mRuleEngine* mrules = nullptr;
+  //   #endif // USE_MODULE_CORE_RULES
+  //   #ifdef USE_MODULE_DRIVERS_LEDS
+  //   mStatusLEDs* mstatus_leds = nullptr;
+  //   #endif // USE_MODULE_DRIVERS_LEDS
 
-    mWiFi *mwif = nullptr;
-    mTelemetry *mtel = nullptr;
+  //   mWiFi *mwif = nullptr;
+  //   mTelemetry *mtel = nullptr;
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
-    mWebServer *mweb = nullptr;
-    #endif
+  //   #ifdef USE_MODULE_CORE_WEBSERVER
+  //   mWebServer *mweb = nullptr;
+  //   #endif
 
-  #ifdef USE_MODULE_SENSORS_DHT
-    mSensorsDHT *msdht = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_BME
-    mSensorsBME *msbme = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-    mSensorsDB18 *msdb18 = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_INA219
-    mSensorsINA219 *msina219 = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    mUltraSonicSensor *mus = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    mOilFurnace *mof = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    mBlinds *mbbl = nullptr;
-  #endif
-  #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
-    mPulseCounter *mpc = nullptr;
-  #endif
+  // #ifdef USE_MODULE_SENSORS_DHT
+  //   mSensorsDHT *msdht = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_BME
+  //   mSensorsBME *msbme = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_DS18B20
+  //   mSensorsDB18 *msdb18 = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_INA219
+  //   mSensorsINA219 *msina219 = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_ULTRASONICS
+  //   mUltraSonicSensor *mus = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_OILFURNACE
+  //   mOilFurnace *mof = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_BLINDS
+  //   mBlinds *mbbl = nullptr;
+  // #endif
+  // #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
+  //   mPulseCounter *mpc = nullptr;
+  // #endif
 
   
-  #ifdef USE_MODULE_DRIVERS_HBRIDGE
-    mHBridge *mdhb = nullptr;
-  #endif
+  // #ifdef USE_MODULE_DRIVERS_HBRIDGE
+  //   mHBridge *mdhb = nullptr;
+  // #endif
 
-  #ifdef USE_MODULE_DRIVERS_ENERGY
-    mEnergy *mdenergy = nullptr;
-  #endif
-
-
-
-  /**
-   * Lights
-   * */
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-    mInterfaceLight *minterface_light = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    mAnimatorLight *mlights_animator = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    mAddressableLight *mlights_addressable = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    mPWMLight *mlights_pwm = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-    mWLEDEffects *mlights_wled = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
+  // #ifdef USE_MODULE_DRIVERS_ENERGY
+  //   mEnergy *mdenergy = nullptr;
+  // #endif
 
 
 
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    mHeating* mh = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    mRelays* mry = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-    mCameraOV2640* mcamera_ov2640 = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-    mSDCard* msdcard = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-    mGPS* mgps = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    mSerialUART* mserial = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-    mShellyDimmer* mshelly_dimmer = nullptr;
-  #endif 
+  // /**
+  //  * Lights
+  //  * */
+  // #ifdef USE_MODULE_LIGHTS_INTERFACE
+  //   mInterfaceLight *minterface_light = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  // #endif
+  // #ifdef USE_MODULE_LIGHTS_ANIMATOR
+  //   mAnimatorLight *mlights_animator = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  // #endif
+  // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  //   mAddressableLight *mlights_addressable = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  // #endif
+  // #ifdef USE_MODULE_LIGHTS_PWM
+  //   mPWMLight *mlights_pwm = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  // #endif
+  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+  //   mWLEDEffects *mlights_wled = nullptr;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+  // #endif
 
 
-  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
-    mPWM* mpwm = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-    mMotionSensor *mms = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DOOR
-    mDoorSensor *mds = nullptr;
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    mDoorBell *mdb = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    mRadiatorFan* mrf = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    mSonoffIFan* mifan = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_FAN
-    mFan* mfan = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_TREADMILL
-    mTreadmill* mtreadmill = nullptr;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
-    mSensorColours* msenscol = nullptr;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-    mIRtransceiver* mir = nullptr;
-  #endif
-  #if defined(USE_IR_RECEIVER) || defined(USE_MODULE_CUSTOM_IRTRANSMITTER)
-    void parse_IRCodes(char* topic, char* payload, unsigned int length);
-  #endif
-  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-   mNextionPanel* mnext = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-    mMoistureSensor *mois = nullptr;
-  #endif
 
-  // Sensors
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-    mButtons *mbtn = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_SWITCHES
-    mSwitches *mswh = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    mPzem_AC *mspm = nullptr;
-  #endif
-  #ifdef USE_MODULE_SENSORS_ANALOG
-    mSensorsAnalog *msanalog = nullptr;
-  #endif
+  // #ifdef USE_MODULE_CUSTOM_HEATING
+  //   mHeating* mh = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_RELAY
+  //   mRelays* mry = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
+  //   mCameraOV2640* mcamera_ov2640 = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_SDCARD
+  //   mSDCard* msdcard = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_GPS
+  //   mGPS* mgps = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+  //   mSerialUART* mserial = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  //   mShellyDimmer* mshelly_dimmer = nullptr;
+  // #endif 
 
-  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    mExerciseBike *meb = nullptr;
-  #endif
+
+  // #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+  //   mPWM* mpwm = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_MOTION
+  //   mMotionSensor *mms = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_DOOR
+  //   mDoorSensor *mds = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+  //   mDoorBell *mdb = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+  //   mRadiatorFan* mrf = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+  //   mSonoffIFan* mifan = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_FAN
+  //   mFan* mfan = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_TREADMILL
+  //   mTreadmill* mtreadmill = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+  //   mSensorColours* msenscol = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+  //   mIRtransceiver* mir = nullptr;
+  // #endif
+  // #if defined(USE_IR_RECEIVER) || defined(USE_MODULE_CUSTOM_IRTRANSMITTER)
+  //   void parse_IRCodes(char* topic, char* payload, unsigned int length);
+  // #endif
+  // #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
+  // #endif
+  // #ifdef USE_MODULE_DISPLAYS_NEXTION
+  //  mNextionPanel* mnext = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_MOISTURE
+  //   mMoistureSensor *mois = nullptr;
+  // #endif
+
+  // // Sensors
+  // #ifdef USE_MODULE_SENSORS_BUTTONS
+  //   mButtons *mbtn = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_SWITCHES
+  //   mSwitches *mswh = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+  //   mPzem_AC *mspm = nullptr;
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_ANALOG
+  //   mSensorsAnalog *msanalog = nullptr;
+  // #endif
+
+  // #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+  //   mExerciseBike *meb = nullptr;
+  // #endif
 
   uint8_t Instance_Init();
   uint8_t CheckPointersPass();
@@ -917,28 +910,31 @@ class mTaskerManager{
   // Overload
   int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0, bool flags_is_executing_rule = false);
 
+  uint16_t GetClassSizeByID(uint8_t class_id);
+
   // std::variant< int, std::string > GetClassObjectbyID(uint8_t id);
   // void TaskerTest();
 
   const char* GetTaskName(uint8_t task, char* buffer);
-  PGM_P GetClassName(uint8_t id);
+  PGM_P GetModuleName(uint8_t id);
   uint8_t InitClassList();
   PGM_P GetModuleFriendlyName(uint8_t module_id);
   uint16_t GetClassCount();
-  void Init_InterfaceHandler();
+
+  bool ValidTaskID(uint8_t module_id);
 
   // enum 
 
-  #define CLASS_ID_MAX 255
-  struct CLASS_ID{
-    uint8_t list[CLASS_ID_MAX];
-    uint8_t module_type[CLASS_ID_MAX];
-    // #ifdef DEBUG_EXECUTION_TIME
-    // uint16_t execution_time_average_ms[CLASS_ID_MAX];
-    // uint16_t execution_time_max_ms[CLASS_ID_MAX];
-    // #endif
-    uint8_t count = 0;
-  }module_settings; 
+  // #define CLASS_ID_MAX 255
+  // struct CLASS_ID{
+  //   uint8_t list[CLASS_ID_MAX];
+  //   uint8_t module_type[CLASS_ID_MAX];
+  //   // #ifdef DEBUG_EXECUTION_TIME
+  //   // uint16_t execution_time_average_ms[CLASS_ID_MAX];
+  //   // uint16_t execution_time_max_ms[CLASS_ID_MAX];
+  //   // #endif
+  //   uint8_t count = 0;
+  // }module_settings; 
 
   uint16_t last_function = 255; // 0 will be first
 
@@ -949,5 +945,6 @@ class mTaskerManager{
   int16_t GetModuleIDbyFriendlyName(const char* c);
 
 };
+
 
 #endif

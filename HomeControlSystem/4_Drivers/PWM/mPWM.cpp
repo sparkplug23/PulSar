@@ -50,7 +50,7 @@
 
 // /*********************************************************************************************/
 
-// void mPWM::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
+// void mPWM::SetFanSpeed(uint8_t fanspeed, bool sequence)
 // {
 //   ifan_fanspeed_timer = 0;                         // Stop any sequence
 //   ifan_fanspeed_goal = fanspeed;
@@ -129,7 +129,7 @@
 // //   }
 // // }
 
-// // bool mPWM::SonoffIfanSerialInput(void)
+// // bool mPWM::SerialInput(void)
 // // {
 // //   if (SONOFF_IFAN03 == my_module_type) {
 // //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -182,7 +182,7 @@
 //   //   }
 //   // }
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < MAX_FAN_SPEED)) {
-//   //   SonoffIFanSetFanspeed(XdrvMailbox.payload, true);
+//   //   SetFanSpeed(XdrvMailbox.payload, true);
 //   // }
 //   // ResponseCmndNumber(GetFanspeed());
 // }
@@ -199,13 +199,13 @@ void mPWM::init(void)
   // return false;  // Continue init chain
 }
 
-// void mPWM::SonoffIfanUpdate(void)
+// void mPWM::SpeedRefresh(void)
 // {
 //   // if (SONOFF_IFAN03 == my_module_type) {
 //     if (ifan_fanspeed_timer) {
 //       ifan_fanspeed_timer--;
 //       if (!ifan_fanspeed_timer) {
-//         SonoffIFanSetFanspeed(ifan_fanspeed_goal, false);
+//         SetFanSpeed(ifan_fanspeed_goal, false);
 //       }
 //     }
 //   // }
@@ -267,7 +267,7 @@ int8_t mPWM::Tasker(uint8_t function){
 
     break;
 //     case FUNC_EVERY_250_MSECOND:
-//       // SonoffIfanUpdate();
+//       // SpeedRefresh();
 //     break;
 //     /************
 //      * COMMANDS SECTION * 
@@ -276,7 +276,7 @@ int8_t mPWM::Tasker(uint8_t function){
 
 //     break;  
 //       //case FUNC_SERIAL:
-//       //result = SonoffIfanSerialInput();
+//       //result = SerialInput();
 //       //break;
 //     /************
 //      * MQTT SECTION * 
@@ -348,7 +348,7 @@ int8_t mPWM::Tasker(uint8_t function){
 //     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
 //     //   speed=0; //default off
 //     // }      
-//     // SonoffIFanSetFanspeed(speed, false);
+//     // SetFanSpeed(speed, false);
 //     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);

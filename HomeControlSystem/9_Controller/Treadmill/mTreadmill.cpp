@@ -43,7 +43,7 @@ int8_t mTreadmill::Tasker(uint8_t function){
       EverySecond();
     break;
     case FUNC_EVERY_250_MSECOND:
-      // SonoffIfanUpdate();
+      // SpeedRefresh();
     break;
     // case FUNC_EVERY_100_MSECOND:
     // break;

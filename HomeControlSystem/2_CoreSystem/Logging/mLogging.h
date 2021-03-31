@@ -258,12 +258,21 @@ void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const c
 // mLogging* mLogging::mso3 = nullptr;
 #endif
 
-class mLogging{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mLogging :
+  public mTaskerInterface
+{
 public:
     mLogging(){}; // Class constructor
     // mLogging(HardwareSerial* hs);
     void init(void);
     int8_t Tasker(uint8_t function);
+
+    static const char* PM_MODULE_CORE_LOGGING_CTR;
+    static const char* PM_MODULE_CORE_LOGGING_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; }
 
     // template<typename T>
     // void Debug_Printf(T format, )

@@ -80,13 +80,27 @@ enum HARDWARE_STATUS_IMPORTANCE_IDS{
 
 #include <Ticker.h>
 
-class mTelemetry{
+
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mTelemetry :
+  public mTaskerInterface
+{
   public:
     mTelemetry(){};
     
     int8_t Tasker(uint8_t function);
     void init(void);
     void WebPage_Root_AddHandlers();
+
+    
+
+static const char* PM_MODULE_CORE_TELEMETRY_CTR;
+static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
+PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
+PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
+
+
 
     uint8_t ConstructJSON_Health(uint8_t json_level);
     uint8_t ConstructJSON_Settings(uint8_t json_level);
@@ -122,6 +136,7 @@ class mTelemetry{
     void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
     #endif // #ifdef USE_MODULE_CORE_WEBSERVER
     
+    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
     #define HARDWARE_STATUS_MAX_LENGTH 200
     struct STATUSHARDWARE{
       //make function that appends pretty simple message
@@ -130,18 +145,19 @@ class mTelemetry{
       uint8_t importance = 0; //0 low, 1 med, 2 high
     }hardwarestatus;
     void ConstructCtr_HardwareStatus();
+    #endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
 
-    uint16_t wifi_reconnects_counter = 0;
+    // uint16_t wifi_reconnects_counter = 0;
 
     void Init();
 
-    #define HARDWARE_STATUS_OFFSET_INDEX MQTT_MAX_PACKET_SIZE/2
+    // #define HARDWARE_STATUS_OFFSET_INDEX MQTT_MAX_PACKET_SIZE/2
 
-    uint8_t fParseTasmotaCommand = false;
+    // uint8_t fParseTasmotaCommand = false;
 
-    uint32_t tSavedTest;
+    // uint32_t tSavedTest;
 
-    uint32_t loop_delay_temp = 100;
+    // uint32_t loop_delay_temp = 100;
 
     //use new syntax
     enum STATUS_SYSTEM_IDS{
@@ -190,10 +206,6 @@ class mTelemetry{
       handler<mTelemetry> mqtthandler_debug_moduleinterface;
       handler<mTelemetry> mqtthandler_debug_minimal;
     #endif
-
-
-
-
 
 };
 

@@ -1102,6 +1102,9 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     memset(name_ctr,0,sizeof(name_ctr));
     sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
+
+    AddLog_P(LOG_LEVEL_TEST, PSTR("Searching \"%s\""),name_ctr);
+
     if(strcmp(c,name_ctr)==0){
       return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID+ii;
     }

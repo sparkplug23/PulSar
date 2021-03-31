@@ -11,8 +11,11 @@
 DEFINE_PGM_CTR(PM_EVENT_DOOR_OPENED_CTR) D_JSON_OPENED;
 DEFINE_PGM_CTR(PM_EVENT_DOOR_CLOSED_CTR) D_JSON_CLOSED;
 
+#include "1_TaskerManager/mTaskerInterface.h"
 
-class mDoorSensor{
+class mDoorSensor :
+  public mTaskerInterface
+{
   public:
 	  mDoorSensor(){};
 

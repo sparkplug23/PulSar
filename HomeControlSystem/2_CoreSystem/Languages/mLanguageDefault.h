@@ -167,6 +167,10 @@
 #define D_MODULE_CORE_RULES_CTR            "Rules"
 #define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
 
+  #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
+  #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
+
+  
 //#ifdef USE_MODULE_CORE_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
@@ -232,7 +236,10 @@
 //#endif
 //#ifdef USE_MODULE_LIGHTS_ANIMATOR
   #define D_MODULE_LIGHTS_ADDRESSABLE_CTR              "mRGBAnimator"
-  #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "pixels"
+  #define D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR              "addressable"
+
+  #define D_MODULE_LIGHTS_ANIMATOR_CTR              "ANIMATOR"
+  #define D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR              "pixels"
 //#endif
 //#ifdef USE_MODULE_LIGHTS_PWMCONTROLLED
 
@@ -870,9 +877,10 @@
 // #define D_GPIO_FUNCTION_RELAY_3_CTR       D_GPIO_FUNCTION_RELAY_CTR " 3"      // Suffix "1i"
 // #define D_GPIO_FUNCTION_RELAY_4_CTR       D_GPIO_FUNCTION_RELAY_CTR " 4"      // Suffix "1i"
 #define D_GPIO_FUNCTION_LED_CTR           "Led"        // Suffix "1i"
-#define D_GPIO_FUNCTION_NETWORK_STATUS_LED_CTR "Network Status LED"
-#define D_GPIO_FUNCTION_LEDLNK_CTR          D_GPIO_FUNCTION_LED_CTR "_Link"
-#define D_GPIO_FUNCTION_LEDLNK_INV_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
+// #define D_GPIO_FUNCTION_NETWORK_STATUS_LED_CTR "Network Status LED"
+//REMOVE LINK LED
+// #define D_GPIO_FUNCTION_LEDLNK_CTR          D_GPIO_FUNCTION_LED_CTR "_Link"
+// #define D_GPIO_FUNCTION_LED1_CTR          D_GPIO_FUNCTION_LED_CTR "_Link" " Inv"
 #define D_GPIO_FUNCTION_DOOR_OPEN_CTR       "Door Open"
 #define D_GPIO_FUNCTION_DOOR_LOCK_CTR       "Door Lock"
 #define D_GPIO_FUNCTION_SERIAL_DEBUG_TX_CTR "Serial Debug TX"
@@ -1254,6 +1262,7 @@
 #define D_JSON_THRESHOLD "Threshold"
 #define D_JSON_TEMPLATE_PARSE_SUCCESS "TemplateParseSucess"
 #define D_JSON_TELNET "Telnet"
+#define D_JSON_TELNET_PORT "TelnetPort"
 #define D_JSON_TEMPLATE "Template"
 #define D_JSON_TIMEZONE "TimeZone"
 #define D_JSON_TODAY "Today"

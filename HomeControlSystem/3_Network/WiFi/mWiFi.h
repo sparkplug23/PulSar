@@ -49,9 +49,12 @@
 
 
 
+#include "1_TaskerManager/mTaskerInterface.h"
 #include "2_CoreSystem/Time/mTime.h"
 
-class mWiFi{
+class mWiFi :
+  public mTaskerInterface
+{
   public:
     mWiFi(){};
     
@@ -61,6 +64,13 @@ class mWiFi{
 
     int8_t Tasker(uint8_t function);
     void init(void);
+    
+
+    static const char* PM_MODULE_NETWORK_WIFI_CTR;
+    static const char* PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WIFI_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR; }
+
 
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();

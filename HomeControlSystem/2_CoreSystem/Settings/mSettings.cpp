@@ -26,6 +26,10 @@ struct DATA_BUFFER data_buffer;
 // union TimeRule TimeRuleTest;
 
 
+const char* mSettings::PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
+const char* mSettings::PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR = D_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
+
+
 
 
 // /*********************struct DATA_BUFFER2 data_buffer;***********************************************************************/
@@ -368,6 +372,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 // template<typename T>
 // int8_t mSettings::Tasker(uint8_t function, T param1){ 
 
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
     
@@ -1715,7 +1720,7 @@ void mSettings::SystemSettings_DefaultBody_Sensors(){
 
 
 void mSettings::SystemSettings_DefaultBody_Power(){
-  Settings.power = APP_POWER;
+  // Settings.power = APP_POWER;
   #ifdef SET_POWERONSTATE_AS_ON
     Settings.poweronstate = POWER_ALL_ON; //temporary fix for poweronstate
   #else

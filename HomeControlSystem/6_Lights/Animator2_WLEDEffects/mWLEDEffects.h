@@ -1224,7 +1224,9 @@ class WS2812FX {
 
 
 
-class mWLEDEffects{
+class mWLEDEffects :
+  public mTaskerInterface
+{
   public:
     mWLEDEffects(){};
     void Init();
@@ -1404,6 +1406,10 @@ byte optionType;
     void SubTask_Animation();
     void LightSetPWMOutputsRgbcctColor(RgbcctColor colour);
 
+    // static const char* PM_MODULE_CORE_TIME_CTR;
+    // static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
+    // PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
+    // PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
 
     #ifdef USE_MODULE_CORE_WEBSERVER
       void WebCommand_Parse();

@@ -60,6 +60,18 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 #define USE_LEGACY_PIN_METHOD
 
+//Minimal
+#define USE_MODULE_CORE_HARDWAREPINS
+#define USE_MODULE_CORE_SETTINGS
+#define USE_MODULE_CORE_SUPPORT
+#define USE_MODULE_CORE_LOGGING
+#define USE_MODULE_CORE_TELEMETRY
+#define USE_MODULE_CORE_TIME
+#define USE_MODULE_CORE_RULES
+
+#define USE_MODULE_NETWORK_WIFI
+#define USE_MODULE_NETWORK_MQTT
+
 
 // /*********************************************************************************************\
 //  * [TBD-lighting.bin]

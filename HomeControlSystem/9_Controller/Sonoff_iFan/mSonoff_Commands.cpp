@@ -65,7 +65,7 @@ void mSonoffIFan::parse_JSONCommand(void){
       Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
       speed=0; //default off
     }      
-    SonoffIFanSetFanspeed(speed, false);
+    SetFanSpeed(speed, false);
     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);

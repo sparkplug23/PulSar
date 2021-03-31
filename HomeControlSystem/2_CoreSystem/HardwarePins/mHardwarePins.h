@@ -18,13 +18,24 @@
 #ifdef ESP8266
   #define DRX 3
 #endif
+
+#include "1_TaskerManager/mTaskerInterface.h"
   
 
   #include "jsmn.h"
 
-class mHardwarePins{
+class mHardwarePins :
+  public mTaskerInterface
+{
   public:
     mHardwarePins(){}; //inline, no cpp needed
+        
+    static const char* PM_MODULE_CORE_HARDWAREPINS_CTR;
+    static const char* PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_HARDWAREPINS_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR; }
+
+    uint8_t works = 0;
 
     void ModuleSettings_FlashSerial();
     

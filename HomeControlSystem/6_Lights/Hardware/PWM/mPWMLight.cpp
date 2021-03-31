@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_LIGHTS_PWM 
 
+const char* mPWMLight::PM_MODULE_DRIVERS_PWM_CTR = D_MODULE_DRIVERS_PWM_CTR;
+const char* mPWMLight::PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR = D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
+
 
 /**********************************************************************************************************************************
  * ********************************************************************************************************************************

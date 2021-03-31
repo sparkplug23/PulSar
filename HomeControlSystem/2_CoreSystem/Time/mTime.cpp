@@ -1,9 +1,15 @@
 #include "mTime.h"
 
 
+
+const char* mTime::PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
+const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDLY_CTR;
+
+
 int8_t mTime::Tasker(uint8_t function){
 
 // return 0;
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
 
   switch(function){
     case FUNC_INIT:
@@ -1601,6 +1607,7 @@ void mTime::RtcSecond(void)
     int16_t timezone_minutes = pCONT_set->Settings.timezone_minutes;
     if (pCONT_set->Settings.timezone < 0) { timezone_minutes *= -1; }
     Rtc.time_timezone = (pCONT_set->Settings.timezone * SECS_PER_HOUR) + (timezone_minutes * SECS_PER_MIN);
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.timezone=%d"),pCONT_set->Settings.timezone);
     if (99 == pCONT_set->Settings.timezone) {
       int32_t dstoffset = pCONT_set->Settings.toffset[1] * SECS_PER_MIN;
       int32_t stdoffset = pCONT_set->Settings.toffset[0] * SECS_PER_MIN;
@@ -1620,6 +1627,7 @@ void mTime::RtcSecond(void)
         }
       }
     }
+      // AddLog_P(LOG_LEVEL_TEST,PSTR("Rtc.time_timezone=%d"),Rtc.time_timezone);
     Rtc.local_time += Rtc.time_timezone;
     Rtc.time_timezone /= 60;
     // if (!pCONT_set->Settings.energy_kWhtotal_time) {

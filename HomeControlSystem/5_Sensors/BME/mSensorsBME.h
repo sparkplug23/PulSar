@@ -14,7 +14,11 @@ class Adafruit_BME280;
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-class mSensorsBME{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mSensorsBME :
+  public mTaskerInterface
+{
   
   public:
     mSensorsBME(){};

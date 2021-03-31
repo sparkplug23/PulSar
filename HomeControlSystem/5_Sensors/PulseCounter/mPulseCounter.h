@@ -16,7 +16,11 @@
 #include <ESPAsyncWebServer.h>
 #endif //USE_MODULE_CORE_WEBSERVER
 
-class mPulseCounter{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mPulseCounter :
+  public mTaskerInterface
+{
 
   private:
   public:

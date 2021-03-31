@@ -303,16 +303,24 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 #include <Ticker.h>
 
 
+#include "1_TaskerManager/mTaskerInterface.h"
 
 
-class mSupport{
+class mSupport :
+  public mTaskerInterface
+{
   public:
     mSupport(){};
     
     int8_t Tasker(uint8_t function);
     void init(void);
 
-      
+    static const char* PM_MODULE_CORE_SUPPORT_CTR;
+    static const char* PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
+    PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
+    PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR; }
+
+          
     // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
     #ifdef USE_ARDUINO_OTA
       /*********************************************************************************************\

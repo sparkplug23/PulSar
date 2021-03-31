@@ -4,9 +4,6 @@
 /* Null, because instance will be initialized on demand. */
 mTaskerManager* mTaskerManager::instance = nullptr;
 
-void mTaskerManager::uart_intr_handle_u2(void *arg){
-
-}
 
 mTaskerManager* mTaskerManager::GetInstance(){
   if (instance == nullptr){
@@ -15,86 +12,121 @@ mTaskerManager* mTaskerManager::GetInstance(){
   return instance;
 }
 
+
+
 // Checks if defined pointers are NOT nullptr and therefore initiated
 uint8_t mTaskerManager::Instance_Init(){
+  
+  mTasks.push_back(new mMQTT());
+  mTasksIDs.push_back(D_MODULE_NETWORK_MQTT_ID);
 
-  if(mqt  == nullptr){ mqt  = new mMQTT();      }
-  if(mod  == nullptr){ mod  = new mHardwarePins(); }
-  if(mt   == nullptr){ mt   = new mTime();      }
-  if(mset == nullptr){ mset = new mSettings();  }
-  if(msup == nullptr){ msup = new mSupport();   }
-  if(mwif == nullptr){ mwif = new mWiFi();      }
+  mTasks.push_back(new mHardwarePins());
+  mTasksIDs.push_back(D_MODULE_CORE_HARDWAREPINS_ID);
+
+  mTasks.push_back(new mTime());
+  mTasksIDs.push_back(D_MODULE_CORE_TIME_ID);
+
+  mTasks.push_back(new mSettings());
+  mTasksIDs.push_back(D_MODULE_CORE_SETTINGS_ID);
+
+  mTasks.push_back(new mSupport());
+  mTasksIDs.push_back(D_MODULE_CORE_SUPPORT_ID);
+
+  mTasks.push_back(new mWiFi());
+  mTasksIDs.push_back(D_MODULE_NETWORK_WIFI_ID);
+
   #ifdef USE_MODULE_CORE_WEBSERVER
-  if(mweb == nullptr){ mweb = new mWebServer(); }
+  mTasks.push_back(new mWebServer());
+  mTasksIDs.push_back(D_MODULE_NETWORK_WEBSERVER_ID);
   #endif //USE_MODULE_CORE_WEBSERVER
-  if(mso  == nullptr){ mso  = new mLogging(); }
-  if(mtel == nullptr){ mtel = new mTelemetry(); }
+
+  mTasks.push_back(new mLogging());
+  mTasksIDs.push_back(D_MODULE_CORE_LOGGING_ID);
+
+  mTasks.push_back(new mTelemetry());
+  mTasksIDs.push_back(D_MODULE_CORE_TELEMETRY_ID);
 
   #ifdef USE_MODULE_CORE_RULES
-  if(mrules == nullptr){ mrules = new mRuleEngine();}//100); }
+  mTasks.push_back(new mRuleEngine());
+  mTasksIDs.push_back(D_MODULE_CORE_RULES_ID);
   #endif // USE_MODULE_CORE_RULES
 
   // Sensors
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    if(mspm == nullptr){ mspm = new mPzem_AC(); }
+  mTasks.push_back(new mPzem_AC());
+  mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_DHT
-    if(msdht == nullptr){ msdht = new mSensorsDHT(); }
+  mTasks.push_back(new mSensorsDHT());
+  mTasksIDs.push_back(D_MODULE_SENSORS_DHT_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_BME
-    if(msbme == nullptr){ msbme = new mSensorsBME(); }
+  mTasks.push_back(new mSensorsBME());
+  mTasksIDs.push_back(D_MODULE_SENSORS_BME_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_DS18B20
-    if(msdb18 == nullptr){ msdb18 = new mSensorsDB18(); }
+  mTasks.push_back(new mSensorsDB18());
+  mTasksIDs.push_back(D_MODULE_SENSORS_DB18S20_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_INA219
-    if(msina219 == nullptr){ msina219 = new mSensorsINA219(); }
+  mTasks.push_back(new mSensorsINA219());
+  mTasksIDs.push_back(D_MODULE_SENSORS_INA219_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
-    if(mms == nullptr){ mms = new mMotionSensor(); }
+  mTasks.push_back(new mMotionSensor());
+  mTasksIDs.push_back(D_MODULE_SENSORS_MOTION_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
-    if(mois == nullptr){ mois = new mMoistureSensor(); }
+  mTasks.push_back(new mMoistureSensor());
+  mTasksIDs.push_back(D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_DOOR
-    if(mds == nullptr){ mds = new mDoorSensor(); }
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    if(mdb == nullptr){ mdb = new mDoorBell(); }
+  mTasks.push_back(new mDoorSensor());
+  mTasksIDs.push_back(D_MODULE_SENSORS_DOOR_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-    if(mpc == nullptr){ mpc = new mPulseCounter(); }
+  mTasks.push_back(new mPulseCounter());
+  mTasksIDs.push_back(D_MODULE_SENSORS_PULSECOUNTER_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
-    if(mbtn == nullptr){ mbtn = new mButtons(); }
+  mTasks.push_back(new mButtons());
+  mTasksIDs.push_back(D_MODULE_SENSORS_BUTTONS_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
-    if(mswh == nullptr){ mswh = new mSwitches(); }
+  mTasks.push_back(new mSwitches());
+  mTasksIDs.push_back(D_MODULE_SENSORS_SWITCHES_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_ANALOG
-    if(msanalog == nullptr){ msanalog = new mSensorsAnalog(); }
+  mTasks.push_back(new mSensorsAnalog());
+  mTasksIDs.push_back(D_MODULE_SENSORS_ANALOG_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    if(mspm == nullptr){ mspm = new mPzem_AC(); }
+  mTasks.push_back(new mPzem_AC());
+  mTasksIDs.push_back(D_MODULE_SENSORS_PZEM004T_MODBUS_ID);
   #endif
 
   /**
    * Lights
    * */
   #ifdef USE_MODULE_LIGHTS_INTERFACE
-    if(minterface_light == nullptr){ minterface_light = new mInterfaceLight(); }
+  mTasks.push_back(new mInterfaceLight());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_INTERFACE_ID);
   #endif  
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    if(mlights_animator == nullptr){ mlights_animator = new mAnimatorLight();}
+  mTasks.push_back(new mAnimatorLight());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_ANIMATOR_ID);
   #endif 
   #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    if(mlights_addressable == nullptr){ mlights_addressable = new mAddressableLight();}
+  mTasks.push_back(new mAddressableLight());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_ADDRESSABLE_ID);
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
-    if(mlights_pwm == nullptr){ mlights_pwm = new mPWMLight(); }
+  mTasks.push_back(new mPWMLight());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
   #endif
   #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-    if(mlights_wled == nullptr){ mlights_wled = new mWLEDEffects(); }
+  mTasks.push_back(new mWLEDEffects());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_WLED_EFFECTS_ID);
   #endif
 
   /**
@@ -109,434 +141,122 @@ uint8_t mTaskerManager::Instance_Init(){
     mSAWProtocol msp;
   #endif
   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    if(mrf == nullptr){ mrf = new mRadiatorFan(); }
+  mTasks.push_back(new mRadiatorFan());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_RADIATORFAN_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_BLINDS
-    if(mbbl == nullptr){ mbbl = new mBlinds(); }
+  mTasks.push_back(new mBlinds());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_BLINDS_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
-    if(mdhb == nullptr){ mdhb = new mHBridge(); }
+  mTasks.push_back(new mHBridge());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_HBRIDGE_ID);
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    if(mus == nullptr){ mus = new mUltraSonicSensor(); }
+  mTasks.push_back(new mUltraSonicSensor());
+  mTasksIDs.push_back(D_MODULE_SENSORS_ULTRASONIC_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    if(mof == nullptr){ mof = new mOilFurnace(); }
+  mTasks.push_back(new mOilFurnace());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_OILFURNACE_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-    if(mir == nullptr){ mir = new mIRtransceiver(); }
+  mTasks.push_back(new mIRtransceiver());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_IRTRANSCEIVER_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
-    if(mry == nullptr){ mry = new mRelays(); }
+  mTasks.push_back(new mRelays());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_RELAY_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
-    if(msdcard == nullptr){ msdcard = new mSDCard(); }
+  mTasks.push_back(new mSDCard());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_SDCARD_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
-    if(mgps == nullptr){ mgps = new mGPS(); }
+  mTasks.push_back(new mGPS());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_GPS_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    if(mserial == nullptr){ mserial = new mSerialUART(); }
+  mTasks.push_back(new mSerialUART());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_SERIAL_UART_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-    if(mshelly_dimmer == nullptr){ mshelly_dimmer = new mShellyDimmer(); }
+  mTasks.push_back(new mShellyDimmer());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_SHELLY_DIMMER_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-    if(mcamera_ov2640 == nullptr){ mcamera_ov2640 = new mCameraOV2640(); }
+  mTasks.push_back(new mCameraOV2640());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_CAMERA_OV2640_ID);
   #endif
+  #ifdef USE_MODULE_DRIVERS_LEDS
+  mTasks.push_back(new mStatusLEDs());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_STATUS_LEDS_ID);
+  #endif // USE_MODULE_DRIVERS_LEDS
 
 
   #ifdef USE_MODULE_DRIVERS_PWM
-    if(mpwm == nullptr){ mpwm = new mPWM(); }
+  mTasks.push_back(new mPWM());
+  mTasksIDs.push_back(D_MODULE_LIGHTS_PWM_ID);
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-    if(mnext == nullptr){ mnext = new mNextionPanel(); }
+  mTasks.push_back(new mNextionPanel());
+  mTasksIDs.push_back(D_MODULE_DISPLAYS_NEXTION_ID);
   #endif
   #ifdef USE_MODULE_DRIVERS_ENERGY
-    if(mdenergy == nullptr){ mdenergy = new mEnergy(); }
+  mTasks.push_back(new mEnergy());
+  mTasksIDs.push_back(D_MODULE_DRIVERS_ENERGY_ID);
   #endif
 
   // Controllers
   #ifdef USE_MODULE_CUSTOM_HEATING
-    if(mh == nullptr){ mh = new mHeating(); }
+  mTasks.push_back(new mHeating());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_HEATING_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    if(meb == nullptr){ meb = new mExerciseBike(); }
+  mTasks.push_back(new mExerciseBike());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_EXERCISEBIKE_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    if(mifan == nullptr){ mifan = new mSonoffIFan(); }
+  mTasks.push_back(new mSonoffIFan());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_SONOFF_IFAN_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_FAN
-    if(mfan == nullptr){ mfan = new mFan(); }
+  mTasks.push_back(new mFan());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_FAN_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_TREADMILL
-    if(mtreadmill == nullptr){ mtreadmill = new mTreadmill(); }
+  mTasks.push_back(new mTreadmill());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_TREADMILL_ID);
   #endif
   #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
-    if(msenscol == nullptr){ msenscol = new mSensorColours(); }
+  mTasks.push_back(new mSensorColours());
+  mTasksIDs.push_back(D_MODULE_CUSTOM_SENSORCOLOURS_ID);
   #endif
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+  mTasks.push_back(new mDoorBell());
+  mTasksIDs.push_back(D_MODULE_CONTROLLER_DOORBELL_ID);
+  #endif
+
+  for(auto& task:mTasksIDs){
+    Serial.printf("task:mTasksIDs=%d\n\r",mTasksIDs[task]); Serial.flush();
+  }
 
 
 }
 
-void mTaskerManager::Init_InterfaceHandler(){
-
-
-  // if(mqt  == nullptr){ mqt  = new mMQTT();      }
-  // if(mod  == nullptr){ mod  = new mHardwarePins(); }
-  // if(mt   == nullptr){ mt   = new mTime();      }
-  // if(mset == nullptr){ mset = new mSettings();  }
-  // if(msup == nullptr){ msup = new mSupport();   }
-  // if(mwif == nullptr){ mwif = new mWiFi();      }
-  // if(mweb == nullptr){ mweb = new mWebServer(); }
-  // if(mso  == nullptr){ mso  = new mLogging(); }
-  // if(mtel == nullptr){ mtel = new mTelemetry(); }
-
-
-  // int array[] = {mset, msup};
-
-  // mTaskerManager *array[30];
-  // array[0] = new mSettings();
-  // array[1] = new mSupport();
-
-}
-
-// Gets the class id's and stores in array, used in interface 
-uint8_t mTaskerManager::InitClassList(){
-
-  memset(&module_settings,0,sizeof(module_settings));
-
-  // Core system
-  #ifdef D_MODULE_CORE_TIME_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_TIME_ID;
-  #endif
-  #ifdef D_MODULE_NETWORK_MQTT_ID
-    module_settings.list[module_settings.count++] = D_MODULE_NETWORK_MQTT_ID;
-  #endif
-  #ifdef D_MODULE_CORE_LOGGING_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_LOGGING_ID;
-  #endif
-  #ifdef D_MODULE_NETWORK_WIFI_ID
-    module_settings.list[module_settings.count++] = D_MODULE_NETWORK_WIFI_ID;
-  #endif
-  #ifdef D_MODULE_CORE_SETTINGS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_SETTINGS_ID;
-  #endif
-  #ifdef D_MODULE_CORE_SUPPORT_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_SUPPORT_ID;
-  #endif
-  #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_HARDWAREPINS_ID;
-  #endif
-  #ifdef D_MODULE_CORE_RULES_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_RULES_ID;
-  #endif
-
-
-  #ifdef D_MODULE_NETWORK_WEBSERVER_ID
-    module_settings.list[module_settings.count++] = D_MODULE_NETWORK_WEBSERVER_ID;
-  #endif
-  #ifdef D_MODULE_CORE_TELEMETRY_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CORE_TELEMETRY_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_BUTTONS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_BUTTONS_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_SWITCHES_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_SWITCHES_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_ANALOG_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_ANALOG_ID;
-  #endif
-
-  // Sensors
-  #ifdef D_MODULE_SENSORS_DHT_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DHT_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_BME_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_BME_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_DB18S20_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DB18S20_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_INA219_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_INA219_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_ULTRASONIC_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_DOOR_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_DOOR_ID;
-  #endif
-  #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CONTROLLER_DOORBELL_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_MOTION_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_MOTION_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_PULSECOUNTER_ID;
-  #endif
-  #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_SENSORS_PZEM004T_MODBUS_ID;
-  #endif
-
-  // Wireless
-  #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_IRTRANSCEIVER_ID;
-  #endif
-  #ifdef mSAWMain_ID
-    module_settings.list[module_settings.count++] = mSAWMain_ID;
-  #endif
-  #ifdef mSAWProtocol_ID
-    module_settings.list[module_settings.count++] = mSAWProtocol_ID;
-  #endif
-
-  /**
-   * Drivers
-   * */
-  #ifdef D_MODULE_DRIVERS_RELAY_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_RELAY_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_PWM_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_PWM_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_HBRIDGE_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_ENERGY_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_ENERGY_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_SDCARD_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SDCARD_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_GPS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_GPS_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SERIAL_UART_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-  #endif
-  #ifdef D_MODULE_DRIVERS_CAMERA_OV2640_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DRIVERS_CAMERA_OV2640_ID;
-  #endif
-
-  /**
-   * Lighting
-   * */
-  #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_INTERFACE_ID;
-  #endif
-  #ifdef D_MODULE_LIGHTS_ANIMATOR_ID
-    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_ANIMATOR_ID;
-  #endif  
-  #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_ADDRESSABLE_ID;
-  #endif
-  #ifdef D_MODULE_LIGHTS_PWM_ID
-    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_PWM_ID
-  #endif  
-  #ifdef D_MODULE_LIGHTS_WLED_EFFECTS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_LIGHTS_WLED_EFFECTS_ID
-  #endif  
-
-  // Displays
-  #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-    module_settings.list[module_settings.count++] = D_MODULE_DISPLAYS_NEXTION_ID;
-  #endif
-  
-  //Specific
-  #ifdef D_MODULE_CUSTOM_BLINDS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_BLINDS_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_HEATING_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_HEATING_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_SONOFF_IFAN_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_FAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_FAN_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_SENSORCOLOURS_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_RADIATORFAN_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_OILFURNACE_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_EXERCISEBIKE_ID;
-  #endif
-  #ifdef D_MODULE_CUSTOM_TREADMILL_ID
-    module_settings.list[module_settings.count++] = D_MODULE_CUSTOM_TREADMILL_ID;
-  #endif
-  // #ifdef D_MOILTANK_MODULE_ID
-  //   module_settings.list[module_settings.count++] = D_MOILTANK_MODULE_ID;
-  // #endif
-  
-DEBUG_LINE;
-
-}
 
 uint16_t mTaskerManager::GetClassCount(){
-  return module_settings.count;
+  return mTasksIDs.size();
 }
 
 
-// Checks if defined pointers are NOT nullptr and therefore initiated
-uint8_t mTaskerManager::CheckPointersPass(){
-
-//probably phase out? singletons will remove need
-
-
-  // system
-  if(mset==nullptr){ return false; }
-  if(msup==nullptr){ return false; }
-  if(mwif==nullptr){ return false; }
-  #ifdef USE_MQTT
-    if(mqt==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_CORE_WEBSERVER
-    if(mweb==nullptr){ return false; }
-  #endif
-
-  //Lights
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-    if(minterface_light==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    if(mlights_animator==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    if(mlights_addressable==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    if(mlights_pwm==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-    if(mlights_wled==nullptr){ return false; }
-  #endif
-
-  // Sensor
-  #ifdef USE_MODULE_SENSORS_DOOR
-    if(mds==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-    if(mms==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_DHT
-    if(msdht==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_BME
-    if(msbme==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-    if(msdb18==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_INA219
-    if(msina219==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-    if(mois==nullptr){ return false; }
-  #endif
-
-
-
-  #ifdef USE_RTC
-    if(mt==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    if(mrf==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    if(mbbl==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    if(mus==nullptr){ return false; }
-  #endif
-  // #ifdef USE_OILTANK
-  //   if(mot==nullptr){ return false; }
-  // #endif
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    if(mh==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    if(mry==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-    if(msdcard==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-    if(mgps==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    if(mserial==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-    if(mshelly_dimmer==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-    if(mcamera_ov2640==nullptr){ return false; }
-  #endif
-
-  #ifdef USE_MODULE_DRIVERS_PWM
-    if(mpwm==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-    if(mnext==nullptr){ return false; }
-  #endif
-  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined(USE_MODULE_DRIVERS_RF433MHZ)
-    if(msm==nullptr){ return false; }
-  #endif
-  #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-    if(mifan==nullptr){ return false; }
-  #endif
-  #ifdef D_MODULE_CUSTOM_FAN_ID
-    if(mfan==nullptr){ return false; }
-  #endif
-  #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
-    if(msenscol==nullptr){ return false; }
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-    if(mod==nullptr){ return false; }
-  #endif
-
-  // Drivers
-  #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
-    if(mdhb==nullptr){ return false; }
-  #endif
-  #ifdef D_MODULE_DRIVERS_ENERGY_ID
-    if(mdenergy==nullptr){ return false; }
-  #endif
-
-  return true;
-
-}
-
-
-// to replace interface found in tasmota 
-// single function will call ALL cpp files that have a Tasker, passing the command
 /**
  * 
- * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. If !0, a specific tasker will be called and this function will exit after completion
+ * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
+ If !0, a specific tasker will be called and this function will exit after completion
  * */
-
 int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
-// }
-// template<typename T>
-// int8_t mTaskerManager::Tasker_Interface(uint8_t function, T param1, uint8_t target_tasker = 0){
 
-  // if(function == FUNC_JSON_COMMAND_OBJECT){
-  // Serial.println("BEFORE FUNC_JSON_COMMAND_OBJECT TASKER"); Serial.flush();
-  // }
 
   int8_t result = 0;
 
@@ -552,373 +272,112 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   // Serial.printf("Tasker_Interface2 %d %d\n\r", function, target_tasker); Serial.flush();
 
   // Check system is safe to run
-  if(function==FUNC_CHECK_POINTERS){
-    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%s"),GetTaskName(function));
-    if(!CheckPointersPass()){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "CheckPointers FAILED!!"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-      return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID;
-    }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "CheckPointers PASSED"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-      return FUNCTION_RESULT_SUCCESS_ID;
-    }
-  }else
   if(function==FUNC_PRE_INIT){
-    InitClassList();
     // InitRules();
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "FUNC_PRE_INIT  GetClassCount %d"),module_settings.count);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "FUNC_PRE_INIT  GetClassCount %d"),module_settings.count);
+    // #endif// ENABLE_LOG_LEVEL_INFO
   }
 
-  
   #ifdef USE_MODULE_CORE_RULES
-
 // I dont think i want this in here, as not only do I need to pass a trigger event, I might need to pass (or change a struct) tp include matching values
-  
 // For now, this function is called always, later it will only happen without a set range of function_inputs
   if(flags_is_executing_rule != true){
     pCONT_rules->Tasker_Rules_Interface(function);
   }
   #endif
-
-  DEBUG_LINE;
-
+  
   uint8_t fModule_present = false;
   #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     char buffer_taskname[50];
   #endif
+//   for(uint8_t i=0;i<module_settings.count;i++){
+//     // If target_tasker != 0, then use it, else, use indexed array
 
-  for(uint8_t i=0;i<module_settings.count;i++){
-    // If target_tasker != 0, then use it, else, use indexed array
-
-// Serial.printf("%s\n\r",pCONT_mqtt->MqttIsConnected()?"con":"NOT CONNECTED");
-    DEBUG_LINE;
-    switch_index = target_tasker ? target_tasker : module_settings.list[i];
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-        switch_index, 
-        GetTaskName(function, buffer_taskname),
-        GetModuleFriendlyName(switch_index));
-    #endif
+// // Serial.printf("%s\n\r",pCONT_mqtt->MqttIsConnected()?"con":"NOT CONNECTED");
+//     DEBUG_LINE;
+//     switch_index = target_tasker ? target_tasker : module_settings.list[i];
+//     #ifdef ENABLE_ADVANCED_DEBUGGING
+//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+//         switch_index, 
+//         GetTaskName(function, buffer_taskname),
+//         GetModuleFriendlyName(switch_index));
+//     #endif
     
-    // char buffer_taskname[40];
-    //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-    //     switch_index, 
-    //     GetTaskName(function, buffer_taskname),
-    //     GetModuleFriendlyName(switch_index));
-    // DEBUG_LINE;
+//     // char buffer_taskname[40];
+//     //   AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
+//     //     switch_index, 
+//     //     GetTaskName(function, buffer_taskname),
+//     //     GetModuleFriendlyName(switch_index));
+//     // DEBUG_LINE;
 
-    // Remember start millis
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-    uint32_t start_millis = millis();
-    #endif
-    fModule_present = true; //assume true
+//     // Remember start millis
+//     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+//     uint32_t start_millis = millis();
+//     #endif
+//     fModule_present = true; //assume true
     
-    switch(switch_index){
-      // CoreSystem
-      #ifdef D_MODULE_NETWORK_WIFI_ID
-        case D_MODULE_NETWORK_WIFI_ID:      
-
-          // #ifdef USE_INTERFACE_NEW
-          //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
-          // #else
-          // #endif
-
-          result = mwif->Tasker(function); 
-
-        
-        break;
-      #endif
-      #ifdef D_MODULE_CORE_SETTINGS_ID
-        case D_MODULE_CORE_SETTINGS_ID:           
-        
-          // #ifdef USE_INTERFACE_NEW
-          //   // result = (mLogging.*interfacehandler_logging.Tasker)(function);
-          // #else
-            result = mset->Tasker(function); 
-          // #endif
-
-        break;
-      #endif
-      #ifdef D_MODULE_CORE_SUPPORT_ID
-        case D_MODULE_CORE_SUPPORT_ID:    
-        
-          // #ifdef DISBALE_TEST_SECTION
-          result = msup->Tasker(function);  
-          // #endif
-          
-          break;
-      #endif
-      #ifdef D_MODULE_CORE_LOGGING_ID
-        case D_MODULE_CORE_LOGGING_ID:  
-        
-          // #ifdef DISBALE_TEST_SECTION
-          
-          result = mso->Tasker(function); 
-          // #endif
-           break;
-      #endif
-      #ifdef D_MODULE_CORE_TIME_ID
-        case D_MODULE_CORE_TIME_ID:       
-          result = mt->Tasker(function); 
-        break;
-      #endif
-      #ifdef D_MODULE_NETWORK_MQTT_ID
-        case D_MODULE_NETWORK_MQTT_ID:    
-          result = mqt->Tasker(function);  
-        break;
-      #endif
-      #ifdef D_MODULE_NETWORK_WEBSERVER_ID
-        case D_MODULE_NETWORK_WEBSERVER_ID:  result = mweb->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CORE_TELEMETRY_ID
-        case D_MODULE_CORE_TELEMETRY_ID:    
-        result = mtel->Tasker(function); 
-        break;
-      #endif
-      #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-        case D_MODULE_CORE_HARDWAREPINS_ID:  
-        
-          // #ifdef DISBALE_TEST_SECTION
-          result = mod->Tasker(function); 
-          
-          
-          // #endif
-          break;
-      #endif
-      #ifdef D_MODULE_CORE_RULES_ID
-        case D_MODULE_CORE_RULES_ID:  
-        
-          // #ifdef DISBALE_TEST_SECTION
-          result = mrules->Tasker(function); 
-          
-          
-          // #endif
-          break;
-      #endif
 
 
-      //Sensors
-      #ifdef D_MODULE_SENSORS_DOOR_ID
-        case D_MODULE_SENSORS_DOOR_ID:       result = mds->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_MOTION_ID
-        case D_MODULE_SENSORS_MOTION_ID:     result = mms->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
-        case D_MODULE_SENSORS_PZEM004T_MODBUS_ID: result = mspm->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
-        case D_MODULE_SENSORS_ULTRASONIC_ID: result = mus->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DHT_ID
-        case D_MODULE_SENSORS_DHT_ID:       result = msdht->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_BME_ID
-        case D_MODULE_SENSORS_BME_ID:       result = msbme->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_DB18S20_ID
-        case D_MODULE_SENSORS_DB18S20_ID:      result = msdb18->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_INA219_ID
-        case D_MODULE_SENSORS_INA219_ID:      result = msina219->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
-        case D_MODULE_CUSTOM_RADIATORFAN_ID:      result = mrf->Tasker(function); break;
-      #endif
-      #ifdef USE_MODULE_CUSTOM_BLINDS
-        case D_MODULE_CUSTOM_BLINDS_ID:           result = mbbl->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-        case D_MODULE_CUSTOM_OILFURNACE_ID:       result = mof->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
-        case D_MODULE_CUSTOM_EXERCISEBIKE_ID:     result = meb->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_HEATING_ID
-        case D_MODULE_CUSTOM_HEATING_ID:          result = mh-> Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_RELAY_ID
-        case D_MODULE_DRIVERS_RELAY_ID:    
-        
-        result = mry->Tasker(function);
+  for(auto& task:mTasks){
+    task->Tasker(function);
+  }
 
-        //  f<int>();
-        //  mry->f2<int>();
-        
-        // result = mry->Tasker(function);
-         break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_SDCARD_ID
-        case D_MODULE_DRIVERS_SDCARD_ID:    
-          result = msdcard->Tasker(function);
-        break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_GPS_ID
-        case D_MODULE_DRIVERS_GPS_ID:    
-          result = mgps->Tasker(function);
-        break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
-        case D_MODULE_DRIVERS_SERIAL_UART_ID:    
-          result = mserial->Tasker(function);
-        break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
-        case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:    
-          result = mshelly_dimmer->Tasker(function);
-        break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_CAMERA_OV2640_ID
-        case D_MODULE_DRIVERS_CAMERA_OV2640_ID:    
-          result = mcamera_ov2640->Tasker(function);
-        break;
-      #endif
+  //   #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+  //   // Remember start millis
+  //   uint32_t end_millis = millis();
 
-      #ifdef D_MODULE_DRIVERS_PWM_ID
-        case D_MODULE_DRIVERS_PWM_ID:    
-        
-        result = mpwm->Tasker(function);
-
-         break;
-      #endif
-
-      // Customs to be named "Controllers or Systems"
-      #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-        case D_MODULE_CUSTOM_SONOFF_IFAN_ID:      result = mifan->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_FAN_ID
-        case D_MODULE_CUSTOM_FAN_ID:      result = mfan->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
-        case D_MODULE_CUSTOM_SENSORCOLOURS_ID:      result = msenscol->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CUSTOM_TREADMILL_ID
-        case D_MODULE_CUSTOM_TREADMILL_ID:      result = mtreadmill->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
-        case D_MODULE_CONTROLLER_DOORBELL_ID:   result = mdb->Tasker(function); break;
-      #endif
-
-
-
-      #ifdef D_MSAW_MODULE_ID
-        case D_MSAW_MODULE_ID:             result = msm->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-        case D_MODULE_DISPLAYS_NEXTION_ID:    result = mnext->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_BUTTONS_ID
-        case D_MODULE_SENSORS_BUTTONS_ID:         result =  mbtn->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_SWITCHES_ID
-        case D_MODULE_SENSORS_SWITCHES_ID:        result = mswh->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_ANALOG_ID
-        case D_MODULE_SENSORS_ANALOG_ID:        result = msanalog->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
-        case D_MODULE_SENSORS_PULSECOUNTER_ID:    result = mpc->Tasker(function); break;
-      #endif
-      //Drivers
-      #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
-        case D_MODULE_DRIVERS_IRTRANSCEIVER_ID:   result = mir->Tasker(function);  break;
-      #endif
-      #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
-        case D_MODULE_DRIVERS_HBRIDGE_ID:         result = mdhb->Tasker(function); break;
-      #endif
-
-
-      /**
-       * Lights
-       * */
-      #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-        case D_MODULE_LIGHTS_INTERFACE_ID:       result = minterface_light->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_LIGHTS_ANIMATOR_ID
-        case D_MODULE_LIGHTS_ANIMATOR_ID:     result = mlights_animator->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-        case D_MODULE_LIGHTS_ADDRESSABLE_ID:     result = mlights_addressable->Tasker(function); break;
-      #endif
-      #ifdef D_MODULE_LIGHTS_PWM_ID
-        case D_MODULE_LIGHTS_PWM_ID:     result = mlights_pwm->Tasker(function); break;
-      #endif  
-      #ifdef D_MODULE_LIGHTS_WLED_EFFECTS_ID
-        case D_MODULE_LIGHTS_WLED_EFFECTS_ID:     result = mlights_wled->Tasker(function); break;
-      #endif  
-
-
-
-      #ifdef D_MODULE_DRIVERS_ENERGY_ID
-        case D_MODULE_DRIVERS_ENERGY_ID:   result = mdenergy->Tasker(function); break;
-      #endif
-      //default
-      default:
-        fModule_present = false;
-        // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "default"));
-      break;
-    } //end switch
-
-    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-    // Remember start millis
-    uint32_t end_millis = millis();
-
-    // Get this execution time 
-    uint32_t this_millis = end_millis - start_millis;
+  //   // Get this execution time 
+  //   uint32_t this_millis = end_millis - start_millis;
     
-    #if defined(DEBUG_EXECUTION_TIME)
-    // Get average
-    if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
-      module_settings.execution_time_average_ms[i] += this_millis;
-      module_settings.execution_time_average_ms[i] /= 2; //gets average
+  //   #if defined(DEBUG_EXECUTION_TIME)
+  //   // Get average
+  //   if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
+  //     module_settings.execution_time_average_ms[i] += this_millis;
+  //     module_settings.execution_time_average_ms[i] /= 2; //gets average
 
-      // Get max
-      if(this_millis > module_settings.execution_time_max_ms[i]){
-        module_settings.execution_time_max_ms[i] = this_millis; // remember max
-      }
-    }
-    #endif // DEBUG_EXECUTION_TIME
-    #endif
+  //     // Get max
+  //     if(this_millis > module_settings.execution_time_max_ms[i]){
+  //       module_settings.execution_time_max_ms[i] = this_millis; // remember max
+  //     }
+  //   }
+  //   #endif // DEBUG_EXECUTION_TIME
+  //   #endif
     
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
-    #endif
-    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-      if(this_millis > 500){
-        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-      }
-    #endif
+  //   #ifdef ENABLE_ADVANCED_DEBUGGING
+  //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
+  //   #endif
+  //   #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+  //     if(this_millis > 500){
+  //       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+  //     }
+  //   #endif
 
-    // print boot info as it proceeds
-    // if(function == FUNC_INIT){
-    //   AddLog_P(LOG_LEVEL_INFO, PSTR("\t\tBootProgress: %s %d %%"),GetModuleFriendlyName(switch_index),map(i,0,module_settings.count,0,100));
-    // }
+  //   // print boot info as it proceeds
+  //   // if(function == FUNC_INIT){
+  //   //   AddLog_P(LOG_LEVEL_INFO, PSTR("\t\tBootProgress: %s %d %%"),GetModuleFriendlyName(switch_index),map(i,0,module_settings.count,0,100));
+  //   // }
 
-    if(target_tasker!=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-      break; //only run for loop for the class set. if 0, rull all
-    }
-    // Special flag that can be set to end interface ie event handled, no need to check others
-    if(fExitTaskerWithCompletion){fExitTaskerWithCompletion=false;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-      break; //only run for loop for the class set. if 0, rull all
-    }
+  //   if(target_tasker!=0){
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+  //   #endif// ENABLE_LOG_LEVEL_INFO
+  //     break; //only run for loop for the class set. if 0, rull all
+  //   }
+  //   // Special flag that can be set to end interface ie event handled, no need to check others
+  //   if(fExitTaskerWithCompletion){fExitTaskerWithCompletion=false;
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+  //   #endif// ENABLE_LOG_LEVEL_INFO
+  //     break; //only run for loop for the class set. if 0, rull all
+  //   }
     
-  DEBUG_LINE;
+  // DEBUG_LINE;
 
-  } //end for
+  // } //end for
 
   DEBUG_LINE;
-  if(!mset->flag_boot_complete){
+  if(!pCONT_set->flag_boot_complete){
     char buffer_taskname[50];
     if(function != last_function){
       uint8_t boot_percentage = map(function,0,FUNC_ON_SUCCESSFUL_BOOT,0,100);
@@ -935,7 +394,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //}
       last_function = function;
     }
-    if(function == FUNC_ON_SUCCESSFUL_BOOT){ mset->flag_boot_complete = true; }
+    if(function == FUNC_ON_SUCCESSFUL_BOOT){ pCONT_set->flag_boot_complete = true; }
   }//flag_boot_complete
 
   
@@ -946,6 +405,187 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
   DEBUG_LINE;
   return result;
+
+}
+
+
+//ifdef debug only include then
+uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id){
+    
+  switch(class_id){
+    // CoreSystem
+    #ifdef D_MODULE_NETWORK_WIFI_ID
+      case D_MODULE_NETWORK_WIFI_ID:  return sizeof(mWiFi);
+    #endif
+    #ifdef D_MODULE_CORE_SETTINGS_ID
+      case D_MODULE_CORE_SETTINGS_ID: return sizeof(mSettings);
+    #endif
+    #ifdef D_MODULE_CORE_SUPPORT_ID
+      case D_MODULE_CORE_SUPPORT_ID: return sizeof(mSupport);
+    #endif
+    #ifdef D_MODULE_CORE_LOGGING_ID
+      case D_MODULE_CORE_LOGGING_ID: return sizeof(mLogging);
+    #endif
+    #ifdef D_MODULE_CORE_TIME_ID
+      case D_MODULE_CORE_TIME_ID: return sizeof(mTime);
+    #endif
+    #ifdef D_MODULE_NETWORK_MQTT_ID
+      case D_MODULE_NETWORK_MQTT_ID: return sizeof(mMQTT);
+    #endif
+    #ifdef D_MODULE_NETWORK_WEBSERVER_ID
+      case D_MODULE_NETWORK_WEBSERVER_ID:   return sizeof(mWebServer);
+    #endif
+    #ifdef D_MODULE_CORE_TELEMETRY_ID
+      case D_MODULE_CORE_TELEMETRY_ID:     return sizeof(mTelemetry);
+    #endif
+    #ifdef D_MODULE_CORE_HARDWAREPINS_ID
+      case D_MODULE_CORE_HARDWAREPINS_ID:   return sizeof(mHardwarePins);
+    #endif
+    #ifdef D_MODULE_CORE_RULES_ID
+      case D_MODULE_CORE_RULES_ID:   return sizeof(mRuleEngine);
+    #endif
+    #ifdef D_MODULE_DRIVERS_STATUS_LEDS_ID
+      case D_MODULE_DRIVERS_STATUS_LEDS_ID: return sizeof(mStatusLEDs);
+    #endif
+
+    //Sensors
+    #ifdef D_MODULE_SENSORS_DOOR_ID
+      case D_MODULE_SENSORS_DOOR_ID:  return sizeof(mDoorSensor);
+    #endif
+    #ifdef D_MODULE_SENSORS_MOTION_ID
+      case D_MODULE_SENSORS_MOTION_ID: return sizeof(mMotionSensor);
+    #endif
+    #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
+      case D_MODULE_SENSORS_PZEM004T_MODBUS_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
+      case D_MODULE_SENSORS_ULTRASONIC_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_DHT_ID
+      case D_MODULE_SENSORS_DHT_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_BME_ID
+      case D_MODULE_SENSORS_BME_ID: return sizeof(mSensorsBME);
+    #endif
+    #ifdef D_MODULE_SENSORS_DB18S20_ID
+      case D_MODULE_SENSORS_DB18S20_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_INA219_ID
+      case D_MODULE_SENSORS_INA219_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
+      case D_MODULE_CUSTOM_RADIATORFAN_ID: return sizeof();
+    #endif
+    #ifdef USE_MODULE_CUSTOM_BLINDS
+      case D_MODULE_CUSTOM_BLINDS_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
+      case D_MODULE_CUSTOM_OILFURNACE_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
+      case D_MODULE_CUSTOM_EXERCISEBIKE_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_HEATING_ID
+      case D_MODULE_CUSTOM_HEATING_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_RELAY_ID
+      case D_MODULE_DRIVERS_RELAY_ID:  return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_SDCARD_ID
+      case D_MODULE_DRIVERS_SDCARD_ID:   return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_GPS_ID
+      case D_MODULE_DRIVERS_GPS_ID:     return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
+      case D_MODULE_DRIVERS_SERIAL_UART_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
+      case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:  return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_CAMERA_OV2640_ID
+      case D_MODULE_DRIVERS_CAMERA_OV2640_ID:   return sizeof();
+    #endif
+
+    #ifdef D_MODULE_DRIVERS_PWM_ID
+      case D_MODULE_DRIVERS_PWM_ID:    return sizeof();
+    #endif
+
+    // Customs to be named "Controllers or Systems"
+    #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
+      case D_MODULE_CUSTOM_SONOFF_IFAN_ID:   return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_FAN_ID
+      case D_MODULE_CUSTOM_FAN_ID:   return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
+      case D_MODULE_CUSTOM_SENSORCOLOURS_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CUSTOM_TREADMILL_ID
+      case D_MODULE_CUSTOM_TREADMILL_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
+      case D_MODULE_CONTROLLER_DOORBELL_ID: return sizeof();
+    #endif
+
+
+
+    #ifdef D_MSAW_MODULE_ID
+      case D_MSAW_MODULE_ID:   return sizeof();
+    #endif
+    #ifdef D_MODULE_DISPLAYS_NEXTION_ID
+      case D_MODULE_DISPLAYS_NEXTION_ID:  return sizeof(mNextionPanel);
+    #endif
+    #ifdef D_MODULE_SENSORS_BUTTONS_ID
+      case D_MODULE_SENSORS_BUTTONS_ID:    return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_SWITCHES_ID
+      case D_MODULE_SENSORS_SWITCHES_ID:   return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_ANALOG_ID
+      case D_MODULE_SENSORS_ANALOG_ID:  return sizeof();
+    #endif
+    #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
+      case D_MODULE_SENSORS_PULSECOUNTER_ID:  return sizeof();
+    #endif
+    //Drivers
+    #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
+      case D_MODULE_DRIVERS_IRTRANSCEIVER_ID: return sizeof();
+    #endif
+    #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
+      case D_MODULE_DRIVERS_HBRIDGE_ID:    return sizeof();
+    #endif
+
+
+    /**
+     * Lights
+      * */
+    #ifdef D_MODULE_LIGHTS_INTERFACE_ID
+      case D_MODULE_LIGHTS_INTERFACE_ID:    return sizeof(mInterfaceLight);
+    #endif
+    #ifdef D_MODULE_LIGHTS_ANIMATOR_ID
+      case D_MODULE_LIGHTS_ANIMATOR_ID:    return sizeof(mAnimatorLight);
+    #endif
+    #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
+      case D_MODULE_LIGHTS_ADDRESSABLE_ID:     return sizeof(mAddressableLight);
+    #endif
+    #ifdef D_MODULE_LIGHTS_PWM_ID
+      case D_MODULE_LIGHTS_PWM_ID:    return sizeof(mPWMLight);
+    #endif  
+    #ifdef D_MODULE_LIGHTS_WLED_EFFECTS_ID
+      case D_MODULE_LIGHTS_WLED_EFFECTS_ID:     return sizeof(mWLEDEffects);
+    #endif  
+
+
+
+    #ifdef D_MODULE_DRIVERS_ENERGY_ID
+      case D_MODULE_DRIVERS_ENERGY_ID:  return sizeof();
+    #endif
+    //default
+    default: return -1; 
+  } //end switch
+
+  return -1;
 
 }
 
@@ -1049,300 +689,54 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
 }
 
 
-PGM_P mTaskerManager::GetClassName(uint8_t task){
-  switch(task){
-    // CoreSystem
-    case D_MODULE_CORE_TIME_ID:        return PM_MODULE_CORE_TIME_CTR; 
-    case D_MODULE_NETWORK_MQTT_ID:        return PM_MODULE_NETWORK_MQTT_CTR;
-    case D_MODULE_CORE_LOGGING_ID:   return PM_MODULE_CORE_LOGGING_CTR;
-    case D_MODULE_NETWORK_WIFI_ID:        return PM_MODULE_NETWORK_WIFI_CTR;
-    case D_MODULE_CORE_SETTINGS_ID:    return PM_MODULE_CORE_SETTINGS_CTR;
-    case D_MODULE_CORE_SUPPORT_ID:     return PM_MODULE_CORE_SUPPORT_CTR;
-    case D_MODULE_CORE_HARDWAREPINS_ID:     return PM_MODULE_CORE_HARDWAREPINS_CTR;
-    #ifdef D_MODULE_CORE_RULES_ID
-      case D_MODULE_CORE_RULES_ID:        return PM_MODULE_CORE_RULES_CTR;
-    #endif
-
-
-
-
-    #ifdef D_MODULE_CUSTOM_HEATING_ID
-      case D_MODULE_CUSTOM_HEATING_ID:         return PM_MODULE_CUSTOM_HEATING_CTR;
-    #endif
-    #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-      case D_MODULE_DISPLAYS_NEXTION_ID:  return D_MODULE_DISPLAYS_NEXTION_CTR;
-    #endif
-
-    #ifdef D_MODULE_NETWORK_WEBSERVER_ID
-      case D_MODULE_NETWORK_WEBSERVER_ID:        return PM_MODULE_NETWORK_WEBSERVER_CTR;
-    #endif
-    #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-      case D_MODULE_LIGHTS_ADDRESSABLE_ID:        return PM_MODULE_LIGHTS_ADDRESSABLE_CTR;
-    #endif
-    #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-      case D_MODULE_LIGHTS_INTERFACE_ID:        return PM_MODULE_LIGHTS_INTERFACE_CTR;
-    #endif
-
-    #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-      case D_MODULE_CUSTOM_OILFURNACE_ID:        return PM_MODULE_CUSTOM_OILFURNACE_CTR;
-    #endif
-    #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
-      case D_MODULE_CUSTOM_EXERCISEBIKE_ID:        return PM_MODULE_CUSTOM_EXERCISEBIKE_CTR;
-    #endif
-
-    // Drivers
-    #ifdef D_MODULE_DRIVERS_RELAY_ID
-      case D_MODULE_DRIVERS_RELAY_ID:        return PM_MODULE_DRIVERS_RELAY_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_PWM_ID
-      case D_MODULE_DRIVERS_PWM_ID:        return PM_MODULE_DRIVERS_PWM_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_SDCARD_ID
-      case D_MODULE_DRIVERS_SDCARD_ID:        return PM_MODULE_DRIVERS_SDCARD_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_GPS_ID
-      case D_MODULE_DRIVERS_GPS_ID:        return PM_MODULE_DRIVERS_GPS_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
-      case D_MODULE_DRIVERS_SERIAL_UART_ID:        return PM_MODULE_DRIVERS_SERIAL_UART_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
-      case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:        return PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_CAMERA_OV2640_ID
-      case D_MODULE_DRIVERS_CAMERA_OV2640_ID:        return PM_MODULE_DRIVERS_CAMERA_OV2640_CTR;
-    #endif
-
-    // Custom
-    #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-      case D_MODULE_CUSTOM_SONOFF_IFAN_ID:        return PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_CUSTOM_FAN_ID
-      case D_MODULE_CUSTOM_FAN_ID:        return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_CUSTOM_TREADMILL_ID
-      case D_MODULE_CUSTOM_TREADMILL_ID:        return PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
-      case D_MODULE_CUSTOM_SENSORCOLOURS_ID:        return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
-    #endif
-
-
-
-    default: return 0;
-  }
-}
-
 
 
 int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
 
-  if(c=='\0'){
-    return -1;
+  if(c=='\0'){ return -1; }
+
+  for(int ii=0;ii<mTasks.size();ii++){
+    if(strcasecmp_P(c, mTasks[ii]->GetModuleFriendlyName())){
+      return mTasksIDs[ii];
+    }    
   }
-  #ifdef D_MODULE_DRIVERS_RELAY_ID
-  if(strcasecmp_P(c,PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)==0){ return D_MODULE_DRIVERS_RELAY_ID; }
-  #endif // D_MODULE_DRIVERS_RELAY_ID
-  #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
-  if(strcasecmp_P(c,PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR)==0){ return D_MODULE_DRIVERS_SHELLY_DIMMER_ID; }
-  #endif // D_MODULE_DRIVERS_RELAY_ID
-
-  #ifdef USE_MODULE_SENSORS_SWITCHES
-  if(strcasecmp_P(c,PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR)==0){ return D_MODULE_SENSORS_SWITCHES_ID; }
-  #endif //USE_MODULE_SENSORS_SWITCHES
-  #ifdef USE_MODULE_SENSORS_MOTION
-  if(strcasecmp_P(c,PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR)==0){ return D_MODULE_SENSORS_MOTION_ID; }
-  #endif //USE_MODULE_SENSORS_MOTION
-
-
   return -1;
 }
 
 
+int16_t mTaskerManager::GetVectorIndexbyModuleID(uint8_t id_search)
+{
+
+  uint8_t counter = 0;
+  for(auto& id:mTasksIDs)
+  {
+    if(id == id_search){
+      return counter;
+    }   
+    counter++; 
+  }
+  return -1;
+
+}
+
+bool mTaskerManager::ValidTaskID(uint8_t module_id){
+  return GetVectorIndexbyModuleID(module_id) >= 0 ? true : false;
+}
 
 
 PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t module_id){
-
-  switch(module_id){
-    // CoreSystem (Range 0-29)
-    #ifdef D_MODULE_CORE_HARDWAREPINS_ID
-      case D_MODULE_CORE_HARDWAREPINS_ID:     return PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_CORE_SETTINGS_ID
-      case D_MODULE_CORE_SETTINGS_ID:         return PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_CORE_SUPPORT_ID
-      case D_MODULE_CORE_SUPPORT_ID:          return PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_CORE_LOGGING_ID
-      case D_MODULE_CORE_LOGGING_ID:          return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_CORE_TELEMETRY_ID
-      case D_MODULE_CORE_TELEMETRY_ID:        return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_CORE_TIME_ID
-      case D_MODULE_CORE_TIME_ID:             return PM_MODULE_CORE_TIME_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_CORE_RULES_ID
-      case D_MODULE_CORE_RULES_ID:        return PM_MODULE_CORE_RULES_FRIENDLY_CTR;
-    #endif
-// Displays (30-39)
-    #ifdef D_MODULE_DISPLAYS_NEXTION_ID
-      case D_MODULE_DISPLAYS_NEXTION_ID:      return D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR; 
-    #endif
-// Drivers (Range 40-99)
-    #ifdef D_MODULE_DRIVERS_HBRIDGE_ID
-      case D_MODULE_DRIVERS_HBRIDGE_ID:       return D_MODULE_DRIVERS_HBRIDGE_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_DRIVERS_ENERGY_ID
-      case D_MODULE_DRIVERS_ENERGY_ID:        return PM_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR;     
-    #endif
-    #ifdef D_MODULE_LIGHTS_ADDRESSABLE_ID
-      case D_MODULE_LIGHTS_ADDRESSABLE_ID:    return PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR;//, sizeof(PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)); break; 
-    #endif
-    #ifdef D_MODULE_LIGHTS_INTERFACE_ID
-      case D_MODULE_LIGHTS_INTERFACE_ID:      return PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_IRTRANSCEIVER_ID
-      case D_MODULE_DRIVERS_IRTRANSCEIVER_ID: return PM_MODULE_DRIVERS_IRTRANSCEIVER_FRIENDLY_CTR;  break;
-    #endif
-    #ifdef D_MODULE_DRIVERS_RELAY_ID
-      case D_MODULE_DRIVERS_RELAY_ID:         return PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_DRIVERS_CAMERA_OV2640_ID
-      case D_MODULE_DRIVERS_CAMERA_OV2640_ID:        return PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
-    #endif
-    #ifdef D_MODULE_DRIVERS_GPS_ID
-      case D_MODULE_DRIVERS_GPS_ID:         return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
-      case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_DRIVERS_SHELLY_DIMMER_ID
-      case D_MODULE_DRIVERS_SHELLY_DIMMER_ID:        return PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
-    #endif
-    // #ifdef D_MODULE_DRIVERS_SERIAL_UART_ID
-    //   case D_MODULE_DRIVERS_SERIAL_UART_ID:         return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; 
-    // #endif
-    #ifdef D_MODULE_DRIVERS_PWM_ID
-      case D_MODULE_DRIVERS_PWM_ID:         return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MSAW_MODULE_ID
-      case D_MSAW_MODULE_ID:
-        return D_MSAW_MODULE_FRIENDLY_CTR; 
-      break;
-    #endif
-// Network (100-119)
-    #ifdef D_MODULE_NETWORK_WIFI_ID
-      case D_MODULE_NETWORK_WIFI_ID:         return PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_NETWORK_MQTT_ID
-      case D_MODULE_NETWORK_MQTT_ID:        return PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_NETWORK_WEBSERVER_ID
-      case D_MODULE_NETWORK_WEBSERVER_ID:        return PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR; 
-    #endif
-// Sensors (Range 120-169)
-    #ifdef D_MODULE_SENSORS_BUTTONS_ID
-      case D_MODULE_SENSORS_BUTTONS_ID:
-        return D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_SENSORS_SWITCHES_ID
-      case D_MODULE_SENSORS_SWITCHES_ID:
-        return D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_SENSORS_ANALOG_ID
-      case D_MODULE_SENSORS_ANALOG_ID:
-        return PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_SENSORS_PULSECOUNTER_ID
-      case D_MODULE_SENSORS_PULSECOUNTER_ID:
-        return D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_CONTROLLER_DOORBELL_ID
-      case D_MODULE_CONTROLLER_DOORBELL_ID:        return PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_SENSORS_PZEM004T_MODBUS_ID
-      case D_MODULE_SENSORS_PZEM004T_MODBUS_ID:     return PM_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_SENSORS_DHT_ID
-      case D_MODULE_SENSORS_DHT_ID:
-        return PM_MODULE_SENSORS_DHT_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_SENSORS_BME_ID
-      case D_MODULE_SENSORS_BME_ID:             return PM_MODULE_SENSORS_BME_FRIENDLY_CTR; 
-    #endif    
-    #ifdef D_MODULE_SENSORS_DB18S20_ID
-      case D_MODULE_SENSORS_DB18S20_ID:         return PM_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;  break;
-    #endif
-    #ifdef D_MODULE_SENSORS_INA219_ID
-      case D_MODULE_SENSORS_INA219_ID:         return PM_MODULE_SENSORS_INA219_FRIENDLY_CTR;  break;
-    #endif
-    #ifdef D_MODULE_SENSORS_ULTRASONIC_ID
-      case D_MODULE_SENSORS_ULTRASONIC_ID:      return PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_SENSORS_MOTION_ID
-      case D_MODULE_SENSORS_MOTION_ID:        return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_SENSORS_DOOR_ID
-      case D_MODULE_SENSORS_DOOR_ID:        return PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID
-      case D_MODULE_SENSORS_RESISTIVE_MOISTURE_ID:
-        return D_MODULE_SENSORS_RESISTIVE_MOISTURE_FRIENDLY_CTR; 
-      break;
-    #endif
-// Specefic Bespoke Modules (Range 170-189)
-    #ifdef D_MODULE_CUSTOM_BLINDS_ID
-      case D_MODULE_CUSTOM_BLINDS_ID:
-        return D_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_CUSTOM_HEATING_ID
-      case D_MODULE_CUSTOM_HEATING_ID:
-        return PM_MODULE_CUSTOM_HEATING_FRIENDLY_CTR; 
-      break;
-    #endif
-    #ifdef D_MODULE_CUSTOM_RADIATORFAN_ID
-      case D_MODULE_CUSTOM_RADIATORFAN_ID:
-        return D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR; 
-      break;
-    #endif
-
-    // Custom
-    #ifdef D_MODULE_CUSTOM_SONOFF_IFAN_ID
-      case D_MODULE_CUSTOM_SONOFF_IFAN_ID:         return PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR;  
-    #endif
-    #ifdef D_MODULE_CUSTOM_FAN_ID
-      case D_MODULE_CUSTOM_FAN_ID:         return PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR;  
-    #endif
-    #ifdef D_MODULE_CUSTOM_TREADMILL_ID
-      case D_MODULE_CUSTOM_TREADMILL_ID:         return PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;  
-    #endif
-    #ifdef D_MODULE_CUSTOM_SENSORCOLOURS_ID
-      case D_MODULE_CUSTOM_SENSORCOLOURS_ID:         return PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;  
-    #endif
+  if(!ValidTaskID(module_id)){
+    return PM_SEARCH_NOMATCH;
+  }  
+  return pModule(module_id)->GetModuleFriendlyName();
+}
 
 
-
-    #ifdef D_MODULE_CUSTOM_OILFURNACE_ID
-      case D_MODULE_CUSTOM_OILFURNACE_ID:        return PM_MODULE_CUSTOM_OILFURNACE_FRIENDLY_CTR; 
-    #endif
-    #ifdef D_MODULE_CUSTOM_EXERCISEBIKE_ID
-      case D_MODULE_CUSTOM_EXERCISEBIKE_ID:
-        return D_MODULE_CUSTOM_EXERCISEBIKE_FRIENDLY_CTR; 
-      break;
-    #endif
-    default:
-      return PM_SEARCH_NOMATCH;
-    break;
-  }
-
+PGM_P mTaskerManager::GetModuleName(uint8_t module_id){
+  if(!ValidTaskID(module_id)){
+    return PM_SEARCH_NOMATCH;
+  }  
+  return pModule(module_id)->GetModuleName();
 }
   
 

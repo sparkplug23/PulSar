@@ -3,6 +3,10 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
 
+const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
+const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
+
+
 void mInterfaceLight::Init_NeoPixelAnimator(uint16_t size, uint8_t timebase){
 
   animator_controller = new NeoPixelAnimator(size, timebase); // NeoPixel animation management object
@@ -458,7 +462,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 // AddLog_Array(LOG_LEVEL_TEST, "palette_rgbcct_users", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5);
 
 
-AddLog_Array(LOG_LEVEL_TEST, "palette_encoded_users_colour_map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 30);
+//AddLog_Array(LOG_LEVEL_TEST, "palette_encoded_users_colour_map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 30);
 
 
 

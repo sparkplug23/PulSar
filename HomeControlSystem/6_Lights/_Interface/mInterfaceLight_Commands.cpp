@@ -494,9 +494,9 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
   pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
   pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
 
-#ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
-  #endif
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+  // #endif
 
 
 
@@ -812,7 +812,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
-  Serial.println("HER"); Serial.flush();
+  // Serial.println("HER"); Serial.flush();
   rgbcct_controller.setHue360(hue_new);
   animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS

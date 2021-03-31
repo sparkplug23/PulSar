@@ -321,8 +321,12 @@ enum RGB_VIEW_SHOW_TYPE_IDS{
 };
 
 
+#include "1_TaskerManager/mTaskerManager.h"
 
-class mInterfaceLight{
+
+class mInterfaceLight :
+  public mTaskerInterface
+{
   public:
     mInterfaceLight(){};
 
@@ -771,6 +775,11 @@ void ShowInterface();
 
     int8_t Tasker(uint8_t function);
     void Init(void);
+    
+    static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
+    static const char* PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR; }
 
 
     void WebAppend_Root_Buttons();

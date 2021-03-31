@@ -285,16 +285,16 @@ const uint8_t MAX_FRIENDLYNAMES = 4;        // Max number of Friendly names
 // //const char WIFI_HOSTNAME[] = "%s-%04d";     // Expands to <MQTT_TOPIC>-<last 4 decimal chars of MAC address>
 const char WIFI_HOSTNAME[]  = "%s"; //!PROGMEM    // Expands to <MQTT_TOPIC>-<last 4 decimal chars of MAC address>
 //^ cant be porgmem
-const uint8_t CONFIG_FILE_SIGN = 0xA5;      // Configuration file signature
-const uint8_t CONFIG_FILE_XOR = 0x5A;       // Configuration file xor (0 = No Xor)
+// const uint8_t CONFIG_FILE_SIGN = 0xA5;      // Configuration file signature
+// const uint8_t CONFIG_FILE_XOR = 0x5A;       // Configuration file xor (0 = No Xor)
 
-const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
-const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
-const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
+// const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
+// const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
+// const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
 
 const uint8_t MQTT_RETRY_SECS = 10;         // Minimum seconds to retry MQTT connection
-const uint32_t GLOBAL_VALUES_VALID = 300;   // Max number of seconds to keep last received values
-const power_t APP_POWER = 0;                // Default saved power state Off
+// const uint32_t GLOBAL_VALUES_VALID = 300;   // Max number of seconds to keep last received values
+// const power_t APP_POWER = 0;                // Default saved power state Off
 //const uint16_t WS2812_MAX_LEDS = 512;       // Max number of ledout.index
 
 const uint32_t PWM_RANGE = 1023;            // 255..1023 needs to be devisible by 256
@@ -306,27 +306,27 @@ const uint16_t PWM_MIN = 100;               // [PWM_MIN] Minimum frequency - Def
                                             //    For Dimmers use double of your mains AC frequecy (100 for 50Hz and 120 for 60Hz)
                                             //    For Controlling Servos use 50 and also set PWM_FREQ as 50 (DO NOT USE THESE VALUES FOR DIMMERS)
 
-const uint8_t DEFAULT_POWER_DELTA = 80;     // Power change percentage
-const uint16_t MAX_POWER_HOLD = 10;         // Time in SECONDS to allow max agreed power
-const uint16_t MAX_POWER_WINDOW = 30;       // Time in SECONDS to disable allow max agreed power
-const uint16_t SAFE_POWER_HOLD = 10;        // Time in SECONDS to allow max unit safe power
-const uint16_t SAFE_POWER_WINDOW = 30;      // Time in MINUTES to disable allow max unit safe power
+// const uint8_t DEFAULT_POWER_DELTA = 80;     // Power change percentage
+// const uint16_t MAX_POWER_HOLD = 10;         // Time in SECONDS to allow max agreed power
+// const uint16_t MAX_POWER_WINDOW = 30;       // Time in SECONDS to disable allow max agreed power
+// const uint16_t SAFE_POWER_HOLD = 10;        // Time in SECONDS to allow max unit safe power
+// const uint16_t SAFE_POWER_WINDOW = 30;      // Time in MINUTES to disable allow max unit safe power
 const uint8_t MAX_POWER_RETRY = 5;          // Retry count allowing agreed power limit overflow
 
-const uint8_t STATES = 20;                  // Number of states per second using 50 mSec interval
-const uint8_t IMMINENT_RESET_FACTOR = 10;   // Factor to extent button hold time for imminent Reset to default 40 seconds using KEY_HOLD_TIME of 40
+// const uint8_t STATES = 20;                  // Number of states per second using 50 mSec interval
+// const uint8_t IMMINENT_RESET_FACTOR = 10;   // Factor to extent button hold time for imminent Reset to default 40 seconds using KEY_HOLD_TIME of 40
 const uint8_t BOOT_LOOP_TIME = 10;         // Number of seconds to stop detecting boot loops
 // const uint16_t SYSLOG_TIMER = 600;          // Seconds to restore syslog_level
 // const uint16_t SERIALLOG_TIMER = 600;       // Seconds to disable SerialLog
-const uint8_t OTA_ATTEMPTS = 5;             // Number of times to try fetching the new firmware
+// const uint8_t OTA_ATTEMPTS = 5;             // Number of times to try fetching the new firmware
 
-const uint16_t FLOATSZ = 16;                // Max number of characters in float result from dtostrfd (max 32)
-// const uint16_t INPUT_BUFFER_SIZE = 520;     // Max number of characters in (serial and http) command buffer
-const uint16_t CMDSZ = 2;                  // Max number of characters in command
-const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
-// const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
+// const uint16_t FLOATSZ = 16;                // Max number of characters in float result from dtostrfd (max 32)
+// // const uint16_t INPUT_BUFFER_SIZE = 520;     // Max number of characters in (serial and http) command buffer
+// const uint16_t CMDSZ = 2;                  // Max number of characters in command
+// const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
+// // const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
 
-const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
+// const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
 const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
 
 // #ifdef USE_MQTT_TLS
@@ -340,13 +340,13 @@ const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
 // #else
 // #endif
 
-const uint8_t MAX_BACKLOG = 30;             // Max number of commands in backlog
-const uint32_t MIN_BACKLOG_DELAY = 2;       // Minimal backlog delay in 0.1 seconds
+// const uint8_t MAX_BACKLOG = 30;             // Max number of commands in backlog
+// const uint32_t MIN_BACKLOG_DELAY = 2;       // Minimal backlog delay in 0.1 seconds
 
 const uint32_t SOFT_BAUDRATE = 9600;        // Default software serial baudrate
 const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
-const uint32_t SERIAL_POLLING = 100;        // Serial receive polling in ms
-// const uint8_t MAX_STATUS = 11;              // Max number of status lines
+// const uint32_t SERIAL_POLLING = 100;        // Serial receive polling in ms
+// // const uint8_t MAX_STATUS = 11;              // Max number of status lines
 
 
 const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01
@@ -403,7 +403,7 @@ enum SwitchModeOptions_IDS {
 
 enum LedStateOptions {LED_OFF, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT, MAX_LED_OPTION};
 
-enum EmulationOptions {EMUL_NONE, EMUL_WEMO, EMUL_HUE, EMUL_MAX};
+// enum EmulationOptions {EMUL_NONE, EMUL_WEMO, EMUL_HUE, EMUL_MAX};
 
 enum TopicOptions { CMND, STAT, TELE, nu1, RESULT_OR_CMND, RESULT_OR_STAT, RESULT_OR_TELE };
 
@@ -441,6 +441,7 @@ enum MODULE_STATUS{
 
  enum Shortcuts { SC_CLEAR, SC_DEFAULT, SC_USER };
 
+//TBR
 enum SettingsParmaIndex {P_HOLD_TIME, P_MAX_POWER_RETRY, 
 P_TUYA_DIMMER_ID, P_MDNS_DELAYED_START, P_BOOT_LOOP_OFFSET, 
 P_RGB_REMAP, P_MAX_PARAM8};  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
@@ -609,7 +610,7 @@ enum XsnsFunctions {
 
 
 
-
+//command source will be useful for rules, 
 enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, SRC_BACKLOG, SRC_SERIAL, SRC_WEBGUI, SRC_WEBCOMMAND, SRC_WEBCONSOLE, SRC_PULSETIMER,
                      SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
 const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
@@ -668,26 +669,34 @@ extern "C" {
   #endif  // AUTOFLASHSIZE
 #endif
 
+#include "1_TaskerManager/mTaskerInterface.h"
 
-class mSettings{
+class mSettings :
+  public mTaskerInterface
+{
   public:
     mSettings(){};
     
     //overload
     int8_t Tasker(uint8_t function);
 
+    static const char* PM_MODULE_CORE_SETTINGS_CTR;
+    static const char* PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR; }
+
 
     void init(void);
 
     uint16_t CountCharInCtr(const char* tosearch, char tofind);
-void ClearAllDeviceName(void);
-int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
+    void ClearAllDeviceName(void);
+    int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
 
-// int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
-// int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
-int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id, int8_t class_id = -1);
+    // int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
+    // int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
+    int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id, int8_t class_id = -1);
 
-void Function_Template_Load();
+    void Function_Template_Load();
 
     // #ifdef ESP8266
     //   // From libraries/EEPROM/EEPROM.cpp EEPROMClass
@@ -1736,7 +1745,7 @@ uint8_t counter_no_pullup = 0;              // Counter input pullup flag (1 = No
 uint8_t energy_flg = 0;                     // Energy monitor configured
 // uint8_t Settings.light_settings.type = 0;                     // Light types
 uint8_t serial_in_byte;                     // Received byte
-uint8_t ota_retry_counter = OTA_ATTEMPTS;   // OTA retry counter
+// uint8_t ota_retry_counter = OTA_ATTEMPTS;   // OTA retry counter
 uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
 uint8_t devices_present = 0;                // Max number of devices supported
 
@@ -1748,19 +1757,22 @@ uint8_t seriallog_level_during_boot;
 
 
 uint8_t my_module_type;                     // Current copy of Settings.module or user template type
-uint8_t my_adc0;                            // Active copy of Module ADC0
-uint8_t last_source = 0;                    // Last command source
-uint8_t shutters_present = 0;               // Number of actual define shutters
+// uint8_t my_adc0;                            // Active copy of Module ADC0
+// uint8_t last_source = 0;                    // Last command source
+// uint8_t shutters_present = 0;               // Number of actual define shutters
 uint8_t mdns_delayed_start = 0;             // mDNS delayed start
-bool serial_local = false;                  // Handle serial locally;
-bool fallback_topic_flag = false;           // Use Topic or FallbackTopic
-bool backlog_mutex = false;                 // Command backlog pending
-bool interlock_mutex = false;               // Interlock power command pending
+// bool serial_local = false;                  // Handle serial locally;
+// bool fallback_topic_flag = false;           // Use Topic or FallbackTopic
+// bool backlog_mutex = false;                 // Command backlog pending
+// bool interlock_mutex = false;               // Interlock power command pending
 bool stop_flash_rotate = false;             // Allow flash configuration rotation
+
+//TBR
 bool blinkstate = false;                    // LED state
-bool latest_uptime_flag = true;             // Signal latest uptime
+
+// bool latest_uptime_flag = true;             // Signal latest uptime
 bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
-bool dht_flg = false;                       // DHT configured
+// bool dht_flg = false;                       // DHT configured
 bool i2c_flg = false;                       // I2C configured
 bool spi_flg = false;                       // SPI configured
 bool soft_spi_flg = false;                  // Software SPI configured

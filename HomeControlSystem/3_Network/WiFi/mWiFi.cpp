@@ -6,9 +6,19 @@ extern "C" {
 }
 #endif
 
+const char* mWiFi::PM_MODULE_NETWORK_WIFI_CTR = D_MODULE_NETWORK_WIFI_CTR;
+const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
+
+
+
+
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function){
 
+//   DEBUG_PRINT_FUNCTION_NAME_TEST;
+
+// Serial.println("wifi");
+//   DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       WifiConnect();
@@ -534,10 +544,10 @@ void mWiFi::WifiSetState(uint8_t state)
     if (state) {
       // pCONT_set->rules_flag.wifi_connected = 1;
       connection.link_count++;
-      connection.downtime += pCONT->mt->UpTime() - connection.last_event;
+      connection.downtime += pCONT_time->UpTime() - connection.last_event;
     } else {
       // pCONT_set->rules_flag.wifi_disconnected = 1;
-      connection.last_event = pCONT->mt->UpTime();
+      connection.last_event = pCONT_time->UpTime();
     }
 
   }
@@ -944,7 +954,7 @@ void mWiFi::WifiCheck(uint8_t param)
             // 
 
             if (pCONT_set->Settings.flag_network.use_wifi_rescan) {  // SetOption57 - Scan wifi network every 44 minutes for configured AP's
-              if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
+              if (!(pCONT_time->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
                 connection.scan_state = 2;
               }
             }

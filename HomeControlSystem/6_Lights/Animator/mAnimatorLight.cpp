@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
+const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
+
 /*******************************************************************************************************************
 ********************************************************************************************************************
 ************TASKER**************************************************************************************************
@@ -65,10 +68,10 @@ int8_t mAnimatorLight::Tasker(uint8_t function){
 
 
 
-            AddLog_P(LOG_LEVEL_TEST, PSTR( "RgbcctColor colour=%d,%d,%d"), // DEBUG_INSERT_PAGE_BREAK
-            colour.R,
-            colour.G,
-            colour.B);
+            // AddLog_P(LOG_LEVEL_TEST, PSTR( "RgbcctColor colour=%d,%d,%d"), // DEBUG_INSERT_PAGE_BREAK
+            // colour.R,
+            // colour.G,
+            // colour.B);
       // pCONT_wif->wifi_counter_tester++;
       // AddLog_P(LOG_LEVEL_INFO,PSTR("wifi_counter_tester=%d"),pCONT_wif->wifi_counter_tester);
 

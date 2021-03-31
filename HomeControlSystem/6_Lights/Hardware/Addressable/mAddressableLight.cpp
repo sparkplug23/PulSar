@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE 
 
+const char* mAddressableLight::PM_MODULE_LIGHTS_ADDRESSABLE_CTR = D_MODULE_LIGHTS_ADDRESSABLE_CTR;
+const char* mAddressableLight::PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR = D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR;
+
 // SetPixelHardware
 /**
  * colour_hardware will already have colour_order mapped

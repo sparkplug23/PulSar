@@ -37,7 +37,11 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR) "button_table";
 
 #include <Ticker.h>
 
-class mButtons{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mButtons :
+  public mTaskerInterface
+{
   public:
     mButtons(){};
     

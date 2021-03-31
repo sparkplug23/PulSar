@@ -77,7 +77,11 @@
 
 enum SwitchStates { PRESSED, NOT_PRESSED };
 
-class mSwitches{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mSwitches :
+  public mTaskerInterface
+{
   public:
     mSwitches(){};
     

@@ -1,26 +1,72 @@
 #include "mSonoffIFan.h"
 
-//  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
+// iFan03 Hardware
+// 4 Relays (1 Light + 3 Fan)
+// 433 mhz controller via serial sMCU
 
 #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
 
-//Uses 433mhz radios, relays, buttons
+int8_t mSonoffIFan::Tasker(uint8_t function){
 
-/*********************************************************************************************\
-  Sonoff iFan02 and iFan03
-\*********************************************************************************************/
+  /************
+   * INIT SECTION * 
+  *******************/
+  if(function == FUNC_INIT){
+    init();
+  }
+
+  // Only continue in to tasker if module was configured properly
+  // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_EVERY_SECOND:    
+
+    break;
+    case FUNC_EVERY_250_MSECOND:
+      SpeedRefresh();
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+      CheckAndExecute_JSONCommands();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand();
+    break;
+    case FUNC_SERIAL:
+      SerialInput();
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+  }
+  
+  /************
+   * WEBPAGE SECTION * 
+  *******************/  
+  #ifdef USE_MODULE_CORE_WEBSERVER
+  return Tasker_Web(function);
+  #endif // USE_MODULE_CORE_WEBSERVER
+
+} // END Tasker
+
+
 
 /*********************************************************************************************/
-
-// bool mSonoffIFan::IsModuleIfan(void)
-// {
-//   return ((SONOFF_IFAN02 == my_module_type) || (SONOFF_IFAN03 == my_module_type));
-// }
-
-// uint8_t mSonoffIFan::MaxFanspeed(void)
-// {
-//   return MAX_FAN_SPEED;
-// }
 
 uint8_t mSonoffIFan::GetFanspeed(void)
 {
@@ -52,7 +98,7 @@ void mSonoffIFan::SetLightState(uint8_t state)
 
 /*********************************************************************************************/
 
-void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
+void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 {
   ifan_fanspeed_timer = 0;                         // Stop any sequence
   ifan_fanspeed_goal = fanspeed;
@@ -131,8 +177,8 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
 //   }
 // }
 
-// bool mSonoffIFan::SonoffIfanSerialInput(void)
-// {
+bool mSonoffIFan::SerialInput(void)
+{
 //   if (SONOFF_IFAN03 == my_module_type) {
 //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
 //       serial_in_byte_counter = 0;
@@ -165,47 +211,26 @@ void mSonoffIFan::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
 //     }
 //     return false;
 //   }
-// }
-
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
-
-void mSonoffIFan::CmndFanspeed(void)
-{
-  // if (XdrvMailbox.data_len > 0) {
-  //   if ('-' == XdrvMailbox.data[0]) {
-  //     XdrvMailbox.payload = (int16_t)GetFanspeed() -1;
-  //     if (XdrvMailbox.payload < 0) { XdrvMailbox.payload = MAX_FAN_SPEED -1; }
-  //   }
-  //   else if ('+' == XdrvMailbox.data[0]) {
-  //     XdrvMailbox.payload = GetFanspeed() +1;
-  //     if (XdrvMailbox.payload > MAX_FAN_SPEED -1) { XdrvMailbox.payload = 0; }
-  //   }
-  // }
-  // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < MAX_FAN_SPEED)) {
-  //   SonoffIFanSetFanspeed(XdrvMailbox.payload, true);
-  // }
-  // ResponseCmndNumber(GetFanspeed());
 }
+
 
 /*********************************************************************************************/
 
 void mSonoffIFan::init(void)
 {
-  // if (SONOFF_IFAN03 == my_module_type) {
+  if(pCONT_set->my_module_type == MODULE_SONOFF_IFAN03_ID){
   //   SetSerial(9600, TS_SERIAL_8N1);
-  // }
-  // return false;  // Continue init chain
+    settings.fEnableModule = true;
+  }
 }
 
-void mSonoffIFan::SonoffIfanUpdate(void)
+void mSonoffIFan::SpeedRefresh(void)
 {
   // if (SONOFF_IFAN03 == my_module_type) {
     if (ifan_fanspeed_timer) {
       ifan_fanspeed_timer--;
       if (!ifan_fanspeed_timer) {
-        SonoffIFanSetFanspeed(ifan_fanspeed_goal, false);
+        SetFanSpeed(ifan_fanspeed_goal, false);
       }
     }
   // }
@@ -218,122 +243,6 @@ void mSonoffIFan::SonoffIfanUpdate(void)
 }
 
 
-int8_t mSonoffIFan::Tasker(uint8_t function){
-
-  /************
-   * INIT SECTION * 
-  *******************/
-  if(function == FUNC_PRE_INIT){
-    // pre_init();
-  }else
-  if(function == FUNC_INIT){
-    init();
-  }
-
-  // Only continue in to tasker if module was configured properly
-  // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_EVERY_SECOND:    
-
-    break;
-    case FUNC_EVERY_250_MSECOND:
-      SonoffIfanUpdate();
-    break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
-    break;
-    /************
-     * MQTT SECTION * 
-    *******************/
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
-    break;
-  }
-  
-  /************
-   * WEBPAGE SECTION * 
-  *******************/
-  
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
-
-} // END Tasker
-
-
-
-// int8_t mSonoffIFan::Tasker_Web(uint8_t function){
-
-
-//   switch(function){
-//     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
-
-//       // create command list
-//       char dlist[100]; memset(dlist,0,sizeof(dlist));
-//       pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
-//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-
-//       uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
-          
-//       BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Ceiling Fan Controls","");
-
-//       char button_value_ctr[10];
-//       char button_key_ctr[50];
-//       char button_text_ctr[30];
-
-//       BufferWriterI->Append_P(PSTR("{t}<tr>"));
-//         for(uint8_t button_id=0;button_id<5;button_id++){
-//           /*
-          
-// "<td{sw1}%d
-// %%'{cs}%s
-// '{bc}'%s
-// '{djk}%s
-// '{va}%s
-// '>%s%s
-// {bc2}";
-
-//           */
-//           BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2, 
-//                                     100/(button_id==0?1:4),
-//                                     button_id==0?"4":"", 
-//                                     "buttonh",
-//                                     pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
-//                                     pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
-//                                     pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
-//                                     ""
-//                                 );
-//           // LightPower button gets its own row
-//           if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
-//         }
-//       BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-
-//     }break;
-//   }
-
-// }
 
 
 
@@ -418,22 +327,20 @@ void mSonoffIFan::MQTTHandler_Set_TelePeriod(){
 
 void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
+  uint8_t list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
     MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSonoffIFan>* mqtthandler_list_ptr[] = {
+  struct handler<mSonoffIFan>* list_p[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
   };
 
   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_SONOFF_IFAN_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
+    list_p, list_ids, sizeof(list_p)/sizeof(list_p[0]), mqtt_handler_id
   );
 
 }

@@ -141,7 +141,7 @@ void mSensorColours::SetFanspeed(uint8_t fanspeed, bool sequence)
 //   }
 // }
 
-// bool mSensorColours::SonoffIfanSerialInput(void)
+// bool mSensorColours::SerialInput(void)
 // {
 //   if (SONOFF_IFAN03 == my_module_type) {
 //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -212,7 +212,7 @@ void mSensorColours::init(void)
 
 }
 
-void mSensorColours::SonoffIfanUpdate(void)
+void mSensorColours::SpeedRefresh(void)
 {
   // if (SONOFF_IFAN03 == my_module_type) {
     // if (ifan_fanspeed_timer) {
@@ -268,7 +268,7 @@ int8_t mSensorColours::Tasker(uint8_t function){
       EverySecond();
     break;
     case FUNC_EVERY_250_MSECOND:
-      // SonoffIfanUpdate();
+      // SpeedRefresh();
     break;
     /************
      * COMMANDS SECTION * 

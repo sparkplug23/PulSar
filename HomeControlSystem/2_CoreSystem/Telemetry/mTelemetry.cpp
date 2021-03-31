@@ -2,8 +2,14 @@
 
 // Keep Telemetry on its own, so either MQTT or WebUI can poll for it
 
+const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
+const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
+
+
+
 int8_t mTelemetry::Tasker(uint8_t function){
 
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       Init();
@@ -375,8 +381,10 @@ void mTelemetry::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 void mTelemetry::Init(){
+    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
   memset(&hardwarestatus,0,sizeof(hardwarestatus));
   hardwarestatus.len += 0;//sprintf(hardwarestatus.ctr,"Restarted");
+    #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
 }
 
 
@@ -384,9 +392,12 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
 
   IPAddress localip = WiFi.localIP();
 
+    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
   // Generate status message from all modules for human readable message
   memset(&hardwarestatus,0,sizeof(hardwarestatus));
   pCONT->Tasker_Interface(FUNC_STATUS_MESSAGE_APPEND);
+
+    #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
 
   JsonBuilderI->Start();
   
@@ -416,7 +427,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
       JsonBuilderI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
       JsonBuilderI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
       JsonBuilderI->Add(PM_JSON_RSSI,         WiFi.RSSI());
-      JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
+      // JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
       JsonBuilderI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
       JsonBuilderI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
     JsonBuilderI->Level_End();
@@ -425,10 +436,12 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
     //   JsonBuilderI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
     // JsonBuilderI->Level_End();
+    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
     JsonBuilderI->Level_Start(PM_JSON_STATUS);
       JsonBuilderI->Add(PM_JSON_MESSAGE,         hardwarestatus.ctr); //this can be turned into a subadd method
       JsonBuilderI->Add(PM_JSON_LEVEL,           hardwarestatus.importance);
     JsonBuilderI->Level_End();
+    #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
     // JsonBuilderI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
   return JsonBuilderI->End();
     
@@ -533,8 +546,9 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
     JsonBuilderI->Add(PM_JSON_SSID, WiFi.SSID().c_str());
     JsonBuilderI->Add(PM_JSON_SSID_NUMBERED, pCONT_set->Settings.sta_active); // Used to debug switching in grafana
     JsonBuilderI->Add(PM_JSON_RSSI, WiFi.RSSI());
-    JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
+    // JsonBuilderI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
     JsonBuilderI->Add(PM_JSON_HOSTNAME, pCONT_set->my_hostname);
+    JBI->Add_P(PM_JSON_TELNET_PORT, TELNET_PORT);
     JsonBuilderI->Add_FV(PM_JSON_STATIC_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),staticip[0],staticip[1],staticip[2],staticip[3]);
     JsonBuilderI->Add_FV(PM_JSON_GATEWAY,PSTR("\"%d.%d.%d.%d\""),gatewayip[0],gatewayip[1],gatewayip[2],gatewayip[3]);
     JsonBuilderI->Add_FV(PM_JSON_SUBNETMASK,PSTR("\"%d.%d.%d.%d\""),subnetip[0],subnetip[1],subnetip[2],subnetip[3]);
@@ -740,17 +754,31 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHea
 
 uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //BuildHealth
 
+  JsonBuilderI->Start();
+  
   #ifdef DEBUG_EXECUTION_TIME
     char buffer[50];
-    JsonBuilderI->Start();
     JsonBuilderI->Level_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
       JsonBuilderI->Array_AddArray("average", pCONT->module_settings.execution_time_average_ms, sizeof(pCONT->module_settings.execution_time_average_ms));
       JsonBuilderI->Array_AddArray("max",     pCONT->module_settings.execution_time_max_ms,     sizeof(pCONT->module_settings.execution_time_max_ms));
     JsonBuilderI->Level_End();
-    return JsonBuilderI->End();
-  #else
-    return 0;
   #endif
+
+  JBI->Level_Start("ModuleSize");
+
+  
+  // for(uint8_t i=0;i<pCONT->module_settings.count;i++){
+  //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
+  //   // if(pCONT->GetClassSizeByID(i)>10000){
+  //   //   JBI->Add("bad",i);
+  //   // }
+  // }
+
+
+  JBI->Level_End();
+
+
+  return JsonBuilderI->End();
 }
 
 

@@ -138,7 +138,7 @@ void mFan::SetFanspeed(uint8_t fanspeed, bool sequence)
 //   }
 // }
 
-// bool mFan::SonoffIfanSerialInput(void)
+// bool mFan::SerialInput(void)
 // {
 //   if (SONOFF_IFAN03 == my_module_type) {
 //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -209,7 +209,7 @@ void mFan::init(void)
 
 }
 
-void mFan::SonoffIfanUpdate(void)
+void mFan::SpeedRefresh(void)
 {
   // if (SONOFF_IFAN03 == my_module_type) {
     // if (ifan_fanspeed_timer) {
@@ -263,7 +263,7 @@ int8_t mFan::Tasker(uint8_t function){
 
     break;
     case FUNC_EVERY_250_MSECOND:
-      // SonoffIfanUpdate();
+      // SpeedRefresh();
     break;
     /************
      * COMMANDS SECTION * 

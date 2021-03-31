@@ -61,7 +61,10 @@ enum fIndexs_Type_IDS{
   INDEX_TYPE_SCALED_100 
 };
 
-class mPalette{
+class mPalette 
+// :
+//   public mTaskerInterface
+{
   private:
     /* Prevent others from being created */
     mPalette(mPalette const& other) = delete;
@@ -73,7 +76,7 @@ class mPalette{
     static mPalette* GetInstance();
     /* Here will be the instance stored. */
     static mPalette* instance;
-    
+        
     RgbcctColor GetActiveFirstColourFromCurrentPalette();
     
     RgbwColor Color32bit2RgbColour(uint32_t colour32bit);

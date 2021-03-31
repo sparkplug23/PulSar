@@ -11,6 +11,8 @@
 
 #define DEFINE_PGM_CTR(X) \
   const char X[] PROGMEM =
+#define DEFINE_SPGM_CTR(X) \
+  static const char X[] PROGMEM =
 #define DEFINE_PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 

@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_SENSORS_MOTION
 
+const char* mMotionSensor::PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTION_CTR;
+const char* mMotionSensor::PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR = D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
+
 
 int8_t mMotionSensor::Tasker(uint8_t function){
 

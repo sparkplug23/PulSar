@@ -5,7 +5,11 @@
 
 #ifdef USE_MODULE_SENSORS_ANALOG
 
-class mSensorsAnalog{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mSensorsAnalog :
+  public mTaskerInterface
+{
   public:
     // Constructor
     mSensorsAnalog(){};

@@ -8,6 +8,7 @@
 
 #define D_USER_MICHAEL // maybe undef later?
 #define USE_DEVFEATURE_UART_TEST
+// #define ENABLE_DEVFEATURE_TESTING_VECTORS
 
 // #define USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
 
@@ -123,239 +124,239 @@ Flash: [=====     ]  49.8% (used 510260 bytes from 1023984 bytes)
 */
 
 
-#ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
-    mHardwarePins mod;
-    mSettings mset;
-    mSupport msup;
-    mLogging mso;
-    mTime mt;
-    mMQTT mqt;
-    mWiFi mwif;
-    mTelemetry mtel;
-    #ifdef USE_MODULE_CORE_WEBSERVER
-    mWebServer mweb;
-    #endif
-  #ifdef USE_MODULE_SENSORS_DHT
-    mSensorsDHT msdht;
-  #endif
-  #ifdef USE_MODULE_SENSORS_BME
-    mSensorsBME msbme;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-    mSensorsDB18 msdb18;
-  #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    mUltraSonicSensor mus;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    mOilFurnace mof;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    mBlinds mbbl;
-  #endif
-  #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
-    mPulseCounter mpc;
-  #endif
+// #ifdef USE_DECLARE_AT_COMPILE_TO_DEBUG
+//     mHardwarePins mod;
+//     mSettings mset;
+//     mSupport msup;
+//     mLogging mso;
+//     mTime mt;
+//     mMQTT mqt;
+//     mWiFi mwif;
+//     mTelemetry mtel;
+//     #ifdef USE_MODULE_CORE_WEBSERVER
+//     mWebServer mweb;
+//     #endif
+//   #ifdef USE_MODULE_SENSORS_DHT
+//     mSensorsDHT msdht;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BME
+//     mSensorsBME msbme;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DS18B20
+//     mSensorsDB18 msdb18;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_ULTRASONICS
+//     mUltraSonicSensor mus;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_OILFURNACE
+//     mOilFurnace mof;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_BLINDS
+//     mBlinds mbbl;
+//   #endif
+//   #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
+//     mPulseCounter mpc;
+//   #endif
 
   
-  #ifdef USE_MODULE_DRIVERS_HBRIDGE
-    mHBridge mdhb;
-  #endif
+//   #ifdef USE_MODULE_DRIVERS_HBRIDGE
+//     mHBridge mdhb;
+//   #endif
 
-  #ifdef USE_MODULE_DRIVERS_ENERGY
-    mEnergy mdenergy;
-  #endif
-  /*
-    Lights
-    */
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-    mInterfaceLight mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    mRGBAnimator mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    mPWMLight mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-
-
-
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    mHeating mh;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    mRelays mry;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
-    mPWM mpwm;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    mGarageLights mrl;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-    mMotionSensor mms;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DOOR
-    mDoorSensor mds;
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    mDoorBell mdb;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    mRadiatorFan mrf;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    mSonoffIFan mifan;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_FAN
-    mFan mfan;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-    mIRtransceiver mir;
-  #endif
-  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-   mNextionPanel mnext;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-    mMoistureSensor mois;
-  #endif
-
-  // Sensors
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-    mButtons mbtn;
-  #endif
-  #ifdef USE_MODULE_SENSORS_SWITCHES
-    mSwitches mswh;
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    mPzem_AC mspm;
-  #endif
+//   #ifdef USE_MODULE_DRIVERS_ENERGY
+//     mEnergy mdenergy;
+//   #endif
+//   /*
+//     Lights
+//     */
+//   #ifdef USE_MODULE_LIGHTS_INTERFACE
+//     mInterfaceLight mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_ANIMATOR
+//     mRGBAnimator mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_PWM
+//     mPWMLight mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
 
 
-  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    mExerciseBike meb;
-  #endif
+
+//   #ifdef USE_MODULE_CUSTOM_HEATING
+//     mHeating mh;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//     mRelays mry;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+//     mPWM mpwm;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
+//     mGarageLights mrl;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOTION
+//     mMotionSensor mms;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DOOR
+//     mDoorSensor mds;
+//   #endif
+//   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+//     mDoorBell mdb;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+//     mRadiatorFan mrf;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+//     mSonoffIFan mifan;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_FAN
+//     mFan mfan;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+//     mIRtransceiver mir;
+//   #endif
+//   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
+//   #endif
+//   #ifdef USE_MODULE_DISPLAYS_NEXTION
+//    mNextionPanel mnext;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOISTURE
+//     mMoistureSensor mois;
+//   #endif
+
+//   // Sensors
+//   #ifdef USE_MODULE_SENSORS_BUTTONS
+//     mButtons mbtn;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_SWITCHES
+//     mSwitches mswh;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+//     mPzem_AC mspm;
+//   #endif
+
+
+//   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+//     mExerciseBike meb;
+//   #endif
   
-void init_class_instances(){
-   pCONT->mod = &mod;
-   pCONT->mset = &mset;
-    pCONT-> msup = &msup;
-    pCONT-> mso = &mso;
-    pCONT-> mt = &mt;
-    pCONT-> mqt = &mqt;
-    pCONT-> mwif = &mwif;
-    pCONT-> mtel = &mtel;
-    #ifdef USE_MODULE_CORE_WEBSERVER
-    pCONT-> mweb = &mweb;
-    #endif
-  #ifdef USE_MODULE_SENSORS_DHT
-    pCONT-> msdht = &mset;
-  #endif
-  #ifdef USE_MODULE_SENSORS_BME
-    pCONT-> msbme = &mset;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-    pCONT-> msdb18;
-  #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    pCONT-> mus;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    pCONT-> mof;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    pCONT-> mbbl;
-  #endif
-  #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
-    pCONT-> mpc;
-  #endif
+// void init_class_instances(){
+//    pCONT->mod = &mod;
+//    pCONT->mset = &mset;
+//     pCONT-> msup = &msup;
+//     pCONT-> mso = &mso;
+//     pCONT-> mt = &mt;
+//     pCONT-> mqt = &mqt;
+//     pCONT-> mwif = &mwif;
+//     pCONT-> mtel = &mtel;
+//     #ifdef USE_MODULE_CORE_WEBSERVER
+//     pCONT-> mweb = &mweb;
+//     #endif
+//   #ifdef USE_MODULE_SENSORS_DHT
+//     pCONT-> msdht = &mset;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BME
+//     pCONT-> msbme = &mset;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DS18B20
+//     pCONT-> msdb18;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_ULTRASONICS
+//     pCONT-> mus;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_OILFURNACE
+//     pCONT-> mof;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_BLINDS
+//     pCONT-> mbbl;
+//   #endif
+//   #ifdef   USE_MODULE_SENSORS_PULSE_COUNTER
+//     pCONT-> mpc;
+//   #endif
 
   
-  #ifdef USE_MODULE_DRIVERS_HBRIDGE
-    pCONT-> mdhb;
-  #endif
+//   #ifdef USE_MODULE_DRIVERS_HBRIDGE
+//     pCONT-> mdhb;
+//   #endif
 
-  #ifdef USE_MODULE_DRIVERS_ENERGY
-    pCONT-> mdenergy;
-  #endif
-  /*
-    Lights
-    */
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-    pCONT-> mil = &mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    pCONT-> mrgbani = &mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    pCONT-> mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
-  #endif
-
-
-
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    pCONT-> mh;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
-    pCONT-> mry;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
-    pCONT-> mpwm;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
-    pCONT-> mrl;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOTION
-    pCONT-> mms;
-  #endif
-  #ifdef USE_MODULE_SENSORS_DOOR
-    pCONT-> mds;
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    pCONT-> mdb;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    pCONT-> mrf;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    pCONT-> mifan;
-  #endif
-  #ifdef USE_MODULE_CUSTOM_FAN
-    pCONT-> mfan;
-  #endif
-  #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-    pCONT-> mir;
-  #endif
-  #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
-  #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
-   pCONT-> mnext;
-  #endif
-  #ifdef USE_MODULE_SENSORS_MOISTURE
-    pCONT-> mois;
-  #endif
-
-  // Sensors
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-    pCONT-> mbtn;
-  #endif
-  #ifdef USE_MODULE_SENSORS_SWITCHES
-    pCONT-> mswh;
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    pCONT-> mspm;
-  #endif
+//   #ifdef USE_MODULE_DRIVERS_ENERGY
+//     pCONT-> mdenergy;
+//   #endif
+//   /*
+//     Lights
+//     */
+//   #ifdef USE_MODULE_LIGHTS_INTERFACE
+//     pCONT-> mil = &mil;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_ANIMATOR
+//     pCONT-> mrgbani = &mrgbani;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
+//   #ifdef USE_MODULE_LIGHTS_PWM
+//     pCONT-> mlights_pwm;    // this should be moved to accessing from inside USE_MODULE_LIGHTS_INTERFACE
+//   #endif
 
 
-  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    pCONT-> meb;
-  #endif
 
-}
+//   #ifdef USE_MODULE_CUSTOM_HEATING
+//     pCONT-> mh;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//     pCONT-> mry;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_PWM  //this is really a pin class, but keep it on its own for now
+//     pCONT-> mpwm;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SECURITY_LIGHT
+//     pCONT-> mrl;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOTION
+//     pCONT-> mms;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_DOOR
+//     pCONT-> mds;
+//   #endif
+//   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+//     pCONT-> mdb;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_RADIATORFAN
+//     pCONT-> mrf;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+//     pCONT-> mifan;
+//   #endif
+//   #ifdef USE_MODULE_CUSTOM_FAN
+//     pCONT-> mfan;
+//   #endif
+//   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
+//     pCONT-> mir;
+//   #endif
+//   #if defined(USE_MODULE_DRIVERS_RF433MHZ) || defined (USE_MODULE_DRIVERS_RF433MHZ)
+//   #endif
+//   #ifdef USE_MODULE_DISPLAYS_NEXTION
+//    pCONT-> mnext;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_MOISTURE
+//     pCONT-> mois;
+//   #endif
 
-#endif
+//   // Sensors
+//   #ifdef USE_MODULE_SENSORS_BUTTONS
+//     pCONT-> mbtn;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_SWITCHES
+//     pCONT-> mswh;
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+//     pCONT-> mspm;
+//   #endif
+
+
+//   #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+//     pCONT-> meb;
+//   #endif
+
+// }
+
+// #endif
 
 
 #ifdef ESP32
@@ -376,8 +377,62 @@ void init_class_instances(){
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
 /********************************************************************************************/
+#ifdef ENABLE_DEVFEATURE_TESTING_VECTORS
+void setup(void)
+{ 
+  Serial.begin(115200);
+  Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
+  pCONT->Instance_Init();
+
+  for(int i=0;i<8;i++)
+  {
+    Serial.printf("\t id=[%d] \t\n\r",i);
+    pCONT->mTasks[i]->Tasker(0);
+    Serial.printf("\t Tid=[%d] \t\n\r\n\r",pCONT->mTasksIDs[i]);
+  }
+
+  // for(int i=0;i<255;i++)
+  // {
+  //   int16_t result = pCONT->GetVectorIndexbyModuleID(i);
+  //   if(result>=0){
+  //     Serial.printf("GetVectorIndexbyModuleID=[%d|%d]\n\r",i,result);
+  //     // pCONT->mTasks[result]->Tasker(0);
+  //   }
+  // }
+
+// for(int i=0;i<8;i++)
+// {
+//   Serial.printf("\t id=[%d] \t\n\r",i);
 
 
+  int16_t result = pCONT->GetVectorIndexbyModuleID(D_MODULE_CORE_HARDWAREPINS_ID);
+  
+  Serial.printf("result=[%d]\n\r",result); Serial.flush();
+  if(result>=0){
+    pCONT->mTasks[result]->Tasker(0);
+  }
+
+  pCONT_pins->works = 12;
+  pCONT_pins->Tasker(0);
+
+  //pCONT_pins pCONT->mpins
+
+
+
+
+  // Serial.printf("\t Tid=[%d] \t\n\r\n\r",pCONT->mTasksIDs[i]);
+// }
+
+
+
+  Serial.println(F("\n\rSUCCESS...")); delay(1000);
+}
+void loop(){
+
+}
+#endif // ENABLE_DEVFEATURE_TESTING_VECTORS
+
+#ifndef ENABLE_DEVFEATURE_TESTING_VECTORS
 void setup(void)
 { 
   // hw_wdt_disable();
@@ -411,6 +466,8 @@ void setup(void)
   void init_class_instances();
   #endif 
   
+// Serial.println("her1"); Serial.flush();
+  // delay(5000);
   pCONT->Instance_Init();
 
   // Set boot method
@@ -427,7 +484,7 @@ void setup(void)
     delay(10000); // long enough to cause reset
   }  
 
-  pCONT->InitClassList();
+  // pCONT->InitClassList();
     
   pCONT_set->RtcRebootLoad();
   if(!pCONT_set->RtcRebootValid()) { pCONT_set->RtcReboot.fast_reboot_count = 0; }
@@ -435,6 +492,7 @@ void setup(void)
   pCONT_set->RtcRebootSave();
 
   pCONT_sup->init_FirmwareVersion();
+
   
   // Load config from memory
   pCONT_set->SettingsDefault(); //preload minimal required
@@ -483,12 +541,11 @@ void setup(void)
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);         //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);//load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
   // Configure sensor/drivers to values desired for modules
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
-  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);
-  
+  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
@@ -507,6 +564,8 @@ void setup(void)
 // /********************************************************************************************/
 // /*********************loop*******************************************************************/
 // /********************************************************************************************/
+
+
 
 // Test case
 // Write into the buffer, every 5 seconds
@@ -1176,3 +1235,4 @@ void UART_Loop(){
 
 */
 
+#endif // #ifndef ENABLE_DEVFEATURE_TESTING_VECTORS

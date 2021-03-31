@@ -1,8 +1,15 @@
 
 #include "2_CoreSystem/Support/mSupport.h"
 
+const char* mSupport::PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
+const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
+
+
 
 int8_t mSupport::Tasker(uint8_t function){
+
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
+
 
   switch(function){
     case FUNC_INIT:
@@ -2053,7 +2060,7 @@ void mSupport::PerformEverySecond(void)
       if (2 == pCONT_set->ota_state_flag) {
         // pCONT_set->ota_url = pCONT_set->Settings.ota_url;
         pCONT_set->RtcSettings.ota_loader = 0;  // Try requested image first
-        pCONT_set->ota_retry_counter = OTA_ATTEMPTS;
+        // pCONT_set->ota_retry_counter = OTA_ATTEMPTS;
         
         #ifdef ESP8266
           ESPhttpUpdate.rebootOnUpdate(false);
@@ -2076,7 +2083,7 @@ void mSupport::PerformEverySecond(void)
 // #endif  // USE_ARILUX_RF
         pCONT_set->ota_state_flag = 92;
         pCONT_set->ota_result = 0;
-        pCONT_set->ota_retry_counter--;
+        // pCONT_set->ota_retry_counter--;
 
 
         // if (pCONT_set->ota_retry_counter) {
@@ -2359,6 +2366,7 @@ void mSupport::UpdateStatusBlink(){
 
     // Work out the led state based on time
     if (pCONT_set->restart_flag || pCONT_set->ota_state_flag) {                 // Overrule blinks and keep led lit
+      AddLog_P(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
       pCONT_set->blinkstate = true;                                  // Stay lit
     } else {
       pCONT_set->blinkspeed--; // based of multiples of 200ms
@@ -2385,21 +2393,21 @@ void mSupport::UpdateStatusBlink(){
 
 
 //DEBUG_LINE_HERE;
-  if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
-    bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
-    // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
-    //(MODULE_SONOFF_T11 == pCONT_set->my_module_type) || 
-    //(MODULE_SONOFF_T12 == pCONT_set->my_module_type) || 
-    //(MODULE_SONOFF_T13 == pCONT_set->my_module_type)) {
-    //   tstate = (!pCONT_set->power) ? 1 : 0;                          // As requested invert signal for Touch devices to find them in the dark
-    // }
-   SetLedPower(tstate);
-  }
+  // if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
+  //   bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
+  //   // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
+  //   //(MODULE_SONOFF_T11 == pCONT_set->my_module_type) || 
+  //   //(MODULE_SONOFF_T12 == pCONT_set->my_module_type) || 
+  //   //(MODULE_SONOFF_T13 == pCONT_set->my_module_type)) {
+  //   //   tstate = (!pCONT_set->power) ? 1 : 0;                          // As requested invert signal for Touch devices to find them in the dark
+  //   // }
+  //  SetLedPower(tstate);
+  // }
 
   DEBUG_LINE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
+  //   #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 
@@ -3048,11 +3056,11 @@ void mSupport::UpdateLedPowerAll()
 
 void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
 {
-  if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
-    if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
-      led = 1;
-    }
-  }
+  // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
+  //   if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
+  //     led = 1;
+  //   }
+  // }
   if (pCONT_pins->PinUsed(GPIO_LED1_ID, led)) {
     uint32_t mask = 1 << led;
     if (state) {
@@ -3089,16 +3097,16 @@ void mSupport::SetLedPower(uint32_t state)
     #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
     #endif// ENABLE_LOG_LEVEL_INFO
-  if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
-    SetLedPowerIdx(0, state);
-  } else {
+  // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
+  //   SetLedPowerIdx(0, state);
+  // } else {
     power_t mask = 1;
     for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {  // Map leds to power
       bool tstate = (pCONT_set->power & mask);
       SetLedPowerIdx(i, tstate);
       mask <<= 1;
     }
-  }
+  // }
 }
 
 void mSupport::SetLedPowerAll(uint32_t state)
@@ -3114,15 +3122,15 @@ void mSupport::SetLedLink(uint32_t state)
   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
     #endif// ENABLE_LOG_LEVEL_INFO
 
-  uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
-  uint32_t led_inv = pCONT_set->ledlnk_inverted;
-  if (99 == led_pin) {                    // Legacy - LED1 is status
-    SetLedPowerIdx(0, state);
-  }
-  else if (led_pin < 99) {
-    if (state) { state = 1; }
-    digitalWrite(led_pin, (led_inv) ? !state : state);
-  }
+  // uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
+  // uint32_t led_inv = pCONT_set->ledlnk_inverted;
+  // if (99 == led_pin) {                    // Legacy - LED1 is status
+  //   SetLedPowerIdx(0, state);
+  // }
+  // else if (led_pin < 99) {
+  //   if (state) { state = 1; }
+  //   digitalWrite(led_pin, (led_inv) ? !state : state);
+  // }
 #ifdef USE_BUZZER
   BuzzerSetStateToLed(state);
 #endif // USE_BUZZER

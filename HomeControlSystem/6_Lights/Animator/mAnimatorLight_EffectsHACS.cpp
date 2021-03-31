@@ -617,7 +617,7 @@ void mAnimatorLight::LCDDisplay_updateDisplay(byte color, byte colorSpacing) {  
   
   // displayTime(now(), color, colorSpacing);                                                                  // ...set leds to display the time...
   
-  LCDDisplay_displayTime(pCONT_time->Rtc.utc_time, color, colorSpacing);
+  LCDDisplay_displayTime(pCONT_time->Rtc.local_time, color, colorSpacing);
   
   
   // if (overlayMode == 1) LCDDisplay_colorOverlay();                                                                     // ...and if using overlayMode = 1 draw custom colors over single leds
@@ -887,7 +887,11 @@ void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour_Solid
     animation_colours_rgbcct.DesiredColour,
     param.progress);
 
-  pCONT_iLight->SetPixelColourHardwareInterface(output_colour,0,true);
+  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
+    SetPixelColor(ii,output_colour);
+  }
+
+  // pCONT_iLight->SetPixelColourHardwareInterface(output_colour,0,true);
   
 }
 

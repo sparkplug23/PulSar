@@ -1,6 +1,12 @@
 #include "mMQTT.h"
 
+const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
+const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
+
+
 int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
+
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
 
   #ifdef DISABLE_NETWORK
     return 0;
@@ -268,7 +274,7 @@ void mMQTT::MqttConnected(void)
   DEBUG_PRINT_FUNCTION_NAME;
     DEBUG_LINE;
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT->mt->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
   DEBUG_LINE;
   
     #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
@@ -496,7 +502,7 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT->mt->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);

@@ -115,7 +115,7 @@ struct handler {
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic;
-  uint8_t       module_id = 0;
+  // uint8_t       module_id = 0;
   uint8_t       handler_id = 0;
   Handler_Flags flags;
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
@@ -138,13 +138,16 @@ class mSupport;
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#include "1_TaskerManager/mTaskerInterface.h"
 #define WILLQOS_CTR 2
 #define WILLRETAIN_CTR true
 #define WILLMESSAGE_ONDISCONNECT_CTR "{\"LWT\":\"Offline\"}"
 #define WILLMESSAGE_ONCONNECT_CTR "{\"LWT\":\"Online\"}"
 
 
-class mMQTT{
+class mMQTT :
+  public mTaskerInterface
+{
 
   public:
     mMQTT(){};
@@ -152,6 +155,11 @@ class mMQTT{
     int8_t Tasker(uint8_t function);
 
     bool flag_uptime_reached_reduce_frequency = false;
+
+    static const char* PM_MODULE_NETWORK_MQTT_CTR;
+    static const char* PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_NETWORK_MQTT_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR; }
 
     // char lwt_message_ondisconnect_ctr[50];#
   

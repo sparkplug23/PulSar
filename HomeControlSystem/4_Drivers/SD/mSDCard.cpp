@@ -217,7 +217,7 @@ void mSDCard::testFileIO(fs::FS &fs, const char * path){
 
 // /*********************************************************************************************/
 
-// void mSDCard::SonoffIFanSetFanspeed(uint8_t fanspeed, bool sequence)
+// void mSDCard::SetFanSpeed(uint8_t fanspeed, bool sequence)
 // {
 //   ifan_fanspeed_timer = 0;                         // Stop any sequence
 //   ifan_fanspeed_goal = fanspeed;
@@ -296,7 +296,7 @@ void mSDCard::testFileIO(fs::FS &fs, const char * path){
 // //   }
 // // }
 
-// // bool mSDCard::SonoffIfanSerialInput(void)
+// // bool mSDCard::SerialInput(void)
 // // {
 // //   if (SONOFF_IFAN03 == my_module_type) {
 // //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -349,7 +349,7 @@ void mSDCard::testFileIO(fs::FS &fs, const char * path){
 //   //   }
 //   // }
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < MAX_FAN_SPEED)) {
-//   //   SonoffIFanSetFanspeed(XdrvMailbox.payload, true);
+//   //   SetFanSpeed(XdrvMailbox.payload, true);
 //   // }
 //   // ResponseCmndNumber(GetFanspeed());
 // }
@@ -409,13 +409,13 @@ void mSDCard::init(void)
 
 }
 
-// void mSDCard::SonoffIfanUpdate(void)
+// void mSDCard::SpeedRefresh(void)
 // {
 //   // if (SONOFF_IFAN03 == my_module_type) {
 //     if (ifan_fanspeed_timer) {
 //       ifan_fanspeed_timer--;
 //       if (!ifan_fanspeed_timer) {
-//         SonoffIFanSetFanspeed(ifan_fanspeed_goal, false);
+//         SetFanSpeed(ifan_fanspeed_goal, false);
 //       }
 //     }
 //   // }
@@ -651,7 +651,7 @@ void mSDCard::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
 //     //   speed=0; //default off
 //     // }      
-//     // SonoffIFanSetFanspeed(speed, false);
+//     // SetFanSpeed(speed, false);
 //     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
 //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);

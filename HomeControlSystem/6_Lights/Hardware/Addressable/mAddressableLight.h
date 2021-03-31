@@ -11,11 +11,18 @@
 // #include "6_Lights/Hardware/Addressable/"
 
 
-class mAddressableLight{
+class mAddressableLight :
+  public mTaskerInterface
+{
   public:
     mAddressableLight(){};
     void Init();
     int8_t Tasker(uint8_t function);
+    
+    static const char* PM_MODULE_LIGHTS_ADDRESSABLE_CTR;
+    static const char* PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ADDRESSABLE_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR; }
 
     void LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10);
 

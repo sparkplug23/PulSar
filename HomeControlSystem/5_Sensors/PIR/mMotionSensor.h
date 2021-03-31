@@ -18,7 +18,12 @@ typedef struct pir_detect_s{
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-class mMotionSensor{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+
+class mMotionSensor :
+  public mTaskerInterface
+{
   public:
     // Constructor
     mMotionSensor(){};
@@ -29,6 +34,12 @@ class mMotionSensor{
     int8_t Tasker(uint8_t function);
     // All SubTasks called by Tasker 
     void EveryLoop();
+        
+    static const char* PM_MODULE_SENSORS_MOTION_CTR;
+    static const char* PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; }
+
 
     enum MOTION_TRIGGER_TYPE_IDS{
       MOTION_TRIGGER_TYPE_REPORT_ONLY_ID=0,

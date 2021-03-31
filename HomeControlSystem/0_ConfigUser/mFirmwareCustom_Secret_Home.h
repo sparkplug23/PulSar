@@ -1,27 +1,20 @@
-#ifndef MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_HOME_H
-#define MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_HOME_H
+#ifndef MFIRMWARECUSTOM_SECRET_HOME_H
+#define MFIRMWARECUSTOM_SECRET_HOME_H
 
 // #ifdef USER_MICHAEL
 
-// /*********************************************************************************************\
-//  * This file is one of two user configurable files
-//  * 
-//  * "mFirmwareCustom.h" allows advanced users to create a custom build of firmware tailored to a specefic tasks 
-//  * For example, using a device to control heating, which includes numorous sensors, relays and controls that are unique.
-//  * This can also include lights or displays as notification/information systems. 
-//  * Although all sensors/drivers are accesible through default builds, this allows users to config and add their own controllers.
-//  * Ideally, when possible, templates can be used to replicate the custom firmware options performed here.
-// \*********************************************************************************************/
+/*********************************************************************************************\
+ * Personal configs for installed home devices as of 2021
+\*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
-// // #define ENABLE_TESTUSER
+// #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
 // #define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
-
 
 // //--------------------------------[Enable Device]-------------------------------------
 /**
@@ -37,38 +30,38 @@ Kitchen/Dining
   - shelf1
   - crystal1
 **/
-#define DEVICE_KITCHENLIGHT1
-#define DEVICE_KITCHENLIGHT2
-#define DEVICE_KITCHENLIGHT3
-#define DEVICE_KITCHENLIGHT4
-#define DEVICE_RGBSHELF
-#define DEVICE_RGBCRYSTAL3
-#define DEVICE_RGBCOOKER
-#define DEVICE_KITCHENSENSOR
-#define DEVICE_RGBFRIDGE
+// #define DEVICE_KITCHENLIGHT1
+// #define DEVICE_KITCHENLIGHT2
+// #define DEVICE_KITCHENLIGHT3
+// #define DEVICE_KITCHENLIGHT4
+// #define DEVICE_RGBSHELF
+// #define DEVICE_RGBCRYSTAL3
+// #define DEVICE_RGBCOOKER
+// #define DEVICE_KITCHENSENSOR
+// #define DEVICE_RGBFRIDGE
 
 /**
 Utility
   - crystal2
   - pir, bme, door sensor
 **/
-#define DEVICE_RGBUTILITY
-#define DEVICE_UTILITYSENSOR
-#define DEVICE_RGBCRYSTAL1
+// #define DEVICE_RGBUTILITY
+// #define DEVICE_UTILITYSENSOR
+// #define DEVICE_RGBCRYSTAL1
 
 /**
 DSToilet
   - consumerunit = 8 pzem, bme
 */
-#define DEVICE_CONSUMERUNIT
+// #define DEVICE_CONSUMERUNIT
 
 /**
 LivingRoom
   - 3 optional sockets for the corners
   - sensor = pir inside, bme..... ultrasonic, outside pir
 **/
-#define DEVICE_LIVINGROOMSENSOR
-#define DEVICE_RGBFIREPLACE
+// #define DEVICE_LIVINGROOMSENSOR
+// #define DEVICE_RGBFIREPLACE
 
 /**
  * 
@@ -78,30 +71,30 @@ Hallway
   - hallway table
  */
 // #define DEVICE_RADIATORFAN
-#define DEVICE_HEATING
-#define DEVICE_DOORBELLWALLCHIME
+// #define DEVICE_HEATING
+// #define DEVICE_DOORBELLWALLCHIME
 
 /**
 Outside
   - CeilingLight
 **/
-#define DEVICE_SIDEDOORLIGHT
-#define DEVICE_GAZEBCON
+// #define DEVICE_SIDEDOORLIGHT
+// #define DEVICE_GAZEBCON
 
 /**
 Garage
   - CeilingLight
 **/
-#define DEVICE_OILTANK
-#define DEVICE_OILFURNACE
-#define DEVICE_GARAGELIGHT
-#define DEVICE_TREADMILL
+// #define DEVICE_OILTANK
+// #define DEVICE_OILFURNACE
+// #define DEVICE_GARAGELIGHT
+// #define DEVICE_TREADMILL
 
 /**
 Spareroom
   - CeilingLight
 **/
-#define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
+// #define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
 
 /**
  * 
@@ -112,7 +105,7 @@ Masterbedroom
   - non camera home display
  */
 // #define DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING
-#define DEVICE_MASTERBEDROOMSENSOR
+// #define DEVICE_MASTERBEDROOMSENSOR
 // #define DEVICE_FLOORFAN2
 
 /**
@@ -132,14 +125,13 @@ Masterbedroom
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-#define DEVICE_LANDINGPANEL
-#define DEVICE_IMMERSIONSENSOR
+// #define DEVICE_LANDINGPANEL
+// #define DEVICE_IMMERSIONSENSOR
 
 /**
  * Attic
  */
-
-#define DEVICE_ATTICSENSOR
+// #define DEVICE_ATTICSENSOR
 
 /**
 Bathroom
@@ -156,18 +148,11 @@ Bathroom
  - rgbbedroomclock
  - candlewarmer
  **/
-#define DEVICE_BEDROOMSENSOR
-#define DEVICE_AIRPURIFIER
-#define DEVICE_BEDROOM_CEILINGFAN
-#define DEVICE_FLOORFAN1
-#define DEVICE_BEDROOMBLINDS
-
-
-
-
-
-
-
+// #define DEVICE_BEDROOMSENSOR
+// #define DEVICE_AIRPURIFIER
+// #define DEVICE_BEDROOM_CEILINGFAN
+// #define DEVICE_FLOORFAN1
+// #define DEVICE_BEDROOMBLINDS
 
 
 
@@ -185,13 +170,7 @@ Bathroom
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
-  #define DISABLE_SLEEP
   #define DISABLE_WEBSERVER
-
-  // #define ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS
-  // #define ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
-  // #define ENABLE_DEVFEATURE_RTC_TIME_V2
-  // #define ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
   
   #define USE_MODULE_SENSORS_BUTTONS
   
@@ -264,7 +243,7 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -385,7 +364,7 @@ Bathroom
       "\"15\":\"" D_GPIO_FUNCTION_REL1_CTR  "\"," //swapped relays
       "\"4\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -500,7 +479,7 @@ Bathroom
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -617,7 +596,7 @@ Bathroom
   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_CONTROLLER_STATUS_LEDS
+  // #define USE_MODULE_DRIVERS_LEDS
   #define DISABLE_WEBSERVER
 
 
@@ -856,7 +835,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       #endif      
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1164,7 +1143,7 @@ Bathroom
       "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
-      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1380,7 +1359,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
       #endif 
-      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1645,7 +1624,7 @@ Bathroom
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\"," //d2 normally
       #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1991,7 +1970,7 @@ Bathroom
 //       "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\"," 
 //       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
 //       #endif 
-//       "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+//       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
 
       
       #ifdef USE_MODULE_SENSORS_SWITCHES
@@ -2002,7 +1981,7 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
 
 
     "},"
@@ -2417,7 +2396,7 @@ Bathroom
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif  
-      "\"0\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2743,7 +2722,7 @@ Bathroom
       "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_POSITION_CTR "\","
       #endif
       "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
-      "\"D4\":\""  D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2960,7 +2939,7 @@ Bathroom
   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_CONTROLLER_STATUS_LEDS
+  // #define USE_MODULE_DRIVERS_LEDS
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
 
@@ -3105,7 +3084,7 @@ Bathroom
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif
       "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
-      "\"D4\":\"" D_GPIO_FUNCTION_LEDLNK_INV_CTR "\""
+      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
