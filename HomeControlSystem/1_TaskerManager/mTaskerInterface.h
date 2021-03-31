@@ -11,6 +11,7 @@ class mTaskerInterface
     virtual int8_t Tasker(uint8_t);
     virtual PGM_P GetModuleName();
     virtual PGM_P GetModuleFriendlyName();
+    // virtual uint16_t GetUniqueModuleID();
 
     // Does this create a new instance? I would want the previous instance back
     // mTaskerInterface* create(String name){

@@ -68,10 +68,6 @@
   #define SupportHardware SupportESP32
 #endif
 
-
-#include "1_TaskerManager/mTaskerNameList.h"
-
-
 // #include <variant>
 
 // Returns via tasker that report special status
@@ -338,38 +334,38 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CORE_HARDWAREPINS
   #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
   class                                             mHardwarePins;
-  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->mTasks[EM_MODULE_CORE_HARDWAREPINS_ID])
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pInterface[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SETTINGS
   #include "2_CoreSystem/Settings/mSettings.h"
   class                                             mSettings;
-  #define   pCONT_set                               static_cast<mSettings*>(pCONT->mTasks[EM_MODULE_CORE_SETTINGS_ID])
+  #define   pCONT_set                               static_cast<mSettings*>(pCONT->pInterface[EM_MODULE_CORE_SETTINGS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SUPPORT
   #include "2_CoreSystem/Support/mSupport.h"
   class                                             mSupport;
-  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->mTasks[EM_MODULE_CORE_SUPPORT_ID])
+  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pInterface[EM_MODULE_CORE_SUPPORT_ID])
 #endif 
 #ifdef USE_MODULE_CORE_LOGGING
   #include "2_CoreSystem/Logging/mLogging.h"
   class                                             mLogging;
-  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->mTasks[EM_MODULE_CORE_LOGGING_ID])
+  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->pInterface[EM_MODULE_CORE_LOGGING_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/Telemetry/mTelemetry.h"
   class                                             mTelemetry;
-  #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->mTasks[EM_MODULE_CORE_TELEMETRY_ID])
+  #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->pInterface[EM_MODULE_CORE_TELEMETRY_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TIME
   #include "2_CoreSystem/Time/mTime.h"
   class                                             mTime;
-  #define   pCONT_time                              static_cast<mTime*>(pCONT->mTasks[EM_MODULE_CORE_TIME_ID])
+  #define   pCONT_time                              static_cast<mTime*>(pCONT->pInterface[EM_MODULE_CORE_TIME_ID])
 #endif 
 
 #ifdef USE_MODULE_CORE_RULES
   #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
   class                                             mRuleEngine;
-  #define            pCONT_rules                    static_cast<mRuleEngine*>(pCONT->mTasks[EM_MODULE_CORE_RULES_ID])
+  #define            pCONT_rules                    static_cast<mRuleEngine*>(pCONT->pInterface[EM_MODULE_CORE_RULES_ID])
 #endif // USE_MODULE_CORE_RULES
 
 
@@ -378,17 +374,17 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/WiFi/mWiFi.h"
   class                                             mWiFi;
-  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->mTasks[EM_MODULE_NETWORK_WIFI_ID])
+  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pInterface[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/MQTT/mMQTT.h"
   class                                             mMQTT;
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->mTasks[EM_MODULE_NETWORK_MQTT_ID])
+  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pInterface[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
 #ifdef USE_MODULE_CORE_WEBSERVER
   #include "3_Network/WebServer/mWebServer.h"
   class                                             mWebServer;
-  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->mTasks[EM_MODULE_NETWORK_WEBSERVER_ID])
+  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pInterface[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 
 
@@ -525,27 +521,27 @@ DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR)            D_MODULE_D
 #ifdef USE_MODULE_LIGHTS_INTERFACE
   #include "6_Lights/_Interface/mInterfaceLight.h"
   class                                         mInterfaceLight;
-  #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->mTasks[EM_MODULE_LIGHTS_INTERFACE_ID])
+  #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/Animator/mAnimatorLight.h"
   class                                         mAnimatorLight;
-  #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->mTasks[EM_MODULE_LIGHTS_ANIMATOR_ID])
+  #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_ANIMATOR_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   #include "6_Lights/Hardware/Addressable/mAddressableLight.h"
   class                                         mAddressableLight;
-  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->mTasks[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
+  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_PWM
   #include "6_Lights/Hardware/PWM/mPWMLight.h"
   class                                         mPWMLight;
-  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->mTasks[EM_MODULE_LIGHTS_PWM_ID])
+  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
   #include "6_Lights/WLEDEffects/mWLEDEffects.h"
   class                                         mWLEDEffects;
-  #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->mTasks[EM_MODULE_LIGHTS_WLED_EFFECTS_ID])
+  #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->pInterface[EM_MODULE_LIGHTS_WLED_EFFECTS_ID])
 #endif
 
 
@@ -743,102 +739,10 @@ DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR)            D_MODULE_D
   #define pCONT_mdb                                           pCONT->mdb
 #endif
 
-#define pModule(X) mTasks[GetVectorIndexbyModuleID(X)]
+// #define pModule(X) pInterface[GetVectorIndexbyModuleID(X)]
+#define pModule(X) pInterface[X]
 
 
-DEFINE_PGM_CTR(PM_FUNC_POINTER_INIT_CTR)                            D_FUNC_POINTER_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_TEMPLATE_LOAD_CTR)                           D_FUNC_TEMPLATE_LOAD_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MODULE_INIT_CTR)                             D_FUNC_MODULE_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_PRE_INIT_CTR)                                D_FUNC_PRE_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_INIT_CTR)                                    D_FUNC_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR)            D_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_LOOP_CTR)                                    D_FUNC_LOOP_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_50_MSECOND_CTR)                        D_FUNC_EVERY_50_MSECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_100_MSECOND_CTR)                       D_FUNC_EVERY_100_MSECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_200_MSECOND_CTR)                       D_FUNC_EVERY_200_MSECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_250_MSECOND_CTR)                       D_FUNC_EVERY_250_MSECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_SECOND_CTR)                            D_FUNC_EVERY_SECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_MINUTE_CTR)                            D_FUNC_EVERY_MINUTE_CTR; 
-DEFINE_PGM_CTR(PM_FUNC_EVERY_HOUR_CTR)                              D_FUNC_EVERY_HOUR_CTR; 
-DEFINE_PGM_CTR(PM_FUNC_EVERY_MIDNIGHT_CTR)                          D_FUNC_EVERY_MIDNIGHT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_MIDDAY_CTR)                            D_FUNC_EVERY_MIDDAY_CTR;
-DEFINE_PGM_CTR(PM_FUNC_ON_SUCCESSFUL_BOOT_CTR)                      D_FUNC_ON_SUCCESSFUL_BOOT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_UPTIME_10_SECONDS_CTR)                       D_FUNC_UPTIME_10_SECONDS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_UPTIME_1_MINUTES_CTR)                        D_FUNC_UPTIME_1_MINUTES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_UPTIME_10_MINUTES_CTR)                       D_FUNC_UPTIME_10_MINUTES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_UPTIME_60_MINUTES_CTR)                       D_FUNC_UPTIME_60_MINUTES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_RESTART_SPLASH_INFORMATION_CTR)              D_FUNC_RESTART_SPLASH_INFORMATION_CTR;
-DEFINE_PGM_CTR(PM_FUNC_PREP_BEFORE_TELEPERIOD_CTR)                  D_FUNC_PREP_BEFORE_TELEPERIOD_CTR;
-DEFINE_PGM_CTR(PM_FUNC_JSON_APPEND_CTR)                             D_FUNC_JSON_APPEND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SAVE_BEFORE_RESTART_CTR)                     D_FUNC_SAVE_BEFORE_RESTART_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SETTINGS_DEFAULT_CTR)                        D_FUNC_SETTINGS_DEFAULT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES_CTR)     D_FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR)     D_FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR)        D_FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR)        D_FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_FUNCTION_LAMBDA_INIT_CTR)                    D_FUNC_FUNCTION_LAMBDA_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_FUNCTION_LAMBDA_LOOP_CTR)                    D_FUNC_FUNCTION_LAMBDA_LOOP_CTR;
-DEFINE_PGM_CTR(PM_FUNC_COMMAND_CTR)                                 D_FUNC_COMMAND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_COMMAND_SENSOR_CTR)                          D_FUNC_COMMAND_SENSOR_CTR;
-DEFINE_PGM_CTR(PM_FUNC_COMMAND_DRIVER_CTR)                          D_FUNC_COMMAND_DRIVER_CTR;
-DEFINE_PGM_CTR(PM_FUNC_JSON_COMMAND_CTR)                            D_FUNC_JSON_COMMAND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_JSON_COMMAND_OBJECT_CTR)                     D_FUNC_JSON_COMMAND_OBJECT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WIFI_CONNECTED_CTR)                          D_FUNC_WIFI_CONNECTED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WIFI_DISCONNECTED_CTR)                       D_FUNC_WIFI_DISCONNECTED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_SUBSCRIBE_CTR)                          D_FUNC_MQTT_SUBSCRIBE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_INIT_CTR)                               D_FUNC_MQTT_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_CONNECTED_CTR)                          D_FUNC_MQTT_CONNECTED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_DISCONNECTED_CTR)                       D_FUNC_MQTT_DISCONNECTED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_COMMAND_CTR)                            D_FUNC_MQTT_COMMAND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_SENDER_CTR)                             D_FUNC_MQTT_SENDER_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_HANDLERS_RESET_CTR)                     D_FUNC_MQTT_HANDLERS_RESET_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_HANDLERS_INIT_CTR)                      D_FUNC_MQTT_HANDLERS_INIT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR)        D_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SET_POWER_CTR)                               D_FUNC_SET_POWER_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SET_DEVICE_POWER_CTR)                        D_FUNC_SET_DEVICE_POWER_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SHOW_SENSOR_CTR)                             D_FUNC_SHOW_SENSOR_CTR;
-DEFINE_PGM_CTR(PM_FUNC_RULES_PROCESS_CTR)                           D_FUNC_RULES_PROCESS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SERIAL_CTR)                                  D_FUNC_SERIAL_CTR;
-DEFINE_PGM_CTR(PM_FUNC_FREE_MEM_CTR)                                D_FUNC_FREE_MEM_CTR;
-DEFINE_PGM_CTR(PM_FUNC_BUTTON_PRESSED_CTR)                          D_FUNC_BUTTON_PRESSED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_ENERGY_RESET_CTR)                            D_FUNC_ENERGY_RESET_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SENSOR_UPDATED_CTR)                          D_FUNC_SENSOR_UPDATED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_STATUS_MESSAGE_APPEND_CTR)                   D_FUNC_STATUS_MESSAGE_APPEND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_JSON_HARDWARE_APPEND_CTR)                    D_FUNC_JSON_HARDWARE_APPEND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_SET_CHANNELS_CTR)                            D_FUNC_SET_CHANNELS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_MAIN_BUTTON_CTR)                     D_FUNC_WEB_ADD_MAIN_BUTTON_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_BUTTON_CTR)                          D_FUNC_WEB_ADD_BUTTON_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS_CTR)          D_FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_HANDLER_CTR)                         D_FUNC_WEB_ADD_HANDLER_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ROOT_SEND_STYLE_CTR)                     D_FUNC_WEB_ROOT_SEND_STYLE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ROOT_SEND_SCRIPT_CTR)                    D_FUNC_WEB_ROOT_SEND_SCRIPT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ROOT_SCRIPT_JSON_FETCH_MODULEPARSING_CTR) D_FUNC_WEB_ROOT_SCRIPT_JSON_FETCH_MODULEPARSING_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ROOT_SEND_BODY_CTR)                      D_FUNC_WEB_ROOT_SEND_BODY_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ROOT_SEND_STATUS_CTR)                    D_FUNC_WEB_ROOT_SEND_STATUS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_ROOT_SHOWS_CTR)                      D_FUNC_WEB_ADD_ROOT_SHOWS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_JSON_FETCH_RESULT_CTR)               D_FUNC_WEB_ADD_JSON_FETCH_RESULT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_JSON_DATA_FETCH_URL_CTR)             D_FUNC_WEB_ADD_JSON_DATA_FETCH_URL_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_ROOT_TABLE_ROWS_CTR)                 D_FUNC_WEB_ADD_ROOT_TABLE_ROWS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_ROOT_SCRIPT_CTR)                     D_FUNC_WEB_ADD_ROOT_SCRIPT_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_ADD_ROOT_STYLE_CTR)                      D_FUNC_WEB_ADD_ROOT_STYLE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_LOADTIME_ROOT_URLS_CTR)           D_FUNC_WEB_APPEND_LOADTIME_ROOT_URLS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_LOADTIME_ROOT_RATES_CTR)          D_FUNC_WEB_APPEND_LOADTIME_ROOT_RATES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_RUNTIME_ROOT_URLS_CTR)            D_FUNC_WEB_APPEND_RUNTIME_ROOT_URLS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_RUNTIME_ROOT_RATES_CTR)           D_FUNC_WEB_APPEND_RUNTIME_ROOT_RATES_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED_CTR)  D_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED_CTR)     D_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS_CTR)        D_FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR)                 D_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR)         D_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_COMMAND_CTR)                             D_FUNC_WEB_COMMAND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_CHECK_POINTERS_CTR)                          D_FUNC_CHECK_POINTERS_CTR;
-DEFINE_PGM_CTR(PM_FUNC_WEB_SYSTEM_INFO_CTR)                         D_FUNC_WEB_SYSTEM_INFO_CTR;
-DEFINE_PGM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_DEBUG_CONFIGURE_CTR;
-
-
-DEFINE_PGM_CTR(PM_FUNC_EVENT_MOTION_STARTED_CTR)  D_FUNC_EVENT_MOTION_STARTED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)   D_FUNC_EVENT_SET_POWER_CHANGED_CTR;
 
 #include  "1_TaskerManager/mTaskerInterface.h"
 
@@ -853,7 +757,7 @@ class mTaskerManager{
     /* Private constructor to prevent instancing. */
     mTaskerManager(){};
 
-    // mTaskerInterface* mTasks[50];
+    // mTaskerInterface* pInterface[50];
 
 
     /* Here will be the instance stored. */
@@ -864,10 +768,10 @@ class mTaskerManager{
 
     int16_t GetVectorIndexbyModuleID(uint8_t id_search);
 
-    // std::vector<mTaskerInterface*> mTasks;
+    // std::vector<mTaskerInterface*> pInterface;
     // std::vector<uint8_t> mTasksIDs;
 
-    mTaskerInterface* mTasks[EM_MODULE_LENGTH_ID];
+    mTaskerInterface* pInterface[EM_MODULE_LENGTH_ID];
 
     uint8_t Instance_Init();
     uint8_t CheckPointersPass();
@@ -876,7 +780,6 @@ class mTaskerManager{
 
     uint16_t GetClassSizeByID(uint8_t class_id);
 
-    const char* GetTaskName(uint8_t task, char* buffer);
     PGM_P GetModuleName(uint8_t id);
     uint8_t InitClassList();
     PGM_P GetModuleFriendlyName(uint8_t module_id);

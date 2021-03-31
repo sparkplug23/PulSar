@@ -387,7 +387,7 @@ void setup(void)
   for(int i=0;i<8;i++)
   {
     Serial.printf("\t id=[%d] \t\n\r",i);
-    pCONT->mTasks[i]->Tasker(0);
+    pCONT->pInterface[i]->Tasker(0);
     Serial.printf("\t Tid=[%d] \t\n\r\n\r",pCONT->mTasksIDs[i]);
   }
 
@@ -396,7 +396,7 @@ void setup(void)
   //   int16_t result = pCONT->GetVectorIndexbyModuleID(i);
   //   if(result>=0){
   //     Serial.printf("GetVectorIndexbyModuleID=[%d|%d]\n\r",i,result);
-  //     // pCONT->mTasks[result]->Tasker(0);
+  //     // pCONT->pInterface[result]->Tasker(0);
   //   }
   // }
 
@@ -409,7 +409,7 @@ void setup(void)
   
   Serial.printf("result=[%d]\n\r",result); Serial.flush();
   if(result>=0){
-    pCONT->mTasks[result]->Tasker(0);
+    pCONT->pInterface[result]->Tasker(0);
   }
 
   pCONT_pins->works = 12;
