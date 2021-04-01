@@ -166,10 +166,10 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
    if(abs(millis()-tCheckTime)>=10000){ tCheckTime=millis(); // only check for time larger than checkbetween time
 
       // Check to within 5 seconds
-      if(pCONT->mt->CheckBetweenSOD(pCONT->mt->ConvertHHMMSStoSOD(14,0,0),pCONT->mt->ConvertHHMMSStoSOD(14,0,11))){ // MIDNIGHT
-      //  for(int i=0;i<5;i++){pCONT->mso->MessagePrint("\t INSIDE TIME");pCONT->mso->MessagePrintln(pCONT->mt->RtcTime.Wday);}
+      if(pCONT_time->CheckBetweenSOD(pCONT_time->ConvertHHMMSStoSOD(14,0,0),pCONT_time->ConvertHHMMSStoSOD(14,0,11))){ // MIDNIGHT
+      //  for(int i=0;i<5;i++){pCONT->mso->MessagePrint("\t INSIDE TIME");pCONT->mso->MessagePrintln(pCONT_time->RtcTime.Wday);}
         if(oiltank.smooth_1m.isvalid){
-        EEPROM.put(EEPROM_GET_DAYS_ADDRESS(pCONT->mt->RtcTime.Wday),(int)oiltank.smooth_1m.final.litres_in_tank); //add,int
+        EEPROM.put(EEPROM_GET_DAYS_ADDRESS(pCONT_time->RtcTime.Wday),(int)oiltank.smooth_1m.final.litres_in_tank); //add,int
         EEPROM.commit();
         }
       }else{
@@ -200,10 +200,10 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
       history.perweekdays[5].litres_change = history.perweekdays[5].litres_in_tank-history.perweekdays[4].litres_in_tank;
       history.perweekdays[6].litres_change = history.perweekdays[6].litres_in_tank-history.perweekdays[5].litres_in_tank;
 
-      uint8_t today = pCONT->mt->RtcTime.Wday;
+      uint8_t today = pCONT_time->RtcTime.Wday;
       uint8_t yday;
-      if(pCONT->mt->RtcTime.Wday==0){yday=6;}else{yday=pCONT->mt->RtcTime.Wday-1;}
-      uint8_t tomorrow = pCONT->mt->RtcTime.Wday+1;
+      if(pCONT_time->RtcTime.Wday==0){yday=6;}else{yday=pCONT_time->RtcTime.Wday-1;}
+      uint8_t tomorrow = pCONT_time->RtcTime.Wday+1;
       if(tomorrow>6){tomorrow=0;}
 
       history.overview.litres_change = history.perweekdays[tomorrow].litres_in_tank-history.perweekdays[today].litres_in_tank;

@@ -35,6 +35,11 @@ void mSettings::parse_JSONCommand(){
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
+  /**
+   * Add command that will cause templates to be loaded overwriting settings, then commit to saving
+
+   */
+
 
 
 

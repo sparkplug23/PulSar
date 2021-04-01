@@ -320,7 +320,11 @@ class mSupport :
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR; }
 
-          
+          void CheckResetConditions();
+          void Handle_OTA_URLS();
+          void Handle_Check_Power_Saving();
+
+
     // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
     #ifdef USE_ARDUINO_OTA
       /*********************************************************************************************\
@@ -643,7 +647,6 @@ void SleepDelay(uint32_t mseconds);
 uint32_t tSavedLoop1Sec = millis();
 uint32_t tSavedLoop50mSec = millis();
 uint32_t tSavedLoop100mSec = millis();
-uint32_t tSavedLoop200mSec = millis();
 uint32_t tSavedLoop250mSec = millis();
 uint32_t loop_runtime_millis;
 uint32_t loop_start_millis = millis();

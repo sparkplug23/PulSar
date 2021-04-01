@@ -1,6 +1,6 @@
 #include "mEnergy.h"
 
-#ifdef USE_MODULE_DRIVERS_ENERGY
+#ifdef USE_MODULE_ENERGY_INTERFACE
 
 const char HTTP_ENERGY_SNS1[] PROGMEM =
   "{s}" D_POWERUSAGE_APPARENT "{m}%s " D_UNIT_VA "{e}"
@@ -141,7 +141,7 @@ bool mEnergy::EnergyTariff1Active()  // Off-Peak hours
 {
 
   // uint8_t dst = 0;
-  // if (pCONT->mt->IsDst() && (pCONT_set->Settings.energy_usage.tariff[0][1] != pCONT_set->Settings.energy_usage.tariff[1][1])) {
+  // if (pCONT_time->IsDst() && (pCONT_set->Settings.energy_usage.tariff[0][1] != pCONT_set->Settings.energy_usage.tariff[1][1])) {
   //   dst = 1;
   // }
   // if (pCONT_set->Settings.energy_usage.tariff[0][dst] != pCONT_set->Settings.energy_usage.tariff[1][dst]) {
@@ -150,7 +150,7 @@ bool mEnergy::EnergyTariff1Active()  // Off-Peak hours
   //                                         (pCONT_time->RtcTime.day_of_week == 7))) {
   //     return true;
   //   }
-  //   uint32_t minutes = pCONT->mt->MinutesPastMidnight();
+  //   uint32_t minutes = pCONT_time->MinutesPastMidnight();
   //   if (pCONT_set->Settings.energy_usage.tariff[0][dst] > pCONT_set->Settings.energy_usage.tariff[1][dst]) {
   //     // {"Tariff":{"Off-Peak":{"STD":"22:00","DST":"23:00"},"Standard":{"STD":"06:00","DST":"07:00"},"Weekend":"OFF"}}
   //     return ((minutes >= pCONT_set->Settings.energy_usage.tariff[0][dst]) || (minutes < pCONT_set->Settings.energy_usage.tariff[1][dst]));
@@ -219,7 +219,7 @@ void mEnergy::EnergyUpdateTotal(float value, bool kwh)
     pCONT_set->RtcSettings.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
     pCONT_set->Settings.energy_usage.energy_kWhtotal = pCONT_set->RtcSettings.energy_kWhtotal;
     Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
-    pCONT_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? pCONT->mt->LocalTime() : pCONT->mt->Midnight();
+    pCONT_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? pCONT_time->LocalTime() : pCONT_time->Midnight();
     AddLog_P(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total updated with hardware value"));
   }
   EnergyUpdateToday();
@@ -240,7 +240,7 @@ void mEnergy::Energy200ms(void)
   //   //XnrgCall(FUNC_ENERGY_EVERY_SECOND);
 
   //   if (pCONT_set->RtcTime.valid) {
-  //     if (pCONT->mt->LocalTime() == pCONT->mt->Midnight()) {
+  //     if (pCONT_time->LocalTime() == pCONT_time->Midnight()) {
   //       pCONT_set->Settings.energy_usage.energy_kWhyesterday = pCONT_set->RtcSettings.energy_kWhtoday;
 
   //       pCONT_set->RtcSettings.energy_kWhtotal += pCONT_set->RtcSettings.energy_kWhtoday;
@@ -694,7 +694,7 @@ void mEnergy::EnergyShow(bool json)
     // bool show_energy_period = (0 == pCONT_set->tele_period);
 
     // pCONT_sup->ResponseAppend_P(PSTR(",\"" D_RSLT_ENERGY "\":{\"" D_JSON_TOTAL_START_TIME "\":\"%s\",\"" D_JSON_TOTAL "\":%s,\"" D_JSON_YESTERDAY "\":%s,\"" D_JSON_TODAY "\":%s"),
-    //   pCONT->mt->GetDateAndTimeCtr(DT_ENERGY),
+    //   pCONT_time->GetDateAndTimeCtr(DT_ENERGY),
     //   EnergyFormatIndex(value_chr, energy_total_chr[0], json, energy_total_fields),
     //   energy_yesterday_chr,
     //   energy_daily_chr);
@@ -1074,9 +1074,9 @@ int8_t mEnergy::Tasker(uint8_t function){
     case FUNC_LOOP: 
       // EveryLoop();
     break;  
-    case FUNC_EVERY_200_MSECOND:
-      //Energy200ms();
-    break;
+    // case FUNC_EVERY_200_MSECOND:
+    //   //Energy200ms();
+    // break;
     case FUNC_EVERY_SECOND:
       //EnergyEverySecond();
       UpdateThresholdLimits();

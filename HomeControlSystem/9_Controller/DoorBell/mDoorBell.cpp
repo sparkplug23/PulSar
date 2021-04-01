@@ -52,7 +52,7 @@ void mDoorBell::RingDoorBellSet(uint8_t seconds, uint16_t freq){
   ringer.freq = freq;
   ringer.seconds = seconds;
   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Set"));
-  memcpy(ringer.trigger_time_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr)); 
+  memcpy(ringer.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
 }
 
 // Function called each time
@@ -172,7 +172,7 @@ void mDoorBell::EveryLoop(){
       doorbell_switch.isactive = true;
       doorbell_switch.tDetectTimeforDebounce = millis();   
 
-      memcpy(doorbell_switch.trigger_time_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr)); 
+      memcpy(doorbell_switch.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
 
       if(settings.fEnable_Switch_Relay_Binding){
         RingDoorBellSet(2, 500); //1 per sec for 2 secs (2 rings)
@@ -182,7 +182,7 @@ void mDoorBell::EveryLoop(){
       doorbell_switch.isactive = false;
     }
     doorbell_switch.ischanged = true;
-    // doorbell_switch.changedtime = pCONT->mt->RtcTime;
+    // doorbell_switch.changedtime = pCONT_time->RtcTime;
     doorbell_switch.detected_time = pCONT_time->GetTimeShortNow();
     // fUpdateSendDoorSensor = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -429,7 +429,7 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //   doorobj["position"] = BellSwitch_OnOff_Ctr();
 //   //   // char timectr[12]; memset(timectr,0,sizeof(timectr));
 //   //   // sprintf(timectr,"%sT%02d:%02d:%02d",
-//   //   //   pCONT->mt->GetDOWShortctr(doorbell_switch.changedtime.Wday),
+//   //   //   pCONT_time->GetDOWShortctr(doorbell_switch.changedtime.Wday),
 //   //   //   doorbell_switch.changedtime.hour,
 //   //   //   doorbell_switch.changedtime.minute,
 //   //   //   doorbell_switch.changedtime.second
@@ -441,7 +441,7 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //   lockobj["position"] = LOCKOPENCTR;
 //   //   char timectr2[15]; memset(timectr2,0,sizeof(timectr2));
 //   //   sprintf(timectr2,"%sT%02d:%02d:%02d",
-//   //     pCONT->mt->GetDOWShortctr(lock_detect.changedtime.Wday),
+//   //     pCONT_time->GetDOWShortctr(lock_detect.changedtime.Wday),
 //   //     lock_detect.changedtime.hour,
 //   //     lock_detect.changedtime.minute,
 //   //     lock_detect.changedtime.second

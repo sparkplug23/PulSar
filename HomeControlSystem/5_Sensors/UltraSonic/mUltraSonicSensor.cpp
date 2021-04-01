@@ -465,7 +465,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
       
     JsonBuilderI->Start();
       JsonBuilderI->Add("location", pCONT_set->GetDeviceName(D_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
-      JsonBuilderI->Add("time", pCONT->mt->RtcTime.hhmmss_ctr);
+      JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->End();
 
     if(presence_detect.isactive){
@@ -630,7 +630,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
         if(presence_detect.state){ 
           presence_detect.isactive = true;
           // presence_detect.wasactive = false; //toggle as "previous state"
-          memcpy(presence_detect.detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
+          memcpy(presence_detect.detected_rtc_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr));
         }else{
           presence_detect.isactive = false;
           // presence_detect.wasactive = true; //toggle as "previous state"

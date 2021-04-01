@@ -362,16 +362,16 @@ void mHeating::init_program_scheduling(void){
 
 //           activeprograms[device_id].temps.state = ACTIVEP_SCHEDULED;
 
-//           //uint8_t fTimeReached = pCONT->mt->CheckBetween_Week_DateTimes(&program_temps[device_id].schedule.ontime,&program_temps[device_id].schedule.offtime);
+//           //uint8_t fTimeReached = pCONT_time->CheckBetween_Week_DateTimes(&program_temps[device_id].schedule.ontime,&program_temps[device_id].schedule.offtime);
 
-//           uint8_t fTimeReached = pCONT->mt->CheckDateTimeWeekIsNow(&program_temps[device_id].schedule.ontime);
+//           uint8_t fTimeReached = pCONT_time->CheckDateTimeWeekIsNow(&program_temps[device_id].schedule.ontime);
 
-//           program_temps[device_id].schedule.untilontime = pCONT->mt->GetDifferenceInDateTimes(&pCONT->mt->RtcTime,&program_temps[device_id].schedule.ontime);
+//           program_temps[device_id].schedule.untilontime = pCONT_time->GetDifferenceInDateTimes(&pCONT_time->RtcTime,&program_temps[device_id].schedule.ontime);
 
 //           AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
 
 //           // uint8_t hours, minutes, seconds;
-//           // pCONT->mt->DateTimeWeek2HHMMSS(&program_temps[device_id].schedule.untilontime,&hours,&minutes,&seconds);
+//           // pCONT_time->DateTimeWeek2HHMMSS(&program_temps[device_id].schedule.untilontime,&hours,&minutes,&seconds);
 //           //
 //           // pCONT->mso->MessagePrint("hours> "); pCONT->mso->MessagePrintln(hours);
 //           // pCONT->mso->MessagePrint("minutes> "); pCONT->mso->MessagePrintln(minutes);
@@ -721,8 +721,8 @@ void mHeating::init_program_scheduling(void){
 
 //   // Possibly adding heating start time too? so curves are assuming heating is on
 
-//   datetime_t untiltime = pCONT->mt->GetDifferenceInDateTimes(&pCONT->mt->RtcTime,&heating_device_relays[device_id].ontime);
-//   uint32_t secondson = pCONT->mt->GetSecondsOfDayFromDateTime(&untiltime);
+//   datetime_t untiltime = pCONT_time->GetDifferenceInDateTimes(&pCONT_time->RtcTime,&heating_device_relays[device_id].ontime);
+//   uint32_t secondson = pCONT_time->GetSecondsOfDayFromDateTime(&untiltime);
 
 //   int cold_start_seconds = 0;
 //   float sensor_temp = 0;
@@ -893,12 +893,12 @@ void mHeating::init_program_scheduling(void){
 
 //     //       // char time_ctr[20]; memset(time_ctr,'\0',sizeof(time_ctr));
 //     //       // sprintf(time_ctr, "%02d:%02d:%02d",(int)program_temps[device].schedule.ontime.hour,(int)program_temps[device].schedule.ontime.minute,(int)program_temps[device].schedule.ontime.second);
-//     //       // scheduleobj[D_JSON_ONTIME] = time_ctr;//pCONT->mt->getFormattedTime();
+//     //       // scheduleobj[D_JSON_ONTIME] = time_ctr;//pCONT_time->getFormattedTime();
           
 //     //       // char time_ctr2[20];
 //     //       // memset(time_ctr2,'\0',sizeof(time_ctr2));
 //     //       // sprintf(time_ctr2, "%02d:%02d:%02d",(int)program_temps[device].schedule.offtime.hour,(int)program_temps[device].schedule.offtime.minute,(int)program_temps[device].schedule.offtime.second);
-//     //       // scheduleobj[D_JSON_OFFTIME] = time_ctr2;//pCONT->mt->getFormattedTime();
+//     //       // scheduleobj[D_JSON_OFFTIME] = time_ctr2;//pCONT_time->getFormattedTime();
 
 //     //     //data_buffer.payload.json_pairs++;
 //     JsonBuilderI->Level_End();
@@ -969,7 +969,7 @@ void mHeating::init_program_scheduling(void){
 //         JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, i, buffer, sizeof(buffer)));
 //           JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_msdb18->sensor[i].reading.val);
 //           JsonBuilderI->Add(D_JSON_ISVALID, pCONT_msdb18->sensor[i].reading.isvalid);
-//           JsonBuilderI->Add(D_JSON_SECS, (int)abs(pCONT->mt->uptime.seconds_nonreset-pCONT_msdb18->sensor[i].reading.captureupsecs));
+//           JsonBuilderI->Add(D_JSON_SECS, (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT_msdb18->sensor[i].reading.captureupsecs));
 //         JsonBuilderI->Level_End();
 //       } 
 //     }
@@ -1003,7 +1003,7 @@ void mHeating::init_program_scheduling(void){
 //   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(id));
 //   //       json1[D_JSON_TEMP] = mSupport::roundfloat(pCONT->mhs->watertemps.ptr->roc10s.val,1);
 //   //       json1[D_JSON_ISVALID] = (int)pCONT->mhs->watertemps.ptr->roc10s.isvalid;
-//   //       json1[D_JSON_SECS] = (int)abs(pCONT->mt->uptime.second-pCONT->mhs->watertemps.ptr->roc10s.captureupsecs);
+//   //       json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.second-pCONT->mhs->watertemps.ptr->roc10s.captureupsecs);
 //   //   //}
 
 //   // }
@@ -1044,7 +1044,7 @@ void mHeating::init_program_scheduling(void){
 // //       JsonObject json1 = obj.createNestedObject(GetSensorNameByID(id));
 // //       json1[D_JSON_TEMP] = mSupport::roundfloat(pCONT->mhs->watertemps.ptr->roc1m.val,1);
 // //       json1[D_JSON_ISVALID] = (int)pCONT->mhs->watertemps.ptr->roc1m.isvalid;
-// //       json1[D_JSON_SECS] = (int)abs(pCONT->mt->uptime.second-pCONT->mhs->watertemps.ptr->roc1m.captureupsecs);
+// //       json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.second-pCONT->mhs->watertemps.ptr->roc1m.captureupsecs);
 // //     //}
 
 // //   }
@@ -1085,7 +1085,7 @@ void mHeating::init_program_scheduling(void){
 //   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(id));
 //   //     json1[D_JSON_TEMP] = mSupport::roundfloat(pCONT->mhs->watertemps.ptr->roc10m.val,1);
 //   //     json1[D_JSON_ISVALID] = (int)pCONT->mhs->watertemps.ptr->roc10m.isvalid;
-//   //     json1[D_JSON_SECS] = (int)abs(pCONT->mt->uptime.second-pCONT->mhs->watertemps.ptr->roc10m.captureupsecs);
+//   //     json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.second-pCONT->mhs->watertemps.ptr->roc10m.captureupsecs);
 //   //  // }
 
 //   // }
@@ -1114,7 +1114,7 @@ void mHeating::init_program_scheduling(void){
 //       JsonBuilderI->Add(D_JSON_ISVALID, pCONT->msdht->sensor[dht_id].instant.isvalid);
 //       JsonBuilderI->Add(D_JSON_ISCHANGED, pCONT->msdht->sensor[dht_id].instant.ischanged);
 //       // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
-//       // json1[D_JSON_SECS] = (int)abs(pCONT->mt->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
+//       // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
 //       // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
 //       // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
 //     JsonBuilderI->Level_End();
@@ -1817,28 +1817,28 @@ void mHeating::init_program_scheduling(void){
 // // //   //   }
 // // //   // }
 // // //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
-// // //   //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
+// // //   //   datetime_t ontime = pCONT_time->GetTimefromCtr(obj["schedule"]["ontime"]);
 // // //   //   program_temps[device_id].schedule.ontime = ontime;
 
 // // //   //   //pCONT->mso->MessagePrint("ontime>>\t "); 
-// // //   //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
+// // //   //   //pCONT_time->PrintDateTime(&program_temps[device_id].schedule.ontime);
 // // //   //   //pCONT->mso->MessagePrintln(" ");
 // // //   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
 // // //   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
 // // //   //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
 
 // // //   //   // Check if new hour is tomorrow
-// // //   //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->RtcTime.hour){
-// // //   //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
+// // //   //   // if(program_temps[device_id].schedule.ontime.hour<pCONT_time->RtcTime.hour){
+// // //   //   //   pCONT_time->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
 // // //   //   // }
 
 // // //   //   // add off time based on max limit possible
 // // //   //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
-// // //   //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
+// // //   //    pCONT_time->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
 
-// // //   //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
+// // //   //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT_time->PrintDateTime(&program_temps[device_id].schedule.offtime);
 // // //   //   //pCONT->mso->MessagePrintln(" ");
-// // //   //   //pCONT->mso->MessagePrint("RtcTime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->RtcTime);
+// // //   //   //pCONT->mso->MessagePrint("RtcTime>>\t "); pCONT_time->PrintDateTime(&pCONT_time->RtcTime);
 
 // // //   //    // splash result (add new ctr for this message)
 // // //   //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;
@@ -1906,28 +1906,28 @@ void mHeating::init_program_scheduling(void){
 // //   //   }
 // //   // }
 // //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_ONTIME].isNull()){
-// //   //   datetime_t ontime = pCONT->mt->GetTimefromCtr(obj["schedule"]["ontime"]);
+// //   //   datetime_t ontime = pCONT_time->GetTimefromCtr(obj["schedule"]["ontime"]);
 // //   //   program_temps[device_id].schedule.ontime = ontime;
 
 // //   //   //pCONT->mso->MessagePrint("ontime>>\t "); 
-// //   //   //pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.ontime);
+// //   //   //pCONT_time->PrintDateTime(&program_temps[device_id].schedule.ontime);
 // //   //   //pCONT->mso->MessagePrintln(" ");
 // //   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.hour);pCONT->mso->MessagePrint(":");
 // //   //   // pCONT->mso->MessagePrint(program_temps[device_id].schedule.ontime.minute);pCONT->mso->MessagePrint(":");
 // //   //   // pCONT->mso->MessagePrintln(program_temps[device_id].schedule.ontime.second);
 
 // //   //   // Check if new hour is tomorrow
-// //   //   // if(program_temps[device_id].schedule.ontime.hour<pCONT->mt->RtcTime.hour){
-// //   //   //   pCONT->mt->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
+// //   //   // if(program_temps[device_id].schedule.ontime.hour<pCONT_time->RtcTime.hour){
+// //   //   //   pCONT_time->AddSecondsToDateTime(program_temps[device_id].schedule.ontime,SEC2DAY);
 // //   //   // }
 
 // //   //   // add off time based on max limit possible
 // //   //    program_temps[device_id].schedule.offtime = program_temps[device_id].schedule.ontime; // Copy everything
-// //   //    pCONT->mt->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
+// //   //    pCONT_time->AddSecondsToDateTime(&program_temps[device_id].schedule.offtime,SEC2MIN*program_temps[device_id].time_running.limit);
 
-// //   //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT->mt->PrintDateTime(&program_temps[device_id].schedule.offtime);
+// //   //   // pCONT->mso->MessagePrint("offtime>>\t "); pCONT_time->PrintDateTime(&program_temps[device_id].schedule.offtime);
 // //   //   //pCONT->mso->MessagePrintln(" ");
-// //   //   //pCONT->mso->MessagePrint("RtcTime>>\t "); pCONT->mt->PrintDateTime(&pCONT->mt->RtcTime);
+// //   //   //pCONT->mso->MessagePrint("RtcTime>>\t "); pCONT_time->PrintDateTime(&pCONT_time->RtcTime);
 
 // //   //    // splash result (add new ctr for this message)
 // //   //    program_temps[device_id].schedule.mode_sch = SCHEDULED_SET_ID;

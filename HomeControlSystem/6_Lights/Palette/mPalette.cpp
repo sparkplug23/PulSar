@@ -54,7 +54,7 @@ void mPalette::init_PresetColourPalettes(){
     init_PresetColourPalettes_User_Generic_Fill(0);
   }
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   /**
    *  Static 
    * */
@@ -106,7 +106,7 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Gradient_SunLevel_Group01_06();
   init_ColourPalettes_Gradient_SunLevel_Group01_07();
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 }
 
 

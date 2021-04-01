@@ -28,6 +28,33 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
     case FUNC_EVERY_SECOND:
       // Serial.println("mLogging::Tasker");
     break;
+    case FUNC_EVERY_MINUTE:
+
+
+  /**** For increasing log level temporarily then reseting
+   * 
+   * */
+  // if (pCONT_set->seriallog_timer) {
+  //   seriallog_timer--;
+  //   if (!seriallog_timer) {
+  //     if (seriallog_level) {
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //     }
+  //     seriallog_level = 0;
+  //   }
+  // }
+
+  // if (syslog_timer) {  // Restore syslog level
+  //   syslog_timer--;
+  //   if (!syslog_timer) {
+  //     syslog_level = Settings.syslog_level;
+  //     if (Settings.syslog_level) {
+  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //     }
+  //   }
+  // }
+
+    break;
     case FUNC_WIFI_CONNECTED:
       StartTelnetServer();
     break;

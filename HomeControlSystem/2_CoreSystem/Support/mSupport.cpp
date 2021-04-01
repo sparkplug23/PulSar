@@ -54,6 +54,22 @@ int8_t mSupport::Tasker(uint8_t function){
     case FUNC_EVERY_FIVE_MINUTE:
       //CmndCrash();
     break;
+    case FUNC_ON_BOOT_SUCCESSFUL:
+
+
+
+//move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
+  // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
+    AddLog_P(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
+    pCONT_set->RtcReboot.fast_reboot_count = 0;
+    pCONT_set->RtcRebootSave();
+    pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
+    #endif// ENABLE_LOG_LEVEL_INFO
+  // }
+
+    break;
     case FUNC_MQTT_COMMAND: 
       parse_JSONCommand();
     break;
@@ -1293,6 +1309,14 @@ char* mSupport::Trim(char* p)
   // q++;
   // *q = '\0';
   // return p;
+  if (*p != '\0') {
+    while ((*p != '\0') && isblank(*p)) { p++; }  // Trim leading spaces
+    char* q = p + strlen(p) -1;
+    while ((q >= p) && isblank(*q)) { q--; }   // Trim trailing spaces
+    q++;
+    *q = '\0';
+  }
+  return p;
 }
 
 char* mSupport::NoAlNumToUnderscore(char* dest, const char* source)
@@ -2008,52 +2032,137 @@ void mSupport::SleepDelay(uint32_t mseconds) {
 
 void mSupport::PerformEverySecond(void)
 {
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("mSupport::PerformEverySecond"));
   // pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
   // pCONT_sup->activity.loop_counter=0;
   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
 
-
-  if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
-    pCONT_set->RtcReboot.fast_reboot_count = 0;
-    pCONT_set->RtcRebootSave();
-    
-    pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
-    #endif// ENABLE_LOG_LEVEL_INFO
-  }
-
-  // if ((4 == uptime) && (SONOFF_IFAN02 == my_module_type)) {  // Microcontroller needs 3 seconds before accepting commands
-  //   SetDevicePower(1, SRC_RETRY);      // Sync with default power on state microcontroller being Light ON and Fan OFF
-  //   SetDevicePower(power, SRC_RETRY);  // Set required power on state
-  // }
-
-
-  /**** For increasing log level temporarily then reseting
-   * 
-   * */
-  // if (pCONT_set->seriallog_timer) {
-  //   seriallog_timer--;
-  //   if (!seriallog_timer) {
-  //     if (seriallog_level) {
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
-  //     }
-  //     seriallog_level = 0;
-  //   }
-  // }
-
-  // if (syslog_timer) {  // Restore syslog level
-  //   syslog_timer--;
-  //   if (!syslog_timer) {
-  //     syslog_level = Settings.syslog_level;
-  //     if (Settings.syslog_level) {
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
-  //     }
-  //   }
-  // }
-
   ResetGlobalValues();
 
+  Handle_OTA_URLS();
+
+  Handle_Check_Power_Saving();
+
+  //If restart is ordered, of type reset, save network, erase settings, set defaults, reload network, complete restart
+  CheckResetConditions();
+
+  // Wifi keep alive to send Gratuitous ARP
+  //wifiKeepAlive();
+
+
+// #ifdef ESP32
+//   if (11 == TasmotaGlobal.uptime) {  // Perform one-time ESP32 houskeeping
+//     ESP_getSketchSize();             // Init sketchsize as it can take up to 2 seconds
+//   }
+// #endif
+//     //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
+
+// /*
+// if (!global_state.network_down) {
+// #ifdef FIRMWARE_MINIMAL
+//       if (1 == RtcSettings.ota_loader) {
+//         RtcSettings.ota_loader = 0;
+//         ota_state_flag = 3;
+//       }
+// #endif  // FIRMWARE_MINIMAL
+
+// #ifdef USE_DISCOVERY
+//       StartMdns();
+// #endif  // USE_DISCOVERY
+
+// #ifdef USE_MODULE_CORE_WEBSERVER
+//       if (Settings.webserver) {
+
+// #ifdef ESP8266
+//         StartWebserver(Settings.webserver, WiFi.localIP());
+// #else  // ESP32
+// #ifdef USE_ETHERNET
+//         StartWebserver(Settings.webserver, (EthernetLocalIP()) ? EthernetLocalIP() : WiFi.localIP());
+// #else
+//         StartWebserver(Settings.webserver, WiFi.localIP());
+// #endif
+// #endif
+
+// #ifdef USE_DISCOVERY
+// #ifdef USE_NETWORK_MDNS
+//         MdnsAddServiceHttp();
+// #endif  // USE_NETWORK_MDNS
+// #endif  // USE_DISCOVERY
+//       } else {
+//         StopWebserver();
+//       }
+// #ifdef USE_EMULATION
+//     if (Settings.flag2.emulation) { UdpConnect(); }
+// #endif  // USE_EMULATION
+// #endif  // USE_MODULE_CORE_WEBSERVER
+
+// #ifdef USE_DEVICE_GROUPS
+//       DeviceGroupsStart();
+// #endif  // USE_DEVICE_GROUPS
+
+// #ifdef USE_KNX
+//       if (!knx_started && Settings.flag.knx_enabled) {  // CMND_KNX_ENABLED
+//         KNXStart();
+//         knx_started = true;
+//       }
+// #endif  // USE_KNX
+
+//       MqttCheck();
+//     } else {
+// #ifdef USE_EMULATION
+//       UdpDisconnect();
+// #endif  // USE_EMULATION
+
+// #ifdef USE_DEVICE_GROUPS
+//       DeviceGroupsStop();
+// #endif  // USE_DEVICE_GROUPS
+
+// #ifdef USE_KNX
+//       knx_started = false;
+// #endif  // USE_KNX
+//     }
+// */
+
+// DEBUG_LINE_HERE;
+
+
+
+
+
+
+
+
+
+
+}
+
+  void mSupport::Handle_Check_Power_Saving()
+  {
+
+    /*if (save_data_counter && (backlog_pointer == backlog_index)) {
+      save_data_counter--;
+      if (save_data_counter <= 0) { Serial.print("if (save_data_counter <= 0)="); Serial.println(save_data_counter);
+        if (Settings.flag_system.save_state) {
+          power_t mask = POWER_MASK;
+          for (uint8_t i = 0; i < MAX_PULSETIMERS; i++) {
+            if ((Settings.pulse_timer[i] > 0) && (Settings.pulse_timer[i] < 30)) {  // 3 seconds
+              mask &= ~(1 << i);
+            }
+          }
+          if (!((Settings.power &mask) == (power &mask))) {
+            Settings.power = power;
+          }
+        } else {
+          Settings.power = 0;
+        }
+        Serial.println("SettingsSave(0); from sonoff.ino");
+        SettingsSave(0);
+        save_data_counter = Settings.save_data; Serial.println("save_data_counter = Settings.save_data; 2");
+      }
+    }*/
+  }
+void mSupport::Handle_OTA_URLS()
+{
 
     if (pCONT_set->ota_state_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
       pCONT_set->ota_state_flag--;
@@ -2160,34 +2269,18 @@ void mSupport::PerformEverySecond(void)
         //MqttPublishPrefixTopic_P(STAT, PSTR(D_JSON_UPGRADE));
       }
     }
+}
 
-
-    /*if (save_data_counter && (backlog_pointer == backlog_index)) {
-      save_data_counter--;
-      if (save_data_counter <= 0) { Serial.print("if (save_data_counter <= 0)="); Serial.println(save_data_counter);
-        if (Settings.flag_system.save_state) {
-          power_t mask = POWER_MASK;
-          for (uint8_t i = 0; i < MAX_PULSETIMERS; i++) {
-            if ((Settings.pulse_timer[i] > 0) && (Settings.pulse_timer[i] < 30)) {  // 3 seconds
-              mask &= ~(1 << i);
-            }
-          }
-          if (!((Settings.power &mask) == (power &mask))) {
-            Settings.power = power;
-          }
-        } else {
-          Settings.power = 0;
-        }
-        Serial.println("SettingsSave(0); from sonoff.ino");
-        SettingsSave(0);
-        save_data_counter = Settings.save_data; Serial.println("save_data_counter = Settings.save_data; 2");
-      }
-    }*/
-
-//#ifdef DISABLE_SETTINGS_SAVING_BUG
-// DEBUG_LINE_HERE;
+void mSupport::CheckResetConditions()
+{
     if (pCONT_set->restart_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
       if ((214 == pCONT_set->restart_flag) || (215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
+// Backup current SSIDs and Passwords
+
+
+
+                                      // Loading in new network configs only if they are considered save and correct
+
         // char storage_wifi[sizeof(pCONT_set->Settings.sta_ssid) +
         //                   sizeof(pCONT_set->Settings.sta_pwd)];
         // char storage_mqtt[sizeof(pCONT_set->Settings.mqtt_host) +
@@ -2232,6 +2325,9 @@ void mSupport::PerformEverySecond(void)
         // }
         pCONT_set->restart_flag = 2;
       }
+
+
+
       else if (213 == pCONT_set->restart_flag) {
         pCONT_set->SettingsSdkErase();  // Erase flash SDK parameters
         pCONT_set->restart_flag = 2;
@@ -2254,97 +2350,8 @@ void mSupport::PerformEverySecond(void)
       }
     }
 
-  // Wifi keep alive to send Gratuitous ARP
-  //wifiKeepAlive();
 
-  pCONT_time->WifiPollNtp();
-
-// #ifdef ESP32
-//   if (11 == TasmotaGlobal.uptime) {  // Perform one-time ESP32 houskeeping
-//     ESP_getSketchSize();             // Init sketchsize as it can take up to 2 seconds
-//   }
-// #endif
-//     //if (!pCONT_set->global_state.wifi_down) { MqttCheck(); }
-
-// /*
-// if (!global_state.network_down) {
-// #ifdef FIRMWARE_MINIMAL
-//       if (1 == RtcSettings.ota_loader) {
-//         RtcSettings.ota_loader = 0;
-//         ota_state_flag = 3;
-//       }
-// #endif  // FIRMWARE_MINIMAL
-
-// #ifdef USE_DISCOVERY
-//       StartMdns();
-// #endif  // USE_DISCOVERY
-
-// #ifdef USE_MODULE_CORE_WEBSERVER
-//       if (Settings.webserver) {
-
-// #ifdef ESP8266
-//         StartWebserver(Settings.webserver, WiFi.localIP());
-// #else  // ESP32
-// #ifdef USE_ETHERNET
-//         StartWebserver(Settings.webserver, (EthernetLocalIP()) ? EthernetLocalIP() : WiFi.localIP());
-// #else
-//         StartWebserver(Settings.webserver, WiFi.localIP());
-// #endif
-// #endif
-
-// #ifdef USE_DISCOVERY
-// #ifdef USE_NETWORK_MDNS
-//         MdnsAddServiceHttp();
-// #endif  // USE_NETWORK_MDNS
-// #endif  // USE_DISCOVERY
-//       } else {
-//         StopWebserver();
-//       }
-// #ifdef USE_EMULATION
-//     if (Settings.flag2.emulation) { UdpConnect(); }
-// #endif  // USE_EMULATION
-// #endif  // USE_MODULE_CORE_WEBSERVER
-
-// #ifdef USE_DEVICE_GROUPS
-//       DeviceGroupsStart();
-// #endif  // USE_DEVICE_GROUPS
-
-// #ifdef USE_KNX
-//       if (!knx_started && Settings.flag.knx_enabled) {  // CMND_KNX_ENABLED
-//         KNXStart();
-//         knx_started = true;
-//       }
-// #endif  // USE_KNX
-
-//       MqttCheck();
-//     } else {
-// #ifdef USE_EMULATION
-//       UdpDisconnect();
-// #endif  // USE_EMULATION
-
-// #ifdef USE_DEVICE_GROUPS
-//       DeviceGroupsStop();
-// #endif  // USE_DEVICE_GROUPS
-
-// #ifdef USE_KNX
-//       knx_started = false;
-// #endif  // USE_KNX
-//     }
-// */
-
-// DEBUG_LINE_HERE;
-
-
-
-
-
-
-
-
-
-
-}
-
+    }
 
 void mSupport::UpdateStatusBlink(){
   
@@ -2843,7 +2850,7 @@ void mSupport::parse_JSONCommand(){
   // if(obj.containsKey("resetcounter")){
   //   uint8_t val = obj["resetcounter"];
   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
-  //   pCONT->mt->ResetRebootCounter();
+  //   pCONT_time->ResetRebootCounter();
   //   data_buffer.isserviced++;
   // }else
   // if(obj.containsKey("loglevel")){
@@ -2950,9 +2957,9 @@ void mSupport::parse_JSONCommand(){
   // data_buffer.payload.isserviced++;
   // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
   //   if(strstr(root["command"],"resetcounter")){
-  //     pCONT->mt->ResetRebootCounter();
+  //     pCONT_time->ResetRebootCounter();
   //   }else if(strstr(root["command"],"reset_wificounter")){
-  //     //pCONT->mt->ResetRebootCounter();
+  //     //pCONT_time->ResetRebootCounter();
   //   }
   //   data_buffer.payload.isserviced++;
   // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
@@ -2967,7 +2974,7 @@ void mSupport::parse_JSONCommand(){
   
 
   // if(root["resetcounter"]){ pCONT->mso->MessagePrintln("root[resetcounter]");
-  //   pCONT->mt->ResetRebootCounter();
+  //   pCONT_time->ResetRebootCounter();
   //   data_buffer.payload.isserviced++;
   // }else if(root["healthsecnormal"]){ pCONT->mso->MessagePrintln("root[healthsecnormal]");
   //   healthsecnormal = root["healthsecnormal"];
@@ -2980,9 +2987,9 @@ void mSupport::parse_JSONCommand(){
   // data_buffer.payload.isserviced++;
   // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
   //   if(strstr(root["command"],"resetcounter")){
-  //     pCONT->mt->ResetRebootCounter();
+  //     pCONT_time->ResetRebootCounter();
   //   }else if(strstr(root["command"],"reset_wificounter")){
-  //     //pCONT->mt->ResetRebootCounter();
+  //     //pCONT_time->ResetRebootCounter();
   //   }
   //   data_buffer.payload.isserviced++;
   // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");

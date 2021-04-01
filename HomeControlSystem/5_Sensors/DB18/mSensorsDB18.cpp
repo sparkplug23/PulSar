@@ -171,7 +171,7 @@ void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t requ
               }
               sensor[sensor_id].reading.val = tmp_float;
               sensor[sensor_id].reading.isvalid = true; 
-              sensor[sensor_id].reading.captureupsecs = pCONT->mt->uptime.seconds_nonreset;
+              sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
               AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }else{

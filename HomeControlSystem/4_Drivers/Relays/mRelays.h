@@ -14,13 +14,23 @@
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR) "scheduled";
 
 
-class mRelays{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mRelays :
+  public mTaskerInterface
+{
   public:
     mRelays(){};
 
     #ifndef RELAYS_CONNECTED
       #define RELAYS_CONNECTED 4
     #endif
+
+    static const char* PM_MODULE_DRIVERS_RELAY_CTR;
+    static const char* PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RELAY_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR; }
+
     
     typedef union {
       uint16_t data; // allows full manipulating

@@ -10,7 +10,11 @@
 #include <stdint.h>
 #include "3_Network/MQTT/mMQTT.h"
 
-class mRuleEngine{
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mRuleEngine :
+  public mTaskerInterface
+{
     
   private:
     /* Prevent others from being created */
@@ -21,6 +25,11 @@ class mRuleEngine{
     
   public:
     #define D_MAX_RULES 5
+    
+    static const char* PM_MODULE_CORE_RULES_CTR;
+    static const char* PM_MODULE_CORE_RULES_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_RULES_FRIENDLY_CTR; }
 
     uint8_t* data = nullptr;
     uint16_t _dataLen = 0;

@@ -61,8 +61,8 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
       JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->RtcTime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
-          JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
+          JsonBuilderI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
@@ -116,8 +116,8 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           JsonBuilderI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT->mt->RtcTime.hhmmss_ctr, pCONT->mt->uptime.hhmmss_ctr);
-          JsonBuilderI->Add("fc", pCONT->mt->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
+          JsonBuilderI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
@@ -2073,10 +2073,10 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
     
 //   // AppendBuffer_PI2(PSTR(D_PROGRAM_VERSION "}2%s(%s)"), pCONT_set->my_version, "my_image");//pCONT_set->my_image
 //   // // #ifdef ESP8266
-//   // //   AppendBuffer_PI2(PSTR("}1" D_BUILD_DATE_AND_TIME "}2%s"), pCONT->mt->GetBuildDateAndTime(dd));
+//   // //   AppendBuffer_PI2(PSTR("}1" D_BUILD_DATE_AND_TIME "}2%s"), pCONT_time->GetBuildDateAndTime(dd));
 //   // //   AppendBuffer_PI2(PSTR("}1" D_CORE_AND_SDK_VERSION "}2" ARDUINO_ESP8266_RELEASE "/%s"), ESP.getSdkVersion());
 //   // // #endif
-//   // // AppendBuffer_PI2(PSTR("}1" D_UPTIME "}2%s"), pCONT->mt->getFormattedUptime());
+//   // // AppendBuffer_PI2(PSTR("}1" D_UPTIME "}2%s"), pCONT_time->getFormattedUptime());
 //   // // #ifdef ESP8266
 //   // //   AppendBuffer_PI2(PSTR("}1" D_FLASH_WRITE_COUNT "}2%d at 0x%X"), pCONT_set->Settings.save_flag, pCONT_set->GetSettingsAddress());
 //   // // #endif

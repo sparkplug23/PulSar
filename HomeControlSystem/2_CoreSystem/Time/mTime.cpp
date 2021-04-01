@@ -56,6 +56,8 @@ int8_t mTime::Tasker(uint8_t function){
     case FUNC_EVERY_SECOND:{
 
       //Serial.println(GetUptime());
+      
+      pCONT_time->WifiPollNtp();
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
         UpdateStoredRTCVariables();
@@ -75,7 +77,7 @@ int8_t mTime::Tasker(uint8_t function){
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
       //I need another for stable boot
-      //if(RtcTime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_SUCCESSFUL_BOOT);}
+      if(RtcTime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
 
       if(RtcTime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }

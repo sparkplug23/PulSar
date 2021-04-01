@@ -161,7 +161,7 @@ void mExerciseBike::SubTask_Light(){
 //     //driveway
 //     if(pir_detect_copy.isactive && light_control_driveway.fEnableAutomaticLight){
 //       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
-//       if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
+//       if(pCONT_time->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
 //         SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
 //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
 //       }else{
@@ -179,7 +179,7 @@ void mExerciseBike::SubTask_Light(){
 
     //garden
     // if(pir_detect.isactive && light_control_garden.fEnableAutomaticLight){
-    //   if(pCONT->mt->CheckBetween_Day_DateTimes(&light_control_garden.enabled_starttime,&light_control_garden.enabled_endtime)){
+    //   if(pCONT_time->CheckBetween_Day_DateTimes(&light_control_garden.enabled_starttime,&light_control_garden.enabled_endtime)){
     //     SetLight(LIGHT_GARDEN_ID,TIMED_ON);
     //   }else{
     //     SetLight(LIGHT_GARDEN_ID,OFF);

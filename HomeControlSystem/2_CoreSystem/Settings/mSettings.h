@@ -314,7 +314,7 @@ const uint16_t PWM_MIN = 100;               // [PWM_MIN] Minimum frequency - Def
 const uint8_t MAX_POWER_RETRY = 5;          // Retry count allowing agreed power limit overflow
 
 // const uint8_t STATES = 20;                  // Number of states per second using 50 mSec interval
-// const uint8_t IMMINENT_RESET_FACTOR = 10;   // Factor to extent button hold time for imminent Reset to default 40 seconds using KEY_HOLD_TIME of 40
+const uint8_t IMMINENT_RESET_FACTOR = 10;   // Factor to extent button hold time for imminent Reset to default 40 seconds using KEY_HOLD_TIME of 40
 const uint8_t BOOT_LOOP_TIME = 10;         // Number of seconds to stop detecting boot loops
 // const uint16_t SYSLOG_TIMER = 600;          // Seconds to restore syslog_level
 // const uint16_t SERIALLOG_TIMER = 600;       // Seconds to disable SerialLog
@@ -457,7 +457,7 @@ enum LightSchemes {LS_POWER, LS_WAKEUP, LS_CYCLEUP, LS_CYCLEDN, LS_RANDOM, LS_MA
 enum XsnsFunctions {
   // Init stuff (in importance of boot)
   
-  FUNC_CHECK_POINTERS,
+  // FUNC_CHECK_POINTERS, //phased out
   FUNC_TEMPLATE_MODULE_LOAD,  // Read progmem configs if needed, read settings configuration
   FUNC_SETTINGS_DEFAULT,   // Use defaults in code
   FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT,   // Use defaults in code
@@ -481,18 +481,19 @@ enum XsnsFunctions {
   // FUNC_TRIGGER_
   
   
-  FUNC_ON_SUCCESSFUL_BOOT, //also used as boot percentage progress divisor
+  FUNC_ON_BOOT_COMPLETE, //also used as boot percentage progress divisor : Reaches end of setup
 // END OF BOOT SECTION 
+  FUNC_ON_BOOT_SUCCESSFUL, //should be triggered once after device is considered stable
 
   // Configure sensors and drivers for device
   // Looping trigger times
-  FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_200_MSECOND, FUNC_EVERY_250_MSECOND, 
+  FUNC_LOOP, FUNC_EVERY_50_MSECOND, FUNC_EVERY_100_MSECOND, FUNC_EVERY_250_MSECOND, 
   FUNC_EVERY_SECOND, FUNC_EVERY_SECOND_TP0MS_WINDOW, FUNC_EVERY_SECOND_TP250MS_WINDOW, FUNC_EVERY_SECOND_TP500MS_WINDOW, FUNC_EVERY_SECOND_TP750MS_WINDOW, // All run only once a second, but with delays to spread out tasks which occur at that time cycle
   FUNC_EVERY_FIVE_SECOND, //Used mainly as debugging
   FUNC_EVERY_FIVE_MINUTE,
   FUNC_EVERY_MINUTE, FUNC_EVERY_HOUR, FUNC_EVERY_MIDNIGHT, FUNC_EVERY_MIDDAY,
   // Run once from restart/uptime
-  FUNC_UPTIME_10_SECONDS,
+  FUNC_UPTIME_10_SECONDS, //FUNC_ON_BOOT_SUCCESSFUL same time slot
   FUNC_UPTIME_1_MINUTES,
   FUNC_UPTIME_10_MINUTES,
   FUNC_UPTIME_60_MINUTES,
@@ -618,7 +619,6 @@ DEFINE_PGM_CTR(PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR)            D_FUNC_CONFI
 DEFINE_PGM_CTR(PM_FUNC_LOOP_CTR)                                    D_FUNC_LOOP_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVERY_50_MSECOND_CTR)                        D_FUNC_EVERY_50_MSECOND_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVERY_100_MSECOND_CTR)                       D_FUNC_EVERY_100_MSECOND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVERY_200_MSECOND_CTR)                       D_FUNC_EVERY_200_MSECOND_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVERY_250_MSECOND_CTR)                       D_FUNC_EVERY_250_MSECOND_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVERY_SECOND_CTR)                            D_FUNC_EVERY_SECOND_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVERY_MINUTE_CTR)                            D_FUNC_EVERY_MINUTE_CTR; 
@@ -694,7 +694,7 @@ DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS_CTR)        D_FUNC_WEB_A
 DEFINE_PGM_CTR(PM_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR)                 D_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR;
 DEFINE_PGM_CTR(PM_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR)         D_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR;
 DEFINE_PGM_CTR(PM_FUNC_WEB_COMMAND_CTR)                             D_FUNC_WEB_COMMAND_CTR;
-DEFINE_PGM_CTR(PM_FUNC_CHECK_POINTERS_CTR)                          D_FUNC_CHECK_POINTERS_CTR;
+// DEFINE_PGM_CTR(PM_FUNC_CHECK_POINTERS_CTR)                          D_FUNC_CHECK_POINTERS_CTR;
 DEFINE_PGM_CTR(PM_FUNC_WEB_SYSTEM_INFO_CTR)                         D_FUNC_WEB_SYSTEM_INFO_CTR;
 DEFINE_PGM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_DEBUG_CONFIGURE_CTR;
 
@@ -784,10 +784,6 @@ class mSettings :
     const char* GetTaskName(uint8_t task, char* buffer);
     #endif
     
-// RAM:   [=====     ]  51.8% (used 42400 bytes from 81920 bytes)
-// Flash: [======    ]  56.6% (used 579356 bytes from 1023984 bytes)
-
-
     void init(void);
 
     uint16_t CountCharInCtr(const char* tosearch, char tofind);
@@ -1336,9 +1332,9 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   };
 } SysBitfield_BootStatus;
 
-
-
 SysBitfield_BootStatus boot_status;
+
+#define RESET_BOOT_STATUS() memset(&pCONT_set->boot_status,0,sizeof(pCONT_set->boot_status))
 
 
 struct SensorSettings{
@@ -1860,7 +1856,7 @@ uint8_t seriallog_level_during_boot;
 
 uint8_t my_module_type;                     // Current copy of Settings.module or user template type
 // uint8_t my_adc0;                            // Active copy of Module ADC0
-// uint8_t last_source = 0;                    // Last command source
+uint8_t last_source = 0;                    // Last command source
 // uint8_t shutters_present = 0;               // Number of actual define shutters
 uint8_t mdns_delayed_start = 0;             // mDNS delayed start
 // bool serial_local = false;                  // Handle serial locally;

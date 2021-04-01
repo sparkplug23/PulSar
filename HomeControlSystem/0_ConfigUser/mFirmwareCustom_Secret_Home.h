@@ -171,6 +171,7 @@ Bathroom
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
+  #define USE_MODULE_CORE_RULES
   
   #define USE_MODULE_SENSORS_BUTTONS
   
@@ -197,6 +198,27 @@ Bathroom
       "]"
     "}"
   "}";
+  
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "}"
+  "}";
+
 #endif
 
 /**************************************************************************************************************************************************
@@ -256,74 +278,49 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
   
   #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    "\"Rule0\":{" //switch example
+    "\"Rule0\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":2"//setpower
-        //2
-        // "\"Value\":100"//setpower
-        // Append other "normal" commands here? this would need storing
-        //"\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "}"
     "},"
-    "\"Rule1\":{" //switch example
+    "\"Rule1\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":2"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "}"
     "}"
   "}";
-
-
-
 
 #endif
 
@@ -332,8 +329,6 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
   
   #define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 2
-  
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_CORE_RULES
   
@@ -341,15 +336,6 @@ Bathroom
   #define RELAYS_CONNECTED 2
   #define USE_MODULE_DRIVERS_INTERFACE
     
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\""
-  // "}";
-
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -389,57 +375,35 @@ Bathroom
   "}";
 
   
-  #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
+  #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    "\"Rule0\":{" //switch example
+    "\"Rule0\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":2"//setpower
-        //2
-        // "\"Value\":100"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2" 
       "}"
     "},"
-    "\"Rule1\":{" //switch example
+    "\"Rule1\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":1," //number, name, or all
-        //2
-        "\"State\":2"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
       "}"
     "}"
   "}";
@@ -453,9 +417,6 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 VirtualSwt"
   
   #define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 2
-  
-  // #define ENABLE_BUG_TRACING
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_SWITCHES
@@ -463,9 +424,6 @@ Bathroom
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 1
   #define USE_MODULE_DRIVERS_INTERFACE
-
-  // #define USE_VIRTUAL_REMOTE_URL_RELAY
-  // #define VIRTUAL_DEVICE_MDNS_NAME          "kitchenlight4"
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -483,15 +441,6 @@ Bathroom
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
-  
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
-  // "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Switch4_CupboardVirtual"
 
@@ -512,24 +461,22 @@ Bathroom
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    "\"Rule0\":{" //switch example
+    "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Switches\","    //sensor
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," //number, name, or all
-        "\"State\":0," // KEEP IT OFF, Not needed, Virtual sense device only
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":0,"
         "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"socket_number_11/set/relays\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
       "}"
     "}"
   "}";
-
-  // #bug - modifytoggle doesnt work after restart with unknown state
 
 #endif
 
@@ -540,8 +487,6 @@ Bathroom
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  
-  // #define ENABLE_BUG_TRACING
 
   #define USE_MODULE_SENSORS_BUTTONS
 
@@ -574,31 +519,13 @@ Bathroom
 #ifdef DEVICE_RGBSHELF
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
-  
-  // #define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 1
-
-  
-  // // #define ENABLE_PIXEL_FUNCTION_EFFECTS
-  // #define DISABLE_WEBSERVER
-   
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  
-  #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
+    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
+  
   #define DISABLE_WEBSERVER
-
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -611,34 +538,14 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-  //   #ifdef STRIP_SIZE_MAX
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   #else
-  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
-  //   #endif //STRIP_SIZE_MAX
-  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
-  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":20,\"" D_JSON_RATE "\":120,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 09\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
-  //   "\"" D_JSON_BRIGHTNESS     "\":100"
-  // "}";
   #define STRIP_SIZE_MAX 33
 
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
@@ -650,10 +557,9 @@ Bathroom
       "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
     "},"
     "\"TimeMs\":30000,"
-    "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
+    "\"ColourPalette\":\"Shelf Hearts\","
     "\"BrightnessRGB\":70"
   "}";
-
 
 #endif
 
@@ -1117,7 +1023,7 @@ Bathroom
   #define SETTINGS_HOLDER 2
 
   #define USE_BUILD_TYPE_ENERGY
-  #define USE_MODULE_DRIVERS_ENERGY
+  #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_SENSORS_PZEM004T_MODBUS
 
   #define USE_MODULE_SENSORS_BME

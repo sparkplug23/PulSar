@@ -117,7 +117,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 
 #ifdef USE_BUILD_TYPE_ENERGY
-  #define USE_MODULE_DRIVERS_ENERGY
+  #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_SENSORS_PZEM004T_MODBUS
 #endif
 

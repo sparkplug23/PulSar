@@ -2,6 +2,12 @@
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
+
+const char* mRelays::PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
+const char* mRelays::PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR = D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
+
+
+
 //minimal
 /*
 1) MQTT control, including minutes on
@@ -173,9 +179,9 @@ void mRelays::RulesEvent_Set_Power(){
 
   AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
-  uint8_t relay_index = pCONT->mrules->rules[pCONT->mrules->rules_active_index].command.device_id;
+  uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
-  uint8_t relay_state = pCONT->mrules->rules[pCONT->mrules->rules_active_index].command.value.data[0];
+  uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
 
 
   pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
@@ -332,7 +338,7 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
-  return pCONT_set->GetDeviceName(D_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
+  return pCONT_set->GetDeviceName(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
 }
 
 const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
@@ -357,7 +363,7 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   if(c=='\0'){ return -1; }  
 
   int8_t device_id;
-  int8_t class_id = D_MODULE_DRIVERS_RELAY_ID;
+  int8_t class_id = EM_MODULE_DRIVERS_RELAY_ID;
 
   int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,device_id,class_id);
   AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
@@ -957,7 +963,7 @@ void mRelays::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_scheduled_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_RELAY_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_RELAY_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

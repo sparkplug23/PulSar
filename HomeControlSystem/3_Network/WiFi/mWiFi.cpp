@@ -137,7 +137,7 @@ void mWiFi::WifiConfig(uint8_t type)
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
 
 }
@@ -416,7 +416,7 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
         uint8_t j;DEBUG_LINE_HERE;
         for (j = 0; j < D_MAX_SSIDS; j++) {DEBUG_LINE_HERE;
           if (ssid_scan == pCONT_set->Settings.sta_ssid[j]) {  // SSID match
-          DEBUG_LINE_HERE;
+          // DEBUG_LINE_HERE;
           // #ifdef 
           //   AddLog_P(LOG_LEVEL_TEST, PSTR("%s"),ssid_scan);
 
@@ -483,7 +483,7 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
       WiFi.scanDelete();                            // Clean up Ram
       delay(0);
     }
-    DEBUG_LINE_HERE;
+    // DEBUG_LINE_HERE;
     connection.scan_state = 0;
     // If bssid changed then (re)connect wifi
     for (uint8_t i = 0; i < sizeof(connection.bssid); i++) {
@@ -551,8 +551,8 @@ void mWiFi::WifiSetState(uint8_t state)
     }
 
   }
-  // if(pCONT->mt==NULL){
-  //    AddLog_P(LOG_LEVEL_DEBUG_MORE, "pCONT->mt==NULL");
+  // if(pCONT_time==NULL){
+  //    AddLog_P(LOG_LEVEL_DEBUG_MORE, "pCONT_time==NULL");
   // }
   pCONT_set->global_state.wifi_down = state ^1;
   if (!pCONT_set->global_state.wifi_down) {
@@ -930,7 +930,7 @@ void mWiFi::WifiCheck(uint8_t param)
       //   pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED);
 
       //   //if (pCONT_set->Settings.flag_network.use_wifi_rescan) {
-      //     if (!(pCONT->mt->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
+      //     if (!(pCONT_time->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
       //       connection.scan_state = 2;
       //       // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_WIFI "%s"),"WIFI_RESCAN_MINUTES occurred connection.scan_state = 2");
       //     }

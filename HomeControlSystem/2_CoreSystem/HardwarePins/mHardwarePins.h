@@ -5,19 +5,14 @@
 // In the near future, this mode will be tested by feeding the template via http command
 
 #include "1_TaskerManager/mTaskerManager.h"
-// #include "2_CoreSystem/mBaseConfig.h"
 
-#include "2_CoreSystem/Logging/mLogging.h"
-
-#include "1_TaskerManager/mTaskerManager.h"
-
-
-//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/mHardwareTemplates.h"
 
 #ifdef ESP8266
   #define DRX 3
 #endif
+
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pInterface[EM_MODULE_CORE_HARDWAREPINS_ID])
 
 #include "1_TaskerManager/mTaskerInterface.h"
   

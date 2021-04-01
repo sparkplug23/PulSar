@@ -341,7 +341,7 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 
-    AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
+    // AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
     uint8_t jsonpair_count = jtok.size();
 
 

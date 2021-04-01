@@ -78,7 +78,7 @@ void mPzem_AC::ReadAndParse(void)
         if (PzemAc.phase == pCONT_iEnergy->Energy.phase_count -1) {
           sReadSensor = true; // last phase reached
           if (PzemAc.energy > PzemAc.last_energy) {  // Handle missed phase
-            if (pCONT->mt->uptime.seconds_nonreset > PZEM_AC_STABILIZE) {
+            if (pCONT_time->uptime.seconds_nonreset > PZEM_AC_STABILIZE) {
               //pCONT_iEnergy->EnergyUpdateTotal(PzemAc.energy, false);
               AddLog_P(LOG_LEVEL_INFO,PSTR("PzemAc.energy=%d"),(int)PzemAc.energy);
             }
@@ -112,7 +112,7 @@ void mPzem_AC::ReadAndParse(void)
   else {
     AddLog_P(LOG_LEVEL_INFO,PSTR("PzemAcModbus->Send(PZEM) PzemAc.send_retry%d"),PzemAc.send_retry);
     PzemAc.send_retry--;
-    if ((pCONT_iEnergy->Energy.phase_count > 1) && (0 == PzemAc.send_retry) && (pCONT->mt->uptime.seconds_nonreset < PZEM_AC_STABILIZE)) {
+    if ((pCONT_iEnergy->Energy.phase_count > 1) && (0 == PzemAc.send_retry) && (pCONT_time->uptime.seconds_nonreset < PZEM_AC_STABILIZE)) {
       //pCONT_iEnergy->Energy.phase_count--;  // Decrement phases if no response after retry within 30 seconds after restart
     }
   }

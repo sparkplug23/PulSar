@@ -2,6 +2,11 @@
 
 #ifdef USE_MODULE_CORE_RULES
 
+
+const char* mRuleEngine::PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
+const char* mRuleEngine::PM_MODULE_CORE_RULES_FRIENDLY_CTR = D_MODULE_CORE_RULES_FRIENDLY_CTR;
+
+
 // /* Null, because instance will be initialized on demand. */
 // RuleEngine* RuleEngine::instance = nullptr;
 
@@ -340,7 +345,7 @@ void mRuleEngine::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     // &mqtthandler_scheduled_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CORE_RULES_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CORE_RULES_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
@@ -376,7 +381,7 @@ void mRuleEngine::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // rules[0].trigger.device_id = 0;
 //   // rules[0].trigger.value.data[0] = 2; //switch type toggle
 //   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[0].command.module_id = D_MODULE_DRIVERS_RELAY_ID;
+//   // rules[0].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
 //   // rules[0].command.function_id = FUNC_EVENT_SET_POWER;
 //   // rules[0].command.device_id = 0;
 //   // rules[0].command.value.data[0] = 2; //toggle
@@ -395,7 +400,7 @@ void mRuleEngine::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // rules[1].trigger.device_id = 1; //switch1
 //   // rules[1].trigger.value.data[0] = 2; //switch type toggle
 //   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[1].command.module_id = D_MODULE_DRIVERS_RELAY_ID;
+//   // rules[1].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
 //   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
 //   // rules[1].command.device_id = 1; //relay0
 //   // rules[1].command.value.data[0] = 2; //toggle
@@ -417,7 +422,7 @@ void mRuleEngine::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // rules[1].trigger.index = 1;
 //   // rules[1].trigger.state = 2; //toggle
 //   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[1].command.module_id = D_MODULE_DRIVERS_RELAY_ID;
+//   // rules[1].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
 //   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
 //   // rules[1].command.index = 0;
 //   // rules[1].command.state = 2; //toggle

@@ -319,8 +319,8 @@ void mSwitches::SwitchHandler(uint8_t mode)
         if (switchflag < 3) {
           //update the event
           #ifdef USE_MODULE_CORE_RULES
-          pCONT->mrules->Reset();
-          pCONT->mrules->Add_All(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
+          pCONT_rules->Reset();
+          pCONT_rules->Add_All(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
           #endif // USE_MODULE_CORE_RULES
         }

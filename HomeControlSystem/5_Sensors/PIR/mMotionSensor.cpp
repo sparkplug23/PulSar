@@ -220,7 +220,7 @@ void mMotionSensor::EveryLoop(){
   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
     if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state){
-      //if(pCONT->mt->RtcTime.seconds_nonreset<20){ break; }
+      //if(pCONT_time->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
       pir_detect[sensor_id].state = PIR_Detected(sensor_id);
 
@@ -234,11 +234,11 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
         
         pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNow();
         
-        // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT->mt->RtcTime.hhmmss_ctr,sizeof(pCONT->mt->RtcTime.hhmmss_ctr));
+        // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr));
         pir_detect[sensor_id].isactive = true;
 
         #ifdef USE_MODULE_CORE_RULES
-        pCONT_rules->New_Event(D_MODULE_SENSORS_MOTION_ID, sensor_id);
+        pCONT_rules->New_Event(EM_MODULE_SENSORS_MOTION_ID, sensor_id);
         #endif
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_STARTED_ID);
 
@@ -260,7 +260,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
         }
 
         #ifdef USE_MODULE_CORE_RULES
-        pCONT_rules->New_Event(D_MODULE_SENSORS_MOTION_ID, sensor_id);
+        pCONT_rules->New_Event(EM_MODULE_SENSORS_MOTION_ID, sensor_id);
         #endif
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_ENDED_ID);
 
@@ -370,7 +370,7 @@ uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
       
       pir_detect[sensor_id].ischanged = false;
       
-      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
@@ -444,7 +444,7 @@ void mMotionSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_MOTION_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_MOTION_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

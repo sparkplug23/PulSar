@@ -62,7 +62,6 @@
 #define D_FUNC_LOOP_CTR                                     "LOOP"
 #define D_FUNC_EVERY_50_MSECOND_CTR                         "EVERY_50_MSECOND"
 #define D_FUNC_EVERY_100_MSECOND_CTR                        "EVERY_100_MSECOND"
-#define D_FUNC_EVERY_200_MSECOND_CTR                        "EVERY_200_MSECOND"
 #define D_FUNC_EVERY_250_MSECOND_CTR                        "EVERY_250_MSECOND"
 #define D_FUNC_EVERY_SECOND_CTR                             "EVERY_SECOND"
 #define D_FUNC_EVERY_MINUTE_CTR                             "EVERY_MINUTE" 
@@ -138,7 +137,7 @@
 #define D_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR                  "WEB_APPEND_ROOT_BUTTONS"
 #define D_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR          "WEB_PAGEINFORMATION_SEND_MODULE"
 #define D_FUNC_WEB_COMMAND_CTR                              "WEB_COMMAND"
-#define D_FUNC_CHECK_POINTERS_CTR                           "CHECK_POINTERS"
+// #define D_FUNC_CHECK_POINTERS_CTR                           "CHECK_POINTERS"
 #define D_FUNC_WEB_SYSTEM_INFO_CTR                          "WEB_SYSTEM_INFO"
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
@@ -159,18 +158,19 @@
 #define D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR       "telemetry"
 #define D_MODULE_CORE_TIME_CTR                     "mTime"
 #define D_MODULE_CORE_TIME_FRIENDLY_CTR            "time"
-#define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
-#define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
-#define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
-#define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
 
 #define D_MODULE_CORE_RULES_CTR            "Rules"
 #define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
 
-  #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
-  #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
+#define D_MODULE_CORE_UPDATES_CTR            "Updates"
+#define D_MODULE_CORE_UPDATES_FRIENDLY_CTR   "update"
+
 
   
+#define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
+#define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
+#define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
+#define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
 //#ifdef USE_MODULE_CORE_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
@@ -219,13 +219,19 @@
 
   #define D_MODULE_DRIVERS_CAMERA_OV2640_CTR "Camera"
   #define D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR "camera"
+
+  #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
+  #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
+
+  #define D_MODULE_DRIVERS_FILESYSTEM_CTR "mFileSystem"
+  #define D_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR "filesystem"
   
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
 //#endif
 // Energy (Range 130-139
-//#ifdef USE_MODULE_DRIVERS_ENERGY
+//#ifdef USE_MODULE_ENERGY_INTERFACE
   #define D_INTERFACE_ENERGY_MODULE_CTR              "mEnergy"
   #define D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR     "energy"
 //#endif

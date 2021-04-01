@@ -9,9 +9,9 @@
 // #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 // #include "2_CoreSystem/mSystemConfig.h"
 
-// // #define USE_MODULE_DRIVERS_ENERGY
+// // #define USE_MODULE_ENERGY_INTERFACE
 
-#ifdef USE_MODULE_DRIVERS_ENERGY
+#ifdef USE_MODULE_ENERGY_INTERFACE
 
 // #include "1_TaskerManager/mTaskerManager.h"
 

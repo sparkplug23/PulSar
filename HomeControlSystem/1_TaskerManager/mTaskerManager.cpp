@@ -33,6 +33,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_TIME
   pInterface[EM_MODULE_CORE_TIME_ID] = new mTime();
   #endif 
+  #ifdef USE_MODULE_CORE_RULES
+  pInterface[EM_MODULE_CORE_RULES_ID] = new mRuleEngine();
+  #endif
+  #ifdef USE_MODULE_CORE_UPDATES
+  pInterface[EM_MODULE_CORE_UPDATES_ID] = new mUpdates();
+  #endif
   // Network
   #ifdef USE_MODULE_NETWORK_WIFI
   pInterface[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();
@@ -40,7 +46,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_NETWORK_MQTT
   pInterface[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
   #endif 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   pInterface[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebserver();
   #endif
   // Displays
@@ -52,7 +58,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   // Drivers (Range 40-129)
   #ifdef USE_MODULE_DRIVERS_INTERFACE
-    pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
+    // pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
     pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
@@ -61,7 +67,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pInterface[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID] = new X();
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
-    pInterface[EM_MODULE_DRIVERS_RELAY_ID] = new X();
+    pInterface[EM_MODULE_DRIVERS_RELAY_ID] = new mRelays();
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
     pInterface[EM_MODULE_DRIVERS_PWM_ID] = new X();
@@ -87,9 +93,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_LEDS
     pInterface[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new X();
   #endif
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    pInterface[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
+  #endif
   // Energy
-  #ifdef USE_MODULE_DRIVERS_ENERGY
-    pInterface[EM_MODULE_DRIVERS_ENERGY_ID] = new X();
+  #ifdef USE_MODULE_ENERGY_INTERFACE
+    pInterface[EM_MODULE_ENERGY_INTERFACE_ID] = new X();
   #endif
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -109,7 +118,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_BUTTONS
-    pInterface[EM_MODULE_SENSORS_BUTTONS_ID] = new X();
+    pInterface[EM_MODULE_SENSORS_BUTTONS_ID] = new mButtons();
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
     pInterface[EM_MODULE_SENSORS_SWITCHES_ID] = new X();
@@ -139,7 +148,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pInterface[EM_MODULE_SENSORS_DOOR_ID] = new X();
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
-    pInterface[EM_MODULE_SENSORS_MOTION_ID] = new X();
+    pInterface[EM_MODULE_SENSORS_MOTION_ID] = new mMotionSensor();
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
     pInterface[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID] = new X();
@@ -318,7 +327,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   if(!pCONT_set->flag_boot_complete){
     char buffer_taskname[50];
     if(function != last_function){
-      uint8_t boot_percentage = map(function,0,FUNC_ON_SUCCESSFUL_BOOT,0,100);
+      uint8_t boot_percentage = map(function,0,FUNC_ON_BOOT_COMPLETE,0,100);
       // Optional progress bar using block symbols?
       //5% = 1 bar, 20 bars total [B                   ]
       //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
@@ -337,7 +346,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //}
       last_function = function;
     }
-    if(function == FUNC_ON_SUCCESSFUL_BOOT){ pCONT_set->flag_boot_complete = true; }
+    if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   }//flag_boot_complete
 
   
@@ -539,7 +548,8 @@ int16_t mTaskerManager::GetModuleIDbyFriendlyName(const char* c){
   if(c=='\0'){ return -1; }
 
   for(int ii=0;ii<GetClassCount();ii++){
-    if(strcasecmp_P(c, pInterface[ii]->GetModuleFriendlyName())){
+    if(strcasecmp_P(c, pInterface[ii]->GetModuleFriendlyName())==0){
+      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pInterface[ii]->GetModuleFriendlyName(),ii);
       return ii;//mTasksIDs[ii];
     }    
   }

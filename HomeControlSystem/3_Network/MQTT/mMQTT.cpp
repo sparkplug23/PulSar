@@ -93,12 +93,12 @@ int8_t mMQTT::CheckAndExecute_JSONCommands(){
 void mMQTT::parse_JSONCommand(void){
 
 
-AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand"));
+// AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand"));
 
   // Need to parse on a copy
   char parsing_buffer[data_buffer.payload.len+1];
   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
+  // AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
@@ -162,11 +162,12 @@ AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand"));
     // ppublish(jtok_topic.getStr(),jtok_payload.getStr(),false);
     pubsub->publish(topic_ctr,buffer_escaped,false);
 
-  }else{
-
-    AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand !MQTTSend"));
-  
   }
+  // else{
+
+  //   AddLog_P(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand !MQTTSend"));
+  
+  // }
 
   //Search for json sending
   //{"MQTT"}

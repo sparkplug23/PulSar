@@ -1153,7 +1153,7 @@ void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t 
   mPaletteI->active_scene_palette_id = palette_id;
   active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
   
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
+  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
 }
 
 /******************************************************************************************************************************

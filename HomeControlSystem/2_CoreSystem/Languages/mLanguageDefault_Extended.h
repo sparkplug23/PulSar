@@ -195,7 +195,7 @@
 //   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
 // //#endif
 // // Energy (Range 130-139
-// //#ifdef USE_MODULE_DRIVERS_ENERGY
+// //#ifdef USE_MODULE_ENERGY_INTERFACE
 //   #define D_INTERFACE_ENERGY_MODULE_CTR              "mEnergy"
 //   #define D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR     "energy"
 // //#endif

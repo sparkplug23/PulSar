@@ -147,7 +147,8 @@ void mInterfaceLight::Template_Load(){
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
@@ -206,7 +207,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   //   CommandSet_RGBCT_Linked(ct_rgb_linked);
   // }
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
 
 

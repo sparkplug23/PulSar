@@ -209,7 +209,8 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
   memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR("MODULE_TEMPLATE READ = \"%s\""), buffer);
+  AddLog_P(LOG_LEVEL_DEBUG, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
+  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("Load = \"%s\""), buffer);
   #endif // ENABLE_LOG_LEVEL_INFO
   
   JsonParser parser(buffer);
@@ -275,7 +276,7 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
     
     int8_t  pin_number = -1;
     int16_t gpio_number = -1;
-          AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
+          // AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
 
           // delay(3000); 
 
@@ -345,16 +346,16 @@ uint8_t jsonpair_count = jtok.size();
 
 
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "ENDED"));
+  // AddLog_P(LOG_LEVEL_INFO, PSTR(DEBUG_INSERT_PAGE_BREAK "ENDED"));
   ModuleSettings_FlashSerial();
 
 
-  for(int i=0;i<20;i++){
+  // for(int i=0;i<20;i++){
 
-    Serial.printf("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
+  //   Serial.printf("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
 
 
-  }
+  // }
 
   DEBUG_LINE;
 
@@ -1049,9 +1050,11 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
     mpin = ValidPin(i, pCONT_set->my_module.io[i]);
 
-    // #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    if(mpin){
     AddLog_P(LOG_LEVEL_DEBUG, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
-    // #endif // ENABLE_LOG_LEVEL_INFO
+    }
+    #endif // ENABLE_LOG_LEVEL_DEBUG
 
     if (mpin) {
 
@@ -1071,23 +1074,23 @@ void mHardwarePins::GpioInit(void)
       // #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
       if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
-        pCONT->mbtn->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
+        pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
         mpin -= (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
       }
       else if ((mpin >= GPIO_KEY1_INV_ID) && (mpin < (GPIO_KEY1_INV_ID + MAX_KEYS))) {
-        pCONT->mbtn->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
+        pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
         mpin -= (GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
       }
       else if ((mpin >= GPIO_KEY1_INV_NP_ID) && (mpin < (GPIO_KEY1_INV_NP_ID + MAX_KEYS))) {
-        pCONT->mbtn->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
-        pCONT->mbtn->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+        pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+        pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
         mpin -= (GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
       }else
       #endif
 
       #ifdef USE_MODULE_DRIVERS_RELAY
       if ((mpin >= GPIO_REL1_INV_ID) && (mpin < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
-        bitSet(pCONT->mry->rel_inverted, mpin - GPIO_REL1_INV_ID);
+        bitSet(pCONT_mry->rel_inverted, mpin - GPIO_REL1_INV_ID);
         mpin -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
       }
       #endif
@@ -1230,9 +1233,9 @@ void mHardwarePins::GpioInit(void)
   pCONT_set->devices_present = 0;
   pCONT_set->Settings.light_settings.type = 0;//LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
+  #endif // ENABLE_LOG_LEVEL_INFO
   pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
 
 
@@ -1350,9 +1353,9 @@ void mHardwarePins::GpioInit(void)
   if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
     pCONT_set->devices_present++;
     pCONT_set->Settings.light_settings.type = LT_WS2812;
-    AddLog_P(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }else{
-    AddLog_P(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
+    // AddLog_P(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }
 #endif  // USE_WS2812
 // #ifdef USE_SM16716

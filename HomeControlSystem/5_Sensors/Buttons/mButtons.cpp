@@ -25,6 +25,12 @@
 #ifdef USE_MODULE_SENSORS_BUTTONS
 
 
+const char* mButtons::PM_MODULE_SENSORS_BUTTONS_CTR = D_MODULE_SENSORS_BUTTONS_CTR;
+const char* mButtons::PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR = D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
+
+
+
+
 // /********************************************************************************************/
 
 void mButtons::ButtonPullupFlag(uint8 button_bit)
@@ -87,7 +93,7 @@ uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
 void mButtons::ButtonHandler(void)
 {
   
-  if (pCONT->mt->uptime.seconds_nonreset < 4) { 
+  if (pCONT_time->uptime.seconds_nonreset < 4) { 
     
     
     // Serial.println("ButtonHandler block");
@@ -449,7 +455,7 @@ void mButtons::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_BUTTONS_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_BUTTONS_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id
