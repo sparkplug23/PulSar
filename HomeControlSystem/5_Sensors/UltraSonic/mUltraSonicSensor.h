@@ -13,10 +13,10 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#endif //USE_MODULE_CORE_WEBSERVER
+#endif //USE_MODULE_NETWORK_WEBSERVER
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/averaged";
 

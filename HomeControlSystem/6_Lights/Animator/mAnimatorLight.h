@@ -3,6 +3,8 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#define D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID 141
+
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
@@ -160,6 +162,14 @@ class mAnimatorLight :
     mAnimatorLight(){};
     void pre_init(void);
     void init(void);
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mAnimatorLight);
+    };
+    #endif
+
+
     
     // Put settings at top of class from now on, use it for common settings
     struct SETTINGS{
@@ -961,6 +971,7 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     static const char* PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ANIMATOR_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
 
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
@@ -1265,7 +1276,7 @@ void SetPixelColor_All(RgbcctColor colour);
     uint8_t ConstructJSON_Flasher(uint8_t json_level = 0);
     uint8_t ConstructJSON_Mixer(uint8_t json_level = 0);
 
-  #ifdef USE_MQTT
+  #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();

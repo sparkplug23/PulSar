@@ -13,3 +13,4 @@ struct is_string_type {
 
 template <typename T>
 struct is_string_type<const T> : is_string_type<T> {};
+

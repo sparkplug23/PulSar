@@ -97,7 +97,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -111,7 +111,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
     // Other stuff
     case FUNC_STATUS_MESSAGE_APPEND:
       Append_Hardware_Status_Message();

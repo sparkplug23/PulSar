@@ -573,7 +573,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -587,15 +587,15 @@ Serial.printf("pwm=%d\n\r",pwm_test);
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   } // end switch
   
   /************
    * WEBPAGE SECTION * 
   *******************/
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END function
 
@@ -946,7 +946,7 @@ void mInterfaceLight::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;

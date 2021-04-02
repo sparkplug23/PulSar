@@ -1,24 +1,4 @@
-/*
 
-  mFirmwareDefaults.h - Post header file for Sonoff-Tasmota
-
-  Copyright (C) 2019  Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-//#ifdef ESP8266
 #ifndef _FIRMWARE_DEFAULTS_H_
 #define _FIRMWARE_DEFAULTS_H_ 0.1
 
@@ -70,7 +50,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #define USE_MODULE_CORE_RULES
 
 #define USE_MODULE_NETWORK_WIFI
-#define USE_MODULE_NETWORK_MQTT
+// #define USE_MODULE_NETWORK_MQTT
 
 
 // /*********************************************************************************************\
@@ -357,7 +337,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #undef USE_HOME_ASSISTANT                     // Disable Home Assistant
 // #undef USE_MQTT_TLS                           // Disable TLS support won't work as the MQTTHost is not set
 // #undef USE_KNX                                // Disable KNX IP Protocol Support
-// //#undef USE_MODULE_CORE_WEBSERVER                          // Disable Webserver
+// //#undef USE_MODULE_NETWORK_WEBSERVER                          // Disable Webserver
 // //#undef USE_EMULATION                          // Disable Wemo or Hue emulation
 // #undef USE_CUSTOM                             // Disable Custom features
 // #undef USE_DISCOVERY                          // Disable Discovery services for both MQTT and web server
@@ -423,7 +403,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #undef USE_HOME_ASSISTANT                     // Disable Home Assistant
 // #undef USE_MQTT_TLS                           // Disable TLS support won't work as the MQTTHost is not set
 // #undef USE_KNX                                // Disable KNX IP Protocol Support
-// //#undef USE_MODULE_CORE_WEBSERVER                          // Disable Webserver
+// //#undef USE_MODULE_NETWORK_WEBSERVER                          // Disable Webserver
 // #undef USE_EMULATION                          // Disable Wemo or Hue emulation
 // #undef USE_CUSTOM                             // Disable Custom features
 // #undef USE_DISCOVERY                          // Disable Discovery services for both MQTT and web server

@@ -225,7 +225,7 @@ void AddLog_P(
 
   // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
   // LOG : WEBSERVER
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
     if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
       // Delimited, zero-terminated buffer of log lines.
@@ -248,7 +248,7 @@ void AddLog_P(
     
     }
   }
-  #endif  // USE_MODULE_CORE_WEBSERVER
+  #endif  // USE_MODULE_NETWORK_WEBSERVER
   
   // SERIAL_DEBUG.printf("%s %d\r\n","end",millis());
 
@@ -440,7 +440,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     }
 
   // LOG : WEBSERVER
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
     // Delimited, zero-terminated buffer of log lines.
     // Each entry has this format: [index][log data]['\1']
@@ -468,7 +468,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   // SERIAL_DEBUG.printf("END WEBLOG");
 
   }
-  #endif  // USE_MODULE_CORE_WEBSERVER
+  #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 }
 
@@ -574,7 +574,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
   *entry_pp = entry_p;
   *len_p = len;
 }
-//#endif  // USE_MODULE_CORE_WEBSERVER
+//#endif  // USE_MODULE_NETWORK_WEBSERVER
 
 void mLogging::Syslog(void)
 {
@@ -610,7 +610,7 @@ void mLogging::AddLogAddLog(uint8_t loglevel)
 //   if (loglevel <= seriallog_level) {
 //     SERIAL_DEBUG.printf("%s%s\r\n", mxtime, log_data);
 //   }
-// #ifdef USE_MODULE_CORE_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 //   if (Settings.webserver && (loglevel <= Settings.weblog_level)) {
 //     // Delimited, zero-terminated buffer of log lines.
 //     // Each entry has this format: [index][log data]['\1']
@@ -627,7 +627,7 @@ void mLogging::AddLogAddLog(uint8_t loglevel)
 //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%s\1"), web_log, web_log_index++, mxtime, log_data);
 //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
 //   }
-// #endif  // USE_MODULE_CORE_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 //   if (!global_state.wifi_down && (loglevel <= syslog_level)) { Syslog(); }
 }
 
@@ -698,8 +698,10 @@ if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
   //Share on serial/telnet
   // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
   //Send via mqtt
+  #ifdef USE_MODULE_NETWORK_MQTT
   pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
-
+  #endif
+  
   return 0;// len;
 }
 

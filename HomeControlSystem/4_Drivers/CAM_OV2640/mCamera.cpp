@@ -1927,7 +1927,7 @@ AddLog_P(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -1941,7 +1941,7 @@ AddLog_P(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
 
   }
   
@@ -1954,9 +1954,9 @@ AddLog_P(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
    * WEBPAGE SECTION * 
   *******************/
   
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
 

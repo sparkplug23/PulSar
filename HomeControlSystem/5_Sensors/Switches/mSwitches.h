@@ -122,11 +122,11 @@ class mSwitches :
     
 Ticker* TickerSwitch = nullptr;
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebAppend_Root_Draw_Table();
     void WebAppend_Root_Status_Table();
 
-    #endif// USE_MODULE_CORE_WEBSERVER
+    #endif// USE_MODULE_NETWORK_WEBSERVER
 
     uint32_t tSavedSwitchProbe = millis();
     uint32_t switch_debounce = 0;          // Switch debounce timer

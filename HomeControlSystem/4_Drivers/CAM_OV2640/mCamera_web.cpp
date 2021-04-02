@@ -1,7 +1,7 @@
 #include "mCamera.h"
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 
@@ -2254,4 +2254,4 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 
 
 #endif // USE_MODULE_DRIVERS_CAMERA_OV2640
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER

@@ -1,6 +1,8 @@
 #ifndef _MDOORSENSOR_H
 #define _MDOORSENSOR_H 0.2
 
+#define D_UNIQUE_MODULE_SENSORS_DOOR_ID 130
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_DOOR
@@ -21,6 +23,18 @@ class mDoorSensor :
 
     void init(void);
     void pre_init(void);
+    
+    static const char* PM_MODULE_SENSORS_DOOR_CTR;
+    static const char* PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DOOR_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DOOR_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mDoorSensor);
+    };
+    #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

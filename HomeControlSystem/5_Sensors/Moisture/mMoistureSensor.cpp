@@ -46,7 +46,7 @@ void mMoistureSensor::Tasker(uint8_t function){
 
 } // END function
 
-#ifdef USE_MQTT
+#ifdef USE_MODULE_NETWORK_MQTT
 
 // NEW METHOD -- first senders then on internals
 void mMoistureSensor::SubTasker_MQTTSender(){

@@ -1,6 +1,8 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H 0.4
 
+#define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
+
 #include "2_CoreSystem/mBaseConfig.h"
 
 // #define ENABLE_WIFI_DEVELOPMENT
@@ -59,6 +61,11 @@ class mWiFi :
     mWiFi(){};
     
     #define D_MAX_SSIDS 3
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mWiFi);
+    };
+    #endif
     
     void WifiConnectAP(uint8_t ap_index);
 
@@ -70,6 +77,7 @@ class mWiFi :
     static const char* PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WIFI_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WIFI_ID; }
 
 
     int8_t GetRSSdBm();
@@ -111,9 +119,16 @@ class mWiFi :
     }connection;
 
 
+void StartMdns(void);
+void MqttDiscoverServer(void);
+void MdnsAddServiceHttp(void);
+void MdnsUpdate(void);
+// uint8_t mdns_begun = 0;             // mDNS active
 
+struct {
+  uint8_t begun = 0;                  // mDNS active
+} Mdns;
 
-    uint8_t mdns_begun = 0;             // mDNS active
     uint8_t wps_result;
 
 

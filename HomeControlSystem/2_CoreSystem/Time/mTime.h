@@ -3,7 +3,7 @@
   
 #include <Arduino.h>
 
-
+#define D_UNIQUE_MODULE_CORE_TIME_ID 5
 
 
 typedef struct datetime{
@@ -135,6 +135,13 @@ class mTime :
     static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mTime);
+    };
+    #endif
 
 
     uint32_t uptime_seconds_nonreset = 0; //test new uptime with comparison of breaktime

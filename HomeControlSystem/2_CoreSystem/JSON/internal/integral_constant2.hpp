@@ -3,7 +3,9 @@
 #pragma once
 
 // #include <ArduinoJson/Namespace.hpp>
-#include "2_CoreSystem/JSON/namespace.hpp"
+// #include "2_CoreSystem/JSON/namespace.hpp"
+
+#include <Arduino.h>
 
 //namespace ARDUINOJSON_NAMESPACE2 {
 

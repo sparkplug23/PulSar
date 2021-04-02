@@ -908,7 +908,7 @@
 
 
 
-// #ifdef USE_MQTT
+// #ifdef USE_MODULE_NETWORK_MQTT
 
 // // schedule.run_time:hh:mm
 // // schedule.run_days:M-W-FSS
@@ -1796,9 +1796,9 @@
 //    * WEBPAGE SECTION * 
 //   *******************/
   
-//   #ifdef USE_MODULE_CORE_WEBSERVER
+//   #ifdef USE_MODULE_NETWORK_WEBSERVER
 //   return Tasker_Web(function);
-//   #endif // USE_MODULE_CORE_WEBSERVER
+//   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 // } // END Tasker
 

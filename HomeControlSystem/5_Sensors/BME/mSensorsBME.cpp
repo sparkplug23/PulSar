@@ -3,6 +3,10 @@
 #ifdef USE_MODULE_SENSORS_BME
 
 
+const char* mSensorsBME::PM_MODULE_SENSORS_BME_CTR = D_MODULE_SENSORS_BME_CTR;
+const char* mSensorsBME::PM_MODULE_SENSORS_BME_FRIENDLY_CTR = D_MODULE_SENSORS_BME_FRIENDLY_CTR;
+
+
 int8_t mSensorsBME::Tasker(uint8_t function){
 
   int8_t function_result = 0;
@@ -58,18 +62,18 @@ int8_t mSensorsBME::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
       break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
       break;
-    #endif //USE_MODULE_CORE_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -80,7 +84,7 @@ int8_t mSensorsBME::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   }
 
   return function_result;
@@ -151,7 +155,7 @@ void mSensorsBME::EveryLoop(){
 }
 
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mSensorsBME::WebAppend_Root_Status_Table_Draw(){
 
   char value_ctr[8];
@@ -237,7 +241,7 @@ void mSensorsBME::WebAppend_Root_Status_Table_Data(){
   JsonBuilderI->Array_End();
 
 }
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 // New function that breaks things up into switch statements
@@ -331,7 +335,7 @@ uint8_t mSensorsBME::ConstructJSON_Sensor(uint8_t json_level){
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
@@ -423,7 +427,7 @@ void mSensorsBME::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_BME_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_BME_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

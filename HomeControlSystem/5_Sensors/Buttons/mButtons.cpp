@@ -1,22 +1,3 @@
-/*
-  support.ino - support for Sonoff-Tasmota
-
-  Copyright (C) 2019  Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-//#ifdef ESP8266
 
 #include "mButtons.h"
 
@@ -269,7 +250,7 @@ int8_t mButtons::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -283,11 +264,11 @@ int8_t mButtons::Tasker(uint8_t function){
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WEB SECTION * 
     *******************/
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break; 
@@ -295,14 +276,14 @@ int8_t mButtons::Tasker(uint8_t function){
       WebAppend_Root_Status_Table();
     break; 
     
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
   }
 
 }
 
 
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 void mButtons::WebAppend_Root_Draw_Table(){
 
@@ -333,7 +314,7 @@ void mButtons::WebAppend_Root_Status_Table(){
   
 }
 
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 bool mButtons::IsButtonActive(uint8_t id){
 // Needs to know what type the button is, low, high, no pullup etc

@@ -171,7 +171,7 @@
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
-//#ifdef USE_MODULE_CORE_WEBSERVER
+//#ifdef USE_MODULE_NETWORK_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
 //#endif

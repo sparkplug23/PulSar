@@ -1,21 +1,3 @@
-// /*
-//   xdrv_09_timers.ino - timer support for Sonoff-Tasmota
-
-//   Copyright (C) 2019  Theo Arends
-
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// */
 
 // #ifdef ESP8266
 // #ifdef USE_TIMERS
@@ -527,7 +509,7 @@
 //  * Presentation
 // \*********************************************************************************************/
 
-// #ifdef USE_MODULE_CORE_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_TIMERS_WEB
 
 // #define WEB_HANDLE_TIMER "tm"
@@ -769,7 +751,7 @@
 //   AddLogAddLog(LOG_LEVEL_DEBUG);
 // }
 // #endif  // USE_TIMERS_WEB
-// #endif  // USE_MODULE_CORE_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 // /*********************************************************************************************\
 //  * Interface
@@ -784,7 +766,7 @@
 //     case FUNC_PRE_INIT:
 //       TimerSetRandomWindows();
 //       break;
-// #ifdef USE_MODULE_CORE_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 // #ifdef USE_TIMERS_WEB
 //     case FUNC_WEB_ADD_BUTTON:
 // #ifdef USE_RULES
@@ -797,7 +779,7 @@
 //       WebServer->on("/" WEB_HANDLE_TIMER, HandleTimerConfiguration);
 //       break;
 // #endif  // USE_TIMERS_WEB
-// #endif  // USE_MODULE_CORE_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
 //     case FUNC_EVERY_SECOND://Serial.println("Xdrv09 - FUNC_EVERY_SECOND");
 //       TimerEverySecond();
 //       break;

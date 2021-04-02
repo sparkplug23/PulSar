@@ -41,7 +41,7 @@ int8_t mSwitches::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); 
@@ -55,18 +55,18 @@ int8_t mSwitches::Tasker(uint8_t function){
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
       WebAppend_Root_Draw_Table();
     break; 
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break; 
-    #endif //USE_MODULE_CORE_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER
 
   }
 
@@ -346,7 +346,7 @@ void mSwitches::SwitchLoop(void)
 }
 
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mSwitches::WebAppend_Root_Draw_Table(){
 
   const char kTitle_TableTitles_Root[] = 
@@ -385,7 +385,7 @@ void mSwitches::WebAppend_Root_Status_Table(){
   JsonBuilderI->Array_End();
   
 }
-    #endif// USE_MODULE_CORE_WEBSERVER
+    #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
 bool mSwitches::IsSwitchActive(uint8_t id){
@@ -487,7 +487,7 @@ void mSwitches::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//60; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;

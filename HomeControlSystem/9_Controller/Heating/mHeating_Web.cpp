@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 int8_t mHeating::Tasker_Web(uint8_t function){
 
@@ -424,7 +424,7 @@ void mHeating::WebPage_Root_AddHandlers(){
 
 // }
 
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif

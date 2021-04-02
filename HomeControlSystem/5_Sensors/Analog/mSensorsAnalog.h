@@ -34,11 +34,11 @@ class mSensorsAnalog :
     // pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
     
     
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
     void WebSend_JSON_Root_Table(AsyncWebServerRequest *request);
-    #endif// USE_MODULE_CORE_WEBSERVER
+    #endif// USE_MODULE_NETWORK_WEBSERVER
 
     uint8_t PIR_Detected(uint8_t sensor_id);
     const char* PIR_Detected_Ctr(uint8_t sensor_id);

@@ -1,6 +1,8 @@
 #ifndef _MSTREAMOUT_H
 #define _MSTREAMOUT_H 0.5
 
+#define D_UNIQUE_MODULE_CORE_LOGGING_ID 3
+
 #include <Arduino.h>
 #ifdef ESP32
   #include <WiFi.h> //esp32
@@ -8,6 +10,8 @@
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
 #endif
+
+#include "1_TaskerManager/mTaskerManager.h"
 
 #include <Arduino.h>
 #include <stdint.h>
@@ -269,10 +273,17 @@ public:
     void init(void);
     int8_t Tasker(uint8_t function);
 
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mLogging);
+    };
+    #endif
+
     static const char* PM_MODULE_CORE_LOGGING_CTR;
     static const char* PM_MODULE_CORE_LOGGING_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
 
     // template<typename T>
     // void Debug_Printf(T format, )

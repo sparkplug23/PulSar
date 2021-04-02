@@ -1,7 +1,7 @@
 #include "mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
@@ -88,13 +88,13 @@ void mAnimatorLight::WebAppend_Root_Status_Table(){
         case 2:
           JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
             pCONT_iLight->animation.transition.rate_ms/1000, 
-            pCONT_iLight->animation.transition.time_ms.val/1000
+            pCONT_iLight->animation.transition.time_ms/1000
           );
         break;
         case 3: 
           JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
-            pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val, 
-            pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val)
+            pCONT_iLight->animation.transition.pixels_to_update_as_number, 
+            pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_number)
           );
         break;
         case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
@@ -2253,4 +2253,4 @@ void mAnimatorLight::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServer
 
 
 #endif
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER

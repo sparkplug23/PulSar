@@ -1,6 +1,8 @@
 #ifndef mAddressableLight2_H
 #define mAddressableLight2_H 0.1
 
+#define D_UNIQUE_MODULE_LIGHTS_ADDRESSABLE_ID 142
+
 // Functions in here will be identical between hardware types, with get, set, configs that init the interface and animator level depending on the hardware type
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -23,6 +25,13 @@ class mAddressableLight :
     static const char* PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ADDRESSABLE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ADDRESSABLE_ID; }
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mAddressableLight);
+    };
+    #endif
+
 
     void LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10);
 
@@ -54,13 +63,13 @@ class mAddressableLight :
     void LightSetPWMOutputsRgbcctColor(RgbcctColor colour);
 
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
       void WebCommand_Parse();
       int8_t Tasker_Web(uint8_t function);
       void WebAppend_JSON_RootPage_LiveviewPixels();
       void WebAppend_Root_ControlUI();
       void WebAppend_Root_Status_Table();
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 };
 #endif

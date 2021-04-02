@@ -64,7 +64,7 @@ int8_t mStatusLEDs::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -78,7 +78,7 @@ int8_t mStatusLEDs::Tasker(uint8_t function){
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT    
+    #endif //USE_MODULE_NETWORK_MQTT    
   }
 
 } // END function
@@ -498,9 +498,9 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //  * WEBPAGE SECTION * 
 //   // *******************/
   
-//   // #ifdef USE_MODULE_CORE_WEBSERVER
+//   // #ifdef USE_MODULE_NETWORK_WEBSERVER
 //   // return Tasker_Web(function);
-//   // #endif // USE_MODULE_CORE_WEBSERVER
+//   // #endif // USE_MODULE_NETWORK_WEBSERVER
 
 // } // END Tasker
 

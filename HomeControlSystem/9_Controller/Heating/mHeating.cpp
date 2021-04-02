@@ -860,7 +860,7 @@ void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 
 
 
-#ifdef USE_MQTT
+#ifdef USE_MODULE_NETWORK_MQTT
 
 // schedule.run_time:hh:mm
 // schedule.run_days:M-W-FSS
@@ -1778,9 +1778,9 @@ int8_t mHeating::Tasker(uint8_t function){
    * WEBPAGE SECTION * 
   *******************/
   
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
 

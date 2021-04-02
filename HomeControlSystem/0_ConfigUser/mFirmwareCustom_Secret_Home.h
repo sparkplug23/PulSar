@@ -10,7 +10,7 @@
 // #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
-// #define FORCE_TEMPLATE_LOADING
+#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -521,7 +521,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
     
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   
@@ -722,7 +722,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
 
   #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
+  #define SETTINGS_HOLDER 2
      
   #define USE_MODULE_SENSORS_MOTION
 
@@ -753,12 +753,12 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-        "]"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -925,7 +925,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_DOOR
       DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
       #endif
-      DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LEDLNK_CTR)
+      DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LED1_CTR)
     "},"
     DEFINE_END_SVALUE("BASE",D_MODULE_NAME_USERMODULE_CTR)
   "}";
@@ -934,7 +934,6 @@ Bathroom
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Utility"
   #define D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "SideDoor"
   
-  // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"

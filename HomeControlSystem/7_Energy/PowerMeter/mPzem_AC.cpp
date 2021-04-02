@@ -215,7 +215,7 @@ int8_t mPzem_AC::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -226,7 +226,7 @@ int8_t mPzem_AC::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   }
   
   return function_result;

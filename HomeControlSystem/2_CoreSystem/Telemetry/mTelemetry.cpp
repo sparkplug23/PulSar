@@ -15,15 +15,15 @@ int8_t mTelemetry::Tasker(uint8_t function){
       Init();
     break;
     
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-    #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
+    #endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -34,13 +34,13 @@ int8_t mTelemetry::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   }
 
 }
 
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void mTelemetry::WebPage_Root_AddHandlers(){
 
   /**
@@ -105,12 +105,12 @@ void mTelemetry::WebPage_Root_AddHandlers(){
   });*/
 
 }
-#endif //  #ifdef USE_MODULE_CORE_WEBSERVER
+#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 
 
-#ifdef USE_MODULE_NETWORKS_MQTT
+#ifdef USE_MODULE_NETWORK_MQTT
 
 
 
@@ -369,14 +369,7 @@ void mTelemetry::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 }
 
-
-
-
-
-
-
-
-#endif // USE_MODULE_NETWORKS_MQTT
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 

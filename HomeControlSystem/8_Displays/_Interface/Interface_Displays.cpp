@@ -268,7 +268,7 @@
 //       // mcl->mweb->WSBufferAppend_P(PSTR("}1}2&nbsp;"));  // Empty line
 
 //     break;
-//     #ifdef USE_MODULE_NETWORKS_MQTT
+//     #ifdef USE_MODULE_NETWORK_MQTT
 //     case FUNC_MQTT_HANDLERS_INIT:
 //       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
 //     break;

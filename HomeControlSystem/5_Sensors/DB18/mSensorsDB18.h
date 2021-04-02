@@ -58,10 +58,10 @@ class mSensorsDB18 :
     // Predefines by device
     #define SPLASH_ADDRESS_ON_INIT
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebAppend_Root_Status_Table_Draw();
     void WebAppend_Root_Status_Table_Data();
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
     // #ifdef DEVICE_MYBEDROOM

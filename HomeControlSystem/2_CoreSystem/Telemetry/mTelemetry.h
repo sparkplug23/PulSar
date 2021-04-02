@@ -1,28 +1,9 @@
 
-// KEEP - useful
-
-//   sonoff.h - Master header file for Sonoff-Tasmota
-
-//   Copyright (C) 2019  Theo Arends
-
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 //#ifdef ESP8266
 #ifndef _MTELEMETRY_H_
 #define _MTELEMETRY_H_
 
+#define D_UNIQUE_MODULE_CORE_TELEMETRY_ID 4
 
 #include "2_CoreSystem/mBaseConfig.h"
 
@@ -95,12 +76,18 @@ class mTelemetry :
 
     
 
-static const char* PM_MODULE_CORE_TELEMETRY_CTR;
-static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
-PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
-PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
+    static const char* PM_MODULE_CORE_TELEMETRY_CTR;
+    static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
+    PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
+    PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
 
 
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mTelemetry);
+    };
+    #endif
 
     uint8_t ConstructJSON_Health(uint8_t json_level);
     uint8_t ConstructJSON_Settings(uint8_t json_level);
@@ -119,7 +106,7 @@ PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
     #endif
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
@@ -134,7 +121,7 @@ PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
     void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
-    #endif // #ifdef USE_MODULE_CORE_WEBSERVER
+    #endif // #ifdef USE_MODULE_NETWORK_WEBSERVER
     
     #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
     #define HARDWARE_STATUS_MAX_LENGTH 200

@@ -1,9 +1,15 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
 
 #include "mWebServer.h"
+
+
+const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
+const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR;
+
 
 uint8_t webserver_state = HTTP_OFF;
 

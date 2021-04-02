@@ -95,7 +95,7 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -106,7 +106,7 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   }
 
 } // END function
@@ -162,7 +162,7 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
 
 
 
-// #ifdef USE_MQTT
+// #ifdef USE_MODULE_NETWORK_MQTT
 
 /*********************************************************************************************************************************************
 ******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
@@ -221,7 +221,7 @@ void mSensorsAnalog::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;

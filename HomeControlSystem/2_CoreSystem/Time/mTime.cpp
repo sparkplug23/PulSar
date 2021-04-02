@@ -87,6 +87,7 @@ int8_t mTime::Tasker(uint8_t function){
     case FUNC_EVERY_MIDNIGHT:
     
     break;
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_SENDER:
       //SubTasker_MQTTSender();
     break;
@@ -100,6 +101,7 @@ int8_t mTime::Tasker(uint8_t function){
       pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
     }
     break;
+    #endif // USE_MODULE_NETWORK_MQTT
   }
 
 }//end
@@ -1168,27 +1170,6 @@ const char* mTime::GetDOWShortctr(uint8_t Wday, char* buffer){
 }
 
 
-
-// #ifdef ENABLE_DEVFEATURE_RTC_TIME_V2
-
-/*
-  support_rtc.ino - Real Time Clock support for Tasmota
-
-  Copyright (C) 2020  Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 /*********************************************************************************************\
  * Sources: Time by Michael Margolis and Paul Stoffregen (https://github.com/PaulStoffregen/Time)

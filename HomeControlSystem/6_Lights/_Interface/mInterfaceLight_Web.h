@@ -3,7 +3,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 #ifdef ESP32
@@ -38,7 +38,7 @@ void Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request);
 
 void WebAppend_Root_RGBPalette();
 
-#endif //   #ifdef USE_MODULE_CORE_WEBSERVER
+#endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #endif
 #endif

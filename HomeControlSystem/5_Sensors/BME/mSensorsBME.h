@@ -1,6 +1,8 @@
 #ifndef MSENSORSBME_H
 #define MSENSORSBME_H 0.2
 
+#define D_UNIQUE_MODULE_SENSORS_BME_ID 143
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_BME
@@ -25,6 +27,20 @@ class mSensorsBME :
     void Pre_Init(void);
     void init(void);
     int8_t Tasker(uint8_t function);
+    
+    static const char* PM_MODULE_SENSORS_BME_CTR;
+    static const char* PM_MODULE_SENSORS_BME_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BME_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_BME_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BME_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSensorsBME);
+    };
+    #endif
+
+
 
     float sealevel_pressure; 
 

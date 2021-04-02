@@ -2,6 +2,8 @@
 #ifndef _MSUPPORT_H_
 #define _MSUPPORT_H_
 
+#define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2
+
 
 //using class, to save known sun position, maybe in support? azimuth, elevation, isvalid, age
 
@@ -319,6 +321,13 @@ class mSupport :
     static const char* PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSupport);
+    };
+    #endif
 
           void CheckResetConditions();
           void Handle_OTA_URLS();

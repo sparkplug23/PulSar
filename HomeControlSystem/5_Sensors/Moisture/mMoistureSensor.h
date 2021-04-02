@@ -47,7 +47,7 @@ class mMoistureSensor :
     uint32_t tSavedMeasure = 0;
     uint8_t rateMeasure = 10;
 
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
       void MQTTSendMoistureSensorIfChanged();
       void SubTasker_MQTTSender();
       void AddToJsonObject_AddHardware(JsonObject root);

@@ -1,6 +1,8 @@
 #ifndef _MRELAYS_H
 #define _MRELAYS_H 0.1
 
+#define D_UNIQUE_MODULE_DRIVERS_RELAY_ID 45
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_RELAY
@@ -30,6 +32,7 @@ class mRelays :
     static const char* PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RELAY_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RELAY_ID; }
 
     
     typedef union {

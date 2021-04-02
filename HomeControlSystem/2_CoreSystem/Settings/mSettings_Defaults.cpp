@@ -187,6 +187,7 @@ void mSettings::SystemSettings_DefaultBody_MQTT(){
 
 void mSettings::SystemSettings_DefaultBody_TelePeriods(){
 
+//make mqtt commands to allow me to tweak and debug 
   Settings.sensors.ifchanged_secs = 10;
   Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
   Settings.sensors.teleperiod_secs = 120;
@@ -517,11 +518,14 @@ DEBUG_LINE;
   devices_present = 6; 
   //global_state.data = 3;  // Init global state (wifi_down, mqtt_down) to solve possible network issues
   // baudrate = Settings.baudrate * 1200;
-  #ifdef USE_NETWORK_MDNS
-  Settings.flag_network.mdns_enabled = USE_NETWORK_MDNS;
-  mdns_delayed_start = 60;//Settings.param[P_MDNS_DELAYED_START];
 
+
+  #ifdef USE_NETWORK_MDNS
+  Settings.flag_network.mdns_enabled = 1;//USE_NETWORK_MDNS;
+  mdns_delayed_start = 60;//Settings.param[P_MDNS_DELAYED_START];
   #endif // #ifdef USE_NETWORK_MDNS
+
+
   // seriallog_level = Settings.seriallog_level;
   // seriallog_timer = SERIALLOG_TIMER;
   // syslog_level = Settings.syslog_level;
@@ -590,10 +594,10 @@ void mSettings::SettingsResetDst(void)
 // void mSettings::SettingsDefaultWebColor(void)
 // {
   
-//   #ifdef USE_MODULE_CORE_WEBSERVER
+//   #ifdef USE_MODULE_NETWORK_WEBSERVER
 //   char scolor[10];
 //   for (uint8_t i = 0; i < COL_LAST; i++) {
 //     pCONT_web->WebHexCode(i, pCONT_sup->GetTextIndexed_P(scolor, sizeof(scolor), i, kWebColors));
 //   }
-//   #endif //  #ifdef USE_MODULE_CORE_WEBSERVER
+//   #endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
 // }

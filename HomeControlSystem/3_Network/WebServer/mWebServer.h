@@ -1,9 +1,11 @@
 #ifndef _MWEBSERVER_H
 #define _MWEBSERVER_H 0.3
 
+#define D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID 22
+
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #ifdef DEBUG_WEBSERVER_MEMORY
 typedef struct  FREEMEM_HANDLER{
@@ -1297,14 +1299,33 @@ enum HttpOptions {HTTP_OFF, HTTP_USER, HTTP_ADMIN, HTTP_MANAGER, HTTP_MANAGER_RE
 
 
 
+//  :
+//   public mTaskerInterface
+// {
+
+#include "1_TaskerManager/mTaskerInterface.h"
 
 
 
-
-
-class mWebServer : public AsyncWebHandler{
+class mWebServer : 
+public AsyncWebHandler, 
+public mTaskerInterface{
   public:
     mWebServer(){};
+    
+    static const char* PM_MODULE_NETWORK_WEBSERVER_CTR;
+    static const char* PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WEBSERVER_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mWebServer);
+    };
+    #endif
+
+
     
     int8_t Tasker(uint8_t function);
     void init(void);

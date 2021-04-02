@@ -1,6 +1,8 @@
 #ifndef _MMOTIONSENSOR_H
 #define _MMOTIONSENSOR_H 1.0
 
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID 131
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_MOTION
@@ -39,6 +41,7 @@ class mMotionSensor :
     static const char* PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
 
 
     enum MOTION_TRIGGER_TYPE_IDS{

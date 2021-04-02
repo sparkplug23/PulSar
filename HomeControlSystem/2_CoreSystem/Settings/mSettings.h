@@ -1,6 +1,8 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
+#define D_UNIQUE_MODULE_CORE_SETTINGS_ID 1
+
 #include "2_CoreSystem/mBaseConfig.h"
 
 /*
@@ -17,11 +19,14 @@ return potato;
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
 #else
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1200
-#endif //USE_MODULE_CORE_WEBSERVER
+#endif //USE_MODULE_NETWORK_WEBSERVER
+
+#define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
+
 
 enum DATA_BUFFER_FLAG_SOURCE_IDS{
   DATA_BUFFER_FLAG_SOURCE_MQTT=0,
@@ -116,7 +121,12 @@ typedef union {
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
-  #include "avr/pgmspace.h"
+  // #include "avr/pgmspace.h"
+  #if (defined(__AVR__))
+  #include <avr\pgmspace.h>
+  #else
+  #include <pgmspace.h>
+  #endif
 #endif
 
 #include "2_CoreSystem/Time/mTime.h"
@@ -779,6 +789,13 @@ class mSettings :
     static const char* PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSettings);
+    };
+    #endif
 
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
     const char* GetTaskName(uint8_t task, char* buffer);
@@ -834,7 +851,7 @@ class mSettings :
 //   // From libraries/EEPROM/EEPROM.cpp EEPROMClass
 //   const uint32_t SPIFFS_END = ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
 
-// #else  // Core > 2.5.2 and STAGE
+// #else  //Core > 2.5.2 and STAGE
 
 //   #if AUTOFLASHSIZE
 

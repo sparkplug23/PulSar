@@ -212,11 +212,11 @@ class mHeating{
     }heating_status[4];
 
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
     void Web_Root_Draw(AsyncWebServerRequest *request);
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
     uint8_t time_map_timers_upstairs[4];// = {0, 60, 90, 120};

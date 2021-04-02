@@ -1,6 +1,8 @@
 #ifndef _USE_MODULE_DRIVERS_FILESYSTEM_H
 #define _USE_MODULE_DRIVERS_FILESYSTEM_H 0.3
 
+#define D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID 53
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
@@ -64,6 +66,7 @@ class mFileSystem :
     static const char* PM_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR;
     PGM_P GetModuleName(){         return PM_MODULE_DRIVERS_FILESYSTEM_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID; }
 
     
 void UfsInitOnce(void);

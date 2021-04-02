@@ -5,7 +5,8 @@
 
 #include <stdint.h>
 
-#include "2_CoreSystem/JSON/internal/namespace.hpp"
+#include <Arduino.h>
+// #include "2_CoreSystem/JSON/internal/namespace.hpp"
 
 #include "2_CoreSystem/JSON/internal/is_char_type.hpp"
 #include "2_CoreSystem/JSON/internal/is_string_type.hpp"

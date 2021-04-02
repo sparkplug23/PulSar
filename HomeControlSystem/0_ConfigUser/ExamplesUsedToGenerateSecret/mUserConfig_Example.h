@@ -69,7 +69,7 @@
 #define WIFI_CONFIG_NO_SSID    WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
                                                  //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
                                                  //   *** NOTE: When WPS is disabled by USE_WPS below, WIFI_WPSCONFIG will execute WIFI_MANAGER ***
-                                                 //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_CORE_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
+                                                 //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_NETWORK_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
                                                  //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
 
 // -- Syslog --------------------------------------
@@ -104,8 +104,7 @@
 #define USE_MQTT_RETAINED_VERSION_HISTORY_CHECK
 
 //#define SEND_TEMPLATES_OVER_MQTT
-#define USE_MODULE_NETWORKS_MQTT
-#define USE_MQTT
+#define USE_MODULE_NETWORK_MQTT
 #define MQTT_HOST              "192.168.1.65"    // [MqttHost]
 #define MQTT_FINGERPRINT1      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint1]
 #define MQTT_FINGERPRINT2      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint2]
@@ -118,10 +117,10 @@
 #define MQTT_SWITCH_RETAIN     0                 // [SwitchRetain] Switch may send retain flag (0 = off, 1 = on)
 #define MQTT_BUTTON_SWITCH_FORCE_LOCAL     0     // [SetOption61] Force local operation when button/switch topic is set (0 = off, 1 = on)
 
-#define MQTT_STATUS_OFF        "OFF"             // [StateText1] Command or Status result when turned off (needs to be a string like "0" or "Off")
-#define MQTT_STATUS_ON         "ON"              // [StateText2] Command or Status result when turned on (needs to be a string like "1" or "On")
-#define MQTT_CMND_TOGGLE       "TOGGLE"          // [StateText3] Command to send when toggling (needs to be a string like "2" or "Toggle")
-#define MQTT_CMND_HOLD         "HOLD"            // [StateText4] Command to send when button is kept down for over KEY_HOLD_TIME * 0.1 seconds (needs to be a string like "HOLD")
+// #define MQTT_STATUS_OFF        "OFF"             // [StateText1] Command or Status result when turned off (needs to be a string like "0" or "Off")
+// #define MQTT_STATUS_ON         "ON"              // [StateText2] Command or Status result when turned on (needs to be a string like "1" or "On")
+// #define MQTT_CMND_TOGGLE       "TOGGLE"          // [StateText3] Command to send when toggling (needs to be a string like "2" or "Toggle")
+// #define MQTT_CMND_HOLD         "HOLD"            // [StateText4] Command to send when button is kept down for over KEY_HOLD_TIME * 0.1 seconds (needs to be a string like "HOLD")
 
 // -- MQTT topics ---------------------------------
 #define MQTT_FULLTOPIC         "%topic%/%prefix%/" // [FullTopic] Subscribe and Publish full topic name - Legacy topic
@@ -290,7 +289,7 @@
 
 // -- HTTP ----------------------------------------
 #ifndef DISABLE_WEBSERVER
-  #define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
+  #define USE_MODULE_NETWORK_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
   #define WEB_PORT             80                // Web server Port for User and Admin mode
   #define WEB_USERNAME         "admin"           // Web server Admin mode user name
 #endif

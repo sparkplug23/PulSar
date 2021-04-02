@@ -1,6 +1,8 @@
 #ifndef MPWMLIGHT_H
 #define MPWMLIGHT_H 0.1
 
+#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 46
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_PWM
@@ -26,6 +28,12 @@ class mPWMLight :
     static const char* PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_PWM_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_PWM_ID; }
+     #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mPWMLight);
+    };
+    #endif
 
     void SetPixelColorHardware(uint16_t index, RgbcctColor colour_hardware);
     RgbcctColor GetPixelColorHardware(uint16_t index);

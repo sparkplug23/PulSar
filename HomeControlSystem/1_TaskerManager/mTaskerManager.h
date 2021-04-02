@@ -87,7 +87,7 @@ enum FUNCTION_RESULT_IDS{
 // Libraries
 #include <StreamString.h>                   // Webserver, Updater
 
-#define NO_GLOBAL_MDNS
+// #define NO_GLOBAL_MDNS
 #ifdef USE_ARDUINO_OTA
   #include <ArduinoOTA.h>                   // Arduino OTA
 #endif  // USE_ARDUINO_OTA
@@ -119,14 +119,19 @@ enum FUNCTION_RESULT_IDS{
   // #ifdef USE_NETWORK_MDNS
   // // #include <ESP8266mDNS.h>
   // #endif // #ifdef USE_NETWORK_MDNS
+  
+#ifdef USE_DISCOVERY
+  #include <ESP8266mDNS.h>                  // MQTT, Webserver, Arduino OTA
+#endif  // USE_DISCOVERY
+
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
   #define WDT_RESET() ESP.wdtFeed()
   #include <ESP8266WiFi.h>
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-  #endif //USE_MODULE_CORE_WEBSERVER
+  #endif //USE_MODULE_NETWORK_WEBSERVER
 #endif
 
 #include "2_CoreSystem/JSON/mJSON.h"
@@ -185,7 +190,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
   // Displays
@@ -335,391 +340,245 @@ enum MODULE_IDS{
 // CoreSystem (Range 0-29)
 #ifdef USE_MODULE_CORE_HARDWAREPINS
   #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
-  // class                                             mHardwarePins;
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SETTINGS
   #include "2_CoreSystem/Settings/mSettings.h"
-  // class                                             mSettings;
-  #define   pCONT_set                               static_cast<mSettings*>(pCONT->pInterface[EM_MODULE_CORE_SETTINGS_ID])
+  #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SUPPORT
   #include "2_CoreSystem/Support/mSupport.h"
-  // class                                             mSupport;
-  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pInterface[EM_MODULE_CORE_SUPPORT_ID])
+  #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pModule[EM_MODULE_CORE_SUPPORT_ID])
 #endif 
 #ifdef USE_MODULE_CORE_LOGGING
   #include "2_CoreSystem/Logging/mLogging.h"
-  // class                                             mLogging;/
-  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->pInterface[EM_MODULE_CORE_LOGGING_ID])
+  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->pModule[EM_MODULE_CORE_LOGGING_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/Telemetry/mTelemetry.h"
-  class                                             mTelemetry;
-  #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->pInterface[EM_MODULE_CORE_TELEMETRY_ID])
+  #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->pModule[EM_MODULE_CORE_TELEMETRY_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TIME
   #include "2_CoreSystem/Time/mTime.h"
-  class                                             mTime;
-  #define   pCONT_time                              static_cast<mTime*>(pCONT->pInterface[EM_MODULE_CORE_TIME_ID])
+  #define   pCONT_time                              static_cast<mTime*>(pCONT->pModule[EM_MODULE_CORE_TIME_ID])
 #endif 
 #ifdef USE_MODULE_CORE_RULES
   #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
-  class                                             mRuleEngine;
-  #define            pCONT_rules                    static_cast<mRuleEngine*>(pCONT->pInterface[EM_MODULE_CORE_RULES_ID])
+  #define   pCONT_rules                             static_cast<mRuleEngine*>(pCONT->pModule[EM_MODULE_CORE_RULES_ID])
 #endif
 #ifdef USE_MODULE_CORE_UPDATES
   #include "2_CoreSystem/Updates/mUpdates.h"
-  class                                             mUpdates;
-  #define            pCONT_updates                  static_cast<mUpdates*>(pCONT->pInterface[EM_MODULE_CORE_UPDATES_ID])
+  #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
 
 
 // Network (20-29)
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/WiFi/mWiFi.h"
-  class                                             mWiFi;
-  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pInterface[EM_MODULE_NETWORK_WIFI_ID])
+  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/MQTT/mMQTT.h"
-  class                                             mMQTT;
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pInterface[EM_MODULE_NETWORK_MQTT_ID])
+  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/WebServer/mWebServer.h"
-  class                                             mWebServer;
-  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pInterface[EM_MODULE_NETWORK_WEBSERVER_ID])
+  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
   // #include "3_Network/WebServer/mWebServer.h"
-  // class                                             mDisplayInterface;
-  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pInterface[EM_MODULE_DISPLAY_INTERFACE])
+  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAY_INTERFACE])
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
   #include "8_Displays/Nextion/mNextionPanel.h"
-  class                                             mNextionPanel;
-  #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pInterface[EM_MODULE_DISPLAYS_NEXTION_ID])
+  #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
 #endif
 
 
 // Drivers (Range 40-129)
 #ifdef USE_MODULE_DRIVERS_INTERFACE
   // #include "3_Network/WebServer/mWebServer.h"
-  // class                                             mDisplayInterface;
-  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pInterface[EM_MODULE_DISPLAY_INTERFACE])
+  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAY_INTERFACE])
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
-  class                                             mIRtransceiver;
-  #define pCONT_mdirt                               static_cast<mIRtransceiver*>(pCONT->pInterface[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
+  #define pCONT_mdirt                               static_cast<mIRtransceiver*>(pCONT->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/Relays/mRelays.h"
-  class                                             mRelays;
-  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pInterface[EM_MODULE_DRIVERS_RELAY_ID])
+  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
-  class                                             mPWM;
-  #define pCONT_nex                                 static_cast<mPWM*>(pCONT->pInterface[EM_MODULE_DRIVERS_PWM_ID])
+  #define pCONT_nex                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433MHZ
   #include "4_Drivers/SAWRadios/mSAWRadios.h"
-  class                                             mSAWMain;
-  #define pCONT_433                                 static_cast<mSAWMain*>(pCONT->pInterface[EM_MODULE_DRIVERS_SAWRADIOS_ID])
+  #define pCONT_433                                 static_cast<mSAWMain*>(pCONT->pModule[EM_MODULE_DRIVERS_SAWRADIOS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
-  class                                             mSDCard;
-  #define pCONT_mdhbridge                           static_cast<mSDCard*>(pCONT->pInterface[EM_MODULE_DRIVERS_SDCARD_ID])
+  #define pCONT_mdhbridge                           static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_GPS
   #include "4_Drivers/GPS/mGPS.h"
-  class                                             mGPS;
-  #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pInterface[EM_MODULE_DRIVERS_GPS_ID])
+  #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pModule[EM_MODULE_DRIVERS_GPS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
   #include "4_Drivers/SerialUART/mSerialUART.h"
-  class mSerialUART;
-  #define            D_MODULE_DRIVERS_SERIAL_UART_ID       49
-  #define            pCONT_serial                        pCONT->mserial
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_CTR)           D_MODULE_DRIVERS_SERIAL_UART_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR)  D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define pCONT_mdhbridge                           static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/ShellyDimmer/mShellyDimmer.h"
-  class mShellyDimmer;
-  #define            D_MODULE_DRIVERS_SHELLY_DIMMER_ID        50
-  #define            pCONT_shelly_dimmer                      pCONT->mshelly_dimmer 
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR)         D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR)  D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
   #include "4_Drivers/CAM_OV2640/mCamera.h"
-  class mCameraOV2640;
-  #define            D_MODULE_DRIVERS_CAMERA_OV2640_ID       51
-  #define            pCONT_cam                        pCONT->mcamera_ov2640
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_CAMERA_OV2640_CTR)           D_MODULE_DRIVERS_CAMERA_OV2640_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR)  D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
 #endif
-
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/LEDs/mLEDs.h"
-class mStatusLEDs;
-#define            D_MODULE_DRIVERS_STATUS_LEDS_ID 52
-#define            pCONT_status_leds                              pCONT->mstatus_leds
-DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_CTR)                     D_MODULE_DRIVERS_STATUS_LEDS_CTR;
-DEFINE_PGM_CTR(PM_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR)            D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR;
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
-#endif //USE_MODULE_DRIVERS_LEDS
-
-
+  #define pCONT_status_leds                         static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID])
+#endif
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/FileSystem/mFileSystem.h"
-  class                                         mFileSystem;
-  #define pCONT_mfile                           static_cast<mFileSystem*>(pCONT->pInterface[EM_MODULE_DRIVERS_FILESYSTEM_ID])
-#endif //USE_MODULE_DRIVERS_FILESYSTEM
-
-
-
+  #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
+#endif
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
   #include "7_Energy/_Interface/mEnergy.h"
-  class mEnergy;
-  #define            D_MODULE_DRIVERS_ENERGY_ID                   130
-  #define            pCONT_iEnergy                                pCONT->mdenergy  
-  DEFINE_PGM_CTR(PM_INTERFACE_ENERGY_MODULE_CTR)              "mEnergy";
-  DEFINE_PGM_CTR(PM_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR)     "energy";
-  class                                             mHBridge;
-  #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pInterface[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define pCONT_iEnergy                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_ENERGY_ID])
 #endif
 
 // Lights (Range 140-169)
 #ifdef USE_MODULE_LIGHTS_INTERFACE
   #include "6_Lights/_Interface/mInterfaceLight.h"
-  class                                         mInterfaceLight;
-  #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_INTERFACE_ID])
+  #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->pModule[EM_MODULE_LIGHTS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/Animator/mAnimatorLight.h"
-  class                                         mAnimatorLight;
-  #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_ANIMATOR_ID])
+  #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ANIMATOR_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
   #include "6_Lights/Hardware/Addressable/mAddressableLight.h"
-  class                                         mAddressableLight;
-  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
+  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_PWM
   #include "6_Lights/Hardware/PWM/mPWMLight.h"
-  class                                         mPWMLight;
-  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pInterface[EM_MODULE_LIGHTS_PWM_ID])
+  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pModule[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
   #include "6_Lights/WLEDEffects/mWLEDEffects.h"
-  class                                         mWLEDEffects;
-  #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->pInterface[EM_MODULE_LIGHTS_WLED_EFFECTS_ID])
+  #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID])
 #endif
 
 // Sensors (Range 120-169)
 #ifdef USE_MODULE_SENSORS_BUTTONS
   #include "5_Sensors/Buttons/mButtons.h"
-  class                                         mButtons;
-  #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_SWITCHES
   #include "5_Sensors/Switches/mSwitches.h"
-  class                                         mSwitches;
-  #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pInterface[EM_MODULE_SENSORS_SWITCHES_ID])
+  #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ANALOG
   #include "5_Sensors/Analog/mSensorsAnalog.h"
-  class                                         mSensorsAnalog;
-  #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pInterface[EM_MODULE_SENSORS_ANALOG_ID])
+  #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
   #include "7_Energy/PowerMeter/mPzem_AC.h"
-  class                                         mPzem_AC;
-  #define pCONT_pzem                            static_cast<mPzem_AC*>(pCONT->pInterface[EM_MODULE_SENSORS_PZEM004T_MODBUS_ID])
+  #define pCONT_pzem                            static_cast<mPzem_AC*>(pCONT->pModule[EM_MODULE_SENSORS_PZEM004T_MODBUS_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/DHT/mSensorsDHT.h"
-  class                                         mSensorsDHT;
-  #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pInterface[EM_MODULE_SENSORS_DHT_ID])
+  #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/BME/mSensorsBME.h"
-  class                                         mSensorsBME;
-  #define pCONT_bme                             static_cast<mSensorsBME*>(pCONT->pInterface[EM_MODULE_SENSORS_BME_ID])
+  #define pCONT_bme                             static_cast<mSensorsBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DS18B20
   #include "5_Sensors/DB18/mSensorsDB18.h"
-  class                                         mSensorsDB18;
-  #define pCONT_msdb18                          static_cast<mSensorsDB18*>(pCONT->pInterface[EM_MODULE_SENSORS_DB18S20_ID])
+  #define pCONT_msdb18                          static_cast<mSensorsDB18*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_INA219
   #include "5_Sensors/INA219/mSensorsINA219.h"
-  class                                         mSensorsINA219;
-  #define pCONT_mina219                         static_cast<mSensorsINA219*>(pCONT->pInterface[EM_MODULE_SENSORS_INA219_ID])
+  #define pCONT_mina219                         static_cast<mSensorsINA219*>(pCONT->pModule[EM_MODULE_SENSORS_INA219_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
-  class                                         mUltraSonicSensor;
-  #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pInterface[EM_MODULE_SENSORS_ULTRASONIC_ID])
+  #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/Door/mDoorSensor.h"
-  class                                         mDoorSensor;
-  #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pInterface[EM_MODULE_SENSORS_DOOR_ID])
+  #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOTION
   #include "5_Sensors/PIR/mMotionSensor.h"
-  class                                         mMotionSensor;
-  #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pInterface[EM_MODULE_SENSORS_MOTION_ID])
+  #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
-  class                                         mMoistureSensor;
-  #define pCONT_srmoisture                      static_cast<mMoistureSensor*>(pCONT->pInterface[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
+  #define pCONT_srmoisture                      static_cast<mMoistureSensor*>(pCONT->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
-  class                                         mPulseCounter;
-  #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pInterface[EM_MODULE_SENSORS_PULSECOUNTER_ID])
+  #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
 #endif
-
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CUSTOM_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
-  class mBlinds;
-  #define D_MODULE_CUSTOM_BLINDS_ID 170
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_BLINDS_CTR)              "mBlinds";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR)              "blinds";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_HEATING
   #include "9_Controller/Heating/mHeating.h"
-  class mHeating;
-  #define D_MODULE_CUSTOM_HEATING_ID 171
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_HEATING_CTR)              "mHeating";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_HEATING_FRIENDLY_CTR)              "heating";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"
-  class mRadiatorFan;
-  #define D_MODULE_CUSTOM_RADIATORFAN_ID 175
-  DEFINE_PGM_CTR(MODULE_CUSTOM_RADIATORFAN_CTR)              "mRadiatorFan";
-  DEFINE_PGM_CTR(MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR)              "radiatorfan";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CUSTOM_RADIATORFAN_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
-  // #ifdef ESP32
-  //   #include "IRDevices/IRLib32/IRremote.h"
-  // #endif
-  // #ifdef ESP8266
-  //   #include "4_Drivers/IRDevices/IRLib8266/IRremoteESP8266.h"
-  //   #include "4_Drivers/IRDevices/IRLib8266/IRsend.h"
-  // // #endifclass mOilFurnace;
-  #define D_MODULE_CUSTOM_IRTRANSMITTER_ID 177
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IRTRANSMITTER_CTR)              "infrared";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IRTRANSMITTER_FRIENDLY_CTR)              "infrared";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #include "4_Drivers/IRDevices/mIRtransceiver.h"
+  #define pCONT_ir                              static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_OILFURNACE
   #include "9_Controller/OilFurnace/mOilFurnace.h"
-  class mOilFurnace;
-  #define D_MODULE_CUSTOM_OILFURNACE_ID 177
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_OILFURNACE_CTR)              "mOilFurnace";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_OILFURNACE_FRIENDLY_CTR)              "oilfurnace";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbut                            static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CUSTOM_OILFURNACE_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
   #include "9_Controller/ExerciseBike/mExerciseBike.h"
-  class mExerciseBike;
-  #define D_MODULE_CUSTOM_EXERCISEBIKE_ID 178
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_EXERCISEBIKE_CTR)              "mExerciseBike";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_EXERCISEBIKE_FRIENDLY_CTR)              "exercisebike";
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_bike                            static_cast<mExerciseBike*>(pCONT->pModule[EM_MODULE_CUSTOM_EXERCISEBIKE_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
   #include "9_Controller/Sonoff_iFan/mSonoffIFan.h"
-  class mSonoffIFan;
-  #define D_MODULE_CUSTOM_SONOFF_IFAN_ID                             179
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_CTR)               "mSonoffIFan";
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_IFAN_FRIENDLY_CTR)      "fan";
-  #define pCONT_ifan                                           pCONT->mifan
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CUSTOM_SONOFF_IFAN_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_FAN
   #include "9_Controller/Fan/mFan.h"
-  class mFan;
-  #define D_MODULE_CUSTOM_FAN_ID                        180
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_CTR)               D_MODULE_CUSTOM_FAN_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_FAN_FRIENDLY_CTR)      D_MODULE_CUSTOM_FAN_FRIENDLY_CTR;
-  #define pCONT_mfan                                     pCONT->mfan
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_mfan                            static_cast<mFan*>(pCONT->pModule[EM_MODULE_CUSTOM_FAN_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_TREADMILL
   #include "9_Controller/Treadmill/mTreadmill.h"
-  class mTreadmill;
-  #define D_MODULE_CUSTOM_TREADMILL_ID                        181
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_TREADMILL_CTR)               D_MODULE_CUSTOM_TREADMILL_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR)      D_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR;
-  #define pCONT_mtreadmill                                    pCONT_timereadmill
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbut                            static_cast<mTreadmill*>(pCONT->pModule[EM_MODULE_CUSTOM_TREADMILL_ID])
 #endif
 #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
   #include "9_Controller/SensorColours/mSensorColours.h"
-  class mSensorColours;
-  #define D_MODULE_CUSTOM_SENSORCOLOURS_ID                        182
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_CTR)               D_MODULE_CUSTOM_SENSORCOLOURS_CTR;
-  DEFINE_PGM_CTR(PM_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR)      D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR;
-  #define pCONT_msenscol                                     pCONT->msenscol
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_msenscol                        static_cast<mSensorColours*>(pCONT->pModule[EM_MODULE_CUSTOM_SENSORCOLOURS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
   #include "9_Controller/DoorBell/mDoorBell.h"
-  class mDoorBell;
-  #define D_MODULE_CONTROLLER_DOORBELL_ID 123
-  DEFINE_PGM_CTR(PM_MODULE_CONTROLLER_DOORBELL_CTR)              "mDoorBell";
-  DEFINE_PGM_CTR(PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR)              "doorbell";
-  #define pCONT_mdb                                           pCONT->mdb
-  class                                         mButtons;
-  #define pCONT_sbut                            static_cast<mButtons*>(pCONT->pInterface[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_sbut                            static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
 #endif
-
-// #define pModule(X) pInterface[GetVectorIndexbyModuleID(X)]
-#define pModule(X) pInterface[X]
-
-
 
 #include  "1_TaskerManager/mTaskerInterface.h"
 
@@ -733,22 +592,31 @@ class mTaskerManager{
     mTaskerManager(mTaskerManager&& other) = delete;
     /* Private constructor to prevent instancing. */
     mTaskerManager(){};
-
-    // mTaskerInterface* pInterface[50];
-
-
     /* Here will be the instance stored. */
     static mTaskerManager* instance;
   public:
     // External function to get instance
-    static mTaskerManager* GetInstance();
+    static mTaskerManager* GetInstance(){
+      if (instance == nullptr){
+        instance = new mTaskerManager();
+      }
+      return instance;
+    };
 
-    int16_t GetVectorIndexbyModuleID(uint8_t id_search);
+    int16_t GetModuleIndexbyFriendlyName(const char* c);
+    int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
 
-    // std::vector<mTaskerInterface*> pInterface;
+
+    uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
+
+    #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+      char buffer_taskname[50];
+    #endif
+
+    // std::vector<mTaskerInterface*> pModule;
     // std::vector<uint8_t> mTasksIDs;
 
-    mTaskerInterface* pInterface[EM_MODULE_LENGTH_ID];
+    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
     uint8_t Instance_Init();
     uint8_t CheckPointersPass();

@@ -1,6 +1,8 @@
 #ifndef _mHardwarePins_H_
 #define _mHardwarePins_H_
 
+#define   D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID 0
+
 // MapConfig serves the purpose of feeding the template methods until successful saving of states are archieved
 // In the near future, this mode will be tested by feeding the template via http command
 
@@ -12,7 +14,7 @@
   #define DRX 3
 #endif
 
-  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pInterface[EM_MODULE_CORE_HARDWAREPINS_ID])
+  #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 
 #include "1_TaskerManager/mTaskerInterface.h"
   
@@ -29,6 +31,13 @@ class mHardwarePins :
     static const char* PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_HARDWAREPINS_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mHardwarePins);
+    };
+    #endif
 
     uint8_t works = 0;
 

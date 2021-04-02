@@ -151,9 +151,9 @@ int8_t mDoorBell::Tasker(uint8_t function){
    * WEBPAGE SECTION * 
   *******************/
   
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 } // END function
@@ -458,7 +458,7 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 void mDoorBell::WebAppend_Root_Status_Table_Draw(){
@@ -545,7 +545,7 @@ void mDoorBell::WebPage_Root_AddHandlers(){
    * */
 
 }
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif

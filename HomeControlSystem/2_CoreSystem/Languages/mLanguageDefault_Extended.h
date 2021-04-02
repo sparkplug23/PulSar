@@ -156,7 +156,7 @@
 // #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 // #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 // #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
-// //#ifdef USE_MODULE_CORE_WEBSERVER
+// //#ifdef USE_MODULE_NETWORK_WEBSERVER
 //   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
 //   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
 // //#endif
@@ -2061,25 +2061,6 @@
 // //   D_CMND,
 // //   D_STAT,
 // //   D_TELE };
-// /*
-// //   en-GB.h - localization for English - United Kingdom for Sonoff-Tasmota
-
-// //   Copyright (C) 2019  Theo Arends
-
-// //   This program is free software: you can redistribute it and/or modify
-// //   it under the terms of the GNU General Public License as published by
-// //   the Free Software Foundation, either version 3 of the License, or
-// //   (at your option) any later version.
-
-// //   This program is distributed in the hope that it will be useful,
-// //   but WITHOUT ANY WARRANTY; without even the implied warranty of
-// //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// //   GNU General Public License for more details.
-
-// //   You should have received a copy of the GNU General Public License
-// //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// // */
-
 // // const char kCodeImage[] PROGMEM = "sonoff|minimal|classic|sensors|knx|basic|display";
 
 // // support.ino
@@ -2092,7 +2073,7 @@
 // DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 
 // // xdrv_02_webserver.ino
-// // #ifdef USE_MODULE_CORE_WEBSERVER
+// // #ifdef USE_MODULE_NETWORK_WEBSERVER
 // // const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // // const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // // const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
@@ -2136,6 +2117,6 @@
 // const char S_CONSOLE[] PROGMEM = D_CONSOLE;
 // const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
 // const char S_RESTART[] PROGMEM = D_RESTART;
-// // #endif  // USE_MODULE_CORE_WEBSERVER
+// // #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 #endif  // _I18N_H_

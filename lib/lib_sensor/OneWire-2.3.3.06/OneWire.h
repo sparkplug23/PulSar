@@ -273,7 +273,12 @@ void directModeOutput(IO_REG_TYPE pin)
 
 #include "scss_registers.h"
 #include "portable.h"
-#include "avr/pgmspace.h"
+// #include "avr/pgmspace.h"
+#if (defined(__AVR__))
+#include <avr\pgmspace.h>
+#else
+#include <pgmspace.h>
+#endif
 
 #define GPIO_ID(pin)			(g_APinDescription[pin].ulGPIOId)
 #define GPIO_TYPE(pin)			(g_APinDescription[pin].ulGPIOType)

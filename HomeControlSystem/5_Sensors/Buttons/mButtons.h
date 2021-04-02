@@ -2,6 +2,8 @@
 #ifndef _MBUTTON_H_
 #define _MBUTTON_H_
 
+#define D_UNIQUE_MODULE_SENSORS_BUTTONS_ID 120
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_BUTTONS
@@ -53,6 +55,7 @@ class mButtons :
     static const char* PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BUTTONS_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BUTTONS_ID; }
 
 // /*********************************************************************************************\
 //  * Button support
@@ -86,12 +89,12 @@ void ButtonLoop(void);
 
 char* IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen);
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 void WebAppend_Root_Draw_Table();
 void WebAppend_Root_Status_Table();
 
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 bool IsButtonActive(uint8_t id);
 

@@ -1,6 +1,8 @@
 #ifndef _USE_MODULE_CORE_UPDATES_H
 #define _USE_MODULE_CORE_UPDATES_H 0.3
 
+#define D_UNIQUE_MODULE_CORE_UPDATES_ID 7
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CORE_UPDATES
@@ -22,6 +24,14 @@ class mUpdates :
     static const char* PM_MODULE_CORE_UPDATES_FRIENDLY_CTR;
     PGM_P GetModuleName(){         return PM_MODULE_CORE_UPDATES_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_UPDATES_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_UPDATES_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mUpdates);
+    };
+    #endif
 
     void init(void);
     void pre_init();

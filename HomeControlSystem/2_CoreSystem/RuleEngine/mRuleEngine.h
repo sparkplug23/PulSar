@@ -3,6 +3,8 @@
 #ifndef _MRULEENGINE_H
 #define _MRULEENGINE_H
 
+#define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 6
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CORE_RULES
@@ -30,6 +32,13 @@ class mRuleEngine :
     static const char* PM_MODULE_CORE_RULES_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_RULES_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mRuleEngine);
+    };
+    #endif
 
     uint8_t* data = nullptr;
     uint16_t _dataLen = 0;

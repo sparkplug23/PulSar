@@ -107,13 +107,13 @@ void EveryLoop();
       uint8_t fUpdateSendDoorSensor;
     //#endif
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
 void WebCommand_Parse(void);
 
 
 void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Status_Table();
-  #endif// USE_MODULE_CORE_WEBSERVER
+  #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
     

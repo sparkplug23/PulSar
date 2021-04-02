@@ -3,7 +3,7 @@
 
 #include "mWebServer.h"
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 /*************************************************************************************************************************************************************************************
   ************************************************************************************************************************************************************************************
@@ -512,7 +512,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
     do {
       char* tmp;
       size_t len;
-      pCONT->mso->GetLog(counter, &tmp, &len);
+      pCONT_sto->GetLog(counter, &tmp, &len);
       if (len) { //if there is new log data
       // and is not larger than buffer
         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
@@ -2345,4 +2345,4 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 // }
 
 
-#endif //   #ifdef USE_MODULE_CORE_WEBSERVER
+#endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER

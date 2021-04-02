@@ -157,6 +157,18 @@ void Scheduler()
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA
+
+  #ifdef ESP8266                     // Not needed with esp32 mdns
+// #ifdef USE_DISCOVERY
+// #ifdef USE_WEBSERVER
+// #ifdef WEBSERVER_ADVERTISE
+  pCONT_wif->MdnsUpdate();
+// #endif  // WEBSERVER_ADVERTISE
+// #endif  // USE_WEBSERVER
+// #endif  // USE_DISCOVERY
+#endif  // ESP8266
+
+
   
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
   

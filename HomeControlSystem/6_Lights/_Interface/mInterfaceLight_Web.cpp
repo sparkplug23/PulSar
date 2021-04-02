@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 int8_t mInterfaceLight::Tasker_Web(uint8_t function){
 
@@ -185,7 +185,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              rgbcct_controller.getBriRGB() ? D_JSON_ON : D_JSON_OFF //make this a state function
+                              rgbcct_controller.getBrightness255() ? D_JSON_ON : D_JSON_OFF //make this a state function
                               //mSupport::GetStateCtr_P()
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
@@ -690,4 +690,4 @@ void mInterfaceLight::WebCommand_Parse(void)
 
 
 #endif
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER

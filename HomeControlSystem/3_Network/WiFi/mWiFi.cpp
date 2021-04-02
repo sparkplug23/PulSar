@@ -9,9 +9,6 @@ extern "C" {
 const char* mWiFi::PM_MODULE_NETWORK_WIFI_CTR = D_MODULE_NETWORK_WIFI_CTR;
 const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
 
-
-
-
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function){
 
@@ -43,6 +40,8 @@ int8_t mWiFi::Tasker(uint8_t function){
     break;
     case FUNC_LOOP: 
     
+  MDNS.update();
+    
     break;
     case FUNC_EVERY_SECOND:
       // AddLog_P(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
@@ -63,6 +62,13 @@ int8_t mWiFi::Tasker(uint8_t function){
       //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
+    case FUNC_WIFI_CONNECTED:
+    
+#ifdef USE_DISCOVERY
+      StartMdns();
+#endif  // USE_DISCOVERY
+
+break;
   }
 
 
@@ -102,11 +108,11 @@ void mWiFi::WifiConfig(uint8_t type)
     WiFi.disconnect();                       // Solve possible Wifi hangs
     connection.config_type = type;
 
-    #ifndef USE_MODULE_CORE_WEBSERVER
+    #ifndef USE_MODULE_NETWORK_WEBSERVER
     if (WIFI_MANAGER == connection.config_type) { 
       connection.config_type = WIFI_SERIAL; 
     }
-    #endif  // USE_MODULE_CORE_WEBSERVER
+    #endif  // USE_MODULE_NETWORK_WEBSERVER
 //  DEBUG_LINE_HERE;
     connection.config_counter = WIFI_CONFIG_SEC;   // Allow up to WIFI_CONFIG_SECS seconds for phone to provide ssid/pswd
     connection.counter = connection.config_counter +5;
@@ -123,14 +129,14 @@ void mWiFi::WifiConfig(uint8_t type)
       AddLog_P(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
     #endif// ENABLE_LOG_LEVEL_INFO
     }
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     else if (WIFI_MANAGER == connection.config_type || WIFI_MANAGER_RESET_ONLY == connection.config_type) {
     #ifdef ENABLE_LOG_LEVEL_INFO
      AddLog_P(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
     #endif// ENABLE_LOG_LEVEL_INFO
      pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == connection.config_type);
     }
-    #endif  // USE_MODULE_CORE_WEBSERVER
+    #endif  // USE_MODULE_NETWORK_WEBSERVER
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog_P(LOG_LEVEL_INFO, PSTR("else connection.config_type"));
@@ -960,20 +966,20 @@ void mWiFi::WifiCheck(uint8_t param)
             }
 
             
-            #ifdef USE_MODULE_CORE_WEBSERVER
+            #ifdef USE_MODULE_NETWORK_WEBSERVER
               if (pCONT_set->Settings.webserver) {
                 pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
               } else {
                 pCONT_web->StopWebserver();
               }
-            #endif  // USE_MODULE_CORE_WEBSERVER
+            #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 
           } else {
             
         Serial.printf( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
             WifiSetState(0);
-            // Mdns.begun = 0;
+            Mdns.begun = 0;
           }
         }//END else
 
@@ -1356,6 +1362,91 @@ bool mWiFi::WifiConfigCounter(void)
   
 // }
 // //#endif
+
+
+/*********************************************************************************************\
+ * MDNS
+\*********************************************************************************************/
+
+
+#ifdef USE_DISCOVERY
+void mWiFi::StartMdns(void) {
+//  static uint8_t mdns_delayed_start = Settings.param[P_MDNS_DELAYED_START];
+
+  // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
+    if (!Mdns.begun) {
+//      if (mdns_delayed_start) {
+//        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_ATTEMPTING_CONNECTION));
+//        mdns_delayed_start--;
+//      } else {
+//        mdns_delayed_start = Settings.param[P_MDNS_DELAYED_START];
+        MDNS.end(); // close existing or MDNS.begin will fail
+
+
+
+
+        Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);//TasmotaGlobal.hostname);
+
+AddLog_P(LOG_LEVEL_TEST, PSTR("mdns pCONT_set->Settings.system_name.device = %s"),pCONT_set->Settings.system_name.device);
+
+
+
+        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED));
+//      }
+    }
+  // }
+}
+
+#ifdef MQTT_HOST_DISCOVERY
+void mWiFi::MqttDiscoverServer(void)
+{
+  if (!Mdns.begun) { return; }
+
+  int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
+
+  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
+
+  if (n > 0) {
+    uint32_t i = 0;            // If the hostname isn't set, use the first record found.
+#ifdef MDNS_HOSTNAME
+    for (i = n; i > 0; i--) {  // Search from last to first and use first if not found
+      if (!strcmp(MDNS.hostname(i).c_str(), MDNS_HOSTNAME)) {
+        break;                 // Stop at matching record
+      }
+    }
+#endif  // MDNS_HOSTNAME
+    // SettingsUpdateText(SET_MQTT_HOST, MDNS.hostname(i).c_str());
+    // Settings.mqtt_port = MDNS.port(i);
+
+    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
+  }
+}
+#endif  // MQTT_HOST_DISCOVERY
+
+#ifdef WEBSERVER_ADVERTISE
+void mWiFi::MdnsAddServiceHttp(void) {
+  if (1 == Mdns.begun) {
+    Mdns.begun = 2;
+    MDNS.addService("http", "tcp", WEB_PORT);
+    MDNS.addServiceTxt("http", "tcp", "devicetype", "tasmota");
+  }
+}
+
+#ifdef ESP8266 //Not needed with esp32 mdns
+void mWiFi::MdnsUpdate(void) {
+  if (2 == Mdns.begun) {
+    MDNS.update(); // this is basically passpacket like a webserver
+   // being called in main loop so no logging
+   // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MDNS "MDNS.update"));
+  }
+}
+#endif  // ESP8266
+#endif  // WEBSERVER_ADVERTISE
+#endif  // USE_DISCOVERY
+
+
+
+
 
 // In 1dB increments
 int8_t mWiFi::GetRSSdBm(){

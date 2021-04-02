@@ -514,7 +514,7 @@ void mEnergy::UpdateEnergyUsagePerMinute(){
 
 
 
-// // #ifdef USE_MODULE_CORE_WEBSERVER
+// // #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 const char* mEnergy::EnergyFormatIndex(char* result, char* input, bool json, uint32_t index, bool single)
 {
@@ -778,7 +778,7 @@ void mEnergy::EnergyShow(bool json)
 //       KnxSensor(KNX_ENERGY_START, Energy.start_energy);
 //     }
 // #endif  // USE_KNX
-// #ifdef USE_MODULE_CORE_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
 //   // } else {
 
 //       if (Energy.voltage_available) {
@@ -810,7 +810,7 @@ void mEnergy::EnergyShow(bool json)
 //       if (!isnan(Energy.export_active)) {
 //         pCONT_web->WSContentSend_PD(HTTP_ENERGY_SNS3, export_active_chr[0]);
 //       }
-// #endif  // USE_MODULE_CORE_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER
   //} //if json
 }
 
@@ -1090,18 +1090,18 @@ int8_t mEnergy::Tasker(uint8_t function){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Draw_Table();
     break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
-    #endif //USE_MODULE_CORE_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
@@ -1114,7 +1114,7 @@ int8_t mEnergy::Tasker(uint8_t function){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
   }
   
   return function_result;
@@ -1131,7 +1131,7 @@ int8_t mEnergy::Tasker(uint8_t function){
 //   }
 // }
 
-  #ifdef USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mEnergy::WebAppend_Root_Draw_Table(){
   char buffer[30];
   BufferWriterI->Append_P(PSTR("{t}"));
@@ -1220,7 +1220,7 @@ void mEnergy::WebAppend_Root_Status_Table(){
 }
 
 
-  #endif// USE_MODULE_CORE_WEBSERVER
+  #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
 // void mEnergy::parse_JSONCommand(){
@@ -1480,7 +1480,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;

@@ -1,6 +1,8 @@
 #ifndef _DRIVER_INTERFACE_LIGHTS1_H
 #define _DRIVER_INTERFACE_LIGHTS1_H 0.1
 
+#define D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID 140
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -329,6 +331,21 @@ class mInterfaceLight :
 {
   public:
     mInterfaceLight(){};
+
+    
+    static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
+    static const char* PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mInterfaceLight);
+    };
+    #endif
+
+
 
     /**
      * Module settings other tasks/module may need
@@ -776,11 +793,6 @@ void ShowInterface();
     int8_t Tasker(uint8_t function);
     void Init(void);
     
-    static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
-    static const char* PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR; }
-
 
     void WebAppend_Root_Buttons();
     void WebAppend_Root_Draw_Table();
@@ -878,7 +890,7 @@ void ShowInterface();
     uint8_t ConstructJSON_Debug(uint8_t json_method = 0);
 
   
-    #ifdef USE_MQTT 
+    #ifdef USE_MODULE_NETWORK_MQTT 
         void MQTTHandler_Init();
         void MQTTHandler_Set_fSendNow();
         void MQTTHandler_Set_TelePeriod();
@@ -995,25 +1007,6 @@ private:
 
 
 
-
-// /*
-//   xdrv_04_light.ino - PWM, WS2812 and sonoff led support for Tasmota
-
-//   Copyright (C) 2020  Theo Arends
-
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// */
 
 // // #ifdef USE_LIGHT
 // /*********************************************************************************************\

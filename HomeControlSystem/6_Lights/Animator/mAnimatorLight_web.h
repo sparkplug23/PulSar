@@ -4,7 +4,7 @@
 
 
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #include "stdint.h"
 
@@ -193,4 +193,4 @@ int main() {
 */
 
 
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER

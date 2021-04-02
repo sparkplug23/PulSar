@@ -161,6 +161,19 @@ void mSettings::parse_JSONCommand(){
   
   #endif
 
+  /*
+  
+//make mqtt commands to allow me to tweak and debug 
+  Settings.sensors.ifchanged_secs = 10;
+  Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
+  Settings.sensors.teleperiod_secs = 120;
+  Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
+  Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
+  Settings.sensors.configperiod_secs = SEC_IN_HOUR;
+
+
+*/
+
 #ifdef ENABLE_BUFFER_STRUCT
   u
   int8_t tmp_id = 0;

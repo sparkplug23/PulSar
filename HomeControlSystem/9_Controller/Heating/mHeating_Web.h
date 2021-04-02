@@ -5,7 +5,7 @@
 
 #ifdef USE_MODULE_CUSTOM_HEATING
 
-#ifdef USE_MODULE_CORE_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 // no class, include within header class
 
@@ -14,7 +14,7 @@ int test = 0;
 int8_t Tasker_Web(uint8_t function);
 
 
-#endif // USE_MODULE_CORE_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 

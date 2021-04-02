@@ -2,6 +2,13 @@
 
 #ifdef USE_MODULE_SENSORS_DOOR
 
+
+
+const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DOOR_CTR;
+const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
+
+
+
 void mDoorSensor::pre_init(void){
   
   settings.fEnableSensor = false;
@@ -67,7 +74,7 @@ int8_t mDoorSensor::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -81,18 +88,18 @@ int8_t mDoorSensor::Tasker(uint8_t function){
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT    
+    #endif //USE_MODULE_NETWORK_MQTT    
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
       break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
       break;
-    #endif //USE_MODULE_CORE_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER
   }
 
 } // END function
@@ -115,7 +122,7 @@ void mDoorSensor::EveryLoop(){
 
 }
 
-    #ifdef USE_MODULE_CORE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[10];
@@ -179,7 +186,7 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
 }
 
 
-    #endif // USE_MODULE_CORE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
   if(door_detect.isactive){
@@ -205,7 +212,7 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
+  JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
   JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){
@@ -287,7 +294,7 @@ void mDoorSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DOOR_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DOOR_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

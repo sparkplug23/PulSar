@@ -66,7 +66,7 @@ int8_t mUpdates::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
@@ -80,7 +80,7 @@ int8_t mUpdates::Tasker(uint8_t function){
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_fSendNow();
     break;
-    #endif //USE_MQTT
+    #endif //USE_MODULE_NETWORK_MQTT
 
      case FUNC_LOOP:
     //   UfsExecuteCommandFileLoop();
@@ -122,9 +122,9 @@ int8_t mUpdates::Tasker(uint8_t function){
    * WEBPAGE SECTION * 
   *******************/
   
-  #ifdef USE_MODULE_CORE_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_CORE_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  // return Tasker_Web(function);
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
 
@@ -154,8 +154,7 @@ uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-
-////////////////////// START OF MQTT /////////////////////////
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mUpdates::MQTTHandler_Init(){
 
@@ -233,5 +232,7 @@ void mUpdates::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   );
 
 }
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif // USE_MODULE_CORE_UPDATES

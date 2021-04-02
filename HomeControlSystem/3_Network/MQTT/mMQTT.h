@@ -1,6 +1,8 @@
 #ifndef _MMQTT
 #define _MMQTT 0.7
 
+#define D_UNIQUE_MODULE_NETWORK_MQTT_ID 21
+
 #include <stdint.h>
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -153,6 +155,11 @@ class mMQTT :
     mMQTT(){};
     void init(void);
     int8_t Tasker(uint8_t function);
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mMQTT);
+    };
+    #endif
 
     bool flag_uptime_reached_reduce_frequency = false;
 
@@ -160,6 +167,7 @@ class mMQTT :
     static const char* PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_MQTT_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_MQTT_ID; }
 
     // char lwt_message_ondisconnect_ctr[50];#
   
