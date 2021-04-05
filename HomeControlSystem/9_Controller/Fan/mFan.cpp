@@ -2,7 +2,7 @@
 
 //  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
 
-#ifdef USE_MODULE_CUSTOM_FAN
+#ifdef USE_MODULE_CONTROLLER_FAN
 
 //Uses 433mhz radios, relays, buttons
 
@@ -579,7 +579,7 @@ void mFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_FAN_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_FAN_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

@@ -40,7 +40,7 @@ Tcelius = Tkelvin - 273.
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#ifdef USE_MODULE_CUSTOM_OILFURNACE
+#ifdef USE_MODULE_CONTROLLER_OILFURNACE
 
 #include <math.h>
 

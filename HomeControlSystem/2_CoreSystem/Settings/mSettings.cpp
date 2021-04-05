@@ -389,7 +389,7 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
 void mSettings::Function_Template_Load(){
 
   #ifndef DISABLE_SERIAL_LOGGING
-  //Serial.printf("mSettings::Function_Template_Load"); Serial.flush();
+  //DEBUG_PRINTF("mSettings::Function_Template_Load"); Serial.flush();
   #endif
 
   boot_status.function_template_parse_success = 0;
@@ -692,7 +692,7 @@ void mSettings::RtcRebootLoad(void)
     RtcRebootSave();
   }
   rtc_reboot_crc = GetRtcRebootCrc();
-  Serial.printf("fast_reboot=%d\n\r",RtcReboot.fast_reboot_count);
+  DEBUG_PRINTF("fast_reboot=%d\n\r",RtcReboot.fast_reboot_count);
   #endif
 }
 

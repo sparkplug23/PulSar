@@ -232,8 +232,8 @@
 //#endif
 // Energy (Range 130-139
 //#ifdef USE_MODULE_ENERGY_INTERFACE
-  #define D_INTERFACE_ENERGY_MODULE_CTR              "mEnergy"
-  #define D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR     "energy"
+  #define D_MODULE_ENERGY_INTERFACE_CTR              "mEnergy"
+  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "energy"
 //#endif
 // Lights (Range 140-169
 //#ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -276,9 +276,9 @@
   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
   #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
 //#endif
-//#ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-  #define D_MODULE_SENSORS_PZEM004T_MODBUS_CTR              "mPzem_AC"
-  #define D_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR              "powermeter_pzem"
+//#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+  #define D_MODULE_ENERGY_PZEM004T_CTR              "pzem004t"
+  #define D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR              "pzem004t"
 //#endif
 //#ifdef USE_MODULE_SENSORS_DHT
   #define D_MODULE_SENSORS_DHT_CTR               "mSensorsDHT"
@@ -316,44 +316,44 @@
   #define D_MODULE_SENSORS_PULSECOUNTER_CTR              "mPulseCounter"
   #define D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR              "pulsecounter"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_BLINDS
-  #define D_MODULE_CUSTOM_BLINDS_CTR              "mBlinds"
-  #define D_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR              "blinds"
+//#ifdef USE_MODULE_CONTROLLER_BLINDS
+  #define D_MODULE_CONTROLLER_BLINDS_CTR              "mBlinds"
+  #define D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR              "blinds"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_HEATING
-  #define D_MODULE_CUSTOM_HEATING_CTR              "mHeating"
-  #define D_MODULE_CUSTOM_HEATING_FRIENDLY_CTR              "heating"
+//#ifdef USE_MODULE_CONTROLLER_HEATING
+  #define D_MODULE_CONTROLLER_HEATING_CTR              "mHeating"
+  #define D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR              "heating"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_RADIATORFAN
-  #define D_MODULE_CUSTOM_RADIATORFAN_CTR              "mRadiatorFan"
-  #define D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
+//#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+  #define D_MODULE_CONTROLLER_RADIATORFAN_CTR              "mRadiatorFan"
+  #define D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-  #define D_MODULE_CUSTOM_CEILINGFAN_CTR               "mCeilingFan"
-  #define D_MODULE_CUSTOM_CEILINGFAN_FRIENDLY_CTR      "ceilingfan"
+//#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+  #define D_MODULE_CONTROLLER_CEILINGFAN_CTR               "mCeilingFan"
+  #define D_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR      "ceilingfan"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
-  #define D_MODULE_CUSTOM_IRTRANSMITTER_CTR              "infrared"
-  #define D_MODULE_CUSTOM_IRTRANSMITTER_FRIENDLY_CTR              "infrared"
+//#ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
+  #define D_MODULE_CONTROLLER_IRTRANSMITTER_CTR              "infrared"
+  #define D_MODULE_CONTROLLER_IRTRANSMITTER_FRIENDLY_CTR              "infrared"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_OILFURNACE
-  #define D_MODULE_CUSTOM_OILFURNACE_CTR              "mOilFurnace"
-  #define D_MODULE_CUSTOM_OILFURNACE_FRIENDLY_CTR              "oilfurnace"
+//#ifdef USE_MODULE_CONTROLLER_OILFURNACE
+  #define D_MODULE_CONTROLLER_OILFURNACE_CTR              "mOilFurnace"
+  #define D_MODULE_CONTROLLER_OILFURNACE_FRIENDLY_CTR              "oilfurnace"
 //#endif
-//#ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-  #define D_MODULE_CUSTOM_EXERCISEBIKE_CTR              "mExerciseBike"
-  #define D_MODULE_CUSTOM_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
+//#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
+  #define D_MODULE_CONTROLLER_EXERCISEBIKE_CTR              "mExerciseBike"
+  #define D_MODULE_CONTROLLER_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
 //#endif
 
 // currently fanpwm
-  #define D_MODULE_CUSTOM_FAN_CTR              "mFan"
-  #define D_MODULE_CUSTOM_FAN_FRIENDLY_CTR              "fan"
+  #define D_MODULE_CONTROLLER_FAN_CTR              "mFan"
+  #define D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR              "fan"
 
-#define D_MODULE_CUSTOM_SENSORCOLOURS_CTR "mSensorColours"
-#define D_MODULE_CUSTOM_SENSORCOLOURS_FRIENDLY_CTR "sensor_colours"
+#define D_MODULE_CONTROLLER_SENSORCOLOURS_CTR "mSensorColours"
+#define D_MODULE_CONTROLLER_SENSORCOLOURS_FRIENDLY_CTR "sensor_colours"
 
-#define D_MODULE_CUSTOM_TREADMILL_CTR "mTreadmill"
-#define D_MODULE_CUSTOM_TREADMILL_FRIENDLY_CTR "treadmill"
+#define D_MODULE_CONTROLLER_TREADMILL_CTR "mTreadmill"
+#define D_MODULE_CONTROLLER_TREADMILL_FRIENDLY_CTR "treadmill"
 
 #define D_MODULE_CONTROLLER_DOORBELL_CTR "doorbell"
 #define D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR "doorbell"

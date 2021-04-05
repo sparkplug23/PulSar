@@ -1,6 +1,6 @@
 #include "mOilFurnace.h"
 
-#ifdef USE_MODULE_CUSTOM_OILFURNACE
+#ifdef USE_MODULE_CONTROLLER_OILFURNACE
 
 
 // void CmndMqttUser(void)
@@ -963,7 +963,7 @@ void mOilFurnace::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_furnace_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_OILFURNACE_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_OILFURNACE_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

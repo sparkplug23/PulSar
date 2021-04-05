@@ -315,7 +315,7 @@
 //  #define USE_EXPRESSION                         // Add support for expression evaluation in rules (+3k2 code, +64 bytes mem)
 
 // -- Internal Analog input -----------------------
-#ifndef USE_MODULE_CUSTOM_BLINDS
+#ifndef USE_MODULE_CONTROLLER_BLINDS
   //#define USE_ADC_VCC                              // Display Vcc in Power status. Disable for use as Analog input on selected devices
 #endif
 

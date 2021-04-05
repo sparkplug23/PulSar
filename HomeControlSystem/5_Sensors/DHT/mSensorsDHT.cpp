@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_SENSORS_DHT
 
+const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_CTR = D_MODULE_SENSORS_DHT_CTR;
+const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_FRIENDLY_CTR = D_MODULE_SENSORS_DHT_FRIENDLY_CTR;
+
 
 void mSensorsDHT::Pre_Init(void){
 
@@ -397,7 +400,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
   for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
     if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))&&(sensor[sensor_id].instant.isvalid)){
 
-      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
         JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
@@ -486,7 +489,7 @@ void mSensorsDHT::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DHT_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

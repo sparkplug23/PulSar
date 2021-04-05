@@ -2122,19 +2122,6 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 //   // // }
 //   // // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
 
-//   // #ifdef USE_DISCOVERY
-//   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2%s"), (pCONT_set->Settings.flag_network.mdns_enabled) ? D_ENABLED : D_DISABLED);
-//   //   if (pCONT_set->Settings.flag_network.mdns_enabled) {
-//   // #ifdef USE_NETWORK_MDNS
-//   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_WEB_SERVER));
-//   // #else
-//   //     AppendBuffer_PI2(PSTR("}1" D_MDNS_ADVERTISE "}2" D_DISABLED));
-//   // #endif // USE_NETWORK_MDNS
-//   //   }
-//   // #else
-//   //   AppendBuffer_PI2(PSTR("}1" D_MDNS_DISCOVERY "}2" D_DISABLED));
-//   // #endif // USE_DISCOVERY
-
 //   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
 //   // AppendBuffer_PI2(PSTR("}1" "Module Config" "}2"));//,       ESP.getChipId());
 //   // // Class/Tasks info

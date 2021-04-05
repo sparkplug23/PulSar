@@ -3,6 +3,10 @@
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
 
 
+const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_DOORBELL_CTR;
+const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR = D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR;
+
+
 void mDoorBell::pre_init(void){
 
 
@@ -210,7 +214,7 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_method){
 
     JsonBuilderI->Start();
       char buffer[80];
-      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(D_MODULE_CONTROLLER_DOORBELL_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_CONTROLLER_DOORBELL_ID, 0, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&doorbell_switch.detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, doorbell_switch.isactive ? "detected": "over");
     JsonBuilderI->End();
@@ -293,7 +297,7 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_DOORBELL_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_DOORBELL_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

@@ -1,6 +1,8 @@
 #ifndef _USE_MODULE_DRIVERS_SHELLY_DIMMER_H
 #define _USE_MODULE_DRIVERS_SHELLY_DIMMER_H 0.3
 
+#define D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID 50
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
@@ -86,13 +88,28 @@
 
 #include <TasmotaSerial.h>
 
-class mShellyDimmer{
-
+class mShellyDimmer :
+  public mTaskerInterface
+{
   private:
   public:
     mShellyDimmer(){};
     int8_t Tasker(uint8_t function);
     
+    static const char* PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
+    static const char* PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mShellyDimmer);
+    };
+    #endif
+
+
     void init();
     void pre_init();
     int8_t pin = -1;

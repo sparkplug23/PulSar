@@ -40,7 +40,9 @@ int8_t mWiFi::Tasker(uint8_t function){
     break;
     case FUNC_LOOP: 
     
-  MDNS.update();
+      #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
+        MdnsUpdate();
+      #endif // USE_NETWORK_MDNS
     
     break;
     case FUNC_EVERY_SECOND:
@@ -64,11 +66,11 @@ int8_t mWiFi::Tasker(uint8_t function){
     break;
     case FUNC_WIFI_CONNECTED:
     
-#ifdef USE_DISCOVERY
-      StartMdns();
-#endif  // USE_DISCOVERY
+      #ifdef USE_NETWORK_MDNS
+        StartMdns();
+      #endif  // USE_NETWORK_MDNS
 
-break;
+    break;
   }
 
 
@@ -949,7 +951,7 @@ void mWiFi::WifiCheck(uint8_t param)
           if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0) && !connection.config_type) {
     //#endif /// LWIP_IPV6=1
     
-        // Serial.printf( " if ((WL_CONNECTED == WiFi.status())\n\r");
+        // DEBUG_PRINTF( " if ((WL_CONNECTED == WiFi.status())\n\r");
 
         //resting state, connected and healthy
 
@@ -977,7 +979,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
           } else {
             
-        Serial.printf( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
+        DEBUG_PRINTF( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
             WifiSetState(0);
             Mdns.begun = 0;
           }
@@ -1368,34 +1370,19 @@ bool mWiFi::WifiConfigCounter(void)
  * MDNS
 \*********************************************************************************************/
 
-
 #ifdef USE_DISCOVERY
+
 void mWiFi::StartMdns(void) {
-//  static uint8_t mdns_delayed_start = Settings.param[P_MDNS_DELAYED_START];
-
   // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
-    if (!Mdns.begun) {
-//      if (mdns_delayed_start) {
-//        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_ATTEMPTING_CONNECTION));
-//        mdns_delayed_start--;
-//      } else {
-//        mdns_delayed_start = Settings.param[P_MDNS_DELAYED_START];
-        MDNS.end(); // close existing or MDNS.begin will fail
-
-
-
-
-        Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);//TasmotaGlobal.hostname);
-
-AddLog_P(LOG_LEVEL_TEST, PSTR("mdns pCONT_set->Settings.system_name.device = %s"),pCONT_set->Settings.system_name.device);
-
-
-
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED));
-//      }
-    }
-  // }
+  if (!Mdns.begun) {
+    // close existing or MDNS.begin will fail
+    MDNS.end(); 
+    // Begin with devicename
+    Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);
+    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s" "with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),pCONT_set->Settings.system_name.device);
+  }
 }
+
 
 #ifdef MQTT_HOST_DISCOVERY
 void mWiFi::MqttDiscoverServer(void)
@@ -1408,22 +1395,21 @@ void mWiFi::MqttDiscoverServer(void)
 
   if (n > 0) {
     uint32_t i = 0;            // If the hostname isn't set, use the first record found.
-#ifdef MDNS_HOSTNAME
+    #ifdef MDNS_HOSTNAME
     for (i = n; i > 0; i--) {  // Search from last to first and use first if not found
       if (!strcmp(MDNS.hostname(i).c_str(), MDNS_HOSTNAME)) {
         break;                 // Stop at matching record
       }
     }
-#endif  // MDNS_HOSTNAME
+    #endif  // MDNS_HOSTNAME
     // SettingsUpdateText(SET_MQTT_HOST, MDNS.hostname(i).c_str());
     // Settings.mqtt_port = MDNS.port(i);
-
     // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
   }
 }
 #endif  // MQTT_HOST_DISCOVERY
 
-#ifdef WEBSERVER_ADVERTISE
+#ifdef WEBSERVER_HOST_DISCOVERY
 void mWiFi::MdnsAddServiceHttp(void) {
   if (1 == Mdns.begun) {
     Mdns.begun = 2;
@@ -1431,17 +1417,16 @@ void mWiFi::MdnsAddServiceHttp(void) {
     MDNS.addServiceTxt("http", "tcp", "devicetype", "tasmota");
   }
 }
-
 #ifdef ESP8266 //Not needed with esp32 mdns
 void mWiFi::MdnsUpdate(void) {
+  MDNS.update();
   if (2 == Mdns.begun) {
     MDNS.update(); // this is basically passpacket like a webserver
-   // being called in main loop so no logging
    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MDNS "MDNS.update"));
   }
 }
 #endif  // ESP8266
-#endif  // WEBSERVER_ADVERTISE
+#endif  // WEBSERVER_HOST_DISCOVERY
 #endif  // USE_DISCOVERY
 
 

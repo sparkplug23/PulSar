@@ -1,6 +1,8 @@
 #ifndef _MMOISTURESENSOR_H
 #define _MMOISTURESENSOR_H 0.1
 
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID 131
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_MOISTURE
@@ -23,6 +25,21 @@ class mMoistureSensor :
     // Tasker that is called on each loop
     int8_t Tasker(uint8_t function);
     // All SubTasks called by Tasker 
+    
+    static const char* PM_MODULE_SENSORS_MOTION_CTR;
+    static const char* PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mMoistureSensor);
+    };
+    #endif
+
+
 
     #define MOISTURE_DETECT_INIT() pinMode(MOISTURE_DIGITAL_PIN,INPUT_PULLUP)
     #ifdef MOISTURE_ISACTIVELOW

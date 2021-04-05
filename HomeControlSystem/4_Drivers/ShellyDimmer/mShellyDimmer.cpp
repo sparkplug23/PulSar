@@ -5,6 +5,11 @@
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
 
 
+const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
+const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
+
+
+
 // /*********************************************************************************************/
 
 void mShellyDimmer::init(void)
@@ -293,7 +298,7 @@ void mShellyDimmer::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_SHELLY_DIMMER_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids, 
     sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
     mqtt_handler_id

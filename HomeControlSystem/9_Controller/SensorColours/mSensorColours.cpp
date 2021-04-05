@@ -5,7 +5,7 @@
 
 
 
-#ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+#ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
 
 //Uses 433mhz radios, relays, buttons
 
@@ -763,7 +763,7 @@ void mSensorColours::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_SENSORCOLOURS_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_SENSORCOLOURS_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

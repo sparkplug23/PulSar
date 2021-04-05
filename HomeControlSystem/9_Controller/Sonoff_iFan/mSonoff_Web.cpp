@@ -1,6 +1,6 @@
 #include "mSonoffIFan.h"
 
-#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 
 
 

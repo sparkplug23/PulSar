@@ -37,7 +37,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
 
     if(jtok = jobj["Module"]){
       if(jtok.isStr()){
-        if((matched_id=pCONT->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
+        if((matched_id=pCONT->GetModuleIndexbyFriendlyName(jtok.getStr()))>=0){
           event->module_id = matched_id;
           data_buffer.isserviced++;
         }

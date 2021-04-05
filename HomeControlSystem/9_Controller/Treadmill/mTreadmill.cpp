@@ -1,6 +1,6 @@
 #include "mTreadmill.h"
 
-#ifdef USE_MODULE_CUSTOM_TREADMILL
+#ifdef USE_MODULE_CONTROLLER_TREADMILL
 
 
 void mTreadmill::pre_init(){
@@ -423,7 +423,7 @@ void mTreadmill::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_TREADMILL_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_TREADMILL_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

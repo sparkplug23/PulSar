@@ -87,6 +87,14 @@ class JsonBuilder{
     void AddKey(const char* key);
     void Level_Start(); //no key name 
 
+    bool BufferValid(){
+      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+      {
+        return false;
+      }
+      return true;
+    }
+
     template <typename T>
     T GetLength(){
       return writer.length;
@@ -120,7 +128,7 @@ class JsonBuilder{
       char buffer_id[50];
       uint8_t id = getIdentifierID4(value);
       GetIndentifierNameByID(id, buffer_id);
-      Serial.printf("%s id=%d %s \n\t", key, id, buffer_id);
+      DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
       #endif
       
       if(is_number_type<T>::value){ 
@@ -133,6 +141,7 @@ class JsonBuilder{
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value);
       }else
       if(is_float_type<T>::value){ 
+        // float f = static_cast<float>(value);
         float f = 0;     memcpy(&f,&value,sizeof(f));
         char fvalue[20]; dtostrfd2(f,3,fvalue);
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
@@ -157,9 +166,10 @@ class JsonBuilder{
       char buffer_id[50];
       uint8_t id = getIdentifierID4(value);
       GetIndentifierNameByID(id, buffer_id);
-      Serial.printf("%s id=%d %s \n\t", key, id, buffer_id);
+      DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
       #endif
       
+        // float f = reinterpret_cast<float>(value);
       if(is_number_type<T>::value){ 
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
       }else
@@ -169,7 +179,7 @@ class JsonBuilder{
       if(is_char_type<T>::value){   
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
       }else
-      if(is_float_type<T>::value){ 
+      if (is_float_type<T>::value){ 
         float f = 0;     memcpy(&f,&value,sizeof(f));
         char fvalue[20]; dtostrfd2(f,3,fvalue);
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
@@ -201,7 +211,7 @@ class JsonBuilder{
   char buffer_id[50];
   uint8_t id = getIdentifierID4(value);
   GetIndentifierNameByID(id, buffer_id);
-  Serial.printf("%s id=%d %s \n\t", key, id, buffer_id);
+  DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
   #endif
   
   if(is_number_type<T>::value){ 
@@ -217,16 +227,62 @@ class JsonBuilder{
     float f = 0;     memcpy(&f,&value,sizeof(f));
     char fvalue[20]; dtostrfd2(f,3,fvalue);
     *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+
+    // float f = static_cast<float>(value);
+    // char fvalue[20]; dtostrfd2(f,3,fvalue);
+    // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
   }
 
-  // Serial.printf("TEST TIME = %s\n\r",writer.buffer[0]);
+  // DEBUG_PRINTF("TEST TIME = %s\n\r",writer.buffer[0]);
 
 }
+
+  // template <typename T, typename U>
+  // void Array_AddValue(T* value_arr, U value_arr_len){
+  
+  //   if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)){ return; }
+
+  //   for(uint16_t index=0;index<value_arr_len;index++){
+
+  //     // Add comma for any value after first
+  //     if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
+
+  //     if(is_number_type<T>::value){ 
+  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
+  //     }else
+  //     if(is_char_type<T>::value){   
+  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
+  //     }else
+  //     if(is_string_type<T>::value){ 
+  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
+  //     }else
+  //     if(is_float_type<T>::value){ 
+  //       float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
+  //       char ctr[10]; dtostrfd2(f,3,ctr);
+  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%f",12.34);  
+
+  //   // float f = static_cast<float>(value_arr[index]);
+  //   // char fvalue[20]; dtostrfd2(f,3,fvalue);
+  //   // // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+  //   //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);  
+
+
+  //       // float f = reinterpret_cast<float>(value_arr[index*4]);
+  //       // // float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
+  //       // char ctr[10]; dtostrfd2(f,3,ctr);
+  //       // *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
+  //     }
+  //   }
+
+  // }
+
+
+
 
   template <typename T, typename U>
   void Array_AddValue(T* value_arr, U value_arr_len){
   
-    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)){ return; }
+    if(!BufferValid()){ return; }
 
     for(uint16_t index=0;index<value_arr_len;index++){
 
@@ -241,20 +297,53 @@ class JsonBuilder{
       }else
       if(is_string_type<T>::value){ 
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
-      }else
-      if(is_float_type<T>::value){ 
-        float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
-        char ctr[10]; dtostrfd2(f,3,ctr);
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
       }
+    //   else
+    //   if(is_float_type<T>::value){ 
+    //     float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
+    //     char ctr[10]; dtostrfd2(f,3,ctr);
+    //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%f",12.34);  
+
+    // // float f = static_cast<float>(value_arr[index]);
+    // // char fvalue[20]; dtostrfd2(f,3,fvalue);
+    // // // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+    // //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);  
+
+
+    //     // float f = reinterpret_cast<float>(value_arr[index*4]);
+    //     // // float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
+    //     // char ctr[10]; dtostrfd2(f,3,ctr);
+    //     // *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
+    //   }
     }
 
   }
+
+  
+  template <typename U>
+  void Array_AddValue_F(float* value_arr, U value_arr_len){
+  
+    if(!BufferValid()){ return; }
+    char ctr[10]; 
+
+    for(uint16_t index=0;index<value_arr_len;index++){
+      if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }      // Add comma for any value after first
+      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",dtostrfd2(value_arr[index],3,ctr));  
+    }
+
+  }
+
 
   template <typename T, typename U>
   void Array_AddArray(const char* key, T* value_arr, U value_arr_len){
     Array_Start(key);
     Array_AddValue(value_arr,value_arr_len);
+    Array_End();
+  }
+  template <typename U>
+  void Array_AddArray_F(const char* key, float* value_arr, U value_arr_len){
+    Array_Start(key);
+    Array_AddValue_F(value_arr,value_arr_len);
     Array_End();
   }
   // #endif

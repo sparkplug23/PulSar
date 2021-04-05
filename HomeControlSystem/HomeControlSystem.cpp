@@ -8,7 +8,6 @@
 
 // #define USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
 
-#define NO_GLOBAL_MDNS
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
@@ -84,12 +83,10 @@ void setup(void)
 
   pCONT_sup->init_FirmwareVersion();
 
-  
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
   #endif
 
-  
   // Load config from memory
   pCONT_set->SettingsDefault(); //preload minimal required
   #ifdef ENABLE_SETTINGS_STORAGE
@@ -151,25 +148,13 @@ void setup(void)
 
 }
 
-void Scheduler()
+void LoopTasker()
 {
 
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA
-
-  #ifdef ESP8266                     // Not needed with esp32 mdns
-// #ifdef USE_DISCOVERY
-// #ifdef USE_WEBSERVER
-// #ifdef WEBSERVER_ADVERTISE
-  pCONT_wif->MdnsUpdate();
-// #endif  // WEBSERVER_ADVERTISE
-// #endif  // USE_WEBSERVER
-// #endif  // USE_DISCOVERY
-#endif  // ESP8266
-
-
-  
+   
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
   
   if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
@@ -192,7 +177,7 @@ void loop(void)
   pCONT_sup->loop_start_millis = millis();
   WDT_RESET();
 
-  Scheduler();
+  LoopTasker();
     
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 
@@ -205,7 +190,7 @@ void loop(void)
   }
 
   if(pCONT_sup->loop_runtime_millis > 40){
-    Serial.printf("loop_runtime_millis=%d\n\r", pCONT_sup->loop_runtime_millis);
+    DEBUG_PRINTF("loop_runtime_millis=%d\n\r", pCONT_sup->loop_runtime_millis);
   }
 
   //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
@@ -246,11 +231,11 @@ void loop(void)
 
   DEBUG_LINE;
   // Create a debug mqtt packet for timings, of main loop and interface loops
-  // Serial.printf("%s=%d\r\n","tick",pCONT_sup->loop_runtime_millis);
-  // Serial.printf("%s=%d\r\n","tick",pCONT_sup->activity.cycles_per_sec);
+  // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->loop_runtime_millis);
+  // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->activity.cycles_per_sec);
   // uint32_t start_millis = millis();
   // AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC = %d \t %d"),loops_per_second,mtel.activity.cycles_per_sec);
-  // Serial.printf("ADD TIME = %d\n\r",millis()-start_millis);
+  // DEBUG_PRINTF("ADD TIME = %d\n\r",millis()-start_millis);
 
   pCONT_set->fSystemRestarted = false; //phase out and use module flag instead
 

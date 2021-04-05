@@ -1,9 +1,11 @@
 #ifndef _MCEILINGFAN_H
 #define _MCEILINGFAN_H 0.3
 
+#define D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID 179
+
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 
 //const char TEST_DLIST[] PROGMEM = {D_JSON_LIGHTPOWER "|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED"|" D_JSON_FANSPEED};
 // DEFINE_PGM_CTR(kListFanControls) "Light|Off|Low|Medium|High";
@@ -13,7 +15,9 @@ const uint8_t kIFan03Speed[MAX_FAN_SPEED +2] = { 0x00, 0x01, 0x03, 0x04, 0x05, 0
 const uint8_t kIFan03Sequence[MAX_FAN_SPEED][MAX_FAN_SPEED] = {{0, 2, 2, 2}, {0, 1, 2, 4}, {1, 1, 2, 5}, {4, 4, 5, 3}};
 
 
-class mSonoffIFan {
+class mSonoffIFan :
+  public mTaskerInterface
+{
 
   private:
   public:
@@ -25,6 +29,17 @@ class mSonoffIFan {
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
 
+    static const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR;
+    static const char* PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSonoffIFan);
+    };
+    #endif
     struct SETTINGS{
       uint8_t fEnableModule = false;
     }settings;

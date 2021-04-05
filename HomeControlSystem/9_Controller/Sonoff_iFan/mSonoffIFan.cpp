@@ -4,7 +4,10 @@
 // 4 Relays (1 Light + 3 Fan)
 // 433 mhz controller via serial sMCU
 
-#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+
+const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;
+const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR = D_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR;
 
 int8_t mSonoffIFan::Tasker(uint8_t function){
 
@@ -339,7 +342,7 @@ void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_SONOFF_IFAN_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_SONOFF_IFAN_ID,
     list_p, list_ids, sizeof(list_p)/sizeof(list_p[0]), mqtt_handler_id
   );
 

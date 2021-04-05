@@ -75,10 +75,10 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new X();
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-    pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new mShellyDimmer();
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-    pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new mCameraOV2640();
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
     pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new X();
@@ -88,7 +88,10 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
-    pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new X();
+    pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new mEnergy();
+  #endif
+  #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+    pModule[EM_MODULE_ENERGY_PZEM004T_MODBUS_ID] = new mPzem_AC();
   #endif
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -101,7 +104,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID] = new mAddressableLight();
   #endif
   #ifdef USE_MODULE_LIGHTS_PWM
-    pModule[EM_MODULE_LIGHTS_PWM_ID] = new X();
+    pModule[EM_MODULE_LIGHTS_PWM_ID] = new mPWMLight();
   #endif
   #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
     pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new X();
@@ -111,28 +114,25 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_SENSORS_BUTTONS_ID] = new mButtons();
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
-    pModule[EM_MODULE_SENSORS_SWITCHES_ID] = new X();
+    pModule[EM_MODULE_SENSORS_SWITCHES_ID] = new mSwitches();
   #endif
   #ifdef USE_MODULE_SENSORS_ANALOG
-    pModule[EM_MODULE_SENSORS_ANALOG_ID] = new X();
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    pModule[EM_MODULE_SENSORS_PZEM004T_MODBUS_ID] = new X();
+    pModule[EM_MODULE_SENSORS_ANALOG_ID] = new mSensorsAnalog();
   #endif
   #ifdef USE_MODULE_SENSORS_DHT
-    pModule[EM_MODULE_SENSORS_DHT_ID] = new X();
+    pModule[EM_MODULE_SENSORS_DHT_ID] = new mSensorsDHT();
   #endif
   #ifdef USE_MODULE_SENSORS_BME
     pModule[EM_MODULE_SENSORS_BME_ID] = new mSensorsBME();
   #endif
   #ifdef USE_MODULE_SENSORS_DS18B20
-    pModule[EM_MODULE_SENSORS_DB18S20_ID] = new X();
+    pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mSensorsDB18();
   #endif
   #ifdef USE_MODULE_SENSORS_INA219
     pModule[EM_MODULE_SENSORS_INA219_ID] = new X();
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
-    pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new X();
+    pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new mUltraSonicSensor();
   #endif
   #ifdef USE_MODULE_SENSORS_DOOR
     pModule[EM_MODULE_SENSORS_DOOR_ID] = new mDoorSensor();
@@ -147,38 +147,38 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID] = new X();
   #endif
   // Controllers
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    pModule[EM_MODULE_CUSTOM_BLINDS_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_BLINDS
+    pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    pModule[EM_MODULE_CUSTOM_HEATING_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_HEATING
+    pModule[EM_MODULE_CONTROLLER_HEATING_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    pModule[EM_MODULE_CUSTOM_RADIATORFAN_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+    pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();
   #endif
-  #ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
-    pModule[EM_MODULE_CUSTOM_IRTRANSMITTER_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
+    pModule[EM_MODULE_CONTROLLER_IRTRANSMITTER_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    pModule[EM_MODULE_CUSTOM_OILFURNACE_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_OILFURNACE
+    pModule[EM_MODULE_CONTROLLER_OILFURNACE_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    pModule[EM_MODULE_CUSTOM_EXERCISEBIKE_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
+    pModule[EM_MODULE_CONTROLLER_EXERCISEBIKE_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    pModule[EM_MODULE_CUSTOM_SONOFF_IFAN_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+    pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID] = new mSonoffIFan();
   #endif
-  #ifdef USE_MODULE_CUSTOM_FAN
-    pModule[EM_MODULE_CUSTOM_FAN_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_FAN
+    pModule[EM_MODULE_CONTROLLER_FAN_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_TREADMILL
-    pModule[EM_MODULE_CUSTOM_TREADMILL_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_TREADMILL
+    pModule[EM_MODULE_CONTROLLER_TREADMILL_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
-    pModule[EM_MODULE_CUSTOM_SENSORCOLOURS_ID] = new X();
+  #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
+    pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-    pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new X();
+    pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();
   #endif
 
 }
@@ -205,31 +205,24 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
-    switch_index = target_tasker;//target_tasker ? target_tasker : module_settings.list[i];
+    switch_index = target_tasker ? target_tasker : i;
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"),
-        switch_index, 
-        GetTaskName(function, buffer_taskname),
-        GetModuleFriendlyName(switch_index));
+      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();
     #endif
 
-    pModule[i]->Tasker(function);
+    pModule[switch_index]->Tasker(function);
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-    // Remember start millis
-    uint32_t end_millis = millis();
-    // Get this execution time 
-    uint32_t this_millis = end_millis - start_millis;
-    #if defined(DEBUG_EXECUTION_TIME)
-    // Get average
+    uint32_t end_millis = millis(); // Remember start millis
+    uint32_t this_millis = end_millis - start_millis; // Get this execution time 
+    #if defined(DEBUG_EXECUTION_TIME) // Get average
     //if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
       module_settings.execution_time_average_ms[i] += this_millis;
       module_settings.execution_time_average_ms[i] /= 2; //gets average
-
      // Get max
       if(this_millis > module_settings.execution_time_max_ms[i]){
         module_settings.execution_time_max_ms[i] = this_millis; // remember max
@@ -272,14 +265,14 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //5% = 1 bar, 20 bars total [B                   ]
       //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
       #ifndef DISABLE_SERIAL_LOGGING
-      Serial.printf("[");
+      DEBUG_PRINTF("[");
       for(uint8_t percent=0;percent<100;percent+=5){  
-        if(percent<boot_percentage){ Serial.print((char)219); }else{ Serial.printf(" "); }
+        if(percent<boot_percentage){ Serial.print((char)219); }else{ DEBUG_PRINTF(" "); }
       }      
       #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      Serial.printf("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
+      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
       #else
-      Serial.printf("] %03d\n\r",boot_percentage);
+      DEBUG_PRINTF("] %03d\n\r",boot_percentage);
       #endif // ENABLE_DEBUG_FUNCTION_NAMES
       #endif
       //}

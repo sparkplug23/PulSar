@@ -1,6 +1,8 @@
 #ifndef _mSensorsAnalog_H
 #define _mSensorsAnalog_H 1.0
 
+#define D_UNIQUE_MODULE_SENSORS_ANALOG_ID 122
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_ANALOG
@@ -20,6 +22,20 @@ class mSensorsAnalog :
     int8_t Tasker(uint8_t function);
     // All SubTasks called by Tasker 
     void EveryLoop();
+
+
+    static const char* PM_MODULE_SENSORS_ANALOG_CTR;
+    static const char* PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ANALOG_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ANALOG_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSensorsAnalog);
+    };
+    #endif
 
     void parse_JSONCommand();
 

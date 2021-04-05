@@ -1,17 +1,36 @@
 #ifndef _USE_MODULE_DRIVERS_CAMERA_OV2640_H
 #define _USE_MODULE_DRIVERS_CAMERA_OV2640_H 0.1
 
+#define D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID 51
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
 
 
-class mCameraOV2640{
+class mCameraOV2640 :
+  public mTaskerInterface
+{
 
   private:
   public:
     mCameraOV2640(){};
     int8_t Tasker(uint8_t function);
+
+    
+    static const char* PM_MODULE_DRIVERS_CAMERA_OV2640_CTR;
+    static const char* PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_CAMERA_OV2640_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_CAMERA_OV2640_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mCameraOV2640);
+    };
+    #endif
+
     
     void init();
     void pre_init();

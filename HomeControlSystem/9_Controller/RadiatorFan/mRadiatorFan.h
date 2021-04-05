@@ -1,9 +1,11 @@
 #ifndef _MRADIATORFAN_H
 #define _MRADIATORFAN_H 0.3
 
+#define D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID 175
+
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CUSTOM_RADIATORFAN
+#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
 
 
 #define FAN_RELAY_PIN RELAY_0_PIN 
@@ -19,8 +21,9 @@
 #define RAD_FAN_RELAY_ON HIGH //holds active state
 #define RAD_FAN_RELAY_OFF LOW //holds active state
 
-class mRadiatorFan{
-
+class mRadiatorFan :
+  public mTaskerInterface
+{
   public:
     mRadiatorFan(){};
     int8_t Tasker(uint8_t function);
@@ -33,6 +36,17 @@ class mRadiatorFan{
       uint8_t ischanged = false;
     }fan;
 
+    static const char* PM_MODULE_CONTROLLER_RADIATORFAN_CTR;
+    static const char* PM_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_RADIATORFAN_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mRadiatorFan);
+    };
+    #endif
     
 void SubTasker_MQTTSender();
 

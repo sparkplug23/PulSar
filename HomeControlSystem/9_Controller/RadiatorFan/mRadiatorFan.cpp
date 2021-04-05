@@ -1,5 +1,9 @@
 #include "mRadiatorFan.h"
-#ifdef USE_MODULE_CUSTOM_RADIATORFAN
+#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+
+const char* mRadiatorFan::PM_MODULE_CONTROLLER_RADIATORFAN_CTR = D_MODULE_CONTROLLER_RADIATORFAN_CTR;
+const char* mRadiatorFan::PM_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR = D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR;
+
 
 // Rename to something generic
 
@@ -57,7 +61,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(abs(millis()-tCheckForMaxTemp)>=60000*10){tCheckForMaxTemp=millis();
 
-     pCONT->mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
+     pCONT_mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
 
       // int tempsensorid;
       // if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){
@@ -131,7 +135,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function){ //Serial.println("mRadiatorFan::T
 int8_t mRadiatorFan::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_RADIATORFAN_FRIENDLY_CTR)>=0){
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -403,7 +407,7 @@ void mRadiatorFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_RADIATORFAN_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_RADIATORFAN_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

@@ -383,9 +383,9 @@
 
 //   if ((0 == payload) || (99 == payload)) {
 //     uint32_t maxfn = (devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : (!devices_present) ? 1 : devices_present;
-// #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+// #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 //     if (IsModuleIfan()) { maxfn = 1; }
-// #endif  // USE_MODULE_CUSTOM_SONOFF_IFAN
+// #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 //     stemp[0] = '\0';
 //     for (uint32_t i = 0; i < maxfn; i++) {
 //       snprintf_P(stemp, sizeof(stemp), PSTR("%s%s\"%s\"" ), stemp, (i > 0 ? "," : ""), EscapeJSONString(SettingsText(SET_FRIENDLYNAME1 +i)).c_str());
@@ -1335,7 +1335,7 @@ void mSupport::CmndRestart(void)
 //     Settings.flag.mqtt_serial_raw = (XdrvMailbox.index > 3) ? 1 : 0;  // CMND_SERIALSEND3
 //     if (XdrvMailbox.data_len > 0) {
 //       if (1 == XdrvMailbox.index) {
-//         Serial.printf("%s\n", XdrvMailbox.data);                    // "Hello Tiger\n"
+//         DEBUG_PRINTF("%s\n", XdrvMailbox.data);                    // "Hello Tiger\n"
 //       }
 //       else if (2 == XdrvMailbox.index || 4 == XdrvMailbox.index) {
 //         for (uint32_t i = 0; i < XdrvMailbox.data_len; i++) {
@@ -1344,7 +1344,7 @@ void mSupport::CmndRestart(void)
 //       }
 //       else if (3 == XdrvMailbox.index) {
 //         uint32_t dat_len = XdrvMailbox.data_len;
-//         Serial.printf("%s", Unescape(XdrvMailbox.data, &dat_len));  // "Hello\f"
+//         DEBUG_PRINTF("%s", Unescape(XdrvMailbox.data, &dat_len));  // "Hello\f"
 //       }
 //       else if (5 == XdrvMailbox.index) {
 //         SerialSendRaw(RemoveSpace(XdrvMailbox.data));               // "AA004566" as hex values
@@ -2636,7 +2636,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //       Settings.flag_system.mqtt_serial_raw = (index > 3) ? 1 : 0;
 //       if (data_len > 0) {
 //         if (1 == index) {
-//           Serial.printf("%s\n", dataBuf);                    // "Hello Tiger\n"
+//           DEBUG_PRINTF("%s\n", dataBuf);                    // "Hello Tiger\n"
 //         }
 //         else if (2 == index || 4 == index) {
 //           for (uint32_t i = 0; i < data_len; i++) {
@@ -2645,7 +2645,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         }
 //         else if (3 == index) {
 //           uint16_t dat_len = data_len;
-//           Serial.printf("%s", Unescape(dataBuf, &dat_len));  // "Hello\f"
+//           DEBUG_PRINTF("%s", Unescape(dataBuf, &dat_len));  // "Hello\f"
 //         }
 //         else if (5 == index) {
 //           SerialSendRaw(RemoveSpace(dataBuf));               // "AA004566" as hex values

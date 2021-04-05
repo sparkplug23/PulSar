@@ -3,7 +3,7 @@
 
 // Make custom controller, with motor a driver and sensor as analog
 
-#ifdef USE_MODULE_CUSTOM_BLINDS
+#ifdef USE_MODULE_CONTROLLER_BLINDS
 
 
 
@@ -62,7 +62,7 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_BLINDS_FRIENDLY_CTR));
+      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;

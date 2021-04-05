@@ -108,8 +108,10 @@
 #define ENABLE_MQTT_DEBUG_TELEMETRY
 #define USE_MQTT_RETAINED_VERSION_HISTORY_CHECK
 
+#define USE_DEBUG_CLASS_SIZE
+
 //#define SEND_TEMPLATES_OVER_MQTT
-// #define USE_MODULE_NETWORK_MQTT
+#define USE_MODULE_NETWORK_MQTT
 #define MQTT_HOST              "192.168.1.65"    // [MqttHost]
 #define MQTT_FINGERPRINT1      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint1]
 #define MQTT_FINGERPRINT2      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint2]
@@ -129,8 +131,6 @@
 
 // -- MQTT topics ---------------------------------
 #define MQTT_FULLTOPIC         "%topic%/%prefix%/" // [FullTopic] Subscribe and Publish full topic name - Legacy topic
-
-#define MQTT_HOST_DISCOVERY
 
 //#define ENABLE_RESTART_ON_MQTT_LOST
 
@@ -301,11 +301,9 @@
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
-  //#define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
+  #define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
   #define MQTT_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
-// -- mDNS ----------------------------------------
-// #define USE_NETWORK_MDNS           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)
-
+  #define WEBSERVER_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
 
 
 // -- Time ----------------------------------------
@@ -320,7 +318,7 @@
 //  #define USE_EXPRESSION                         // Add support for expression evaluation in rules (+3k2 code, +64 bytes mem)
 
 // -- Internal Analog input -----------------------
-#ifndef USE_MODULE_CUSTOM_BLINDS
+#ifndef USE_MODULE_CONTROLLER_BLINDS
   //#define USE_ADC_VCC                              // Display Vcc in Power status. Disable for use as Analog input on selected devices
 #endif
 

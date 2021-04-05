@@ -1,6 +1,6 @@
 #include "mRadiatorFan.h"
 
-#ifdef USE_MODULE_CUSTOM_RADIATORFAN
+#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
 
 
 void mRadiatorFan::parse_JSONCommand(void){

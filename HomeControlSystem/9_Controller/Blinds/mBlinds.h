@@ -3,7 +3,7 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#ifdef USE_MODULE_CUSTOM_BLINDS
+#ifdef USE_MODULE_CONTROLLER_BLINDS
 
 #include "ArduinoJson.h"
 

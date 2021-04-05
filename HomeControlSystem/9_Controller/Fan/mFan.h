@@ -1,11 +1,11 @@
-#ifndef _MCUSE_MODULE_CUSTOM_FANEILINGFAN_H
-#define _MCUSE_MODULE_CUSTOM_FANEILINGFAN_H 0.3
+#ifndef _MCUSE_MODULE_CONTROLLER_FANEILINGFAN_H
+#define _MCUSE_MODULE_CONTROLLER_FANEILINGFAN_H 0.3
 
 // PWM Fan and Sonoff Fan to be brought together? One fan controller, different output methods
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CUSTOM_FAN
+#ifdef USE_MODULE_CONTROLLER_FAN
 
 #include "1_TaskerManager/mTaskerManager.h"
 

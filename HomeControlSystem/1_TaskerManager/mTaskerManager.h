@@ -87,7 +87,6 @@ enum FUNCTION_RESULT_IDS{
 // Libraries
 #include <StreamString.h>                   // Webserver, Updater
 
-// #define NO_GLOBAL_MDNS
 #ifdef USE_ARDUINO_OTA
   #include <ArduinoOTA.h>                   // Arduino OTA
 #endif  // USE_ARDUINO_OTA
@@ -244,6 +243,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_ENERGY_INTERFACE
     EM_MODULE_ENERGY_INTERFACE_ID,
   #endif
+  #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+    EM_MODULE_ENERGY_PZEM004T_MODBUS_ID,
+  #endif
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
     EM_MODULE_LIGHTS_INTERFACE_ID,
@@ -269,9 +271,6 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_SENSORS_ANALOG
     EM_MODULE_SENSORS_ANALOG_ID,
-  #endif
-  #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-    EM_MODULE_SENSORS_PZEM004T_MODBUS_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_DHT
     EM_MODULE_SENSORS_DHT_ID,
@@ -301,35 +300,35 @@ enum MODULE_IDS{
     PM_MODULE_SENSORS_PULSECOUNTER_ID,
   #endif
   // Controllers
-  #ifdef USE_MODULE_CUSTOM_BLINDS
-    EM_MODULE_CUSTOM_BLINDS_ID,
+  #ifdef USE_MODULE_CONTROLLER_BLINDS
+    EM_MODULE_CONTROLLER_BLINDS_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_HEATING
-    EM_MODULE_CUSTOM_HEATING_ID,
+  #ifdef USE_MODULE_CONTROLLER_HEATING
+    EM_MODULE_CONTROLLER_HEATING_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_RADIATORFAN
-    EM_MODULE_CUSTOM_RADIATORFAN_ID,
+  #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+    EM_MODULE_CONTROLLER_RADIATORFAN_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
-    EM_MODULE_CUSTOM_IRTRANSMITTER_ID,
+  #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
+    EM_MODULE_CONTROLLER_IRTRANSMITTER_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_OILFURNACE
-    EM_MODULE_CUSTOM_OILFURNACE_ID,
+  #ifdef USE_MODULE_CONTROLLER_OILFURNACE
+    EM_MODULE_CONTROLLER_OILFURNACE_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
-    EM_MODULE_CUSTOM_EXERCISEBIKE_ID,
+  #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
+    EM_MODULE_CONTROLLER_EXERCISEBIKE_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
-    EM_MODULE_CUSTOM_SONOFF_IFAN_ID,
+  #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+    EM_MODULE_CONTROLLER_SONOFF_IFAN_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_FAN
-    EM_MODULE_CUSTOM_FAN_ID,
+  #ifdef USE_MODULE_CONTROLLER_FAN
+    EM_MODULE_CONTROLLER_FAN_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_TREADMILL
-    EM_MODULE_CUSTOM_TREADMILL_ID,
+  #ifdef USE_MODULE_CONTROLLER_TREADMILL
+    EM_MODULE_CONTROLLER_TREADMILL_ID,
   #endif
-  #ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
-    EM_MODULE_CUSTOM_SENSORCOLOURS_ID,
+  #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
+    EM_MODULE_CONTROLLER_SENSORCOLOURS_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     EM_MODULE_CONTROLLER_DOORBELL_ID,
@@ -455,7 +454,11 @@ enum MODULE_IDS{
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
   #include "7_Energy/_Interface/mEnergy.h"
-  #define pCONT_iEnergy                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_ENERGY_ID])
+  #define pCONT_iEnergy                           static_cast<mEnergy*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
+#endif
+#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+  #include "7_Energy/PowerMeter/mPzem_AC.h"
+  #define pCONT_pzem                            static_cast<mPzem_AC*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_MODBUS_ID])
 #endif
 
 // Lights (Range 140-169)
@@ -493,10 +496,6 @@ enum MODULE_IDS{
   #include "5_Sensors/Analog/mSensorsAnalog.h"
   #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
-  #include "7_Energy/PowerMeter/mPzem_AC.h"
-  #define pCONT_pzem                            static_cast<mPzem_AC*>(pCONT->pModule[EM_MODULE_SENSORS_PZEM004T_MODBUS_ID])
-#endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/DHT/mSensorsDHT.h"
   #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
@@ -522,7 +521,7 @@ enum MODULE_IDS{
   #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOTION
-  #include "5_Sensors/PIR/mMotionSensor.h"
+  #include "5_Sensors/Motion/mMotionSensor.h"
   #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
@@ -535,49 +534,49 @@ enum MODULE_IDS{
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
-#ifdef USE_MODULE_CUSTOM_BLINDS
+#ifdef USE_MODULE_CONTROLLER_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
   #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING
   #include "9_Controller/Heating/mHeating.h"
   #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_RADIATORFAN
+#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"
-  #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CUSTOM_RADIATORFAN_ID])
+  #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_IRTRANSMITTER
+#ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
   #define pCONT_ir                              static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_OILFURNACE
+#ifdef USE_MODULE_CONTROLLER_OILFURNACE
   #include "9_Controller/OilFurnace/mOilFurnace.h"
-  #define pCONT_sbut                            static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CUSTOM_OILFURNACE_ID])
+  #define pCONT_sbut                            static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CONTROLLER_OILFURNACE_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
   #include "9_Controller/ExerciseBike/mExerciseBike.h"
-  #define pCONT_bike                            static_cast<mExerciseBike*>(pCONT->pModule[EM_MODULE_CUSTOM_EXERCISEBIKE_ID])
+  #define pCONT_bike                            static_cast<mExerciseBike*>(pCONT->pModule[EM_MODULE_CONTROLLER_EXERCISEBIKE_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
   #include "9_Controller/Sonoff_iFan/mSonoffIFan.h"
-  #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CUSTOM_SONOFF_IFAN_ID])
+  #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_FAN
+#ifdef USE_MODULE_CONTROLLER_FAN
   #include "9_Controller/Fan/mFan.h"
-  #define pCONT_mfan                            static_cast<mFan*>(pCONT->pModule[EM_MODULE_CUSTOM_FAN_ID])
+  #define pCONT_mfan                            static_cast<mFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_FAN_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_TREADMILL
+#ifdef USE_MODULE_CONTROLLER_TREADMILL
   #include "9_Controller/Treadmill/mTreadmill.h"
-  #define pCONT_sbut                            static_cast<mTreadmill*>(pCONT->pModule[EM_MODULE_CUSTOM_TREADMILL_ID])
+  #define pCONT_sbut                            static_cast<mTreadmill*>(pCONT->pModule[EM_MODULE_CONTROLLER_TREADMILL_ID])
 #endif
-#ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+#ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
   #include "9_Controller/SensorColours/mSensorColours.h"
-  #define pCONT_msenscol                        static_cast<mSensorColours*>(pCONT->pModule[EM_MODULE_CUSTOM_SENSORCOLOURS_ID])
+  #define pCONT_msenscol                        static_cast<mSensorColours*>(pCONT->pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
   #include "9_Controller/DoorBell/mDoorBell.h"
-  #define pCONT_sbut                            static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
+  #define pCONT_doorbell                        static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
 #endif
 
 #include  "1_TaskerManager/mTaskerInterface.h"

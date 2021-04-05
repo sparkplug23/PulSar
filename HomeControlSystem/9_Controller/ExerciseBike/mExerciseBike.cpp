@@ -1,6 +1,6 @@
 #include "mExerciseBike.h"
 
-#ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE
+#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
 
 mExerciseBike::mExerciseBike(void){}
 
@@ -517,7 +517,7 @@ void mExerciseBike::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     } // switch
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_EXERCISEBIKE_ID,mqtthandler_ptr); }
+    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CONTROLLER_EXERCISEBIKE_ID,mqtthandler_ptr); }
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

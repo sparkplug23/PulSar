@@ -1,6 +1,8 @@
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
+#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID    131
+
 #include "1_TaskerManager/mTaskerManager.h"
 // #include "2_CoreSystem/mBaseConfig.h"
 
@@ -8,9 +10,9 @@
 // #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 // #include "2_CoreSystem/mSystemConfig.h"
 
-// // #define USE_MODULE_SENSORS_PZEM004T_MODBUS
+// // #define USE_MODULE_ENERGY_PZEM004T_MODBUS
 
-#ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
 
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
@@ -18,7 +20,9 @@
 // #include "1_TaskerManager/mTaskerManager.h"
 
 
-class mPzem_AC{
+class mPzem_AC :
+  public mTaskerInterface
+{
   public:
 	  mPzem_AC(){};
     void Pre_Init(void);
@@ -26,6 +30,19 @@ class mPzem_AC{
     bool parse_Command();
     uint8_t sReadSensor = false;
     
+    static const char* PM_MODULE_ENERGY_PZEM004T_CTR;
+    static const char* PM_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_ENERGY_PZEM004T_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_PZEM004T_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mPzem_AC);
+    };
+    #endif
+
+
     void EveryLoop();
     struct SETTINGS{
       uint8_t fEnableSensor = false;
@@ -97,14 +114,9 @@ class mPzem_AC{
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mPzem_AC>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPzem_AC> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mPzem_AC> mqtthandler_sensor_ifchanged;
     struct handler<mPzem_AC> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);

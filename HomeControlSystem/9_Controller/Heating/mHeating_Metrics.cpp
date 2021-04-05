@@ -7,7 +7,7 @@
  * */
 
 
-#ifdef USE_MODULE_CUSTOM_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING
 
 // void mHeating::pre_init(void){
 
@@ -1807,9 +1807,9 @@
 // int8_t mHeating::CheckAndExecute_JSONCommands(){
 
 //   // Check if instruction is for me
-//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_HEATING_FRIENDLY_CTR)>=0){
+//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CUSTOM_HEATING_FRIENDLY_CTR));
+//     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR));
 //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     parse_JSONCommand();
@@ -2126,7 +2126,7 @@
 //   };
 
 //   for(uint8_t list_id=0;list_id<sizeof(functionhandler_list_ptr)/sizeof(functionhandler_list_ptr[0]);list_id++){
-//     pCONT_sup->FunctionHandler_Call(*this,D_MODULE_CUSTOM_HEATING_ID,functionhandler_list_ptr[list_id]); 
+//     pCONT_sup->FunctionHandler_Call(*this,D_MODULE_CONTROLLER_HEATING_ID,functionhandler_list_ptr[list_id]); 
 //   }   
   
 // }
@@ -2460,7 +2460,7 @@
 //     &mqtthandler_relays_teleperiod
 //   };
 
-//   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CUSTOM_HEATING_ID,
+//   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_CONTROLLER_HEATING_ID,
 //     mqtthandler_list_ptr, mqtthandler_list_ids,
 //     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
 //     mqtt_handler_id

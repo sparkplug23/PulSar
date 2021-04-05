@@ -1,14 +1,14 @@
 #include "mSonoffIFan.h"
 
-#ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 
 
 int8_t mSonoffIFan::CheckAndExecute_JSONCommands(){
 
   // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CUSTOM_FAN_FRIENDLY_CTR)>=0){
+  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CUSTOM_FAN_FRIENDLY_CTR));
+    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     

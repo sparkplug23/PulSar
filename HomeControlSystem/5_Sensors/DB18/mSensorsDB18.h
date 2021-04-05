@@ -1,6 +1,8 @@
 #ifndef MSENSORSDB_H
 #define MSENSORSDB_H 0.3
 
+#define D_UNIQUE_MODULE_SENSORS_DB18_ID 127
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_DS18B20
@@ -29,6 +31,18 @@ class mSensorsDB18 :
     void Init(void);
     void Pre_Init();
     
+    static const char* PM_MODULE_SENSORS_DB18_CTR;
+    static const char* PM_MODULE_SENSORS_DB18_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DB18_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DB18_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DB18_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSensorsDB18);
+    };
+    #endif
+
     struct SETTINGS{
       uint8_t  fEnableSensor = true;
       uint8_t  nSensorsFound = 0; // count of sensors found    n:number found, c:case number for switches

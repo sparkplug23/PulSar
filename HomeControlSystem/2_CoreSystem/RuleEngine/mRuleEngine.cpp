@@ -143,6 +143,12 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           true  // runnig a rule, so don't call this loop back into this function
         );
 
+        AddLog_P(LOG_LEVEL_TEST, PSTR("Tasker_Interface(%d,%d,%d)"),
+          rules[rule_index].command.function_id, // function the previous trigger is linked to
+          rules[rule_index].command.module_id, //target module
+          true  // runnig a rule, so don't call this loop back into this function
+          );
+
         // Populate any jsoncommands to be executed
         if(rules[rule_index].command.json_commands_dlist_id>=0){
 

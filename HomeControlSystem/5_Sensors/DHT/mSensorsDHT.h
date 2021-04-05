@@ -1,6 +1,8 @@
 #ifndef MSENSORSDHT_H
 #define MSENSORSDHT_H 0.2
 
+#define D_UNIQUE_MODULE_SENSORS_DHT_ID 125
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_DHT
@@ -20,7 +22,7 @@ class DHTesp;
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mSensorsDHT :
-  public: mTaskerInterface
+  public mTaskerInterface
 {
 
   private:
@@ -33,6 +35,18 @@ class mSensorsDHT :
     #define MAX_SENSORS 4
     int8_t pin[MAX_SENSORS] = {-1,-1,-1,-1};
     // DHTesp* dht[MAX_SENSORS];
+
+    static const char* PM_MODULE_SENSORS_DHT_CTR;
+    static const char* PM_MODULE_SENSORS_DHT_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DHT_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DHT_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DHT_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSensorsDHT);
+    };
+    #endif
 
     
   enum {

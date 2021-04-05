@@ -181,7 +181,7 @@ class mAnimatorLight :
     }settings;
   
     void SetPixelColor(uint16_t indexPixel, RgbcctColor color);
-    RgbcctColor GetPixelColor(uint16_t indexPixel);
+    RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
     
     #if defined(ESP8266)
       #if defined(USE_WS28XX_METHOD_800KBPS)

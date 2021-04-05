@@ -35,6 +35,13 @@ class mRelays :
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RELAY_ID; }
 
     
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mRelays);
+    };
+    #endif
+
+
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 

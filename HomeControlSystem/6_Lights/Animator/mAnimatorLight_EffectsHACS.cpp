@@ -868,7 +868,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
 
   AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  animation_colours_rgbcct.StartingColor = pCONT_iLight->GetPixelColourHardwareInterface();
+  animation_colours_rgbcct.StartingColor = GetPixelColor();
+  // GetPixelColourHardwareInterface();
+
+  AddLog_P(LOG_LEVEL_TEST, PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
+    
+
   // Call the animator to blend from previous to new
   this->setAnimFunctionCallback(
     [this](const AnimationParam& param){

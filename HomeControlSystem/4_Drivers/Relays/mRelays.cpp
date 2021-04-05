@@ -123,7 +123,7 @@ int8_t mRelays::Tasker(uint8_t function){
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
+    #ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
@@ -665,7 +665,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
   pCONT_sup->ShowSource(source);
 
-// #ifdef USE_MODULE_CUSTOM_SONOFF_IFAN
+// #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 //   if (IsModuleIfan()) {
 //     blink_mask &= 1;                 // No blinking on the fan relays
 //     Settings.flag_system.interlock = 0;     // No interlock mode as it is already done by the microcontroller - CMND_INTERLOCK - Enable/disable interlock
@@ -673,7 +673,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 //     Settings.pulse_timer[2] = 0;
 //     Settings.pulse_timer[3] = 0;
 //   }
-// #endif  // USE_MODULE_CUSTOM_SONOFF_IFAN
+// #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 
   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteCommandPower(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
 

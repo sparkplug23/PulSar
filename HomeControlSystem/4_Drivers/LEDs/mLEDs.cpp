@@ -822,7 +822,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     } // switch
 
 //     // Pass handlers into command to test and (ifneeded) execute
-//     if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CUSTOM_N_ID,mqtthandler_ptr); }
+//     if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CONTROLLER_N_ID,mqtthandler_ptr); }
 
 //     // stop searching
 //     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

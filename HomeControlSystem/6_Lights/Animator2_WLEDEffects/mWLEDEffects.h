@@ -322,10 +322,6 @@ DEFINE_PGM_CTR(PM_FX_MODE_CHUNCHUN_CTR)               D_FX_MODE_CHUNCHUN_CTR;
 #define MAX_LEDS_WLED 1500
 #define MAX_LEDS_DMA 500
 
-// enable additional debug output
-#define DEBUG_PRINT(x) Serial.print(x)
-#define DEBUG_PRINTLN(x) Serial.println(x)
-#define DEBUG_PRINTF(x) Serial.printf(x)  
 
 // GLOBAL VARIABLES
 // both declared and defined in header (solution from http://www.keil.com/support/docs/1868.htm)

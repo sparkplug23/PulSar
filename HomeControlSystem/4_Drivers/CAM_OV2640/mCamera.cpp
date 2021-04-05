@@ -3,6 +3,13 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
+
+
+const char* mCameraOV2640::PM_MODULE_DRIVERS_CAMERA_OV2640_CTR = D_MODULE_DRIVERS_CAMERA_OV2640_CTR;
+const char* mCameraOV2640::PM_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR = D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR;
+
+
+
 /*
 
   This is a simple MJPEG streaming webserver implemented for AI-Thinker ESP32-CAM
@@ -1162,7 +1169,7 @@ void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_CAMERA_OV2640_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids, 
     sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
     mqtt_handler_id

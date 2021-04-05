@@ -1,27 +1,47 @@
 #include "mPzem_AC.h"
 
-#ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+
+const char* mPzem_AC::PM_MODULE_ENERGY_PZEM004T_CTR = D_MODULE_ENERGY_PZEM004T_CTR;
+const char* mPzem_AC::PM_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR = D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR;
 
 void mPzem_AC::Pre_Init(void)
 {
+  #ifdef ESP8266
   if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
     pCONT_set->energy_flg = pCONT_iEnergy->ENERGY_MODULE_PZEM004TV3_ID;
     settings.fEnableSensor = true;
   }
+  #else
+  pCONT_set->energy_flg = pCONT_iEnergy->ENERGY_MODULE_PZEM004TV3_ID;
+  settings.fEnableSensor = true;
+
+  #endif//
 }
 
 
 void mPzem_AC::Init(void)
 {
+
+  #ifdef ESP8266
   PzemAcModbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM016_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+  #endif
+
+  #ifdef USE_DEVFEATURE_ENABLE_PZEM004T_SERIAL2
+  PzemAcModbus = new TasmotaModbus(16, 17);
+  #endif
+
+
   uint8_t result = PzemAcModbus->Begin(9600);
+    AddLog_P(LOG_LEVEL_TEST, PSTR("PzemAcModbus result = %d"),result);
   if (result) {
+    AddLog_P(LOG_LEVEL_TEST, PSTR("PzemAcModbus result = %d"),result);
     if (2 == result) { pCONT_sup->ClaimSerial(); }   // If serial0 is used, disable logging
     #ifdef DEVICE_CONSUMERUNIT
-      pCONT_iEnergy->Energy.phase_count = 8;  // Start off with three phases
+      pCONT_iEnergy->Energy.phase_count = 8;
     #endif 
     #ifdef DEVICE_PZEM_TESTER
-      pCONT_iEnergy->Energy.phase_count = 2;  // Start off with three phases
+      pCONT_iEnergy->Energy.phase_count = 2;
     #endif
 
     PzemAc.phase = 0;
@@ -67,6 +87,8 @@ void mPzem_AC::ReadAndParse(void)
         pCONT_iEnergy->Energy.frequency[PzemAc.phase]     = pzem_modbus[PzemAc.phase].frequency;  
         pCONT_iEnergy->Energy.power_factor[PzemAc.phase]  = pzem_modbus[PzemAc.phase].power_factor;  
         pCONT_iEnergy->Energy.energy2[PzemAc.phase]       = pzem_modbus[PzemAc.phase].energy;  
+
+        // Serial.println(pCONT_iEnergy->Energy.voltage[PzemAc.phase]);
 
         //temp fix
         pCONT_iEnergy->Energy.energy += pCONT_iEnergy->Energy.energy2[PzemAc.phase];
@@ -180,7 +202,6 @@ int8_t mPzem_AC::Tasker(uint8_t function){
 
   // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
 
-  // Only continue to remaining functions if sensor has been detected and enabled
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
@@ -189,22 +210,6 @@ int8_t mPzem_AC::Tasker(uint8_t function){
     *******************/
     case FUNC_INIT:
       Init();
-    break;
-    /************
-     * SETTINGS SECTION * 
-    *******************/
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-      // Settings_Load();
-    break;
-    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-      // Settings_Save();
-    break;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-      // Settings_Default();
-    break;
-    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-      // Settings_Default();
-      // pCONT_set->SettingsSave(2);
     break;
     /************
      * PERIODIC SECTION * 
@@ -237,36 +242,39 @@ int8_t mPzem_AC::Tasker(uint8_t function){
 
 uint8_t mPzem_AC::ConstructJSON_Settings(uint8_t json_method){
 
-  D_DATA_BUFFER_CLEAR();
-  // StaticJsonDocument<400> doc;
-  // JsonObject root = doc.to<JsonObject>();
+  JsonBuilderI->Start();
 
-  // root["json_teleperiod_level"] = pCONT_set->GetTelePeriodJsonLevelCtr();
-
-  // data_buffer.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer.payload.ctr);
+  JsonBuilderI->Add(D_JSON_CHANNELCOUNT,         0);
   
-  // return data_buffer.payload.len>3?true:false;
 
-  return 0;
+  return JsonBuilderI->End();
 
 }
 
 
 uint8_t mPzem_AC::ConstructJSON_Sensor(uint8_t json_method){
 
-  D_DATA_BUFFER_CLEAR();
 
-  // DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
-  // JsonObject root = doc.to<JsonObject>();
+  JsonBuilderI->Start();
 
-  // uint8_t ischanged = false;
+  JsonBuilderI->Add(D_JSON_VOLTAGE, pzem_modbus[0].voltage);
+  
 
-  // char channel_ctr[3];
-  // memset(channel_ctr,0,sizeof(channel_ctr));
-  // // sprintf(channel_ctr,"%02d",channel);
+  return JsonBuilderI->End();
 
-  return 0;
+
+  // D_DATA_BUFFER_CLEAR();
+
+  // // DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
+  // // JsonObject root = doc.to<JsonObject>();
+
+  // // uint8_t ischanged = false;
+
+  // // char channel_ctr[3];
+  // // memset(channel_ctr,0,sizeof(channel_ctr));
+  // // // sprintf(channel_ctr,"%02d",channel);
+
+  // return 0;
 
   // //   JsonObject kwh_per_minute_obj = root.createNestedObject("kwh_stats"); 
   
@@ -322,6 +330,8 @@ uint8_t mPzem_AC::ConstructJSON_Sensor(uint8_t json_method){
 ********************************************************************************************************************************************/
 
 void mPzem_AC::MQTTHandler_Init(){
+
+  struct handler<mPzem_AC>* mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -387,7 +397,7 @@ void mPzem_AC::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_PZEM004T_MODBUS_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_PZEM004T_MODBUS_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

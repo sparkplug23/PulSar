@@ -22,7 +22,7 @@ return potato;
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
 #else
-#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1200
+#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1500
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
 #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
@@ -330,7 +330,7 @@ const uint8_t BOOT_LOOP_TIME = 10;         // Number of seconds to stop detectin
 // const uint16_t SERIALLOG_TIMER = 600;       // Seconds to disable SerialLog
 // const uint8_t OTA_ATTEMPTS = 5;             // Number of times to try fetching the new firmware
 
-// const uint16_t FLOATSZ = 16;                // Max number of characters in float result from dtostrfd (max 32)
+const uint16_t FLOATSZ = 16;                // Max number of characters in float result from dtostrfd (max 32)
 // // const uint16_t INPUT_BUFFER_SIZE = 520;     // Max number of characters in (serial and http) command buffer
 // const uint16_t CMDSZ = 2;                  // Max number of characters in command
 // const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
@@ -464,6 +464,8 @@ enum LightSchemes {LS_POWER, LS_WAKEUP, LS_CYCLEUP, LS_CYCLEDN, LS_RANDOM, LS_MA
 
 // enum COMMAND_FUNCTIONS_IDS{}
 
+
+//move functions into taskermanager
 enum XsnsFunctions {
   // Init stuff (in importance of boot)
   

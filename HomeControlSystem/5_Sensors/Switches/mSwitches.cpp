@@ -5,6 +5,11 @@
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
 
+
+const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
+const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR = D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
+
+
 int8_t mSwitches::Tasker(uint8_t function){
 
   switch(function){
@@ -320,7 +325,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
           //update the event
           #ifdef USE_MODULE_CORE_RULES
           pCONT_rules->Reset();
-          pCONT_rules->Add_All(D_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
+          pCONT_rules->Add_All(EM_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
           #endif // USE_MODULE_CORE_RULES
         }
@@ -453,7 +458,7 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
     if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
       
-      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_SWITCHES_ID, sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_SWITCHES_ID, sensor_id, buffer, sizeof(buffer)));
         JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
         JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
         JsonBuilderI->Add("ischanged", switches[sensor_id].ischanged);
@@ -547,7 +552,7 @@ void mSwitches::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_SWITCHES_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_SWITCHES_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

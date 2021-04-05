@@ -122,7 +122,7 @@ void mTelemetry::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  mqtthandler_ptr->tRateSecs = 1;//DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;

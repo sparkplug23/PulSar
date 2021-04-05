@@ -8,13 +8,10 @@ struct is_number_type {
       std::is_same<T, signed short>::value || std::is_same<T, unsigned short>::value ||
       std::is_same<T, signed int>::value || std::is_same<T, unsigned int>::value ||
       std::is_same<T, signed long>::value || std::is_same<T, unsigned long>::value ||
-
       std::is_same<T, int8_t>::value  || std::is_same<T, uint8_t>::value ||
       std::is_same<T, int16_t>::value || std::is_same<T, uint16_t>::value ||
       std::is_same<T, int32_t>::value || std::is_same<T, uint32_t>::value ||
-
-      std::is_same<T, bool>::value;
-      
+      std::is_same<T, bool>::value;      
 };
 
 template <typename T>

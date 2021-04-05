@@ -3,7 +3,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CUSTOM_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 

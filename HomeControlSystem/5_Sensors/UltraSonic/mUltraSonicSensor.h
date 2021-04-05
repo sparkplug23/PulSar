@@ -1,6 +1,8 @@
 #ifndef _MULTRASONICSENSOR_H
 #define _MULTRASONICSENSOR_H 0.7
 
+#define D_UNIQUE_MODULE_SENSORS_ULTRASONIC_ID 129
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
@@ -22,8 +24,15 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_AVERAGED_CTR) "sensors/aver
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mUltraSonicSensor{
-  : public mTaskerInterface.h
+#include "1_TaskerManager/mTaskerInterface.h"
+
+class mUltraSonicSensor :
+  public mTaskerInterface
+{
+
+
+// class mUltraSonicSensor{
+//   : public mTaskerInterface
   public:
     //#define D_MODULE_TOPIC_NAME "ultrasonic"
 
@@ -32,6 +41,18 @@ class mUltraSonicSensor{
     int8_t pin_trig = -1;
     int8_t pin_echo = -1;
 
+    static const char* PM_MODULE_SENSORS_ULTRASONIC_CTR;
+    static const char* PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ULTRASONIC_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ULTRASONIC_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mUltraSonicSensor);
+    };
+    #endif
     
     typedef union {
       uint8_t data; // allows full manipulating

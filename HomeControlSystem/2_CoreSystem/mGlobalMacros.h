@@ -16,6 +16,11 @@
 #define DEFINE_PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 
+// enable additional debug output
+#define DEBUG_PRINT Serial.print
+#define DEBUG_PRINTLN Serial.println
+#define DEBUG_PRINTF Serial.printf
+
 /*
 // ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
 

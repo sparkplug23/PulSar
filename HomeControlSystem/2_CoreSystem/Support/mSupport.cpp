@@ -30,8 +30,8 @@ int8_t mSupport::Tasker(uint8_t function){
   // for(int n=0; n<10; ++n) {
 
   
-  //   // Serial.printf("%d = %d\n\r",n, GetNormalDistributionRandom(100,2,90,100));
-  //   Serial.printf("%d = %d\n\r",n, GetRandomSaturationVariation(100,5,95,100));
+  //   // DEBUG_PRINTF("%d = %d\n\r",n, GetNormalDistributionRandom(100,2,90,100));
+  //   DEBUG_PRINTF("%d = %d\n\r",n, GetRandomSaturationVariation(100,5,95,100));
 
   //   // (100,10,90,100)
 
@@ -319,7 +319,7 @@ void mSupport::init_FirmwareVersion(){
   // }
 
   // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
-//Serial.printf("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
+//DEBUG_PRINTF("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
 
   // Version Current
   pCONT_set->firmware_version.current.part_branch = (PROJECT_VERSION >> 30) & 0x03;
@@ -331,7 +331,7 @@ void mSupport::init_FirmwareVersion(){
 
   // Display Version Output
 
-  // Serial.printf("firmware_version.current = %X\n\r",PROJECT_VERSION);
+  // DEBUG_PRINTF("firmware_version.current = %X\n\r",PROJECT_VERSION);
     
   // char firmware_current[40];
   memset(pCONT_set->firmware_version.current.name_ctr,0,sizeof(pCONT_set->firmware_version.current.name_ctr));
@@ -356,7 +356,7 @@ void mSupport::init_FirmwareVersion(){
   // );
 
 
-  //Serial.printf("firmware_version.current = %s\n\r",firmware_current);
+  //DEBUG_PRINTF("firmware_version.current = %s\n\r",firmware_current);
   // AddLog_P(LOG_LEVEL_INFO,PSTR("firmware_version.current = %s"),firmware_current);
 
   // char code_image[20];

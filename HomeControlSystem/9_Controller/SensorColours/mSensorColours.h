@@ -1,5 +1,5 @@
-#ifndef _MCUSE_MODULE_CUSTOM_SENSORCOLOURS_H
-#define _MCUSE_MODULE_CUSTOM_SENSORCOLOURS_H 0.3
+#ifndef _MCUSE_MODULE_CONTROLLER_SENSORCOLOURS_H
+#define _MCUSE_MODULE_CONTROLLER_SENSORCOLOURS_H 0.3
 
 /**
  * Using sensor readings, to generate colour palettes
@@ -11,7 +11,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CUSTOM_SENSORCOLOURS
+#ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
 
 class mSensorColours {
 

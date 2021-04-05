@@ -2,6 +2,9 @@
 
 #ifdef USE_MODULE_SENSORS_DS18B20
 
+const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
+const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
+
 
 void mSensorsDB18::Pre_Init(){
 
@@ -173,12 +176,12 @@ void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t requ
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }else{
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if
@@ -217,7 +220,7 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
     
     if(sensor[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
 
-      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
         JsonBuilderI->Add(D_JSON_ISVALID, sensor[sensor_id].reading.isvalid);
         JsonBuilderI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
@@ -674,7 +677,7 @@ void mSensorsDB18::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DB18S20_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DB18S20_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

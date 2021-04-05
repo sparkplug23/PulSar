@@ -4,6 +4,11 @@
 
 // Make basic class, report adc via mqtt (for tree level)
 
+const char* mSensorsAnalog::PM_MODULE_SENSORS_ANALOG_CTR = D_MODULE_SENSORS_ANALOG_CTR;
+const char* mSensorsAnalog::PM_MODULE_SENSORS_ANALOG_FRIENDLY_CTR = D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR;
+
+
+
 void mSensorsAnalog::Pre_Init(void){
 
   // sensors_active = 0;
@@ -264,7 +269,7 @@ void mSensorsAnalog::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_sensor_ifchanged
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_ANALOG_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_ANALOG_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

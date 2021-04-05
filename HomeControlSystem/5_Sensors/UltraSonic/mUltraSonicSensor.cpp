@@ -2,6 +2,13 @@
 
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
 
+
+const char* mUltraSonicSensor::PM_MODULE_SENSORS_ULTRASONIC_CTR = D_MODULE_SENSORS_ULTRASONIC_CTR;
+const char* mUltraSonicSensor::PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR = D_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR;
+
+
+
+
 void mUltraSonicSensor::Pre_Init(){ 
 
   if(pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID)){
@@ -464,7 +471,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
     char buffer[50];
       
     JsonBuilderI->Start();
-      JsonBuilderI->Add("location", pCONT_set->GetDeviceName(D_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("location", pCONT_set->GetDeviceName(EM_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
       JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->End();
 
@@ -856,7 +863,7 @@ void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     &mqtthandler_averaged_ifchanged
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_ULTRASONIC_ID,
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_ULTRASONIC_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
     mqtt_handler_id

@@ -1,9 +1,12 @@
 #ifndef _MSWITCHES_H_
 #define _MSWITCHES_H_
 
+#define D_UNIQUE_MODULE_SENSORS_SWITCHES_ID 121
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SWITCHES
+
 
 // #ifdef ESP8266
 // #define SWITCH_V2
@@ -88,6 +91,17 @@ class mSwitches :
     int8_t Tasker(uint8_t function);
     void init(void);
 
+    static const char* PM_MODULE_SENSORS_SWITCHES_CTR;
+    static const char* PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SWITCHES_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SWITCHES_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSwitches);
+    };
+    #endif
 
     struct SETTINGS{
       uint8_t switches_found = 0;

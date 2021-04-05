@@ -1,6 +1,8 @@
 #ifndef _DRIVER_ENERGY_H
 #define _DRIVER_ENERGY_H 0.1
 
+#define D_UNIQUE_MODULE_ENERGY_INTERFACE_ID 130
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 // #include "2_CoreSystem/mBaseConfig.h"
@@ -34,12 +36,24 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR) "thresholdlimi
 
 #include "3_Network/MQTT/mMQTT.h"
 
-class mEnergy{
+class mEnergy :
+  public mTaskerInterface
+{
   public:
     mEnergy(){};
     void Init(void);
     void pre_init(void);
     //#define D_MODULE_TOPIC_NAME "energy"
+
+    static const char* PM_MODULE_ENERGY_INTERFACE_CTR;
+    static const char* PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){ return sizeof(mEnergy); };
+    #endif
 
     #ifndef MAX_ENERGY_SENSORS
     #define MAX_ENERGY_SENSORS 12
@@ -147,6 +161,8 @@ void Settings_Save();
     #define D_JSON_MODULEADDRESS "ModuleAddress"
 
     struct ENERGY {
+
+      //move these into their own struct, so I can set the struct of them to 0
       float voltage[MAX_ENERGY_SENSORS];// = { 0, 0, 0, 0 };               // 123.1 V
       float current[MAX_ENERGY_SENSORS];// = { 0, 0, 0 };               // 123.123 A
       float active_power[MAX_ENERGY_SENSORS];// = { 0, 0, 0 };          // 123.1 W
@@ -293,7 +309,6 @@ void Settings_Save();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mEnergy>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

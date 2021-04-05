@@ -3,7 +3,7 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#ifdef USE_MODULE_CUSTOM_EXERCISE_BIKE //move into lights? pir activated light, equally a driver of lights..but it senses
+#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE //move into lights? pir activated light, equally a driver of lights..but it senses
 // make light activation method of motion
 
 #include <ArduinoJson.h>

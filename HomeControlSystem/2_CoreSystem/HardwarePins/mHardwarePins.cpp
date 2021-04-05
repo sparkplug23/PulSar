@@ -17,7 +17,7 @@ void mHardwarePins::Template_Load(){
 int8_t mHardwarePins::Tasker(uint8_t function){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
-  // Serial.printf("works=%d\n\r",works);
+  // DEBUG_PRINTF("works=%d\n\r",works);
   
   if(function == FUNC_TEMPLATE_MODULE_LOAD){
     Template_Load();
@@ -169,9 +169,9 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "BASE: %d"
   //   ),
   // uint8_t real_gpio = 0;
-  // Serial.printf("\n\r");
-  // Serial.printf("Template: %s\n\r", pCONT_set->Settings.user_template2.full_ctr);
-  // Serial.printf("Name: %s\n\r", pCONT_set->Settings.user_template2.hardware.name);
+  // DEBUG_PRINTF("\n\r");
+  // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template2.full_ctr);
+  // DEBUG_PRINTF("Name: %s\n\r", pCONT_set->Settings.user_template2.hardware.name);
   // for(uint8_t gpio=0;gpio<sizeof(pCONT_set->Settings.user_template2.hardware.gp.io);gpio++){
   //   //get proper gpio number
 
@@ -191,11 +191,11 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     case 12: real_gpio = 16; break;
   //   }
 
-  //   Serial.printf("\t%d(%d):%d\n\r",gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
+  //   DEBUG_PRINTF("\t%d(%d):%d\n\r",gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
   // }
-  // Serial.printf("FLAGS: %08X\n\r",pCONT_set->Settings.user_template2.flags);
-  // Serial.printf("BASE : %08X\n\r",pCONT_set->Settings.user_template2.base);
-  // Serial.printf("\n\r\n\r"); 
+  // DEBUG_PRINTF("FLAGS: %08X\n\r",pCONT_set->Settings.user_template2.flags);
+  // DEBUG_PRINTF("BASE : %08X\n\r",pCONT_set->Settings.user_template2.base);
+  // DEBUG_PRINTF("\n\r\n\r"); 
 
 }
 
@@ -352,7 +352,7 @@ uint8_t jsonpair_count = jtok.size();
 
   // for(int i=0;i<20;i++){
 
-  //   Serial.printf("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
+  //   DEBUG_PRINTF("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
 
 
   // }
@@ -388,14 +388,11 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else if(strcmp(c,"D8")==0){ pin = 15; }
   else if(strcmp(c,"D0")==0){ pin = 16; }
   else if(strcmp(c,"LBI")==0){ 
-
     #ifdef LED_BUILTIN
     pin = LED_BUILTIN; 
     #else
     pin = -1;
-    #endif
-    
-    
+    #endif   
   }
 
 
@@ -605,7 +602,7 @@ uint32_t mHardwarePins::Pin(uint32_t gpio, uint32_t index) {
   for (uint32_t i = 0; i < sizeof(pCONT_set->pin); i++) {
     // needs new pin array
     if (pCONT_set->pin[i] == real_gpio) {
-      Serial.printf("Pin number configured for gpio %d\n\r",i);
+      DEBUG_PRINTF("Pin number configured for gpio %d\n\r",i);
       return i;              // Pin number configured for gpio
     }
   }
@@ -1385,7 +1382,7 @@ void mHardwarePins::GpioInit(void)
   }
 
   #ifndef DISABLE_SERIAL_LOGGING
-  //Serial.printf("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
+  //DEBUG_PRINTF("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
   #endif
 
   pCONT_sup->SetLedPower(pCONT_set->Settings.ledstate &8);
@@ -1533,11 +1530,11 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_CTR)==0){  return GPIO_LED5_ID; }
   // if(strcmp_P(c,PM_GPIO_FUNCTION_LED5_INV_CTR)==0){  return GPIO_LED5_INV_ID; }
 
-  // #if defined(USE_MODULE_SENSORS_PZEM004T_MODBUS) || defined(USE_PZEM_DC)
+  // #if defined(USE_MODULE_ENERGY_PZEM004T_MODBUS) || defined(USE_PZEM_DC)
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_TX_CTR)==0){  return GPIO_PZEM0XX_TX_ID; }
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM004_RX_CTR)==0){  return GPIO_PZEM004_RX_ID; }
-  // #ifdef USE_MODULE_SENSORS_PZEM004T_MODBUS
+  // #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM016_RX_CTR)==0){  return GPIO_PZEM016_RX_ID; }
   // #endif
   // #ifdef USE_MODULE_SENSORS_ULTRASONICS
