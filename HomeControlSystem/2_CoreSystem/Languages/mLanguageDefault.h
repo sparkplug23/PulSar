@@ -143,7 +143,8 @@
 
 #define D_FUNC_EVENT_MOTION_STARTED_CTR "MotionStarted"
 #define   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "StateChanged"
-#define   D_FUNC_EVENT_SET_POWER_CHANGED_CTR   "SetPower"
+#define   D_FUNC_EVENT_SET_POWER_CTR   "SetPower"
+#define   D_FUNC_EVENT_SET_SPEED_CTR   "SetSpeed"
 
 // Module names
 #define D_MODULE_CORE_HARDWAREPINS_CTR            "mHardwarePins"
@@ -225,6 +226,9 @@
 
   #define D_MODULE_DRIVERS_FILESYSTEM_CTR "mFileSystem"
   #define D_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR "filesystem"
+
+  #define D_MODULE_DRIVERS_BUZZER_CTR "mBuzzer"
+  #define D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR "buzzer"
   
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
@@ -232,8 +236,11 @@
 //#endif
 // Energy (Range 130-139
 //#ifdef USE_MODULE_ENERGY_INTERFACE
-  #define D_MODULE_ENERGY_INTERFACE_CTR              "mEnergy"
+  #define D_MODULE_ENERGY_INTERFACE_CTR              "mEnergyInterface"
   #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "energy"
+
+  #define D_MODULE_ENERGY_ADE7953_CTR              "ADE7953"
+  #define D_MODULE_ENERGY_ADE7953_FRIENDLY_CTR     "ade7953"
 //#endif
 // Lights (Range 140-169
 //#ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -276,7 +283,7 @@
   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
   #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
 //#endif
-//#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+//#ifdef USE_MODULE_ENERGY_PZEM004T_V3
   #define D_MODULE_ENERGY_PZEM004T_CTR              "pzem004t"
   #define D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR              "pzem004t"
 //#endif
@@ -293,7 +300,7 @@
   #define D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR              "db18s20"
 //#endif
 //#ifdef USE_MODULE_SENSORS_DS18B20
-  #define D_MODULE_SENSORS_INA219_CTR              "mSensorsINA219"
+  #define D_MODULE_SENSORS_INA219_CTR              "mEnergyINA219"
   #define D_MODULE_SENSORS_INA219_FRIENDLY_CTR              "ina219"
 //#endif
 //#ifdef USE_MODULE_SENSORS_ULTRASONICS
@@ -315,6 +322,10 @@
 //#ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #define D_MODULE_SENSORS_PULSECOUNTER_CTR              "mPulseCounter"
   #define D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR              "pulsecounter"
+
+  #define D_MODULE_SENSORS_PRESENCE_CTR              "mPresence"
+  #define D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR              "presence"
+
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS
   #define D_MODULE_CONTROLLER_BLINDS_CTR              "mBlinds"
@@ -987,6 +998,7 @@
 #define D_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR     "HBRIDGE L9110 Output B"
 #define D_GPIO_FUNCTION_ANALOG_POSITION_CTR "Analog Position"
 #define D_GPIO_FUNCTION_FAN_IRSEND_CTR "Fan IRSend"
+#define D_GPIO_FUNCTION_ADE7953_IRQ_CTR "ADE7953_IRQ"
 
 
 /**

@@ -680,6 +680,8 @@ void LightCalcPWMRange();
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
 
+    void CheckHardwareElementColourOrder();
+
     
 // #ifndef ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
 //     uint16_t getCT10bits();
@@ -936,7 +938,7 @@ void ShowInterface();
 // {
   
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
 //   // #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
 
 // /* Color Temperature (https://developers.meethue.com/documentation/core-concepts)

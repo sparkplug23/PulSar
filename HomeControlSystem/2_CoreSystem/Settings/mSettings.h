@@ -298,9 +298,9 @@ const char WIFI_HOSTNAME[]  = "%s"; //!PROGMEM    // Expands to <MQTT_TOPIC>-<la
 // const uint8_t CONFIG_FILE_SIGN = 0xA5;      // Configuration file signature
 // const uint8_t CONFIG_FILE_XOR = 0x5A;       // Configuration file xor (0 = No Xor)
 
-// const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
-// const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
-// const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
+const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
+const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
+const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
 
 const uint8_t MQTT_RETRY_SECS = 10;         // Minimum seconds to retry MQTT connection
 // const uint32_t GLOBAL_VALUES_VALID = 300;   // Max number of seconds to keep last received values
@@ -316,11 +316,11 @@ const uint16_t PWM_MIN = 100;               // [PWM_MIN] Minimum frequency - Def
                                             //    For Dimmers use double of your mains AC frequecy (100 for 50Hz and 120 for 60Hz)
                                             //    For Controlling Servos use 50 and also set PWM_FREQ as 50 (DO NOT USE THESE VALUES FOR DIMMERS)
 
-// const uint8_t DEFAULT_POWER_DELTA = 80;     // Power change percentage
-// const uint16_t MAX_POWER_HOLD = 10;         // Time in SECONDS to allow max agreed power
-// const uint16_t MAX_POWER_WINDOW = 30;       // Time in SECONDS to disable allow max agreed power
-// const uint16_t SAFE_POWER_HOLD = 10;        // Time in SECONDS to allow max unit safe power
-// const uint16_t SAFE_POWER_WINDOW = 30;      // Time in MINUTES to disable allow max unit safe power
+const uint8_t DEFAULT_POWER_DELTA = 80;     // Power change percentage
+const uint16_t MAX_POWER_HOLD = 10;         // Time in SECONDS to allow max agreed power
+const uint16_t MAX_POWER_WINDOW = 30;       // Time in SECONDS to disable allow max agreed power
+const uint16_t SAFE_POWER_HOLD = 10;        // Time in SECONDS to allow max unit safe power
+const uint16_t SAFE_POWER_WINDOW = 30;      // Time in MINUTES to disable allow max unit safe power
 const uint8_t MAX_POWER_RETRY = 5;          // Retry count allowing agreed power limit overflow
 
 // const uint8_t STATES = 20;                  // Number of states per second using 50 mSec interval
@@ -527,10 +527,6 @@ enum XsnsFunctions {
   FUNC_BOOT_MESSAGE, //at 10 seconds, show how the function is configured
 
   //Light commands
-  FUNC_LIGHT_POWER_ON,
-  FUNC_LIGHT_POWER_OFF,
-  FUNC_LIGHT_UPDATE_OUTPUT,
-
   // Commands
   // FUNC_COMMAND, 
   // FUNC_COMMAND_SENSOR, 
@@ -547,10 +543,6 @@ enum XsnsFunctions {
   FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, //
   // 
-  FUNC_SET_POWER, FUNC_SET_DEVICE_POWER, FUNC_SHOW_SENSOR,
-  FUNC_RULES_PROCESS, FUNC_SERIAL, FUNC_FREE_MEM, FUNC_BUTTON_PRESSED,
-  FUNC_SET_POWER_ON_ID,
-  FUNC_SET_POWER_OFF_ID,
 
   // Events (new internal triggers, if something happens trigger another... this will become rules)
   // Ie if this event below happens, then have another ID which is called to run the triggered event
@@ -615,6 +607,17 @@ enum XsnsFunctions {
    * */
   FUNC_EVENT_INPUT_STATE_CHANGED_ID,
   FUNC_EVENT_SET_POWER_ID,
+  FUNC_EVENT_SET_SPEED_ID,
+
+  
+  FUNC_SET_POWER, FUNC_SET_DEVICE_POWER, FUNC_SHOW_SENSOR,
+  FUNC_RULES_PROCESS, FUNC_SERIAL, FUNC_FREE_MEM, FUNC_BUTTON_PRESSED,
+  FUNC_SET_POWER_ON_ID,
+  FUNC_SET_POWER_OFF_ID,
+
+  FUNC_LIGHT_POWER_ON,
+  FUNC_LIGHT_POWER_OFF,
+  FUNC_LIGHT_UPDATE_OUTPUT,
 
 
   FUNC_FINALLY_END_OF_LOOP // Ran at the end of each loop, used to reset flags that should have been handled eg motion
@@ -714,7 +717,8 @@ DEFINE_PGM_CTR(PM_FUNC_DEBUG_CONFIGURE_CTR)                         D_FUNC_DEBUG
 // Function names exposed to rules, need places here
 DEFINE_PGM_CTR(PM_FUNC_EVENT_MOTION_STARTED_CTR)  D_FUNC_EVENT_MOTION_STARTED_CTR;
 DEFINE_PGM_CTR(PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR;
-DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CHANGED_CTR)   D_FUNC_EVENT_SET_POWER_CHANGED_CTR;
+DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_POWER_CTR)   D_FUNC_EVENT_SET_POWER_CTR;
+DEFINE_PGM_CTR(PM_FUNC_EVENT_SET_SPEED_CTR)   D_FUNC_EVENT_SET_SPEED_CTR;
 
 
 //command source will be useful for rules, 
@@ -1130,7 +1134,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t use_underscore : 1;           // bit 14 (v6.5.0.12) - SetOption64 - Enable "_" instead of "-" as sensor index separator
     uint32_t fast_power_cycle_disable : 1; // bit 15 (v6.6.0.20) - SetOption65 - Disable fast power cycle detection for device reset
     uint32_t tuya_serial_mqtt_publish : 1; // bit 16 (v6.6.0.21) - SetOption66 - Enable TuyaMcuReceived messages over Mqtt
-    uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
+    //uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
     uint32_t pwm_multi_channels : 1;       // bit 18 (v6.6.0.3)  - SetOption68 - Enable multi-channels PWM instead of Color PWM
     uint32_t ex_tuya_dimmer_min_limit : 1; // bit 19 (v6.6.0.5)  - SetOption69 - Limits Tuya dimmers to minimum of 10% (25) when enabled.
     uint32_t energy_weekend : 1;           // bit 20 (v6.6.0.8)  - CMND_TARIFF
@@ -1334,6 +1338,16 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 
   };
 } SysBitfield_Sensors;
+
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+  uint8_t data;                           // Allow bit manipulation using SetOption
+  struct {                                 // SetOption0 .. SetOption31
+    uint8_t buzzer_freq_mode : 1;               // bit 0              - SetOption0  - Save power state and use after restart
+    uint8_t buzzer_enable : 1;
+    uint8_t reserved : 6;          // bit 1              - SetOption1  - Control button multipress
+   
+  };
+} SysBitfield_Drivers;
 
 
 
@@ -1576,6 +1590,8 @@ struct SYSCFG {
   // StateBitfield global_state;                 // Global states (currently Wifi and Mqtt) (8 bits)
 
   uint16_t      mqtt_retry;                // 396
+
+  SysBitfield_Drivers    flag_drivers;
   
 
   // Timer         timer[MAX_TIMERS];         // 670
@@ -1645,6 +1661,7 @@ struct SYSCFG {
   // char          mems[MAX_RULE_MEMS][10];   // 7CE
   // char          rules[MAX_RULE_SETS][MAX_RULE_SIZE]; // 800 uses 512 bytes in v5.12.0m, 3 x 512 bytes in v5.14.0b
   
+  uint32_t      i2c_drivers[3];            // FEC  I2cDriver
 
   // SysBitfield4  flag4;                     // TEMP FIX
 // TO SORT
@@ -1659,6 +1676,9 @@ struct SYSCFG {
   // E00 - FFF (4095 ie eeprom size) free locations
   uint32_t      cfg_crc32;                 // FFC
 } Settings;
+
+
+
 
 // NEW flag that allows anything to run on reboot
 uint8_t fSystemRestarted = true; // will be restart at the end of the first loop
@@ -1688,6 +1708,9 @@ struct RTCMEM {
   uint8_t       free_022[22];              // 2D6
                                            // 2EC - 2FF free locations
 } RtcSettings;
+
+
+
 
 
 
@@ -1826,10 +1849,13 @@ uint8_t backlog_pointer = 0;                // Command backlog pointer
 uint8_t blinkspeed = 1;                     // LED blink rate
 
 
-// These are used only at runtime, and not saved
+// These are used only at runtime, and not saved eg TasmotaGlobals
 struct RUNTIME_VALUES{
   uint8_t sleep;                              // Current copy of Settings.sleep
   uint32_t tSavedUpdateLoopStatistics;
+  uint8_t energy_driver;                    // Energy monitor configured
+  uint8_t light_driver;                     // Light module configured
+  
 }runtime_value;
 
 
@@ -1859,7 +1885,12 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
 
 uint8_t pwm_inverted = 0;                   // PWM inverted flag (1 = inverted)
 uint8_t counter_no_pullup = 0;              // Counter input pullup flag (1 = No pullup)
-uint8_t energy_flg = 0;                     // Energy monitor configured
+
+
+//phased out for runtime.energy_Driver
+        //uint8_t energy_flg = 0;                     // Energy monitor configured
+
+
 // uint8_t Settings.light_settings.type = 0;                     // Light types
 uint8_t serial_in_byte;                     // Received byte
 // uint8_t ota_retry_counter = OTA_ATTEMPTS;   // OTA retry counter
@@ -1890,7 +1921,7 @@ bool blinkstate = false;                    // LED state
 // bool latest_uptime_flag = true;             // Signal latest uptime
 bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
 // bool dht_flg = false;                       // DHT configured
-bool i2c_flg = false;                       // I2C configured
+bool i2c_enabled = false;                       // I2C configured
 bool spi_flg = false;                       // SPI configured
 bool soft_spi_flg = false;                  // Software SPI configured
 bool ntp_force_sync = false;                // Force NTP sync

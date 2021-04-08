@@ -45,7 +45,7 @@ bool mWebServer::WifiIsInManagerMode(){
 // {
 //   // if ((source > 0) && (source < SRC_MAX)) {
 //   //   char stemp1[20];
-//   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR("SRC: %s from %s"), 
+//   //   AddLog(LOG_LEVEL_DEBUG, PSTR("SRC: %s from %s"), 
 //   //   pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
 //   // }
 // }
@@ -53,7 +53,7 @@ bool mWebServer::WifiIsInManagerMode(){
 // void mWebServer::ExecuteWebCommand(char* svalue, int source)
 // {
 //   ShowWebSource(source);
-//   //AddLog_P(LOG_LEVEL_DEBUG, PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
+//   //AddLog(LOG_LEVEL_DEBUG, PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
 //   ExecuteCommand(svalue, SRC_IGNORE);
 // }
 
@@ -104,13 +104,13 @@ void mWebServer::StartWebserver(int type, IPAddress ipweb)
     }
     reset_web_log_flag = false;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
     #endif// ENABLE_LOG_LEVEL_INFO
     pWebServer->begin();
   }
   if(webserver_state != type){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_JSON_IPADDRESS " %s"), pCONT_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
     
     #endif// ENABLE_LOG_LEVEL_INFO
     // pCONT_set->rules_flag.http_init = 1;
@@ -408,7 +408,7 @@ void mWebServer::FreeMem_Usage_Before(freemem_usage_t* freemem){
 }
 void mWebServer::FreeMem_Usage_After(freemem_usage_t* freemem){
   freemem->bytes_used = freemem->free_bytes - ESP.getFreeHeap();
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_ASYNC "Free \"%s\"=%d/%d %d space"), //used of previously free, additional space that remained free
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_ASYNC "Free \"%s\"=%d/%d %d space"), //used of previously free, additional space that remained free
     freemem->name_ptr,
     freemem->bytes_used,freemem->free_bytes,
     ESP.getFreeHeap());
@@ -424,7 +424,7 @@ void mWebServer::StopWebserver(void)
     pWebServer->reset(); // asyncedit
     webserver_state = HTTP_OFF;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
     #endif// ENABLE_LOG_LEVEL_INFO
   //}
 }
@@ -433,19 +433,19 @@ void mWebServer::WifiManagerBegin(bool reset_only)
 {
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "mWebServer::WifiManagerBegin"));
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "mWebServer::WifiManagerBegin"));
     #endif// ENABLE_LOG_LEVEL_INFO
 
   // setup AP
   if (!pCONT_set->global_state.wifi_down) {
     WiFi.mode(WIFI_AP_STA);
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
     #endif// ENABLE_LOG_LEVEL_INFO
   } else {
     WiFi.mode(WIFI_AP);
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -622,7 +622,7 @@ void mWebServer::HandleHttpCommand(AsyncWebServerRequest *request)
 {
   // //if (!HttpCheckPriviledgedAccess(false)) { return; }
 
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_COMMAND));
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_COMMAND));
 
   // uint8_t valid = 1;
   // if (pCONT_set->Settings.web_password[0] != 0) {
@@ -702,7 +702,7 @@ bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 {
   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
   if ((WifiIsInManagerMode())){//} && !pCONT_sup->ValidIpAddress(request->hostHeader().c_str())) {
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
     // request->sendHeader(F("Location"), String("http://") + request->client().localIP().toString(), true);
 
 
@@ -794,7 +794,7 @@ bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
 //     }
 //     url += command;                           // url = |http://192.168.178.86/cm?cmnd=POWER1 ON|
 
-// //AddLog_P(LOG_LEVEL_DEBUG, PSTR("DBG: Uri |%s|"), url.c_str());
+// //AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Uri |%s|"), url.c_str());
 
 // #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
 //     HTTPClient http;
@@ -973,7 +973,7 @@ enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRES
 // //   token = strtok(NULL, "");
 // // //  snprintf_P(svalue, sizeof(svalue), (token == NULL) ? "" : token);  // Fails with command FullTopic home/%prefix%/%topic% as it processes %p of %prefix%
 // //   strlcpy(svalue, (token == NULL) ? "" : token, sizeof(svalue));       // Fixed 5.8.0b
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
 
 // //   //MqttDataHandler(stopic, (uint8_t*)svalue, strlen(svalue));
 // //   ParseAndExecuteWebCommands(stopic, (uint8_t*)svalue, strlen(svalue));
@@ -1026,7 +1026,7 @@ enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRES
 
 // //   //if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); } //?
 
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
  
 // //   // Check classname exists
 // //   if(strstr(topicBuf,"::")){
@@ -1076,15 +1076,15 @@ enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRES
 
 // //   webcommand.fWaiting = true;
   
-// //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
+// //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
 // //     D_COMMAND " %s, " D_DATA " %s"),
 // //    grpflg, index, type, dataBuf);
 
 
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
-// //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
+// //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
   
 // //   pCONT->Tasker_Interface(FUNC_WEB_COMMAND);
 

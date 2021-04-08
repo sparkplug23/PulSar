@@ -8,7 +8,7 @@ int8_t mShellyDimmer::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -30,7 +30,7 @@ void mShellyDimmer::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  
@@ -69,7 +69,7 @@ void mShellyDimmer::parse_JSONCommand(void){
 //   readFile(SD_MMC, filename);
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 

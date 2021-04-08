@@ -14,7 +14,7 @@ void mStatusLEDs::pre_init(void){
     digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), HIGH); //OFF
     settings.fEnableSensor = true;
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_LED1_ID));
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_LED1_ID));
     //disable pir code
   }
 
@@ -313,7 +313,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // //       if (action != GetFanspeed()) {
 // //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 // //         ExecuteCommand(svalue, SRC_REMOTE);
-// // #ifdef USE_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER
 // //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // // #endif
 // //       }
@@ -328,7 +328,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // //   }
 // //   if (7 == mode) {
 // //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// // #ifdef USE_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER
 // //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // // #endif
 // //   }
@@ -520,7 +520,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // Check if instruction is for me
 //   // if(mSupport::CheckSetTopicIsModulebyID())
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/pwmfan")>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     parse_JSONCommand(obj);
 //     return FUNCTION_RESULT_HANDLED_ID;
@@ -543,7 +543,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     // }else{
 //     //   SetLightState(light);      
 //     // }
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
 //     // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
 //     // isserviced++;  
 //   }
@@ -565,9 +565,9 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 //     // SetFanspeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -586,8 +586,8 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     analogWrite(pin,set_fan_pwm);
 
 //     // SetFanspeed(speed, false);
-//     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
+//     AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
 //     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANPWM,set_fan_pwm);
 //     // isserviced++;
 //   }
@@ -665,10 +665,10 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //       Serial.println(dlist2);
 
 //       pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 0, dlist2);
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+//       AddLog(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
 
 //       pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 1, dlist2);
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+//       AddLog(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
 
 //       // break;
 //       uint8_t button_values2[2] = {2, 2}; //toggle, fanspeed0-3

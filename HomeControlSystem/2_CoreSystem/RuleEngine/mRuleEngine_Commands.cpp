@@ -7,7 +7,7 @@ int8_t mRuleEngine::CheckAndExecute_JSONCommands(){
 
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CORE_RULES_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CORE_RULES_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CORE_RULES_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -21,13 +21,13 @@ int8_t mRuleEngine::CheckAndExecute_JSONCommands(){
 
 void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event){
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
+  AddLog(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
 
   JsonParserToken jtok;
   // JsonParserObject jobj2 = &jobj;
 
     // if(jtok = jobj["Module"]){
-    //   AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND jobj[rule_name] 123"));    
+    //   AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jobj[rule_name] 123"));    
     // } 
     int16_t matched_id = 0;
 
@@ -47,8 +47,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
         data_buffer.isserviced++;
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -66,8 +66,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
         data_buffer.isserviced++;
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -86,8 +86,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
         data_buffer.isserviced++;
       }
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -112,8 +112,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
@@ -136,15 +136,15 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
       // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
       // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
     if(jtok = jobj["JsonCommands"]){
 
-      AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
+      AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
 
 
       // if(jsonbuffer.data != nullptr){
@@ -170,8 +170,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
           // I need to create the ability to move to add/edit buffer (like tas)
           // Rules can therefore only be created once at starttime for now          
 
-          AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
-          AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
+          AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
+          AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
 
           // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
         }
@@ -196,7 +196,7 @@ void mRuleEngine::parse_JSONCommand(){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   } 
@@ -211,7 +211,7 @@ void mRuleEngine::parse_JSONCommand(){
     sprintf(rule_name, "Rule%d", rule_index);
     if(jtok = obj[rule_name]){
       
-      AddLog_P(LOG_LEVEL_INFO, PSTR("MATCHED Rule%d"),rule_index);
+      AddLog(LOG_LEVEL_INFO, PSTR("MATCHED Rule%d"),rule_index);
 
       mRuleEngine::EVENT_PART* p_event = nullptr;
 
@@ -244,19 +244,19 @@ void mRuleEngine::parse_JSONCommand(){
 
     //   if(jtok.isStr()){
     //     if((tmp_id=pCONT->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
-    //       AddLog_P(LOG_LEVEL_INFO, PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
+    //       AddLog(LOG_LEVEL_INFO, PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
     //       p_event->module_id = tmp_id;
     //       data_buffer.isserviced++;
     //     }
     //   }else
     //   if(jtok.isNum()){
-    //     AddLog_P(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module"));
+    //     AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module"));
     //     // get pointer to rule via rule_index
     //     // CommandSet_Rule_Module_ID(jtok.getInt(), );
     //     data_buffer.isserviced++;
     //   }
     //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
     //   // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     // }//end trigger
@@ -301,7 +301,7 @@ void mRuleEngine::parse_JSONCommand(){
 //   }
   
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
 //   // #endif
 
 // }

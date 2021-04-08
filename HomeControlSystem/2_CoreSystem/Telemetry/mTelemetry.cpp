@@ -325,9 +325,9 @@ void mTelemetry::MQTTHandler_Set_TelePeriod(){
 void mTelemetry::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
+    AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
   #endif
-    // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
+    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
   
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SYSTEM_HEALTH_ID,
@@ -735,7 +735,6 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHea
     JsonBuilderI->Add("Module" D_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
     JsonBuilderI->Add("Function" D_JSON_TEMPLATE,       pCONT_set->boot_status.function_template_parse_success);//?"Default":"Saved");
 
-    
     JsonBuilderI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
     myio cmodule;

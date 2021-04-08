@@ -34,7 +34,7 @@ void mMoistureSensor::Tasker(uint8_t function){
       //   }else{
       //     pir_detect.isactive = false;
       //   }
-      //   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),ONOFF_CTR(pir_detect));
+      //   //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),ONOFF_CTR(pir_detect));
 
       //   pir_detect.ischanged = true;
       // }

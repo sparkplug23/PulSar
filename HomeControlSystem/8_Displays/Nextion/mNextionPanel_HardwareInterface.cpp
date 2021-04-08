@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void mNextionPanel::nextionReset()
 {
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD");
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD");
   //digitalWrite(nextionResetPin, LOW);
   
   #ifdef USE_NEXTION_SOFTWARE_SERIAL
@@ -37,7 +37,7 @@ void mNextionPanel::nextionReset()
   }
   if (lcdConnected)
   {
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD completed");
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD completed");
     if (settings.page)
     {
 
@@ -51,7 +51,7 @@ sprintf(command_ctr,"page %d\0",settings.page);
   }
   else
   {
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ERROR: Rebooting LCD completed, but LCD is not responding.");
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ERROR: Rebooting LCD completed, but LCD is not responding.");
   }
   //mqttClient.publish(mqttStatusTopic, WILLMESSAGE_ONDISCONNECT_CTR);
 }
@@ -64,7 +64,7 @@ void mNextionPanel::nextionConnect()
     static unsigned int nextionRetryCount = 0;
     if ((nextionModel.length() == 0) && (nextionRetryCount < (nextionRetryMax - 2)))
     { // Try issuing the "connect" command a few times
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion connect request"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion connect request"));
       nextionSendCmd("connect");
       nextionRetryCount++;
       nextionCheckTimer = millis();
@@ -73,7 +73,7 @@ void mNextionPanel::nextionConnect()
     { // If we still don't have model info, try to change nextion serial speed from 9600 to 115200
       nextionSetSpeed();
       nextionRetryCount++;
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion serial speed 115200 request"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion serial speed 115200 request"));
       nextionCheckTimer = millis();
     }
     else if ((lcdVersion < 1) && (nextionRetryCount <= nextionRetryMax))
@@ -85,7 +85,7 @@ void mNextionPanel::nextionConnect()
       //nextionSendCmd("get " + lcdVersionQuery.toString().c_str());
       lcdVersionQueryFlag = true;
       nextionRetryCount++;
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion version query"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion version query"));
       nextionCheckTimer = millis();
     }
   }
@@ -107,7 +107,7 @@ void mNextionPanel::nextionSetSpeed()
     swSer->begin(38400);
   #else
   
-  ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: No Nextion response, attempting 9600bps connection"));
+  ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: No Nextion response, attempting 9600bps connection"));
   SERIAL_NEXTION_TX.begin(9600);
   SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
   SERIAL_NEXTION_TX.print("bauds=38400");
@@ -141,7 +141,7 @@ bool mNextionPanel::nextionHandleInput()
 
   if (serial_available())
   {
-    //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
+    //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
     lcdConnected = true;
     byte nextionCommandByte = serial_read();
 
@@ -165,12 +165,12 @@ bool mNextionPanel::nextionHandleInput()
   }
   if (nextionCommandComplete)
   {
-  //  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),
+  //  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),
     //Serial.println(ConvertBytetoASCII(nextionReturnBuffer,nextionReturnIndex));
     // for(int i=0;i<nextionReturnIndex;i++){
-    //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "%d | %s"),i,String(nextionReturnBuffer[i], HEX));
+    //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "%d | %s"),i,String(nextionReturnBuffer[i], HEX));
     // }
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),hmiDebug.c_str());
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),hmiDebug.c_str());
     hmiDebug = "";
   }
   return nextionCommandComplete;
@@ -191,7 +191,7 @@ void mNextionPanel::nextionProcessInput()
   // first instructions byte
   switch(nextionReturnBuffer[0]){
     case NEXTION_COMMAND_INVALID_INSTRUCTION:
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
     break;
 
   }
@@ -216,7 +216,7 @@ void mNextionPanel::nextionProcessInput()
       screen_press.tSavedButtonONEvent = millis();
       screen_press.fEnableImmediateButtonTime = true; 
 
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
               
       memset(event_ctr,0,sizeof(event_ctr));
       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -237,7 +237,7 @@ void mNextionPanel::nextionProcessInput()
       screen_press.tSavedButtonONDurationEvent = screen_press.tSavedButtonOFFEvent - screen_press.tSavedButtonONEvent;
       screen_press.duration = screen_press.tSavedButtonONDurationEvent;
       
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
               
       memset(event_ctr,0,sizeof(event_ctr));
       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -249,13 +249,13 @@ void mNextionPanel::nextionProcessInput()
       JsonBuilderI->End();
 
       if(!fEnableIgnoreNextOffEvent){
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
         pCONT_mqtt->ppublish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
         pCONT_mqtt->ppublish("status/nextion/event/end",JsonBuilderI->GetBufferPtr(),0);
         MQTTSend_PressEvent();
       }else{
         fEnableIgnoreNextOffEvent = false;// reset to listen to next event
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
       }
 
 
@@ -273,13 +273,13 @@ void mNextionPanel::nextionProcessInput()
     // Meaning: page 2
     String nextionPage = String(nextionReturnBuffer[1]);
     
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
 
     if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
     { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
       settings.page = nextionPage.toInt();
       String mqttPageTopic = mqttStateTopic + "/page";      
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
       //mqttClient.publish(mqttPageTopic, nextionPage);
       pCONT_mqtt->ppublish("status/nextion/event4",nextionPage.c_str(),0);
     }
@@ -298,16 +298,16 @@ void mNextionPanel::nextionProcessInput()
     byte nextionTouchAction = nextionReturnBuffer[5];
     if (nextionTouchAction == 0x01)
     {  
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
       String mqttTouchTopic = mqttStateTopic + "/touchOn";
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
       pCONT_mqtt->ppublish("status/nextion/xyCoord",xyCoord.c_str(),0);
     }
     else if (nextionTouchAction == 0x00)
     {
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
       String mqttTouchTopic = mqttStateTopic + "/touchOff";
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
       pCONT_mqtt->ppublish("status/nextion/event6",xyCoord.c_str(),0);
     }
   }
@@ -322,17 +322,17 @@ void mNextionPanel::nextionProcessInput()
       getString += (char)nextionReturnBuffer[i];
     }
     
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
   
     if (mqttGetSubtopic == "")
     { // If there's no outstanding request for a value, publish to mqttStateTopic
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
       pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
     }
     else
     { // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
       String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;      
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
       pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
       mqttGetSubtopic = "";
     }
@@ -347,13 +347,13 @@ void mNextionPanel::nextionProcessInput()
     getInt = getInt * 256 + nextionReturnBuffer[2];
     getInt = getInt * 256 + nextionReturnBuffer[1];
     String getString = String(getInt);
-    //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
+    //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
 
     if (lcdVersionQueryFlag)
     {
       lcdVersion = getInt;
       lcdVersionQueryFlag = false;
-      ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
+      ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
     }
     else if (mqttGetSubtopic == "")
     {
@@ -385,7 +385,7 @@ void mNextionPanel::nextionProcessInput()
         if (comokFieldCount == 2)
         {
           nextionModel = comokField;
-          ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
+          ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
         }
         comokFieldCount++;
         comokField = "";
@@ -414,21 +414,21 @@ void mNextionPanel::SetAttribute_Txt(uint8_t page, uint8_t element_id, const cha
   char command_ctr[100];
   sprintf(command_ctr,"p[%d].b[%d].txt=\"%s\"",page,element_id,ctr);
   serial_print_suffixed(command_ctr);  
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 }
 
 void mNextionPanel::SetAttribute_BackgroundColour(uint8_t page, uint8_t element_id, uint32_t colour){
   char command_ctr[30];
   sprintf(command_ctr,"p[%d].b[%d].bco=%d",page,element_id,colour);
   serial_print_suffixed(command_ctr);
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 }
 
 void mNextionPanel::SetAttribute_FontColour(uint8_t page, uint8_t element_id, uint32_t colour){
   char command_ctr[30];
   sprintf(command_ctr,"p[%d].b[%d].pco=%d",page,element_id,colour);
   serial_print_suffixed(command_ctr);
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 }
 
 
@@ -448,7 +448,7 @@ void mNextionPanel::nextionSetAttr(const char* hmiAttribute, const char* hmiValu
     SERIAL_NEXTION_TX.print(utf8ascii2((char*)hmiValue));
     SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
   #endif
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "PHASEOUT USING, KEEP LEGACY, SET %s=%s"),hmiAttribute,hmiValue);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "PHASEOUT USING, KEEP LEGACY, SET %s=%s"),hmiAttribute,hmiValue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -462,7 +462,7 @@ void mNextionPanel::nextionGetAttr(const char* c_str)//String hmiAttribute)
   sprintf(hmiattribute_ctr,"get %s",c_str);
   serial_print_suffixed(hmiattribute_ctr);
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " GET 'get %s'"),hmiattribute_ctr);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " GET 'get %s'"),hmiattribute_ctr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -470,7 +470,7 @@ void mNextionPanel::nextionSendCmd(const char* c_str)
 { // Send a raw command to the Nextion panel
   serial_print(utf8ascii(c_str));
   serial_print_suffix();
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
 }
 
 
@@ -602,13 +602,13 @@ void mNextionPanel::EverySecond_FlashScreen(){
 
   if(flash_message.cShowSeconds==0){
     // Return screen to previous
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
     Command_SetPage(settings.page_saved);
     flash_message.cShowSeconds = -1;
   }else
   if(flash_message.cShowSeconds>0){
     flash_message.cShowSeconds--;
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
   }
 
 } //end F

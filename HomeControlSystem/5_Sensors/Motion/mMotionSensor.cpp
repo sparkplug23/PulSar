@@ -173,7 +173,7 @@ void mMotionSensor::Pre_Init(void){
           pinMode(pin[settings.sensors_active], INPUT);
         break;
       }
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[%d] %d"), settings.sensors_active, pin[settings.sensors_active]);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[%d] %d"), settings.sensors_active, pin[settings.sensors_active]);
       settings.sensors_active++;
       settings.fEnableSensor = true;
     }
@@ -212,13 +212,13 @@ void mMotionSensor::EveryLoop(){
 
   // pinMode(12, INPUT_PULLUP);
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("MOTION"));
+  // AddLog(LOG_LEVEL_TEST, PSTR("MOTION"));
 
   // Serial.println(digitalRead(12));
   
 
   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-  //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
+  //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
     if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state){
       //if(pCONT_time->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
@@ -230,7 +230,7 @@ void mMotionSensor::EveryLoop(){
         pir_detect[sensor_id].tDetectTime = millis(); 
 //        pir_detect[sensor_id].detected_time_of_day_seconds = pCONT_time->GetTimeOfDay_Seconds();
 
-AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
+AddLog(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
         
         pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNow();
         
@@ -267,7 +267,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
       }
       // char buffer[20];
       // char buffer2[20];
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\" @ %s"),
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\" @ %s"),
       //                                   PIR_Detected_Ctr(sensor_id, buffer, sizeof(buffer)),
       //                                   mTime::ConvertTimeOfDay_Seconds_HHMMSS(pir_detect[sensor_id].detected_time_of_day_seconds, buffer2, sizeof(buffer2))                                                                          
       //         );
@@ -275,7 +275,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
       
 // char buffer[20];
 //       char buffer2[20];
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_PIR "pir_detect %d @ %s"),
+//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_PIR "pir_detect %d @ %s"),
 //                                         pCONT_time->GetTimeOfDay_Seconds(),
 //                                         mTime::ConvertTimeOfDay_Seconds_HHMMSS(pCONT_time->GetTimeOfDay_Seconds(), buffer2, sizeof(buffer2))                                                                          
 //               );
@@ -299,7 +299,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].stat
 int8_t mMotionSensor::CheckAndExecute_JSONCommands(){
 
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
     return FUNCTION_RESULT_HANDLED_ID;
@@ -319,7 +319,7 @@ void mMotionSensor::parse_JSONCommand(){ //parse_Command() and pass packet (topi
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  

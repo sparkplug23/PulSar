@@ -199,7 +199,7 @@ T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min =
     result = constrain(result, constrained_min, constrained_max);
   }
 
-  // AddLog_P(LOG_LEVEL_INFO, PSTR("result=%d"),result);
+  // AddLog(LOG_LEVEL_INFO, PSTR("result=%d"),result);
 
   return result; 
 
@@ -389,7 +389,9 @@ class mSupport :
     float FastPrecisePowf(const float x, const float y);
 
 
+    #ifdef USE_I2C
     const uint8_t I2C_RETRY_COUNTER = 3;
+    uint32_t i2c_active[4] = { 0 };
     uint32_t i2c_buffer = 0;
     TwoWire* wire = nullptr;
     bool I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size);
@@ -412,6 +414,19 @@ class mSupport :
     int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
     void I2cScan(char *devs, unsigned int devs_len);
     bool I2cDevice(uint8_t addr);
+    void I2cResetActive(uint32_t addr, uint32_t count = 1);
+    void I2cSetActive(uint32_t addr, uint32_t count = 1);
+    void I2cSetActiveFound(uint32_t addr, const char *types);
+    bool I2cActive(uint32_t addr);
+    bool I2cSetDevice(uint32_t addr);
+    bool I2cEnabled(uint32_t i2c_index);
+    #endif // USE_I2C
+
+
+
+
+
+
 
     IPAddress syslog_host_addr;      // Syslog host IP address
     uint32_t syslog_host_hash = 0;   // Syslog host name hash

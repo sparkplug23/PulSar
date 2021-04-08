@@ -253,7 +253,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
   if (Wc.up) {
     esp_camera_deinit();
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Deinit"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Deinit"));
     //return Wc.up;
   }
   Wc.up = 0;
@@ -305,7 +305,7 @@ uint32_t WcSetup(int32_t fsiz) {
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Default template"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Default template"));
   // }
 
   //ESP.getPsramSize()
@@ -320,12 +320,12 @@ uint32_t WcSetup(int32_t fsiz) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM found"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM found"));
   } else {
     config.frame_size = FRAMESIZE_VGA;
     config.jpeg_quality = 12;
     config.fb_count = 1;
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM not found"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: PSRAM not found"));
   }
 
 //  AddLog(LOG_LEVEL_INFO, PSTR("CAM: heap check 1: %d"),ESP_getFreeHeap());
@@ -339,7 +339,7 @@ uint32_t WcSetup(int32_t fsiz) {
   if (x) { free(x); }
 
   if (err != ESP_OK) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("CAM: Init failed with error 0x%x"), err);
+    AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed with error 0x%x"), err);
     return 0;
   }
 
@@ -358,7 +358,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
   camera_fb_t *wc_fb = esp_camera_fb_get();
   if (!wc_fb) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("CAM: Init failed to get the frame on time"));
+    AddLog(LOG_LEVEL_INFO, PSTR("CAM: Init failed to get the frame on time"));
     return 0;
   }
   Wc.width = wc_fb->width;
@@ -369,7 +369,7 @@ uint32_t WcSetup(int32_t fsiz) {
   fd_init();
 #endif
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR("CAM: Initialized"));
+  AddLog(LOG_LEVEL_INFO, PSTR("CAM: Initialized"));
 
   Wc.up = 1;
   if (psram) { Wc.up = 2; }
@@ -803,12 +803,12 @@ uint32_t WcSetup(int32_t fsiz) {
 // }
 
 void mCameraOV2640::HandleWebcamMjpeg(void) {
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Handle camserver"));
+  AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Handle camserver"));
 //  if (!Wc.stream_active) {
 // always restart stream
     Wc.stream_active = 1;
     Wc.client = Wc.CamServer->client();
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Create client"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Create client"));
 //  }
 }
 
@@ -822,13 +822,13 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
   bool jpeg_converted = false;
 
   if (!Wc.client.connected()) {
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Client fail"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Client fail"));
     Wc.stream_active = 0;
   }
   if (1 == Wc.stream_active) {
     Wc.client.flush();
     Wc.client.setTimeout(3);
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Start stream"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Start stream"));
     // Wc.client.print("HTTP/1.1 200 OK\r\n"
     //   "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
     //   "\r\n");
@@ -837,7 +837,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
   if (2 == Wc.stream_active) {
     wc_fb = esp_camera_fb_get();
     if (!wc_fb) {
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Frame fail"));
+      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Frame fail"));
       Wc.stream_active = 0;
     }
   }
@@ -845,7 +845,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
     if (wc_fb->format != PIXFORMAT_JPEG) {
       jpeg_converted = frame2jpg(wc_fb, 80, &_jpg_buf, &_jpg_buf_len);
       if (!jpeg_converted){
-        AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: JPEG compression failed"));
+        AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: JPEG compression failed"));
         _jpg_buf_len = wc_fb->len;
         _jpg_buf = wc_fb->buf;
       }
@@ -882,7 +882,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
     //AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: send frame"));
   }
   if (0 == Wc.stream_active) {
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
     Wc.client.flush();
     Wc.client.stop();
   }
@@ -898,7 +898,7 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
 // /*********************************************************************************************/
 
 uint32_t mCameraOV2640::WcSetStreamserver(uint32_t flag) {
-AddLog_P(LOG_LEVEL_TEST, PSTR("mCameraOV2640::WcSetStreamserver"));
+AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::WcSetStreamserver"));
 
 
 if (pCONT_set->global_state.network_down) { return 0; }
@@ -917,7 +917,7 @@ if (pCONT_set->global_state.network_down) { return 0; }
 
       // Wc.CamServer->on("/cam.jpg", HandleWebcamMjpeg);
       // Wc.CamServer->on("/stream", HandleWebcamMjpeg);
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Stream init"));
+      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream init"));
       Wc.CamServer->begin();
     }
   } else {
@@ -925,7 +925,7 @@ if (pCONT_set->global_state.network_down) { return 0; }
       Wc.CamServer->stop();
       delete Wc.CamServer;
       Wc.CamServer = NULL;
-      AddLog_P(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
+      AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream exit"));
     }
   }
   return 0;
@@ -942,7 +942,7 @@ void mCameraOV2640::WcStreamControl() {
 void mCameraOV2640::EveryLoop(void) {
   if (Wc.CamServer) {
     
-// AddLog_P(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
+// AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
     Wc.CamServer->handleClient();
     if (Wc.stream_active) { HandleWebcamMjpegTask(); }
   }
@@ -1045,7 +1045,7 @@ void mCameraOV2640::pre_init(){
   // }
 // }
 
-AddLog_P(LOG_LEVEL_TEST, PSTR("mCameraOV2640::pre_init"));
+AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::pre_init"));
 
 }
 
@@ -1886,7 +1886,7 @@ if(settings.caminit){
       // WcSetStreamserver(1);
 
 
-AddLog_P(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
+AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
 
       // setup_cam();
 

@@ -71,12 +71,12 @@ void mAnimatorLight::SubTask_Notifications(){
   if(notif.flags.fEnableTimeoutAll){
     if(mTime::TimeReached(&notif.tSaved.TimeoutCounter,30000)){  
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "Seconds until notif timeout: [%d/%d]"),(millis()-notif.tSaved.TimeoutCounter)/1000,120);
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "Seconds until notif timeout: [%d/%d]"),(millis()-notif.tSaved.TimeoutCounter)/1000,120);
       #endif
     }
     if(mTime::TimeReached(&notif.tSaved.Timeout,120000)){
         #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tNotifPanelTimeout"));
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tNotifPanelTimeout"));
       #endif
       TurnLEDsOff();
     }
@@ -91,7 +91,7 @@ void mAnimatorLight::SubTask_Notifications(){
       ){ notif.flags.fForcePanelUpdate = false;
       
       #ifdef ENABLE_LOG_LEVEL_INFO
-      //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d:%s"),i,GetNotificationModeNamebyID(notif.pixel[i].mode, buffer));
+      //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d:%s"),i,GetNotificationModeNamebyID(notif.pixel[i].mode, buffer));
       #endif
       
       RgbcctColor colour = RgbcctColor(0);
@@ -208,20 +208,20 @@ void mAnimatorLight::SubTask_Notifications(){
   } //end timer check
 
   
-            // AddLog_P(LOG_LEVEL_TEST, PSTR("notif.pixel[i].tRateUpdate=%d"),notif.pixel[i].tRateUpdate);
+            // AddLog(LOG_LEVEL_TEST, PSTR("notif.pixel[i].tRateUpdate=%d"),notif.pixel[i].tRateUpdate);
 
   //Auto turn off
   if(mTime::TimeReached(&notif.tSaved.AutoOff,1000)){// if 1 second past
     for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ //check all
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
       #endif
       if(notif.pixel[i].auto_time_off_secs==1){ //if =1 then turn off and clear to 0
         SetPixelColor(i,0);
         notif.pixel[i].auto_time_off_secs = 0;
         notif.pixel[i].mode = NOTIF_MODE_STATIC_OFF_ID;
         #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].auto_time_off_secs);
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "Notif tSaved.AutoOff to OFF[%d]"),notif.pixel[i].auto_time_off_secs);
         #endif
       }else
       if(notif.pixel[i].auto_time_off_secs>1){ //if =1 then turn off and clear to 0
@@ -297,20 +297,20 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_PIXELNUM]){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_PIXELNUM));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     if(jtok.isArray()){  
      JsonParserArray arrobj = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_PIXELNUM];
       for(auto v : arrobj) {
         if(parsed.pixelnum.found_idx > STRIP_NOTIFICATION_SIZE){ break; }
         parsed.pixelnum.val[parsed.pixelnum.found_idx++] = v.getInt();
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);      
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);      
       }
     }else
     if(jtok.isStr()){
       if(strstr(jtok.getStr(),"all")){
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " const char* " "all"));    
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " const char* " "all"));    
         #endif // ENABLE_LOG_LEVEL_COMMANDS 
         for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
       }
@@ -319,11 +319,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     if(jtok.isNum()){
       parsed.pixelnum.val[parsed.pixelnum.found_idx++] = jtok.getInt();
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " int" " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " int" " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       data_buffer.isserviced++;
     }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM "Not Found"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM "Not Found"));
     }
   } //end pixelnum
   
@@ -337,11 +337,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     
     
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_COLOUR));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_COLOUR));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 
-    // AddLog_P(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
+    // AddLog(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
     uint8_t jsonpair_count = jtok.size();
 
 
@@ -351,21 +351,21 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
       JsonParserToken jtok_colour_array = jtok;
       uint8_t subjsonpair_count = jtok.size();
       
-      AddLog_P(LOG_LEVEL_INFO, PSTR("jtok_colour_array.size()=%d,%d"),jtok_colour_array.size(), subjsonpair_count);
+      AddLog(LOG_LEVEL_INFO, PSTR("jtok_colour_array.size()=%d,%d"),jtok_colour_array.size(), subjsonpair_count);
       // uint8_t jsonpair_count = jtok.size();
 
       RgbcctColor colour_tmp = RgbcctColor(0);
       for(int subpair_index = 0; subpair_index < subjsonpair_count; subpair_index++){
         jtok.nextOne(); //skip start of object
         colour_tmp[subpair_index] = jtok.getInt();
-        AddLog_P(LOG_LEVEL_INFO, PSTR("colour_tmp[%d]=%d"), subpair_index, colour_tmp[subpair_index]);
+        AddLog(LOG_LEVEL_INFO, PSTR("colour_tmp[%d]=%d"), subpair_index, colour_tmp[subpair_index]);
       }
 
       parsed.rgbcct.colour[parsed.rgbcct.found_idx++] = colour_tmp;
       
     }
 
-    AddLog_P(LOG_LEVEL_TEST, PSTR("parsed.rgbcct.found_idx=%d"), parsed.rgbcct.found_idx);
+    AddLog(LOG_LEVEL_TEST, PSTR("parsed.rgbcct.found_idx=%d"), parsed.rgbcct.found_idx);
 
 
     // if(jtok.isArray()){  
@@ -373,13 +373,13 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     //   for(auto v : arrobj) {
     //     if(parsed.pixelnum.found_idx > STRIP_NOTIFICATION_SIZE){ break; }
     //     parsed.pixelnum.val[parsed.pixelnum.found_idx++] = v.getInt();
-    //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);      
+    //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " JsonArray " " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);      
     //   }
     // }else
     // if(jtok.isStr()){
     //   if(strstr(jtok.getStr(),"all")){
     //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " const char* " "all"));    
+    //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " const char* " "all"));    
     //     #endif // ENABLE_LOG_LEVEL_COMMANDS 
     //     for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.pixelnum.val[parsed.pixelnum.found_idx++] = i; }
     //   }
@@ -388,11 +388,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     // if(jtok.isNum()){
     //   parsed.pixelnum.val[parsed.pixelnum.found_idx++] = jtok.getInt();
     //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " int" " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);    
+    //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM " int" " [i%d:v%d]"),parsed.pixelnum.found_idx-1,parsed.pixelnum.val[parsed.pixelnum.found_idx-1]);    
     //   #endif // ENABLE_LOG_LEVEL_COMMANDS
     //   data_buffer.isserviced++;
     // }else{
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM "Not Found"));
+    //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_PIXELNUM "Not Found"));
     // }
 
 
@@ -406,20 +406,20 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_HUE]){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_HUE));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_HUE));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     if(jtok.isArray()){  
      JsonParserArray arrobj = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_HUE];
       for(auto v : arrobj) {
         if(parsed.hue.found_idx > STRIP_NOTIFICATION_SIZE){ break; }
         parsed.hue.val[parsed.hue.found_idx++] = v.getInt();
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " JsonArray " " [i%d:v%d]"),parsed.hue.found_idx-1,parsed.hue.val[parsed.hue.found_idx-1]);      
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " JsonArray " " [i%d:v%d]"),parsed.hue.found_idx-1,parsed.hue.val[parsed.hue.found_idx-1]);      
       }
     }else
     if(jtok.isStr()){
       if(strstr(jtok.getStr(),"all")){
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " const char* " "all"));    
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " const char* " "all"));    
         #endif // ENABLE_LOG_LEVEL_COMMANDS 
         for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.hue.val[parsed.hue.found_idx++] = i; }
       }
@@ -428,11 +428,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     if(jtok.isNum()){
       parsed.hue.val[parsed.hue.found_idx++] = jtok.getInt();
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " int" " [i%d:v%d]"),parsed.hue.found_idx-1,parsed.hue.val[parsed.hue.found_idx-1]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE " int" " [i%d:v%d]"),parsed.hue.found_idx-1,parsed.hue.val[parsed.hue.found_idx-1]);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       data_buffer.isserviced++;
     }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE "Not Found"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_HUE "Not Found"));
     }
   } //end hue
 
@@ -443,20 +443,20 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_BRIGHTNESS]){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_BRIGHTNESS));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_BRIGHTNESS));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     if(jtok.isArray()){  
      JsonParserArray arrobj = jtok;//obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_BRIGHTNESS];
       for(auto v : arrobj) {
         if(parsed.brightness.found_idx > STRIP_NOTIFICATION_SIZE){ break; }
         parsed.brightness.val[parsed.brightness.found_idx++] = v.getInt();
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " JsonArray " " [i%d:v%d]"),parsed.brightness.found_idx-1,parsed.brightness.val[parsed.brightness.found_idx-1]);      
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " JsonArray " " [i%d:v%d]"),parsed.brightness.found_idx-1,parsed.brightness.val[parsed.brightness.found_idx-1]);      
       }
     }else
     if(jtok.isStr()){
       if(strstr(jtok.getStr(),"all")){
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " const char* " "all"));    
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " const char* " "all"));    
         #endif // ENABLE_LOG_LEVEL_COMMANDS 
         for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.brightness.val[parsed.brightness.found_idx++] = i; }
       }
@@ -465,11 +465,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     if(jtok.isNum()){
       parsed.brightness.val[parsed.brightness.found_idx++] = jtok.getInt();
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " int" " [i%d:v%d]"),parsed.brightness.found_idx-1,parsed.brightness.val[parsed.brightness.found_idx-1]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " int" " [i%d:v%d]"),parsed.brightness.found_idx-1,parsed.brightness.val[parsed.brightness.found_idx-1]);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       data_buffer.isserviced++;
     }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS "Not Found"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS "Not Found"));
     }
   } //end brightness
 
@@ -481,20 +481,20 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_SPEED]){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_SPEED));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_SPEED));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     if(jtok.isArray()){  
      JsonParserArray arrobj = jtok;
       for(auto v : arrobj) {
         if(parsed.speed.found_idx > STRIP_NOTIFICATION_SIZE){ break; }
         parsed.speed.val[parsed.speed.found_idx++] = v.getInt();
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " JsonArray " " [i%d:v%d]"),parsed.speed.found_idx-1,parsed.speed.val[parsed.speed.found_idx-1]);      
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " JsonArray " " [i%d:v%d]"),parsed.speed.found_idx-1,parsed.speed.val[parsed.speed.found_idx-1]);      
       }
     }else
     if(jtok.isStr()){
       if(strstr(jtok.getStr(),"all")){
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " const char* " "all"));    
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " const char* " "all"));    
         #endif // ENABLE_LOG_LEVEL_COMMANDS 
         for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.speed.val[parsed.speed.found_idx++] = i; }
       }
@@ -503,11 +503,11 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     if(jtok.isNum()){
       parsed.speed.val[parsed.speed.found_idx++] = jtok.getInt();
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " int" " [i%d:v%d]"),parsed.speed.found_idx-1,parsed.speed.val[parsed.speed.found_idx-1]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED " int" " [i%d:v%d]"),parsed.speed.found_idx-1,parsed.speed.val[parsed.speed.found_idx-1]);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       data_buffer.isserviced++;
     }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED "Not Found"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_SPEED "Not Found"));
     }
   } //end speed
 
@@ -518,7 +518,7 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_MODE]){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_MODE));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS  " " D_PARSING_MATCHED D_JSON_MODE));  
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     if(jtok.isArray()){  
      JsonParserArray arrobj = jtok;//obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_BRIGHTNESS];
@@ -531,13 +531,13 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
         // Check if string
 
         parsed.notif_mode.val[parsed.notif_mode.found_idx++] = v.getInt();
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE " JsonArray " " [i%d:v%d]"),parsed.notif_mode.found_idx-1,parsed.notif_mode.val[parsed.notif_mode.found_idx-1]);      
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE " JsonArray " " [i%d:v%d]"),parsed.notif_mode.found_idx-1,parsed.notif_mode.val[parsed.notif_mode.found_idx-1]);      
       }
     }else
     if(jtok.isStr()){
       // if(strstr(jtok.getStr(),"all")){
       //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " const char* " "all"));    
+      //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_BRIGHTNESS " const char* " "all"));    
       //   #endif // ENABLE_LOG_LEVEL_COMMANDS 
       //   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ parsed.brightness.val[parsed.brightness.found_idx++] = i; }
       // }
@@ -546,12 +546,12 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
     if(jtok.isNum()){
       parsed.notif_mode.val[parsed.notif_mode.found_idx++] = jtok.getInt();
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE " int" " [i%d:v%d]"),parsed.notif_mode.found_idx-1,parsed.notif_mode.val[parsed.notif_mode.found_idx-1]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE " int" " [i%d:v%d]"),parsed.notif_mode.found_idx-1,parsed.notif_mode.val[parsed.notif_mode.found_idx-1]);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       data_buffer.isserviced++;
     }else
     {
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE "Not Found"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_MODE "Not Found"));
     }
   } //end brightness
   
@@ -562,19 +562,19 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // Check pixel num exists (exit if it doesn't)
   if(jtok = obj[PM_JSON_NOTIFICATIONS].getObject()[PM_JSON_TIME_SECS]){
   
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_SECS));  
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_SECS));  
     // Arrays
     if(jtok.isArray()){       
       JsonParserArray array = jtok;
       for(auto v : array) {
         parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = v.getInt()*1000; //secs2ms
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,v.getInt());    
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,v.getInt());    
       }
       data_buffer.isserviced++;
     }else
     if(jtok.isNum()){
       parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = jtok.getInt()*1000; //secs2ms
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,jtok.getInt());    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,jtok.getInt());    
     }
 
   }
@@ -583,23 +583,23 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   //   if(obj[D_JSON_TIME_SECS].is<int>()){
   //     int val = obj[D_JSON_TIME_SECS];
   //     parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val*1000; //secs2ms
-  //     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
+  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
   //     data_buffer.isserviced++;
   //   }else{
-  //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS "Not Found"));
+  //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_SECS "Not Found"));
   //   }
   // }else
 
 
   // if(!obj[D_JSON_TIME_MS].isNull()){
-  //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_MS));  
+  //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_PARSING_MATCHED " " D_JSON_TIME_MS));  
   //   // Arrays
   //   if(obj[D_JSON_TIME_MS].is<JsonArray>()){   
   //     JsonArrayConst array = obj[D_JSON_TIME_MS];
   //     for(JsonVariantConst v : array) {
   //       int val = v.as<int>();
   //       parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val;
-  //       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
+  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " JsonArray " " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
   //     }
   //     data_buffer.isserviced++;
   //   }
@@ -608,10 +608,10 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   //   // if(obj[D_JSON_TIME_MS].is<int>()){
   //   //   int val = obj[D_JSON_TIME_MS];
   //   //   parsed.timeon_ms.val[parsed.timeon_ms.found_idx++] = val;
-  //   //   AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
+  //   //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS " int" " [i%d:v%d]"),parsed.timeon_ms.found_idx-1,val);    
   //   //   data_buffer.isserviced++;
   //   // }else{
-  //   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS "Not Found"));
+  //   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS " " D_JSON_TIME_MS "Not Found"));
   //   // }
   // } 
   
@@ -690,7 +690,7 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   if(parsed.timeon_ms.found_idx){
     pixelidx = 0; subidx = 0;
     while(pixelidx<parsed.pixelnum.found_idx){     // Step across all pixels
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS "timeon_ms [%d i%d:v%d]"),pixelidx,parsed.timeon_ms.found_idx,parsed.pixelnum.val[pixelidx]);    
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_NOTIFICATIONS "timeon_ms [%d i%d:v%d]"),pixelidx,parsed.timeon_ms.found_idx,parsed.pixelnum.val[pixelidx]);    
       int pixelnum = parsed.pixelnum.val[pixelidx++];
       notif.pixel[pixelnum].auto_time_off_secs = (parsed.timeon_ms.val[subidx]/1000); 
       if(subidx<parsed.timeon_ms.found_idx-1){subidx++;}

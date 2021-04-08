@@ -16,45 +16,45 @@ void mSensorsDB18::Pre_Init(){
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
     //increment that we have another sensor group added IF we have sensors attached
     if(sensor_group[sensor_group_count].sensor_count){
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB1 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB1 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
       settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
       sensor_group_count++;
     }else{
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
     }
   }
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
   if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
     //increment that we have another sensor group added IF we have sensors attached
     if(sensor_group[sensor_group_count].sensor_count){
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
       settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
       sensor_group_count++;
     }else{
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
     }
   }
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
   if(settings.nSensorsFound){
     settings.fEnableSensor = true;
     settings.group_count = sensor_group_count;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "settings.fEnableSensor, %d sensors"),settings.nSensorsFound);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "settings.fEnableSensor, %d sensors"),settings.nSensorsFound);
   }
 
   // delay(2000);
@@ -66,7 +66,7 @@ void mSensorsDB18::Pre_Init(){
 
 void mSensorsDB18::Init(void){
 
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
+  // AddLog(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
 
   // sensor group 1 exists
   uint8_t sensor_group_count = 0;
@@ -76,7 +76,7 @@ void mSensorsDB18::Init(void){
   sensors_attached +=  sensor_group[sensor_group_count].sensor_count;
   if(sensors_attached>=DB18_SENSOR_MAX){
     sensor_group[sensor_group_count].sensor_count = DB18_SENSOR_MAX; // set limit
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_DSB "DB18_SENSOR_MAX limit reached"));
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DSB "DB18_SENSOR_MAX limit reached"));
   }
 
   // load sensor data into their own sensor struct GROUP
@@ -89,7 +89,7 @@ void mSensorsDB18::Init(void){
 
     if(group_sensor_found){
     
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "group_sensor_found=%d %d"),sensor_group_id,group_sensor_found);
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "group_sensor_found=%d %d"),sensor_group_id,group_sensor_found);
 
       //if sensor limit, exit
       for(uint8_t sensor_id=0;
@@ -111,12 +111,12 @@ void mSensorsDB18::Init(void){
           sensor_group[sensor_group_id].dallas->setResolution(sensor[sensor_count].address, TEMPERATURE_PRECISION);
 
 
-          AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
           sensor_count++; // increment how many is found
           //limit if number of sensors is reached
           if(sensor_count>DB18_SENSOR_MAX){ break; }
         }else{
-          AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed"));        
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed"));        
         }
       }//end for
     }
@@ -124,7 +124,7 @@ void mSensorsDB18::Init(void){
 
 
   if(!sensor_count){    
-    // AddLog_P(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
+    // AddLog(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
     return;
   }
 
@@ -176,12 +176,12 @@ void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t requ
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }else{
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if
@@ -300,7 +300,7 @@ void mSensorsDB18::printAddress(DeviceAddress deviceAddress, int8_t index){
     if(i<7){Serial.print(",");}
   }
   Serial.println();
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR("printAddress %X:%X:%X:%X:%X:%X:%X:%X"),
+  // AddLog(LOG_LEVEL_DEBUG,PSTR("printAddress %X:%X:%X:%X:%X:%X:%X:%X"),
   //   deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
   //   deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
 }
@@ -396,11 +396,11 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
     case FUNC_EVERY_SECOND:{
       // char buffer[100];
       // uint8_t ii = 5;
-      // AddLog_P(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
     
     
-      // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),0,GetCorrectedDeviceID(0)); 
-      // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),1,GetCorrectedDeviceID(1)); 
+      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),0,GetCorrectedDeviceID(0)); 
+      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),1,GetCorrectedDeviceID(1)); 
 
     }
     break;   
@@ -451,7 +451,7 @@ int8_t mSensorsDB18::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -468,12 +468,12 @@ void mSensorsDB18::parse_JSONCommand(){
  // Need to parse on a copy
   char parsing_buffer[data_buffer.payload.len+1];
   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
+  AddLog(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
     #endif// ENABLE_LOG_LEVEL_INFO
     return;
   }  
@@ -488,7 +488,7 @@ void mSensorsDB18::parse_JSONCommand(){
     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
       
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
     #endif // LOG_LEVEL_COMMANDS
     
     uint8_t address_temp[8];
@@ -504,7 +504,7 @@ void mSensorsDB18::parse_JSONCommand(){
       for(auto address_id : array_sensor_address_iter) {
         int address = address_id.getInt();
         // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
-        //AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
+        //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
         // #endif
         address_temp[address_index++] = address;
         // if(address_index>7){ break; } //error!
@@ -532,11 +532,11 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
   // Address moved into struct, I need to rearrange now with ids
 
   
-        AddLog_P(LOG_LEVEL_INFO, "searching start %d",settings.group_count);
+        AddLog(LOG_LEVEL_INFO, "searching start %d",settings.group_count);
 
 
   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
-        AddLog_P(LOG_LEVEL_INFO, "searching iter %d",sensor_group_id);
+        AddLog(LOG_LEVEL_INFO, "searching iter %d",sensor_group_id);
     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
       // Check address has been set    
       
@@ -548,7 +548,7 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
       
       
         AddLog_Array(LOG_LEVEL_INFO, "isconnected", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Searched %02d, Found %02d, Id from %d to %d %d"),
+        AddLog(LOG_LEVEL_TEST, PSTR("Searched %02d, Found %02d, Id from %d to %d %d"),
           address_to_find[7],
           sensor[sensor_count].address[7],
           sensor_count,
@@ -561,7 +561,7 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
 
       }
       else{
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed - no find with search %d"),sensor[sensor_count].address[7]);   
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed - no find with search %d"),sensor[sensor_count].address[7]);   
       }
       sensor_count++;
     }
@@ -573,7 +573,7 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
 void mSensorsDB18::EveryLoop(){
   if(mTime::TimeReachedNonReset(&tSavedMeasureSensor,settings.rate_measure_ms)){
     
-    // AddLog_P(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
+    // AddLog(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
 
     if(!db18_sensors_active){ // Retry init if failed
       Init(); //search again
@@ -582,7 +582,7 @@ void mSensorsDB18::EveryLoop(){
         tSavedMeasureSensor = millis()+10000; //30 seocnds backoff
       }
     }else{
-      // AddLog_P(LOG_LEVEL_DEBUG,PSTR("SplitTask_UpdateSensors"));
+      // AddLog(LOG_LEVEL_DEBUG,PSTR("SplitTask_UpdateSensors"));
         for(uint8_t sensor_group_id=0;
                   sensor_group_id<settings.group_count;
                   sensor_group_id++

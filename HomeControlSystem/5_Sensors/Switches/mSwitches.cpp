@@ -30,12 +30,12 @@ int8_t mSwitches::Tasker(uint8_t function){
         // Serial.printf("PinUsed[302]\t\tpin=%d\n\r",pCONT_pins->PinUsed(GPIO_SWT2_NP_ID));
       // pinMode(13,INPUT);
       // pinMode(5,INPUT);
-      // AddLog_P(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
+      // AddLog(LOG_LEVEL_TEST,PSTR("%d %d %d %d %d %d"),
       //   digitalRead(13),digitalRead(5),
       //   pCONT_pins->GetPin(GPIO_SWT1_NP_ID],pCONT_pins->GetPin(GPIO_SWT2_NP_ID],
       //   pCONT_pins->GetPin(GPIO_SWT1_ID],pCONT_pins->GetPin(GPIO_SWT2_ID]
       // );
-      // AddLog_P(LOG_LEVEL_INFO,PSTR("Switches(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
+      // AddLog(LOG_LEVEL_INFO,PSTR("Switches(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
       // settings.switches_found,
       // switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
       // switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
@@ -140,7 +140,7 @@ void mSwitches::SwitchInit(void)
       switches[settings.switches_found].lastwallswitch = digitalRead(switches[settings.switches_found].pin);  
       
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
+        AddLog(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
       #endif // ENABLE_LOG_LEVEL_INFO
       
       if(settings.switches_found++ >= MAX_SWITCHES){ break; }
@@ -233,7 +233,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
 {
   if (pCONT_time->uptime.seconds_nonreset < 4) { return; }  
 
-  uint8_t button = NOT_PRESSED;
+  uint8_t button = SWITCH_NOT_PRESSED_ID;
   uint8_t switchflag;
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.switch_debounce;
 
@@ -271,7 +271,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
 
       if (button != switches[i].lastwallswitch) {
         switches[i].ischanged = true;
-        AddLog_P(LOG_LEVEL_TEST,PSTR("button%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),button,i,switches[i].lastwallswitch);
+        AddLog(LOG_LEVEL_TEST,PSTR("button%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),button,i,switches[i].lastwallswitch);
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
         case TOGGLE:
@@ -284,12 +284,12 @@ void mSwitches::SwitchHandler(uint8_t mode)
           switchflag = ~button &1;       // Follow inverted wall switch state
           break;
         case PUSHBUTTON:
-          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch)) {
+          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTON_INV:
-          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with releasing pushbutton from Gnd
           }
           break;
@@ -299,19 +299,19 @@ void mSwitches::SwitchHandler(uint8_t mode)
           }
           break;
         case PUSHBUTTONHOLD:
-          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch)) {
+          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTONHOLD_INV:
-          if ((NOT_PRESSED == button) && (PRESSED == switches[i].lastwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((PRESSED == button) && (NOT_PRESSED == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
@@ -324,8 +324,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
         if (switchflag < 3) {
           //update the event
           #ifdef USE_MODULE_CORE_RULES
-          pCONT_rules->Reset();
-          pCONT_rules->Add_All(EM_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
+          pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
           #endif // USE_MODULE_CORE_RULES
         }

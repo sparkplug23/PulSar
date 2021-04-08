@@ -8,7 +8,7 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -22,7 +22,7 @@ int8_t mInterfaceLight::CheckAndExecute_JSONCommands(){
 void mInterfaceLight::parse_JSONCommand(void){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands"));
+  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands"));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   #ifdef USE_MODULE_LIGHTS_PWM
@@ -46,7 +46,7 @@ void mInterfaceLight::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  
@@ -69,7 +69,7 @@ void mInterfaceLight::parse_JSONCommand(void){
       data_buffer.isserviced++;
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -85,7 +85,7 @@ void mInterfaceLight::parse_JSONCommand(void){
       data_buffer.isserviced++;
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -93,7 +93,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_ActiveSolidPalette_Hue_360(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -101,14 +101,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_ActiveSolidPalette_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), getSat());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), getSat());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_SAT_255]){ // alternate full range 0-255
     CommandSet_ActiveSolidPalette_Sat_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT_255)), getSat());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT_255)), getSat());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -116,14 +116,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
     CommandSet_Brt_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -131,14 +131,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
     #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_BrtRGB_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -146,14 +146,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_BrtCT_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriCT());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -161,14 +161,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -176,7 +176,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   } 
 
@@ -184,14 +184,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -199,14 +199,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),animation.transition.rate_ms);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),animation.transition.rate_ms);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.rate_ms);  
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.rate_ms);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -214,14 +214,14 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_LightsCountToUpdateAsNumber(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
     #endif
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
     CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), animation.transition.pixels_to_update_as_number);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), animation.transition.pixels_to_update_as_number);
     #endif
   }
   
@@ -237,7 +237,7 @@ void mInterfaceLight::parse_JSONCommand(void){
       data_buffer.isserviced++;
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -245,7 +245,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_Auto_Time_Off_Secs(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -260,7 +260,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     ModifyStateNumberIfToggled(&state, light_power_state);
     CommandSet_LightPowerState(state);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
     #endif // ENABLE_LOG_LEVEL_DEBUG       
   }
  
@@ -299,7 +299,7 @@ void mInterfaceLight::parse_JSONCommand(void){
       data_buffer.isserviced++;
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -315,7 +315,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
     CommandSet_EnabledAnimation_Flag(state);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -333,7 +333,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     //   data_buffer.isserviced++;
     // }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -349,7 +349,7 @@ void mInterfaceLight::parse_JSONCommand(void){
   //     data_buffer.isserviced++;
   //   }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName2(buffer, sizeof(buffer)));
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName2(buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
@@ -357,7 +357,7 @@ void mInterfaceLight::parse_JSONCommand(void){
     CommandSet_LightSizeCount(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -378,7 +378,7 @@ void mInterfaceLight::parse_JSONCommand(void){
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -409,7 +409,7 @@ void mInterfaceLight::CommandSet_PixelHardwareTypeID(uint8_t value){
   char buffer[20];
   pCONT_set->Settings.light_settings.type = value;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
 int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
@@ -438,14 +438,14 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
   char buffer[60];
   // settings.pixel_hardware_color_order_id = value; 
-  
 
-  
+  // return;
+    
   if(!c){ return; }
   if(strlen(c)<=5){
-    AddLog_P(LOG_LEVEL_TEST, PSTR("Valid Length"));
+    AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
   }else{
-    AddLog_P(LOG_LEVEL_TEST, PSTR("INVALID Length"));
+    AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
     return;
   }
 
@@ -458,7 +458,7 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
 
   for(uint8_t index=0;index<strlen(c);index++){
-    if(c[index]==0){ break; }
+    // if(c[index]==0){ break; }
 
     if((c[index]=='R')||(c[index]=='r')){
       order->r = index;
@@ -478,7 +478,7 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
 
   }
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+  AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
     order->r,
     order->g,
     order->b,
@@ -488,14 +488,14 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
 
   //tmp fix, copy, flip 1 and 2
 
-  memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
+  // memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
 
   
-  pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
-  pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
+  // pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
+  // pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
 
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
   // #endif
 
 
@@ -525,9 +525,9 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 
 //   // if(!c){ return -1; }
 //   // if(strlen(c)<=5){
-//   //   AddLog_P(LOG_LEVEL_TEST, PSTR("Valid Length"));
+//   //   AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
 //   // }else{
-//   //   AddLog_P(LOG_LEVEL_TEST, PSTR("INVALID Length"));
+//   //   AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
 //   //   return -1;
 //   // }
 
@@ -560,7 +560,7 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 
 //   // }
 
-//   // AddLog_P(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//   // AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
 //   //   order->r,
 //   //   order->g,
 //   //   order->b,
@@ -581,6 +581,15 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 //   // return -1;
 // }
 
+/**
+ * Fall back to default if invalid 
+ **/
+void mInterfaceLight::CheckHardwareElementColourOrder(){
+  
+  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+
+}
+
 
 
 // /******************************************************************************************************************************
@@ -596,7 +605,7 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 //   // char buffer[60];
 //   // settings.pixel_hardware_color_order_id = value; 
 //   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
 //   // #endif
 
   
@@ -626,9 +635,9 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 // int8_t mInterfaceLight::GetHardwareColourTypeIDbyName2(const char* c){
 //   if(!c){ return -1; }
 //   if(strlen(c)<=5){
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("Valid Length"));
+//     AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
 //   }else{
-//     AddLog_P(LOG_LEVEL_TEST, PSTR("INVALID Length"));
+//     AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
 //     return -1;
 //   }
 
@@ -661,7 +670,7 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 
 //   }
 
-//   AddLog_P(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//   AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
 //     order->r,
 //     order->g,
 //     order->b,
@@ -690,30 +699,30 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 
 void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
     #endif   
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT DEBUG_INSERT_PAGE_BREAK "f::CommandSet_LightPowerState %d"), state);
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT DEBUG_INSERT_PAGE_BREAK "f::CommandSet_LightPowerState %d"), state);
   #endif
           
   switch(state){
     case LIGHT_POWER_STATE_ON_ID:
       // SetAnimationProfile(ANIMATION_PROFILE_TURN_ON_ID);
 
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
       memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation loading previous state"));
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation loading previous state"));
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
 
       // Handle depending on hardware type
       
       switch(animation.mode_id){
         default:
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
         #ifdef USE_MODULE_LIGHTS_ANIMATOR
         case ANIMATION_MODE_EFFECTS_ID:
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
           #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
           pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
           #endif
@@ -722,7 +731,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
         break;
         #endif // 
         // case ANIMATION_MODE_SCENE_ID:
-        //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "scene"));
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "scene"));
         //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
         //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
         // break;
@@ -741,22 +750,22 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 
 
       // Remember previous state for returning to later  
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
       memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
-      AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation SAVING state to return to"));
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation SAVING state to return to"));
       // If I use overrides, is this neccesary?
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
       light_power_state = false;
 
       //if palette, set colour to black and update all
       switch(animation.mode_id){
         default:
           // #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
           // #endif
         case ANIMATION_MODE_EFFECTS_ID://PRESETS_ID:
           // #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
           // #endif
           animation_override.time_ms = 1000; //force fast rate to turn on
           // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
@@ -775,7 +784,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
         break;
         // case ANIMATION_MODE_SCENE_ID:
         //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-        //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
         //   // #endif
         //   // setBriRGB(0);
         //   // animation.brightness = 0;
@@ -816,7 +825,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
   rgbcct_controller.setHue360(hue_new);
   animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -830,7 +839,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
   rgbcct_controller.setSat255(sat_new);
   animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat255());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -845,7 +854,7 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   animation.flags.fForceUpdate = true;
   setBriRGB_Global(brt_new);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -861,7 +870,7 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
   animation.flags.fForceUpdate = true;
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightnessRGB255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -877,7 +886,7 @@ void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
   animation.flags.fForceUpdate = true;
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBrightnessCCT255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBrightnessCCT255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -892,7 +901,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
   rgbcct_controller.setCCT(ct);
   animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -907,7 +916,7 @@ bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb
   rgbcct_controller.setRGBCCTLinked(ct_rgb_linked);
   animation.flags.fForceUpdate = true;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -927,7 +936,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[30];
   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
   #endif // ENABLE_LOG_LEVEL_DEBUG
 }
 
@@ -942,7 +951,7 @@ void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
   animation.flags.fEnable_Animation = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), animation.flags.fEnable_Animation);    
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), animation.flags.fEnable_Animation);    
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -958,7 +967,7 @@ void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
   animation.transition.time_ms = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
   #endif
 
 }
@@ -976,7 +985,7 @@ void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
   if(animation.transition.rate_ms<animation.transition.time_ms){ animation.transition.time_ms = animation.transition.rate_ms;}
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
   #endif
 
 }
@@ -1031,7 +1040,7 @@ void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value){
   char buffer[50];
 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1080,7 +1089,7 @@ void mInterfaceLight::CommandSet_Auto_Time_Off_Secs(uint16_t value){
   auto_off_settings.time_decounter_secs = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
   #endif
 
 }
@@ -1095,7 +1104,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 
   settings.light_size_count = value;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1112,7 +1121,7 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
   #endif
 
 }
@@ -1129,7 +1138,7 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
   // animation.transition.pixels_to_update_as_percentage = value;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
   #endif
 
 }
@@ -1153,7 +1162,7 @@ void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t 
   mPaletteI->active_scene_palette_id = palette_id;
   active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
   
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
 }
 
 /******************************************************************************************************************************
@@ -1182,8 +1191,8 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   #endif
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette.id);
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette.id);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1196,7 +1205,7 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 
 void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen){
 
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("START[%d|%d] fMapIDs_Type=%d"),
+      // AddLog(LOG_LEVEL_TEST, PSTR("START[%d|%d] fMapIDs_Type=%d"),
       // palette_id,mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID,
       // mPaletteI->palettelist.rgbcct_users[0].flags.fMapIDs_Type);
 
@@ -1205,7 +1214,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   // Check if palette can be edited
   if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ 
-      AddLog_P(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
+      AddLog(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
       return; 
   }
 
@@ -1215,7 +1224,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   uint8_t* palette_buffer = nullptr;
 
   if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID){
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
+    // AddLog(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     palette_id_adjusted_to_array_index = palette_id;
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID)*palette_id_adjusted_to_array_index];
     // Clear the entire new colour to the "unset" values
@@ -1229,7 +1238,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
+    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
 // palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
 
 
@@ -1245,15 +1254,15 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   animation.flags.fForceUpdate = true;
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
+    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
+    // AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID;    
     palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
 
     
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
+    // AddLog(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
     
     // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
     
@@ -1279,14 +1288,14 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   // AddLog_Array(LOG_LEVEL_COMMANDS, "rgbcct map", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5*5);
   // AddLog_Array(LOG_LEVEL_COMMANDS, "encoded map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 25);
   // AddLog_Array(LOG_LEVEL_COMMANDS, "colour id map", mPaletteI->palettelist.ptr->colour_map_id, 25);
-  // AddLog_P(LOG_LEVEL_COMMANDS, "colour map size %d", mPaletteI->palettelist.ptr->colour_map_size);
+  // AddLog(LOG_LEVEL_COMMANDS, "colour map size %d", mPaletteI->palettelist.ptr->colour_map_size);
   // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   // Serial.flush();
   // delay(3000);
 
   
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("END fIndexs_Type=%d"),palettelist.rgbcct_users[0].flags.fIndexs_Type);
+      // AddLog(LOG_LEVEL_TEST, PSTR("END fIndexs_Type=%d"),palettelist.rgbcct_users[0].flags.fIndexs_Type);
 
 
 }
@@ -1302,7 +1311,7 @@ void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
   char buffer[60];
   animation.mode_id = value;        
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
   #endif
 
 }

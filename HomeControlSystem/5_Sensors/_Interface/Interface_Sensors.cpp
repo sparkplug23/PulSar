@@ -38,7 +38,7 @@
 //   // if((pin_rx>=0)&&(pin_tx>=0)){
 //   //   status_enabled = true;
 //   // }else{
-//   //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d %d"),pin_tx,pin_rx);
+//   //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d %d"),pin_tx,pin_rx);
 //   //   status_enabled = false;
 //   // }
 
@@ -64,11 +64,11 @@
 //   }
 
 //   if(lcdConnected){
-//     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD responding, continuing program load"));
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD responding, continuing program load"));
 //     nextionSendCmd("connect");
 //   }
 //   else{
-//     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD not responding, continuing program load"));
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD not responding, continuing program load"));
 //   }
 
 //   // Configure some items
@@ -208,7 +208,7 @@
 //       //   "}";
 //       // mcl->mweb->WSBufferAppend_P(function);
       
-//       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tasker %s"),"FUNC_WEB_ROOT_SEND_SCRIPT");
+//       // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tasker %s"),"FUNC_WEB_ROOT_SEND_SCRIPT");
 //     }
 //     break;
 //     case FUNC_WEB_SHOW_PARAMETERS:{
@@ -307,7 +307,7 @@
 
 //   // char command[sizeof(mcl->mset->Settings.ota_url) + 10];  // OtaUrl
 
-//   // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
+//   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
 //   // mcl->mwif->WifiConfigCounter();
 
 //   // char otaurl[sizeof(mcl->mset->Settings.ota_url)];
@@ -334,7 +334,7 @@
 // {
 // //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPLOAD_DONE));
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPLOAD_DONE));
 
 //   char error[100];
 
@@ -361,7 +361,7 @@
 // //       snprintf_P(error, sizeof(error), PSTR(D_UPLOAD_ERROR_CODE " %d"), upload_error);
 // //     }
 // //     mcl->mwif->WSBufferAppend_P(error);
-// //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
+// //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
 // //     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system.stop_flash_rotate;
 // //   } else {
 // //     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_SUCCESS));
@@ -379,7 +379,7 @@
 // void mNextionPanel::HandleUploadLoop(void)
 // {
 
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), "HandleUploadLoop");
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), "HandleUploadLoop");
 
 // //   // Based on ESP8266HTTPUpdateServer.cpp uses ESP8266WebServer Parsing.cpp and Cores Updater.cpp (Update)
 // //   bool _serialoutput = (LOG_LEVEL_DEBUG <= mcl->mset->seriallog_level);
@@ -402,7 +402,7 @@
 // //       return;
 // //     }
 // //     //SettingsSave(1);  // Free flash for upload
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
+// //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
 // //     if (UPL_SETTINGS == upload_file_type) {
 // //       if (!mcl->mset->SettingsBufferAlloc()) {
 // //         upload_error = 2;  // Not enough space
@@ -571,7 +571,7 @@
 // //       #endif
 // //     }
 // //     if (!upload_error) {
-// //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_SUCCESSFUL " %u bytes. " D_RESTARTING), upload.totalSize);
+// //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_SUCCESSFUL " %u bytes. " D_RESTARTING), upload.totalSize);
 // //     }
 // //   } else if (UPLOAD_FILE_ABORTED == upload.status) {
 // //     mcl->mset->restart_flag = 0;
@@ -605,13 +605,13 @@
 
 //   if(flash_message.cShowSeconds==0){
 //     // Return screen to previous
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
 //     Command_SetPage(settings.page_saved);
 //     flash_message.cShowSeconds = -1;
 //   }else
 //   if(flash_message.cShowSeconds>0){
 //     flash_message.cShowSeconds--;
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION D_JSON_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
 //   }
 
 // } //end F
@@ -673,7 +673,7 @@
 //   // Check if long press threshold reached
 //   if(screen_press.fEnableImmediateButtonTime){
 //     if(mTime::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
 //       screen_press.fEnableImmediateButtonTime=false;
 //       fEnableIgnoreNextOffEvent = true;
 //       MQTTSend_LongPressEvent();
@@ -735,7 +735,7 @@
 //   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
 //   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//   //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_PAGE_SET);
+//   //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_PAGE_SET);
 //   //   Command_SetPage(arg_value);
 //   // }
 
@@ -743,7 +743,7 @@
 //   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
 //   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//   //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_SLIDER);
+//   //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_SLIDER);
 //   //   Command_SetBrightness(arg_value);
 //   // }
 
@@ -751,7 +751,7 @@
 //   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
 //   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//   //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> Command_ToggleBrightness " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE);
+//   //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> Command_ToggleBrightness " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE);
 //   //   Command_ToggleBrightness();
 //   // }
   
@@ -1026,64 +1026,64 @@
 //   //     mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
 //   //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //   //     update_all = true; //refresh all
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 
 //   //     switch(ii){
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
 //   //         // from mapped value to real value
 //   //         arg_value = animation.transition.PROGMEM pixels_to_update_as_percentage_map[arg_value];
 //   //         animation.transition.pixels_to_update_as_percentage = constrain(arg_value,0,100);
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage);
+//   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage);
 //   //         // Also convert to number equivalent
 //   //         animation.transition.pixels_to_update_as_number = map(animation.transition.pixels_to_update_as_percentage,0,100,0,ledout.length);
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER,animation.transition.pixels_to_update_as_number);
+//   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER,animation.transition.pixels_to_update_as_number);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELORDER: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELORDER");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELORDER");
 //   //         animation.transition.order = arg_value; // no map
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
+//   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
 //   //         animation.transition.rate_ms = arg_value*1000; //seconds to milliseconds
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms);
+//   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
 //   //         animation.transition.time_ms = arg_value*1000; //seconds to milliseconds
 //   //         // If period > rate, increase period to rate
 //   //         animation.transition.time_ms = animation.transition.time_ms>animation.transition.rate_ms?animation.transition.rate_ms:animation.transition.time_ms;
-//   //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms); 
+//   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms); 
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"TRANSITIONMETHOD");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"TRANSITIONMETHOD");
 //   //         animation.transition.method = arg_value;
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetTransitionMethodName());      
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetTransitionMethodName());      
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_ANIMATIONMODE: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"ANIMATIONMODE");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"ANIMATIONMODE");
 //   //         animation.mode = arg_value;
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetAnimationModeName());
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetAnimationModeName());
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
 //   //         animation.palette = arg_value;
-//   //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteName());
+//   //         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteName());
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 //   //         flashersettings.function = arg_value;  
 //   //         flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;  //restart animation/function
-//   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
+//   //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
 //   //       break;
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 //   //         mixer.running_id = arg_value;          
-//   //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
+//   //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
 //   //       break;
 //   //       default: 
-//   //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "DEFAULT hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "DEFAULT hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //   //       break;
 //   //     } //switch
 //   //   } //if
@@ -1098,10 +1098,10 @@
 
 //   // //if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_CONFIGURE_LOGGING));
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_CONFIGURE_LOGGING));
 
 //   // if (mcl->mweb->pWebServer->hasParam("save")) {
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"save\")"));
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"save\")"));
 //   //   WebSave_NextionSettings();
 //   //   mcl->mweb->HandleRoot(); // return to main menu
 //   //   return;
@@ -1156,7 +1156,7 @@
 // void mNextionPanel::wifiConnected()
 // { // MQTT connection and subscriptions
 
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
 
 //   // Show connection success
 //   //nextionSendCmd("page 0");
@@ -1164,11 +1164,11 @@
 //   // char display_ctr[30];memset(display_ctr,0,sizeof(display_ctr));
 //   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
 
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
 //   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_CONNECTED"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_CONNECTED"));
       
 //       // nextionSendCmd("page 0");
 
@@ -1188,7 +1188,7 @@
 
 // void mNextionPanel::wifiDisconnected(){
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
   
 //   // char display_ctr[120];memset(display_ctr,0,sizeof(display_ctr));
 //   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connect to%s\\rFAILED rc=%s\"",WiFi.localIP().toString(),"192.168.1.65",mcl->mqt->pubsub->stateCtr());
@@ -1198,12 +1198,12 @@
 //   // // show item
 //   // nextionSendCmd("vis 3,1");
   
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
 //   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
   
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_DISCONNECTED"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_DISCONNECTED"));
 
 //       // nextionSendCmd("page 0");
 
@@ -1239,7 +1239,7 @@
 // void mNextionPanel::mqttConnected()
 // { // MQTT connection and subscriptions
 
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
 
 //   // Show connection success
 //   //nextionSendCmd("page 0");
@@ -1247,7 +1247,7 @@
 //   // char display_ctr[30];memset(display_ctr,0,sizeof(display_ctr));
 //   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
 
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
 //   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
@@ -1259,7 +1259,7 @@
 
 // void mNextionPanel::mqttDisconnected(){
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
   
 //   // char display_ctr[120];memset(display_ctr,0,sizeof(display_ctr));
 //   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connect to%s\\rFAILED rc=%s\"",WiFi.localIP().toString(),"192.168.1.65",mcl->mqt->pubsub->stateCtr());
@@ -1269,7 +1269,7 @@
 //   // // show item
 //   // nextionSendCmd("vis 3,1");
   
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
 //   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
@@ -1289,7 +1289,7 @@
 
 //   StaticJsonDocument<100> doc;
 //   JsonObject rootobj = doc.to<JsonObject>();
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
 
 //   char event_ctr[20];
 //   memset(event_ctr,0,sizeof(event_ctr));
@@ -1315,7 +1315,7 @@
 
 //   StaticJsonDocument<100> doc;
 //   JsonObject rootobj = doc.to<JsonObject>();
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
 
 //   char event_ctr[20];
 //   memset(event_ctr,0,sizeof(event_ctr));
@@ -1350,7 +1350,7 @@
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(mcl->mset->data_buffer_old.topic.ctr,"set/nextion")>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 //     mcl->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
 //     fOpenHABDataStreamActive = true;
@@ -1362,49 +1362,49 @@
 //   char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
 
 //   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/commands")){ // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
 
 //     StaticJsonDocument<300> doc;
 //     DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //     JsonObject obj = doc.as<JsonObject>();
 
 //     if(!obj["page"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "page"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "page"));    
 //       settings.page = obj["page"];
 //       sprintf(command_ctr,"page %d",settings.page);
 //       nextionSendCmd(command_ctr);
 //     }else
 //     if(!obj["command"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "command"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "command"));    
 //       const char* command = obj["command"];
 //       nextionSendCmd(command);
 //     }else
 //     if(!obj["statusupdate"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
 //       uint8_t statusupdate = obj["statusupdate"];
 //       sprintf(command_ctr,"statusupdate %d",statusupdate);
 //       mqtthandler_settings_teleperiod.flags.SendNow = true;
 //     }else
 //     if(!obj["brightness"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
 //       uint8_t brightness = obj["brightness"];
 //       //nextionSetAttr("dim", String(brightness));
 //       //sprintf(command_ctr,"dims=%d",brightness);
 //       nextionSendCmd("dims=dim");
 //     }else
 //     if(!obj["lcdreboot"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
 //       uint8_t lcdreboot = obj["lcdreboot"];
 //       nextionReset();
 //     }else
 //     if(!obj["onoff"].isNull()){ 
 //       const char* onoff = obj["onoff"];
 //       if(strstr(onoff,"ON")){
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"onoff",D_ON);    
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"onoff",D_ON);    
 //         nextionSendCmd("dim=dims");
 //       }else
 //       if(strstr(onoff,"OFF")){
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));     
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));     
 //         nextionSendCmd("dims=dim");
 //         nextionSetAttr("dim", "0");
 //       }
@@ -1413,7 +1413,7 @@
 //   }else
 //   // Group commands (many)
 //   if(strstr(mcl->mset->data_buffer_old.topic.ctr,"/set_multi")){  // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED " set_multi"));     
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED " set_multi"));     
 //     nextionParseJson(mcl->mset->data_buffer_old.payload.ctr);
 //   }else
 //   // Set element 
@@ -1475,7 +1475,7 @@
 
 // int8_t mNextionPanel::parsesub_FlashMessage(){
 
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
 
 //   #ifdef JSONDOCUMENT_STATIC
 //     StaticJsonDocument<800> doc;
@@ -1484,7 +1484,7 @@
 //   #endif
 //   DeserializationError error = deserializeJson(doc, mcl->mset->data_buffer_old.payload.ctr);
 //   if(error){
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
 //     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
 //     return 0;
 //   }
@@ -1495,26 +1495,26 @@
 
 //   if(!obj["message"].isNull()){ 
 //     const char* messagectr = obj["message"];
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
 //     sprintf(flash_message.message,"%s",messagectr);
 //   }
 
 //   if(!obj["time_secs"].isNull()){ 
 //     uint8_t time = obj["time_secs"];
 //     flash_message.cShowSeconds = time>60?60:time;
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
 //   }
 
 //   if(!obj["background_colour"].isNull()){ 
 //     uint32_t background_colour = obj["background_colour"];
 //     flash_message.background_colour = background_colour;
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
 //   }
 
 //   if(!obj["font_colour"].isNull()){ 
 //     uint32_t font_colour = obj["font_colour"];
 //     flash_message.font_colour = font_colour;
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
 //   }
   
 
@@ -1570,7 +1570,7 @@
 
 //   if (serial_available())
 //   {
-//     //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEXTION " if (Serial.available())"));
+//     //AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEXTION " if (Serial.available())"));
 //     lcdConnected = true;
 //     byte nextionCommandByte = serial_read();
 
@@ -1594,12 +1594,12 @@
 //   }
 //   if (nextionCommandComplete)
 //   {
-// //    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),
+// //    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),
 //     //Serial.println(ConvertBytetoASCII(nextionReturnBuffer,nextionReturnIndex));
 //     // for(int i=0;i<nextionReturnIndex;i++){
-//     //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "%d | %s"),i,String(nextionReturnBuffer[i], HEX));
+//     //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "%d | %s"),i,String(nextionReturnBuffer[i], HEX));
 //     // }
-//     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),hmiDebug.c_str());
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),hmiDebug.c_str());
 //     hmiDebug = "";
 //   }
 //   return nextionCommandComplete;
@@ -1639,7 +1639,7 @@
 //   // first instructions byte
 //   switch(nextionReturnBuffer[0]){
 //     case NEXTION_COMMAND_INVALID_INSTRUCTION:
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
 //     break;
 
 //   }
@@ -1664,7 +1664,7 @@
 //       screen_press.tSavedButtonONEvent = millis();
 //       screen_press.fEnableImmediateButtonTime = true; 
 
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_ON);
               
 //       memset(event_ctr,0,sizeof(event_ctr));
 //       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -1686,7 +1686,7 @@
 //       screen_press.tSavedButtonONDurationEvent = screen_press.tSavedButtonOFFEvent - screen_press.tSavedButtonONEvent;
 //       screen_press.duration = screen_press.tSavedButtonONDurationEvent;
       
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "\"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,D_JSON_OFF);
               
 //       memset(event_ctr,0,sizeof(event_ctr));
 //       sprintf(event_ctr,"p[%d].b[%d]",screen_press.page,screen_press.event);
@@ -1699,13 +1699,13 @@
 //       serializeJson(doc,mcl->mset->data_buffer_old.payload.ctr);
 
 //       if(!fEnableIgnoreNextOffEvent){
-//         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
+//         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
 //         mcl->mqt->ppublish("status/nextion/event",mcl->mset->data_buffer_old.payload.ctr,0);
 //         mcl->mqt->ppublish("status/nextion/event/end",mcl->mset->data_buffer_old.payload.ctr,0);
 //         MQTTSend_PressEvent();
 //       }else{
 //         fEnableIgnoreNextOffEvent = false;// reset to listen to next event
-//         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
+//         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = reset"));
 //       }
 
 
@@ -1723,13 +1723,13 @@
 //     // Meaning: page 2
 //     String nextionPage = String(nextionReturnBuffer[1]);
     
-//     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX "[sendme Page] \"%s\""),nextionPage.c_str());
 
 //     if ((settings.page != nextionPage.toInt()) && ((nextionPage != "0") || nextionReportPage0))
 //     { // If we have a new page AND ( (it's not "0") OR (we've set the flag to report 0 anyway) )
 //       settings.page = nextionPage.toInt();
 //       String mqttPageTopic = mqttStateTopic + "/page";      
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
 //       //mqttClient.publish(mqttPageTopic, nextionPage);
 //       mcl->mqt->ppublish("status/nextion/event4",nextionPage.c_str(),0);
 //     }
@@ -1748,16 +1748,16 @@
 //     byte nextionTouchAction = nextionReturnBuffer[5];
 //     if (nextionTouchAction == 0x01)
 //     {  
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
 //       String mqttTouchTopic = mqttStateTopic + "/touchOn";
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
 //       mcl->mqt->ppublish("status/nextion/xyCoord",xyCoord.c_str(),0);
 //     }
 //     else if (nextionTouchAction == 0x00)
 //     {
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
 //       String mqttTouchTopic = mqttStateTopic + "/touchOff";
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
 //       mcl->mqt->ppublish("status/nextion/event6",xyCoord.c_str(),0);
 //     }
 //   }
@@ -1772,17 +1772,17 @@
 //       getString += (char)nextionReturnBuffer[i];
 //     }
     
-//     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"),getString.c_str());
   
 //     if (mqttGetSubtopic == "")
 //     { // If there's no outstanding request for a value, publish to mqttStateTopic
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
 //       mcl->mqt->ppublish("status/nextion/getString",getString.c_str(),0);
 //     }
 //     else
 //     { // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
 //       String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;      
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
 //       mcl->mqt->ppublish("status/nextion/getString",getString.c_str(),0);
 //       mqttGetSubtopic = "";
 //     }
@@ -1797,13 +1797,13 @@
 //     getInt = getInt * 256 + nextionReturnBuffer[2];
 //     getInt = getInt * 256 + nextionReturnBuffer[1];
 //     String getString = String(getInt);
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: [Int Return] '")) + getString + "'");
 
 //     if (lcdVersionQueryFlag)
 //     {
 //       lcdVersion = getInt;
 //       lcdVersionQueryFlag = false;
-//       ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
+//       ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: lcdVersion '")) + String(lcdVersion) + "'");
 //     }
 //     else if (mqttGetSubtopic == "")
 //     {
@@ -1835,7 +1835,7 @@
 //         if (comokFieldCount == 2)
 //         {
 //           nextionModel = comokField;
-//           ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
+//           ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI IN: nextionModel: ")) + nextionModel);
 //         }
 //         comokFieldCount++;
 //         comokField = "";
@@ -1864,21 +1864,21 @@
 //   char command_ctr[100];
 //   sprintf(command_ctr,"p[%d].b[%d].txt=\"%s\"",page,element_id,ctr);
 //   serial_print_suffixed(command_ctr);  
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 // }
 
 // void mNextionPanel::SetAttribute_BackgroundColour(uint8_t page, uint8_t element_id, uint32_t colour){
 //   char command_ctr[30];
 //   sprintf(command_ctr,"p[%d].b[%d].bco=%d",page,element_id,colour);
 //   serial_print_suffixed(command_ctr);
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 // }
 
 // void mNextionPanel::SetAttribute_FontColour(uint8_t page, uint8_t element_id, uint32_t colour){
 //   char command_ctr[30];
 //   sprintf(command_ctr,"p[%d].b[%d].pco=%d",page,element_id,colour);
 //   serial_print_suffixed(command_ctr);
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "nSetTxtAttr %s"),command_ctr);
 // }
 
 
@@ -1898,7 +1898,7 @@
 //     SERIAL_NEXTION_TX.print(utf8ascii2((char*)hmiValue));
 //     SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
 //   #endif
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "PHASEOUT USING, KEEP LEGACY, SET %s=%s"),hmiAttribute,hmiValue);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "PHASEOUT USING, KEEP LEGACY, SET %s=%s"),hmiAttribute,hmiValue);
 // }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1912,7 +1912,7 @@
 //   sprintf(hmiattribute_ctr,"get %s",c_str);
 //   serial_print_suffixed(hmiattribute_ctr);
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " GET 'get %s'"),hmiattribute_ctr);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " GET 'get %s'"),hmiattribute_ctr);
 // }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1920,14 +1920,14 @@
 // { // Send a raw command to the Nextion panel
 //   serial_print(utf8ascii(c_str));
 //   serial_print_suffix();
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
 // }
 
 // void mNextionPanel::nextionSendCmd_JSON(String s_str)
 // { // Send a raw command to the Nextion panel
 //   serial_print(utf8ascii(s_str));
 //   serial_print_suffix();
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),s_str.c_str());
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),s_str.c_str());
 // }
 
 
@@ -1947,19 +1947,19 @@
 //   DeserializationError jsonError = deserializeJson(nextionCommands, c_str);
 //   if (jsonError)
 //   { // Couldn't parse incoming JSON command
-//     ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"MQTT: [ERROR] Failed to parse incoming JSON command with error: ")) + String(jsonError.c_str()));
+//     ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"MQTT: [ERROR] Failed to parse incoming JSON command with error: ")) + String(jsonError.c_str()));
 //   }
 //   else
 //   {
-//   //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!ajsonError %d"),nextionCommands.size());
+//   //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!ajsonError %d"),nextionCommands.size());
 
 //     //deserializeJson(nextionCommands, mcl->mset->data_buffer_old.payload.ctr);//strPayload);
     
-//   //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!bjsonError %d"),nextionCommands.size());
+//   //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "!bjsonError %d"),nextionCommands.size());
 
 //     for (uint8_t i = 0; i < nextionCommands.size(); i++)
 //     {
-//       //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "nextionSendCmd %s"),nextionCommands[i]);
+//       //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "nextionSendCmd %s"),nextionCommands[i]);
 //       nextionSendCmd_JSON(nextionCommands[i]);
 //     }
 //   }
@@ -1973,7 +1973,7 @@
 //     static unsigned int nextionRetryCount = 0;
 //     if ((nextionModel.length() == 0) && (nextionRetryCount < (nextionRetryMax - 2)))
 //     { // Try issuing the "connect" command a few times
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion connect request"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion connect request"));
 //       nextionSendCmd("connect");
 //       nextionRetryCount++;
 //       nextionCheckTimer = millis();
@@ -1982,7 +1982,7 @@
 //     { // If we still don't have model info, try to change nextion serial speed from 9600 to 115200
 //       nextionSetSpeed();
 //       nextionRetryCount++;
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion serial speed 115200 request"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion serial speed 115200 request"));
 //       nextionCheckTimer = millis();
 //     }
 //     else if ((lcdVersion < 1) && (nextionRetryCount <= nextionRetryMax))
@@ -1994,7 +1994,7 @@
 //       //nextionSendCmd("get " + lcdVersionQuery.toString().c_str());
 //       lcdVersionQueryFlag = true;
 //       nextionRetryCount++;
-//       AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion version query"));
+//       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "sending Nextion version query"));
 //       nextionCheckTimer = millis();
 //     }
 //   }
@@ -2017,7 +2017,7 @@
 //   swSer->begin(38400);
 //   #else
   
-//   ////AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: No Nextion response, attempting 9600bps connection"));
+//   ////AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: No Nextion response, attempting 9600bps connection"));
 //   SERIAL_NEXTION_TX.begin(9600);
 //   SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
 //   SERIAL_NEXTION_TX.print("bauds=38400");
@@ -2052,7 +2052,7 @@
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // void mNextionPanel::nextionReset()
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD");
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HMI: Rebooting LCD");
 //   //digitalWrite(nextionResetPin, LOW);
   
 //   #ifdef USE_NEXTION_SOFTWARE_SERIAL
@@ -2079,7 +2079,7 @@
 //   }
 //   if (lcdConnected)
 //   {
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),(F("HMI: Rebooting LCD completed"));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),(F("HMI: Rebooting LCD completed"));
 //     if (settings.page)
 //     {
 
@@ -2093,7 +2093,7 @@
 //   }
 //   else
 //   {
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ERROR: Rebooting LCD completed, but LCD is not responding.");
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ERROR: Rebooting LCD completed, but LCD is not responding.");
 //   }
 //   //mqttClient.publish(mqttStatusTopic, WILLMESSAGE_ONDISCONNECT_CTR);
 // }
@@ -2109,7 +2109,7 @@
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // // void mNextionPanel::espWifiConfigCallback(WiFiManager *myWiFiManager)
 // // { // Notify the user that we're entering config mode
-// //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),(F("WIFI: Failed to connect to assigned AP, entering config mode"));
+// //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),(F("WIFI: Failed to connect to assigned AP, entering config mode"));
 // //   while (millis() < 800)
 // //   { // for factory-reset system this will be called before display is responsive. give it a second.
 // //     delay(10);
@@ -2272,13 +2272,13 @@
 //   // ArduinoOTA.setPassword(configPassword);
 
 //   // ArduinoOTA.onStart([]() {
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: update start"));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: update start"));
 //   //   nextionSendCmd("page 0");
 //   //   nextionSetAttr("p[0].b[1].txt", "\"ESP OTA Update\"");
 //   // });
 //   // ArduinoOTA.onEnd([]() {
 //   //   nextionSendCmd("page 0");
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: update complete"));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: update complete"));
 //   //   nextionSetAttr("p[0].b[1].txt", "\"ESP OTA Update\\rComplete!\"");
 //   //   //espReset();
 //   // });
@@ -2286,7 +2286,7 @@
 //   //   nextionSetAttr("p[0].b[1].txt", "\"ESP OTA Update\\rProgress: " + String(progress / (total / 100)) + "%\"");
 //   // });
 //   // ArduinoOTA.onError([](ota_error_t error) {
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: ERROR code ")) + String(error));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"ESP OTA: ERROR code ")) + String(error));
 //   //   if (error == OTA_AUTH_ERROR)
 //   //     //debugPrintln(F("ESP OTA: ERROR - Auth Failed"));
 //   //   else if (error == OTA_BEGIN_ERROR)
@@ -2346,7 +2346,7 @@
 //   //   //mqttClient.disconnect();
 //   // }
 //   nextionReset();
-//   AddLog_P(LOG_LEVEL_TEST,PSTR("mNextionPanel::espReset()"));
+//   AddLog(LOG_LEVEL_TEST,PSTR("mNextionPanel::espReset()"));
 //   // ESP.reset();
 //   // delay(5000);
 // }
@@ -2355,7 +2355,7 @@
 // bool mNextionPanel::updateCheck()
 // { // firmware update check
 //   // HTTPClient updateClient;
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: Checking update URL: ")) + String(UPDATE_URL));
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: Checking update URL: ")) + String(UPDATE_URL));
 //   // String updatePayload;
 //   // updateClient.begin(wifiClient, UPDATE_URL);
 //   // int httpCode = updateClient.GET(); // start connection and send HTTP header
@@ -2369,7 +2369,7 @@
 //   // }
 //   // else
 //   // {
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: Update check failed: ")) + updateClient.errorToString(httpCode));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: Update check failed: ")) + updateClient.errorToString(httpCode));
 //   //   return false;
 //   // }
 //   // updateClient.end();
@@ -2379,7 +2379,7 @@
 
 //   // if (jsonError)
 //   // { // Couldn't parse the returned JSON, so bail
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: JSON parsing failed: ")) + String(jsonError.c_str()));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: JSON parsing failed: ")) + String(jsonError.c_str()));
 //   //   return false;
 //   // }
 //   // else
@@ -2387,23 +2387,23 @@
 //   //   if (!updateJson["d1_mini"]["version"].isNull())
 //   //   {
 //   //     updateEspAvailableVersion = updateJson["d1_mini"]["version"].as<float>();
-//   //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: updateEspAvailableVersion: ")) + String(updateEspAvailableVersion));
+//   //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: updateEspAvailableVersion: ")) + String(updateEspAvailableVersion));
 //   //     espFirmwareUrl = updateJson["d1_mini"]["firmware"].as<String>();
 //   //     if (updateEspAvailableVersion > nextionVersion)
 //   //     {
 //   //       updateEspAvailable = true;
-//   //       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: New ESP version available: ")) + String(updateEspAvailableVersion));
+//   //       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: New ESP version available: ")) + String(updateEspAvailableVersion));
 //   //     }
 //   //   }
 //   //   if (nextionModel && !updateJson[nextionModel]["version"].isNull())
 //   //   {
 //   //     updateLcdAvailableVersion = updateJson[nextionModel]["version"].as<int>();
-//   //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: updateLcdAvailableVersion: ")) + String(updateLcdAvailableVersion));
+//   //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: updateLcdAvailableVersion: ")) + String(updateLcdAvailableVersion));
 //   //     lcdFirmwareUrl = updateJson[nextionModel]["firmware"].as<String>();
 //   //     if (updateLcdAvailableVersion > lcdVersion)
 //   //     {
 //   //       updateLcdAvailable = true;
-//   //       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: New LCD version available: ")) + String(updateLcdAvailableVersion));
+//   //       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"UPDATE: New LCD version available: ")) + String(updateLcdAvailableVersion));
 //   //     }
 //   //   }
 //   //   //debugPrintln(F("UPDATE: Update check completed"));
@@ -2423,7 +2423,7 @@
 //   {
 
 //     if(otatransfererror){
-//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "QUIT OTA and Restart display"));
+//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "QUIT OTA and Restart display"));
 //       nextionReset();
 //       break;
 //     }
@@ -2441,7 +2441,7 @@
 
 //       if (inByte == 0x5)
 //       {
-//         AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"inByte == 0x5");
+//         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"inByte == 0x5");
 //         otaSuccessVal = true;
 //         otatransfererror = true;
 //         break;
@@ -2449,7 +2449,7 @@
 //       else
 //       {
 //         otatransfererror = false;
-// AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%x"),inByte);
+// AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%x"),inByte);
 //         // //debugPrintln(String(inByte, HEX));
 //       }
 //     }
@@ -2469,7 +2469,7 @@
 //   // based in large part on code posted by indev2 here:
 //   // http://support.iteadstudio.com/support/discussions/topics/11000007686/page/2
 
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "nextionStartOtaDownload otaurl"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "nextionStartOtaDownload otaurl"));
 
 //   // uint32_t lcdOtaFileSize = 0;
 //   // String lcdOtaNextionCmd;
@@ -2480,14 +2480,14 @@
 //   // const uint32_t lcdOtaTimeout = 30000; // timeout for receiving new data in milliseconds
 //   // static uint32_t lcdOtaTimer = 0;      // timer for upload timeout
 
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware download from: ")) + otaUrl);
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware download from: ")) + otaUrl);
 //   // WiFiClient lcdOtaWifi;
 //   // HTTPClient lcdOtaHttp;
 //   // lcdOtaHttp.begin(lcdOtaWifi, otaUrl);
 //   // int lcdOtaHttpReturn = lcdOtaHttp.GET();
 //   // if (lcdOtaHttpReturn > 0)
 //   // { // HTTP header has been sent and Server response header has been handled
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: HTTP GET return code:")) + String(lcdOtaHttpReturn));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: HTTP GET return code:")) + String(lcdOtaHttpReturn));
 //   //   if (lcdOtaHttpReturn == HTTP_CODE_OK)
 //   //   {                                                 // file found at server
 //   //     int32_t lcdOtaRemaining = lcdOtaHttp.getSize(); // get length of document (is -1 when Server sends no Content-Length header)
@@ -2496,7 +2496,7 @@
 //   //     static const uint16_t lcdOtaBufferSize = 1024; // upload data buffer before sending to UART
 //   //     static uint8_t lcdOtaBuffer[lcdOtaBufferSize] = {};
 
-//   //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: File found at Server. Size ")) + String(lcdOtaRemaining) + String(F(" bytes in ")) + String(lcdOtaParts) + String(F(" 4k chunks.")));
+//   //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: File found at Server. Size ")) + String(lcdOtaRemaining) + String(F(" bytes in ")) + String(lcdOtaParts) + String(F(" 4k chunks.")));
 
 //   //     WiFiUDP::stopAll(); // Keep mDNS responder and MQTT traffic from breaking things
 //   //     if (//mqttClient.connected())
@@ -2512,7 +2512,7 @@
 //   //     SERIAL_NEXTION_TX.flush();
 //   //     nextionHandleInput();
 //   //     String lcdOtaNextionCmd = "whmi-wri " + String(lcdOtaFileSize) + ",115200,0";
-//   //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Sending LCD upload command: ")) + lcdOtaNextionCmd);
+//   //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Sending LCD upload command: ")) + lcdOtaNextionCmd);
 //   //     SERIAL_NEXTION_TX.print(lcdOtaNextionCmd);
 //   //     SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
 //   //     SERIAL_NEXTION_TX.flush();
@@ -2560,12 +2560,12 @@
 //   //           lcdOtaChunkCounter = 0;
 //   //           if (nextionOtaResponse())
 //   //           { // We've completed a chunk
-//   //             //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Part ")) + String(lcdOtaPartNum) + String(F(" OK, ")) + String(lcdOtaPercentComplete) + String(F("% complete")));
+//   //             //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Part ")) + String(lcdOtaPartNum) + String(F(" OK, ")) + String(lcdOtaPercentComplete) + String(F("% complete")));
 //   //             lcdOtaTimer = millis();
 //   //           }
 //   //           else
 //   //           {
-//   //             //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Part ")) + String(lcdOtaPartNum) + String(F(" FAILED, ")) + String(lcdOtaPercentComplete) + String(F("% complete")));
+//   //             //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Part ")) + String(lcdOtaPartNum) + String(F(" FAILED, ")) + String(lcdOtaPercentComplete) + String(F("% complete")));
 //   //             //debugPrintln(F("LCD OTA: failure"));
 //   //             delay(2000); // extra delay while the LCD does its thing
 //   //             espReset();
@@ -2591,7 +2591,7 @@
 //   //     lcdOtaTransferred += lcdOtaChunkCounter;
 //   //     if ((lcdOtaTransferred == lcdOtaFileSize) && nextionOtaResponse())
 //   //     {
-//   //       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
+//   //       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
 //   //       uint32_t lcdOtaDelay = millis();
 //   //       while ((millis() - lcdOtaDelay) < 5000)
 //   //       { // extra 5sec delay while the LCD handles any local firmware updates from new versions of code sent to it
@@ -2609,7 +2609,7 @@
 //   // }
 //   // else
 //   // {
-//   //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: HTTP GET failed, error code ")) + lcdOtaHttp.errorToString(lcdOtaHttpReturn));
+//   //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: HTTP GET failed, error code ")) + lcdOtaHttp.errorToString(lcdOtaHttpReturn));
 //   //   espReset();
 //   // }
 //   // lcdOtaHttp.end();
@@ -2645,7 +2645,7 @@
 //   //       DeserializationError jsonError = deserializeJson(configJson, buf.get());
 //   //       if (jsonError)
 //   //       { // Couldn't parse the saved config
-//   //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: [ERROR] Failed to parse /config.json: ")) + String(jsonError.c_str()));
+//   //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: [ERROR] Failed to parse /config.json: ")) + String(jsonError.c_str()));
 //   //       }
 //   //       else
 //   //       {
@@ -2720,7 +2720,7 @@
 //   //         }
 //   //         String configJsonStr;
 //   //         serializeJson(configJson, configJsonStr);
-//   //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: parsed json:")) + configJsonStr);
+//   //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: parsed json:")) + configJsonStr);
 //   //       }
 //   //     }
 //   //     else
@@ -2743,7 +2743,7 @@
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // void mNextionPanel::configSaveCallback()
 // { // Callback notifying us of the need to save config
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Configuration changed, flagging for save");
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Configuration changed, flagging for save");
 //   shouldSaveConfig = true;
 // }
 
@@ -2751,7 +2751,7 @@
 // void mNextionPanel::configSave()
 // { // Save the custom parameters to config.json
 //   nextionSetAttr("p[0].b[1].txt", "\"Saving\\rconfig\"");
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
 //   DynamicJsonDocument jsonConfigValues(1024);
 //   // jsonConfigValues["mqttServer"] = mqttServer;
 //   // jsonConfigValues["mqttPort"] = mqttPort;
@@ -2766,10 +2766,10 @@
 //   //jsonConfigValues["debugTelnetEnabled"] = debugTelnetEnabled;
 //   // jsonConfigValues["mdnsEnabled"] = mdnsEnabled;
   
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),"SPIFFS: Saving config");
 
   
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "SPIFFS: mqttServer = \"%s\""),mqttServer);
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "SPIFFS: mqttServer = \"%s\""),mqttServer);
 
 // #ifdef ESP8266
 //   // File configFile = SPIFFS.open("/config.json", "w");
@@ -2838,9 +2838,9 @@
 // void mNextionPanel::webHandleNotFound()
 // { 
   
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNotFound"));
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNotFound"));
 //   // // webServer 404
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending 404 to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending 404 to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = "File Not Found\n\n";
 //   // httpMessage += "URI: ";
 //   // httpMessage += mcl->mweb->pWebServer->uri();
@@ -2863,7 +2863,7 @@
 // void mNextionPanel::webHandleSaveConfig()
 // { 
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleSaveConfig"));// http://plate01/saveConfig
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleSaveConfig"));// http://plate01/saveConfig
 // //   if (configPassword[0] != '\0')
 // //   { //Request HTTP auth if configPassword is set
 // //     if (!mcl->mweb->pWebServer->authenticate(configUser, configPassword))
@@ -2871,7 +2871,7 @@
 // //       return mcl->mweb->pWebServer->requestAuthentication();
 // //     }
 // //   }
-// //   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /saveConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+// //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /saveConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 // //   String httpMessage = FPSTR(HTTP_HEAD2);
 // //   httpMessage.replace("{v}", String(nextionNode));
 // //   httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -2981,7 +2981,7 @@
 // //     configSave();
 // //     if (shouldSaveWifi)
 // //     {
-// //       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"CONFIG: Attempting connection to SSID: ")) + mcl->mweb->pWebServer->arg("wifiSSID"));
+// //       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"CONFIG: Attempting connection to SSID: ")) + mcl->mweb->pWebServer->arg("wifiSSID"));
 // //       espWifiSetup();
 // //     }
 // //     espReset();
@@ -3008,8 +3008,8 @@
 //   //   }
 //   // }
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleResetConfig"));
-//   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /resetConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleResetConfig"));
+//   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /resetConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // //httpMessage.replace("{v}", String("nextionNode"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3042,7 +3042,7 @@
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // void mNextionPanel::webHandleNextionFirmware()
 // { 
-// //   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
+// //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
   
 // // const char HTTP_FORM_UPG2[] =
 // //   "<div id='f1' name='f1' style='display:block;'>"
@@ -3073,7 +3073,7 @@
 // void mNextionPanel::webHandleNextionFirmware_PhaseOut()
 // { 
   
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "void mNextionPanel::webHandleNextionFirmware_PhaseOut()"));
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "void mNextionPanel::webHandleNextionFirmware_PhaseOut()"));
 //   // // http://plate01/firmware
 //   // // if (configPassword[0] != '\0')
 //   // // { //Request HTTP auth if configPassword is set
@@ -3082,9 +3082,9 @@
 //   // //     return mcl->mweb->pWebServer->requestAuthentication();
 //   // //   }
 //   // // }
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /firmware page to client connected from: "))) ;//mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /firmware page to client connected from: "))) ;//mcl->mweb->pWebServer->client().remoteIP().toString());
 
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // //httpMessage.replace("{v}", (String("nextionNode") + " update"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3151,7 +3151,7 @@
 // void mNextionPanel::webHandleEspFirmware()
 // { 
   
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleEspFirmware"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleEspFirmware"));
 //   // http://plate01/espfirmware
 //   // if (configPassword[0] != '\0')
 //   // { //Request HTTP auth if configPassword is set
@@ -3161,7 +3161,7 @@
 //   //   }
 //   // }
 
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /espfirmware page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /espfirmware page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " ESP update"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3185,7 +3185,7 @@
 // { // http://plate01/lcdupload
 //   // Upload firmware to the Nextion LCD via HTTP upload
 
-// //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "webHandleLcdUpload"));
+// //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "webHandleLcdUpload"));
 
 // //   // if (configPassword[0] != '\0')
 // //   // { //Request HTTP auth if configPassword is set
@@ -3206,9 +3206,9 @@
 // //   if (tftFileSize == 0)
 // //   {
     
-// //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "LCD OTA: FAILED, no filesize sent."));
+// //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "LCD OTA: FAILED, no filesize sent."));
   
-// //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: FAILED, no filesize sent.")));
+// //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: FAILED, no filesize sent.")));
 // //     String httpMessage = FPSTR(HTTP_HEAD2);
 // //     // httpMessage.replace("{v}", (String("nextionNode") + " LCD update"));
 // //     httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3224,7 +3224,7 @@
 // //   else if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
 // //   { // Our timer expired so reset
   
-// //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
+// //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
 // //    //debugPrintln(F("LCD OTA: ERROR: LCD upload timeout.  Restarting."));
 // //     //espReset();
 // //   }
@@ -3232,33 +3232,33 @@
 // //   {
 // //     //WiFiUDP::stopAll(); // Keep mDNS responder from breaking things
 
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware upload");
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: upload.filename: ",upload.filename.c_str());
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d"),"LCD OTA: TFTfileSize: ",tftFileSize);
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware upload");
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: upload.filename: ",upload.filename.c_str());
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d"),"LCD OTA: TFTfileSize: ",tftFileSize);
 
 // //     lcdOtaRemaining = tftFileSize;
 // //     lcdOtaParts = (lcdOtaRemaining / 4096) + 1;
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: File upload beginning. Size ",lcdOtaRemaining," bytes in ",lcdOtaParts," 4k chunks.");
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: File upload beginning. Size ",lcdOtaRemaining," bytes in ",lcdOtaParts," 4k chunks.");
 
 // //     serial_print_suffix(); // Send empty command to LCD
 
 // //     nextionHandleInput();
 
 // //     String lcdOtaNextionCmd = "whmi-wri " + String(tftFileSize) + ",38400,0";
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: Sending LCD upload command: ",lcdOtaNextionCmd.c_str());
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: Sending LCD upload command: ",lcdOtaNextionCmd.c_str());
 
 // //     char lcdOtaNextionCmd_ctr[100];
 // //     sprintf(lcdOtaNextionCmd_ctr,"whmi-wri %d,38400,0",tftFileSize);
 
 // //     serial_print_suffixed(lcdOtaNextionCmd_ctr);
     
-// //     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),lcdOtaNextionCmd_ctr);
+// //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),lcdOtaNextionCmd_ctr);
     
 // //     if (nextionOtaResponse()){
-// //       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command accepted");
+// //       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command accepted");
 // //     }else{
-// //       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command FAILED.");
+// //       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command FAILED.");
 // //       espReset();
 // //     }
 // //     lcdOtaTimer = millis();
@@ -3293,7 +3293,7 @@
 // //         lcdOtaUploadIndex++;
 // //       }
 
-// //       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "len=%d"),lcdOtaChunkSize);
+// //       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "len=%d"),lcdOtaChunkSize);
 
 // //       #ifdef USE_NEXTION_SOFTWARE_SERIAL
 // //         swSer->flush();                              // Clear out current UART buffer
@@ -3320,12 +3320,12 @@
 // //         lcdOtaChunkCounter = 0;
 // //         if (nextionOtaResponse())
 // //         {
-// //           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," OK, ",lcdOtaPercentComplete,"% complete");
+// //           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," OK, ",lcdOtaPercentComplete,"% complete");
 // //         }
 // //         else
 // //         {
-// //           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," FAILED, ",lcdOtaPercentComplete,"% complete");
-// //           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%"),"EXIT EARLY?");
+// //           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," FAILED, ",lcdOtaPercentComplete,"% complete");
+// //           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%"),"EXIT EARLY?");
 
 // //         }
 // //       }
@@ -3347,7 +3347,7 @@
 // //     {
 // //       if (nextionOtaResponse())
 // //       {
-// //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
+// //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
 // //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaSuccess");
 // //         mcl->mweb->pWebServer->send(303);
 // //         uint32_t lcdOtaDelay = millis();
@@ -3360,7 +3360,7 @@
 // //       }
 // //       else
 // //       {
-// //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+// //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 // //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 // //         mcl->mweb->pWebServer->send(303);
 // //         uint32_t lcdOtaDelay = millis();
@@ -3380,7 +3380,7 @@
 // //     {
 // //       if (nextionOtaResponse())
 // //       { // YAY WE DID IT
-// //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
+// //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
 // //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaSuccess");
 // //         mcl->mweb->pWebServer->send(303);
 // //         uint32_t lcdOtaDelay = millis();
@@ -3393,7 +3393,7 @@
 // //       }
 // //       else
 // //       {
-// //         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+// //         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 // //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 // //         mcl->mweb->pWebServer->send(303);
 // //         uint32_t lcdOtaDelay = millis();
@@ -3408,8 +3408,8 @@
 // //   }
 // //   else if (upload.status == UPLOAD_FILE_ABORTED)
 // //   { // Something went kablooey
-// //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
-// //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+// //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
+// //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 // //     mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 // //     mcl->mweb->pWebServer->send(303);
 // //     uint32_t lcdOtaDelay = millis();
@@ -3422,8 +3422,8 @@
 // //   }
 // //   else
 // //   { // Something went weird, we should never get here...
-// //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: upload.status returned: ")) + String(upload.status));
-// //     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+// //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: upload.status returned: ")) + String(upload.status));
+// //     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 // //     mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 // //     mcl->mweb->pWebServer->send(303);
 // //     uint32_t lcdOtaDelay = millis();
@@ -3446,8 +3446,8 @@
 //   //     return mcl->mweb->pWebServer->requestAuthentication();
 //   //   }
 //   // // }
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateSuccess"));
-//   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaSuccess page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateSuccess"));
+//   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaSuccess page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update success"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3471,8 +3471,8 @@
 //   //     return mcl->mweb->pWebServer->requestAuthentication();
 //   //   }
 //   // }
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateFailure"));
-//   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaFailure page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateFailure"));
+//   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaFailure page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update failed"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3485,7 +3485,7 @@
 //   // httpMessage += FPSTR(HTTP_END2);
 //   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
 
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "httpMessage=%s"),httpMessage.c_str());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "httpMessage=%s"),httpMessage.c_str());
 
 // }
 
@@ -3499,8 +3499,8 @@
 //   //     return mcl->mweb->pWebServer->requestAuthentication();
 //   //   }
 //   // }
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdDownload"));
-//   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcddownload page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdDownload"));
+//   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcddownload page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3527,20 +3527,20 @@
 //   //     return mcl->mweb->pWebServer->requestAuthentication();
 //   //   }
 //   // }
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleTftFileSize"));
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /tftFileSize page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleTftFileSize"));
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /tftFileSize page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " TFT Filesize"));
 //   // httpMessage += FPSTR(HTTP_HEAD_END2);
 //   // httpMessage += FPSTR(HTTP_END2);
 //   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),httpMessage.c_str());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),httpMessage.c_str());
 //   // tftFileSize = mcl->mweb->pWebServer->arg("tftFileSize").toInt();
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "tftFileSize%d"),tftFileSize);
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "tftFileSize%d"),tftFileSize);
 
 
-//   // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"WEB: tftFileSize: ")) + String(tftFileSize));
+//   // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"WEB: tftFileSize: ")) + String(tftFileSize));
 
 
 
@@ -3556,8 +3556,8 @@
 //   //     return mcl->mweb->pWebServer->requestAuthentication();
 //   //   }
 //   // // }
-//   // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleReboot"));
-//   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /reboot page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleReboot"));
+//   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /reboot page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   // String httpMessage = FPSTR(HTTP_HEAD2);
 //   // // httpMessage.replace("{v}", (String("nextionNode") + " NEXTION reboot"));
 //   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -3569,7 +3569,7 @@
 //   // httpMessage += String(F("<br/>Rebooting device"));
 //   // httpMessage += FPSTR(HTTP_END2);
 //   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
-//   // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"RESET: Rebooting device");
+//   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"RESET: Rebooting device");
 //   // nextionSendCmd("page 0");
 //   // nextionSetAttr("p[0].b[1].txt", "\"Rebooting...\"");
 //   // // espReset();

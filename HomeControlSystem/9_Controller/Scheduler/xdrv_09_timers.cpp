@@ -695,7 +695,7 @@
 // {
 //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_CONFIGURE_TIMER);
+//   AddLog(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_CONFIGURE_TIMER);
 
 //   if (WebServer->hasParam("save")) {
 //     TimerSaveSettings();

@@ -16,13 +16,13 @@ void mPulseCounter::Pre_Init(void){
 
     // sensor[fSensorCount].dht = new DHTesp;
     // sensor[fSensorCount].dht->setup(pin[fSensorCount], DHTesp::DHT11);
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "GPIO_PULSE_COUNTER Pin[%d] %d"),fSensorCount,pin[fSensorCount]);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "GPIO_PULSE_COUNTER Pin[%d] %d"),fSensorCount,pin[fSensorCount]);
     fSensorCount++;
   }
 
   if(fSensorCount){
     fEnableSensor = true;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "DHT Sensor Enabled"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "DHT Sensor Enabled"));
   }
 
 }
@@ -73,7 +73,7 @@ void mPulseCounter::SplitTask_UpdatePulseCounterSensors(uint8_t sensor_id, uint8
 
   //       // Check if any reads failed and exit early (to try again).
   //       if (sensor[sensor_id].dht->getStatus() != 0) {
-  //         //AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
+  //         //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
   //         sensor[sensor_id].instant.isvalid = false;
   //       }else{
   //         sensor[sensor_id].instant.isvalid = true;
@@ -104,7 +104,7 @@ void mPulseCounter::SplitTask_UpdatePulseCounterSensors(uint8_t sensor_id, uint8
   //         sensor[sensor_id].instant.dewPoint = sensor[sensor_id].dht->computeDewPoint(newValues.temperature, newValues.humidity);
   //         sensor[sensor_id].instant.cr = sensor[sensor_id].dht->getComfortRatio(cf, newValues.temperature, newValues.humidity);
 
-  //         AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
+  //         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
       
   //         sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_DONE_ID;
   //       }
@@ -203,9 +203,9 @@ void mPulseCounter::EveryLoop(){
 // for(
   uint8_t sensor_id=0;
   //sensor_id<sensors_active;sensor_id++){
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),Change_Detected_Ctr(sensor_id),sensor_id);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),Change_Detected_Ctr(sensor_id),sensor_id);
     if(Change_Detected(sensor_id)!=sensor[sensor_id].instant.state){
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Change_Detected_Ctr(sensor_id)",sensor_id);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Change_Detected_Ctr(sensor_id)",sensor_id);
       //if(pCONT_time->RtcTime.seconds_nonreset<20){ break; }
       // pCONT->mqt->ppublish("status/motion/event",Change_Detected_Ctr(sensor_id),false);
 
@@ -228,13 +228,13 @@ void mPulseCounter::EveryLoop(){
       sensor[sensor_id].instant.tDeltaTime = sensor[sensor_id].instant.tEndedTime - sensor[sensor_id].instant.tDetectTime;
       
       if(!WithinLimits(settings.min_reading_ms,(uint16_t)sensor[sensor_id].instant.tDeltaTime,settings.max_reading_ms)){
-        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Out of range",sensor_id);
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Out of range",sensor_id);
         sensor[sensor_id].instant.ischanged = true;
         mqtthandler_sensor_ifchanged.flags.SendNow = true;
       }
 
 
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),Change_Detected_Ctr(sensor_id));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\""),Change_Detected_Ctr(sensor_id));
       
     }
 

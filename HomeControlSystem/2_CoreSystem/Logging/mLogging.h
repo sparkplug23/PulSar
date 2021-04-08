@@ -201,15 +201,15 @@ extern "C" {
 
 //https://eli.thegreenplace.net/2014/variadic-templates-in-c/
 
-void AddLog_P(
+void AddLog(
   #ifdef ENABLE_DEVFEATURE_BREAK_ADDLOG
   uint8_t dummy,
   #endif
   uint8_t loglevel, PGM_P formatP, ...);
 
 
-void AddLog_P(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
-// void AddLog_P(PGM_P formatP, ...);
+void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
+// void AddLog(PGM_P formatP, ...);
 void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...);
 int Response_mP(const char* format, ...);
 int ResponseAppend_mP(const char* format, ...);
@@ -316,8 +316,8 @@ public:
     void SetSeriallog(uint8_t loglevel);
     void Syslog(void);
     void AddLogAddLog(uint8_t loglevel);
-    void AddLog_P(uint8_t loglevel, const char *formatP);
-    void AddLog_P(uint8_t loglevel, const char *formatP, const char *formatP2);
+    void AddLog(uint8_t loglevel, const char *formatP);
+    void AddLog(uint8_t loglevel, const char *formatP, const char *formatP2);
     void AddLog_P2(uint8_t loglevel, PGM_P formatP, ...);
     void AddLogBuffer(uint8_t loglevel, uint8_t *buffer, int count);
     void AddLogSerial(uint8_t loglevel);

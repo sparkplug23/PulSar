@@ -8,7 +8,7 @@
 
 void mAnimatorLight::SubTask_Manual_SetPixel(){
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("SubTask_Manual_SetPixel"));
+  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Manual_SetPixel"));
 
   //  pCONT_iLight->animation.transition.rate_ms = 1000;
   //  pCONT_iLight->animation.transition.time_ms.val = 0;
@@ -93,7 +93,7 @@ uint8_t mAnimatorLight::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
   JsonBuilderI->Start();
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("ConstructJSON_Manual_SetPixel"));
+  AddLog(LOG_LEVEL_TEST, PSTR("ConstructJSON_Manual_SetPixel"));
 
     // // JsonBuilderI->Level_Start(D_JSON_MIXER);
     // JsonBuilderI->Add(D_JSON_ENABLED, mixer.flags.Enabled);

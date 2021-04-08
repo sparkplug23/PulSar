@@ -104,7 +104,7 @@ enum USER_SELECTABLE_PINS_StaticCompleteList_IDS {
   // Arilux RF Receive input
   GPIO_ARIRFRCV_ID, GPIO_ARIRFSEL_ID,
   // Buzzer
-  GPIO_BUZZER, GPIO_BUZZER_INV,
+  GPIO_BUZZER_ID, GPIO_BUZZER_INV_ID,
   // GPS Serial
   GPIO_GPS_NMEA_RX_ID, GPIO_GPS_NMEA_TX_ID,
   // Basic IO for door closed/lock position
@@ -119,6 +119,12 @@ enum USER_SELECTABLE_PINS_StaticCompleteList_IDS {
   GPIO_ANALOG_POSITION_ID,
   // PC Fan controls using PWM
   GPIO_FAN_PWM1_ID,
+  // Shelly 2.5 Energy Sensor with I2C
+  GPIO_ADE7953_IRQ_ID,
+  // Shelly Dimmer 2 MCU
+  GPIO_SHELLY2_SHD_BOOT0_ID, GPIO_SHELLY2_SHD_RESET_ID,
+  // ADC options
+  GPIO_ADC0_TEMPERATURE_ID,
   
   
   GPIO_PULSE_COUNTER_ID,         // 
@@ -331,9 +337,9 @@ const uint8_t kList_Selectable_Function_IDs[] PROGMEM = {
 #ifdef USE_DISPLAY
   GPIO_BACKLIGHT_ID,      // Display backlight control
 #endif
-#ifdef USE_BUZZER
-  GPIO_BUZZER,         // Buzzer
-  GPIO_BUZZER_INV,     // Inverted buzzer
+#ifdef USE_MODULE_DRIVER_BUZZER
+  GPIO_BUZZER_ID,         // Buzzer
+  GPIO_BUZZER_INV_ID,     // Inverted buzzer
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   GPIO_DHT11_1OF2_ID,          // DHT11
@@ -373,21 +379,21 @@ const uint8_t kList_Selectable_Function_IDs[] PROGMEM = {
   GPIO_HLW_CF_ID,         // HLW8012 CF power
   GPIO_HJL_CF_ID,         // HJL-01/BL0937 CF power
 #endif
-#if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
+// #if defined(USE_ENERGY_SENSOR) && defined(USE_I2C) && defined(USE_ADE7953)
   GPIO_ADE7953_IRQ_ID,    // ADE7953 IRQ
-#endif
+// #endif
 #if defined(USE_ENERGY_SENSOR) && defined(USE_MCP39F501)
   GPIO_MCP39F5_TX_ID,     // MCP39F501 Serial interface (Shelly2)
   GPIO_MCP39F5_RX_ID,     // MCP39F501 Serial interface (Shelly2)
   GPIO_MCP39F5_RST_ID,    // MCP39F501 Reset (Shelly2)
 #endif
-// #if defined(USE_MODULE_ENERGY_PZEM004T_MODBUS) || defined(USE_PZEM_DC)
+// #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
   GPIO_PZEM0XX_TX_ID,     // PZEM0XX Serial interface
 // #endif
 // #ifdef USE_PZEM004T
   GPIO_PZEM004_RX_ID,     // PZEM004T Serial interface
 // #endif
-// #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+// #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   GPIO_PZEM016_RX_ID,     // PZEM-014_ID,016 Serial Modbus interface
 // #endif
 // #ifdef USE_PZEM_DC
@@ -559,10 +565,10 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED3_INV_CTR)     D_GPIO_FUNCTION_LED3_INV_CTR;
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED4_INV_CTR)     D_GPIO_FUNCTION_LED4_INV_CTR;
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_LED5_INV_CTR)     D_GPIO_FUNCTION_LED5_INV_CTR;
 
-// #if defined(USE_MODULE_ENERGY_PZEM004T_MODBUS) || defined(USE_PZEM_DC)
+// #if defined(USE_MODULE_ENERGY_PZEM004T_V3) || defined(USE_PZEM_DC)
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_PZEM0XX_TX_CTR)     D_GPIO_FUNCTION_PZEM0XX_TX_CTR;
 // #endif
-// #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+// #ifdef USE_MODULE_ENERGY_PZEM004T_V3
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_PZEM016_RX_CTR)     D_GPIO_FUNCTION_PZEM016_RX_CTR;
 // #endif
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_PZEM004_RX_CTR)     D_GPIO_FUNCTION_PZEM004_RX_CTR;
@@ -595,6 +601,8 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_HBRIDGE_L9110_OB_CTR) D_GPIO_FUNCTION_HBRIDGE_L9
 
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_ANALOG_POSITION_CTR) D_GPIO_FUNCTION_ANALOG_POSITION_CTR;
 
+DEFINE_PGM_CTR(PM_GPIO_FUNCTION_ADE7953_IRQ_CTR)  D_GPIO_FUNCTION_ADE7953_IRQ_CTR;
+
 
 /**********MODULE CONFIG**********************************************************************************/
 /**********MODULE CONFIG**********************************************************************************/
@@ -610,8 +618,9 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_ANALOG_POSITION_CTR) D_GPIO_FUNCTION_ANALOG_POSI
 #define USE_MODULE_TEMPLATE_H801
 #define USE_MODULE_TEMPLATE_MAGICHOME
 #define USE_MODULE_TEMPLATE_SHELLY1
-#define USE_MODULE_TEMPLATE_SHELLY2P5
+#define USE_MODULE_TEMPLATE_SHELLY_2P5
 #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+#define USE_MODULE_TEMPLATE_SHELLY_DIMMER2
 
 // Supported hardware modules. Leave completed list
 enum SupportedModules_StaticCompleteList {
@@ -621,6 +630,7 @@ enum SupportedModules_StaticCompleteList {
   MODULE_MAGICHOME_ID,
   MODULE_SHELLY1_ID,
   MODULE_SHELLY2P5_ID,
+  MODULE_SHELLY_DIMMER2_ID,
   MODULE_SONOFF_IFAN03_ID,
 
   // MODULE_SONOFF_RF_ID,
@@ -709,9 +719,13 @@ enum SupportedModules_StaticCompleteList {
   #define            D_MODULE_NAME_SHELLY1_CTR       "Shelly 1"
   DEFINE_PGM_CTR(PM_MODULE_NAME_SHELLY1_CTR)     D_MODULE_NAME_SHELLY1_CTR;
 #endif
-#ifdef USE_MODULE_TEMPLATE_SHELLY2P5
+#ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
   #define            D_MODULE_NAME_SHELLY2P5_CTR       "Shelly 2"
   DEFINE_PGM_CTR(PM_MODULE_NAME_SHELLY2P5_CTR)     D_MODULE_NAME_SHELLY2P5_CTR;
+#endif
+#ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+  #define            D_MODULE_NAME_SHELLY_DIMMER2_CTR       "Shelly Dimmer 2"
+  DEFINE_PGM_CTR(PM_MODULE_NAME_SHELLY_DIMMER2_CTR)     D_MODULE_NAME_SHELLY_DIMMER2_CTR;
 #endif
 #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
@@ -785,8 +799,11 @@ const uint8_t kModuleNiceList[] PROGMEM = {
   #ifdef USE_MODULE_TEMPLATE_SHELLY1
     MODULE_SHELLY1_ID,
   #endif
-  #ifdef USE_MODULE_TEMPLATE_SHELLY2P5
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
     MODULE_SHELLY2P5_ID,
+  #endif
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+    MODULE_SHELLY_DIMMER2_ID,
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     MODULE_SONOFF_IFAN03_ID,        // Sonoff Relay Devices
@@ -874,7 +891,9 @@ DEFINE_PGM_CTR(kModules_Name_list)
   D_MODULE_NAME_MAGICHOME_CTR     "|"
   D_MODULE_NAME_SHELLY1_CTR       "|"
   D_MODULE_NAME_SHELLY2P5_CTR     "|"
+  D_MODULE_NAME_SHELLY_DIMMER2_CTR "|"
   D_MODULE_NAME_SONOFF_IFAN03_CTR "|"
+
 };
 
 
@@ -983,47 +1002,70 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
      0, 0, 0, 0, 0, 0
   },
   #endif
-  #ifdef USE_MODULE_TEMPLATE_SHELLY2P5  
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5  
   {  //D_MODULE_NAME_SHELLY2P5_CTR,        // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
-     0,
-     0,//GPIO_MCP39F5_TX_ID,  // GPIO01 MCP39F501 Serial input
-     0,//GPIO_KEY1_ID,
-     0,//GPIO_MCP39F5_RX_ID,  // GPIO03 MCP39F501 Serial output
-     GPIO_REL1_ID,        // GPIO04
-     GPIO_SWT2_NP_ID,        // GPIO05
-                       // GPIO06 (SD_CLK   Flash)
-                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-     0,                // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
-     0,                // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
-                       // GPIO11 (SD_CMD   Flash)
-     0,//GPIO_I2C_SDA_ID,        // GPIO12
-     GPIO_SWT1_NP_ID,
-     0,//GPIO_I2C_SCL_ID,        // GPIO14
-     GPIO_REL2_ID,//GPIO_MCP39F5_RST_ID, // GPIO15 MCP39F501 Reset
-     0,
-     0//GPIO_SWT1_ID
+    GPIO_LED1_INV_ID,     // GPIO00 LED1i
+    0,                    // GPIO01 None
+    GPIO_KEY1_ID,         // GPIO02 Button1
+    0,                    // GPIO03 None
+    GPIO_REL1_ID,         // GPIO04 Relay1
+    GPIO_SWT2_NP_ID,      // GPIO05 Switch2n
+                          // GPIO06 (SD_CLK   Flash)
+                          // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+                          // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+    0,                    // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
+    0,                    // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
+                          // GPIO11 (SD_CMD   Flash)
+    GPIO_I2C_SDA_ID,      // GPIO12 I2C_SDA
+    GPIO_SWT1_NP_ID,      // GPIO13 Switch1n
+    GPIO_I2C_SCL_ID,      // GPIO14 I2C_SCL
+    GPIO_REL2_ID,         // GPIO15 Relay2
+    GPIO_ADE7953_IRQ_ID,  // GPIO16 ADE7953_IRQ
+    GPIO_FLAG_ADC0_TEMP   // GPIOA0 Tempurature
+  },
+  #endif
+  #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+  {                            // SHELLY_DIMMER2 - Shelly Dimmer 2 (ESP8285)
+    0,                         // GPIO00 None
+    GPIO_HWSERIAL0_TX_ID,      // GPIO01 ESP_TXD Serial RXD connection to Dimmer MCU
+    0,                         // GPIO02 None 
+    GPIO_HWSERIAL0_RX_ID,      // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
+    GPIO_SHELLY2_SHD_BOOT0_ID, // GPIO04 SHD Boot 0 
+    GPIO_SHELLY2_SHD_RESET_ID, // GPIO05 SHD Reset
+                               // GPIO06 (SD_CLK   Flash)
+                               // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+                               // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+    0,                         // GPIO09 None 
+    0,                         // GPIO10 None 
+                               // GPIO11 (SD_CMD   Flash)
+    GPIO_SWT2_NP_ID,           // GPIO12 Switch2n 
+    0,                         // GPIO13 None 
+    GPIO_SWT1_NP_ID,           // GPIO14 Switch1n 
+    0,                         // GPIO15 None
+    GPIO_LED1_INV_ID,          // GPIO16 Led1i 
+    GPIO_FLAG_ADC0_TEMP        // ADC Temperature
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-  { //D_MODULE_NAME_SONOFF_IFAN03_CTR,    // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
-    GPIO_KEY1_ID,          // GPIO00 WIFI_KEY0 Button 1
-    GPIO_HWSERIAL0_TX_ID,           // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
+  {                            // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
+    GPIO_KEY1_ID,              // GPIO00 WIFI_KEY0 Button 1
+    GPIO_HWSERIAL0_TX_ID,      // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
     0,                         // GPIO02 ESP_LOG
-    GPIO_HWSERIAL0_RX_ID,           // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
+    GPIO_HWSERIAL0_RX_ID,      // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
     0,                         // GPIO04 DEBUG_RX
     0,                         // GPIO05 DEBUG_TX
                                // GPIO06 (SD_CLK   Flash)
                                // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                                // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    GPIO_REL1_INV_ID,      // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
-    255,//GPIO_BUZZER_INV_ID,    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
+    GPIO_REL1_INV_ID,          // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+    GPIO_BUZZER_INV_ID,        // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
                                // GPIO11 (SD_CMD   Flash)
-    GPIO_REL3_ID,       // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
-    GPIO_LED1_INV_ID,      // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
-    GPIO_REL2_ID,       // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
-    GPIO_REL4_ID,       // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
-    0, 0
+    GPIO_REL3_ID,              // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+    GPIO_LED1_INV_ID,          // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+    GPIO_REL2_ID,              // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+    GPIO_REL4_ID,              // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+    0,                         // GPIO16 None 
+    0                          // A0
   },
   #endif
 

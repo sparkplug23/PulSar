@@ -40,7 +40,7 @@ void mSerialUART::init_UART2_RingBuffer()
   char data_ctr[] = "UART2 RingBuf Init\0";
   UBaseType_t res =  xRingbufferSend(pCONT_serial->uart2_settings.ringbuffer_handle, data_ctr, strlen(data_ctr), pdMS_TO_TICKS(1000));
   if (res != pdTRUE) {
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
+    AddLog(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
     uart2_settings.initialised = false; //disable if fault
   }
 
@@ -74,7 +74,7 @@ void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
   UBaseType_t res =  xRingbufferSendFromISR(pCONT_serial->uart2_settings.ringbuffer_handle, pCONT_serial->rxbuf2, pCONT_serial->urxlen2, &dummyval);
   
   if (res != pdTRUE) {
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("Failed to send item"));
+    AddLog(LOG_LEVEL_ERROR, PSTR("Failed to send item"));
   }
 
   // after reading bytes from buffer clear UART interrupt status
@@ -144,7 +144,7 @@ int8_t mSerialUART::Tasker(uint8_t function){
     *******************/
     case FUNC_EVERY_SECOND:{
       
-      AddLog_P(LOG_LEVEL_INFO, PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(pCONT_serial->uart2_settings.ringbuffer_handle));
+      AddLog(LOG_LEVEL_INFO, PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(pCONT_serial->uart2_settings.ringbuffer_handle));
 
     }
     break;
@@ -342,8 +342,8 @@ void mSerialUART::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     //   speed=0; //default off
 //     // }      
 //     // SetFanSpeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -417,7 +417,7 @@ void mSerialUART::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // void mSerialUART::WebCommand_Parse(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
 
 //   char tmp[100];
 
@@ -435,9 +435,9 @@ void mSerialUART::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     test_val = arg_value;
 
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //       analogWrite(pin, test_val);
-//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     // SetRefreshLEDs();
 //   }
 

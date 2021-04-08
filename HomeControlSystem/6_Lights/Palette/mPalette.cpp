@@ -30,7 +30,7 @@ mPalette* mPalette::GetInstance(){
 void mPalette::init_PresetColourPalettes(){
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("init_PresetColourPalettes"));
+  AddLog(LOG_LEVEL_DEBUG,PSTR("init_PresetColourPalettes"));
   #endif
   
   /**
@@ -654,7 +654,7 @@ void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
   palettelist.ptr->flags.fMapIDs_Type = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[1]; 
 
   uint8_t pixel_width = GetPixelsWithByMapIDType(palettelist.ptr->flags.fMapIDs_Type);
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("pixel_width %d"),pixel_width);
+  // AddLog(LOG_LEVEL_TEST, PSTR("pixel_width %d"),pixel_width);
   palettelist.ptr->colour_map_size = pixel_width*pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0];
   
 
@@ -669,14 +669,14 @@ void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
   // to be moved into devicelist
   palettelist.ptr->friendly_name_ctr = nullptr;//pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;//&palettelist_variable_users_ctr[ptr->id][0];
   
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill %d"),palettelist.ptr->colour_map_id[0]);
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill size %d"),palettelist.ptr->colour_map_size);
+  // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill %d"),palettelist.ptr->colour_map_id[0]);
+  // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill size %d"),palettelist.ptr->colour_map_size);
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("pixels in map test size %d"),GetPixelsInMap(palettelist.ptr));
+  // AddLog(LOG_LEVEL_TEST, PSTR("pixels in map test size %d"),GetPixelsInMap(palettelist.ptr));
   
   //     RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15),0);
 
-  //     AddLog_P(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
+  //     AddLog(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
 
 
 }
@@ -701,7 +701,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
 
   switch(id){
     default:
-    AddLog_P(LOG_LEVEL_WARN, PSTR("GetPalettePointerByID=%d DEFAULT"),id);
+    AddLog(LOG_LEVEL_WARN, PSTR("GetPalettePointerByID=%d DEFAULT"),id);
     /**
      * Variable User HSBID
      * */
@@ -805,7 +805,7 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
 {
 
   RgbcctColor colour = RgbcctColor(0);
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
+  // AddLog(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
   uint8_t palette_elements[ptr->colour_map_size];
   uint16_t index_relative = 0; // get expected pixel position
   uint16_t expected_pixel_count = 0; // get expected pixel position
@@ -829,8 +829,8 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
   }
 
   //#ifdef ENABLE_LOG_LEVEL_DEBUG
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "fMapIDs_Type[%d]=%d"),ptr->id,ptr->flags.fMapIDs_Type);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour_map_size[%d]=%d"),ptr->id,ptr->colour_map_size);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "fMapIDs_Type[%d]=%d"),ptr->id,ptr->flags.fMapIDs_Type);
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour_map_size[%d]=%d"),ptr->id,ptr->colour_map_size);
   // #endif
 
   switch(ptr->flags.fMapIDs_Type){
@@ -939,7 +939,7 @@ HsbColor mPalette::GetHsbColour(uint8_t id){
 
   // Get Saturation
   uint8_t sat_val = id%12;
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("sat_val = %d   %d"), sat_val, id);
+  // AddLog(LOG_LEVEL_INFO,PSTR("sat_val = %d   %d"), sat_val, id);
 
   switch(sat_val){
     default:
@@ -998,7 +998,7 @@ HsbColor mPalette::GetHsbColour(uint8_t id){
     colour.H = pgm_read_float(colour_float_map_values+12);
   }
 
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("id mod 12 = %d   %d"), id%12, id);
+  // AddLog(LOG_LEVEL_INFO,PSTR("id mod 12 = %d   %d"), id%12, id);
   // colour.S = (12-sat_val)
 
   return colour;
@@ -1048,32 +1048,32 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   // Check for matches with variables names  
   // if ((index_found = pCONT_sup->GetDListIDbyNameCtr(buffer, sizeof(buffer), c, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr)) >= 0) {
   //   // index_found = STATE_NUMBER_OFF_ID;    
-  //     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("index_found = %d"),index_found);    
+  //     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("index_found = %d"),index_found);    
   //     return index_found;
   // }
 
   // Check against stored progmem static names
   for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH_ID;ii++){
     ptr = GetPalettePointerByID(ii);
-    // AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->id %d"),ptr->id);
-    // AddLog_P(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
+    // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->id %d"),ptr->id);
+    // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
 
     if(ptr->friendly_name_ctr == nullptr){ 
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
       // move variable name to join standard devicename and just include as indexed? ie 0-20 is their names?
       #endif // ENABLE_LOG_LEVEL_COMMANDS
     }
     if(ptr->friendly_name_ctr != nullptr){ 
       if(ii>PALETTELIST_VARIABLE_HSBID_LENGTH_ID){
         // if(strcmp_P(c,ptr->friendly_name_ctr)==0){
-        //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
+        //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
         //   return ii;
         // }
 
         if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr)){ 
 
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
           return ii;            
            
           }
@@ -1103,7 +1103,7 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
 
-    AddLog_P(LOG_LEVEL_TEST, PSTR("Searching \"%s\""),name_ctr);
+    AddLog(LOG_LEVEL_TEST, PSTR("Searching \"%s\""),name_ctr);
 
     if(strcmp(c,name_ctr)==0){
       return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID+ii;
@@ -1191,7 +1191,7 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
   switch(ptr->flags.fMapIDs_Type){
     default:
     
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("ERROR pixel_length=%d"),pixel_length);
+    AddLog(LOG_LEVEL_ERROR, PSTR("ERROR pixel_length=%d"),pixel_length);
 
     break;
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID: pixel_width = 1; break;
@@ -1215,14 +1215,14 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
 
   // if(pixel_width){ //so we can divide if not 0
     pixel_length = ptr->colour_map_size/pixel_width; 
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("pixel_length=%d %d %d"),pixel_length,ptr->colour_map_size,pixel_width);
+    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_length=%d %d %d"),pixel_length,ptr->colour_map_size,pixel_width);
   // }else{
   //   pixel_length = ptr->colour_map_size/pixel_width
   // }
   //constrain limit if max
   // if(pixel_width_contrained_limit>=0){
   //   pixel_length = constrain(pixel_length,1,pixel_width_contrained_limit);
-  //   // AddLog_P(LOG_LEVEL_TEST, PSTR("pixel_width_contrained_limit=%d, pixel_length=%d"),pixel_width_contrained_limit, pixel_length);
+  //   // AddLog(LOG_LEVEL_TEST, PSTR("pixel_width_contrained_limit=%d, pixel_length=%d"),pixel_width_contrained_limit, pixel_length);
   // }
   return pixel_length;
 }
@@ -1337,7 +1337,7 @@ uint8_t mPalette::GetDefaultColourPaletteUserIDsCount(uint8_t id){
 
 
 void mPalette::SetPaletteListPtrFromID(uint8_t id){
-  //AddLog_P(LOG_LEVEL_TEST,PSTR("SetPaletteListPtrFromID(%d)"),id);
+  //AddLog(LOG_LEVEL_TEST,PSTR("SetPaletteListPtrFromID(%d)"),id);
   palettelist.ptr = GetPalettePointerByID(id);
 }
 

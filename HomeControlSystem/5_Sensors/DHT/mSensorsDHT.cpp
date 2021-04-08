@@ -15,34 +15,34 @@ void mSensorsDHT::Pre_Init(void){
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_1OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT11_2OF2_ID)) {  // not set when 255
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT11_2OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_1OF2_ID)) {  // not set when 255
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_1OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_2OF2_ID);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
 
   if(settings.sensor_active_count){
     fEnableSensor = true;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "DHT Sensor Enabled"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "DHT Sensor Enabled"));
   }
 
 }
@@ -91,7 +91,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
 
         // Check if any reads failed and exit early (to try again).
         if (sensor[sensor_id].dht->getStatus() != 0) {
-          //AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
+          //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
           sensor[sensor_id].instant.isvalid = false;
         }else{
           sensor[sensor_id].instant.isvalid = true;
@@ -122,7 +122,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
           sensor[sensor_id].instant.dewPoint = sensor[sensor_id].dht->computeDewPoint(newValues.temperature, newValues.humidity);
           sensor[sensor_id].instant.cr = sensor[sensor_id].dht->getComfortRatio(cf, newValues.temperature, newValues.humidity);
 
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
       
           sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_DONE_ID;
         }

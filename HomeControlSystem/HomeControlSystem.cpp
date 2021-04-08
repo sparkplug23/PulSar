@@ -108,7 +108,7 @@ void setup(void)
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
+  AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
   #endif
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   // load
@@ -184,7 +184,7 @@ void loop(void)
   if(mTime::TimeReached(&pCONT_set->runtime_value.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
     #endif // ENABLE_LOG_LEVEL_INFO
     pCONT_sup->activity.loop_counter=0;
   }
@@ -234,7 +234,7 @@ void loop(void)
   // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->loop_runtime_millis);
   // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->activity.cycles_per_sec);
   // uint32_t start_millis = millis();
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("LOOPSEC = %d \t %d"),loops_per_second,mtel.activity.cycles_per_sec);
+  // AddLog(LOG_LEVEL_TEST,PSTR("LOOPSEC = %d \t %d"),loops_per_second,mtel.activity.cycles_per_sec);
   // DEBUG_PRINTF("ADD TIME = %d\n\r",millis()-start_millis);
 
   pCONT_set->fSystemRestarted = false; //phase out and use module flag instead

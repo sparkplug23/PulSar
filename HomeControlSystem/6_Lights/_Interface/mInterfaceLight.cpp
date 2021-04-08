@@ -17,7 +17,7 @@ void mInterfaceLight::Init_NeoPixelAnimator(uint16_t size, uint8_t timebase){
 void mInterfaceLight::Settings_Default(){
 
   // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("mInterfaceLight::Settings_Default"));
+  // AddLog(LOG_LEVEL_TEST,PSTR("mInterfaceLight::Settings_Default"));
   // #endif
 
   // #ifdef USE_LIGHTING_TEMPLATE
@@ -51,7 +51,7 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
   uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
           
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_LIGHT "pixels_in_map %d"),pixels_in_map);
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_LIGHT "pixels_in_map %d"),pixels_in_map);
   #endif
 
   uint16_t desired_pixel = 0; // always first
@@ -98,15 +98,26 @@ bool mInterfaceLight::LightModuleInit(void)
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) { 
         pCONT_set->Settings.light_settings.type++; 
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog_P(LOG_LEVEL_DEBUG,PSTR("LightModuleInit PWM%d"),i);    
+        AddLog(LOG_LEVEL_DEBUG,PSTR("LightModuleInit PWM%d"),i);    
       #endif // ENABLE_LOG_LEVEL_COMMANDS    
       }  // Use Dimmer/Color control for all PWM as SetOption15 = 1
     }
   }
 
+  
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+  order->red = 0;
+  order->green = 1;
+  order->blue = 2;
+  order->white_cold = 3;
+  order->white_warm = 4;
+
+
+
+
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
-    // AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
+    // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
     pCONT_set->Settings.light_settings.type = LT_WS2812; 
   }
 
@@ -132,7 +143,7 @@ bool mInterfaceLight::LightModuleInit(void)
 void mInterfaceLight::Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
+  AddLog(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
   #endif
 
   #ifdef USE_LIGHTING_TEMPLATE
@@ -147,8 +158,8 @@ void mInterfaceLight::Template_Load(){
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
@@ -262,7 +273,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // DEBUG_LINE_HERE;
   //LightCalcPWMRange();
   // #ifdef DEBUG_LIGHT
-  //   AddLog_P(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
+  //   AddLog(LOG_LEVEL_TEST, "LightInit pwm_multi_channels=%d subtype=%d device=%d devices_present=%d",
   //     pwm_multi_channels, subtype, device, pCONT_set->devices_present);
   // #endif
 
@@ -443,23 +454,23 @@ Serial.printf("pwm=%d\n\r",pwm_test);
       // rgbcct_controller.setHS(test_hue,255);
 
       // char buffer[40];
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("palette=\"%s\""), mPaletteI->GetPaletteFriendlyName(buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_TEST, PSTR("palette=\"%s\""), mPaletteI->GetPaletteFriendlyName(buffer, sizeof(buffer)));
 
       // rgbcct_controller.setRGB(0,120,0);
       
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("rgbcct_controller size = %d"), sizeof(RgbcctColor_Controller));
+      // AddLog(LOG_LEVEL_TEST, PSTR("rgbcct_controller size = %d"), sizeof(RgbcctColor_Controller));
 
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test1=%d,%d,%d,%d,%d"), rgbcct_controller.R, rgbcct_controller.G, rgbcct_controller.B, rgbcct_controller.WW, rgbcct_controller.WC);
-      // // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test2=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
+      // AddLog(LOG_LEVEL_TEST, PSTR("colour_test1=%d,%d,%d,%d,%d"), rgbcct_controller.R, rgbcct_controller.G, rgbcct_controller.B, rgbcct_controller.WW, rgbcct_controller.WC);
+      // // AddLog(LOG_LEVEL_TEST, PSTR("colour_test2=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
 
       // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15));
 
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
+      // AddLog(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
 
 //   RgbcctColor colour_test = RgbcctColor(1,2,3,4,5);
 
-// AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test.R, colour_test.G, colour_test.B, colour_test.WW, colour_test.WC);
-// AddLog_P(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
+// AddLog(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test.R, colour_test.G, colour_test.B, colour_test.WW, colour_test.WC);
+// AddLog(LOG_LEVEL_TEST, PSTR("colour_test=%d,%d,%d,%d,%d"), colour_test[0], colour_test[1], colour_test[2], colour_test[3], colour_test[4]);
 // AddLog_Array(LOG_LEVEL_TEST, "palette_rgbcct_users", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5);
 
 
@@ -472,21 +483,21 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 // uint8_t sat = 50;
 
 //      rgbcct_controller.HsToRgb(hue, sat, &r, &g, &b, true);
-//      AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 1);
+//      AddLog(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 1);
 
 //      rgbcct_controller.HsToRgb(hue, sat, &r, &g, &b, 0);
-//      AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 0);
+//      AddLog(LOG_LEVEL_DEBUG, PSTR("setHS HS (%d %d) rgb (%d %d %d) flag=%d"), hue, sat, r, g, b, 0);
 
 
 
       // flag_test^=1;
-      // AddLog_P(LOG_LEVEL_DEBUG, PSTR("setHS RGB raw (%d %d %d) HS (%d %d) bri (%d)"), R, G, B, _hue, _sat, _briRGB);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR("setHS RGB raw (%d %d %d) HS (%d %d) bri (%d)"), R, G, B, _hue, _sat, _briRGB);
       // #endif
 
 
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("fMapIDs_Type=%d"),palettelist.rgbcct_users[0].flags.fMapIDs_Type);
+      // AddLog(LOG_LEVEL_TEST, PSTR("fMapIDs_Type=%d"),palettelist.rgbcct_users[0].flags.fMapIDs_Type);
       // palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
-      // AddLog_P(LOG_LEVEL_TEST, PSTR("fMapIDs_Type=%d"),palettelist.rgbcct_users[0].flags.fMapIDs_Type);
+      // AddLog(LOG_LEVEL_TEST, PSTR("fMapIDs_Type=%d"),palettelist.rgbcct_users[0].flags.fMapIDs_Type);
 
   // for(uint8_t id=0;id<5;id++){
   //   Serial.printf("id ======================= %d\n\r", id);
@@ -494,7 +505,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
   // }
 
 
-      //AddLog_P(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p=%d,%d,%d,%d,%d"), active_rgbcct_colour_p->R, active_rgbcct_colour_p->G, active_rgbcct_colour_p->B, active_rgbcct_colour_p->WW, active_rgbcct_colour_p->WC);
+      //AddLog(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p=%d,%d,%d,%d,%d"), active_rgbcct_colour_p->R, active_rgbcct_colour_p->G, active_rgbcct_colour_p->B, active_rgbcct_colour_p->WW, active_rgbcct_colour_p->WC);
 
 
 //use getcolour from palette to test
@@ -510,7 +521,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 //   uint8_t pixels_in_map = GetPixelsInMap(palettelist.ptr);
   
 //   #ifdef ENABLE_LOG_LEVEL_TEST
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "%d, pixels_in_map %d"),palette_id_test,pixels_in_map);
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "%d, pixels_in_map %d"),palette_id_test,pixels_in_map);
 //   #endif
 
 //   uint16_t desired_pixel = 0;
@@ -518,7 +529,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 //   RgbcctColor colour = GetColourFromPalette(palettelist.ptr, desired_pixel, &start_pixel_position);
   
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog_P(LOG_LEVEL_TEST, PSTR("[%d|%d] colour\t%d\t%d\t%d\t%d\t%d"),palette_id_test,pixels_in_map,colour.R,colour.G,colour.B,colour.WW,colour.WC);                        
+//   AddLog(LOG_LEVEL_TEST, PSTR("[%d|%d] colour\t%d\t%d\t%d\t%d\t%d"),palette_id_test,pixels_in_map,colour.R,colour.G,colour.B,colour.WW,colour.WC);                        
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // }
@@ -538,7 +549,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
 
 
 
-// AddLog_P(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p=%d,%d,%d,%d,%d"), active_rgbcct_colour_p->R, active_rgbcct_colour_p->G, active_rgbcct_colour_p->B, active_rgbcct_colour_p->WW, active_rgbcct_colour_p->WC);
+// AddLog(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p=%d,%d,%d,%d,%d"), active_rgbcct_colour_p->R, active_rgbcct_colour_p->G, active_rgbcct_colour_p->B, active_rgbcct_colour_p->WW, active_rgbcct_colour_p->WC);
 
       //load scene one into internal colour
       // active_rgbcct_colour_p->R = pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0];
@@ -551,7 +562,7 @@ Serial.printf("pwm=%d\n\r",pwm_test);
       //Temp fix until proper monitoring of on/off states
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       light_power_state = rgbcct_controller.getBrightness255()?1:0;
-      //AddLog_P(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
+      //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
     
     }break;
@@ -678,10 +689,10 @@ void mInterfaceLight::ShowInterface(){
 
 void mInterfaceLight::EveryLoop(){
       
-  // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "settings.type == EveryLoop"));
+  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "settings.type == EveryLoop"));
   SubTask_AutoOff();
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("Invalid Light LT_WS2812 HERE %d"),pCONT_set->Settings.light_settings.type);
+  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_WS2812 HERE %d"),pCONT_set->Settings.light_settings.type);
   // Single colour methods
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
      (pCONT_set->Settings.light_settings.type == LT_WS2812)){
@@ -689,7 +700,7 @@ void mInterfaceLight::EveryLoop(){
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
       case ANIMATION_MODE_EFFECTS_ID:
-        //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
         pCONT_lAni->SubTask_Flasher_Main();
         // light_power_state = true;
       break;
@@ -701,12 +712,12 @@ void mInterfaceLight::EveryLoop(){
 
   if(pCONT_set->Settings.light_settings.type == LT_WS2812){ 
     
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_WS2812 %d"),animation.mode_id);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_WS2812 %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
       case ANIMATION_MODE_EFFECTS_ID:
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
         pCONT_lAni->SubTask_Flasher_Main();
         // light_power_state = true;
       break;
@@ -718,21 +729,21 @@ void mInterfaceLight::EveryLoop(){
       #endif
       #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT // Basic colours around boxed objects
       case ANIMATION_MODE_AMBILIGHT_ID:
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_AMBILIGHT_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_AMBILIGHT_ID"));
         pCONT_ladd->SubTask_Ambilight_Main();
         // light_power_state = true;
       break;
       #endif
       #ifdef ENABLE_PIXEL_FUNCTION_ADALIGHT // serial, wifi udp connection
       case ANIMATION_MODE_EFFECTS_ID:
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
         pCONT_ladd->SubTask_Flasher_Main();
         // light_power_state = true;
       break;
       #endif
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
       case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
         pCONT_ladd->SubTask_Manual_SetPixel();
         // light_power_state = true;
       break;
@@ -744,7 +755,7 @@ void mInterfaceLight::EveryLoop(){
   }
   else
   {
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("Invalid Light Type"));
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Invalid Light Type"));
   }
 
 } // END everyloop
@@ -755,11 +766,11 @@ void mInterfaceLight::EveryLoop(){
 void mInterfaceLight::SubTask_AutoOff(){
 
   if(mTime::TimeReached(&auto_off_settings.tSaved,1000)){
-    //AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
+    //AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
     if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
       // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF_ID;
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "animation.auto_off_settings.time_decounter_secs==1 and disable"));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "animation.auto_off_settings.time_decounter_secs==1 and disable"));
       #endif       
 
       CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
@@ -771,7 +782,7 @@ void mInterfaceLight::SubTask_AutoOff(){
       auto_off_settings.time_decounter_secs--; //decrease
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"),auto_off_settings.time_decounter_secs);
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs=%d dec"),auto_off_settings.time_decounter_secs);
       #endif
     }
   }
@@ -998,7 +1009,7 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 void mInterfaceLight::BootMessage(){
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_INFO, PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
+  AddLog(LOG_LEVEL_INFO, PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }

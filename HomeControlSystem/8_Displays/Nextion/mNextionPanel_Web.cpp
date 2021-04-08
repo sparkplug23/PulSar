@@ -74,7 +74,7 @@
       //   "}";
       // mcl->mweb->WSBufferAppend_P(function);
       
-      // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tasker %s"),"FUNC_WEB_ROOT_SEND_SCRIPT");
+      // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tasker %s"),"FUNC_WEB_ROOT_SEND_SCRIPT");
     }
     break;
     // case FUNC_WEB_SHOW_PARAMETERS:{
@@ -149,7 +149,7 @@ void mNextionPanel::WebCommand_Parse(void)
   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-  //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_PAGE_SET);
+  //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_PAGE_SET);
   //   Command_SetPage(arg_value);
   // }
 
@@ -157,7 +157,7 @@ void mNextionPanel::WebCommand_Parse(void)
   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-  //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_SLIDER);
+  //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_SLIDER);
   //   Command_SetBrightness(arg_value);
   // }
 
@@ -165,7 +165,7 @@ void mNextionPanel::WebCommand_Parse(void)
   // if (mcl->mweb->pWebServer->hasParam(arg_ctr)) {
   //   mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
   //   arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-  //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> Command_ToggleBrightness " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE);
+  //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "WebCommand_Parse> Command_ToggleBrightness " D_JSON_COMMAND_NVALUE),arg_ctr,WEB_HANDLE_NEXTION_BRIGHTNESS_TOGGLE);
   //   Command_ToggleBrightness();
   // }
   
@@ -440,64 +440,64 @@ void mNextionPanel::WebSave_NextionSettings(void)
   //     mcl->mweb->WebGetArg(arg_ctr, tmp, sizeof(tmp));
   //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
   //     update_all = true; //refresh all
-  //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 
   //     switch(ii){
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELSUPDATED_PERCENTAGE: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELSUPDATED_PERCENTAGE");
   //         // from mapped value to real value
   //         arg_value = animation.transition.PROGMEM pixels_to_update_as_percentage_map[arg_value];
   //         animation.transition.pixels_to_update_as_percentage = constrain(arg_value,0,100);
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage);
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE,animation.transition.pixels_to_update_as_percentage);
   //         // Also convert to number equivalent
   //         animation.transition.pixels_to_update_as_number = map(animation.transition.pixels_to_update_as_percentage,0,100,0,ledout.length);
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER,animation.transition.pixels_to_update_as_number);
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER,animation.transition.pixels_to_update_as_number);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PIXELORDER: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELORDER");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PIXELORDER");
   //         animation.transition.order = arg_value; // no map
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_SVALUE),D_JSON_TRANSITION,D_JSON_ORDER,GetTransitionOrderName());
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_RATE: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"RATE");
   //         animation.transition.rate_ms = arg_value*1000; //seconds to milliseconds
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms);
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_RATE,animation.transition.rate_ms);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PERIOD: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PERIOD");
   //         animation.transition.time_ms = arg_value*1000; //seconds to milliseconds
   //         // If period > rate, increase period to rate
   //         animation.transition.time_ms = animation.transition.time_ms>animation.transition.rate_ms?animation.transition.rate_ms:animation.transition.time_ms;
-  //         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms); 
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE),D_JSON_TRANSITION,D_JSON_TIME,animation.transition.time_ms); 
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_TRANSITIONMETHOD: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"TRANSITIONMETHOD");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"TRANSITIONMETHOD");
   //         animation.transition.method = arg_value;
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetTransitionMethodName());      
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetTransitionMethodName());      
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_ANIMATIONMODE: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"ANIMATIONMODE");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"ANIMATIONMODE");
   //         animation.mode = arg_value;
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetAnimationModeName());
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_NAME,GetAnimationModeName());
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_PALETTE: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"PALETTE");
   //         animation.palette = arg_value;
-  //         AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteName());
+  //         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteName());
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
   //         flashersettings.function = arg_value;  
   //         flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;  //restart animation/function
-  //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
+  //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flasher.function = %d"),flashersettings.function);
   //       break;
   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_MIXER_RUNNING_ID: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
   //         mixer.running_id = arg_value;          
-  //         AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
+  //         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer.mode.running_id = %d"),mixer.running_id);
   //       break;
   //       default: 
-  //         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "DEFAULT hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+  //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "DEFAULT hasParam(\"%s\")=%d"),arg_ctr,arg_value);
   //       break;
   //     } //switch
   //   } //if
@@ -512,10 +512,10 @@ void mNextionPanel::HandleNextionSettings(void)
 
   // //if (!HttpCheckPriviledgedAccess()) { return; }
 
-  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_CONFIGURE_LOGGING));
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_CONFIGURE_LOGGING));
 
   // if (mcl->mweb->pWebServer->hasParam("save")) {
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"save\")"));
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"save\")"));
   //   WebSave_NextionSettings();
   //   mcl->mweb->HandleRoot(); // return to main menu
   //   return;
@@ -570,7 +570,7 @@ void mNextionPanel::HandleNextionSettings(void)
 void mNextionPanel::wifiConnected()
 { // MQTT connection and subscriptions
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
 
   // Show connection success
   //nextionSendCmd("page 0");
@@ -578,11 +578,11 @@ void mNextionPanel::wifiConnected()
   // char display_ctr[30];memset(display_ctr,0,sizeof(display_ctr));
   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
 
-  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_CONNECTED"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_CONNECTED"));
       
       // nextionSendCmd("page 0");
 
@@ -602,7 +602,7 @@ void mNextionPanel::wifiConnected()
 
 void mNextionPanel::wifiDisconnected(){
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
   
   // char display_ctr[120];memset(display_ctr,0,sizeof(display_ctr));
   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connect to%s\\rFAILED rc=%s\"",WiFi.localIP().toString(),"192.168.1.65",pCONT_mqtt->pubsub->stateCtr());
@@ -612,12 +612,12 @@ void mNextionPanel::wifiDisconnected(){
   // // show item
   // nextionSendCmd("vis 3,1");
   
-  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
   
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_DISCONNECTED"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "FUNC_WIFI_DISCONNECTED"));
 
       // nextionSendCmd("page 0");
 
@@ -663,9 +663,9 @@ void mNextionPanel::wifiDisconnected(){
 void mNextionPanel::webHandleNotFound()
 { 
   
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNotFound"));
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNotFound"));
   // // webServer 404
-  // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending 404 to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending 404 to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = "File Not Found\n\n";
   // httpMessage += "URI: ";
   // httpMessage += mcl->mweb->pWebServer->uri();
@@ -688,7 +688,7 @@ void mNextionPanel::webHandleNotFound()
 void mNextionPanel::webHandleSaveConfig()
 { 
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleSaveConfig"));// http://plate01/saveConfig
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleSaveConfig"));// http://plate01/saveConfig
 //   if (configPassword[0] != '\0')
 //   { //Request HTTP auth if configPassword is set
 //     if (!mcl->mweb->pWebServer->authenticate(configUser, configPassword))
@@ -696,7 +696,7 @@ void mNextionPanel::webHandleSaveConfig()
 //       return mcl->mweb->pWebServer->requestAuthentication();
 //     }
 //   }
-//   //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /saveConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+//   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /saveConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 //   String httpMessage = FPSTR(HTTP_HEAD2);
 //   httpMessage.replace("{v}", String(nextionNode));
 //   httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -806,7 +806,7 @@ void mNextionPanel::webHandleSaveConfig()
 //     configSave();
 //     if (shouldSaveWifi)
 //     {
-//       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"CONFIG: Attempting connection to SSID: ")) + mcl->mweb->pWebServer->arg("wifiSSID"));
+//       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"CONFIG: Attempting connection to SSID: ")) + mcl->mweb->pWebServer->arg("wifiSSID"));
 //       espWifiSetup();
 //     }
 //     espReset();
@@ -833,8 +833,8 @@ void mNextionPanel::webHandleResetConfig()
   //   }
   // }
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleResetConfig"));
-  //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /resetConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleResetConfig"));
+  //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /resetConfig page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // //httpMessage.replace("{v}", String("nextionNode"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -867,7 +867,7 @@ void mNextionPanel::webHandleResetConfig()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void mNextionPanel::webHandleNextionFirmware()
 { 
-//   AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
   
 // const char HTTP_FORM_UPG2[] =
 //   "<div id='f1' name='f1' style='display:block;'>"
@@ -898,7 +898,7 @@ void mNextionPanel::webHandleNextionFirmware()
 void mNextionPanel::webHandleNextionFirmware_PhaseOut()
 { 
   
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "void mNextionPanel::webHandleNextionFirmware_PhaseOut()"));
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "void mNextionPanel::webHandleNextionFirmware_PhaseOut()"));
   // // http://plate01/firmware
   // // if (configPassword[0] != '\0')
   // // { //Request HTTP auth if configPassword is set
@@ -907,9 +907,9 @@ void mNextionPanel::webHandleNextionFirmware_PhaseOut()
   // //     return mcl->mweb->pWebServer->requestAuthentication();
   // //   }
   // // }
-  // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /firmware page to client connected from: "))) ;//mcl->mweb->pWebServer->client().remoteIP().toString());
+  // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /firmware page to client connected from: "))) ;//mcl->mweb->pWebServer->client().remoteIP().toString());
 
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleNextionFirmware"));
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // //httpMessage.replace("{v}", (String("nextionNode") + " update"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -976,7 +976,7 @@ void mNextionPanel::webHandleNextionFirmware_PhaseOut()
 void mNextionPanel::webHandleEspFirmware()
 { 
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleEspFirmware"));
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleEspFirmware"));
   // http://plate01/espfirmware
   // if (configPassword[0] != '\0')
   // { //Request HTTP auth if configPassword is set
@@ -986,7 +986,7 @@ void mNextionPanel::webHandleEspFirmware()
   //   }
   // }
 
-  // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /espfirmware page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /espfirmware page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " ESP update"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1010,7 +1010,7 @@ void mNextionPanel::webHandleLcdUpload()
 { // http://plate01/lcdupload
   // Upload firmware to the Nextion LCD via HTTP upload
 
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "webHandleLcdUpload"));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "webHandleLcdUpload"));
 
 //   // if (configPassword[0] != '\0')
 //   // { //Request HTTP auth if configPassword is set
@@ -1031,9 +1031,9 @@ void mNextionPanel::webHandleLcdUpload()
 //   if (tftFileSize == 0)
 //   {
     
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "LCD OTA: FAILED, no filesize sent."));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "LCD OTA: FAILED, no filesize sent."));
   
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: FAILED, no filesize sent.")));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: FAILED, no filesize sent.")));
 //     String httpMessage = FPSTR(HTTP_HEAD2);
 //     // httpMessage.replace("{v}", (String("nextionNode") + " LCD update"));
 //     httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1049,7 +1049,7 @@ void mNextionPanel::webHandleLcdUpload()
 //   else if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
 //   { // Our timer expired so reset
   
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
 //    //debugPrintln(F("LCD OTA: ERROR: LCD upload timeout.  Restarting."));
 //     //espReset();
 //   }
@@ -1057,33 +1057,33 @@ void mNextionPanel::webHandleLcdUpload()
 //   {
 //     //WiFiUDP::stopAll(); // Keep mDNS responder from breaking things
 
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware upload");
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: upload.filename: ",upload.filename.c_str());
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d"),"LCD OTA: TFTfileSize: ",tftFileSize);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: LCD upload timeout.  Restarting.");
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Attempting firmware upload");
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: upload.filename: ",upload.filename.c_str());
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d"),"LCD OTA: TFTfileSize: ",tftFileSize);
 
 //     lcdOtaRemaining = tftFileSize;
 //     lcdOtaParts = (lcdOtaRemaining / 4096) + 1;
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: File upload beginning. Size ",lcdOtaRemaining," bytes in ",lcdOtaParts," 4k chunks.");
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: File upload beginning. Size ",lcdOtaRemaining," bytes in ",lcdOtaParts," 4k chunks.");
 
 //     serial_print_suffix(); // Send empty command to LCD
 
 //     nextionHandleInput();
 
 //     String lcdOtaNextionCmd = "whmi-wri " + String(tftFileSize) + ",38400,0";
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: Sending LCD upload command: ",lcdOtaNextionCmd.c_str());
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%s"),"LCD OTA: Sending LCD upload command: ",lcdOtaNextionCmd.c_str());
 
 //     char lcdOtaNextionCmd_ctr[100];
 //     sprintf(lcdOtaNextionCmd_ctr,"whmi-wri %d,38400,0",tftFileSize);
 
 //     serial_print_suffixed(lcdOtaNextionCmd_ctr);
     
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),lcdOtaNextionCmd_ctr);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),lcdOtaNextionCmd_ctr);
     
 //     if (nextionOtaResponse()){
-//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command accepted");
+//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command accepted");
 //     }else{
-//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command FAILED.");
+//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: LCD upload command FAILED.");
 //       espReset();
 //     }
 //     lcdOtaTimer = millis();
@@ -1118,7 +1118,7 @@ void mNextionPanel::webHandleLcdUpload()
 //         lcdOtaUploadIndex++;
 //       }
 
-//       //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "len=%d"),lcdOtaChunkSize);
+//       //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "len=%d"),lcdOtaChunkSize);
 
 //       #ifdef USE_NEXTION_SOFTWARE_SERIAL
 //         swSer->flush();                              // Clear out current UART buffer
@@ -1145,12 +1145,12 @@ void mNextionPanel::webHandleLcdUpload()
 //         lcdOtaChunkCounter = 0;
 //         if (nextionOtaResponse())
 //         {
-//           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," OK, ",lcdOtaPercentComplete,"% complete");
+//           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," OK, ",lcdOtaPercentComplete,"% complete");
 //         }
 //         else
 //         {
-//           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," FAILED, ",lcdOtaPercentComplete,"% complete");
-//           AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%"),"EXIT EARLY?");
+//           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%d%s%d%s"),"LCD OTA: Part ",lcdOtaPartNum," FAILED, ",lcdOtaPercentComplete,"% complete");
+//           AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s%"),"EXIT EARLY?");
 
 //         }
 //       }
@@ -1172,7 +1172,7 @@ void mNextionPanel::webHandleLcdUpload()
 //     {
 //       if (nextionOtaResponse())
 //       {
-//         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
+//         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
 //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaSuccess");
 //         mcl->mweb->pWebServer->send(303);
 //         uint32_t lcdOtaDelay = millis();
@@ -1185,7 +1185,7 @@ void mNextionPanel::webHandleLcdUpload()
 //       }
 //       else
 //       {
-//         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+//         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 //         mcl->mweb->pWebServer->send(303);
 //         uint32_t lcdOtaDelay = millis();
@@ -1205,7 +1205,7 @@ void mNextionPanel::webHandleLcdUpload()
 //     {
 //       if (nextionOtaResponse())
 //       { // YAY WE DID IT
-//         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
+//         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Success, wrote ")) + String(lcdOtaTransferred) + " of " + String(tftFileSize) + " bytes.");
 //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaSuccess");
 //         mcl->mweb->pWebServer->send(303);
 //         uint32_t lcdOtaDelay = millis();
@@ -1218,7 +1218,7 @@ void mNextionPanel::webHandleLcdUpload()
 //       }
 //       else
 //       {
-//         //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+//         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 //         mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 //         mcl->mweb->pWebServer->send(303);
 //         uint32_t lcdOtaDelay = millis();
@@ -1233,8 +1233,8 @@ void mNextionPanel::webHandleLcdUpload()
 //   }
 //   else if (upload.status == UPLOAD_FILE_ABORTED)
 //   { // Something went kablooey
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 //     mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 //     mcl->mweb->pWebServer->send(303);
 //     uint32_t lcdOtaDelay = millis();
@@ -1247,8 +1247,8 @@ void mNextionPanel::webHandleLcdUpload()
 //   }
 //   else
 //   { // Something went weird, we should never get here...
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: upload.status returned: ")) + String(upload.status));
-//     //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: upload.status returned: ")) + String(upload.status));
+//     //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"LCD OTA: Failure"));
 //     mcl->mweb->pWebServer->sendHeader("Location", "/lcdOtaFailure");
 //     mcl->mweb->pWebServer->send(303);
 //     uint32_t lcdOtaDelay = millis();
@@ -1271,8 +1271,8 @@ void mNextionPanel::webHandleLcdUpdateSuccess()
   //     return mcl->mweb->pWebServer->requestAuthentication();
   //   }
   // // }
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateSuccess"));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaSuccess page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateSuccess"));
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaSuccess page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update success"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1296,8 +1296,8 @@ void mNextionPanel::webHandleLcdUpdateFailure()
   //     return mcl->mweb->pWebServer->requestAuthentication();
   //   }
   // }
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateFailure"));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaFailure page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdUpdateFailure"));
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcdOtaFailure page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update failed"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1310,7 +1310,7 @@ void mNextionPanel::webHandleLcdUpdateFailure()
   // httpMessage += FPSTR(HTTP_END2);
   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
 
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "httpMessage=%s"),httpMessage.c_str());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "httpMessage=%s"),httpMessage.c_str());
 
 }
 
@@ -1324,8 +1324,8 @@ void mNextionPanel::webHandleLcdDownload()
   //     return mcl->mweb->pWebServer->requestAuthentication();
   //   }
   // }
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdDownload"));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcddownload page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleLcdDownload"));
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /lcddownload page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " LCD update"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1352,20 +1352,20 @@ void mNextionPanel::webHandleTftFileSize()
   //     return mcl->mweb->pWebServer->requestAuthentication();
   //   }
   // }
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleTftFileSize"));
-  // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /tftFileSize page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleTftFileSize"));
+  // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /tftFileSize page to client connected from: ")) + mcl->mweb->pWebServer->client().remoteIP().toString());
 
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " TFT Filesize"));
   // httpMessage += FPSTR(HTTP_HEAD_END2);
   // httpMessage += FPSTR(HTTP_END2);
   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),httpMessage.c_str());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "%s"),httpMessage.c_str());
   // tftFileSize = mcl->mweb->pWebServer->arg("tftFileSize").toInt();
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "tftFileSize%d"),tftFileSize);
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "tftFileSize%d"),tftFileSize);
 
 
-  // //AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"WEB: tftFileSize: ")) + String(tftFileSize));
+  // //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"WEB: tftFileSize: ")) + String(tftFileSize));
 
 
 
@@ -1381,8 +1381,8 @@ void mNextionPanel::webHandleReboot()
   //     return mcl->mweb->pWebServer->requestAuthentication();
   //   }
   // // }
-  // AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleReboot"));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /reboot page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
+  // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "webHandleReboot"));
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"HTTP: Sending /reboot page to client connected from: ");//) + mcl->mweb->pWebServer->client().remoteIP().toString());
   // String httpMessage = FPSTR(HTTP_HEAD2);
   // // httpMessage.replace("{v}", (String("nextionNode") + " NEXTION reboot"));
   // httpMessage += FPSTR(HTTP_SCRIPT2);
@@ -1394,7 +1394,7 @@ void mNextionPanel::webHandleReboot()
   // httpMessage += String(F("<br/>Rebooting device"));
   // httpMessage += FPSTR(HTTP_END2);
   // mcl->mweb->pWebServer->send(200, "text/html", httpMessage);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"RESET: Rebooting device");
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "%s"),"RESET: Rebooting device");
   // nextionSendCmd("page 0");
   // nextionSetAttr("p[0].b[1].txt", "\"Rebooting...\"");
   // // espReset();
@@ -1416,7 +1416,7 @@ void mNextionPanel::HandleUpgradeFirmwareStart(void)
 
   // char command[sizeof(mcl->mset->Settings.ota_url) + 10];  // OtaUrl
 
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
   // mcl->mwif->WifiConfigCounter();
 
   // char otaurl[sizeof(mcl->mset->Settings.ota_url)];
@@ -1443,7 +1443,7 @@ void mNextionPanel::HandleUploadDone(void)
 {
 //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPLOAD_DONE));
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_UPLOAD_DONE));
 
   char error[100];
 
@@ -1470,7 +1470,7 @@ void mNextionPanel::HandleUploadDone(void)
 //       snprintf_P(error, sizeof(error), PSTR(D_UPLOAD_ERROR_CODE " %d"), upload_error);
 //     }
 //     mcl->mwif->WSBufferAppend_P(error);
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), error);
 //     mcl->mset->stop_flash_rotate = mcl->mset->Settings.flag_system.stop_flash_rotate;
 //   } else {
 //     mcl->mwif->WSBufferAppend_P(PSTR("%06x'>" D_SUCCESSFUL "</font></b><br/>"), mcl->msup->WebColor(mcl->mset->COL_TEXT_SUCCESS));
@@ -1488,7 +1488,7 @@ void mNextionPanel::HandleUploadDone(void)
 void mNextionPanel::HandleUploadLoop(void)
 {
 
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), "HandleUploadLoop");
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_UPLOAD ": %s"), "HandleUploadLoop");
 
 //   // Based on ESP8266HTTPUpdateServer.cpp uses ESP8266WebServer Parsing.cpp and Cores Updater.cpp (Update)
 //   bool _serialoutput = (LOG_LEVEL_DEBUG <= mcl->mset->seriallog_level);
@@ -1511,7 +1511,7 @@ void mNextionPanel::HandleUploadLoop(void)
 //       return;
 //     }
 //     //SettingsSave(1);  // Free flash for upload
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
 //     if (UPL_SETTINGS == upload_file_type) {
 //       if (!mcl->mset->SettingsBufferAlloc()) {
 //         upload_error = 2;  // Not enough space
@@ -1680,7 +1680,7 @@ void mNextionPanel::HandleUploadLoop(void)
 //       #endif
 //     }
 //     if (!upload_error) {
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_SUCCESSFUL " %u bytes. " D_RESTARTING), upload.totalSize);
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD D_SUCCESSFUL " %u bytes. " D_RESTARTING), upload.totalSize);
 //     }
 //   } else if (UPLOAD_FILE_ABORTED == upload.status) {
 //     mcl->mset->restart_flag = 0;

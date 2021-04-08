@@ -16,22 +16,22 @@ void mSensorsAnalog::Pre_Init(void){
   // // Using ++ means always the lowest index will be the active sensor, ie, PIR2 can be 0 when PIR1 is not defined
   // if (pCONT_pins->GetPin(GPIO_PIR_1OF2_ID] < 99) {  // not set when 255
   //   pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_1OF2_ID];
-  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_pins->GetPin(GPIO_PIR_1OF2_ID]);
+  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR1] %d"),pCONT_pins->GetPin(GPIO_PIR_1OF2_ID]);
   // }
   // if (pCONT_pins->GetPin(GPIO_PIR_2OF2_ID] < 99) {  // not set when 255
   //   pin[sensors_active++] = pCONT_pins->GetPin(GPIO_PIR_2OF2_ID];
-  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_pins->GetPin(GPIO_PIR_2OF2_ID]);
+  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "pin[GPIO_PIR2] %d"),pCONT_pins->GetPin(GPIO_PIR_2OF2_ID]);
   // }
 
   // fEnableSensor = false;
 
   // for(uint8_t sensor_id=0;sensor_id<sensors_active;sensor_id++){
   //   if(pin[sensor_id]>=0){
-  //     AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "Pin Set %d"),pin[sensor_id]);
+  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_PIR "Pin Set %d"),pin[sensor_id]);
   //     pinMode(pin[sensor_id],INPUT_PULLUP);
   //     fEnableSensor = true; // true if any are active
   //   }else{
-  //     AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin[sensor_id]);
+  //     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin[sensor_id]);
   //   }
   // }
 
@@ -82,7 +82,7 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
       // EveryLoop();
     break;   
     case FUNC_EVERY_SECOND:
-      AddLog_P(LOG_LEVEL_TEST, PSTR("mSensorsAnalog"));
+      AddLog(LOG_LEVEL_TEST, PSTR("mSensorsAnalog"));
     break;  
     /************
      * COMMANDS SECTION * 
@@ -124,15 +124,15 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
   
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return; // not meant for here
 //   }
 
-//   // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::parse_JSONCommand()");
+//   // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::parse_JSONCommand()");
 
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "Command: " "\"%s\""),data_buffer.payload.ctr);
 
 //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
@@ -147,12 +147,12 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
 
 // //   //If its null (nothing passed), try global parameter
 // //   if(_obj == nullptr){
-// //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "obj == nullptr"));
+// //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "obj == nullptr"));
 // //     if(pCONT_set->pObj != nullptr){
-// //       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "pCONT_set->pObj != nullptr"));
+// //       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "pCONT_set->pObj != nullptr"));
 // //       _obj = pCONT_set->pObj;
 // //     }else{
-// //       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "No Object"));
+// //       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT "No Object"));
 // //       return;
 // //     }
 // //   }

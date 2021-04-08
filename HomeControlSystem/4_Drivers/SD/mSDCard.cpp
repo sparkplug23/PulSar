@@ -266,7 +266,7 @@ void mSDCard::testFileIO(fs::FS &fs, const char * path){
 // //       if (action != GetFanspeed()) {
 // //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 // //         ExecuteCommand(svalue, SRC_REMOTE);
-// // #ifdef USE_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER
 // //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // // #endif
 // //       }
@@ -281,7 +281,7 @@ void mSDCard::testFileIO(fs::FS &fs, const char * path){
 // //   }
 // //   if (7 == mode) {
 // //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// // #ifdef USE_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER
 // //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // // #endif
 // //   }
@@ -515,7 +515,7 @@ int8_t mSDCard::Tasker(uint8_t function){
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //       parse_JSONCommand(obj);
 //       return FUNCTION_RESULT_HANDLED_ID;
@@ -652,8 +652,8 @@ void mSDCard::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     //   speed=0; //default off
 //     // }      
 //     // SetFanSpeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -727,7 +727,7 @@ void mSDCard::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // void mSDCard::WebCommand_Parse(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
 
 //   char tmp[100];
 
@@ -745,9 +745,9 @@ void mSDCard::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     test_val = arg_value;
 
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //       analogWrite(pin, test_val);
-//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     // SetRefreshLEDs();
 //   }
 

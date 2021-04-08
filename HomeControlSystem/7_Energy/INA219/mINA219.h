@@ -3,7 +3,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_INA219
+#ifdef USE_MODULE_ENERGY_INA219
 
 #include <Wire.h>
 #include <SPI.h>
@@ -140,12 +140,12 @@ enum {
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mSensorsINA219 :
+class mEnergyINA219 :
   public mTaskerInterface
 {
   private:
   public:
-    mSensorsINA219(){};
+    mEnergyINA219(){};
     void Pre_Init(void);
     void init(void);
     int8_t Tasker(uint8_t function);
@@ -233,12 +233,12 @@ class mSensorsINA219 :
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mSensorsINA219>* mqtthandler_ptr;
+    struct handler<mEnergyINA219>* mqtthandler_ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mSensorsINA219> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyINA219> mqtthandler_settings_teleperiod;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
-    struct handler<mSensorsINA219> mqtthandler_sensor_ifchanged;
-    struct handler<mSensorsINA219> mqtthandler_sensor_teleperiod;
+    struct handler<mEnergyINA219> mqtthandler_sensor_ifchanged;
+    struct handler<mEnergyINA219> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;

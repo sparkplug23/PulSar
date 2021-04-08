@@ -145,7 +145,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
           sprintf(buffer, "#4d8d90");
           // sprintf(buffer, "%d==%d %d",program_timers[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
         }
-        // AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_timers[row].time_minutes_on_start,row,_kButtonTitle[row]);
+        // AddLog(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_timers[row].time_minutes_on_start,row,_kButtonTitle[row]);
         JsonBuilderI->Add("bc",buffer);//program_timers[row].time_minutes_on_start ? "#00ff00" : "#ee2200" );
       JsonBuilderI->Level_End();
     }
@@ -240,7 +240,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
             sprintf(buffer, "#4d8d90");
             // sprintf(buffer, "%d==%d %d",program_temps[row].time_minutes_on_start,_kButtonTitle[row], row, button_Counter);
           }
-           //AddLog_P(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_temps[row].temp.desired,row,_kButtonTitle[row]);
+           //AddLog(LOG_LEVEL_TEST,PSTR("mins start %d == button[%d]%d"),program_temps[row].temp.desired,row,_kButtonTitle[row]);
         }else{
           
             sprintf(buffer, "#4d8d90");
@@ -373,7 +373,7 @@ void mHeating::WebPage_Root_AddHandlers(){
 //   //   ExecuteCommandPower(0,POWER_TOGGLE,SRC_MQTT);
 
 //   //   // update_all = true; //refresh all
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RELAYS "hasParam test"));//,arg_ctr,arg_value);
 //   // }
 
 //   for(uint8_t relay_id=0;relay_id<4;relay_id++){
@@ -384,8 +384,8 @@ void mHeating::WebPage_Root_AddHandlers(){
 //       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     
@@ -409,8 +409,8 @@ void mHeating::WebPage_Root_AddHandlers(){
 //       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     

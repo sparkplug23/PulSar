@@ -1,6 +1,6 @@
-#include "mSensorsINA219.h"
+#include "mINA219.h"
 
-#ifdef USE_MODULE_SENSORS_INA219
+#ifdef USE_MODULE_ENERGY_INA219
 #ifdef USE_I2C
 
 
@@ -10,7 +10,7 @@ uint8_t ina219_addresses[] = { INA219_ADDRESS1, INA219_ADDRESS2, INA219_ADDRESS3
 char ina219_types[] = "INA219";
 uint8_t ina219_count = 0;
 
-int8_t mSensorsINA219::Tasker(uint8_t function){
+int8_t mEnergyINA219::Tasker(uint8_t function){
 
   int8_t function_result = 0;
   
@@ -54,7 +54,7 @@ int8_t mSensorsINA219::Tasker(uint8_t function){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:
-      AddLog_P(LOG_LEVEL_TEST, PSTR("Read"));   
+      AddLog(LOG_LEVEL_TEST, PSTR("Read"));   
     break;
     /************
      * COMMANDS SECTION * 
@@ -97,7 +97,7 @@ int8_t mSensorsINA219::Tasker(uint8_t function){
 
 
 
-void mSensorsINA219::Pre_Init(){
+void mEnergyINA219::Pre_Init(){
 
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
@@ -153,19 +153,19 @@ pCONT_set->Settings.ina219_mode = 0;
     // if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
     //   settings.fSensorCount++;
     // }else{
-    //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
+    //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
     // }
   }
 
   
   if(settings.fSensorCount){
     settings.fEnableSensor = true;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
   }
 
 }
 
-void mSensorsINA219::init(void){
+void mEnergyINA219::init(void){
 
   for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){    
     sensor[sensor_id].tSavedMeasure = millis();
@@ -175,7 +175,7 @@ void mSensorsINA219::init(void){
   
 }
 
-void mSensorsINA219::EveryLoop(){
+void mEnergyINA219::EveryLoop(){
     
   for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){
     if(mTime::TimeReachedNonReset(&sensor[sensor_id].tSavedMeasure,settings.measure_rate_ms)){
@@ -190,7 +190,7 @@ void mSensorsINA219::EveryLoop(){
 }
 
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mSensorsINA219::WebAppend_Root_Status_Table_Draw(){
+void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[30];
    
@@ -225,7 +225,7 @@ void mSensorsINA219::WebAppend_Root_Status_Table_Draw(){
 
 
 //append to internal buffer if any root messages table
-void mSensorsINA219::WebAppend_Root_Status_Table_Data(){
+void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
   
   uint8_t count = 0;
 
@@ -254,7 +254,7 @@ void mSensorsINA219::WebAppend_Root_Status_Table_Data(){
 
 // New function that breaks things up into switch statements
 // Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID
-void mSensorsINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
+void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
 
   uint16_t addr = ina219_addresses[sensor_id];
 
@@ -279,9 +279,9 @@ void mSensorsINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_com
   sensor[sensor_id].current_ma = sensor[sensor_id].shunt_voltage_mv * ina219_current_multiplier * 1000;
   sensor[sensor_id].power_mw  = (sensor[sensor_id].current_ma/1000) * sensor[sensor_id].load_voltage_mv;
   
-  AddLog_P(LOG_LEVEL_TEST, PSTR("sensor[%d].load_voltage_mv=%d"), sensor_id, (int)sensor[sensor_id].load_voltage_mv);
-  AddLog_P(LOG_LEVEL_TEST, PSTR("sensor[%d].current_ma=%d"),      sensor_id, (int)sensor[sensor_id].current_ma);   
-  AddLog_P(LOG_LEVEL_TEST, PSTR("sensor[%d].power_mw=%d"),        sensor_id, (int)sensor[sensor_id].power_mw);   
+  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].load_voltage_mv=%d"), sensor_id, (int)sensor[sensor_id].load_voltage_mv);
+  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].current_ma=%d"),      sensor_id, (int)sensor[sensor_id].current_ma);   
+  AddLog(LOG_LEVEL_TEST, PSTR("sensor[%d].power_mw=%d"),        sensor_id, (int)sensor[sensor_id].power_mw);   
 
   sensor[sensor_id].isvalid = true;
   sensor[sensor_id].ischanged = true;
@@ -324,10 +324,10 @@ void mSensorsINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_com
   //       sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
   //       sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(sealevel_pressure);
 
-  //       AddLog_P(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
-  //       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
-  //       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
-  //       AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
+  //       AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
+  //       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
+  //       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
+  //       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
 
   //       sensor[sensor_id].sReadSensor = SPLIT_TASK_DONE_ID;
 
@@ -358,7 +358,7 @@ void mSensorsINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_com
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSensorsINA219::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
@@ -366,7 +366,7 @@ uint8_t mSensorsINA219::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mSensorsINA219::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
 
@@ -416,7 +416,7 @@ uint8_t mSensorsINA219::ConstructJSON_Sensor(uint8_t json_level){
 
 
 
-void mSensorsINA219::MQTTHandler_Init(){
+void mEnergyINA219::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -426,7 +426,7 @@ void mSensorsINA219::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsINA219::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -436,7 +436,7 @@ void mSensorsINA219::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsINA219::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -446,12 +446,12 @@ void mSensorsINA219::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsINA219::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyINA219::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 
-void mSensorsINA219::MQTTHandler_Set_fSendNow(){
+void mEnergyINA219::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -460,7 +460,7 @@ void mSensorsINA219::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mSensorsINA219::MQTTHandler_Set_TelePeriod(){
+void mEnergyINA219::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -468,13 +468,13 @@ void mSensorsINA219::MQTTHandler_Set_TelePeriod(){
 } //end "MQTTHandler_Set_TelePeriod"
 
 
-void mSensorsINA219::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mEnergyINA219::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_SENSOR_IFCHANGED_ID, MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsINA219>* mqtthandler_list_ptr[] = {
+  struct handler<mEnergyINA219>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
   };
 
@@ -489,7 +489,7 @@ void mSensorsINA219::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 
-float mSensorsINA219::GetShuntVoltage_mV(uint16_t addr)
+float mEnergyINA219::GetShuntVoltage_mV(uint16_t addr)
 {
   // raw shunt voltage (16-bit signed integer, so +-32767)
   int16_t value = pCONT_sup->I2cReadS16(addr, INA219_REG_SHUNTVOLTAGE);
@@ -498,14 +498,14 @@ float mSensorsINA219::GetShuntVoltage_mV(uint16_t addr)
   return value * 0.01;
 }
 
-float mSensorsINA219::GetBusVoltage_mV(uint16_t addr){
+float mEnergyINA219::GetBusVoltage_mV(uint16_t addr){
   return GetBusVoltage_V(addr) * 1000;
 }
-float mSensorsINA219::GetBusVoltage_V(uint16_t addr)
+float mEnergyINA219::GetBusVoltage_V(uint16_t addr)
 {
   // Shift 3 to the right to drop CNVR and OVF as unsigned
   uint16_t value = pCONT_sup->I2cRead16(addr, INA219_REG_BUSVOLTAGE) >> 3;
-  //AddLog_P(LOG_LEVEL_TEST, PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
+  //AddLog(LOG_LEVEL_TEST, PSTR("GetBusVoltage_V: BusReg = 0x%04X"),value);
   // and multiply by LSB raw bus voltage to return bus voltage in volts (LSB=4mV=0.004V)
   return value * 0.004;
 }
@@ -513,7 +513,7 @@ float mSensorsINA219::GetBusVoltage_V(uint16_t addr)
 
 
 // Not used any more
-float mSensorsINA219::GetCurrent_mA(uint16_t addr)
+float mEnergyINA219::GetCurrent_mA(uint16_t addr)
 {
   // Sometimes a sharp load will reset the INA219, which will reset the cal register,
   // meaning CURRENT and POWER will not be available ... avoid this by always setting
@@ -533,7 +533,7 @@ float mSensorsINA219::GetCurrent_mA(uint16_t addr)
 }
 
 // Not used any more
-float mSensorsINA219::GetPower_mW(uint16_t addr)
+float mEnergyINA219::GetPower_mW(uint16_t addr)
 {
   // Sometimes a sharp load will reset the INA219, which will reset the cal register,
   // meaning CURRENT and POWER will not be available ... avoid this by always setting
@@ -585,11 +585,11 @@ float mSensorsINA219::GetPower_mW(uint16_t addr)
  *     11 or 100 both present 10 milliOhms
  * Because it is difficult to make a range check on such encoded value, none is performed
 \*********************************************************************************************/
-bool mSensorsINA219::SetCalibration(uint8_t mode, uint16_t addr)
+bool mEnergyINA219::SetCalibration(uint8_t mode, uint16_t addr)
 {
   uint16_t config = 0;
 
-  AddLog_P(LOG_LEVEL_TEST, "SetCalibration: mode=%d",mode);
+  AddLog(LOG_LEVEL_TEST, "SetCalibration: mode=%d",mode);
   if (mode < 5)
   {
     // All legacy modes 0..2 are handled the same and consider default 0.1 shunt resistor
@@ -626,7 +626,7 @@ bool mSensorsINA219::SetCalibration(uint8_t mode, uint16_t addr)
  *          occurs at 3.2A.
  *  @note   These calculations assume a 0.1 ohm resistor is present
  */
-void mSensorsINA219::setCalibration_32V_2A() {
+void mEnergyINA219::setCalibration_32V_2A() {
   // By default we use a pretty huge range for the input voltage,
   // which probably isn't the most appropriate choice for system
   // that don't use a lot of power.  But all of the calculations
@@ -720,7 +720,7 @@ void mSensorsINA219::setCalibration_32V_2A() {
  *  @param  on
  *          boolean value
  */
-// void mSensorsINA219::powerSave(bool on) {
+// void mEnergyINA219::powerSave(bool on) {
 //   Adafruit_BusIO_Register config_reg =
 //       Adafruit_BusIO_Register(i2c_dev, INA219_REG_CONFIG, 2, MSBFIRST);
 
@@ -740,7 +740,7 @@ void mSensorsINA219::setCalibration_32V_2A() {
  *          1.3A.
  *  @note   These calculations assume a 0.1 ohm resistor is present
  */
-void mSensorsINA219::setCalibration_32V_1A() {
+void mEnergyINA219::setCalibration_32V_1A() {
   // By default we use a pretty huge range for the input voltage,
   // which probably isn't the most appropriate choice for system
   // that don't use a lot of power.  But all of the calculations
@@ -831,7 +831,7 @@ void mSensorsINA219::setCalibration_32V_1A() {
  *     current measurement (0.1mA), at the expense of
  *     only supporting 16V at 400mA max.
  */
-void mSensorsINA219::setCalibration_16V_400mA() {
+void mEnergyINA219::setCalibration_16V_400mA() {
 
   // Calibration which uses the highest precision for
   // current measurement (0.1mA), at the expense of

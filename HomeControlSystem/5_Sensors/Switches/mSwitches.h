@@ -78,7 +78,7 @@
 // extern Ticker* TickerSwitch;// = nullptr;
 
 
-enum SwitchStates { PRESSED, NOT_PRESSED };
+enum SwitchStates { SWITCH_PRESSED_ID, SWITCH_NOT_PRESSED_ID };
 
 #include "1_TaskerManager/mTaskerInterface.h"
 

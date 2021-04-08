@@ -110,14 +110,14 @@ void mSensorsBME::Pre_Init(){
     if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
       settings.fSensorCount++;
     }else{
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
     }
   }
 
   
   if(settings.fSensorCount){
     settings.fEnableSensor = true;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
   }
 
 }
@@ -285,10 +285,10 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(sealevel_pressure);
 
-        AddLog_P(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
-        AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
+        AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
 
         sensor[sensor_id].sReadSensor = SPLIT_TASK_DONE_ID;
 

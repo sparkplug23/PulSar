@@ -44,6 +44,14 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
       SerialInput();
     break;
     /************
+     * RULES SECTION * 
+    *******************/
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_SPEED_ID:
+      RulesEvent_Set_Speed();
+    break;
+    #endif// USE_MODULE_CORE_RULES
+    /************
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
@@ -66,6 +74,55 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
+
+
+    
+#ifdef USE_MODULE_CORE_RULES
+
+void mSonoffIFan::RulesEvent_Set_Speed(){
+
+  // struct RELAY_EVENT_PARAMETERS{
+  //   uint8_t index;
+  //   uint8_t state;
+  //   uint8_t state;
+  // }rule_event_layout;
+
+  // case FUNC_EVENT_SET_SPEED_ID:
+  //   CommandSet_FanSpeed_Inching();
+  // break;     
+
+  // Set value directly, or its an instruction ie increment
+
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Speed"));
+
+  uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+
+  uint8_t state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+  uint8_t current_speed = 0;
+
+  if(state == STATE_NUMBER_INCREMENT_ID)
+  {
+    current_speed = GetFanspeed();
+    current_speed++;
+    if(current_speed>3){
+      current_speed = 0;
+    }
+    #ifdef USE_MODULE_DRIVERS_BUZZER
+      pCONT_buzzer->BuzzerBeep(current_speed);
+    #endif
+    AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Increment %d"),current_speed);
+  }
+  else
+  {
+    current_speed = state; // should not run
+  }
+
+  SetFanSpeed(current_speed, false);
+
+}
+#endif // USE_MODULE_CORE_RULES
+
+
 
 
 
@@ -150,7 +207,7 @@ void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 //       if (action != GetFanspeed()) {
 //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 //         ExecuteCommand(svalue, SRC_REMOTE);
-// #ifdef USE_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER
 //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // #endif
 //       }
@@ -165,7 +222,7 @@ void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 //   }
 //   if (7 == mode) {
 //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// #ifdef USE_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER
 //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // #endif
 //   }
@@ -182,6 +239,7 @@ void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 
 bool mSonoffIFan::SerialInput(void)
 {
+  AddLog(LOG_LEVEL_TEST,PSTR("mSonoffIFan::SerialInput"));
 //   if (SONOFF_IFAN03 == my_module_type) {
 //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
 //       serial_in_byte_counter = 0;

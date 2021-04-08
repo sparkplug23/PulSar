@@ -23,14 +23,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
     switch(flashersettings.region){
       case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
         #endif
         UpdateDesiredColourFromPaletteSelected();
         flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
       break;
       case EFFECTS_REGION_ANIMATE_ID: //shift along
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        //AddLog_P(LOG_LEVEL_DEBUG_MORE_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+        //AddLog(LOG_LEVEL_DEBUG_MORE_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
         #endif
         // RotateDesiredColour(1,flashersettings.flags.movement_direction);
 
@@ -56,7 +56,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness(){
         }
 
         if(flashersettings.flags.force_finish_flasher_pair_once){
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
           flashersettings.flags.force_finish_flasher_pair_once = false;
         }
       break;
@@ -288,7 +288,7 @@ RgbcctColor mAnimatorLight::ColorFromPalette(uint16_t palette_id, uint8_t desire
   //tmp fix, colour index not working with mine, I need to modulu it with palette size so it repeats along its length
   // mPaletteI->GetPalettePointerByID(palette_id)
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("desired_index=%d"), desired_index);
+  // AddLog(LOG_LEVEL_TEST, PSTR("desired_index=%d"), desired_index);
 
   
   mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
@@ -650,7 +650,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02(){
     tempcol=0;
     // } //startcolour
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
+  AddLog(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
 
   LCDDisplay_updateDisplay(tempcol, colorOffset);
     
@@ -810,7 +810,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 // lcd_display_show_number ++;
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
+  // AddLog(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
 
   // LCDDisplay_updateDisplay(tempcol, colorOffset);
 
@@ -848,7 +848,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
  * Requires new colour calculation each call
  */
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function_Solid_RGBCCT"));
+  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function_Solid_RGBCCT"));
   // Set palette pointer
   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
   // Set up colours
@@ -856,7 +856,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+  AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
@@ -866,12 +866,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
     );
   }
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+  AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
   animation_colours_rgbcct.StartingColor = GetPixelColor();
   // GetPixelColourHardwareInterface();
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
+  AddLog(LOG_LEVEL_TEST, PSTR("StartingColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
     
 
   // Call the animator to blend from previous to new
@@ -920,7 +920,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Sequential(){
     switch(flashersettings.region){
       case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
         #endif
         UpdateDesiredColourFromPaletteSelected();
         // Check if output multiplying has been set, if so, change desiredcolour array
@@ -937,7 +937,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Sequential(){
       break;
       case EFFECTS_REGION_ANIMATE_ID: //shift along
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
         #endif
         RotateDesiredColour(1,flashersettings.flags.movement_direction);
 // Get starting positions already on show
@@ -951,7 +951,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Sequential(){
         );
 
         if(flashersettings.flags.force_finish_flasher_pair_once){
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
           flashersettings.flags.force_finish_flasher_pair_once = false;
         }
       break;
@@ -980,7 +980,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_Sequential(const AnimationParam& p
 
 //     }
 
-        // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL AnimUpdateMemberFunction_Sequential"));
+        // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL AnimUpdateMemberFunction_Sequential"));
   
   for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
@@ -1025,7 +1025,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
 
   switch(flashersettings.region){
     case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
       // UpdateDesiredColourFromPaletteSelected();
@@ -1039,7 +1039,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
       uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
       
       
-       AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
 
 
       RgbTypeColor colour;
@@ -1068,7 +1068,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
       shared_flasher_parameters.indexes.counter ^= 1;
 
       
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"),shared_flasher_parameters.indexes.active,index_1,index_2);
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"),shared_flasher_parameters.indexes.active,index_1,index_2);
   
       
     
@@ -1093,7 +1093,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
 
         animation_colours[index].DesiredColour = colour;
          
-        //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "desired_pixel= %d/%d/%d"),pixels_map_lower_limit,desired_pixel,pixels_map_upper_limit);
+        //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "desired_pixel= %d/%d/%d"),pixels_map_lower_limit,desired_pixel,pixels_map_upper_limit);
   
         // if(++desired_pixel>pixels_map_upper_limit){
         //   desired_pixel = pixels_map_lower_limit;
@@ -1102,7 +1102,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
       } 
 
       //progress active index by 1 or reset
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "shared_flasher_parameters.indexes.active=%d"),shared_flasher_parameters.indexes.active);
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "shared_flasher_parameters.indexes.active=%d"),shared_flasher_parameters.indexes.active);
       if(++shared_flasher_parameters.indexes.active>pixels_in_map-1){
         shared_flasher_parameters.indexes.active=0;
       }
@@ -1110,7 +1110,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
   
     }break;
     case EFFECTS_REGION_ANIMATE_ID: //shift along
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 
       // Check if output multiplying has been set, if so, change desiredcolour array
       // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
@@ -1132,7 +1132,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
 
 
             // desired_colour[ledout.pattern[ledout.index]] = colour; 
-            // AddLog_P(LOG_LEVEL_TEST, PSTR("colour=%d,%d,%d"),
+            // AddLog(LOG_LEVEL_TEST, PSTR("colour=%d,%d,%d"),
             // colour.R,
             // colour.G,
             // colour.B);
@@ -1143,14 +1143,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_
           //     animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColour(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB());
           //   }
 
-          //   //   AddLog_P(LOG_LEVEL_TEST, PSTR("colou2=%d,%d,%d"),
+          //   //   AddLog(LOG_LEVEL_TEST, PSTR("colou2=%d,%d,%d"),
           //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.R,
           //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.G,
           //   // animation_colours[ledout.pattern[ledout.index]].DesiredColour.B);
 
             
           //   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-          //   // AddLog_P(LOG_LEVEL_DEBUG_MORE_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
+          //   // AddLog(LOG_LEVEL_DEBUG_MORE_MORE,PSTR(D_LOG_NEO "colour[p%d:d%d] = %d,%d,%d %d pp%d"),
           //   //   ledout.pattern[ledout.index],desired_pixel,
           //   //   pCONT_iLight->HueF2N(desired_colour[ledout.pattern[ledout.index]].H),pCONT_iLight->SatF2N(desired_colour[ledout.pattern[ledout.index]].S),pCONT_iLight->BrtF2N(desired_colour[ledout.pattern[ledout.index]].B),
           //   //   mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr),pixel_position
@@ -1257,10 +1257,10 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
 
    switch(flashersettings.region){
     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
       // if(flashersettings.flags.enable_endingcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
       // }
 
@@ -1269,7 +1269,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
 
       UpdateDesiredColourFromPaletteSelected();
       // if(flashersettings.flags.enable_startcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
       //   UpdateStartingColourWithSingleColour(RgbcctColor(0));
       // }else{
         UpdateStartingColourWithGetPixel();
@@ -1291,7 +1291,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
 
       uint8_t brightness_now = mapvalue(pCONT_iLight->BrtF2N(hsb.B),0,100,0,255);
 
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE %d %d"), brightness_now, flashersettings.brightness_max);
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE %d %d"), brightness_now, flashersettings.brightness_max);
 
       if(brightness_now < flashersettings.brightness_max){ //+5 to margins so its not the same
         hsb.B = pCONT_iLight->BrtN2F(flashersettings.brightness_max);
@@ -1299,7 +1299,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Popping_Palette_Brightness
         animation_colours[index_random].DesiredColour = hsb;
       }
 
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_BlendStartingToDesiredColour(param); });
     break;
   }
@@ -1331,10 +1331,10 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness
 
    switch(flashersettings.region){
     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
       // if(flashersettings.flags.enable_endingcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
       // }
 
@@ -1343,7 +1343,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness
 
       UpdateDesiredColourFromPaletteSelected();
       // if(flashersettings.flags.enable_startcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
       //   UpdateStartingColourWithSingleColour(RgbcctColor(0));
       // }else{
         UpdateStartingColourWithGetPixel();
@@ -1367,7 +1367,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness
         //   animation_colours[index_random].DesiredColour = hsb;
         // }
 
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back(param); });
       break;
 
@@ -1515,7 +1515,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
     switch(flashersettings.region){
       case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_COLOUR_SELECT"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_COLOUR_SELECT"));
         #endif
 
         // Check if output multiplying has been set, if so, change desiredcolour array
@@ -1567,11 +1567,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
         //   animation_colours[random_pixel_index].DesiredColour =  RgbColor(0,255,0);
         // }
 
-        // AddLog_P(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].DesiredColour.G,animation_colours[random_pixel_index].DesiredColour.B);
+        // AddLog(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].DesiredColour.G,animation_colours[random_pixel_index].DesiredColour.B);
 
         // Get starting positions already on show
         UpdateStartingColourWithGetPixel();
-        // AddLog_P(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].StartingColor.G,animation_colours[random_pixel_index].StartingColor.B);
+        // AddLog(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].StartingColor.G,animation_colours[random_pixel_index].StartingColor.B);
 
 
         // dont automatically run animate again, add timeout for it
@@ -1580,7 +1580,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
       }break;
       case EFFECTS_REGION_ANIMATE_ID: //shift along
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_ANIMATE"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_ANIMATE"));
         #endif
 
         this->setAnimFunctionCallback(
@@ -1590,7 +1590,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
         );
 
         if(flashersettings.flags.force_finish_flasher_pair_once){
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
           flashersettings.flags.force_finish_flasher_pair_once = false;
         }
         
@@ -1615,7 +1615,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_Pulse_Random_On_2(const AnimationP
     SetPixelColor(pixel, updatedColor);
   } // END for
   
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("-->> G,B=%d,%d"),updatedColor.G, updatedColor.B);
+  // AddLog(LOG_LEVEL_TEST, PSTR("-->> G,B=%d,%d"),updatedColor.G, updatedColor.B);
 
 }
 
@@ -1638,7 +1638,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off()
     switch(flashersettings.region){
       case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
         //#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_COLOUR_SELECT"));
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_COLOUR_SELECT"));
         //#endif
 
         pCONT_iLight->settings.light_size_count = 100;
@@ -1710,11 +1710,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off()
         // }
 
 
-        AddLog_P(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].DesiredColour.G,animation_colours[random_pixel_index].DesiredColour.B);
+        AddLog(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].DesiredColour.G,animation_colours[random_pixel_index].DesiredColour.B);
 
         // Get starting positions already on show
         UpdateStartingColourWithGetPixel();
-        // AddLog_P(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].StartingColor.G,animation_colours[random_pixel_index].StartingColor.B);
+        // AddLog(LOG_LEVEL_TEST, PSTR("From G,B=%d,%d"),animation_colours[random_pixel_index].StartingColor.G,animation_colours[random_pixel_index].StartingColor.B);
 
 
         // dont automatically run animate again, add timeout for it
@@ -1723,7 +1723,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off()
       }break;
       case EFFECTS_REGION_ANIMATE_ID: //shift along
         //#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_ANIMATE"));
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "Random_On_2 EFFECTS_ANIMATE"));
         //#endif
 
         this->setAnimFunctionCallback(
@@ -1733,7 +1733,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off()
         );
 
         if(flashersettings.flags.force_finish_flasher_pair_once){
-          AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
           flashersettings.flags.force_finish_flasher_pair_once = false;
         }
         
@@ -1774,7 +1774,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_Pulse_Random_On_Fade_Off(const Ani
     SetPixelColor(pixel, updatedColor);
   } // END for
   
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("-->> G,B=%d,%d"),updatedColor.G, updatedColor.B);
+  // AddLog(LOG_LEVEL_TEST, PSTR("-->> G,B=%d,%d"),updatedColor.G, updatedColor.B);
 
 }
 
@@ -1791,7 +1791,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Rando
 
   switch(flashersettings.region){
     case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
       UpdateDesiredColourFromPaletteSelected();
       UpdateStartingColourWithGetPixel();
@@ -1799,7 +1799,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Rando
     // NO 
     }break;
     case EFFECTS_REGION_ANIMATE_ID: //shift along
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_TwinkleSingleColourRandom(param); });
       break;
   }
@@ -1859,15 +1859,15 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Rand
   
   switch(flashersettings.region){
     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
       // if(flashersettings.flags.enable_endingcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_endingcolour_as_alternate"));
       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
       // }
       UpdateDesiredColourFromPaletteSelected();
       // if(flashersettings.flags.enable_startcolour_as_alternate){
-      //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
+      //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL flashersettings.flags.enable_startcolour_as_alternate"));
       //   UpdateStartingColourWithSingleColour(RgbcctColor(0));
       // }else{
         UpdateStartingColourWithGetPixel();
@@ -1875,7 +1875,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Rand
       flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
     break;
   //   case EFFECTS_REGION_ANIMATE_ID: //shift along
-  //     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+  //     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
   //     this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_TwinkleUsingPaletteColourRandom(param); });
   //     break;
   }
@@ -1990,12 +1990,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All()
 //       case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
 //         switch(flashersettings.region){
 //           case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-//             AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+//             AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //             UpdateDesiredColourFromPaletteSelected();
 //             flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 //           break;
 //           case EFFECTS_REGION_ANIMATE_ID: //shift along
-//             AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+//             AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 //             // Change brightness from 0 to 100% (rotate)
 //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
 //             for(ledout.index=0;ledout.index<pCONT_iLight->settings.light_size_count;ledout.index++){ desired_colour[ledout.index].B = direction; }            
@@ -2029,12 +2029,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All()
 //       case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
 //         switch(flashersettings.region){
 //           case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-//             AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+//             AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //             UpdateDesiredColourFromPaletteSelected();
 //             flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 //           break;
 //           case EFFECTS_REGION_ANIMATE_ID: //shift along
-//             AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+//             AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 //             // Change brightness from 0 to 100% (rotate)
 //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
 //             float random_saturation = direction ? 1 : ((float)random(0,100)/(float)100);
@@ -2324,7 +2324,7 @@ void mAnimatorLight::BlendAnimUpdate(const AnimationParam& param)
 void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Gradient_Alarm_01(){
 
   
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Gradient_Alarm_01"));
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Gradient_Alarm_01"));
 
   //using group 01
   // struct{}
@@ -2373,7 +2373,7 @@ struct EFFECT_CONFIG {
       }
 
 
-AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_iLight->animation.palette.id=%d"),pCONT_iLight->animation.palette.id);
+AddLog(LOG_LEVEL_TEST,PSTR("pCONT_iLight->animation.palette.id=%d"),pCONT_iLight->animation.palette.id);
 
 
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
@@ -2389,7 +2389,7 @@ AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_iLight->animation.palette.id=%d"),pCONT_iLig
     // // NO 
     // }break;
     // case EFFECTS_REGION_ANIMATE_ID: //shift along
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_SunPositions_Gradient_Alarm_01(param); });
       
   //     flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
@@ -2422,7 +2422,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Alarm_01(con
 void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01(){
 
   
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SunPositions_Gradient_Sun_Elevation_And_Azimuth_01"));
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SunPositions_Gradient_Sun_Elevation_And_Azimuth_01"));
 
   //using group 01
   // struct{}
@@ -2479,7 +2479,7 @@ struct EFFECT_CONFIG {
   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(pCONT_iLight->effects_data_buffer);
   //should be memcpy be used to insure size if not exceeded? or sizeof check? pointer is faster
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_iLight->animation.palette.id=%d"),pCONT_iLight->animation.palette.id);
+  AddLog(LOG_LEVEL_TEST,PSTR("pCONT_iLight->animation.palette.id=%d"),pCONT_iLight->animation.palette.id);
 
   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 
@@ -2731,7 +2731,7 @@ struct EFFECT_CONFIG {
     // // NO 
     // }break;
     // case EFFECTS_REGION_ANIMATE_ID: //shift along
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
       this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01(param); });
       
   //     flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
@@ -2767,18 +2767,18 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //     switch(flashersettings.region){
 //       case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
 //         #ifdef ENABLE_LOG_LEVEL_DEBUG
-//         AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+//         AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //         #endif
 //         UpdateDesiredColourFromPaletteSelected();
 //         flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 //       break;
 //       case EFFECTS_REGION_ANIMATE_ID: //shift along
 //         #ifdef ENABLE_LOG_LEVEL_DEBUG
-//         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+//         AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 //         #endif
 //         RotateDesiredColour(1,flashersettings.flags.movement_direction);
 //         if(flashersettings.flags.force_finish_flasher_pair_once){
-//           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
 //           flashersettings.flags.force_finish_flasher_pair_once = false;
 //         }
 //       break;
@@ -2800,14 +2800,14 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //     switch(flashersettings.region){
 //       case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
 //         #ifdef ENABLE_LOG_LEVEL_DEBUG
-//         AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+//         AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //         #endif
 //         UpdateDesiredColourFromPaletteSelected();
 //         flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 //       break;
 //       case EFFECTS_REGION_ANIMATE_ID: //shift along
 //         #ifdef ENABLE_LOG_LEVEL_DEBUG
-//         AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+//         AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 //         #endif
 //         // RotateDesiredColour(1,flashersettings.flags.movement_direction);
 
@@ -2833,7 +2833,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //         }
 
 //         if(flashersettings.flags.force_finish_flasher_pair_once){
-//           AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
 //           flashersettings.flags.force_finish_flasher_pair_once = false;
 //         }
 //       break;
@@ -2910,7 +2910,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 
 //   switch(flashersettings.region){
 //     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-//       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+//       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 //       UpdateDesiredColourFromPaletteSelected();
 //       flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 //       pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
@@ -2926,7 +2926,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //         if(!(ledout.index%flash_twinkle_random.white_pixel_amount)){
 //           flash_twinkle_random.white_leds_index[flash_twinkle_random.white_total_index] = ledout.index;
 //           flash_twinkle_random.stored_colours_index[flash_twinkle_random.white_total_index] = desired_colour[ledout.index];
-//           //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
+//           //AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
 //           flash_twinkle_random.white_total_index++;
 //         }              
 //       }   
@@ -2941,7 +2941,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 //     break;
 
 //     case EFFECTS_REGION_ANIMATE_ID: //shift along
-//       AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+//       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 
 //       // Reset all back to colour first 
 //       for(int jj=0;jj<flash_twinkle_random.white_total_index;jj++){
@@ -2982,7 +2982,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 // //       case EFFECTS_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID:
 // //         switch(flashersettings.region){
 // //           case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 // //             UpdateDesiredColourFromPaletteSelected();
 // //             flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 // //             pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
@@ -2998,7 +2998,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 // //               if(!(ledout.index%flash_twinkle_random.white_pixel_amount)){
 // //                 flash_twinkle_random.white_leds_index[flash_twinkle_random.white_total_index] = ledout.index;
 // //                 flash_twinkle_random.stored_colours_index[flash_twinkle_random.white_total_index] = desired_colour[ledout.index];
-// //                 //AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
+// //                 //AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flash_twinkle_random.white_leds_index %d ledout.index %d"),flash_twinkle_random.white_total_index,ledout.index);
 // //                 flash_twinkle_random.white_total_index++;
 // //               }              
 // //             }   
@@ -3013,7 +3013,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
             
 // //           break;
 // //           case EFFECTS_REGION_ANIMATE_ID: //shift along
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
     
             
 // //             for(int jj=0;jj<flash_twinkle_random.white_total_index;jj++){
@@ -3022,7 +3022,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 // //               }else{
 // //                 desired_colour[flash_twinkle_random.white_leds_index[jj]] = flash_twinkle_random.stored_colours_index[jj];//offcolour;
 // //               }
-// //               // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "leds_index=%d on/amount=%d/%d on=%d"),
+// //               // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "leds_index=%d on/amount=%d/%d on=%d"),
 // //               // flash_twinkle_random.white_leds_index[jj],
 // //               // flash_twinkle_random.white_on_index,
 // //               // flash_twinkle_random.white_pixel_amount,
@@ -3054,12 +3054,12 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 // //       case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
 // //         switch(flashersettings.region){
 // //           case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 // //             UpdateDesiredColourFromPaletteSelected();
 // //             flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 // //           break;
 // //           case EFFECTS_REGION_ANIMATE_ID: //shift along
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 // //             // Change brightness from 0 to 100% (rotate)
 // //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
 // //             for(ledout.index=0;ledout.index<pCONT_iLight->settings.light_size_count;ledout.index++){ desired_colour[ledout.index].B = direction; }            
@@ -3081,12 +3081,12 @@ void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Gradient_Sun_Elevatio
 // //       case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
 // //         switch(flashersettings.region){
 // //           case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
 // //             UpdateDesiredColourFromPaletteSelected();
 // //             flashersettings.region = EFFECTS_REGION_ANIMATE_ID;
 // //           break;
 // //           case EFFECTS_REGION_ANIMATE_ID: //shift along
-// //             AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+// //             AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
 // //             // Change brightness from 0 to 100% (rotate)
 // //             uint8_t direction = flashersettings.function_seq.rate_index%2;//(flashersettings.function_slow_fade.direction^=1);
 // //             float random_saturation = direction ? 1 : ((float)random(0,100)/(float)100);

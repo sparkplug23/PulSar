@@ -936,7 +936,7 @@ int8_t mWLEDEffects::Tasker(uint8_t function){
     break;
     case FUNC_EVERY_SECOND:{
       char buffer[50];
-      AddLog_P(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), GetEffectsModeNamebyID(
+      AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), GetEffectsModeNamebyID(
         mEffects->getMode(),buffer,sizeof(buffer)));
     }break;
     /************
@@ -998,7 +998,7 @@ int8_t mWLEDEffects::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch_P(data_buffer.topic.ctr,PM_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -1019,7 +1019,7 @@ void mWLEDEffects::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PM_JSON_DESERIALIZATION_ERROR);
+    AddLog(LOG_LEVEL_ERROR, PM_JSON_DESERIALIZATION_ERROR);
     #endif// ENABLE_LOG_LEVEL_INFO
     return;
   }  
@@ -1034,25 +1034,25 @@ void mWLEDEffects::parse_JSONCommand(void){
   if(jtok = obj["Effects"].getObject()["Current"]){ // default to secs
     effectCurrent = jtok.getInt();
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   if(jtok = obj["Effects"].getObject()["Speed"]){ // default to secs
     effectSpeed = jtok.getInt();
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   if(jtok = obj["Effects"].getObject()["Intensity"]){ // default to secs
     effectIntensity = jtok.getInt();
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   if(jtok = obj["Effects"].getObject()["Palette"]){ // default to secs
     effectPalette = jtok.getInt();
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
   }
@@ -1061,7 +1061,7 @@ void mWLEDEffects::parse_JSONCommand(void){
   if(jtok = obj["Effects"].getObject()["Mode"]){ // default to secs
     CommandSet_EffectsModeID(jtok.getInt());
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), animation.transition.time_ms.val);  
+    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), animation.transition.time_ms.val);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -1076,7 +1076,7 @@ void mWLEDEffects::SubTask_Animation(){
   // if (pCONT_iLight->animator_controller->IsAnimating()){ 
   //   pCONT_iLight->animator_controller->UpdateAnimations();
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   // AddLog_P(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);
+  //   // AddLog(LOG_LEVEL_DEBUG,PSTR("AnimUpdateCallback output_colour\t\t=%d"),output_colour.R);
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   //   LightUpdate();
   //   pCONT_iLight->animation.flags.fRunning = true; 
@@ -1101,7 +1101,7 @@ void mWLEDEffects::LightUpdate(){
 void mWLEDEffects::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
   // colour already adjusted the brightness
   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(  "\n\r\n\r\n" D_LOG_NEO "FadeToNewColour"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(  "\n\r\n\r\n" D_LOG_NEO "FadeToNewColour"));
   #endif
 
   RgbcctColor fromcolor_npb = output_colour;//GetOutputColour();//GetPixelColor(pixel);
@@ -1120,7 +1120,7 @@ void mWLEDEffects::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_ne
   // }
 
   if(pCONT_iLight->animation_override.time_ms){
-    AddLog_P(LOG_LEVEL_TEST, PSTR("animation_override.time_ms ENABLED = %d"),pCONT_iLight->animation_override.time_ms);
+    AddLog(LOG_LEVEL_TEST, PSTR("animation_override.time_ms ENABLED = %d"),pCONT_iLight->animation_override.time_ms);
     time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0; //reset overwrite
   }
@@ -1174,7 +1174,7 @@ void mWLEDEffects::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   if (pCONT_set->Settings.light_settings.type < LT_PWM6) {
     for (uint8_t i = 0; i < (pCONT_iLight->subtype - pCONT_iLight->pwm_offset); i++) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
         cur_col = cur_col_10[i + pCONT_iLight->pwm_offset]; //leak chance
         if(!pCONT_iLight->isChannelCT(i)) {   // if CT don't use pwm_min and pwm_max
           cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   // shrink to the range of pwm_min..pwm_max
@@ -1518,7 +1518,7 @@ void mWLEDEffects::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment){
   char buffer[50];
   mEffects->setMode(segment, mode);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
 // Temporary method that tracks indexing, to be replaced with single dlist later

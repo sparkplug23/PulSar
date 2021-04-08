@@ -8,7 +8,7 @@
 //   // Check if instruction is for me
 //   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
 //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     parse_JSONCommand();
@@ -30,7 +30,7 @@
 //   JsonParserObject obj = parser.getRootObject();   
 //   if (!obj) { 
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
 //     #endif //ENABLE_LOG_LEVEL_COMMANDS
 //     return;
 //   }  
@@ -70,7 +70,7 @@
 //     //   data_buffer.isserviced++;
 //     // }
 //   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
 //   //   #endif // ENABLE_LOG_LEVEL_DEBUG
 //   }
   
@@ -96,7 +96,7 @@
 //   readFile(SD_MMC, filename);
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 
@@ -119,7 +119,7 @@
 //   }
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("WriteFile")), filename_with_extention);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 
@@ -136,11 +136,11 @@
 // //   analogWrite(pin, value);
 //   createDir(SD_MMC, "/mydir");
 
-// // AddLog_P(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
+// // AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 
@@ -153,13 +153,13 @@
 
 // void mSerialUART::CommandSet_SerialPrint_FileNames(const char* dirname){
 
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("TESTListDir")), dirname);
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("TESTListDir")), dirname);
 //   listDir(SD_MMC, dirname, 0);
 
 //   // listDir(SD_MMC, "/", 0);
 
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 // } 

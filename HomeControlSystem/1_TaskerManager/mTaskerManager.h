@@ -239,12 +239,21 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
+  #ifdef USE_MODULE_DRIVERS_BUZZER
+    EM_MODULE_DRIVERS_BUZZER_ID,
+  #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     EM_MODULE_ENERGY_INTERFACE_ID,
   #endif
-  #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
-    EM_MODULE_ENERGY_PZEM004T_MODBUS_ID,
+  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+    EM_MODULE_ENERGY_PZEM004T_V3_ID,
+  #endif
+  #ifdef USE_MODULE_ENERGY_ADE7953
+    EM_MODULE_ENERGY_ADE7953_ID,
+  #endif
+  #ifdef USE_MODULE_ENERGY_INA219
+    EM_MODULE_ENERGY_INA219_ID,
   #endif
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -281,9 +290,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_DS18B20
     EM_MODULE_SENSORS_DB18S20_ID,
   #endif
-  #ifdef USE_MODULE_SENSORS_INA219
-    EM_MODULE_SENSORS_INA219_ID,
-  #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     EM_MODULE_SENSORS_ULTRASONIC_ID,
   #endif
@@ -294,10 +300,13 @@ enum MODULE_IDS{
     EM_MODULE_SENSORS_MOTION_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
-    PM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID,
+    EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
-    PM_MODULE_SENSORS_PULSECOUNTER_ID,
+    EM_MODULE_SENSORS_PULSECOUNTER_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_PRESENCE
+    EM_MODULE_SENSORS_PRESENCE_ID,
   #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -450,15 +459,27 @@ enum MODULE_IDS{
   #include "4_Drivers/FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_BUZZER
+  #include "4_Drivers/Buzzer/mBuzzer.h"
+  #define pCONT_buzzer                               static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+#endif
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
   #include "7_Energy/_Interface/mEnergy.h"
-  #define pCONT_iEnergy                           static_cast<mEnergy*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
+  #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
 #endif
-#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
-  #include "7_Energy/PowerMeter/mPzem_AC.h"
-  #define pCONT_pzem                            static_cast<mPzem_AC*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_MODBUS_ID])
+#ifdef USE_MODULE_ENERGY_PZEM004T_V3
+  #include "7_Energy/PowerMeter/mPZEM004T.h"
+  #define pCONT_pzem                            static_cast<mEnergyPZEM004T*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID])
+#endif
+#ifdef USE_MODULE_ENERGY_ADE7953
+  #include "7_Energy/ADE7953/mADE7953.h"
+  #define pCONT_ade7953                         static_cast<mEnergyADE7953*>(pCONT->pModule[EM_MODULE_ENERGY_ADE7953_ID])
+#endif
+#ifdef USE_MODULE_ENERGY_INA219
+  #include "7_Energy/INA219/mEnergyINA219.h"
+  #define pCONT_mina219                         static_cast<mEnergyINA219*>(pCONT->pModule[EM_MODULE_ENERGY_INA219_ID])
 #endif
 
 // Lights (Range 140-169)
@@ -508,10 +529,6 @@ enum MODULE_IDS{
   #include "5_Sensors/DB18/mSensorsDB18.h"
   #define pCONT_msdb18                          static_cast<mSensorsDB18*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_INA219
-  #include "5_Sensors/INA219/mSensorsINA219.h"
-  #define pCONT_mina219                         static_cast<mSensorsINA219*>(pCONT->pModule[EM_MODULE_SENSORS_INA219_ID])
-#endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
@@ -531,6 +548,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_PRESENCE
+  #include "5_Sensors/Presence/mPresence.h"
+  #define pCONT_presence                          static_cast<mPresence*>(pCONT->pModule[EM_MODULE_SENSORS_PRESENCE_ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"

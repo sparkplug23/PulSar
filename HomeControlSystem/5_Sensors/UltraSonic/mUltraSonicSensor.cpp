@@ -18,7 +18,7 @@ void mUltraSonicSensor::Pre_Init(){
     pinMode(pin_echo, INPUT); // Sets the echoPin as an Input
     settings.flags.EnableSensor = true;
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d"),pin_trig);
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d"),pin_trig);
     settings.flags.EnableSensor = false;
   }
 
@@ -62,12 +62,12 @@ int mUltraSonicSensor::GetDurationReading(void){
 
   // Return early
   if((abs(millis()-ultrasonic.tUltraSonicSensorReadLast)<blockingtime)){ // if not valid try again right away
-   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime"));
+   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime"));
     return ultrasonic.duration;
   }
   #endif //   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_ULTRASONIC "mUltraSonicSensor::GetDurationReading"));
 
   float duration=0;
 
@@ -84,7 +84,7 @@ int mUltraSonicSensor::GetDurationReading(void){
 
   // CHANGE TO USE INTERRUPT BASED METHOD, IE trigger (turn on interrupt) and have it compare start millis and triggered millis (is pulse nano or millis?)
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
 
   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   //if outside possible range
@@ -92,25 +92,25 @@ int mUltraSonicSensor::GetDurationReading(void){
     
     //pCONT->mso->MessagePrintln("[ULTRA] SAMPLING");
     
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
 
     // float lower = (float)ultrasonic.duration*(1-(ultrasonic.threshold.narrowpercent/100.0));//0.9;
     // float upper = (float)ultrasonic.duration*(1+(ultrasonic.threshold.narrowpercent/100.0));
     // ultrasonic.threshold.lowervalue = lower;
     // ultrasonic.threshold.uppervalue = upper;
 
-    // // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
+    // // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
 
     // // New method under test
     // // GET how new duration relates to previous
     // if(duration>ultrasonic.duration){ // Positive range
     //   ultrasonic.threshold.ratio_pos = duration/ultrasonic.threshold.uppervalue;
     //   ultrasonic.threshold.relative = ultrasonic.threshold.ratio_pos;  
-    //   // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
+    //   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
     // }else{ // Negative range
     //   ultrasonic.threshold.ratio_neg = -1*(ultrasonic.threshold.lowervalue/duration);
     //   ultrasonic.threshold.relative = ultrasonic.threshold.ratio_neg; 
-    //   // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
+    //   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
     // }
 
     // // Check if its within threshold
@@ -148,15 +148,15 @@ int mUltraSonicSensor::GetDurationReading(void){
     // if(ultrasonic.threshold.insidecount>200){ultrasonic.threshold.insidecount=200;}
     // if(ultrasonic.threshold.outsidecount>200){ultrasonic.threshold.outsidecount=200;}
 
-    // AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "fabsf(ultrasonic.threshold.relative) %f"),fabsf(ultrasonic.threshold.relative));
+    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "fabsf(ultrasonic.threshold.relative) %f"),fabsf(ultrasonic.threshold.relative));
 
     // if(fabsf(ultrasonic.threshold.relative)<=1){ 
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA]if(abs(ultrasonic.threshold.relative)<=1) \t\t"));
+    //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA]if(abs(ultrasonic.threshold.relative)<=1) \t\t"));
       ultrasonic.isvalid = true;
     //   ultrasonic.ischanged = true;
     //   ultrasonic.accuracy.insidecount++;
     // }else{
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA] NOT if(abs(ultrasonic.threshold.relative)<=1)"));
+    //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA] NOT if(abs(ultrasonic.threshold.relative)<=1)"));
     //   ultrasonic.isvalid = false;
     //   ultrasonic.ischanged = false;
     //   ultrasonic.accuracy.outsidecount++;
@@ -174,9 +174,9 @@ int mUltraSonicSensor::GetDurationReading(void){
   }else{ // ==0 no response
 
   
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "OUTSIDE DURATION %d"),duration);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "OUTSIDE DURATION %d"),duration);
   
-    //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "[ULTRA] Outside viable range"));
+    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "[ULTRA] Outside viable range"));
     //pCONT->mso->MessagePrintln("[ULTRA] Outside viable range");
     ultrasonic.isvalid = false;
     ultrasonic.ischanged = false;
@@ -225,7 +225,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
             if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
             ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
             
-          AddLog_P(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
+          AddLog(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
             // Reduce frequency of updates to stop data jumps
             if(abs(millis()-ultrasonic.tPermitTempUpdate)>60000){ultrasonic.tPermitTempUpdate = millis();
                 ultrasonic.temperature = ambient_temperature;
@@ -235,7 +235,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
             speedofsound_inmps = 331.3 + (0.606 * ultrasonic.temperature); //https://en.wikipedia.org/wiki/Speed_of_sound
             }
         }else{
-          AddLog_P(LOG_LEVEL_ERROR, PSTR("SOS missing"));
+          AddLog(LOG_LEVEL_ERROR, PSTR("SOS missing"));
         }
         #endif
     #endif
@@ -244,13 +244,13 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
     if(speedofsound_inmps==0){
       speedofsound_inmps = 343;
       #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-      AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_ULTRASONIC "speedofsound_inmps = 343"));
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_ULTRASONIC "speedofsound_inmps = 343"));
       #endif
     }
 
     ultrasonic.speedofsound = speedofsound_inmps;
     
-    AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
 
     return speedofsound_inmps;
 
@@ -322,7 +322,7 @@ void mUltraSonicSensor::SubTask_UltraSonicAverage(){
     averaged.instant.final.distance_mm = GetDistanceMMReadingAdjustedForTemp(); //pin32
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
     #endif // ENABLE_LOG_LEVEL_DEBUG
 
     averaged.instant.final.distance_cm = averaged.instant.final.distance_mm/10; //pin32
@@ -509,7 +509,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function){
       if(mTime::TimeReachedNonReset(&ultrasonic.tReadLast,1000)){//ultrasonic.settings.measure_rate_ms)){
         GetDurationReading(); 
         
-        AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms"),ultrasonic.duration,ultrasonic.settings.measure_rate_ms);
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms"),ultrasonic.duration,ultrasonic.settings.measure_rate_ms);
         
         if(ultrasonic.isvalid){ // stop trying
           ultrasonic.tReadLast = millis();
@@ -604,17 +604,17 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
     if(mTime::TimeReached(&object_detected_static.tSavedCheck,10000)){
       float distancecm = GetDistanceCMReading();
       
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "distancecm=%d"),(int)distancecm);
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "distancecm=%d"),(int)distancecm);
       // in limits
       // if(WITHINLIMITS(object_detected_static.trigger_cm_min,
       //                 distancecm,
       //                 object_detected_static.trigger_cm_max)){
       if(distancecm<250){
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"within");
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"within");
         object_detected_static.ispresent = true;
         AddPresenceEventStatusSum(true);
       }else{
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"outside");
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"outside");
         object_detected_static.ispresent = false;
         AddPresenceEventStatusSum(false);
       }
@@ -624,7 +624,7 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       // }
       
       if(presence_detect.state!=object_detected_static.ispresent){
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF presence_detect"));
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF presence_detect"));
 
         pCONT_mqtt->ppublish("status/presence/event",object_detected_static.ispresent?"Present":"Not Present",false);
         
@@ -650,10 +650,10 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
 
 
 
-        AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "presence_detect"));
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "presence_detect"));
         presence_detect.ischanged = true;
       }else{
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "ELSE presence_detect"));
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "ELSE presence_detect"));
 
       }
 
@@ -669,7 +669,7 @@ void mUltraSonicSensor::parse_JSONCommand(){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ultrasonic")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return; // not meant for here

@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include "3_Network/MQTT/mMQTT.h"
+#include "2_CoreSystem/mHardwareTemplates.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -39,6 +40,11 @@ class mRuleEngine :
       return sizeof(mRuleEngine);
     };
     #endif
+
+    struct SETTINGS{
+
+bool loaded_default_for_moduled = false;
+}settings;  
 
     uint8_t* data = nullptr;
     uint16_t _dataLen = 0;
@@ -156,7 +162,7 @@ class mRuleEngine :
     };
 
     struct RULES{
-      bool enabled = true;
+      bool enabled = false;
       EVENT_PART trigger;
       EVENT_PART command; //introduce multiple commands? Create a vector of rules?
     }rules[D_MAX_RULES];
@@ -201,6 +207,12 @@ class mRuleEngine :
       event_triggered.device_id = _index;
       event_triggered.value.data[0] = _state;
     };
+    void NewEvent(uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
+      Reset();
+      event_triggered.module_id = _module_id;
+      event_triggered.device_id = _index;
+      event_triggered.value.data[0] = _state;
+    };
     void Encoding( uint8_t encoding){
       event_triggered.value.encoding = encoding;
     };
@@ -216,6 +228,18 @@ class mRuleEngine :
 
 
     }
+
+    void DefaultRuleForModule();
+
+    #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    void DefaultRule_Sonoff_iFan03();
+    #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+    #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+    void DefaultRule_Shelly_Dimmer2();
+    #endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+    #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
+    void DefaultRule_Shelly_2p5();
+    #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
 
     
     void parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event);

@@ -109,7 +109,7 @@ void mNextionPanel::pre_init(void){
   // if((pin_rx>=0)&&(pin_tx>=0)){
   //   status_enabled = true;
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d %d"),pin_tx,pin_rx);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d %d"),pin_tx,pin_rx);
   //   status_enabled = false;
   // }
 
@@ -147,11 +147,11 @@ void mNextionPanel::init()
   // Serial.flush();
   // delay(5000);
   if(lcdConnected){
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD responding, continuing program load"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD responding, continuing program load"));
     nextionSendCmd("connect");
   }
   else{
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD not responding, continuing program load"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI: LCD not responding, continuing program load"));
   }
 
   // Configure some items
@@ -198,7 +198,7 @@ void mNextionPanel::EveryLoop(){
   // Check if long press threshold reached
   if(screen_press.fEnableImmediateButtonTime){
     if(mTime::TimeReachedNonReset(&screen_press.tSavedButtonONEvent,LONG_PRESS_DURATION)){
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "LONG_PRESS_DURATION reached"));
       screen_press.fEnableImmediateButtonTime=false;
       fEnableIgnoreNextOffEvent = true;
       MQTTSend_LongPressEvent();
@@ -226,7 +226,7 @@ void mNextionPanel::EveryLoop(){
 void mNextionPanel::mqttConnected()
 { // MQTT connection and subscriptions
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_LOG "mNextionPanel::mqttConnected"));
 
   // Show connection success
   //nextionSendCmd("page 0");
@@ -234,7 +234,7 @@ void mNextionPanel::mqttConnected()
   // char display_ctr[30];memset(display_ctr,0,sizeof(display_ctr));
   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connected\\r%s",WiFi.localIP().toString(),"192.168.1.65");
 
-  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
@@ -246,7 +246,7 @@ void mNextionPanel::mqttConnected()
 
 void mNextionPanel::mqttDisconnected(){
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected"));
   
   // char display_ctr[120];memset(display_ctr,0,sizeof(display_ctr));
   // sprintf(display_ctr,"\"WiFi Connected\\r%s\\rMQTT Connect to%s\\rFAILED rc=%s\"",WiFi.localIP().toString(),"192.168.1.65",pCONT_mqtt->pubsub->stateCtr());
@@ -256,7 +256,7 @@ void mNextionPanel::mqttDisconnected(){
   // // show item
   // nextionSendCmd("vis 3,1");
   
-  // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "mNextionPanel::mqttDisconnected %s"),display_ctr);    
 
   //nextionSetAttr("p[0].b[1].txt", String(display_ctr));
 
@@ -274,7 +274,7 @@ void mNextionPanel::MQTTSend_PressEvent(){
   screen_press.event = nextionReturnBuffer[2];
   uint32_t tSavedTimeSincePressOn = abs(millis() - screen_press.tSavedButtonONEvent);
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
   
   JsonBuilderI->Start();
 
@@ -298,7 +298,7 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
   screen_press.page = nextionReturnBuffer[1];
   screen_press.event = nextionReturnBuffer[2];
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " \"p[%d].b[%d]\"=%s"),screen_press.page,screen_press.event,"LONG_PRESS");
 
   char event_ctr[20];
   memset(event_ctr,0,sizeof(event_ctr));

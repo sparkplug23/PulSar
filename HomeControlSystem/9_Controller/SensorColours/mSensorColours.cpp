@@ -111,7 +111,7 @@ void mSensorColours::SetFanspeed(uint8_t fanspeed, bool sequence)
 //       if (action != GetFanspeed()) {
 //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 //         ExecuteCommand(svalue, SRC_REMOTE);
-// #ifdef USE_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER
 //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // #endif
 //       }
@@ -126,7 +126,7 @@ void mSensorColours::SetFanspeed(uint8_t fanspeed, bool sequence)
 //   }
 //   if (7 == mode) {
 //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// #ifdef USE_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER
 //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // #endif
 //   }
@@ -243,7 +243,7 @@ void mSensorColours::pre_init(){
 
 int8_t mSensorColours::Tasker(uint8_t function){
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR( "mSensorColours::Tasker"));
+  // AddLog(LOG_LEVEL_TEST, PSTR( "mSensorColours::Tasker"));
 
 
   /************
@@ -315,7 +315,7 @@ void mSensorColours::EverySecond(){
   uint8_t sensor_count = pCONT_msdb18->db18_sensors_active;
 
 
-//AddLog_P(LOG_LEVEL_ERROR, PSTR("sensor_count=%d"),sensor_count);
+//AddLog(LOG_LEVEL_ERROR, PSTR("sensor_count=%d"),sensor_count);
 //delay(2000);
 
   if((sensor_count>=DB18_SENSOR_MAX)||(sensor_count==0)){ return; }
@@ -348,7 +348,7 @@ void mSensorColours::EverySecond(){
   int test_temp[sensor_count];
 
 
-AddLog_P(LOG_LEVEL_TEST, PSTR("val=%d %d %d %d %d %d"),
+AddLog(LOG_LEVEL_TEST, PSTR("val=%d %d %d %d %d %d"),
   (int)pCONT_msdb18->sensor[0].reading.val,
   (int)pCONT_msdb18->sensor[1].reading.val,
   (int)pCONT_msdb18->sensor[2].reading.val,
@@ -356,7 +356,7 @@ AddLog_P(LOG_LEVEL_TEST, PSTR("val=%d %d %d %d %d %d"),
   (int)pCONT_msdb18->sensor[4].reading.val,
   (int)pCONT_msdb18->sensor[5].reading.val);
 
-AddLog_P(LOG_LEVEL_TEST, PSTR("add=%d %d %d %d %d %d"),
+AddLog(LOG_LEVEL_TEST, PSTR("add=%d %d %d %d %d %d"),
   pCONT_msdb18->sensor[0].address[7],
   pCONT_msdb18->sensor[1].address[7],
   pCONT_msdb18->sensor[2].address[7],
@@ -395,20 +395,20 @@ switch(ii){
 
     int16_t device_id_found = pCONT_set->GetDeviceIDbyName(name,device_id,class_id);
 
-    // AddLog_P(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
-    AddLog_P(LOG_LEVEL_INFO,PSTR("device_id_found = %s %d %d"),name,device_id_found,(int)pCONT_msdb18->sensor[device_id_found].reading.val);
+    // AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
+    AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %s %d %d"),name,device_id_found,(int)pCONT_msdb18->sensor[device_id_found].reading.val);
 
 
   // Check for matches with variables names  
   // if ((
     // index_found = pCONT_sup->GetDListIDbyNameCtr(buffer, sizeof(buffer), c, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr)) >= 0) {
   //   // index_found = STATE_NUMBER_OFF_ID;    
-  //     AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("index_found = %d"),index_found);    
+  //     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("index_found = %d"),index_found);    
   //     return index_found;
   // }
   int8_t true_struct_id = pCONT_msdb18->FindStructIndexByAddressID(device_id_found);
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("device_id_found true_struct_id %d %d"),device_id_found,true_struct_id);
+  AddLog(LOG_LEVEL_TEST, PSTR("device_id_found true_struct_id %d %d"),device_id_found,true_struct_id);
 
   if(true_struct_id != -1){
 
@@ -441,7 +441,7 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
   //remove the last unneeded iter
   // index--;
 
-  AddLog_P(LOG_LEVEL_ERROR, PSTR("index=%d"),index);
+  AddLog(LOG_LEVEL_ERROR, PSTR("index=%d"),index);
   AddLog_Array(LOG_LEVEL_TEST, "test_temp", test_temp, 6);
   // delay(5000);
 
@@ -450,9 +450,9 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
   pCONT_iLight->CommandSet_PaletteID(mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID);
   pCONT_iLight->CommandSet_TransitionOrderID(TRANSITION_ORDER_INORDER_ID);
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("buffer=%s"),buffer);
+  // AddLog(LOG_LEVEL_TEST, PSTR("buffer=%s"),buffer);
 
-  // AddLog_P(LOG_LEVEL_WARN, PSTR("ENABLE_RELAY_CONTROLS is disabled"));
+  // AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_RELAY_CONTROLS is disabled"));
   
   AddLog_Array(LOG_LEVEL_TEST, "encoded_gradient_temp_array", encoded_gradient_temp_array, index);
   
@@ -499,7 +499,7 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
 //   // Check if instruction is for me
 //   // if(mSupport::CheckSetTopicIsModulebyID())
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/pwmfan")>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     parse_JSONCommand(obj);
 //     return FUNCTION_RESULT_HANDLED_ID;
@@ -522,7 +522,7 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
 //     // }else{
 //     //   SetLightState(light);      
 //     // }
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
 //     // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
 //     // isserviced++;  
 //   }
@@ -544,9 +544,9 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
 
 
 //     // SetFanspeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,pwm_val);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -625,10 +625,10 @@ test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
 //       Serial.println(dlist2);
 
 //       pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 0, dlist2);
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+//       AddLog(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
 
 //       pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), 1, dlist2);
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
+//       AddLog(LOG_LEVEL_INFO, PSTR("button_key_ctr dlist2 %s"), button_key_ctr);
 
 //       // break;
 //       uint8_t button_values2[2] = {2, 2}; //toggle, fanspeed0-3

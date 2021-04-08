@@ -14,13 +14,13 @@ void mHBridge::pre_init(void){
     pin_A_IB = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OA_ID];
     pinMode(pin_A_IB,OUTPUT);
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA Invalid %d"),pin_A_IA);
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA Invalid %d"),pin_A_IA);
     init_success = false;
   }
 
   // if(pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OA_ID] < 99) {
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_IB);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_IB);
   //   init_success = false;
   // }
 
@@ -37,7 +37,7 @@ void mHBridge::pre_init(void){
   //   pinMode(pin_IB,OUTPUT);
   //   digitalWrite(pin_IB,LOW); //STOP THE MOTOR
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_IB Invalid %d"),pin_IB);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_IB Invalid %d"),pin_IB);
   //   init_success = false;
   // }
 
@@ -45,7 +45,7 @@ void mHBridge::pre_init(void){
   //   pin_A_IB = pCONT_pins->GetPin(GPIO_HBRIDGE_L9110_OB_ID];
   //   pinMode(pin_A_IB,OUTPUT);
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_A_IB);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB Invalid %d"),pin_A_IB);
   //   init_success = false;
   // }
 
@@ -59,7 +59,7 @@ void mHBridge::pre_init(void){
   //   pin_AnalogSense = pCONT_pins->GetPin(GPIO_HBRIDGE_ANALOG_SENSE];
   //   pinMode(pin_AnalogSense,INPUT);
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_IB Invalid %d"),pin_IB);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_IB Invalid %d"),pin_IB);
   // }
 
 }
@@ -79,8 +79,8 @@ int8_t mHBridge::Tasker(uint8_t function){
       init();
     break;
     case FUNC_EVERY_SECOND:
-      AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA %d"),pin_A_IA);
-      AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB %d"),pin_A_IB);
+      AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IA %d"),pin_A_IA);
+      AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin pin_A_IB %d"),pin_A_IB);
     break;
     case FUNC_LOOP: 
       //SubTasker_ADC_Measure();
@@ -180,7 +180,7 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
   
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motor")>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here

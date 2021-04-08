@@ -8,7 +8,7 @@ int8_t mNextionPanel::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_INTERFACE_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_LIGHTS_INTERFACE_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -22,7 +22,7 @@ int8_t mNextionPanel::CheckAndExecute_JSONCommands(){
 void mNextionPanel::parse_JSONCommand(void){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEXTION D_TOPIC "Checking all commands"));
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEXTION D_TOPIC "Checking all commands"));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   char buffer[50];
@@ -40,7 +40,7 @@ void mNextionPanel::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  
@@ -64,14 +64,14 @@ void mNextionPanel::parse_JSONCommand(void){
 //       data_buffer.isserviced++;
 //     }
 //     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
 //     #endif // ENABLE_LOG_LEVEL_DEBUG
 //   }
 
 
 // int8_t mNextionPanel::parsesub_SetMulti(JsonObjectConst obj){
 
-//   AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
+//   AddLog(LOG_LEVEL_INFO, PSTR("F::%s"),__FUNCTION__);
 
     // if(jtok = obj["commands"]){
 
@@ -80,7 +80,7 @@ void mNextionPanel::parse_JSONCommand(void){
     //     Serial.println(array.size());
 
     //     for(auto val : array) {
-    //         // AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+    //         // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
 
     //         // if(val.isStr()){
     //             Serial.println(val.getStr());
@@ -98,7 +98,7 @@ void mNextionPanel::parse_JSONCommand(void){
     if(jtok = obj["commands"]){
         JsonParserArray array = jtok;
         for(auto val : array) {
-            // AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+            // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
             nextionSendCmd(val.getStr());
         }
     }
@@ -145,7 +145,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 
 //         // for(auto val : array) {
-//         //     // AddLog_P(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+//         //     // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
 
 //         //     // if(val.isStr()){
 //         //         Serial.println(val.getStr());
@@ -190,7 +190,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 //   // Check if instruction is for me
 //   // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 //   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   //   fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
 //   //   fOpenHABDataStreamActive = true;
@@ -209,18 +209,18 @@ void mNextionPanel::parse_JSONCommand(void){
 //   // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
 //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/commands",sizeof("/commands")-1)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
 //     #endif
 //     isserviced += parsesub_Commands(obj);
 //   }else 
 //    // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
 //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
 //     #endif
 //     isserviced += parsesub_SetMulti(obj);
 //   }else{
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
 //   }  
   
   
@@ -302,7 +302,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 // //   // Check if instruction is for me
 // //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+// //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 // //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //       parsesub_TopicCheck_JSONCommand(obj);
 // //       return FUNCTION_RESULT_HANDLED_ID;
@@ -314,7 +314,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 // int8_t mNextionPanel::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
-//   AddLog_P(LOG_LEVEL_INFO,PSTR("mDoorBell::parsesub_TopicCheck_JSONCommand"));
+//   AddLog(LOG_LEVEL_INFO,PSTR("mDoorBell::parsesub_TopicCheck_JSONCommand"));
 
 //   uint8_t name_num=-1,state=-1;    
 
@@ -334,7 +334,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 //   // Check if instruction is for me
 //   // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/nextion")>=0){
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 //   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   //   fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
 //   //   fOpenHABDataStreamActive = true;
@@ -353,18 +353,18 @@ void mNextionPanel::parse_JSONCommand(void){
 //   // '[...]/device/command/page' -m '1' == nextionSendCmd("page 1")
 //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/commands",sizeof("/commands")-1)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "commands"));    
 //     #endif
 //     isserviced += parsesub_Commands(obj);
 //   }else 
 //    // '[...]/device/command/json' -m '["dim=5", "page 1"]' = nextionSendCmd("dim=50"), nextionSendCmd("page 1")
 //   if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/set_multi",sizeof("/set_multi")-1)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "set_multi"));    
 //     #endif
 //     isserviced += parsesub_SetMulti(obj);
 //   }else{
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "INVALID"));    
 //   }  
   
   
@@ -433,50 +433,50 @@ void mNextionPanel::parse_JSONCommand(void){
 
 //   char command_ctr[100]; memset(command_ctr,0,sizeof(command_ctr));
   
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_TOPIC "/commands"));    
 
 //     if(!obj["page"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "page"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "page"));    
 //       settings.page = obj["page"];
 //       sprintf(command_ctr,"page %d",settings.page);
 //       nextionSendCmd(command_ctr);
 //     }else
 //     if(!obj["command"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "command"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "command"));    
 //       const char* command = obj["command"];
 //       nextionSendCmd(command);
 //     }else
 //     if(!obj["statusupdate"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "statusupdate"));    
 //       uint8_t statusupdate = obj["statusupdate"];
 //       sprintf(command_ctr,"statusupdate %d",statusupdate);
 //       mqtthandler_settings_teleperiod.flags.SendNow = true;
 //     }else
 //     if(!obj["brightness"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
 //       uint8_t brightness = obj["brightness"];
 //       //nextionSetAttr("dim", String(brightness));
 //       //sprintf(command_ctr,"dims=%d",brightness);
 //       nextionSendCmd("dims=dim");
 //     }else
 //     if(!obj["lcdreboot"].isNull()){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
 //       uint8_t lcdreboot = obj["lcdreboot"];
 //       nextionReset();
 //     }else
 //     if(!obj["onoff"].isNull()){ 
 //       const char* onoff = obj["onoff"];
 //       if(strstr(onoff,"ON")){
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"onoff",D_ON);    
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"onoff",D_ON);    
 //         nextionSendCmd("dim=dims");
 //       }else
 //       if(strstr(onoff,"OFF")){
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));     
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));     
 //         nextionSendCmd("dims=dim");
 //         nextionSetAttr("dim", "0");
 //       }
 //     }else{
-//       AddLog_P(LOG_LEVEL_INFO,PSTR("ELSE FOUND"));
+//       AddLog(LOG_LEVEL_INFO,PSTR("ELSE FOUND"));
 //     }
 
 // }
@@ -487,7 +487,7 @@ void mNextionPanel::parse_JSONCommand(void){
 
 // int8_t mNextionPanel::parsesub_FlashMessage(){
 
-//   // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "%s"),"parsesub_FlashMessage");
 
 //   // #ifdef JSONDOCUMENT_STATIC
 //   //   StaticJsonDocument<800> doc;
@@ -496,7 +496,7 @@ void mNextionPanel::parse_JSONCommand(void){
 //   // #endif
 //   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 //   // if(error){
-//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
 //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
 //   //   return 0;
 //   // }
@@ -507,26 +507,26 @@ void mNextionPanel::parse_JSONCommand(void){
 
 //   // if(!obj["message"].isNull()){ 
 //   //   const char* messagectr = obj["message"];
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),"message",messagectr);
 //   //   sprintf(flash_message.message,"%s",messagectr);
 //   // }
 
 //   // if(!obj["time_secs"].isNull()){ 
 //   //   uint8_t time = obj["time_secs"];
 //   //   flash_message.cShowSeconds = time>60?60:time;
-//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"cShowSeconds",flash_message.cShowSeconds);
 //   // }
 
 //   // if(!obj["background_colour"].isNull()){ 
 //   //   uint32_t background_colour = obj["background_colour"];
 //   //   flash_message.background_colour = background_colour;
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"background_colour",background_colour);
 //   // }
 
 //   // if(!obj["font_colour"].isNull()){ 
 //   //   uint32_t font_colour = obj["font_colour"];
 //   //   flash_message.font_colour = font_colour;
-//   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),"font_colour",font_colour);
 //   // }
   
 

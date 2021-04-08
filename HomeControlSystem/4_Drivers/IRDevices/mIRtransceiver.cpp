@@ -4,17 +4,17 @@
 
 void mIRtransceiver::pre_init(void){
 
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("pre_init pCONT_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_pins->GetPin(GPIO_IRSEND]);
+  // AddLog(LOG_LEVEL_INFO,PSTR("pre_init pCONT_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_pins->GetPin(GPIO_IRSEND]);
 
   if (pCONT_pins->GetPin(GPIO_IRSEND_ID] < 99) {  // not set when 255
     pin = pCONT_pins->GetPin(GPIO_IRSEND_ID];
-    AddLog_P(LOG_LEVEL_INFO,PSTR("pin[GPIO_IRSEND] %d"),pin);
+    AddLog(LOG_LEVEL_INFO,PSTR("pin[GPIO_IRSEND] %d"),pin);
   }
   #ifdef CLIMATE_DHT1_PIN
     pin = CLIMATE_DHT1_PIN;
   #endif
   
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend init, Pin = %d"),pin);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend init, Pin = %d"),pin);
 
   pinMode(pin,OUTPUT);
 
@@ -25,7 +25,7 @@ void mIRtransceiver::TransmitCode(uint32_t code, uint8_t code_bits, uint8_t repe
   uint8_t pin_local = pin;
 
   if(pin_local<0){
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend NOT init, Pin = %d"),pin);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend NOT init, Pin = %d"),pin);
     return; // pin not set
   }
 
@@ -36,7 +36,7 @@ void mIRtransceiver::TransmitCode(uint32_t code, uint8_t code_bits, uint8_t repe
   }
 
   pinMode(pin_local,OUTPUT); //temp fix
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend init, pin_local = %d"),pin_local);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_IRR "IRSend init, pin_local = %d"),pin_local);
 
   uint16_t timetmp;
   #ifdef ESP32
@@ -189,7 +189,7 @@ void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int l
 //   irrecv->setUnknownThreshold(IR_RCV_MIN_UNKNOWN_SIZE);
 //   irrecv->enableIRIn();                  // Start the receiver
 
-//   //  AddLog_P(LOG_LEVEL_DEBUG, PSTR("IrReceive initialized"));
+//   //  AddLog(LOG_LEVEL_DEBUG, PSTR("IrReceive initialized"));
 // }
 
 // void IrReceiveCheck(void)

@@ -225,7 +225,7 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return; // not meant for here
@@ -244,7 +244,7 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 //   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
 //   // if(error){
-//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
 //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
 //   //   return 0;
 //   // }
@@ -253,12 +253,12 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 //   // if(!obj["command"].isNull()){ 
 //   //   const char* command = obj["command"];
 //   //   if(strstr(command,"system_send_all")){ 
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+//   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
 //   //     MQTTHandler_Set_fSendNow();
 //   //     isserviced++;
 //   //   }
 //   //   else{
-//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+//   //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
 //   //   }
 //   // }
 
@@ -298,7 +298,7 @@ int8_t mOilFurnace::Tasker(uint8_t function){
 
       #ifdef USE_MODULE_SENSORS_DS18B20
       if(pCONT->mus->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
-        //AddLog_P(LOG_LEVEL_TEST,PSTR("OilFurnace::isvalid"));
+        //AddLog(LOG_LEVEL_TEST,PSTR("OilFurnace::isvalid"));
         SubTask_CopyAveragedSensorValues();
         SubTask_UltraSonicAverageToOilTank();
         SubTask_CalculateOilVolume();
@@ -442,7 +442,7 @@ int8_t mOilFurnace::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parse_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
@@ -458,19 +458,19 @@ void mOilFurnace::parse_JSONCommand(JsonObjectConst obj){
   
   // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/manual",sizeof("/manual")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "manual"));    
   //   #endif
   //   isserviced += parsesub_ModeManual(obj);
   // }else
   // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/timers",sizeof("/programs/timers")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/timers"));    
   //   #endif
   //   isserviced += parsesub_ProgramTimers(obj);
   // }else
   // if(mSupport::memsearch(data_buffer.topic.ctr,data_buffer.topic.len,"/programs/temps",sizeof("/programs/temps")-1)>=0){
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_TOPIC "/programs/temps"));    
   //   #endif
   //   isserviced += parsesub_ProgramTemps(obj);
   // }
@@ -663,7 +663,7 @@ void mOilFurnace::WebSend_JSON_Table(AsyncWebServerRequest *request){
   request->send(200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);
     
   uint16_t freemem_used = freemem_start - ESP.getFreeHeap();
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_ASYNC WEB_HANLDE_JSON_WEB_TOP_BAR " Ef::%s=%d"),"freemem_used",freemem_used);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_ASYNC WEB_HANLDE_JSON_WEB_TOP_BAR " Ef::%s=%d"),"freemem_used",freemem_used);
   //freemem_usage.WebSend_JSON_WebServer_TopBar = freemem_used;
 
 } // end function

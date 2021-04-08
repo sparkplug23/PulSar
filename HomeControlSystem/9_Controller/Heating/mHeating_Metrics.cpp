@@ -206,12 +206,12 @@
 //     //   if((heating_device_relays[device_id].time_minutes_on>FAILSAFE_MINUTES_WARNING)&&(heating_device_relays[device_id].time_minutes_on<FAILSAFE_MINUTES_ERROR)){
 //     //     memset(tmpctr,0,sizeof(tmpctr));
 //     //     sprintf(tmpctr, "Warning, %s heating has been on for a long time of %d minutes",GetDeviceNameLongbyIDCtr(device_id),heating_device_relays[device_id].time_minutes_on);
-//     //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
+//     //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_WARNING "\"%s\""),tmpctr);
 //     //     fMessageToSend = true;
 //     //   }else if(heating_device_relays[device_id].time_minutes_on>FAILSAFE_MINUTES_ERROR){
 //     //     memset(tmpctr,0,sizeof(tmpctr));
 //     //     sprintf(tmpctr, "Error, %s heating has been on for too long. Turning off now.",GetDeviceNameLongbyIDCtr(device_id));
-//     //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
+//     //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_FAILSAFE D_ERROR "\"%s\""),tmpctr);
 //     //     fMessageToSend = true;
 //     //   }
 
@@ -290,7 +290,7 @@
 //   uint8_t log_level = LOG_LEVEL_INFO;//LOG_LEVEL_DEBUG;
 //   for(int device_id=0;device_id<DEVICE_ID_TOTAL;device_id++){
 //     if(program_timers[device_id].time_minutes_on){log_level = LOG_LEVEL_INFO;}
-//     AddLog_P(log_level, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "\"%s\" %d min"),GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),program_timers[device_id].time_minutes_on);
+//     AddLog(log_level, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "\"%s\" %d min"),GetDeviceNamebyIDCtr(device_id, buffer, sizeof(buffer)),program_timers[device_id].time_minutes_on);
 //   }
   
 //   uint8_t state_tmp = 0;
@@ -321,7 +321,7 @@
 //     //   SendMQTTAlertOnChangeofState(device_id,state_tmp);//device,new state
 //     // }
 
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING "activeprograms[%d].timers.state = %d"),device_id,
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING "activeprograms[%d].timers.state = %d"),device_id,
 //       activeprograms[device_id].timers.state);
     
 //   } // end for
@@ -456,7 +456,7 @@
 
 //           program_temps[device_id].schedule.untilontime = pCONT_time->GetDifferenceInDateTimes(&pCONT_time->RtcTime,&program_temps[device_id].schedule.ontime);
 
-//           AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
+//           AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "CheckBetween_Week_DateTimes [%d]"),fTimeReached);
 
 //           // uint8_t hours, minutes, seconds;
 //           // pCONT_time->DateTimeWeek2HHMMSS(&program_temps[device_id].schedule.untilontime,&hours,&minutes,&seconds);
@@ -496,7 +496,7 @@
 
 //           // Time checks - if we have hit max time on (INCLUDES maintain)
 //           if(program_temps[device_id].time_running.on > program_temps[device_id].time_running.limit){   
-//             AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
+//             AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
 //             program_temps[device_id].time_running.on = -1; //deactviate
 //             program_temps[device_id].time_maintaining.limit = -1;
 //           }else{ //stay on
@@ -507,8 +507,8 @@
 
 //           // Temp checks
 //           if(measured_temp >= program_temps[device_id].temp.desired){   
-//             AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] > Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
-//             AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Exceeded Set Point"));
+//             AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] > Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
+//             AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Exceeded Set Point"));
       
 //             // Check should we maintain temp (> minus 1, less than max)
 //             if((program_temps[device_id].time_maintaining.on>=0)&&(program_temps[device_id].time_maintaining.on < program_temps[device_id].time_maintaining.limit)){
@@ -518,7 +518,7 @@
 //             // Turn off
 //             else{
               
-//               AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "desired_count > desired_max"));
+//               AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "desired_count > desired_max"));
       
 //               program_temps[device_id].time_running.on = -2; // -1 is just not active, -2 is a freeze out that lasts one hour unless overriden
 //               program_temps[device_id].time_maintaining.limit = -1;
@@ -548,7 +548,7 @@
 
 //       }//if temp check
 //       else{ 
-//         AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] < Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
+//         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "Measured Temp [%f] < Set Temp [%f]"),measured_temp,program_temps[device_id].temp.desired);
 //       }
 //       // else{
 //       //   program_temps[device_id].status.mode = TEMP_MODE_OFF;
@@ -687,7 +687,7 @@
 
 //  // if(abs(millis()-tSavedHeatingProfiles)>60000){tSavedHeatingProfiles = millis();
 
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROFILES));
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROFILES));
             
 //     //MQQTSendHeatingProfile_Raw_IfChanged();
 
@@ -1534,7 +1534,7 @@
 //   // // if(data_buffer.payload.json_pairs>0){
 //   //   data_buffer.payload.len = measureJson(obj)+1;
 //   //   serializeJson(doc,data_buffer.payload.ctr);
-//   //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
+//   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATINGPANEL D_PAYLOAD " \"%s\""),data_buffer.payload.ctr);
 //   // // }
 
 //   return 0;// data_buffer.payload.len>3?1:0;
@@ -1561,7 +1561,7 @@
 
 // void mHeating::SetHeater(uint8_t device, uint8_t state){
 
-//   //AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
+//   //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
 
 //   // #ifdef ENABLE_MQTT_DEBUG_MESSAGES //debug_message/function 
 //   // pCONT_mqtt->Send_Prefixed_P(PSTR("debug_message/setheater"),PSTR("device=%d,state=%d"),device,state);
@@ -1809,7 +1809,7 @@
 //   // Check if instruction is for me
 //   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR)>=0){
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR));
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR));
 //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     parse_JSONCommand();
@@ -1830,7 +1830,7 @@
 //   JsonParserObject obj = parser.getRootObject();   
 //   if (!obj) { 
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+//     AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
 //     #endif// ENABLE_LOG_LEVEL_INFO
 //     return;
 //   }  
@@ -1849,7 +1849,7 @@
 //   if(jtok = obj[D_JSON_HEATING_DEVICE]){ 
 //     if(jtok.isStr()){
 //       if((device_id = GetDeviceIDbyName(jtok.getStr()))>=0){ // D_JSON_DEVICE
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HEATING_DEVICE)),device_id);
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HEATING_DEVICE)),device_id);
 //       }
 //     }else
 //     if(jtok.isNum()){
@@ -1864,7 +1864,7 @@
 //   if(jtok = obj[D_JSON_TIME_ON]){ 
 //     program_timers[device_id].time_minutes_on = jtok.getInt();
 //     program_timers[device_id].time_minutes_on_start = jtok.getInt();
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),program_timers[device_id].time_minutes_on);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),program_timers[device_id].time_minutes_on);
 //     functionhandler_programs_timers.flags.run_now = true;
 //     mqtthandler_program_timers_ifchanged.flags.SendNow = true;
 //     mqtthandler_program_timers_teleperiod.flags.SendNow = true;
@@ -1874,7 +1874,7 @@
 
 //   if(jtok = obj[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
 //     program_temps[device_id].time_running.limit = jtok.getInt();
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
 //     fForceHeatingTempUpdate = true;
 //     data_buffer.isserviced++;
 //   }
@@ -1883,7 +1883,7 @@
 // // //   // TEMP RELATED
 // // //   if(jtok = obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
 // // //     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-// // //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
+// // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
 // // //     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
 // // //     fForceHeatingTempUpdate = true;
 // // //     data_buffer.isserviced++;
@@ -1891,7 +1891,7 @@
 
 // // //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
 // // //   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-// // //   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+// // //   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
 // // //   //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
 // // //   //   fForceHeatingTempsUpdate = true;
 // // //   //   data_buffer.isserviced++;
@@ -1961,10 +1961,10 @@
 // //   uint8_t timeon,tempset;
 
 // //   if((device_id = GetDeviceIDbyName(obj[D_JSON_DEVICE]))>=0){
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+// //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
 // //     //Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
 // //   }else{
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
+// //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_NOMATCH));
 // //     //Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
 // //     return; // Unknown device, can't execute
 // //   }
@@ -1973,7 +1973,7 @@
 // //   // TEMP RELATED
 // //   if(jtok = obj[D_JSON_TEMP][D_JSON_SET].isNull()){ 
 // //     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
-// //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
+// //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
 // //     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
 // //     fForceHeatingTempUpdate = true;
 // //     data_buffer.isserviced++;
@@ -1981,7 +1981,7 @@
 
 // //   // if(jtok = obj[D_JSON_SCHEDULE][D_JSON_MODE].isNull()){ 
 // //   //   program_temps[device_id].schedule.mode_sch = GetScheduleModeIDByCtr(obj[D_JSON_SCHEDULE][D_JSON_MODE]);
-// //   //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
+// //   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_MODE,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
 // //   //   //Response_mP(S_JSON_COMMAND_SVALUE, D_SET,GetScheduleNameCtrbyID(program_temps[device_id].schedule.mode_sch));
 // //   //   fForceHeatingTempsUpdate = true;
 

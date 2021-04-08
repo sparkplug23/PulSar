@@ -36,11 +36,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR) "thresholdlimi
 
 #include "3_Network/MQTT/mMQTT.h"
 
-class mEnergy :
+class mEnergyInterface :
   public mTaskerInterface
 {
   public:
-    mEnergy(){};
+    mEnergyInterface(){};
     void Init(void);
     void pre_init(void);
     //#define D_MODULE_TOPIC_NAME "energy"
@@ -52,7 +52,7 @@ class mEnergy :
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){ return sizeof(mEnergy); };
+    uint16_t GetClassSize(){ return sizeof(mEnergyInterface); };
     #endif
 
     #ifndef MAX_ENERGY_SENSORS
@@ -141,9 +141,11 @@ class mEnergy :
 void WebAppend_Root_Draw_Table();
 void WebAppend_Root_Status_Table();
     
+    //phase out, in headers
     enum ENERGY_MODULE_ID{
       ENERGY_MODULE_NONE_ID = 0,
-      ENERGY_MODULE_PZEM004TV3_ID=5
+      // ENERGY_MODULE_PZEM004TV3_ID=5,
+      // EM_ENERGY_MODULE_ D_GROUP_MODULE_ENERGY_ADE7953_ID
     };
 
     
@@ -312,14 +314,14 @@ void Settings_Save();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mEnergy> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyInterface> mqtthandler_settings_teleperiod;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
-    struct handler<mEnergy> mqtthandler_sensor_ifchanged;
-    struct handler<mEnergy> mqtthandler_sensor_teleperiod;
+    struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;
+    struct handler<mEnergyInterface> mqtthandler_sensor_teleperiod;
     
-    struct handler<mEnergy> mqtthandler_thresholdlimits_ifchanged; //will contain alert status
-    struct handler<mEnergy> mqtthandler_thresholdlimits_teleperiod;
+    struct handler<mEnergyInterface> mqtthandler_thresholdlimits_ifchanged; //will contain alert status
+    struct handler<mEnergyInterface> mqtthandler_thresholdlimits_teleperiod;
     
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -331,8 +333,8 @@ void Settings_Save();
     };
 
     // const char* postfix_topic_energystats = "energystats";
-    struct handler<mEnergy> mqtthandler_energystats_ifchanged;
-    struct handler<mEnergy> mqtthandler_energystats_teleperiod;
+    struct handler<mEnergyInterface> mqtthandler_energystats_ifchanged;
+    struct handler<mEnergyInterface> mqtthandler_energystats_teleperiod;
   //#endif
 
 

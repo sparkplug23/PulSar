@@ -18,7 +18,7 @@ void mDoorSensor::pre_init(void){
     pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
     settings.fEnableSensor = true;
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
     //disable pir code
   }
 
@@ -26,7 +26,7 @@ void mDoorSensor::pre_init(void){
   //   pin_lock = pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID];
   //   pinMode(pin_lock,INPUT_PULLUP);
   // }else{
-  //   AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_lock);
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_lock);
   //   //disable pir code
   // }
 

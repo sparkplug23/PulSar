@@ -99,7 +99,7 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   if (pCONT_set->Settings.light_settings.type < LT_PWM6) {
     for (uint8_t i = 0; i < (pCONT_iLight->subtype - pCONT_iLight->settings.pwm_offset); i++) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
         cur_col = cur_col_10[i + pCONT_iLight->settings.pwm_offset]; //leak chance
         if(!pCONT_iLight->rgbcct_controller.isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max
          //val_1 = cur_col;

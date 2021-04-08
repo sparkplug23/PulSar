@@ -11,7 +11,7 @@ int8_t mRelays::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     parse_JSONCommand();
@@ -28,12 +28,12 @@ void mRelays::parse_JSONCommand(void){
   // Need to parse on a copy
   char parsing_buffer[data_buffer.payload.len+1];
   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  AddLog_P(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
+  AddLog(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
   JsonParser parser(parsing_buffer);
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
+    AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
     #endif// ENABLE_LOG_LEVEL_INFO
     return;
   }  
@@ -106,7 +106,7 @@ void mRelays::parse_JSONCommand(void){
     sprintf(rule_name, "RelayEnabled%d", ii);
       
 		if(jtok = obj[rule_name]){
-			AddLog_P(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
+			AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),rule_name);
 			SubCommandSet_EnabledTime(jtok.getObject(), ii);
 		}
 
@@ -192,7 +192,7 @@ void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
   relay_status[relay_id].timer_decounter.seconds = time_secs;
   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
   #endif
 }
 
@@ -207,7 +207,7 @@ void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
   // Only apply changes when state is changed
 void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " " D_JSON_COMMAND_NVALUE " " D_JSON_COMMAND_NVALUE)
     ,"CommandSet_Relay_Power","num",num,"state",state);  
 
 	// Check state if it needs to toggle result
@@ -216,16 +216,16 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
   
   //error patch  within vaible range
   if(!((num>=0)&&(num<=settings.relays_connected))){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " Command Invalid"),"CommandSet_Relay_Power");
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS D_FUNCTION_NAME_SVALUE " Command Invalid"),"CommandSet_Relay_Power");
     return;
   }
 
   #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_SCHEDULE_CHECKS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"),
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"),
     settings.flags.enabled_relays_allowed_time_window_checks);
     
     
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
     
   // Add checks to see if relay is restricted from controls (locked by time)
   // flag to enable these checks

@@ -274,8 +274,8 @@ uint32_t timeout = millis();
 
     // if(mTime::TimeReached(&timeout, 2000)){
       
-    //     AddLog_P(LOG_LEVEL_TEST,PSTR(" Forced blocked loop timeout!!") );
-    //     AddLog_P(LOG_LEVEL_TEST,PSTR(" LocationTO: ") );
+    //     AddLog(LOG_LEVEL_TEST,PSTR(" Forced blocked loop timeout!!") );
+    //     AddLog(LOG_LEVEL_TEST,PSTR(" LocationTO: ") );
     //     // // if (fix.valid.location) {
     //       DEBUG_PORT.print( fixcpp.dateTime.seconds);
 
@@ -332,7 +332,7 @@ uint32_t timeout = millis();
       //  averaging_data[1];
 
         // Serial.print( millis() );
-        // AddLog_P(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
+        // AddLog(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
         // // // if (fix.valid.location) {
         //   DEBUG_PORT.print( fixcpp.latitude(), 6 );
         //   DEBUG_PORT.print( ',' );
@@ -417,7 +417,7 @@ uint32_t timeout = millis();
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //       parse_JSONCommand(obj);
 //       return FUNCTION_RESULT_HANDLED_ID;
@@ -656,8 +656,8 @@ void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     //   speed=0; //default off
 //     // }      
 //     // SetFanSpeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -731,7 +731,7 @@ void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // void mGPS::WebCommand_Parse(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
 
 //   char tmp[100];
 
@@ -749,9 +749,9 @@ void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     test_val = arg_value;
 
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //       analogWrite(pin, test_val);
-//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     // SetRefreshLEDs();
 //   }
 

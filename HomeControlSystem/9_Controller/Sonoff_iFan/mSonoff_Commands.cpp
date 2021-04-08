@@ -8,7 +8,7 @@ int8_t mSonoffIFan::CheckAndExecute_JSONCommands(){
   // Check if instruction is for me
   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
     
@@ -33,7 +33,7 @@ void mSonoffIFan::parse_JSONCommand(void){
   JsonParserObject obj = parser.getRootObject();   
   if (!obj) { 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
     #endif //ENABLE_LOG_LEVEL_COMMANDS
     return;
   }  
@@ -53,7 +53,7 @@ void mSonoffIFan::parse_JSONCommand(void){
     }else{
       SetLightState(light);      
     }
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
     // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPOWER,D_TOGGLE);
   
   }
@@ -66,8 +66,8 @@ void mSonoffIFan::parse_JSONCommand(void){
       speed=0; //default off
     }      
     SetFanSpeed(speed, false);
-    AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+    AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
   
   }
@@ -87,7 +87,7 @@ void mSonoffIFan::parse_JSONCommand(void){
   //     data_buffer.isserviced++;
   //   }
   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
   
@@ -106,7 +106,7 @@ void mSonoffIFan::parse_JSONCommand(void){
   //     data_buffer.isserviced++;
   //   }
   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
   
@@ -128,14 +128,14 @@ void mSonoffIFan::parse_JSONCommand(void){
 
 //   analogWrite(pin, value);
 
-// AddLog_P(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
+// AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
 
 
 // //   char buffer[20];
 // //   pCONT_set->Settings.light_settings.type = value;
 // //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog_P(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
 // //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 // } 
 // int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
@@ -170,8 +170,8 @@ void mSonoffIFan::parse_JSONCommand(void){
 //     analogWrite(pin,set_fan_pwm);
 
 //     // SetFanspeed(speed, false);
-//     AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
+//     AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed TEST=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANPWM,set_fan_pwm);
 //     Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANPWM,set_fan_pwm);
 //     // isserviced++;
 //   }

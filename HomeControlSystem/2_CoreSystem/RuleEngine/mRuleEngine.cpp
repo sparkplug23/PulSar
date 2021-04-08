@@ -21,7 +21,7 @@ const char* mRuleEngine::PM_MODULE_CORE_RULES_FRIENDLY_CTR = D_MODULE_CORE_RULES
 
 int8_t mRuleEngine::Tasker(uint8_t function){
 
-    // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT ));
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT ));
 
   int8_t function_result = 0;
   
@@ -29,6 +29,9 @@ int8_t mRuleEngine::Tasker(uint8_t function){
   switch(function){
     case FUNC_PRE_INIT:
     //   Pre_Init();
+    break;
+    case FUNC_INIT:
+      DefaultRuleForModule();
     break;
   }
 
@@ -64,9 +67,10 @@ int8_t mRuleEngine::Tasker(uint8_t function){
     // case FUNC_LOOP: 
     //   EveryLoop();
     // break;  
-    // case FUNC_EVERY_SECOND:
-    //   AddLog_P(LOG_LEVEL_TEST, PSTR("Read"));   
-    // break;
+    case FUNC_EVERY_SECOND:
+      // AddLog(LOG_LEVEL_TEST, PSTR("DefaultRuleForModule"));   
+      // DefaultRuleForModule();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -114,23 +118,23 @@ int8_t mRuleEngine::Tasker(uint8_t function){
 void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 
+  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface function_input%d"),function_input);
 //maybe need to return rule(s) handled then leave taasker_interface
 
 
-  for (int rule_index=0;rule_index<2;rule_index++){
+  for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++){
 
     // Check this rule must act of the function
     if(rules[rule_index].trigger.function_id == function_input){
 
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface rule%d"),rule_index);
+      AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface rule%d"),rule_index);
 
       rules_active_index = rule_index;
 
       // Also check switch_index against rule index
       if(rules[rule_index].trigger.device_id == event_triggered.device_id){
-        AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED Event.index rule%d"),event_triggered.device_id);
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
-        
+        AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Event.index rule%d"),event_triggered.device_id);
+        AddLog(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
         
       // char message[50];
       // memset(message,0,sizeof(message));
@@ -143,7 +147,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           true  // runnig a rule, so don't call this loop back into this function
         );
 
-        AddLog_P(LOG_LEVEL_TEST, PSTR("Tasker_Interface(%d,%d,%d)"),
+        AddLog(LOG_LEVEL_TEST, PSTR("Tasker_Interface(%d,%d,%d)"),
           rules[rule_index].command.function_id, // function the previous trigger is linked to
           rules[rule_index].command.module_id, //target module
           true  // runnig a rule, so don't call this loop back into this function
@@ -161,7 +165,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           ); 
           data_buffer.payload.len += strlen(data_buffer.payload.ctr);
 
-          AddLog_P(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
+          AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
 
           pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
         }
@@ -173,6 +177,37 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
   }
  
+}
+
+
+void mRuleEngine::DefaultRuleForModule(){
+
+// #ifndef USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
+rules_active_index = 0;
+
+#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
+  if(pCONT_set->Settings.module == MODULE_SONOFF_IFAN03_ID){
+    DefaultRule_Sonoff_iFan03();
+  }else
+#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+#ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+  if(pCONT_set->Settings.module == MODULE_SHELLY_DIMMER2_ID){
+    DefaultRule_Shelly_Dimmer2();
+  }else
+#endif // USE_MODULE_TEMPLATE_SHELLY_DIMMER2
+#ifdef USE_MODULE_TEMPLATE_SHELLY_2P5
+  if(pCONT_set->Settings.module == MODULE_SHELLY2P5_ID){
+    DefaultRule_Shelly_2p5();
+  }
+#endif // USE_MODULE_TEMPLATE_SHELLY_2P5
+
+
+
+
+
+
+// #endif // USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
+
 }
 
 
@@ -190,6 +225,10 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
     for(uint8_t id=0;id<2;id++){
 
         sprintf(name, "Rule%d", id);
+
+      JBI->Level_Start("Settings");
+        JBI->Add("Default",settings.loaded_default_for_moduled);
+      JBI->Level_End();
 
       JsonBuilderI->Level_Start_P(name);//pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
 

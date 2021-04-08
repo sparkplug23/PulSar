@@ -2,6 +2,7 @@
 #define _MODULE_POWERMETER_H 0.1
 
 #define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID    131
+#define D_GROUP_MODULE_ENERGY_PZEM004T_ID      2
 
 #include "1_TaskerManager/mTaskerManager.h"
 // #include "2_CoreSystem/mBaseConfig.h"
@@ -10,9 +11,9 @@
 // #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 // #include "2_CoreSystem/mSystemConfig.h"
 
-// // #define USE_MODULE_ENERGY_PZEM004T_MODBUS
+// // #define USE_MODULE_ENERGY_PZEM004T_V3
 
-#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
+#ifdef USE_MODULE_ENERGY_PZEM004T_V3
 
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
@@ -20,11 +21,11 @@
 // #include "1_TaskerManager/mTaskerManager.h"
 
 
-class mPzem_AC :
+class mEnergyPZEM004T :
   public mTaskerInterface
 {
   public:
-	  mPzem_AC(){};
+	  mEnergyPZEM004T(){};
     void Pre_Init(void);
     void Init(void);
     bool parse_Command();
@@ -38,7 +39,7 @@ class mPzem_AC :
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
-      return sizeof(mPzem_AC);
+      return sizeof(mEnergyPZEM004T);
     };
     #endif
 
@@ -115,10 +116,10 @@ class mPzem_AC :
     void MQTTHandler_Set_TelePeriod();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mPzem_AC> mqtthandler_settings_teleperiod;
+    struct handler<mEnergyPZEM004T> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mPzem_AC> mqtthandler_sensor_ifchanged;
-    struct handler<mPzem_AC> mqtthandler_sensor_teleperiod;
+    struct handler<mEnergyPZEM004T> mqtthandler_sensor_ifchanged;
+    struct handler<mEnergyPZEM004T> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers

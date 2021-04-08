@@ -701,7 +701,7 @@ void mSupport::CmndRestart(void)
   //   CmndBlockedLoop();
   //   break;
   // case 99:
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
   //   EspRestart();
   //   break;
   // default:
@@ -1895,7 +1895,7 @@ void mSupport::CmndRestart(void)
 // #ifdef USE_I2C
 // void CmndI2cScan(void)
 // {
-//   if (i2c_flg) {
+//   if (i2c_enabled) {
 //     I2cScan(mqtt_data, sizeof(mqtt_data));
 //   }
 // }
@@ -1961,7 +1961,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 
 //   if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); }
 
-//   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
  
 //   // if (XdrvMqttData(topicBuf, sizeof(topicBuf), dataBuf, sizeof(dataBuf))) { return; }
 
@@ -1995,7 +1995,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     type[i] = '\0';
 //   }
 
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
 //     D_COMMAND " %s, " D_DATA " %s"),
 //    grpflg, index, type, dataBuf);
 
@@ -2024,7 +2024,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 
   //if(strstr(type,"mrgbanimator_pixels_scene_hue")){
   // if(strstr(type, D_WEBARG_SCENE_HUE)){
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_PARSING_MATCHED D_WEBARG_SCENE_HUE));
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RESULT D_PARSING_MATCHED D_WEBARG_SCENE_HUE));
   
   //   Serial.println("if(strstr(type,\"mrgbanimator_pixels_scene_hue\")){");
   //   // Fill mqtt with command, then set data waiting    
@@ -2176,7 +2176,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         Response_P(S_JSON_COMMAND_SVALUE, command, D_JSON_RESTARTING);
 //         break;
 //       case 99:
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
 //         EspRestart();
 //         break;
 //       default:
@@ -3042,7 +3042,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //       Response_P(S_JSON_COMMAND_SVALUE, command, stemp1);
 //     }
 // #ifdef USE_I2C
-//     else if ((CMND_I2CSCAN == command_code) && i2c_flg) {
+//     else if ((CMND_I2CSCAN == command_code) && i2c_enabled) {
 //       I2cScan(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 //     }
 // #endif  // USE_I2C

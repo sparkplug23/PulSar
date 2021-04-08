@@ -27,17 +27,17 @@ void mButtons::ButtonInvertFlag(uint8 button_bit)
 void mButtons::ButtonInit(void)
 {
   
-  AddLog_P(LOG_LEVEL_INFO, PSTR("ButtonInit"));
+  AddLog(LOG_LEVEL_INFO, PSTR("ButtonInit"));
 
   buttons_found = 0;
   for (uint8_t i = 0; i < MAX_KEYS; i++) {
     if (pCONT_pins->PinUsed(GPIO_KEY1_ID,i)) {
       buttons_found++;
-      AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
+      AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
       pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID,i), 
         bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
         
-      AddLog_P(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
+      AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
       bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
       );
 
@@ -81,7 +81,7 @@ void mButtons::ButtonHandler(void)
     
     return; } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
 
-  uint8_t button = NOT_PRESSED;
+  uint8_t button = BUTTON_NOT_PRESSED_ID;
   uint8_t button_present = 0;
   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;            // Extent hold time factor in case of iminnent Reset command
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.button_debounce;
@@ -90,15 +90,15 @@ void mButtons::ButtonHandler(void)
  uint8_t maxdev = (pCONT_set->devices_present > MAX_KEYS) ? MAX_KEYS : pCONT_set->devices_present;
  for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
    
-    button = NOT_PRESSED;
+    button = BUTTON_NOT_PRESSED_ID;
     button_present = 0;
 
   // Serial.println("mButtons::ButtonHandler");
     // if (!button_index && ((MODULE_SONOFF_DUAL == my_module_type) || (MODULE_CH4 == my_module_type))) {
     //   button_present = 1;
     //   if (dual_button_code) {
-    //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON " " D_CODE " %04X"), dual_button_code);
-    //     button = PRESSED;
+    //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON " " D_CODE " %04X"), dual_button_code);
+    //     button = BUTTON_PRESSED_ID;
     //     if (0xF500 == dual_button_code) {                      // Button hold
     //       holdbutton[button_index] = (loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) -1;
     //       hold_time_extent = 1;
@@ -112,7 +112,7 @@ void mButtons::ButtonHandler(void)
       }
     // }
 
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("button=%d"),button);
+    // AddLog(LOG_LEVEL_TEST, PSTR("button=%d"),button);
 
     if (button_present) {
       
@@ -121,38 +121,41 @@ void mButtons::ButtonHandler(void)
       // }
       // else 
       {
-      if ((PRESSED == button) && (NOT_PRESSED == lastbutton[button_index])) {
+      if ((BUTTON_PRESSED_ID == button) && (BUTTON_NOT_PRESSED_ID == lastbutton[button_index])) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-          AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
           //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
             mqtthandler_sensor_ifchanged.flags.SendNow = true;
             // Type method
-            // AddLog_P(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
+            // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
             // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
-            // AddLog_P(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
+            // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
 
 
-            #ifdef USE_MODULE_DRIVERS_RELAY
-              pCONT_mry->ExecuteCommandPower(button_index, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
-      
-              // #ifdef ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS
-              //   AddLog_P(LOG_LEVEL_ERROR,PSTR("ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS=%d"),1000);
-              //   delay(1000);
-              // #endif
+            // #ifdef USE_MODULE_DRIVERS_RELAY
+            //   pCONT_mry->ExecuteCommandPower(button_index, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
+            //   // #ifdef ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS
+            //   //   AddLog(LOG_LEVEL_ERROR,PSTR("ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS=%d"),1000);
+            //   //   delay(1000);
+            //   // #endif
+            // #endif
 
-            #endif
+            #ifdef USE_MODULE_CORE_RULES
+            pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,button);
+            pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
+            #endif // USE_MODULE_CORE_RULES
 
           //}
         // } else {
         //   multipress[button_index] = (multiwindow[button_index]) ? multipress[button_index] +1 : 1;
-        //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, multipress[button_index]);
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, multipress[button_index]);
         //   multiwindow[button_index] = loops_per_second / 2;  // 0.5 second multi press window
         // }
         // blinks = 201;
       }
 
 //held buttons
-      if (NOT_PRESSED == button) {
+      if (BUTTON_NOT_PRESSED_ID == button) {
         holdbutton[button_index] = 0;
       } else {
         holdbutton[button_index]++;

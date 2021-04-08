@@ -60,12 +60,12 @@ int8_t mSupport::Tasker(uint8_t function){
 
 //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
   // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
-    AddLog_P(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
+    AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
     pCONT_set->RtcReboot.fast_reboot_count = 0;
     pCONT_set->RtcRebootSave();
     pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
     #endif// ENABLE_LOG_LEVEL_INFO
   // }
 
@@ -146,7 +146,7 @@ void mSupport::ArduinoOTAInit(void)
       // #endif  // USE_MODULE_NETWORK_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
     // #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
     // #endif// ENABLE_LOG_LEVEL_INFO
     // #endif
     arduino_ota_triggered = true;
@@ -198,7 +198,7 @@ void mSupport::ArduinoOTAInit(void)
         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
     }
     //#ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
     //#endif
     
     ESP.restart(); //should only reach if the first failed
@@ -207,7 +207,7 @@ void mSupport::ArduinoOTAInit(void)
   ArduinoOTA.onEnd([this]()
   {
     //#ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
     //#endif
     ESP.restart();
 	});
@@ -216,7 +216,7 @@ void mSupport::ArduinoOTAInit(void)
   ota_init_success = true;
   
    // #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
   //#endif
 }
 
@@ -318,7 +318,7 @@ void mSupport::init_FirmwareVersion(){
   //   snprintf_P(pCONT_set->my_version, sizeof(pCONT_set->my_version), PSTR("%s.%d"), pCONT_set->my_version, PROJECT_VERSION & 0xff);
   // }
 
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_version=%s"),pCONT_set->my_version);
 //DEBUG_PRINTF("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
 
   // Version Current
@@ -357,12 +357,12 @@ void mSupport::init_FirmwareVersion(){
 
 
   //DEBUG_PRINTF("firmware_version.current = %s\n\r",firmware_current);
-  // AddLog_P(LOG_LEVEL_INFO,PSTR("firmware_version.current = %s"),firmware_current);
+  // AddLog(LOG_LEVEL_INFO,PSTR("firmware_version.current = %s"),firmware_current);
 
   // char code_image[20];
   // snprintf_P(pCONT_set->my_image, sizeof(pCONT_set->my_image), PSTR("(%s)"), 
   //   GetTextIndexed_P(code_image, sizeof(code_image), CODE_IMAGE, kCodeImage));
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("pCONT_set->my_image=%s,CODE_IMAGE=%s"),pCONT_set->my_image,"CODE_IMAGE",CODE_IMAGE);
 
   // Serial.flush();
 
@@ -532,10 +532,10 @@ int16_t mSupport::FindNearestValueIndexUInt8(uint8_t* tosearch, uint8_t tosearch
   //quick check
   for(int i=0;i<tosearch_len;i++){
     if(tosearch[i]==tofind){
-      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      //AddLog(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
       return i; //return index
     }else{
-      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      //AddLog(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
     }
   }
 
@@ -562,10 +562,10 @@ int32_t mSupport::FindNearestValueIndexUInt16(uint16_t* tosearch, uint16_t tosea
   //quick check
   for(int i=0;i<tosearch_len;i++){
     if(tosearch[i]==tofind){
-      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      //AddLog(LOG_LEVEL_DEBUG,PSTR("if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
       return i; //return index
     }else{
-      //AddLog_P(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
+      //AddLog(LOG_LEVEL_DEBUG,PSTR("ELSE if(tosearch[i]==tofind) || %d==%d"),tosearch[i],i);
     }
   }
 
@@ -1645,7 +1645,7 @@ int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* ha
 
   // returns 
   if(p_start_of_found == NULL){
-      // AddLog_P(LOG_LEVEL_INFO,PSTR("p_start_of_found == NULL \n\r%s \n\r%s \n\r%s"),name_tofind,haystack);
+      // AddLog(LOG_LEVEL_INFO,PSTR("p_start_of_found == NULL \n\r%s \n\r%s \n\r%s"),name_tofind,haystack);
     return -1;
     // position = abs(haystack - p_start_of_found); // get the position
   }
@@ -1663,7 +1663,7 @@ int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* ha
     if(*read == '|'){
       delimeter_count++;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO,PSTR("%s\n\r found %s %d"),haystack,read,delimeter_count);
+      AddLog(LOG_LEVEL_INFO,PSTR("%s\n\r found %s %d"),haystack,read,delimeter_count);
     #endif// ENABLE_LOG_LEVEL_INFO
 
       //use this and check class ID, then use it to return device_id
@@ -1676,7 +1676,7 @@ int16_t mSupport::SearchForTextIndexedID(const char* name_tofind, const char* ha
 //strcasecmp
 // if(delimeter_count>0){
 
-      // AddLog_P(LOG_LEVEL_INFO,PSTR("class %d  device %d"),Settings.device_name_buffer.class_id[delimeter_count],Settings.device_name_buffer.device_id[delimeter_count]);
+      // AddLog(LOG_LEVEL_INFO,PSTR("class %d  device %d"),Settings.device_name_buffer.class_id[delimeter_count],Settings.device_name_buffer.device_id[delimeter_count]);
 // }
 
   return delimeter_count;
@@ -1908,7 +1908,7 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   }
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
+  AddLog(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
   #endif// ENABLE_LOG_LEVEL_INFO
 
   return state_number;
@@ -1947,7 +1947,7 @@ void mSupport::SetSerialBaudrate(int baudrate)
 void mSupport::ClaimSerial(void)
 {
   // serial_local = true;
-  // AddLog_P(LOG_LEVEL_INFO, PSTR("SNS: Hardware Serial"));
+  // AddLog(LOG_LEVEL_INFO, PSTR("SNS: Hardware Serial"));
   // SetSeriallog(LOG_LEVEL_NONE);
   // baudrate = Serial.baudRate();
   // Settings.baudrate = baudrate / 1200;
@@ -1984,7 +1984,7 @@ void mSupport::ShowSource(int source)
   if ((source > 0) && (source < SRC_MAX)) {
     char stemp1[20];
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
+    AddLog(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 }
@@ -2032,10 +2032,10 @@ void mSupport::SleepDelay(uint32_t mseconds) {
 
 void mSupport::PerformEverySecond(void)
 {
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("mSupport::PerformEverySecond"));
+  // AddLog(LOG_LEVEL_TEST, PSTR("mSupport::PerformEverySecond"));
   // pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
   // pCONT_sup->activity.loop_counter=0;
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
 
   ResetGlobalValues();
 
@@ -2229,7 +2229,7 @@ void mSupport::Handle_OTA_URLS()
 // #endif  // FIRMWARE_MINIMAL
 
 
-//           // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPLOAD "%s"), pCONT_set->data_buffer.payload.ctr);
+//           // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPLOAD "%s"), pCONT_set->data_buffer.payload.ctr);
 //           #ifdef ESP8266
 // #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
 //           ota_result = (HTTP_UPDATE_FAILED != ESPhttpUpdate.update(data_buffer.payload.ctr));
@@ -2344,7 +2344,7 @@ void mSupport::CheckResetConditions()
       pCONT_set->restart_flag--;
       if (pCONT_set->restart_flag <= 0) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
     #endif// ENABLE_LOG_LEVEL_INFO
         pCONT_wif->EspRestart();
       }
@@ -2373,7 +2373,7 @@ void mSupport::UpdateStatusBlink(){
 
     // Work out the led state based on time
     if (pCONT_set->restart_flag || pCONT_set->ota_state_flag) {                 // Overrule blinks and keep led lit
-      AddLog_P(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
+      AddLog(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
       pCONT_set->blinkstate = true;                                  // Stay lit
     } else {
       pCONT_set->blinkspeed--; // based of multiples of 200ms
@@ -2413,7 +2413,7 @@ void mSupport::UpdateStatusBlink(){
 
   DEBUG_LINE;
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
   //   #endif// ENABLE_LOG_LEVEL_INFO
 
 }
@@ -2570,260 +2570,6 @@ float mSupport::FastPrecisePowf(const float x, const float y)
 
 
 
-/*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
- * Basic I2C routines
- *********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************
-*********************************************************************************************/
-
-#ifdef USE_I2C
-
-bool mSupport::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
-{
-  uint8_t x = I2C_RETRY_COUNTER;
-
-  i2c_buffer = 0;
-  do {
-    wire->beginTransmission(addr);                       // start transmission to device
-    wire->write(reg);                                    // sends register address to read from
-    if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
-      wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
-      if (wire->available() == size) {
-        for (uint8_t i = 0; i < size; i++) {
-          i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
-        }
-      }
-    }
-    x--;
-  } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
-  return (x);
-}
-
-bool mSupport::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
-{
-  bool status = I2cValidRead(addr, reg, 1);
-  *data = (uint8_t)i2c_buffer;
-  return status;
-}
-
-bool mSupport::I2cValidRead16(uint16_t *data, uint8_t addr, uint8_t reg)
-{
-  bool status = I2cValidRead(addr, reg, 2);
-  *data = (uint16_t)i2c_buffer;
-  return status;
-}
-
-bool mSupport::I2cValidReadS16(int16_t *data, uint8_t addr, uint8_t reg)
-{
-  bool status = I2cValidRead(addr, reg, 2);
-  *data = (int16_t)i2c_buffer;
-  return status;
-}
-
-bool mSupport::I2cValidRead16LE(uint16_t *data, uint8_t addr, uint8_t reg)
-{
-  uint16_t ldata;
-  bool status = I2cValidRead16(&ldata, addr, reg);
-  *data = (ldata >> 8) | (ldata << 8);
-  return status;
-}
-
-bool mSupport::I2cValidReadS16_LE(int16_t *data, uint8_t addr, uint8_t reg)
-{
-  uint16_t ldata;
-  bool status = I2cValidRead16LE(&ldata, addr, reg);
-  *data = (int16_t)ldata;
-  return status;
-}
-
-bool mSupport::I2cValidRead24(int32_t *data, uint8_t addr, uint8_t reg)
-{
-  bool status = I2cValidRead(addr, reg, 3);
-  *data = i2c_buffer;
-  return status;
-}
-
-uint8_t mSupport::I2cRead8(uint8_t addr, uint8_t reg)
-{
-  I2cValidRead(addr, reg, 1);
-  return (uint8_t)i2c_buffer;
-}
-
-uint16_t mSupport::I2cRead16(uint8_t addr, uint8_t reg)
-{
-  I2cValidRead(addr, reg, 2);
-  return (uint16_t)i2c_buffer;
-}
-
-int16_t mSupport::I2cReadS16(uint8_t addr, uint8_t reg)
-{
-  I2cValidRead(addr, reg, 2);
-  return (int16_t)i2c_buffer;
-}
-
-uint16_t mSupport::I2cRead16LE(uint8_t addr, uint8_t reg)
-{
-  I2cValidRead(addr, reg, 2);
-  uint16_t temp = (uint16_t)i2c_buffer;
-  return (temp >> 8) | (temp << 8);
-}
-
-int16_t mSupport::I2cReadS16_LE(uint8_t addr, uint8_t reg)
-{
-  return (int16_t)I2cRead16LE(addr, reg);
-}
-
-int32_t mSupport::I2cRead24(uint8_t addr, uint8_t reg)
-{
-  I2cValidRead(addr, reg, 3);
-  return i2c_buffer;
-}
-
-
-
-bool mSupport::I2cWrite(uint8_t addr, uint8_t reg, uint32_t val, uint8_t size)
-{
-  uint8_t x = I2C_RETRY_COUNTER;
-
-  do {
-    wire->beginTransmission((uint8_t)addr);              // start transmission to device
-    wire->write(reg);                                    // sends register address to write to
-    uint8_t bytes = size;
-    while (bytes--) {
-      wire->write((val >> (8 * bytes)) & 0xFF);          // write data
-    }
-    x--;
-  } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
-  return (x);
-}
-
-bool mSupport::I2cWrite8(uint8_t addr, uint8_t reg, uint16_t val)
-{
-   return I2cWrite(addr, reg, val, 1);
-}
-
-bool mSupport::I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val)
-{
-   return I2cWrite(addr, reg, val, 2);
-}
-
-int8_t mSupport::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
-{
-  wire->beginTransmission((uint8_t)addr);
-  wire->write((uint8_t)reg);
-  wire->endTransmission();
-  if (len != wire->requestFrom((uint8_t)addr, (uint8_t)len)) {
-    return 1;
-  }
-  while (len--) {
-    *reg_data = (uint8_t)wire->read();
-    reg_data++;
-  }
-  return 0;
-}
-
-int8_t mSupport::I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
-{
-  wire->beginTransmission((uint8_t)addr);
-  wire->write((uint8_t)reg);
-  while (len--) {
-    wire->write(*reg_data);
-    reg_data++;
-  }
-  wire->endTransmission();
-  return 0;
-}
-
-void mSupport::I2cScan(char *devs, unsigned int devs_len)
-{
-  // Return error codes defined in twi.h and core_esp8266_si2c.c
-  // I2C_OK                      0
-  // I2C_SCL_HELD_LOW            1 = SCL held low by another device, no procedure available to recover
-  // I2C_SCL_HELD_LOW_AFTER_READ 2 = I2C bus error. SCL held low beyond slave clock stretch time
-  // I2C_SDA_HELD_LOW            3 = I2C bus error. SDA line held low by slave/another_master after n bits
-  // I2C_SDA_HELD_LOW_AFTER_INIT 4 = line busy. SDA again held low by another device. 2nd master?
-
-  uint8_t error = 0;
-  uint8_t address = 0;
-  uint8_t any = 0;
-
-  snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_DEVICES_FOUND_AT));
-  for (address = 1; address <= 127; address++) {
-    wire->beginTransmission(address);
-    error = wire->endTransmission();
-    if (0 == error) {
-      any = 1;
-      snprintf_P(devs, devs_len, PSTR("%s 0x%02x"), devs, address);
-    }
-    else if (error != 2) {  // Seems to happen anyway using this scan
-      any = 2;
-      // snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
-      break;
-    }
-  }
-  if (any) {
-    strncat(devs, "\"}", devs_len - strlen(devs) -1);
-  }
-  else {
-    snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
-  }
-}
-
-bool mSupport::I2cDevice(uint8_t addr)
-{
-
-  
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-
-  for (uint8_t address = 1; address <= 127; address++) {
-      AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
-    wire->beginTransmission(address);
-    if (!wire->endTransmission() && (address == addr)) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=true"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-      return true;
-    }else
-    if (!wire->endTransmission() && (address != addr)){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x) also found %x"),address,addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    }
-  }
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-  return false;
-}
-#endif  // USE_I2C
-
 
 
 
@@ -2834,7 +2580,7 @@ void mSupport::parse_JSONCommand(){
   // Check if instruction is for me
   if(mSearchCtrIndexOf(data_buffer.topic.ctr,"set/system")>=0){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CORE_SUPPORT_FRIENDLY_CTR));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CORE_SUPPORT_FRIENDLY_CTR));
     #endif// ENABLE_LOG_LEVEL_INFO
     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
@@ -2849,19 +2595,19 @@ void mSupport::parse_JSONCommand(){
 
   // if(obj.containsKey("resetcounter")){
   //   uint8_t val = obj["resetcounter"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
   //   pCONT_time->ResetRebootCounter();
   //   data_buffer.isserviced++;
   // }else
   // if(obj.containsKey("loglevel")){
   //   const char* name = obj["loglevel"];
-  //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
   //   pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
   //   // Add save log here
   //   data_buffer.isserviced++;
   // }
   // else{
-  //    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
+  //    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
   // }
   
 
@@ -2895,7 +2641,7 @@ void mSupport::parse_JSONCommand(){
   //       snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_SVALUE, command, D_JSON_RESTARTING);
   //       break;
   //     case 99:
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
   //       EspRestart();
   //       break;
   //     default:
@@ -2940,7 +2686,7 @@ void mSupport::parse_JSONCommand(){
 
 // void mSupport::parse_SyncRefresh(){
 //   //DISABLED UNTIL NEW SYNC METHOD/FLAG SYSTEM IS ESTABLISHED
-//       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_ERROR_UNSUPPORTED));
+//       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_ERROR_UNSUPPORTED));
 //   // if((mSupport::memsearch(data_buffer.payload.ctr, data_buffer.payload.len,"refresh",sizeof("refresh")-1))>=0){ pCONT->mso->MessagePrint("MATCHED refresh");
 //   //   //fSendAllData = true;
 //   // }
@@ -3092,17 +2838,17 @@ void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
     }
   }
-#ifdef USE_BUZZER
-  if (led == 0) {
-    BuzzerSetStateToLed(state);
-  }
-#endif // USE_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER
+//   if (led == 0) {
+//     BuzzerSetStateToLed(state);
+//   }
+// #endif // USE_MODULE_DRIVERS_BUZZER
 }
 
 void mSupport::SetLedPower(uint32_t state)
 {
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
     #endif// ENABLE_LOG_LEVEL_INFO
   // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
   //   SetLedPowerIdx(0, state);
@@ -3126,21 +2872,21 @@ void mSupport::SetLedPowerAll(uint32_t state)
 void mSupport::SetLedLink(uint32_t state)
 {
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
     #endif// ENABLE_LOG_LEVEL_INFO
 
-  // uint32_t led_pin = pCONT_pins->GetPin(GPIO_LEDLNK_ID);
-  // uint32_t led_inv = pCONT_set->ledlnk_inverted;
-  // if (99 == led_pin) {                    // Legacy - LED1 is status
-  //   SetLedPowerIdx(0, state);
-  // }
-  // else if (led_pin < 99) {
-  //   if (state) { state = 1; }
-  //   digitalWrite(led_pin, (led_inv) ? !state : state);
-  // }
-#ifdef USE_BUZZER
-  BuzzerSetStateToLed(state);
-#endif // USE_BUZZER
+  uint32_t led_pin = pCONT_pins->GetPin(GPIO_LED1_ID);
+  uint32_t led_inv = pCONT_set->ledlnk_inverted;
+  if (99 == led_pin) {                    // Legacy - LED1 is status
+    SetLedPowerIdx(0, state);
+  }
+  else if (led_pin < 99) {
+    if (state) { state = 1; }
+    digitalWrite(led_pin, (led_inv) ? !state : state);
+  }
+// #ifdef USE_MODULE_DRIVERS_BUZZER
+//   BuzzerSetStateToLed(state);
+// #endif // USE_MODULE_DRIVERS_BUZZER
 }
 
 
@@ -3276,7 +3022,7 @@ void mSupport::DebugFreeMem(void)
   register uint32_t *sp asm("a1");
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d"), 
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "FreeRam %d, FreeStack %d"), 
       ESP.getFreeHeap(), 4 * (sp - g_pcont->stack));
     #endif// ENABLE_LOG_LEVEL_INFO
 }

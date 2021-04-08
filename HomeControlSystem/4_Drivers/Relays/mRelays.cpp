@@ -111,7 +111,7 @@ int8_t mRelays::Tasker(uint8_t function){
     break;
     case FUNC_SET_POWER_ON_ID:
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
-    break;     
+    break;    
     /************
      * RULES SECTION * 
     *******************/
@@ -177,7 +177,7 @@ void mRelays::RulesEvent_Set_Power(){
   // }rule_event_layout;
 
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
@@ -209,7 +209,7 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
     // Auto time off decounters
     if(relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(0, relay_id);
@@ -223,7 +223,7 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
       CommandSet_Relay_Power(1, relay_id);
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
       #endif
     }else{
       //assumed off ie == 0
@@ -334,7 +334,7 @@ void mRelays::WebAppend_Root_Status_Table(){
 const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
   DEBUG_LINE;
   if(device_id >= settings.relays_connected){ 
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_RELAYS "device_id >= settings.relays_connected %d %d"),device_id,settings.relays_connected);
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_RELAYS "device_id >= settings.relays_connected %d %d"),device_id,settings.relays_connected);
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
@@ -352,7 +352,7 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
   char buffer_internal[50];
   sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal, sizeof(buffer_internal)), onoffctr);
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
 
   return buffer;
 }
@@ -366,15 +366,15 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   int8_t class_id = EM_MODULE_DRIVERS_RELAY_ID;
 
   int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,device_id,class_id);
-  AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+  AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
   // show options
   if(device_id_found == -1){
     // for(int ii=0;ii<pCONT_set->GetDeviceNameCount(D_MODULE_DRIVERS_RELAY_ID);ii++){
-    //   AddLog_P(LOG_LEVEL_INFO, PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
+    //   AddLog(LOG_LEVEL_INFO, PSTR("GetDeviceIDbyName option #%d"),ii,pCONT_set->GetDeviceIDbyName(c,pCONT_set->Settings.device_name_buffer.name_buffer,&ii,&class_id));
     // }
-    AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\nsearching=%s"),c);
-    AddLog_P(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
+    AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\nsearching=%s"),c);
+    AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\name_buffer = %s"),pCONT_set->Settings.device_name_buffer.name_buffer);
 
 
   }
@@ -441,7 +441,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
   pCONT_set->last_source = source;
   DEBUG_LINE;
   
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "SetDevicePower(%d,%d)"),rpower,source);
 
   if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {  // All on and stay on
     pCONT_set->power = (1 << pCONT_set->devices_present);// -1;
@@ -510,7 +510,7 @@ DEBUG_LINE;
 //       char remote_command[100];
 //       sprintf(remote_command,"{\"relay\":0,\"onoff\":2}");//,state_level);
 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
+//       AddLog(LOG_LEVEL_INFO, PSTR("Sending USE_VIRTUAL_REMOTE_URL_RELAY"));
 
 //       pCONT_mqtt->ppublish(remote_url,remote_command,false);
 
@@ -529,7 +529,7 @@ DEBUG_LINE;
     for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
-        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
         pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
 
         // #ifdef ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS // leave mums, work on another
@@ -542,7 +542,7 @@ DEBUG_LINE;
         // #endif
 
       }else{
-        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "ELSE i=%d,state=%d"),i,state);
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "ELSE i=%d,state=%d"),i,state);
       }
       rpower >>= 1;
     }
@@ -642,7 +642,7 @@ void mRelays::SetPowerOnState(void)
 
 
 // void mRelays::ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source){
-//   AddLog_P(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
+//   AddLog(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
 //   ExecuteCommandPower(device+1, state, source);
 // }
 
@@ -650,7 +650,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 {
 
 //device++; // I am using 0 index, tasmota used 1
-// AddLog_P(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device++\" index shift"));
+// AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device++\" index shift"));
 
 // device  = Relay number 1 and up
 // state 0 = POWER_OFF = Relay Off
@@ -675,7 +675,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 //   }
 // #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 
-  AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteCommandPower(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteCommandPower(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
 
   bool publish_power = true;
   if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
@@ -687,7 +687,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     // (device < 1) || 
   (device > pCONT_set->devices_present)) {
     device = 0;
-    AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS DEBUG_INSERT_PAGE_BREAK "device>1\tfall back to single relay"));
   }
   active_device = device;
 

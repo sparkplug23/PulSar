@@ -48,7 +48,7 @@ const char UFS_FORM_SDC_HREFdel[] PROGMEM =
 void UfsDirectory(void) {
   if (!HttpCheckPriviledgedAccess()) { return; }
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_MANAGE_FILE_SYSTEM));
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_MANAGE_FILE_SYSTEM));
 
   uint8_t depth = 0;
 
@@ -199,13 +199,13 @@ uint8_t UfsDownloadFile(char *file) {
   File download_file;
 
   if (!dfsp->exists(file)) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: File not found"));
+    AddLog(LOG_LEVEL_INFO, PSTR("UFS: File not found"));
     return 0;
   }
 
   download_file = dfsp->open(file, UFS_FILE_READ);
   if (!download_file) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: Could not open file"));
+    AddLog(LOG_LEVEL_INFO, PSTR("UFS: Could not open file"));
     return 0;
   }
 
@@ -261,7 +261,7 @@ uint8_t UfsDownloadFile(char *file) {
   download_file.close();
 
   if (UfsData.download_busy == true) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: Download is busy"));
+    AddLog(LOG_LEVEL_INFO, PSTR("UFS: Download is busy"));
     return 0;
   }
 

@@ -452,7 +452,7 @@ void mAnimatorLight::init_mixer_defaults(){
 
 
   mixer.enabled_mixer_count = EFFECTS_FUNCTION_MIXER_LENGTH_ID-1;//flasher_id;
-  AddLog_P(LOG_LEVEL_INFO, PSTR("enabled_mixer_count=%d"),mixer.enabled_mixer_count);
+  AddLog(LOG_LEVEL_INFO, PSTR("enabled_mixer_count=%d"),mixer.enabled_mixer_count);
 
 
 }
@@ -468,14 +468,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
 
     if(mixer.group[mixer.running_id].time_on_secs_decounter == 0){ 
       
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter =%d END %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter,sizeof(mixer));
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter =%d END %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter,sizeof(mixer));
 
       uint8_t new_group_found = false;
       mqtthandler_mixer_teleperiod.flags.SendNow = true;
       
       if(mixer.running_id++>=EFFECTS_FUNCTION_MIXER_LENGTH_ID){ // greater or "EQUAL", needed as its moving index before using it again
         
-           AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "mixer was %d|%d, reseting %d"),mixer.running_id,mixer.enabled_mixer_count,EFFECTS_FUNCTION_MIXER_01_ID);
+           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "mixer was %d|%d, reseting %d"),mixer.running_id,mixer.enabled_mixer_count,EFFECTS_FUNCTION_MIXER_01_ID);
 
         
         
@@ -499,18 +499,18 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
       //       if(mixer.running_id>+EFFECTS_FUNCTION_MIXER_LENGTH_ID){
       //         mixer.running_id = EFFECTS_FUNCTION_MIXER_1_ID;
       //       }
-      //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode = WHILE LO OP MULTIPLE");
+      //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode = WHILE LO OP MULTIPLE");
       //     }while(mixer.group[mixer.running_id].enable_skip_restricted_by_time);
-      //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode");
+      //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode");
       //     //mixer.times.skip_restricted_by_time_isactive = true;
       //   }else{
       //     //mixer.times.skip_restricted_by_time_isactive = false;
-      //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"NOT Skipping restricted mode");
+      //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"NOT Skipping restricted mode");
       //   }
-      //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"OUTSIDE restricted CheckBetween_Day_DateTimes");
+      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"OUTSIDE restricted CheckBetween_Day_DateTimes");
       // }else{
       //   //mixer.mode.times.skip_restricted_by_time_isactive = false;
-      //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"INSIDE restricted CheckBetween_Day_DateTimes");
+      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"INSIDE restricted CheckBetween_Day_DateTimes");
       // }
 
 
@@ -523,19 +523,19 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
       //     //   if(mixer.group[id_next].enable_skip_restricted_by_time
       //                &&(!pCONT_time->CheckBetween_Day_DateTimes(&mixer.mode.times.flashing_starttime,&mixer.mode.times.flashing_endtime))){// If time restrictions are not prohibating group
       //     //     id_next++;
-      //     //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"if enable_skip_restricted_by_time");
+      //     //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"if enable_skip_restricted_by_time");
       //     //     break; //finish for lop with current id_next
       //     //   }else{
-      //          //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE enable_skip_restricted_by_time");
+      //          //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE enable_skip_restricted_by_time");
       //     //   }
       //     // }else{ // If time is not valid, but restrictions are enabled, then skip REGARDLESS of time periods
       //          id_next++;
-      //     //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE time invalid");
+      //     //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE time invalid");
       //     //     break; //finish for lop with current id_next
       //     // }// end if(isvalid)
       //   }else{// end if(isenabled)
       //     id_next++; // do move on
-      //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE not enabled");
+      //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE not enabled");
       //   }
       // }// end FOR
 
@@ -550,27 +550,27 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
 //       //       // IF is time restricted AND is not between those times THEN skip it
 //       //     //   if(mixer.group[id_next].enable_skip_restricted_by_time&&(!pCONT_time->CheckBetween_Day_DateTimes(&mixer.mode.times.flashing_starttime,&mixer.mode.times.flashing_endtime))){// If time restrictions are not prohibating group
 //       //     //     id_next++;
-//       //     //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"if enable_skip_restricted_by_time");
+//       //     //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"if enable_skip_restricted_by_time");
 //       //     //     break; //finish for lop with current id_next
 //       //     //   }else{
-//       //          //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE enable_skip_restricted_by_time");
+//       //          //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE enable_skip_restricted_by_time");
 //       //     //   }
 //       //     // }else{ // If time is not valid, but restrictions are enabled, then skip REGARDLESS of time periods
 //       //          id_next++;
-//       //     //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE time invalid");
+//       //     //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE time invalid");
 //       //     //     break; //finish for lop with current id_next
 //       //     // }// end if(isvalid)
 //       //   }else{// end if(isenabled)
 //       //     id_next++; // do move on
-//       //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE not enabled");
+//       //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"ELSE not enabled");
 //       //   }
 //       // }// end FOR
       
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\"=%d"),"mixer.running_id",mixer.running_id);
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\"=%d"),"mixer.running_id",mixer.running_id);
 
 //       // if(mixer.running_id >= EFFECTS_FUNCTION_MIXER_NONE_ID){ //lop around, move forward, but retry function on next go around
 //       //   mixer.running_id = EFFECTS_FUNCTION_MIXER_0_ID;
-//       //   AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"mixer.running_id = EFFECTS_FUNCTION_MIXER_0_ID;");
+//       //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"mixer.running_id = EFFECTS_FUNCTION_MIXER_0_ID;");
 //       //   return; // Quit early
 //       // }
       
@@ -587,12 +587,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
     }else{ 
       mixer.group[mixer.running_id].time_on_secs_decounter--; //if on
       mixer.tSavedTrigger = millis(); //reset if this was reached
-      //AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "Time until MillisReached = %d"),mixer.tSavedMillisToChangeAt-millis());
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
+      //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "Time until MillisReached = %d"),mixer.tSavedMillisToChangeAt-millis());
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
     
       if(mixer.group[mixer.running_id].time_on_secs_decounter < -2){
         mixer.group[mixer.running_id].time_on_secs_decounter = 0;
-        AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "RESET < -1 mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "RESET < -1 mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
       }
     }
 
@@ -621,7 +621,7 @@ void mAnimatorLight::LoadMixerGroupByID(uint8_t id){
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage = mixer.group[id].pixels_to_update_as_percentage; 
   // SetLEDOutAmountByPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage);
 
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("LoadMixerGroupByID strip_size_requiring_update=%d"),strip_size_requiring_update);
+  // AddLog(LOG_LEVEL_TEST, PSTR("LoadMixerGroupByID strip_size_requiring_update=%d"),strip_size_requiring_update);
 
 
   // pCONT_iLight->animation_override.fRefreshAllPixels = true;
@@ -634,7 +634,7 @@ void mAnimatorLight::LoadMixerGroupByID(uint8_t id){
   //   // float brightness_new = brightness_set * ((mixer.group[id].ifenabled_forced_brightness_level_percentage)/(100.0f));
   //   // uint8_t brightness_adjusted_100 = brightness_new * 100;
   //   uint8_t brightness_adjusted_255 = map(mixer.group[id].ifenabled_forced_brightness_level_percentage, 0,100, 0,255);
-  //   AddLog_P(LOG_LEVEL_TEST, PSTR("brightness_adjsuted_255=%d"),brightness_adjusted_255);
+  //   AddLog(LOG_LEVEL_TEST, PSTR("brightness_adjsuted_255=%d"),brightness_adjusted_255);
   //   pCONT_iLight->setBriRGB(brightness_adjusted_255);
   // }else{
   //   //pCONT_iLight->setBriRGB(brightness_adjsuted_255);
@@ -657,20 +657,20 @@ void mAnimatorLight::LoadMixerGroupByID(uint8_t id){
 
   // }
 
-  //   //AddLog_P(LOG_LEVEL_TEST, PSTR("Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice=%d"),mixer.group[id].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice);
+  //   //AddLog(LOG_LEVEL_TEST, PSTR("Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice=%d"),mixer.group[id].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice);
 
   // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
   //   char result[100];
   //   char result2[120];
   //   pCONT_sup->GetTextIndexed_P(result, sizeof(result), id, PM_OUTSIDE_TREE_MIXER_DESCRIPTION);  // should this be _P?
   //   snprintf(result2, sizeof(result2), result, pCONT_iLight->animation.transition.time_ms.val, pCONT_iLight->animation.transition.rate_ms, mixer.group[id].pixel_multiplier_id); 
-  // AddLog_P(LOG_LEVEL_INFO, PSTR("Mixer \"%s\""), result2);//, pCONT_iLight->animation.transition.time_ms.val, pCONT_iLight->animation.transition.rate_ms);          
+  // AddLog(LOG_LEVEL_INFO, PSTR("Mixer \"%s\""), result2);//, pCONT_iLight->animation.transition.time_ms.val, pCONT_iLight->animation.transition.rate_ms);          
   // #endif // USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
 
 
   
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("Settings%d rate_ms=%d"),id,pCONT_iLight->animation.transition.rate_ms);
-  // AddLog_P(LOG_LEVEL_TEST, PSTR("Settings time_ms=%d"),pCONT_iLight->animation.transition.time_ms.val);
+  // AddLog(LOG_LEVEL_TEST, PSTR("Settings%d rate_ms=%d"),id,pCONT_iLight->animation.transition.rate_ms);
+  // AddLog(LOG_LEVEL_TEST, PSTR("Settings time_ms=%d"),pCONT_iLight->animation.transition.time_ms.val);
 
 }
 

@@ -68,25 +68,24 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
     const char* GetGPIOFunctionNamebyID_P(uint8_t id, char* buffer);
     PGM_P GetGPIOFunctionNamebyID_P(uint8_t id);
 
-bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
+    bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
 
 
-uint32_t Pin(uint32_t gpio, uint32_t index = 0);
-boolean PinUsed(uint32_t gpio, uint32_t index = 0);
-void SetPin(uint32_t lpin, uint32_t gpio);
+    uint32_t Pin(uint32_t gpio, uint32_t index = 0);
+    boolean PinUsed(uint32_t gpio, uint32_t index = 0);
+    void SetPin(uint32_t lpin, uint32_t gpio);
 
-uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
-
+    uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
+    void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
 
     uint8_t ModuleNr();
     bool ValidTemplateModule(uint8_t index);
     bool ValidModule(uint8_t index);
     const char* AnyModuleName2(uint8_t index);
-    
 
-int jsoneq(const char *json, jsmntok_t *tok, const char *s) ;
+    int jsoneq(const char *json, jsmntok_t *tok, const char *s) ;
     const char* AnyModuleName(uint8_t index, char* buffer, uint8_t buflen);
 
     const char* ModuleName(char* buffer, uint8_t buflen);

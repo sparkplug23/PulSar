@@ -266,7 +266,7 @@ const char* state_ctr(void);
 
       #ifdef ENABLE_ADVANCED_DEBUGGING
         #ifndef DISABLE_SERIAL_LOGGING
-        // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
+        // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
         //Serial.printf("1MQTTHandler_Command::postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
         #endif
       #endif

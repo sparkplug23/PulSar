@@ -59,6 +59,7 @@ class mSonoffIFan :
     bool SerialInput(void);
     void SpeedRefresh(void);
 
+    void RulesEvent_Set_Speed();
     
     void WebCommand_Parse(void);
     void WebAppend_Root_Draw_PageTable();

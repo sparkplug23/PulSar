@@ -38,7 +38,7 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
   //   seriallog_timer--;
   //   if (!seriallog_timer) {
   //     if (seriallog_level) {
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SERIAL_LOGGING_DISABLED));
   //     }
   //     seriallog_level = 0;
   //   }
@@ -49,7 +49,7 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
   //   if (!syslog_timer) {
   //     syslog_level = Settings.syslog_level;
   //     if (Settings.syslog_level) {
-  //       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_LOGGING_REENABLED));  // Might trigger disable again (on purpose)
   //     }
   //   }
   // }
@@ -66,14 +66,14 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
 
 // for quick prototyping, set to test level
 
-void AddLog_P(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...){
+void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...){
   if(abs(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
     va_list arg;
-    //AddLog_P(loglevel,formatP,arg);
+    //AddLog(loglevel,formatP,arg);
   }
 }
 
-void AddLog_P(
+void AddLog(
   #ifdef ENABLE_DEVFEATURE_BREAK_ADDLOG
   uint8_t dummy,
   #endif  
@@ -89,7 +89,7 @@ void AddLog_P(
     //     pCONT_sto->client = pCONT_sto->server->available();
     //   }
 //     if(pCONT_time->uptime.seconds_nonreset>30){
-  // pCONT_sto->Telnet.println("AddLog_P: ");
+  // pCONT_sto->Telnet.println("AddLog: ");
 //     //   if(pCONT_sto->client.connected()) {
 //     //     pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
 //     //   }
@@ -631,13 +631,13 @@ void mLogging::AddLogAddLog(uint8_t loglevel)
 //   if (!global_state.wifi_down && (loglevel <= syslog_level)) { Syslog(); }
 }
 
-void mLogging::AddLog_P(uint8_t loglevel, const char *formatP)
+void mLogging::AddLog(uint8_t loglevel, const char *formatP)
 {
   // snprintf_P(log_data, sizeof(log_data), formatP);
   // AddLogAddLog(loglevel);
 }
 
-void mLogging::AddLog_P(uint8_t loglevel, const char *formatP, const char *formatP2)
+void mLogging::AddLog(uint8_t loglevel, const char *formatP, const char *formatP2)
 {
   // char message[100];
 
@@ -673,7 +673,7 @@ void mLogging::AddLogSerial(uint8_t loglevel)
 
 void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 {
-  // AddLog_P(LOG_LEVEL_DEBUG, PSTR("SNS: %s missed %d"), sensor, SENSOR_MAX_MISS - misses);
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("SNS: %s missed %d"), sensor, SENSOR_MAX_MISS - misses);
 }
 
 
@@ -696,7 +696,7 @@ if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
   va_end(args);
 
   //Share on serial/telnet
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
   //Send via mqtt
   #ifdef USE_MODULE_NETWORK_MQTT
   pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
@@ -713,7 +713,7 @@ int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char 
   // int mlen = strlen(pCONT_set->response_msg);
   // int len = vsnprintf_P(pCONT_set->response_msg + mlen, sizeof(pCONT_set->response_msg) - mlen, format, args);
   // va_end(args);
-  // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "Response_P %s"),pCONT_set->response_msg);
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "Response_P %s"),pCONT_set->response_msg);
   return 0;// len + mlen;
 }
 
@@ -730,7 +730,7 @@ void mLogging::StartTelnetServer(){
 
   telnet_started = true;
   // if(seriallog)
-  // AddLog_P(LOG_LEVEL_INFO, PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
+  // AddLog(LOG_LEVEL_INFO, PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
 }
 
 

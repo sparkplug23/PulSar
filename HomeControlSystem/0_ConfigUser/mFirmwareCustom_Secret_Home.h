@@ -94,7 +94,7 @@ Garage
 Spareroom
   - CeilingLight
 **/
-// #define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
+#define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
 
 /**
  * 
@@ -973,7 +973,7 @@ Bathroom
 
   #define USE_BUILD_TYPE_ENERGY
   #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_PZEM004T_MODBUS
+  #define USE_MODULE_ENERGY_PZEM004T_V3
   #define USE_DEVFEATURE_ENABLE_PZEM004T_SERIAL2
 
   // #define USE_MODULE_SENSORS_BME
@@ -1556,14 +1556,6 @@ Bathroom
   #define DEVICENAME_CTR          "gazebcon"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
 
-  // #define DEVICE_LOCATION_OUTSIDE
- 
-  // #define STRIP_REPEAT_OUTPUT_MAX       500
-  
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-
   #define USE_MODULE_SENSORS_BME
   #define D_DEVICE_SENSOR_CLIMATE "Outside"
 
@@ -1586,18 +1578,6 @@ Bathroom
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"      
-  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" D_JSON_WS2812 "\","
-  //   "\"" D_JSON_STRIP_SIZE     "\":50,"
-  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"" D_JSON_RGB "\","
-  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"User 10\","
-  //   "\"" D_JSON_ANIMATIONMODE           "\":\"" D_JSON_EFFECTS "\","
-  //   "\"" D_JSON_BRIGHTNESS     "\":5"
-  // "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "BigBulbs"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Lanterns"
@@ -1807,6 +1787,9 @@ Bathroom
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
   
   #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_ADE7953
 
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 2
@@ -1851,6 +1834,14 @@ Bathroom
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_ENERGY_ADE7953 // I2C address 0x38
+      "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
+      "\"16\":\"" D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_SENSORS_ANALOG_TEMPERATURE
+      "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_TEMPERATURE_CTR  "\","
       #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
 
@@ -1902,6 +1893,7 @@ Bathroom
         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         //[0]
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
@@ -1913,7 +1905,7 @@ Bathroom
         "\"State\":1,"//setpower
         // Append other "normal" commands here? this would need storing
         // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
 
         //relay:timeon needs a way to specify which device
         
@@ -1945,7 +1937,7 @@ Bathroom
         // Append other "normal" commands here? this would need storing
         // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
         
-        "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
+        "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
         //relay 
       "}"
     "}"
@@ -1965,7 +1957,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Camera OV2640 Tester"
   #define FORCE_TEMPLATE_LOADING
   
-  #define USE_MODULE_SENSORS_INA219
+  #define USE_MODULE_ENERGY_INA219
   #define USE_MODULE_CONTROLLER_TREADMILL
   #define D_DEVICE_SENSOR_CURRENT "Trigger"
 
@@ -1975,7 +1967,7 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"    
-      #if defined(USE_MODULE_SENSORS_INA219) || defined(USE_MODULE_SENSORS_BME)
+      #if defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_SENSORS_BME)
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
@@ -2008,7 +2000,7 @@ Bathroom
 
 
 #ifdef DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
-  #define DEVICENAME_CTR          "shellydimmer_spareroom" //shelly2
+  #define DEVICENAME_CTR          "shellydimmer_spareroom"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
   
   #define FORCE_TEMPLATE_LOADING
@@ -2029,40 +2021,39 @@ Bathroom
   // #define USE_MODULE_DRIVERS_RELAY
   // #define RELAYS_CONNECTED 2
   // #define USE_MODULE_DRIVERS_INTERFACE
-    
 
   #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-      #define PIN_GPIO_SHELLY_DIMMER_RST_INV 5
-      #define PIN_GPIO_SHELLY_DIMMER_BOOT0   4
+  #define PIN_GPIO_SHELLY_DIMMER_RST_INV 5
+  #define PIN_GPIO_SHELLY_DIMMER_BOOT0   4
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      //0,<100>,0,<101>,<174>,<175>,0,0,<6>,0,<6>,0,<10>,<148>
-      //0,    1,2,    3,    4,    5,9,10,11,12,13,14,15,16
+    // "\"" D_JSON_GPIOC "\":{"
+    //   //0,<100>,0,<101>,<174>,<175>,0,0,<6>,0,<6>,0,<10>,<148>
+    //   //0,    1,2,    3,    4,    5,9,10,11,12,13,14,15,16
 
-      //1=100, TX
-      //3=101, RX
-      //4=174, GPIO_SHELLY_DIMMER_BOOT0
-      //5=175, GPIO_SHELLY_DIMMER_RST_INV
+    //   //1=100, TX
+    //   //3=101, RX
+    //   //4=174, GPIO_SHELLY_DIMMER_BOOT0
+    //   //5=175, GPIO_SHELLY_DIMMER_RST_INV
 
-      "\"1\":\"" D_GPIO_FUNCTION_HWSERIAL0_TX_CTR  "\","
-      "\"3\":\"" D_GPIO_FUNCTION_HWSERIAL0_RX_CTR  "\","
-      //11=6, GPIO_SWT1_NP
-      //13=6, GPIO_SWT1_NP
-      #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"14\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-      #endif
-      //16=148, GPIO_ADC_TEMP
+    //   "\"1\":\"" D_GPIO_FUNCTION_HWSERIAL0_TX_CTR  "\","
+    //   "\"3\":\"" D_GPIO_FUNCTION_HWSERIAL0_RX_CTR  "\","
+    //   //11=6, GPIO_SWT1_NP
+    //   //13=6, GPIO_SWT1_NP
+    //   #ifdef USE_MODULE_SENSORS_SWITCHES
+    //   "\"14\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
+    //   "\"12\":\"" D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
+    //   #endif
+    //   //16=148, GPIO_ADC_TEMP
       
-      //15=10, GPIO_LED1_INV
-      "\"16\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    //   //15=10, GPIO_LED1_INV
+    //   "\"16\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
   "}";
 
   // #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway Light"
@@ -2090,64 +2081,64 @@ Bathroom
   "}";
 
   
-  #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    "\"Rule0\":{" //switch example
-      "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+  // #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // "{"
+  //   "\"Rule0\":{" //switch example
+  //     "\"Trigger\":{"
+  //     //module_id
+  //       "\"Module\":\"Switches\","    //sensor
+  //       //?
+  //       "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
+  //       //[1]
+  //       "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+  //       //[0]
+  //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
         
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"ShellyDimmer\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":2,"//setpower
-        //2
-        "\"Value\":50"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
-      "}"
-    "},"
-    "\"Rule1\":{" //switch example
-      "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Switches\","    //sensor
-        //?
-        "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"ShellyDimmer\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":2,"//setpower
-        "\"Value\":100"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-        //relay 
-      "}"
-    "}"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"ShellyDimmer\","
+  //       // set power?
+  //       "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+  //       //1
+  //       "\"DeviceName\":0," //number, name, or all
+  //       //2
+  //       "\"State\":2,"//setpower
+  //       //2
+  //       "\"Value\":50"//setpower
+  //       // Append other "normal" commands here? this would need storing
+  //       // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //       //relay 
+  //     "}"
+  //   "},"
+  //   "\"Rule1\":{" //switch example
+  //     "\"Trigger\":{"
+  //     //module_id
+  //       "\"Module\":\"Switches\","    //sensor
+  //       //?
+  //       "\"Function\":\"StateChanged\"," //eg. InputChange (TemperatureThreshold)
+  //       //[1]
+  //       "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+  //       //[0]
+  //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"ShellyDimmer\","
+  //       // set power?
+  //       "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+  //       //1
+  //       "\"DeviceName\":0," //number, name, or all
+  //       //2
+  //       "\"State\":2,"//setpower
+  //       "\"Value\":100"//setpower
+  //       // Append other "normal" commands here? this would need storing
+  //       // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //       //relay 
+  //     "}"
+  //   "}"
     
 
-  "}";
+  // "}";
 
 
 #endif
@@ -2485,6 +2476,10 @@ Bathroom
   
   // #define ENABLE_BUG_TRACING
 
+  #define USE_MODULE_DRIVERS_BUZZER
+
+  #define USE_MODULE_CORE_RULES
+
   #define USE_MODULE_SENSORS_BUTTONS
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
 
@@ -2495,7 +2490,8 @@ Bathroom
   #define USE_MODULE_DRIVERS_RELAY
   #define RELAYS_CONNECTED 4
   #define USE_MODULE_DRIVERS_INTERFACE
-    
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -2505,6 +2501,9 @@ Bathroom
   "}";
 
   // Need to create default names for all class in GetDeviceName
+
+  // Add rules so button cycles through fan speeds
+
 
 #endif
 
@@ -3128,30 +3127,30 @@ Bathroom
       "\"Trigger\":{"
         "\"Module\":\"Switches\"," 
         "\"Function\":\"StateChanged\","
-        "\"DeviceName\":0,"
-        "\"State\":2"
+        "\"DeviceName\":0," //Switch 0 of 1
+        "\"State\":2" // Toggle
       "},"
       "\"Command\":{"
         "\"Module\":\"ShellyDimmer\","
         "\"Function\":\"SetPower\","
         "\"DeviceName\":0,"
         "\"State\":2,"
-        "\"Value\":100"
+        "\"Value\":35"
       "}"
     "},"
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"Switches\","
         "\"Function\":\"StateChanged\","
-        "\"DeviceName\":1,"
+        "\"DeviceName\":1," // Closest to bathroom door
         "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"ShellyDimmer\","
         "\"Function\":\"SetPower\","
-        "\"DeviceName\":0,"
+        "\"DeviceName\":0," //Switch 1 of 1
         "\"State\":2,"
-        "\"Value\":50"
+        "\"Value\":100"
       "}"
     "}"    
   "}";

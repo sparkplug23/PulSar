@@ -2,8 +2,8 @@
 
 #ifdef USE_MODULE_ENERGY_INTERFACE
 
-const char* mEnergy::PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
-const char* mEnergy::PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR = D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
+const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
+const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR = D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
 
 const char HTTP_ENERGY_SNS1[] PROGMEM =
   "{s}" D_POWERUSAGE_APPARENT "{m}%s " D_UNIT_VA "{e}"
@@ -18,7 +18,7 @@ const char HTTP_ENERGY_SNS2[] PROGMEM =
 const char HTTP_ENERGY_SNS3[] PROGMEM =
   "{s}" D_EXPORT_ACTIVE "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
 
-void mEnergy::Init(void){
+void mEnergyInterface::Init(void){
 
 
 for(int i=0;i<MAX_ENERGY_SENSORS;i++){
@@ -35,7 +35,7 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
 
 
 
-  if (pCONT_set->energy_flg) {
+  if (pCONT_set->runtime_value.energy_driver) {
     // // if (RtcSettingsValid()) {
     //   Energy.kWhtoday_offset = pCONT_set->RtcSettings.energy_kWhtoday;
     // // }
@@ -155,7 +155,7 @@ const char kEnergyPhases[] PROGMEM = "|%s / %s|%s / %s / %s||[%s,%s]|[%s,%s,%s]"
 
 // /********************************************************************************************/
 
-bool mEnergy::EnergyTariff1Active()  // Off-Peak hours
+bool mEnergyInterface::EnergyTariff1Active()  // Off-Peak hours
 {
 
   // uint8_t dst = 0;
@@ -181,7 +181,7 @@ bool mEnergy::EnergyTariff1Active()  // Off-Peak hours
   // }
 }
 
-void mEnergy::EnergyUpdateToday(void)
+void mEnergyInterface::EnergyUpdateToday(void)
 {
  
   //  if (Energy.kWhtoday_delta > 1000) {
@@ -216,12 +216,12 @@ void mEnergy::EnergyUpdateToday(void)
   
 }
 
-void mEnergy::EnergyUpdateTotal(float value, bool kwh)
+void mEnergyInterface::EnergyUpdateTotal(float value, bool kwh)
 {
   
   char energy_total_chr[FLOATSZ];
   pCONT_sup->dtostrfd(value, 4, energy_total_chr);
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total %s %sWh"), energy_total_chr, (kwh) ? "k" : "");
+  AddLog(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total %s %sWh"), energy_total_chr, (kwh) ? "k" : "");
 
   uint32_t multiplier = (kwh) ? 100000 : 100;  // kWh or Wh to deca milli Wh
 
@@ -238,7 +238,7 @@ void mEnergy::EnergyUpdateTotal(float value, bool kwh)
     pCONT_set->Settings.energy_usage.energy_kWhtotal = pCONT_set->RtcSettings.energy_kWhtotal;
     Energy.total = (float)(pCONT_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
     pCONT_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? pCONT_time->LocalTime() : pCONT_time->Midnight();
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total updated with hardware value"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("NRG: Energy Total updated with hardware value"));
   }
   EnergyUpdateToday();
   
@@ -246,7 +246,7 @@ void mEnergy::EnergyUpdateTotal(float value, bool kwh)
 
 /*********************************************************************************************/
 
-void mEnergy::Energy200ms(void)
+void mEnergyInterface::Energy200ms(void)
 {
   
   // Energy.power_on = (pCONT_set->power != 0) | pCONT_set->Settings.flag_system.no_power_on_check;  // SetOption21 - Show voltage even if powered off
@@ -286,7 +286,7 @@ void mEnergy::Energy200ms(void)
   //XnrgCall(FUNC_EVERY_200_MSECOND);
 }
 
-void mEnergy::EnergySaveState(void)
+void mEnergyInterface::EnergySaveState(void)
 {
   // Settings.energy_kWhdoy = (RtcTime.valid) ? RtcTime.day_of_year : 0;
 
@@ -297,7 +297,7 @@ void mEnergy::EnergySaveState(void)
 }
 
 // #ifdef USE_ENERGY_MARGIN_DETECTION
-// bool mEnergy::EnergyMargin(bool type, uint16_t margin, uint16_t value, bool &flag){//, bool &save_flag)
+// bool mEnergyInterface::EnergyMargin(bool type, uint16_t margin, uint16_t value, bool &flag){//, bool &save_flag)
 // {
 //   // bool change;
 
@@ -312,7 +312,7 @@ void mEnergy::EnergySaveState(void)
 //   // return (change != save_flag);
 // }
 
-void mEnergy::EnergyMarginCheck(void)
+void mEnergyInterface::EnergyMarginCheck(void)
 {
 //   if (Energy.power_steady_counter) {
 //     Energy.power_steady_counter--;
@@ -450,7 +450,7 @@ void mEnergy::EnergyMarginCheck(void)
 }
 
 
-void mEnergy::EnergyEverySecond(void)
+void mEnergyInterface::EnergyEverySecond(void)
 {
   // Overtemp check
   // if (global_update) {
@@ -491,7 +491,7 @@ void mEnergy::EnergyEverySecond(void)
 
 
 
-void mEnergy::UpdateEnergyUsagePerMinute(){
+void mEnergyInterface::UpdateEnergyUsagePerMinute(){
 
   // needs to add guard to wait on valid previous data
 
@@ -499,21 +499,21 @@ void mEnergy::UpdateEnergyUsagePerMinute(){
   uint8_t index = Energy.stats.kwh_per_minute_index;
   uint8_t last_index = (index==0)?59:index-1;
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR("index=%d,last_index=%d"),index,last_index);
+  AddLog(LOG_LEVEL_TEST,PSTR("index=%d,last_index=%d"),index,last_index);
 
   // Get new power last minute
   Energy.stats.last_minutes_energy = Energy.stats.kwh_per_minute[last_index];
   // Get new power
-  Energy.stats.current_energy = pCONT_pzem->PzemAc.last_energy;
+  // Energy.stats.current_energy = pCONT_pzem->PzemAc.last_energy;
   //this minutes usage
   Energy.stats.this_minutes_energy = Energy.stats.current_energy - Energy.stats.last_minutes_energy;
   //store into array
-  Energy.stats.kwh_each_minute[index] = pCONT_pzem->PzemAc.last_energy;
+  // Energy.stats.kwh_each_minute[index] = pCONT_pzem->PzemAc.last_energy;
   Energy.stats.kwh_per_minute[index] = Energy.stats.this_minutes_energy;
   
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"last_minutes_energy",(int)Energy.stats.last_minutes_energy);
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"current_energy",(int)Energy.stats.current_energy);
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"this_minutes_energy",(int)Energy.stats.this_minutes_energy);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"last_minutes_energy",(int)Energy.stats.last_minutes_energy);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"current_energy",(int)Energy.stats.current_energy);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_JSON_COMMAND_NVALUE),"this_minutes_energy",(int)Energy.stats.this_minutes_energy);
 
   //increment index and save
   Energy.stats.kwh_per_minute_index = (index+1);
@@ -534,7 +534,7 @@ void mEnergy::UpdateEnergyUsagePerMinute(){
 
 // // #ifdef USE_MODULE_NETWORK_WEBSERVER
 
-const char* mEnergy::EnergyFormatIndex(char* result, char* input, bool json, uint32_t index, bool single)
+const char* mEnergyInterface::EnergyFormatIndex(char* result, char* input, bool json, uint32_t index, bool single)
 {
   char layout[16];
   pCONT_sup->GetTextIndexed_P(layout, sizeof(layout), (index -1) + (3 * json), kEnergyPhases);
@@ -551,44 +551,44 @@ const char* mEnergy::EnergyFormatIndex(char* result, char* input, bool json, uin
     break;
   }
 
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("layout=%s"),layout);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("result=%s"),result);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("input=%s"),input);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("json=%d"),json);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("index=%d"),index);
+  // AddLog(LOG_LEVEL_TEST,PSTR("layout=%s"),layout);
+  // AddLog(LOG_LEVEL_TEST,PSTR("result=%s"),result);
+  // AddLog(LOG_LEVEL_TEST,PSTR("input=%s"),input);
+  // AddLog(LOG_LEVEL_TEST,PSTR("json=%d"),json);
+  // AddLog(LOG_LEVEL_TEST,PSTR("index=%d"),index);
 
   return result;
 }
 
-const char* mEnergy::EnergyFormat(char* result, char* input, bool json, bool single)
+const char* mEnergyInterface::EnergyFormat(char* result, char* input, bool json, bool single)
 {
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("mEnergy::EnergyFormat"));
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("input=%s"),input);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("json=%d"),json);
+  // AddLog(LOG_LEVEL_TEST,PSTR("mEnergyInterface::EnergyFormat"));
+  // AddLog(LOG_LEVEL_TEST,PSTR("input=%s"),input);
+  // AddLog(LOG_LEVEL_TEST,PSTR("json=%d"),json);
   uint8_t index = (single) ? 1 : Energy.phase_count;  // 1,2,3
   const char* ch = EnergyFormatIndex(result, input, json, index, single);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("mEnergy::EnergyFormat=%s"),ch);
+  // AddLog(LOG_LEVEL_TEST,PSTR("mEnergyInterface::EnergyFormat=%s"),ch);
   //TRACE();
   return ch;
 }
 
-void mEnergy::EnergyShow(bool json)
+void mEnergyInterface::EnergyShow(bool json)
 {
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("mEnergy::EnergyShow(%d)"),(int)Energy.phase_count);
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("mEnergyInterface::EnergyShow(%d)"),(int)Energy.phase_count);
 
   for (uint32_t i = 0; i < Energy.phase_count; i++) {
     if (Energy.voltage_common) {
       Energy.voltage[i] = Energy.voltage[0];
-      AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.voltage[i]"),(int)Energy.voltage[i]);
+      AddLog(LOG_LEVEL_TEST,PSTR("Energy.voltage[i]"),(int)Energy.voltage[i]);
     }
   }
 
-  AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d"),Energy.phase_count);
+  AddLog(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d"),Energy.phase_count);
   float power_factor_knx = Energy.power_factor[0];
 
   if(Energy.phase_count>3){
-    AddLog_P(LOG_LEVEL_ERROR,PSTR("MEMORY ISSUE"));
+    AddLog(LOG_LEVEL_ERROR,PSTR("MEMORY ISSUE"));
     return;
   }
 
@@ -603,9 +603,9 @@ void mEnergy::EnergyShow(bool json)
   memset(frequency_chr,0,sizeof(frequency_chr));
 
   if (!Energy.type_dc) {
-    AddLog_P(LOG_LEVEL_TEST,PSTR("!Energy.type_dc"));
+    AddLog(LOG_LEVEL_TEST,PSTR("!Energy.type_dc"));
     if (Energy.current_available && Energy.voltage_available) {
-      AddLog_P(LOG_LEVEL_TEST,PSTR("current_available"));
+      AddLog(LOG_LEVEL_TEST,PSTR("current_available"));
       for (uint32_t i = 0; i < Energy.phase_count; i++) {
         float apparent_power = Energy.apparent_power[i];
         if (isnan(apparent_power)) {
@@ -631,9 +631,9 @@ void mEnergy::EnergyShow(bool json)
           if ((Energy.current[i] > 0.005) && ((difference > 15) || (difference > (uint32_t)(apparent_power * 100 / 1000)))) {
             // calculating reactive power only if current is greater than 0.005A and
             // difference between active and apparent power is greater than 1.5W or 1%
-            AddLog_P(LOG_LEVEL_INFO,PSTR("reactive_power_A=%d"),reactive_power);
+            AddLog(LOG_LEVEL_INFO,PSTR("reactive_power_A=%d"),reactive_power);
             reactive_power = (float)(pCONT_sup->RoundSqrtInt((uint32_t)(apparent_power * apparent_power * 100) - (uint32_t)(Energy.active_power[i] * Energy.active_power[i] * 100))) / 10;
-            AddLog_P(LOG_LEVEL_INFO,PSTR("reactive_power_B=%d"),reactive_power);
+            AddLog(LOG_LEVEL_INFO,PSTR("reactive_power_B=%d"),reactive_power);
             }
         }
 
@@ -641,9 +641,9 @@ void mEnergy::EnergyShow(bool json)
         pCONT_sup->dtostrfd(reactive_power, pCONT_set->Settings.flag_power.wattage_resolution, reactive_power_chr[i]);
         pCONT_sup->dtostrfd(power_factor, 2, power_factor_chr[i]);
         
-        AddLog_P(LOG_LEVEL_TEST,PSTR("apparent_power=%d,apparent_power_chr[%d]=%s"),(int)apparent_power,i,apparent_power_chr[i]);
-        AddLog_P(LOG_LEVEL_TEST,PSTR("reactive_power_chr[%d]=%s"),i,reactive_power_chr[i]);
-        AddLog_P(LOG_LEVEL_TEST,PSTR("power_factor_chr[%d]=%s"),i,power_factor_chr[i]);
+        AddLog(LOG_LEVEL_TEST,PSTR("apparent_power=%d,apparent_power_chr[%d]=%s"),(int)apparent_power,i,apparent_power_chr[i]);
+        AddLog(LOG_LEVEL_TEST,PSTR("reactive_power_chr[%d]=%s"),i,reactive_power_chr[i]);
+        AddLog(LOG_LEVEL_TEST,PSTR("power_factor_chr[%d]=%s"),i,power_factor_chr[i]);
 
       }
     }
@@ -665,15 +665,15 @@ void mEnergy::EnergyShow(bool json)
   memset(active_power_chr,0,sizeof(active_power_chr));
 
   for (uint32_t i = 0; i < Energy.phase_count; i++) {
-    AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d %d"),Energy.phase_count,i);
+    AddLog(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d %d"),Energy.phase_count,i);
     pCONT_sup->dtostrfd(Energy.voltage[i], pCONT_set->Settings.flag_power.voltage_resolution, voltage_chr[i]);
     pCONT_sup->dtostrfd(Energy.current[i], pCONT_set->Settings.flag_power.current_resolution, current_chr[i]);
     pCONT_sup->dtostrfd(Energy.active_power[i], pCONT_set->Settings.flag_power.wattage_resolution, active_power_chr[i]);
   }
 
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d"),Energy.phase_count);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.voltage[i]=%d"),(int)Energy.voltage[0]);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("Energy.voltage_chr[i]=%s"),voltage_chr[0]);
+  // AddLog(LOG_LEVEL_TEST,PSTR("Energy.phase_count=%d"),Energy.phase_count);
+  // AddLog(LOG_LEVEL_TEST,PSTR("Energy.voltage[i]=%d"),(int)Energy.voltage[0]);
+  // AddLog(LOG_LEVEL_TEST,PSTR("Energy.voltage_chr[i]=%s"),voltage_chr[0]);
 
   char energy_daily_chr[FLOATSZ];
   memset(energy_daily_chr,0,sizeof(energy_daily_chr));
@@ -755,7 +755,7 @@ void mEnergy::EnergyShow(bool json)
     //     EnergyFormat(value_chr, current_chr[0], json));
     // }
 
-    // AddLog_P(LOG_LEVEL_TEST,PSTR(" mEnergy::FUNC_JSON_APPEND "));
+    // AddLog(LOG_LEVEL_TEST,PSTR(" mEnergyInterface::FUNC_JSON_APPEND "));
 
     // Tasker(FUNC_JSON_APPEND);
     // pCONT_sup->ResponseJsonEnd();
@@ -834,9 +834,9 @@ void mEnergy::EnergyShow(bool json)
 
 
 
-uint8_t mEnergy::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
 
-  // Serial.println("mEnergy::ConstructJSON_Sensor"); Serial.flush();
+  // Serial.println("mEnergyInterface::ConstructJSON_Sensor"); Serial.flush();
 
   JsonBuilderI->Start();
 
@@ -870,7 +870,7 @@ uint8_t mEnergy::ConstructJSON_Sensor(uint8_t json_method){
 }
 
 
-uint8_t mEnergy::ConstructJSON_ThresholdLimits(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_method){
 
   JsonBuilderI->Start();
 
@@ -1017,13 +1017,13 @@ uint8_t mEnergy::ConstructJSON_ThresholdLimits(uint8_t json_method){
 
 
 
-void mEnergy::Settings_Load(){
+void mEnergyInterface::Settings_Load(){
 
   // name_buffer = pCONT_set->Settings.energy_usage.name_buffer;
 
 }
 
-void mEnergy::Settings_Default(){
+void mEnergyInterface::Settings_Default(){
   
   // name_buffer = &pCONT_set->Settings.energy_usage.name_buffer[0];
 
@@ -1042,7 +1042,7 @@ void mEnergy::Settings_Default(){
 
 }
 
-void mEnergy::Settings_Save(){
+void mEnergyInterface::Settings_Save(){
 
   // pCONT_set->Settings.energy_usage.name_buffer = name_buffer;
 
@@ -1050,7 +1050,7 @@ void mEnergy::Settings_Save(){
 
 
 
-int8_t mEnergy::Tasker(uint8_t function){ 
+int8_t mEnergyInterface::Tasker(uint8_t function){ 
   // testing without pzem hardware
   // pCONT_set->energy_flg = 5; //?
 
@@ -1064,7 +1064,7 @@ int8_t mEnergy::Tasker(uint8_t function){
   }
 
   // Only continue to remaining functions if sensor has been detected and enabled
-  if(!pCONT_set->energy_flg){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!pCONT_set->runtime_value.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
 
@@ -1141,7 +1141,7 @@ int8_t mEnergy::Tasker(uint8_t function){
   return function_result;
 
 }
-// int8_t mEnergy::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mEnergyInterface::Tasker(uint8_t function, JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       // parse_JSONCommand(obj);
@@ -1153,7 +1153,7 @@ int8_t mEnergy::Tasker(uint8_t function){
 // }
 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mEnergy::WebAppend_Root_Draw_Table(){
+void mEnergyInterface::WebAppend_Root_Draw_Table(){
   char buffer[30];
   BufferWriterI->Append_P(PSTR("{t}"));
   // BufferWriterI->Append_P(PSTR("<table style='border: 1px solid white;border-collapse:collapse;'>"));
@@ -1186,7 +1186,7 @@ void mEnergy::WebAppend_Root_Draw_Table(){
 }
 
 //append to internal buffer if any root messages table
-void mEnergy::WebAppend_Root_Status_Table(){
+void mEnergyInterface::WebAppend_Root_Status_Table(){
 
   char buffer[50];
   uint8_t count = 0;
@@ -1244,13 +1244,13 @@ void mEnergy::WebAppend_Root_Status_Table(){
   #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
-// void mEnergy::parse_JSONCommand(){
+// void mEnergyInterface::parse_JSONCommand(){
 
 //   return;// THIS IS WRONG!!
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/energy")>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
 //     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //     // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
 //     // fOpenHABDataStreamActive = true;
@@ -1269,7 +1269,7 @@ void mEnergy::WebAppend_Root_Status_Table(){
 //   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
 //   // if(error){
-//   //   AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
 //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
 //   //   return 0;
 //   // }
@@ -1278,12 +1278,12 @@ void mEnergy::WebAppend_Root_Status_Table(){
 //   // if(!obj["command"].isNull()){ 
 //   //   const char* command = obj["command"];
 //   //   if(strstr(command,"system_send_all")){ 
-//   //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+//   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
 //   //     MQTTHandler_Set_fSendNow();
 //   //     isserviced++;
 //   //   }
 //   //   else{
-//   //     AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+//   //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
 //   //   }
 //   // }
 
@@ -1297,22 +1297,22 @@ void mEnergy::WebAppend_Root_Status_Table(){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mEnergy::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
 
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+    // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
   
   return JsonBuilderI->End();
 
 }
 
 
-uint8_t mEnergy::ConstructJSON_EnergyStats(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_method){
 
   JsonBuilderI->Start();
 
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+    // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
   
   return JsonBuilderI->End();
   // D_DATA_BUFFER_CLEAR();
@@ -1353,7 +1353,7 @@ uint8_t mEnergy::ConstructJSON_EnergyStats(uint8_t json_method){
     
 }
 
-void mEnergy::UpdateThresholdLimits(){
+void mEnergyInterface::UpdateThresholdLimits(){
 
 
 
@@ -1431,9 +1431,9 @@ leave energy in its own module, not telemetry here
 ********************************************************************************************************************************************/
 ////////////////////// START OF MQTT /////////////////////////
 
-void mEnergy::MQTTHandler_Init(){
+void mEnergyInterface::MQTTHandler_Init(){
 
-    struct handler<mEnergy>* mqtthandler_ptr;
+    struct handler<mEnergyInterface>* mqtthandler_ptr;
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
@@ -1442,17 +1442,17 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -1462,7 +1462,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   
   mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -1472,7 +1472,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_EnergyStats;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_EnergyStats;
   
   mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -1482,7 +1482,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_EnergyStats;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_EnergyStats;
 
   mqtthandler_ptr = &mqtthandler_thresholdlimits_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -1492,7 +1492,7 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_ThresholdLimits;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_ThresholdLimits;
 
   mqtthandler_ptr = &mqtthandler_thresholdlimits_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -1502,12 +1502,12 @@ void mEnergy::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergy::ConstructJSON_ThresholdLimits;
+  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_ThresholdLimits;
 
 } //end "MQTTHandler_Init"
 
 
-void mEnergy::MQTTHandler_Set_fSendNow(){
+void mEnergyInterface::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -1518,7 +1518,7 @@ void mEnergy::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mEnergy::MQTTHandler_Set_TelePeriod(){
+void mEnergyInterface::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -1528,7 +1528,7 @@ void mEnergy::MQTTHandler_Set_TelePeriod(){
 
 
 
-void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mEnergyInterface::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
@@ -1542,7 +1542,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     // MQTT_HANDLER_MODULE_THRESHOLDLIMITS_TELEPERIOD_ID
   };
   
-  struct handler<mEnergy>* mqtthandler_list_ptr[] = {
+  struct handler<mEnergyInterface>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_sensor_ifchanged,
     &mqtthandler_sensor_teleperiod
@@ -1590,13 +1590,13 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //  * Commands
 // \*********************************************************************************************/
 
-// void mEnergy::EnergyCommandCalResponse(uint32_t nvalue)
+// void mEnergyInterface::EnergyCommandCalResponse(uint32_t nvalue)
 // {
 //   // snprintf_P(XdrvMailbox.command, CMDSZ, PSTR("%sCal"), XdrvMailbox.command);
 //   // ResponseCmndNumber(nvalue);
 // }
 
-// void mEnergy::CmndEnergyReset(void)
+// void mEnergyInterface::CmndEnergyReset(void)
 // {
 // //   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= 3)) {
 // //     char *p;
@@ -1698,7 +1698,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // //     XdrvMailbox.command, energy_total_chr, energy_yesterday_chr, energy_daily_chr, energy_usage1_chr, energy_usage2_chr, energy_return1_chr, energy_return2_chr);
 // }
 
-// void mEnergy::CmndTariff(void)
+// void mEnergyInterface::CmndTariff(void)
 // {
 //   // // Tariff1 22:00,23:00 - Tariff1 start hour for Standard Time and Daylight Savings Time
 //   // // Tariff2 6:00,7:00   - Tariff2 start hour for Standard Time and Daylight Savings Time
@@ -1743,7 +1743,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //   GetStateText(Settings.flag_network.energy_weekend));             // CMND_TARIFF
 // }
 
-// void mEnergy::CmndPowerCal(void)
+// void mEnergyInterface::CmndPowerCal(void)
 // {
 //   // Energy.command_code = CMND_POWERCAL;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // microseconds
@@ -1754,7 +1754,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndVoltageCal(void)
+// void mEnergyInterface::CmndVoltageCal(void)
 // {
 //   // Energy.command_code = CMND_VOLTAGECAL;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // microseconds
@@ -1765,7 +1765,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndCurrentCal(void)
+// void mEnergyInterface::CmndCurrentCal(void)
 // {
 //   // Energy.command_code = CMND_CURRENTCAL;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // microseconds
@@ -1776,7 +1776,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndPowerSet(void)
+// void mEnergyInterface::CmndPowerSet(void)
 // {
 //   // Energy.command_code = CMND_POWERSET;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // Watt
@@ -1784,7 +1784,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndVoltageSet(void)
+// void mEnergyInterface::CmndVoltageSet(void)
 // {
 //   // Energy.command_code = CMND_VOLTAGESET;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // Volt
@@ -1792,7 +1792,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndCurrentSet(void)
+// void mEnergyInterface::CmndCurrentSet(void)
 // {
 //   // Energy.command_code = CMND_CURRENTSET;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // milliAmpere
@@ -1800,7 +1800,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndFrequencySet(void)
+// void mEnergyInterface::CmndFrequencySet(void)
 // {
 //   // Energy.command_code = CMND_FREQUENCYSET;
 //   // if (XnrgCall(FUNC_COMMAND)) {  // Hz
@@ -1808,7 +1808,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // }
 // }
 
-// void mEnergy::CmndModuleAddress(void)
+// void mEnergyInterface::CmndModuleAddress(void)
 // {
 //   // if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload < 4) && (1 == Energy.phase_count)) {
 //   //   Energy.command_code = CMND_MODULEADDRESS;
@@ -1819,7 +1819,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // }
 
 // // #ifdef USE_ENERGY_MARGIN_DETECTION
-// void mEnergy::CmndPowerDelta(void)
+// void mEnergyInterface::CmndPowerDelta(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 32000)) {
 //   //   Settings.energy_power_delta = XdrvMailbox.payload;
@@ -1827,7 +1827,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_power_delta);
 // }
 
-// void mEnergy::CmndPowerLow(void)
+// void mEnergyInterface::CmndPowerLow(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_min_power = XdrvMailbox.payload;
@@ -1835,7 +1835,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_min_power);
 // }
 
-// void mEnergy::CmndPowerHigh(void)
+// void mEnergyInterface::CmndPowerHigh(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power = XdrvMailbox.payload;
@@ -1843,7 +1843,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power);
 // }
 
-// void mEnergy::CmndVoltageLow(void)
+// void mEnergyInterface::CmndVoltageLow(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 501)) {
 //   //   Settings.energy_min_voltage = XdrvMailbox.payload;
@@ -1851,7 +1851,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_min_voltage);
 // }
 
-// void mEnergy::CmndVoltageHigh(void)
+// void mEnergyInterface::CmndVoltageHigh(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 501)) {
 //   //   Settings.energy_max_voltage = XdrvMailbox.payload;
@@ -1859,7 +1859,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_voltage);
 // }
 
-// void mEnergy::CmndCurrentLow(void)
+// void mEnergyInterface::CmndCurrentLow(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 16001)) {
 //   //   Settings.energy_min_current = XdrvMailbox.payload;
@@ -1867,7 +1867,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_min_current);
 // }
 
-// void mEnergy::CmndCurrentHigh(void)
+// void mEnergyInterface::CmndCurrentHigh(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 16001)) {
 //   //   Settings.energy_max_current = XdrvMailbox.payload;
@@ -1876,7 +1876,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // }
 
 // // #ifdef USE_ENERGY_POWER_LIMIT
-// void mEnergy::CmndMaxPower(void)
+// void mEnergyInterface::CmndMaxPower(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power_limit = XdrvMailbox.payload;
@@ -1884,7 +1884,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_limit);
 // }
 
-// void mEnergy::CmndMaxPowerHold(void)
+// void mEnergyInterface::CmndMaxPowerHold(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power_limit_hold = (1 == XdrvMailbox.payload) ? MAX_POWER_HOLD : XdrvMailbox.payload;
@@ -1892,7 +1892,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_limit_hold);
 // }
 
-// void mEnergy::CmndMaxPowerWindow(void)
+// void mEnergyInterface::CmndMaxPowerWindow(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power_limit_window = (1 == XdrvMailbox.payload) ? MAX_POWER_WINDOW : XdrvMailbox.payload;
@@ -1900,7 +1900,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_limit_window);
 // }
 
-// void mEnergy::CmndSafePower(void)
+// void mEnergyInterface::CmndSafePower(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power_safe_limit = XdrvMailbox.payload;
@@ -1908,7 +1908,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_safe_limit);
 // }
 
-// void mEnergy::CmndSafePowerHold(void)
+// void mEnergyInterface::CmndSafePowerHold(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_power_safe_limit_hold = (1 == XdrvMailbox.payload) ? SAFE_POWER_HOLD : XdrvMailbox.payload;
@@ -1916,7 +1916,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_safe_limit_hold);
 // }
 
-// void mEnergy::CmndSafePowerWindow(void)
+// void mEnergyInterface::CmndSafePowerWindow(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 1440)) {
 //   //   Settings.energy_max_power_safe_limit_window = (1 == XdrvMailbox.payload) ? SAFE_POWER_WINDOW : XdrvMailbox.payload;
@@ -1924,7 +1924,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_power_safe_limit_window);
 // }
 
-// void mEnergy::CmndMaxEnergy(void)
+// void mEnergyInterface::CmndMaxEnergy(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 3601)) {
 //   //   Settings.energy_max_energy = XdrvMailbox.payload;
@@ -1933,7 +1933,7 @@ void mEnergy::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   // ResponseCmndNumber(Settings.energy_max_energy);
 // }
 
-// void mEnergy::CmndMaxEnergyStart(void)
+// void mEnergyInterface::CmndMaxEnergyStart(void)
 // {
 //   // if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 24)) {
 //   //   Settings.energy_max_energy_start = XdrvMailbox.payload;

@@ -60,7 +60,7 @@ void mShellyDimmer::pre_init(){
 
       ResetToAppMode();
       bool got_version = SendVersion();
-      AddLog_P(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), Shd.dimmer.version_major, Shd.dimmer.version_minor);
+      AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), Shd.dimmer.version_major, Shd.dimmer.version_minor);
       GetSettings();
       SaveSettings();
 
@@ -151,7 +151,7 @@ int8_t mShellyDimmer::Tasker(uint8_t function){
 void mShellyDimmer::RulesEvent_Set_Power(){
 
   
-      AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+      AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
       uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
 
@@ -337,7 +337,7 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
       }
 
       // timeout
-      AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "ShdSerial send timeout"));
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "ShdSerial send timeout"));
   }
   return false;
 

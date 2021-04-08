@@ -11,13 +11,13 @@ void mSettings::SettingsDefault(void)
   stop_flash_rotate = true;
 
    //Serial.println("SettingsDefault");
-  //  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+  //  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
    SystemSettings_DefaultHeader();
   //  Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
     #endif // ENABLE_LOG_LEVEL_INFO
     pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
     boot_status.module_template_used = true;
@@ -31,7 +31,7 @@ void mSettings::SettingsDefault(void)
     
     DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
     #endif// ENABLE_LOG_LEVEL_INFO
     
 }
@@ -107,7 +107,7 @@ DEBUG_LINE;
 
 DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("DefaultBody_System"));
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("DefaultBody_System"));
     #endif// ENABLE_LOG_LEVEL_INFO
 
 DEBUG_LINE;
@@ -375,7 +375,7 @@ void mSettings::SystemSettings_DefaultBody_Power(){
 
 void mSettings::SystemSettings_DefaultBody_Energy(){
 
-  #ifdef USE_ENERGY
+  #ifdef USE_MODULE_ENERGY_INTERFACE
   Settings.energy_usage.energy_power_delta = DEFAULT_POWER_DELTA;
   Settings.energy_usage.energy_power_calibration = HLW_PREF_PULSE;
   Settings.energy_usage.energy_voltage_calibration = HLW_UREF_PULSE;
@@ -409,6 +409,45 @@ void mSettings::SystemSettings_DefaultBody_Energy(){
   Settings.flag_power.voltage_resolution = 0;
   Settings.flag_power.wattage_resolution = 0;
   Settings.flag_power.energy_resolution = ENERGY_RESOLUTION;
+
+  
+//   // Energy
+//   flag.no_power_on_check |= ENERGY_VOLTAGE_ALWAYS;
+//   flag2.current_resolution |= 3;
+// //  flag2.voltage_resolution |= 0;
+// //  flag2.wattage_resolution |= 0;
+//   flag2.energy_resolution |= ENERGY_RESOLUTION;
+//   flag3.dds2382_model |= ENERGY_DDS2382_MODE;
+//   flag3.hardware_energy_total |= ENERGY_HARDWARE_TOTALS;
+//   Settings.param[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
+// //  Settings.energy_power_delta[0] = 0;
+// //  Settings.energy_power_delta[1] = 0;
+// //  Settings.energy_power_delta[2] = 0;
+  Settings.energy_usage.energy_power_calibration = HLW_PREF_PULSE;
+  Settings.energy_usage.energy_voltage_calibration = HLW_UREF_PULSE;
+  Settings.energy_usage.energy_current_calibration = HLW_IREF_PULSE;
+// //  Settings.energy_kWhtoday = 0;
+// //  Settings.energy_kWhyesterday = 0;
+// //  Settings.energy_kWhdoy = 0;
+// //  Settings.energy_min_power = 0;
+// //  Settings.energy_max_power = 0;
+// //  Settings.energy_min_voltage = 0;
+// //  Settings.energy_max_voltage = 0;
+// //  Settings.energy_min_current = 0;
+// //  Settings.energy_max_current = 0;
+// //  Settings.energy_max_power_limit = 0;                            // MaxPowerLimit
+//   Settings.energy_max_power_limit_hold = MAX_POWER_HOLD;
+//   Settings.energy_max_power_limit_window = MAX_POWER_WINDOW;
+// //  Settings.energy_max_power_safe_limit = 0;                       // MaxSafePowerLimit
+//   Settings.energy_max_power_safe_limit_hold = SAFE_POWER_HOLD;
+//   Settings.energy_max_power_safe_limit_window = SAFE_POWER_WINDOW;
+// //  Settings.energy_max_energy = 0;                                 // MaxEnergy
+// //  Settings.energy_max_energy_start = 0;                           // MaxEnergyStart
+// //  Settings.energy_kWhtotal = 0;
+//   RtcSettings.energy_kWhtotal = 0;
+// //  memset((char*)&Settings.energy_usage, 0x00, sizeof(Settings.energy_usage));
+//   memset((char*)&RtcSettings.energy_usage, 0x00, sizeof(RtcSettings.energy_usage));
+//   Settings.param[P_OVER_TEMP] = ENERGY_OVERTEMP;
   #endif
 
 }
@@ -472,20 +511,20 @@ void mSettings::SystemSettings_DefaultBody(void)
 DEBUG_LINE;
   SystemSettings_DefaultBody_System();
 DEBUG_LINE;
-  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time1"));
+  //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time1"));
   SystemSettings_DefaultBody_Network();
 DEBUG_LINE;
-  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Network"));
+  //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Network"));
   SystemSettings_DefaultBody_WebServer();
 DEBUG_LINE;
-  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time2"));
+  //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time2"));
   SystemSettings_DefaultBody_MQTT();
 DEBUG_LINE;
   SystemSettings_DefaultBody_TelePeriods();
 DEBUG_LINE;
   SystemSettings_DefaultBody_Time();
 DEBUG_LINE;
-  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time"));
+  //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Time"));
   SystemSettings_DefaultBody_Weight();
 DEBUG_LINE;
   SystemSettings_DefaultBody_Lighting();
@@ -506,7 +545,7 @@ DEBUG_LINE;
 DEBUG_LINE;
   SystemSettings_DefaultBody_Displays();
 DEBUG_LINE;
-  //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Displays"));
+  //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SystemSettings_DefaultBody_Displays"));
   
   //  Serial.println("SystemSettings_DefaultBody_DONE"); Serial.flush();
 
@@ -562,6 +601,12 @@ DEBUG_LINE;
   //Settings.flag_system.light_signal = 0;
   //Settings.flag_system.not_power_linked = 0;
   //Settings.flag_system.decimal_text = 0;
+  
+// void SettingsEnableAllI2cDrivers(void) {
+  Settings.i2c_drivers[0] = I2CDRIVERS_0_31;
+  Settings.i2c_drivers[1] = I2CDRIVERS_32_63;
+  Settings.i2c_drivers[2] = I2CDRIVERS_64_95;
+// }
   
 
   sprintf(my_hostname,"%s",pCONT_set->Settings.system_name.device);

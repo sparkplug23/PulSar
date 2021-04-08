@@ -56,7 +56,7 @@ void mSettings::SettingsSaveAll(void)
 void mSettings::SettingsLoad(void) {
   
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD));
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD));
   #endif// ENABLE_LOG_LEVEL_INFO
 
 #ifdef ESP8266
@@ -69,25 +69,25 @@ void mSettings::SettingsLoad(void) {
     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
     #endif // ENABLE_LOG_LEVEL_INFO
 
     if ((Settings.cfg_crc32 != 0xFFFFFFFF) && (Settings.cfg_crc32 != 0x00000000) && (Settings.cfg_crc32 == GetSettingsCrc32())) {
       
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc32()| %d==%d"),Settings.cfg_crc32,GetSettingsCrc32());
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc32()| %d==%d"),Settings.cfg_crc32,GetSettingsCrc32());
     #endif // ENABLE_LOG_LEVEL_INFO
       
       if (Settings.save_flag > save_flag) {                 // Find latest page based on incrementing save_flag
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
     #endif // ENABLE_LOG_LEVEL_INFO
      
         save_flag = Settings.save_flag;
         settings_location = flash_location;
         if (Settings.flag_system.stop_flash_rotate && (0 == i)) {  // Stop if only eeprom area should be used and it is valid
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings.flag_system.stop_flash_rotate && (0 == i)"));
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings.flag_system.stop_flash_rotate && (0 == i)"));
     #endif // ENABLE_LOG_LEVEL_INFO
           break;
         }
@@ -99,7 +99,7 @@ void mSettings::SettingsLoad(void) {
   if (settings_location > 0) {
     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu " D_JSON_BOOTCOUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu " D_JSON_BOOTCOUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
     #endif // ENABLE_LOG_LEVEL_INFO
   }
 // #else  // ESP32
@@ -113,13 +113,13 @@ void mSettings::SettingsLoad(void) {
     pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing"),Settings.cfg_holder,SETTINGS_HOLDER);
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing"),Settings.cfg_holder,SETTINGS_HOLDER);
     #endif // ENABLE_LOG_LEVEL_INFO
 
     SettingsDefault();
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " " D_JSON_SUCCESSFUL ));
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " " D_JSON_SUCCESSFUL ));
     #endif // ENABLE_LOG_LEVEL_INFO
   }
   settings_crc32 = GetSettingsCrc32();
@@ -190,13 +190,13 @@ Serial.println("SettingsSave NOT return");
      if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
       stop_flash_rotate = 1;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
     #endif// ENABLE_LOG_LEVEL_INFO
     }
     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
       settings_location = SETTINGS_LOCATION +1;
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
+    //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
     // #endif// ENABLE_LOG_LEVEL_INFO
     }
     if (stop_flash_rotate) {
@@ -204,12 +204,12 @@ Serial.println("SettingsSave NOT return");
     } else {
       settings_location--;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
     #endif// ENABLE_LOG_LEVEL_INFO
       if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
         settings_location = SETTINGS_LOCATION;
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
+      AddLog(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
     #endif // ENABLE_LOG_LEVEL_INFO
       }
     }
@@ -236,7 +236,7 @@ Serial.println("SettingsSave NOT return");
       }
     }
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(Settings));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(Settings));
     #endif// ENABLE_LOG_LEVEL_INFO
 // #else  // ESP32
 //     SettingsWrite(&Settings, sizeof(Settings));
@@ -257,7 +257,7 @@ Serial.println("SettingsSave NOT return");
 
 // void mSettings::SettingsLoad(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD));
 
 //   // Load configuration from eeprom or one of 7 slots below if first valid load does not stop_flash_rotate
 //   struct SYSCFGH {
@@ -279,20 +279,20 @@ Serial.println("SettingsSave NOT return");
 //     flash_location--;
 //     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
 
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
 
 //     // if(Settings.version != 0xFFFFFFFF){
-//     //   AddLog_P(LOG_LEVEL_TEST,PSTR("i=%d version=%X DOES NOT EQUAL tversion=%X"),i,Settings.version,0xFFFFFFFF);
+//     //   AddLog(LOG_LEVEL_TEST,PSTR("i=%d version=%X DOES NOT EQUAL tversion=%X"),i,Settings.version,0xFFFFFFFF);
 //     // }else{
-//     //   AddLog_P(LOG_LEVEL_TEST,PSTR("ELSE ELSE i=%d version=%X tversion=%X"),i,Settings.version,0xFFFFFFFF);
+//     //   AddLog(LOG_LEVEL_TEST,PSTR("ELSE ELSE i=%d version=%X tversion=%X"),i,Settings.version,0xFFFFFFFF);
 //     //   //break;// test
 //     // }
 
 //     bool valid = false;
 //     if((Settings.version > 0x06000000)&&(Settings.version != 0xFFFFFFFF)) {
-//       //AddLog_P(LOG_LEVEL_TEST,PSTR("ESP.flashRead %i IF"),i);
+//       //AddLog(LOG_LEVEL_TEST,PSTR("ESP.flashRead %i IF"),i);
 //       bool almost_valid = (Settings.cfg_crc == GetSettingsCrc());
-//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc()| %d==%d"),Settings.cfg_crc,GetSettingsCrc());
+//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc()| %d==%d"),Settings.cfg_crc,GetSettingsCrc());
 //       // Sometimes CRC on pages below FB, overwritten by OTA, is fine but Settings are still invalid. So check cfg_holder too
 //       if (almost_valid && (0 == cfg_holder)) { cfg_holder = Settings.cfg_holder; }  // At FB always active cfg_holder
 //       valid = (cfg_holder == Settings.cfg_holder);
@@ -305,11 +305,11 @@ Serial.println("SettingsSave NOT return");
 //         // catch when memory is all 1's and not 0
 //         valid = false;
 //       }
-//       AddLog_P(LOG_LEVEL_TEST,PSTR("flashRead ELSE %d %d %d"),valid,Settings.cfg_holder,_SettingsH.cfg_holder);
+//       AddLog(LOG_LEVEL_TEST,PSTR("flashRead ELSE %d %d %d"),valid,Settings.cfg_holder,_SettingsH.cfg_holder);
 //     }
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " ESP.flashRead valid=%d"),valid);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " ESP.flashRead valid=%d"),valid);
 //     if (valid) {
-//       AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
+//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
 //       if (Settings.save_flag > save_flag) {
 //         save_flag = Settings.save_flag;
 //         settings_location = flash_location;
@@ -346,10 +346,10 @@ Serial.println("SettingsSave NOT return");
   
 //   if (settings_location > 0) {
 //     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu" D_BOOT_COUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu" D_BOOT_COUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
 //   }
 //   // else{    
-//   //   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s>%d"), "settings_location",settings_location);
+//   //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s>%d"), "settings_location",settings_location);
 //   // }
 
 //   #ifndef FIRMWARE_MINIMAL
@@ -357,7 +357,7 @@ Serial.println("SettingsSave NOT return");
 //     //Settings.seriallog_level = LOG_LEVEL_ALL;
 //     pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
     
-//     AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing settings"),Settings.cfg_holder,SETTINGS_HOLDER);
+//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing settings"),Settings.cfg_holder,SETTINGS_HOLDER);
 
 //     // Clear system defaults
 //     SettingsDefault();
@@ -406,20 +406,20 @@ Serial.println("SettingsSave NOT return");
 // //DEBUG_LINE_HERE;
 //     if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
 //       stop_flash_rotate = 1;
-//       //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
+//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
 //     }
 //     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
 //       settings_location = SETTINGS_LOCATION +1;
-//       //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
+//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
 //     }
 //     if (stop_flash_rotate) {
 //       settings_location = SETTINGS_LOCATION;
 //     } else {
 //       settings_location--;
-//       //AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
+//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
 //       if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
 //         settings_location = SETTINGS_LOCATION;
-//       //AddLog_P(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
+//       //AddLog(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
 //       }
 //     }
 //     Settings.save_flag++;
@@ -451,9 +451,9 @@ Serial.println("SettingsSave NOT return");
 // // ESP.wdtDisable();
 // //DEBUG_LINE_HERE;
 //     // settings_location = SETTINGS_LOCATION;
-// //     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
+// //     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
 
-// // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
+// // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
 
 // // Serial.flush();
 // // delay(1000);
@@ -466,7 +466,7 @@ Serial.println("SettingsSave NOT return");
 //   }
 // #endif
 
-// // AddLog_P(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
+// // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
 // // ESP.wdtFeed();
 // // delay(1000);
 
@@ -484,7 +484,7 @@ Serial.println("SettingsSave NOT return");
 //       }
 //     }
 
-//     AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(SYSCFG));
+//     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(SYSCFG));
 
 //     settings_crc = Settings.cfg_crc;
 //   }
@@ -529,7 +529,7 @@ void mSettings::SettingsErase(uint8_t type)
   bool _serialoutput = (LOG_LEVEL_DEBUG_MORE <= seriallog_level);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " %d " D_UNIT_SECTORS), _sectorEnd - _sectorStart);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " %d " D_UNIT_SECTORS), _sectorEnd - _sectorStart);
     #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint32_t _sector = _sectorStart; _sector < _sectorEnd; _sector++) {

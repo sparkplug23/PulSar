@@ -18,7 +18,7 @@ void mDoorBell::pre_init(void){
     pin_doorbell_button = pCONT_pins->GetPin(GPIO_CHIME_INPUT_ID);
     pinMode(pin_doorbell_button,INPUT_PULLUP);
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_doorbell_button);
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_doorbell_button);
     //disable pir code
   }
 
@@ -27,7 +27,7 @@ void mDoorBell::pre_init(void){
     pinMode(pin_relay_chime,OUTPUT);
     digitalWrite(pin_relay_chime,HIGH); //active low
   }else{
-    AddLog_P(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_relay_chime);
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_relay_chime);
     //disable pir code
   }
 
@@ -55,7 +55,7 @@ void mDoorBell::RingDoorBellSet(uint8_t seconds, uint16_t freq){
   ringer.end_millis = millis()+(seconds*1000);
   ringer.freq = freq;
   ringer.seconds = seconds;
-  AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Set"));
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Set"));
   memcpy(ringer.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
 }
 
@@ -72,20 +72,20 @@ uint8_t mDoorBell::RingDoorBellLoop(uint8_t reset){
         ringer.closed_millis_end = millis()+500;
       }
       ringer.toggle_millis = millis()+(ringer.freq);//*500); //set new toggle millis
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Toggled"));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Toggled"));
     }
 
     //timeout/finished reset
     if(mTime::MillisReached(&ringer.end_millis)){
       BellChime_Set(BELLCHIME_OFF); // turn off
       ringer.fIsRinging = false;
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.end_millis"));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.end_millis"));
     }
 
     //Only have relay on for short time
     if(mTime::TimeReached(&ringer.closed_millis_end,500)){
       //BELLCHIME_SET(BELLCHIME_OFF); // turn off
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.closed_millis_end"));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Ended ringer.closed_millis_end"));
     }
 
   }
@@ -165,7 +165,7 @@ int8_t mDoorBell::Tasker(uint8_t function){
 
 void mDoorBell::EveryLoop(){
 
-  AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR("Tasker::mDoorBell"));
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Tasker::mDoorBell"));
 
   if((BellSwitch_OnOff()!=doorbell_switch.state)
       &&mTime::TimeReachedNonReset(&doorbell_switch.tDetectTimeforDebounce,100)

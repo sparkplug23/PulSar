@@ -29,7 +29,7 @@
 
 #include "2_CoreSystem/Time/mTime.h"
 
-enum ButtonStates { PRESSED, NOT_PRESSED };
+enum ButtonStates { BUTTON_PRESSED_ID, BUTTON_NOT_PRESSED_ID };
 
 DEFINE_PGM_CTR(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR) "button_table";
 
@@ -74,7 +74,7 @@ uint16_t holdbutton[MAX_KEYS] = { 0 };      // Timer for button hold
 uint16_t dual_button_code = 0;              // Sonoff dual received code
 
 
-uint8_t lastbutton[MAX_KEYS] = { NOT_PRESSED, NOT_PRESSED, NOT_PRESSED, NOT_PRESSED };  // Last button states
+uint8_t lastbutton[MAX_KEYS] = { BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID };  // Last button states
 uint8_t multiwindow[MAX_KEYS] = { 0 };      // Max time between button presses to record press count
 uint8_t multipress[MAX_KEYS] = { 0 };       // Number of button presses within multiwindow
 

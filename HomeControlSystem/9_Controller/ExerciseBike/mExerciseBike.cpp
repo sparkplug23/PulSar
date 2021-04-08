@@ -6,7 +6,7 @@ mExerciseBike::mExerciseBike(void){}
 
 void mExerciseBike::init(void){
   
-  // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::init");
+  // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::init");
 
 //   light_control_driveway.enabled_starttime.Mday = 6; // set to today with __DATE__ later
 //   light_control_driveway.enabled_starttime.month = mTime::MONTH_AUGUST;
@@ -81,10 +81,10 @@ void mExerciseBike::Tasker(uint8_t function){
       //   pCONT->mms->pir_detect.state = PIR_DETECTED();
       //   pCONT->mms->pir_detect.tDetectTime = millis();
       //   if(pCONT->mms->pir_detect.state){ 
-      //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "MOTION pir_detect \"%s\""),D_ON);
+      //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "MOTION pir_detect \"%s\""),D_ON);
       //     pCONT->mms->pir_detect.isactive = true;
       //   }else{ 
-      //     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "MOTION pir_detect \"%s\""),D_OFF);
+      //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "MOTION pir_detect \"%s\""),D_OFF);
       //     pCONT->mms->pir_detect.isactive = false;
       //   }
       //   pCONT->mms->pir_detect.ischanged = true;
@@ -156,17 +156,17 @@ void mExerciseBike::SubTask_Light(){
 //   // Automatic
 //   if(pir_detect_copy.ischanged){ pir_detect_copy.ischanged=false;
 
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::SubTask_Light");
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::SubTask_Light");
 
 //     //driveway
 //     if(pir_detect_copy.isactive && light_control_driveway.fEnableAutomaticLight){
-//       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
+//       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"if(pir_detect.isactive");
 //       if(pCONT_time->CheckBetween_Day_DateTimes(&light_control_driveway.enabled_starttime,&light_control_driveway.enabled_endtime)){
 //         SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
 //       }else{
 //         //SetLight(LIGHT_DRIVEWAY_ID,OFF);
-//         AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"NOT SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
+//         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"NOT SetLight(LIGHT_DRIVEWAY_ID,TIMED_ON);");
 //       }
 //     }
 
@@ -193,25 +193,25 @@ void mExerciseBike::SubTask_Light(){
 //   if(mTime::TimeReached(&tSavedSeconds,1000)){
 //     if(light_control_driveway.seconds_on>0){ 
 //       light_control_driveway.seconds_on--;
-//       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
+//       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
 //       SetLight(LIGHT_DRIVEWAY_ID,ON);
 //       //fForceMQTTUpdate = true;
 //     }else if(light_control_driveway.seconds_on==0){
 //       light_control_driveway.seconds_on = -1; //stop
 //       //fForceMQTTUpdate = true;
-//       AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
+//       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_driveway.seconds_on",light_control_driveway.seconds_on);
 //       SetLight(LIGHT_DRIVEWAY_ID,OFF);
 //     }
 
 //     // if(light_control_garden.seconds_on>0){
 //     //   light_control_garden.seconds_on--;
-//     //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+//     //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
 //     //   SetLight(LIGHT_GARDEN_ID,ON);
 //     //   fForceMQTTUpdate = true;
 //     // }else if(light_control_garden.seconds_on==0){
 //     //   light_control_garden.seconds_on = -1; //stop
 //     //   fForceMQTTUpdate = true;
-//     //   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
+//     //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"light_control_garden.seconds_on",light_control_garden.seconds_on);
 //     //   SetLight(LIGHT_GARDEN_ID,OFF);
 //     // }
 //   }
@@ -233,7 +233,7 @@ void mExerciseBike::SetLight(uint8_t light_id, uint8_t state){
 //   }
 
 //   if(state==TIMED_ON){
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_SVALUE),"state","TIMED_ON");     
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_SVALUE),"state","TIMED_ON");     
 //     state = ON; // For relay call
 //     switch(light_id){
 //       case LIGHT_DRIVEWAY_ID: light_control_driveway.seconds_on = 60; break;
@@ -241,7 +241,7 @@ void mExerciseBike::SetLight(uint8_t light_id, uint8_t state){
 //     }
 //   }
 
-//   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"relay_id",relay_id);      
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION D_JSON_COMMAND_NVALUE),"relay_id",relay_id);      
 
 //   if(relay_id>=0){ //if found
 //     pCONT->mry->CommandSet_Relay_Power(relay_id,state);
@@ -261,7 +261,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
   
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/garagelights")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "/garagelights"));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND "/garagelights"));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return 0; // not meant for here
@@ -271,24 +271,24 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
   u
   int8_t device_id;
 
-  // AddLog_P(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::parse_JSONCommand()");
+  // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_GARAGE D_DEBUG_FUNCTION "\"%s\""),"mExerciseBike::parse_JSONCommand()");
 
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE "Command: " "\"%s\""),data_buffer.payload.ctr);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE "Command: " "\"%s\""),data_buffer.payload.ctr);
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   if(error){
-    AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_JSON_DESERIALIZATION_ERROR));
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_JSON_DESERIALIZATION_ERROR));
     Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
     return 0;
   }
   JsonObject obj = doc.as<JsonObject>();
   
 //   if((device_id = pCONT->mry->GetRelayIDbyName(obj[D_JSON_DEVICE]))>=0){
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_DEVICE,device_id);
 //     Response_mP(S_JSON_COMMAND_NVALUE, D_DEVICE,device_id);
 //   }else{
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
 //     Response_mP(S_JSON_COMMAND_SVALUE, D_DEVICE,D_PARSING_NOMATCH);
 //     return 0; // Unknown device, can't execute
 //   }
@@ -300,7 +300,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
 //   if(obj.containsKey(D_JSON_TIME_ON)){
 //     light_control_ptr->seconds_on = obj[D_JSON_TIME_ON];
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,light_control_ptr->seconds_on);
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_TIME_ON,light_control_ptr->seconds_on);
 //     Response_mP(S_JSON_COMMAND_NVALUE, D_JSON_TIME_ON,light_control_ptr->seconds_on);
 //     isserviced++;
 //   }
@@ -308,17 +308,17 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 //   if(obj.containsKey(D_JSON_ONOFF)){
 //     const char* onoff = obj[D_JSON_ONOFF];
 //     if(strstr(onoff,"ON")){ 
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"ON\""));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"ON\""));
 //       SetLight(device_id,ON);
 //       isserviced++;
 //     }else if(strstr(onoff,"OFF")){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_GARAGE D_PARSING_MATCHED "\"onoff\"=\"OFF\""));
 //       SetLight(device_id,OFF);
 //       isserviced++;
 //     }else{
-//       AddLog_P(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
+//       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_GARAGE D_PARSING_NOMATCH));
 //     }
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ONOFF,onoff);
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_GARAGE D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_ONOFF,onoff);
 //     Response_mP(S_JSON_COMMAND_SVALUE,D_JSON_ONOFF,onoff);
 //     isserviced++;
 //   }

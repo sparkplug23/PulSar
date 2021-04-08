@@ -62,7 +62,7 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
-      AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
@@ -108,10 +108,10 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
     const char* command = obj["manual"];
     
     if(strstr(command,"up")){  //pCONT->mso->println("MATCHED>> up");
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"UP");
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"UP");
       pCONT->mdhb->MoveMotorPulse(1,300);// 1=up,300ms
     }else if(strstr(command,"down")){  //pCONT->mso->println("MATCHED>> down");
-      AddLog_P(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"DOWN");
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"DOWN");
       pCONT->mdhb->MoveMotorPulse(0,300);// 1=up,300ms
     }
     // else if(strstr(command,"vals")){ pCONT->mso->print("MATCHED>> vals");  
@@ -596,7 +596,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
   
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here

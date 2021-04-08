@@ -86,12 +86,21 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
   #endif
+  #ifdef USE_MODULE_DRIVERS_BUZZER
+    pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();
+  #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
-    pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new mEnergy();
+    pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new mEnergyInterface();
   #endif
-  #ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
-    pModule[EM_MODULE_ENERGY_PZEM004T_MODBUS_ID] = new mPzem_AC();
+  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+    pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID] = new mEnergyPZEM004T();
+  #endif
+  #ifdef USE_MODULE_ENERGY_ADE7953
+    pModule[EM_MODULE_ENERGY_ADE7953_ID] = new mEnergyADE7953();
+  #endif
+  #ifdef USE_MODULE_ENERGY_INA219
+    pModule[EM_MODULE_ENERGY_INA219_ID] = new X();
   #endif
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -128,9 +137,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_DS18B20
     pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mSensorsDB18();
   #endif
-  #ifdef USE_MODULE_SENSORS_INA219
-    pModule[EM_MODULE_SENSORS_INA219_ID] = new X();
-  #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new mUltraSonicSensor();
   #endif
@@ -145,6 +151,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
     pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_SENSORS_PRESENCE
+    pModule[EM_MODULE_SENSORS_PRESENCE_ID] = new mPresence();
   #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -193,7 +202,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
   if(target_tasker){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -207,7 +216,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
     switch_index = target_tasker ? target_tasker : i;
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
@@ -232,17 +241,17 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     #endif
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
     #endif
     #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       if(this_millis > 500){
-        AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       }
     #endif
 
     if(target_tasker!=0){
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
       #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
@@ -250,7 +259,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     if(fExitTaskerWithCompletion){
       fExitTaskerWithCompletion=false;
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog_P(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
       #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
@@ -283,7 +292,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   
   DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
   return result;
@@ -310,7 +319,7 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c){
   if(c=='\0'){ return -1; }
   for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
-      //AddLog_P(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pModule[ii]->GetModuleFriendlyName(),ii);
+      //AddLog(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pModule[ii]->GetModuleFriendlyName(),ii);
       return ii;
     }    
   }

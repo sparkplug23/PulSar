@@ -196,7 +196,7 @@
 // //#endif
 // // Energy (Range 130-139
 // //#ifdef USE_MODULE_ENERGY_INTERFACE
-//   #define D_INTERFACE_ENERGY_MODULE_CTR              "mEnergy"
+//   #define D_INTERFACE_ENERGY_MODULE_CTR              "mEnergyInterface"
 //   #define D_INTERFACE_ENERGY_MODULE_FRIENDLY_CTR     "energy"
 // //#endif
 // // Lights (Range 140-169
@@ -234,9 +234,9 @@
 //   #define D_MODULE_SENSORS_DOORBELL_CTR              "mDoorBell"
 //   #define D_MODULE_SENSORS_DOORBELL_FRIENDLY_CTR              "doorbell"
 // //#endif
-// //#ifdef USE_MODULE_ENERGY_PZEM004T_MODBUS
-//   #define D_MODULE_SENSORS_PZEM004T_MODBUS_CTR              "mPzem_AC"
-//   #define D_MODULE_SENSORS_PZEM004T_MODBUS_FRIENDLY_CTR              "powermeter_pzem"
+// //#ifdef USE_MODULE_ENERGY_PZEM004T_V3
+//   #define D_MODULE_SENSORS_PZEM004T_V3_CTR              "mEnergyPZEM004T"
+//   #define D_MODULE_SENSORS_PZEM004T_V3_FRIENDLY_CTR              "powermeter_pzem"
 // //#endif
 // //#ifdef USE_MODULE_SENSORS_DHT
 //   #define D_MODULE_SENSORS_DHT_CTR               "mSensorsDHT"
@@ -251,7 +251,7 @@
 //   #define D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR              "db18s20"
 // //#endif
 // //#ifdef USE_MODULE_SENSORS_DS18B20
-//   #define D_MODULE_SENSORS_INA219_CTR              "mSensorsINA219"
+//   #define D_MODULE_SENSORS_INA219_CTR              "mEnergyINA219"
 //   #define D_MODULE_SENSORS_INA219_FRIENDLY_CTR              "ina219"
 // //#endif
 // //#ifdef USE_MODULE_SENSORS_ULTRASONICS

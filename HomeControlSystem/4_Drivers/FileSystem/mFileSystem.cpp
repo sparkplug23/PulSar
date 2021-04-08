@@ -85,7 +85,7 @@ struct {
 
 // // Init flash file system
 void mFileSystem::UfsInitOnce(void) {
-  AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInitOnce"));
+  AddLog(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInitOnce"));
   ufs_type = 0;
   ffsp = 0;
   ufs_dir = 0;
@@ -93,11 +93,11 @@ void mFileSystem::UfsInitOnce(void) {
 #ifdef ESP8266
   ffsp = &LittleFS;
   if (!LittleFS.begin()) {
-  	AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: !LittleFS.begin()"));
+  	AddLog(LOG_LEVEL_INFO, PSTR("UFS: !LittleFS.begin()"));
     ffsp = 0;
     return;
   }
-  AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: LittleFS.begin()"));
+  AddLog(LOG_LEVEL_INFO, PSTR("UFS: LittleFS.begin()"));
 #endif  // ESP8266
 
 // #ifdef ESP32
@@ -124,11 +124,11 @@ void mFileSystem::UfsInitOnce(void) {
 
 // Called from tasmota.ino at restart. This inits flash file only
 void mFileSystem::UfsInit(void) {
-  AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInit"));
+  AddLog(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInit"));
   UfsData.run_file_pos = -1;
   UfsInitOnce();
   if (ufs_type) {
-    AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: FlashFS mounted with %d kB free"), UfsInfo(1, 0));
+    AddLog(LOG_LEVEL_INFO, PSTR("UFS: FlashFS mounted with %d kB free"), UfsInfo(1, 0));
   }
 }
 
@@ -162,10 +162,10 @@ void mFileSystem::UfsInit(void) {
 //       // make sd card the global filesystem
 // #ifdef ESP8266
 //       // on esp8266 sdcard info takes several seconds !!!, so we ommit it here
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: SDCard mounted"));
+//       AddLog(LOG_LEVEL_INFO, PSTR("UFS: SDCard mounted"));
 // #endif // ESP8266
 // #ifdef ESP32
-//       AddLog_P(LOG_LEVEL_INFO, PSTR("UFS: SDCard mounted with %d kB free"), UfsInfo(1, 0));
+//       AddLog(LOG_LEVEL_INFO, PSTR("UFS: SDCard mounted with %d kB free"), UfsInfo(1, 0));
 // #endif // ESP32
 //     }
 //   }
@@ -273,7 +273,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 
 //   bool yes = ffsp->exists(fname);
 //   if (!yes) {
-//     AddLog_P(LOG_LEVEL_DEBUG, PSTR("TFS: File not found"));
+//     AddLog(LOG_LEVEL_DEBUG, PSTR("TFS: File not found"));
 //   }
 //   return yes;
 // }
@@ -283,7 +283,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 
 //   File file = ffsp->open(fname, "w");
 //   if (!file) {
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("TFS: Save failed"));
+//     AddLog(LOG_LEVEL_INFO, PSTR("TFS: Save failed"));
 //     return false;
 //   }
 
@@ -297,7 +297,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 
 //   File file = ffsp->open(fname, "w");
 //   if (!file) {
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("TFS: Erase failed"));
+//     AddLog(LOG_LEVEL_INFO, PSTR("TFS: Erase failed"));
 //     return false;
 //   }
 
@@ -314,7 +314,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 
 //   File file = ffsp->open(fname, "r");
 //   if (!file) {
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("TFS: File not found"));
+//     AddLog(LOG_LEVEL_INFO, PSTR("TFS: File not found"));
 //     return false;
 //   }
 
@@ -327,7 +327,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 //   if (!ffs_type) { return false; }
 
 //   if (!ffsp->remove(fname)) {
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("TFS: Delete failed"));
+//     AddLog(LOG_LEVEL_INFO, PSTR("TFS: Delete failed"));
 //     return false;
 //   }
 //   return true;
@@ -337,7 +337,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 //   if (!ffs_type) { return false; }
 
 //   if (!ffsp->rename(fname1, fname2)) {
-//     AddLog_P(LOG_LEVEL_INFO, PSTR("TFS: Rename failed"));
+//     AddLog(LOG_LEVEL_INFO, PSTR("TFS: Rename failed"));
 //     return false;
 //   }
 //   return true;
@@ -801,7 +801,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 // // //       if (action != GetFanspeed()) {
 // // //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 // // //         ExecuteCommand(svalue, SRC_REMOTE);
-// // // #ifdef USE_BUZZER
+// // // #ifdef USE_MODULE_DRIVERS_BUZZER
 // // //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // // // #endif
 // // //       }
@@ -816,7 +816,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 // // //   }
 // // //   if (7 == mode) {
 // // //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// // // #ifdef USE_BUZZER
+// // // #ifdef USE_MODULE_DRIVERS_BUZZER
 // // //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // // // #endif
 // // //   }
@@ -1068,7 +1068,7 @@ int8_t mFileSystem::Tasker(uint8_t function){
 
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-//       AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
 //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //       parse_JSONCommand(obj);
 //       return FUNCTION_RESULT_HANDLED_ID;
@@ -1205,8 +1205,8 @@ void mFileSystem::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     //   speed=0; //default off
 //     // }      
 //     // SetFanSpeed(speed, false);
-//     // AddLog_P(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
 //     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
 //     // isserviced++;
 //   }
@@ -1280,7 +1280,7 @@ void mFileSystem::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // void mFileSystem::WebCommand_Parse(void)
 // {
-//   AddLog_P(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
+//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
 
 //   char tmp[100];
 
@@ -1298,9 +1298,9 @@ void mFileSystem::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //     test_val = arg_value;
 
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //       analogWrite(pin, test_val);
-//     // AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
 //     // SetRefreshLEDs();
 //   }
 

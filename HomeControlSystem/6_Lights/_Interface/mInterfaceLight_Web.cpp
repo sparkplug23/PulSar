@@ -507,7 +507,7 @@ void mInterfaceLight::GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g
   // DEBUG_LINE;
   // if(stripbus == nullptr){    
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog_P(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "stripbus == nullptr"));
+  //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "stripbus == nullptr"));
   //   #endif
   // }
   // RgbTypeColor color_hardware = stripbus->GetPixelColor(indexPixel);
@@ -553,7 +553,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //     if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //       pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//       AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 
 //       // new_color[i] = arg_value;
 
@@ -601,7 +601,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //    // SetColour_Hue(arg_value);
 // CommandSet_Hue360(arg_value);
 //     // UpdateSetOutputs();
@@ -612,7 +612,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 
 
 // arg_value = map(arg_value, 0,100, 0,255);
@@ -626,7 +626,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // arg_value = map(arg_value, 0,100, 0,255);
 //     CommandSet_BrtRGB255(arg_value);
     
@@ -639,7 +639,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 //     CommandSet_ColourTemp(arg_value);
 //     // UpdateSetOutputs();
 //     // LightSetOutputs2();
@@ -649,7 +649,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // arg_value = map(arg_value, 0,100, 0,255);
 //     CommandSet_BrtCT255(arg_value);
 //     // UpdateSetOutputs();
@@ -660,7 +660,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // // arg_value = map(arg_value, 0,100, 0,255);
 // //     CommandSet_BrtCT255(arg_value);
 //     // UpdateSetOutputs();
@@ -672,7 +672,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 //   if(pCONT_web->request_web_command->hasParam(arg_ctr)) {
 //     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
+//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
 // // arg_value = map(arg_value, 0,100, 0,255);
 //     if(Get_RGBCT_Linked()){
 //         CommandSet_RGBCT_Linked(false);

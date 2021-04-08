@@ -36,13 +36,13 @@ int8_t mTime::Tasker(uint8_t function){
 
       if(mTime::TimeReached(&tSavedUptime,show_time_rate*1000)){ // 10 secs then 60 secs
         // #ifdef ENABLE_LOG_LEVEL_INFO
-        //     AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "%s"),uptime.hhmmss_ctr);    
+        //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "%s"),uptime.hhmmss_ctr);    
         // #endif// ENABLE_LOG_LEVEL_INFO
       }
 
       if(mTime::TimeReached(&testtime,1)){ // 10 secs then 60 secs
-        // AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "TEST %s"),uptime.hhmmss_ctr);    
-        // AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
+        // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "TEST %s"),uptime.hhmmss_ctr);    
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
         //       pCONT_sup->DebugFreeMem();
         
         #ifndef DISABLE_SERIAL_LOGGING
@@ -96,7 +96,7 @@ int8_t mTime::Tasker(uint8_t function){
       memset(message,0,sizeof(message));
       sprintf_P(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"), uptime.hhmmss_ctr);
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog_P(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
+      AddLog(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
     #endif// ENABLE_LOG_LEVEL_INFO
       pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
     }
@@ -179,11 +179,11 @@ bool mTime::CheckOrStartNTPService(){
   if(RtcTime.valid){
     fTimeSet = true;
     RtcTime.isvalid = true;
-    //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = true"));
+    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = true"));
   }else{
     fTimeSet = false;
     RtcTime.isvalid = false;
-    //AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = false"));
+    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = false"));
   }
 
   RtcTime.isvalid = true;
@@ -300,7 +300,7 @@ void mTime::UpdateStoredRTCVariables(void){
   RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG_MORE,
+  AddLog(LOG_LEVEL_DEBUG_MORE,
     PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
     RtcTime.Mday,RtcTime.month,RtcTime.year,
     RtcTime.Wday,RtcTime.hour,RtcTime.minute,RtcTime.second,
@@ -347,7 +347,7 @@ void mTime::TickRTCVariablesWithUptime(void){
   // RtcTime.Wseconds = (RtcTime.Wday*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
   // RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
 
-  // AddLog_P(LOG_LEVEL_DEBUG_MORE,
+  // AddLog(LOG_LEVEL_DEBUG_MORE,
   //   PSTR(D_LOG_TIME "%02d/%02d/%02d W%02dT%02d:%02d:%02d secs=(%02d,%02d,%02d)"),
   //   RtcTime.Mday,RtcTime.month,RtcTime.year,
   //   RtcTime.Wday,RtcTime.hour,RtcTime.minute,RtcTime.second,
@@ -376,7 +376,7 @@ uint32_t mTime::UpTime(void)
 void mTime::ResetRebootCounter(){
   
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPTIME D_ERROR_UNSUPPORTED "\"rebootinfo\"" ));
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_UPTIME D_ERROR_UNSUPPORTED "\"rebootinfo\"" ));
     #endif// ENABLE_LOG_LEVEL_INFO
   // rebootinfo.count = 0;
   
@@ -453,7 +453,7 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
       (strlen(time_ctr)!=11) && 
       (time_ctr[2]!='D')
     ){
-      AddLog_P(LOG_LEVEL_TEST, PSTR("Invalid time"));
+      AddLog(LOG_LEVEL_TEST, PSTR("Invalid time"));
       return time_s;
     }
   }else{
@@ -464,7 +464,7 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
       return time_s;
     }
     includes_week = false;
-    AddLog_P(LOG_LEVEL_TEST, PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
+    AddLog(LOG_LEVEL_TEST, PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
   }
 
   if(includes_week){
@@ -543,7 +543,7 @@ uint8_t mTime::CheckBetween_Week_DateTimes(datetime_t* start, datetime_t* end){
   int32_t time_until_end = end_sow-RtcTime.Wseconds;
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Week_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Week_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
     start->hour,start->minute,start->second,time_until_start,
     RtcTime.Dseconds,
     time_until_end,end->hour,end->minute,end->second
@@ -571,13 +571,13 @@ uint8_t mTime::CheckBetween_Day_DateTimes(datetime_t* start, datetime_t* end){
   // #ifdef SERIAL_DEBUG_HIGH_LEVEL
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
       start->hour,start->minute,start->second,time_until_start,
       RtcTime.Dseconds,
       time_until_end,end->hour,end->minute,end->second
     ); 
     
-    AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d<%02d (%02d) | %02d<%02d (%02d)"),
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_TIME "CheckBetween_Day_DateTimes " "%02d<%02d (%02d) | %02d<%02d (%02d)"),
       start_sod,RtcTime.Dseconds,(start_sod < RtcTime.Dseconds?1:0),
       RtcTime.Dseconds,end_sod,(RtcTime.Dseconds < end_sod)?1:0
     );
@@ -607,11 +607,11 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
   //need to add check if start>end, then add 24 hours
   if(end_sod < start_sod){
     end_sod += SECS_PER_DAY;
-    AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
   }
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog_P(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
     start->hour,start->minute,start->second,time_until_start,
     RtcTime.Dseconds,
     time_until_end,end->hour,end->minute,end->second
@@ -765,7 +765,7 @@ void mTime::PrintDateTime(time_short_t dt){
 
   char buffer[40];memset(buffer,0,sizeof(buffer));
   sprintf_P(buffer, PSTR("W%02d T%02d:%02d:%02d"), dt.Wday, dt.hour, dt.minute, dt.second);
-  AddLog_P(LOG_LEVEL_TEST,PSTR("PrintDateTime>\"%s\""),buffer);
+  AddLog(LOG_LEVEL_TEST,PSTR("PrintDateTime>\"%s\""),buffer);
   
 }
 
@@ -974,7 +974,7 @@ const char* mTime::GetBuildDateAndTime(char* buffer, uint8_t buflen)
 
 
   // sprintf(bdt, PSTR("%sT%s\0"),mdate,mday);
-  // AddLog_P(LOG_LEVEL_TEST,PSTR("bdt=%s"));
+  // AddLog(LOG_LEVEL_TEST,PSTR("bdt=%s"));
 
   // return bdt;  // 2017-03-07T11:08:02
   return buffer;//PSTR("bdt");  // 2017-03-07T11:08:02
@@ -1590,7 +1590,7 @@ void mTime::RtcSecond(void)
     int16_t timezone_minutes = pCONT_set->Settings.timezone_minutes;
     if (pCONT_set->Settings.timezone < 0) { timezone_minutes *= -1; }
     Rtc.time_timezone = (pCONT_set->Settings.timezone * SECS_PER_HOUR) + (timezone_minutes * SECS_PER_MIN);
-      // AddLog_P(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.timezone=%d"),pCONT_set->Settings.timezone);
+      // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.timezone=%d"),pCONT_set->Settings.timezone);
     if (99 == pCONT_set->Settings.timezone) {
       int32_t dstoffset = pCONT_set->Settings.toffset[1] * SECS_PER_MIN;
       int32_t stdoffset = pCONT_set->Settings.toffset[0] * SECS_PER_MIN;
@@ -1610,7 +1610,7 @@ void mTime::RtcSecond(void)
         }
       }
     }
-      // AddLog_P(LOG_LEVEL_TEST,PSTR("Rtc.time_timezone=%d"),Rtc.time_timezone);
+      // AddLog(LOG_LEVEL_TEST,PSTR("Rtc.time_timezone=%d"),Rtc.time_timezone);
     Rtc.local_time += Rtc.time_timezone;
     Rtc.time_timezone /= 60;
     // if (!pCONT_set->Settings.energy_kWhtotal_time) {
@@ -1640,7 +1640,7 @@ void mTime::RtcSecond(void)
 void mTime::RtcSync(void) {
   // Rtc.time_synced = true;
   RtcSecond();
- AddLog_P(LOG_LEVEL_TEST, PSTR("RTC: Synced"));
+ AddLog(LOG_LEVEL_TEST, PSTR("RTC: Synced"));
 }
 
 void mTime::RtcSetTime(uint32_t epoch)
@@ -1681,16 +1681,16 @@ void mTime::RtcInit(void)
 void mTime::WifiPollNtp() {
   static uint8_t ntp_sync_minute = 0;
 
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("gWifiPollNtp"));
+    // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp"));
   // if (TasmotaGlobal.global_state.network_down || Rtc.user_time_entry) { return; }
   if(pCONT_set->global_state.wifi_down){ 
     
     
-    AddLog_P(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
     
     return ; }
     
-    // AddLog_P(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
+    // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
 
   uint8_t uptime_minute = (pCONT_set->uptime / 60) % 60;  // 0 .. 59
   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
@@ -1701,11 +1701,11 @@ void mTime::WifiPollNtp() {
   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
        pCONT_set->ntp_force_sync ) ) {                                          // Forced sync
- AddLog_P(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
+ AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
 
     pCONT_set->ntp_force_sync = false;
     uint32_t ntp_time = WifiGetNtp();
-    AddLog_P(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
+    AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
 
     if (ntp_time > START_VALID_TIME) {
       pCONT_time->Rtc.utc_time = ntp_time;
@@ -1745,11 +1745,11 @@ uint32_t mTime::WifiGetNtp(void) {
     if (ntp_server_id > 2) { ntp_server_id = 0; }
   }
   if (!resolved_ip) {
-    AddLog_P(LOG_LEVEL_TEST, PSTR("NTP: No server found"));
+    AddLog(LOG_LEVEL_TEST, PSTR("NTP: No server found"));
     return 0;
   }
 
-  AddLog_P(LOG_LEVEL_TEST, PSTR("NTP: Name %s, IP %s"), ntp_server, time_server_ip.toString().c_str());
+  AddLog(LOG_LEVEL_TEST, PSTR("NTP: Name %s, IP %s"), ntp_server, time_server_ip.toString().c_str());
 
   WiFiUDP udp;
 
@@ -1801,7 +1801,7 @@ uint32_t mTime::WifiGetNtp(void) {
       if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
         // Leap-Indicator: unknown (clock unsynchronized)
         // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
-        AddLog_P(LOG_LEVEL_TEST, PSTR("NTP: IP %s unsynched"), time_server_ip.toString().c_str());
+        AddLog(LOG_LEVEL_TEST, PSTR("NTP: IP %s unsynched"), time_server_ip.toString().c_str());
         return 0;
       }
 
@@ -1819,7 +1819,7 @@ uint32_t mTime::WifiGetNtp(void) {
     delay(10);
   }
   // Timeout.
-  AddLog_P(LOG_LEVEL_DEBUG, PSTR("NTP: No reply"));
+  AddLog(LOG_LEVEL_DEBUG, PSTR("NTP: No reply"));
   udp.stop();
   return 0;
 }
