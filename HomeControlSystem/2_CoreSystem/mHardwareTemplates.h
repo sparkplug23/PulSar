@@ -122,7 +122,7 @@ enum USER_SELECTABLE_PINS_StaticCompleteList_IDS {
   // Shelly 2.5 Energy Sensor with I2C
   GPIO_ADE7953_IRQ_ID,
   // Shelly Dimmer 2 MCU
-  GPIO_SHELLY2_SHD_BOOT0_ID, GPIO_SHELLY2_SHD_RESET_ID,
+  GPIO_SHELLY2_SHD_BOOT0_ID, GPIO_SHELLY2_SHD_RESET_INV_ID,
   // ADC options
   GPIO_ADC0_TEMPERATURE_ID,
   
@@ -1031,7 +1031,7 @@ const mytmplt kModules[MODULE_MAXMODULE] PROGMEM = {
     0,                         // GPIO02 None 
     GPIO_HWSERIAL0_RX_ID,      // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
     GPIO_SHELLY2_SHD_BOOT0_ID, // GPIO04 SHD Boot 0 
-    GPIO_SHELLY2_SHD_RESET_ID, // GPIO05 SHD Reset
+    GPIO_SHELLY2_SHD_RESET_INV_ID, // GPIO05 SHD Reset
                                // GPIO06 (SD_CLK   Flash)
                                // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                                // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)

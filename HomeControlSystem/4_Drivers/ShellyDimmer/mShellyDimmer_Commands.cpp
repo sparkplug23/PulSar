@@ -40,14 +40,14 @@ void mShellyDimmer::parse_JSONCommand(void){
 
   if(jtok = obj[PM_JSON_BRIGHTNESS]){
 
-    Shd.req_brightness = map(jtok.getInt(),0,100,0,1000);
+    req_brightness = map(jtok.getInt(),0,100,0,1000);
     SetBrightness();
 
   }
 
   if(jtok = obj["BrightnessFade"]){
 
-    Shd.req_brightness = jtok.getInt();
+    req_brightness = jtok.getInt();
     SetBrightnessFade();
 
   }

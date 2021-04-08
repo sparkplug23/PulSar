@@ -1,57 +1,59 @@
-#include "mShellyDimmer.h"
+/*
+    mShellyDimmer.cpp - Shelly Dimmer 2 support, created for Tasmota and Refactored for TBD_PROJECT_NAME
+    
+    Copyright (C) 2021  James Turton Created
+    Copyright (C) 2021  Michael Refactored
 
-//  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include "mShellyDimmer.h"
 
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
 
-
 const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
 const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR = D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;
-
-
 
 // /*********************************************************************************************/
 
 void mShellyDimmer::init(void)
 {
-  
-    ModuleSelected();
-  // analogWriteFreq(25000);
-  // if (SONOFF_IFAN03 == my_module_type) {
-  //   SetSerial(9600, TS_SERIAL_8N1);
-  // }
-  // return false;  // Continue init chain
 
 }
 
 void mShellyDimmer::pre_init(){
 
-//change this into the fan module
-//   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
-//     pin = pCONT_pins->GetPin(GPIO_FAN_SDCARD1_ID);
-//     pinMode(pin, OUTPUT);
-//     settings.fEnableModule = true;
-//   }
+  if (
+    pCONT_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
+    pCONT_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV_ID) &&
+    pCONT_pins->PinUsed(GPIO_HWSERIAL0_RX_ID) && 
+    pCONT_pins->PinUsed(GPIO_HWSERIAL0_TX_ID)
+    ) {
+      pCONT_set->devices_present++;
+    // TasmotaGlobal.light_type = LT_SERIAL1;
+    settings.fEnableModule = true;
+  }else{
+    return;
+  }
     
-  #ifdef SHELLY_DIMMER_DEBUG
-      AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Driver Starting Tx %d Rx %d"), Pin(GPIO_TXD), Pin(GPIO_RXD));
-  #endif  // SHELLY_DIMMER_DEBUG
-
-  Shd.buffer = (uint8_t *)malloc(SHD_BUFFER_SIZE);
-  if (Shd.buffer != nullptr)
+  buffer = (uint8_t *)malloc(SHD_BUFFER_SIZE);
+  if (buffer != nullptr)
   {
-    // ShdSerial = new TasmotaSerial(Pin(D_GPIO_SERIAL_RXD_ID), Pin(GPIO_TXD), 2, 0, SHD_BUFFER_SIZE);
-
-    //check for defined hardware serial
-    if((!pCONT_pins->PinUsed(GPIO_HWSERIAL0_RX_ID))&&(!pCONT_pins->PinUsed(GPIO_HWSERIAL0_TX_ID))){
-      return;
-    }
-
     ShdSerial = new TasmotaSerial(pCONT_pins->GetPin(GPIO_HWSERIAL0_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL0_TX_ID), 2, 0, SHD_BUFFER_SIZE);
     if (ShdSerial->begin(115200))
     {
-
-      Shd.hardware_serial_active = true;
+      hardware_serial_active = true;
 
       if (ShdSerial->hardwareSerial())
         pCONT_sup->ClaimSerial();
@@ -60,7 +62,7 @@ void mShellyDimmer::pre_init(){
 
       ResetToAppMode();
       bool got_version = SendVersion();
-      AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), Shd.dimmer.version_major, Shd.dimmer.version_minor);
+      AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Shelly Dimmer Co-processor Version v%u.%u"), dimmer.version_major, dimmer.version_minor);
       GetSettings();
       SaveSettings();
 
@@ -138,7 +140,6 @@ int8_t mShellyDimmer::Tasker(uint8_t function){
   /************
    * WEBPAGE SECTION * 
   *******************/
-  
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
   #endif // USE_MODULE_NETWORK_WEBSERVER
@@ -149,33 +150,22 @@ int8_t mShellyDimmer::Tasker(uint8_t function){
 #ifdef USE_MODULE_CORE_RULES
 
 void mShellyDimmer::RulesEvent_Set_Power(){
-
   
-      AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
-      uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+  uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+  uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+  uint8_t brightness_on_value = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1];
 
-      uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+  if(relay_state==2){
+    if(req_brightness){
+      req_brightness = 0;
+    }else{
+      req_brightness = map(brightness_on_value,0,100,0,1000);
+    }
+  }
 
-      uint8_t brightness_on_value = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1];
-
-      if(relay_state==2){
-        if(Shd.req_brightness){
-          Shd.req_brightness = 0;
-        }else{
-          Shd.req_brightness = map(brightness_on_value,0,100,0,1000);
-        }
-      }
-
-      
-    // Shd.req_brightness = map(relay_state,0,100,0,1000);
-    SetBrightness();
-
-
-          // pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
-
-
-
+  SetBrightness();
 
 }
 #endif // USE_MODULE_CORE_RULES
@@ -183,36 +173,18 @@ void mShellyDimmer::RulesEvent_Set_Power(){
 
 uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_method){
 
-  // Active rgbcct palette used as scene
-
-  //ShdSerial.println("mShellyDimmer::ConstructJSON_Settings");
-
-  char buffer[30];
-  
   JsonBuilderI->Start();  
 
-  // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
-  // active_id, plus the values below
-  // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
-  //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
 
-    JBI->Add("serial_active",Shd.hardware_serial_active);
+    JBI->Add("serial_active",hardware_serial_active);
 
-    JBI->Add("version_major",Shd.dimmer.version_major);
-    JBI->Add("version_minor",Shd.dimmer.version_minor);
-    JBI->Add("brightness",Shd.dimmer.brightness);
-    JBI->Add("power",Shd.dimmer.power);
-    JBI->Add("fade_rate",Shd.dimmer.fade_rate);
+    JBI->Add("version_major",dimmer.version_major);
+    JBI->Add("version_minor",dimmer.version_minor);
+    JBI->Add("brightness",dimmer.brightness);
+    JBI->Add("power",dimmer.power);
+    JBI->Add("fade_rate",dimmer.fade_rate);
 
-
-
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
 
 }
@@ -221,7 +193,7 @@ uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
-    JBI->Add_P(PM_JSON_BRIGHTNESS, map(Shd.dimmer.brightness,0,1000,0,100));
+    JBI->Add_P(PM_JSON_BRIGHTNESS, map(dimmer.brightness,0,1000,0,100));
 
   return JsonBuilderI->End();
 
@@ -322,22 +294,22 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
 
   while (retries--)
   {
-      ShdSerial->write(data, len);
-      ShdSerial->flush();
+    ShdSerial->write(data, len);
+    ShdSerial->flush();
 
-      // wait for any response
-      uint32_t snd_time = millis();
-      while(abs(millis()-snd_time)<SHD_ACK_TIMEOUT)
-      // while (TimePassedSince(snd_time) < SHD_ACK_TIMEOUT)
-      {
-          if (SerialInput())
-              return true;
+    // wait for any response
+    uint32_t snd_time = millis();
+    while(abs(millis()-snd_time)<SHD_ACK_TIMEOUT)
+    // while (TimePassedSince(snd_time) < SHD_ACK_TIMEOUT)
+    {
+        if (SerialInput())
+            return true;
 
-          delay(1);
-      }
+        delay(1);
+    }
 
-      // timeout
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "ShdSerial send timeout"));
+    // timeout
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "ShdSerial send timeout"));
   }
   return false;
 
@@ -351,7 +323,7 @@ bool mShellyDimmer::SendCmd(uint8_t cmd, uint8_t *payload, uint8_t len)
   uint8_t pos = 0;
 
   data[0] = SHD_START_BYTE;
-  data[1] = Shd.counter++;
+  data[1] = counter++;
   data[2] = cmd;
   data[3] = len;
 
@@ -380,8 +352,8 @@ void mShellyDimmer::SetBrightness()
 
   uint8_t payload[SHD_SWITCH_SIZE];
 
-  payload[0] = Shd.req_brightness & 0xff;
-  payload[1] = Shd.req_brightness >> 8;
+  payload[0] = req_brightness & 0xff;
+  payload[1] = req_brightness >> 8;
 
   SendCmd(SHD_SWITCH_CMD, payload, SHD_SWITCH_SIZE);
 }
@@ -390,10 +362,10 @@ void mShellyDimmer::SetBrightness()
 void mShellyDimmer::SetBrightnessFade()
 {
   uint16_t delta = 0;
-  if (Shd.req_brightness > Shd.dimmer.brightness)
-    delta = (Shd.req_brightness - Shd.dimmer.brightness) * 0.8;
+  if (req_brightness > dimmer.brightness)
+    delta = (req_brightness - dimmer.brightness) * 0.8;
   else
-      delta = (Shd.dimmer.brightness - Shd.req_brightness) * 0.8;
+      delta = (dimmer.brightness - req_brightness) * 0.8;
 
   // Payload format:
   // [0-1] Brightness (%) * 10
@@ -402,8 +374,8 @@ void mShellyDimmer::SetBrightnessFade()
 
   uint8_t payload[SHD_SWITCH_FADE_SIZE];
 
-  payload[0] = Shd.req_brightness & 0xff;
-  payload[1] = Shd.req_brightness >> 8;
+  payload[0] = req_brightness & 0xff;
+  payload[1] = req_brightness >> 8;
 
   payload[2] = delta & 0xff;
   payload[3] = delta >> 8;
@@ -418,7 +390,7 @@ void mShellyDimmer::SetBrightnessFade()
 void mShellyDimmer::SendSettings()
 {
   // as specified in STM32 assembly
-  uint16_t fade_rate = Shd.req_fade_rate;
+  uint16_t fade_rate = req_fade_rate;
   if (fade_rate > 100)
       fade_rate = 100;
 
@@ -431,20 +403,20 @@ void mShellyDimmer::SendSettings()
 
   uint8_t payload[SHD_SETTINGS_SIZE];
 
-  payload[0] = Shd.req_brightness & 0xff;
-  payload[1] = Shd.req_brightness >> 8;
+  payload[0] = req_brightness & 0xff;
+  payload[1] = req_brightness >> 8;
 
-  payload[2] = Shd.leading_edge & 0xff;
-  payload[3] = Shd.leading_edge >> 8;
+  payload[2] = leading_edge & 0xff;
+  payload[3] = leading_edge >> 8;
 
   payload[4] = fade_rate & 0xff;
   payload[5] = fade_rate >> 8;
 
-  payload[6] = Shd.warmup_brightness & 0xff;
-  payload[7] = Shd.warmup_brightness >> 8;
+  payload[6] = warmup_brightness & 0xff;
+  payload[7] = warmup_brightness >> 8;
 
-  payload[8] = Shd.warmup_time & 0xff;
-  payload[9] = Shd.warmup_time >> 8;
+  payload[8] = warmup_time & 0xff;
+  payload[9] = warmup_time >> 8;
 
   SendCmd(SHD_SETTINGS_CMD, payload, SHD_SETTINGS_SIZE);
 }
@@ -457,11 +429,11 @@ void mShellyDimmer::SendWarmup()
 
   uint8_t payload[SHD_WARMUP_SIZE];
 
-  payload[0] = Shd.warmup_brightness & 0xff;
-  payload[1] = Shd.warmup_brightness >> 8;
+  payload[0] = warmup_brightness & 0xff;
+  payload[1] = warmup_brightness >> 8;
 
-  payload[2] = Shd.warmup_time & 0xff;
-  payload[3] = Shd.warmup_time >> 8;
+  payload[2] = warmup_time & 0xff;
+  payload[3] = warmup_time >> 8;
 
   SendCmd(SHD_WARMUP_CMD, payload, SHD_WARMUP_SIZE);
 }
@@ -484,8 +456,8 @@ bool mShellyDimmer::SyncState()
 {
 #ifdef SHELLY_DIMMER_DEBUG
   AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdSerial %p"), ShdSerial);
-  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Brightness Want %d, Is %d"), Shd.req_brightness, Shd.dimmer.brightness);
-  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Fade Want %d, Is %d"), Settings.light_speed, Shd.dimmer.fade_rate);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Brightness Want %d, Is %d"), req_brightness, dimmer.brightness);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Fade Want %d, Is %d"), Settings.light_speed, dimmer.fade_rate);
 #endif  // SHELLY_DIMMER_DEBUG
 
   if (!ShdSerial)
@@ -494,14 +466,14 @@ bool mShellyDimmer::SyncState()
 #ifdef SHELLY_HW_DIMMING
   // TODO(jamesturton): HW dimming seems to conflict with SW dimming. See how
   // we can disbale SW dimming when using HW dimming.
-  if (Settings.light_speed != Shd.dimmer.fade_rate)
+  if (Settings.light_speed != dimmer.fade_rate)
   {
       ShdSetBrightnessFade();
       ShdDebugState();
   }
   else
 #endif // SHELLY_HW_DIMMING
-  if (Shd.req_brightness != Shd.dimmer.brightness)
+  if (req_brightness != dimmer.brightness)
   {
     SetBrightness();
     DebugState();
@@ -514,11 +486,11 @@ void mShellyDimmer::DebugState()
 {
 #ifdef SHELLY_DIMMER_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "MCU v%d.%d, Brightness:%d(%d%%), Power:%d, Fade:%d"),
-                            Shd.dimmer.version_major, Shd.dimmer.version_minor,
-                            Shd.dimmer.brightness,
-                            changeUIntScale(Shd.dimmer.brightness, 0, 1000, 0, 100),
-                            Shd.dimmer.power,
-                            Shd.dimmer.fade_rate);
+                            dimmer.version_major, dimmer.version_minor,
+                            dimmer.brightness,
+                            changeUIntScale(dimmer.brightness, 0, 1000, 0, 100),
+                            dimmer.power,
+                            dimmer.fade_rate);
 #endif  // SHELLY_DIMMER_DEBUG
 }
 
@@ -528,39 +500,39 @@ bool mShellyDimmer::PacketProcess(void)
   uint8_t id, cmd, len;
   bool ret = false;
 
-  if (Shd.buffer[pos++] != SHD_START_BYTE)
+  if (buffer[pos++] != SHD_START_BYTE)
     return false;
 
-  id = Shd.buffer[pos++];
-  cmd = Shd.buffer[pos++];
-  len = Shd.buffer[pos++];
+  id = buffer[pos++];
+  cmd = buffer[pos++];
+  len = buffer[pos++];
 
   switch (cmd)
   {
     case SHD_POLL_CMD:{
       // 1 when returning fade_rate, 0 when returning wattage, brightness?
-      uint16_t unknown_0 = Shd.buffer[pos + 1] << 8 |
-              Shd.buffer[pos + 0];
+      uint16_t unknown_0 = buffer[pos + 1] << 8 |
+              buffer[pos + 0];
 
-      uint16_t brightness = Shd.buffer[pos + 3] << 8 |
-              Shd.buffer[pos + 2];
+      uint16_t brightness = buffer[pos + 3] << 8 |
+              buffer[pos + 2];
 
-      uint32_t wattage_raw = Shd.buffer[pos + 7] << 24 |
-              Shd.buffer[pos + 6] << 16 |
-              Shd.buffer[pos + 5] << 8 |
-              Shd.buffer[pos + 4];
+      uint32_t wattage_raw = buffer[pos + 7] << 24 |
+              buffer[pos + 6] << 16 |
+              buffer[pos + 5] << 8 |
+              buffer[pos + 4];
 
-      uint32_t voltage_raw = Shd.buffer[pos + 11] << 24 |
-              Shd.buffer[pos + 10] << 16 |
-              Shd.buffer[pos + 9] << 8 |
-              Shd.buffer[pos + 8];
+      uint32_t voltage_raw = buffer[pos + 11] << 24 |
+              buffer[pos + 10] << 16 |
+              buffer[pos + 9] << 8 |
+              buffer[pos + 8];
 
-      uint32_t current_raw = Shd.buffer[pos + 15] << 24 |
-              Shd.buffer[pos + 14] << 16 |
-              Shd.buffer[pos + 13] << 8 |
-              Shd.buffer[pos + 12];
+      uint32_t current_raw = buffer[pos + 15] << 24 |
+              buffer[pos + 14] << 16 |
+              buffer[pos + 13] << 8 |
+              buffer[pos + 12];
 
-      uint32_t fade_rate = Shd.buffer[pos + 16];
+      uint32_t fade_rate = buffer[pos + 16];
 
       float wattage = 0;
       if (wattage_raw > 0)
@@ -590,33 +562,33 @@ bool mShellyDimmer::PacketProcess(void)
 //                 else
 //                     Energy.power_factor[0] = wattage / (voltage * current);
 
-//                 if (Shd.last_power_check > 10 && Energy.active_power[0] > 0)
+//                 if (last_power_check > 10 && Energy.active_power[0] > 0)
 //                 {
-//                     float kWhused = (float)Energy.active_power[0] * (Rtc.utc_time - Shd.last_power_check) / 36;
+//                     float kWhused = (float)Energy.active_power[0] * (Rtc.utc_time - last_power_check) / 36;
 // #ifdef SHELLY_DIMMER_DEBUG
-//                     AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Adding %i mWh to todays usage from %lu to %lu"), (int)(kWhused * 10), Shd.last_power_check, Rtc.utc_time);
+//                     AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Adding %i mWh to todays usage from %lu to %lu"), (int)(kWhused * 10), last_power_check, Rtc.utc_time);
 // #endif  // USE_ENERGY_SENSOR
 //                     Energy.kWhtoday += kWhused;
 //                     EnergyUpdateToday();
 //                 }
-//                 Shd.last_power_check = Rtc.utc_time;
+//                 last_power_check = Rtc.utc_time;
 // #endif  // USE_ENERGY_SENSOR
 
 #ifdef SHELLY_DIMMER_DEBUG
           AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdPacketProcess: Brightness:%d Power:%lu Voltage:%lu Current:%lu Fade:%d"), brightness, wattage_raw, voltage_raw, current_raw, fade_rate);
 #endif  // SHELLY_DIMMER_DEBUG
-          Shd.dimmer.brightness = brightness;
-          Shd.dimmer.power = wattage_raw;
-          Shd.dimmer.fade_rate = fade_rate;
+          dimmer.brightness = brightness;
+          dimmer.power = wattage_raw;
+          dimmer.fade_rate = fade_rate;
       }
       break;
   case SHD_VERSION_CMD:
       {
 #ifdef SHELLY_DIMMER_DEBUG
-          AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdPacketProcess: Version: %u.%u"), Shd.buffer[pos + 1], Shd.buffer[pos]);
+          AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdPacketProcess: Version: %u.%u"), buffer[pos + 1], buffer[pos]);
 #endif  // SHELLY_DIMMER_DEBUG
-          Shd.dimmer.version_minor = Shd.buffer[pos];
-          Shd.dimmer.version_major = Shd.buffer[pos + 1];
+          dimmer.version_minor = buffer[pos];
+          dimmer.version_major = buffer[pos + 1];
       }
       break;
   case SHD_SWITCH_CMD:
@@ -626,7 +598,7 @@ bool mShellyDimmer::PacketProcess(void)
   case SHD_CALIBRATION1_CMD:
   case SHD_CALIBRATION2_CMD:
       {
-          ret = (Shd.buffer[pos] == 0x01);
+          ret = (buffer[pos] == 0x01);
       }
       break;
   }
@@ -640,25 +612,18 @@ void mShellyDimmer::ResetToAppMode()
     AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Request co-processor reset in app mode"));
 #endif  // SHELLY_DIMMER_DEBUG
 
-  // pinMode(Pin(GPIO_SHELLY_DIMMER_RST_INV), OUTPUT);
-  // digitalWrite(Pin(GPIO_SHELLY_DIMMER_RST_INV), LOW);
-  // pinMode(Pin(GPIO_SHELLY_DIMMER_BOOT0), OUTPUT);
-  // digitalWrite(Pin(GPIO_SHELLY_DIMMER_BOOT0), LOW);
-
-  pinMode(PIN_GPIO_SHELLY_DIMMER_RST_INV, OUTPUT);
-  digitalWrite(PIN_GPIO_SHELLY_DIMMER_RST_INV, LOW);
-
-  pinMode(PIN_GPIO_SHELLY_DIMMER_BOOT0, OUTPUT);
-  digitalWrite(PIN_GPIO_SHELLY_DIMMER_BOOT0, LOW);
+  pinMode(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), OUTPUT);
+  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), LOW);
+  pinMode(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), OUTPUT);
+  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_BOOT0_ID), LOW);
 
   delay(50);
 
-    // clear in the receive buffer
-    while (Serial.available())
-        Serial.read();
+  // clear in the receive buffer
+  while (Serial.available())
+      Serial.read();
 
-
-  digitalWrite(PIN_GPIO_SHELLY_DIMMER_RST_INV, HIGH); // pull out of reset
+  digitalWrite(pCONT_pins->GetPin(GPIO_SHELLY2_SHD_RESET_INV_ID), HIGH); // pull out of reset
   delay(50); // wait 50ms fot the co-processor to come online
 }
 
@@ -686,21 +651,21 @@ bool mShellyDimmer::SendVersion(void)
 void mShellyDimmer::GetSettings(void)
 {
   char parameters[32];
-  // Shd.req_brightness      = 0;
-  Shd.leading_edge        = 0;
-  // Shd.req_fade_rate       = 0;
-  Shd.warmup_brightness   = 0;
-  Shd.warmup_time         = 0;
+  // req_brightness      = 0;
+  leading_edge        = 0;
+  // req_fade_rate       = 0;
+  warmup_brightness   = 0;
+  warmup_time         = 0;
 //     if (strstr(SettingsText(SET_SHD_PARAM), ",") != nullptr)
 //     {
 // #ifdef SHELLY_DIMMER_DEBUG
 //         AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Loading params: %s"), SettingsText(SET_SHD_PARAM));
 // #endif  // SHELLY_DIMMER_DEBUG
-//         // Shd.req_brightness      = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 1));
-//         Shd.leading_edge        = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 2));
-//         // Shd.req_fade_rate       = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 3));
-//         Shd.warmup_brightness   = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 4));
-//         Shd.warmup_time         = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 5));
+//         // req_brightness      = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 1));
+//         leading_edge        = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 2));
+//         // req_fade_rate       = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 3));
+//         warmup_brightness   = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 4));
+//         warmup_time         = atoi(subStr(parameters, SettingsText(SET_SHD_PARAM), ",", 5));
 //     }
 }
 
@@ -708,7 +673,7 @@ void mShellyDimmer::SaveSettings(void)
 {
   char parameters[32];
   snprintf_P(parameters, sizeof(parameters), PSTR("%d,%d,%d,%d,%d"),
-              Shd.req_brightness, Shd.leading_edge, Shd.req_fade_rate, Shd.warmup_brightness, Shd.warmup_time);
+              req_brightness, leading_edge, req_fade_rate, warmup_brightness, warmup_time);
   // SettingsUpdateText(SET_SHD_PARAM, parameters);
 }
 
@@ -719,7 +684,7 @@ bool mShellyDimmer::SerialInput(void)
   {
     yield();
     uint8_t serial_in_byte = ShdSerial->read();
-    Shd.buffer[Shd.byte_counter] = serial_in_byte;
+    buffer[byte_counter] = serial_in_byte;
 
     int check = check_byte();
 
@@ -727,11 +692,11 @@ bool mShellyDimmer::SerialInput(void)
     {
       // finished
 #ifdef SHELLY_DIMMER_DEBUG
-      Shd.byte_counter++;
+      byte_counter++;
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "Rx Packet:"));
-      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, Shd.buffer, Shd.byte_counter);
+      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
-      Shd.byte_counter = 0;
+      byte_counter = 0;
 
       PacketProcess();
 
@@ -741,15 +706,15 @@ bool mShellyDimmer::SerialInput(void)
     {
       // wrong data
 #ifdef SHELLY_DIMMER_DEBUG
-      AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Byte %i of received data frame is invalid. Rx Packet:"), Shd.byte_counter);
-      Shd.byte_counter++;
-      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, Shd.buffer, Shd.byte_counter);
+      AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Byte %i of received data frame is invalid. Rx Packet:"), byte_counter);
+      byte_counter++;
+      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
-      Shd.byte_counter = 0;
+      byte_counter = 0;
     }
     else
     {
-        Shd.byte_counter++;
+        byte_counter++;
     }
 
   }
@@ -770,8 +735,8 @@ uint16_t mShellyDimmer::checksum(uint8_t *buf, int len)
 
 int mShellyDimmer::check_byte()
 {
-    uint8_t index = Shd.byte_counter;
-    uint8_t byte = Shd.buffer[index];
+    uint8_t index = byte_counter;
+    uint8_t byte = buffer[index];
 
     if (index == 0)
         return byte == SHD_START_BYTE;
@@ -779,7 +744,7 @@ int mShellyDimmer::check_byte()
     if (index < 4)
         return 1;
 
-    uint8_t data_length = Shd.buffer[3];
+    uint8_t data_length = buffer[3];
     if ((4 + data_length + 3) > SHD_BUFFER_SIZE)
         return 0;
 
@@ -788,8 +753,8 @@ int mShellyDimmer::check_byte()
 
     if (index == 4 + data_length + 1)
     {
-        uint16_t chksm = (Shd.buffer[index - 1] << 8 | Shd.buffer[index]);
-        uint16_t chksm_calc = checksum(&Shd.buffer[1], 3 + data_length);
+        uint16_t chksm = (buffer[index - 1] << 8 | buffer[index]);
+        uint16_t chksm_calc = checksum(&buffer[1], 3 + data_length);
         if (chksm != chksm_calc)
         {
 #ifdef SHELLY_DIMMER_DEBUG
@@ -807,20 +772,6 @@ int mShellyDimmer::check_byte()
     return 0;
 }
 
-/*********************************************************************************************\
- * API Functions
-\*********************************************************************************************/
-
-bool mShellyDimmer::ModuleSelected(void) {
-  // if (PinUsed(GPIO_SHELLY_DIMMER_BOOT0) && PinUsed(GPIO_SHELLY_DIMMER_RST_INV)) {
-    // TasmotaGlobal.devices_present++;
-    // TasmotaGlobal.light_type = LT_SERIAL1;
-
-    // Shd.present = true;
-    settings.fEnableModule = true;
-  // }
-  return settings.fEnableModule;//Shd.present;
-}
 
 bool mShellyDimmer::SetChannels(void)
 {
@@ -833,7 +784,7 @@ bool mShellyDimmer::SetChannels(void)
     // // Use dimmer_hw_min and dimmer_hw_max to constrain our values if the light should be on
     // if (brightness > 0)
     //     brightness = changeUIntScale(brightness, 0, 255, Settings.dimmer_hw_min * 10, Settings.dimmer_hw_max * 10);
-    // Shd.req_brightness = brightness;
+    // req_brightness = brightness;
 
     // ShdDebugState();
 
@@ -846,7 +797,7 @@ bool mShellyDimmer::SetPower(void)
   AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
   #endif  // SHELLY_DIMMER_DEBUG
 
-  Shd.req_on = 1;//(bool)XdrvMailbox.index;
+  req_on = 1;//(bool)XdrvMailbox.index;
   return SyncState();
 }
 
@@ -868,10 +819,10 @@ void CmndShdLeadingEdge(void)
 {
     if (XdrvMailbox.payload == 0 || XdrvMailbox.payload == 1)
     {
-        Shd.leading_edge = 2 - XdrvMailbox.payload;
+        leading_edge = 2 - XdrvMailbox.payload;
         Settings.shd_leading_edge = XdrvMailbox.payload;
 #ifdef SHELLY_DIMMER_DEBUG
-        if (Shd.leading_edge == 1)
+        if (leading_edge == 1)
             AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to trailing edge"));
         else
             AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to leading edge"));
@@ -886,7 +837,7 @@ void CmndShdWarmupBrightness(void)
 {
     if ((10 <= XdrvMailbox.payload) && (XdrvMailbox.payload <= 100))
     {
-        Shd.warmup_brightness = XdrvMailbox.payload * 10;
+        warmup_brightness = XdrvMailbox.payload * 10;
         Settings.shd_warmup_brightness = XdrvMailbox.payload;
 #ifdef SHELLY_DIMMER_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup brightness to %d%%"), XdrvMailbox.payload);
@@ -901,7 +852,7 @@ void CmndShdWarmupTime(void)
 {
     if ((20 <= XdrvMailbox.payload) && (XdrvMailbox.payload <= 200))
     {
-        Shd.warmup_time = XdrvMailbox.payload;
+        warmup_time = XdrvMailbox.payload;
         Settings.shd_warmup_time = XdrvMailbox.payload;
 #ifdef SHELLY_DIMMER_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup time to %dms"), XdrvMailbox.payload);
@@ -997,12 +948,12 @@ bool ShdUpdateFirmware(uint8_t* data, uint32_t size)
 }
 
 bool ShdPresent(void) {
-  return Shd.present;
+  return present;
 }
 
 uint32_t ShdFlash(uint8_t* data, size_t size) {
 #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Updating firmware v%u.%u with %u bytes"), Shd.dimmer.version_major, Shd.dimmer.version_minor, size);
+  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Updating firmware v%u.%u with %u bytes"), dimmer.version_major, dimmer.version_minor, size);
 #endif  // SHELLY_DIMMER_DEBUG
 
   ShdSerial.end();

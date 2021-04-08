@@ -201,11 +201,6 @@ rules_active_index = 0;
   }
 #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
 
-
-
-
-
-
 // #endif // USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
 
 }

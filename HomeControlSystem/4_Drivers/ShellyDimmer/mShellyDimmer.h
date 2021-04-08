@@ -123,36 +123,35 @@ class mShellyDimmer :
 
     typedef struct
     {
-        uint8_t version_major = 0;
-        uint8_t version_minor = 0;
-
-        uint32_t brightness = 1000;
-        uint32_t power = 0;
-        uint32_t fade_rate = 0;
+      uint8_t version_major = 0;
+      uint8_t version_minor = 0;
+      uint32_t brightness = 1000;
+      uint32_t power = 0;
+      uint32_t fade_rate = 0;
     } SHD_DIMMER;
 
-    struct SHD
-    {
-      uint8_t *buffer = nullptr;          // Serial receive buffer
-      int byte_counter = 0;               // Index in serial receive buffer
-      uint16_t req_brightness = 0;
-      bool req_on = false;
-      SHD_DIMMER dimmer;
-      uint32_t start_time = 0;
-      uint8_t counter = 1;                // Packet counter
-      uint16_t req_fade_rate = 0;
-      uint16_t leading_edge = 2;          // Leading edge = 2 Trailing edge = 1
-      uint16_t warmup_brightness = 1000;   // 10%
-      uint16_t warmup_time = 20;          // 20ms
-      #ifdef USE_ENERGY_SENSOR
-        uint32_t last_power_check = 0;      // Time when last power was checked
-      #endif // USE_ENERGY_SENSOR
-      bool hardware_serial_active = false;
-    } Shd;
+    // struct SHD
+    // {
+    uint8_t *buffer = nullptr;          // Serial receive buffer
+    int byte_counter = 0;               // Index in serial receive buffer
+    uint16_t req_brightness = 0;
+    bool req_on = false;
+    SHD_DIMMER dimmer;
+    uint32_t start_time = 0;
+    uint8_t counter = 1;                // Packet counter
+    uint16_t req_fade_rate = 0;
+    uint16_t leading_edge = 2;          // Leading edge = 2 Trailing edge = 1
+    uint16_t warmup_brightness = 1000;   // 10%
+    uint16_t warmup_time = 20;          // 20ms
+    #ifdef USE_ENERGY_SENSOR
+      uint32_t last_power_check = 0;      // Time when last power was checked
+    #endif // USE_ENERGY_SENSOR
+    bool hardware_serial_active = false;
+    // } param;
 
-#ifdef USE_MODULE_CORE_RULES
-void RulesEvent_Set_Power();
-#endif // USE_MODULE_CORE_RULES
+    #ifdef USE_MODULE_CORE_RULES
+    void RulesEvent_Set_Power();
+    #endif // USE_MODULE_CORE_RULES
 
 
     uint16_t checksum(uint8_t *buf, int len);

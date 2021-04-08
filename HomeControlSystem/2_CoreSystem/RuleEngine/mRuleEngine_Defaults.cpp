@@ -53,6 +53,7 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
 
     #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_SHELLY_DIMMER)
     
+    #ifdef USE_HARDWARE_DEFAULT_RULES_1
     // Trigger0
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
@@ -66,10 +67,10 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     p_event->function_id = FUNC_EVENT_SET_POWER_ID;
     p_event->device_id = 0;
     p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 2;  // Toggle
     p_event->value.data[p_event->value.length++] = 50;  // Dim 50% 
     pCONT_rules->rules_active_index++;
     settings.loaded_default_for_moduled = true;
-
     // Trigger1
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
@@ -83,9 +84,48 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
     p_event->function_id = FUNC_EVENT_SET_POWER_ID;
     p_event->device_id = 1;
     p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 2;  // Toggle
     p_event->value.data[p_event->value.length++] = 100;  // Full 100% 
     pCONT_rules->rules_active_index++;
     settings.loaded_default_for_moduled = true;
+    #endif // USE_HARDWARE_DEFAULT_RULES_1
+
+    #ifdef USE_HARDWARE_DEFAULT_RULES_2
+    // Trigger0
+    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
+    p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
+    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->device_id = 0;
+    p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 1;  // Pressed 
+    // Command0
+    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
+    p_event->module_id = EM_MODULE_DRIVERS_SHELLY_DIMMER_ID;
+    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->device_id = 0;
+    p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 2;  // Toggle
+    p_event->value.data[p_event->value.length++] = 50;  // Dim 50% 
+    pCONT_rules->rules_active_index++;
+    settings.loaded_default_for_moduled = true;
+    // Trigger1
+    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
+    p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
+    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    p_event->device_id = 1; 
+    p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 1;  // Pressed 
+    // Command1
+    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
+    p_event->module_id = EM_MODULE_DRIVERS_SHELLY_DIMMER_ID;
+    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    p_event->device_id = 1;
+    p_event->value.length = 0;
+    p_event->value.data[p_event->value.length++] = 2;  // Toggle
+    p_event->value.data[p_event->value.length++] = 100;  // Full 100% 
+    pCONT_rules->rules_active_index++;
+    settings.loaded_default_for_moduled = true;
+    #endif // USE_HARDWARE_DEFAULT_RULES_2
 
     #endif
 
