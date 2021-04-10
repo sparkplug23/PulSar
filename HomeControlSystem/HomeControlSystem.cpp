@@ -113,10 +113,12 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
   // load
   // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
-   // Set boot method
+  #endif
+  
+  // Set boot method
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
-  #endif
+  
 
   // Init the GPIOs
   pCONT_pins->GpioInit();
@@ -128,6 +130,8 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_POST_INIT);
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
+  // Preload any templates defined in mFirmwareCustom.h
+  // pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // Note both below may need checks to ignore if this occured
   // Load the minimal default settings in modules (hard coded) before loading any stored user values
   pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module

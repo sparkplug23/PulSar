@@ -1482,7 +1482,7 @@ struct SettingsMQTT{
   uint16_t      retry;                // 396
   // char          fulltopic[100];       // 558
   
-  char lwt_topic[30];
+  char lwt_topic[40];
   char client_name[40]; 
   char hostname_ctr[20];
   char prefixtopic[50]; // "<devicename>/User extras?"

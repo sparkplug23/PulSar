@@ -575,7 +575,7 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
     // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
     // char buffer[100];
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
     //#endif
 // #ifdef DEVICE_RGBFIREPLACE_TESTER
 //     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
@@ -834,15 +834,19 @@ void mAnimatorLight::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t
 // // Update struct that shows overview, always sends
 uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
 
+  char buffer[100];
+
   JsonBuilderI->Start();
 
+  JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
+
 //   // root[D_JSON_ONOFF] = pCONT_iLight->light_power_state ? "ON" : "OFF";
-//   // root[D_JSON_MODE] = GetAnimationModeName();
-//   root[D_JSON_FUNCTION] = GetFlasherFunctionName();
-//   root["region"] = GetFlasherRegionName();
-//   // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-//   // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
-//   // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
+  JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
+  JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
+  // root["region"] = GetFlasherRegionName();
+  // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
+  // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
+  // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
 
 //   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
 //   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();

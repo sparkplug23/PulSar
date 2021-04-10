@@ -28,7 +28,6 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
      * PERIODIC SECTION * 
     *******************/
       case FUNC_LOOP:
-
         if(Mqtt.connected){
           EveryLoop();
         }
@@ -38,8 +37,20 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
           pubsub->loop();
         }
       break;
-      case FUNC_EVERY_SECOND:
+      case FUNC_EVERY_SECOND:{
+
+        // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_set->Settings.mqtt.client_name=\"%s\""),pCONT_set->Settings.mqtt.client_name);
+        // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_set->Settings.system_name.device=\"%s\""),pCONT_set->Settings.system_name.device);
+
+        // init();
     
+        // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_set->Settings.mqtt.client_name=\"%s\""),pCONT_set->Settings.mqtt.client_name);
+        // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_set->Settings.system_name.device=\"%s\""),pCONT_set->Settings.system_name.device);
+  // memset(pCONT_set->Settings.mqtt.client_name,0,sizeof(pCONT_set->Settings.mqtt.client_name));
+  // sprintf_P(pCONT_set->Settings.mqtt.client_name,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
+
+
+
         if(pCONT_wif->WifiCheckIpConnected()){
           // AddLog(LOG_LEVEL_TEST, PSTR("IS connceted"));
            CheckConnection();
@@ -47,6 +58,7 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
           // AddLog(LOG_LEVEL_TEST, PSTR("NOT connceted"));
 
         }
+      }
       break;
       case FUNC_EVERY_MINUTE:
         //DiscoverServer();
@@ -185,19 +197,16 @@ void mMQTT::parse_JSONCommand(void){
 
 
 
-
-
-
-
 void mMQTT::init(void){
 
   memset(pCONT_set->Settings.mqtt.client_name,0,sizeof(pCONT_set->Settings.mqtt.client_name));
-  sprintf_P(pCONT_set->Settings.mqtt.client_name,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
+  snprintf_P(pCONT_set->Settings.mqtt.client_name,sizeof(pCONT_set->Settings.mqtt.client_name)-1,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
+
 
   //Set primary mqtt broker address as first
   memset(pCONT_set->Settings.mqtt.hostname_ctr,0,sizeof(pCONT_set->Settings.mqtt.hostname_ctr));
   #ifdef USE_NETWORK_MDNS
-  memcpy(pCONT_set->Settings.mqtt.hostname_ctr,MDNS_MQTT_HOSTNAME1,strlen(MDNS_MQTT_HOSTNAME1));
+  snprintf(pCONT_set->Settings.mqtt.hostname_ctr,sizeof(pCONT_set->Settings.mqtt.hostname_ctr),MDNS_MQTT_HOSTNAME1);//,strlen(MDNS_MQTT_HOSTNAME1));
   #endif // #ifdef USE_NETWORK_MDNS
 
   memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
@@ -206,7 +215,7 @@ void mMQTT::init(void){
   setprefixtopic(pCONT_set->Settings.system_name.device);
 
   memset(pCONT_set->Settings.mqtt.lwt_topic,0,sizeof(pCONT_set->Settings.mqtt.lwt_topic));
-  sprintf_P(pCONT_set->Settings.mqtt.lwt_topic,PSTR("%s/status/LWT"),pCONT_set->Settings.system_name.device);
+  snprintf_P(pCONT_set->Settings.mqtt.lwt_topic,sizeof(pCONT_set->Settings.mqtt.lwt_topic)-1,PSTR("%s/status/LWT"),pCONT_set->Settings.system_name.device);
 
    
 }
@@ -264,7 +273,7 @@ bool mMQTT::MqttIsConnected(){
 void mMQTT::MqttConnected(void)
 {
   
-//     AddLog(LOG_LEVEL_INFO, S_LOG_MQTT, PSTR(D_CONNECTED));
+    // AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttConnected %s %d"), D_CONNECTED, Mqtt.connected);
     Mqtt.connected = true;
     
     // AddLog(LOG_LEVEL_WARN, S_LOG_MQTT, PSTR("Mqtt.retry_counter = 0; disabled"));
@@ -309,9 +318,14 @@ DEBUG_LINE;
     // if succesful, clear flag
     connection_maintainer.flag_require_reconnection = false;
 
+
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
+
     DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_MQTT_CONNECTED);
 
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
+    
     DEBUG_LINE;
 
 
@@ -474,9 +488,9 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
     pubsub = new mPubSubClient(*client);
   }
 
-  // if (2 == Mqtt.initial_connection_state) {  // Executed once just after power on and wifi is connected
-  //   Mqtt.initial_connection_state = 1;
-  // }
+  if (2 == Mqtt.initial_connection_state) {  // Executed once just after power on and wifi is connected
+    Mqtt.initial_connection_state = 1;
+  }
 
 // change this to use callback in the future again
   pubsub->setCallback(
@@ -505,15 +519,22 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
 
+  uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
+  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
+  loglevel = LOG_LEVEL_TEST;
+  #endif
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
+  AddLog(loglevel, PSTR("client_name = %s"),pCONT_set->Settings.mqtt.client_name);
+  AddLog(loglevel, PSTR("lwt_topic = %s"),pCONT_set->Settings.mqtt.lwt_topic);
+  AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
   if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
+    
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
     MqttConnected();
   } else {
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Failed %d"),pubsub->state());
     MqttDisconnected(pubsub->state());  // status codes are documented here http://pubsubclient.knolleary.net/api.html#state
   }
 
@@ -716,9 +737,15 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
 
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
+  uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
+  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
+  loglevel = LOG_LEVEL_TEST;
+  #endif
+
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s"),topic_type,module_ctr,postfix_topic_ctr);
+  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
   #endif// ENABLE_LOG_LEVEL_INFO
+
 
   publish_ft(module_ctr,
              topic_type,
@@ -726,6 +753,10 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
              data_buffer.payload.ctr,
              pCONT_set->Settings.sensors.flags.mqtt_retain
             );
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
+  #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 
@@ -767,7 +798,6 @@ void mMQTT::publish_status_module(const char* module_name, const char* topic_pos
   ppublish(topic_ctr,payload_ctr,retain_flag);
 
 }
-
 
 // My function for adding prefix by device name
 boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained){

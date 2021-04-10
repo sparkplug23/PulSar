@@ -168,6 +168,7 @@ void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour(const
     SetPixelColor(pixel, updatedColor);
   } // END for
 
+    // SetPixelColor(0, RgbColor(0,random(0,255),0));
 }
 
 

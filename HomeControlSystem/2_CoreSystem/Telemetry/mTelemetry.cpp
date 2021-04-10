@@ -122,7 +122,7 @@ void mTelemetry::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
   mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -558,6 +558,8 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
 uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
 
   JsonBuilderI->Start();
+
+    JBI->Add("ClientName", pCONT_set->Settings.mqtt.client_name);
     // JsonBuilderI->Level_Start(PM_JSON_PACKETS);
     //   JsonBuilderI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JsonBuilderI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);

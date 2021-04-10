@@ -597,7 +597,7 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
 
       pCONT_set->SettingsSave(1);
       #else 
-      Serial.println("SettingsSave dis");
+      DEBUG_PRINTLN("SettingsSave dis");
       #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
 
       // Serial.println("FUNC_EVERY_MINUTE");

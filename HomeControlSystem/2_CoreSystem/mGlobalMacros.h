@@ -21,6 +21,27 @@
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf
 
+// #define ENABLE_DEBUG123 //USE_SOFTWARE_SERIAL_DEBUG
+
+#if defined(ENABLE_DEBUG123)
+  // #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
+  //                                     SERIAL_DEBUG.print("\t");\
+  //                                     SERIAL_DEBUG.println(__FUNCTION__);\
+  //                                     SERIAL_DEBUG.print("\t");\
+  //                                     SERIAL_DEBUG.println(__LINE__);\
+  //                                     SERIAL_DEBUG.flush();
+                                      
+#define DEBUG_PRINT Serial.print
+#define DEBUG_PRINTLN Serial.println
+#define DEBUG_PRINTF Serial.printf
+#else
+  // #define DEBUG_PRINT_FUNCTION_NAME   //nothing, no code
+  
+#define DEBUG_PRINT //Serial.print
+#define DEBUG_PRINTLN //Serial.println
+#define DEBUG_PRINTF //Serial.printf
+#endif
+
 /*
 // ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
 

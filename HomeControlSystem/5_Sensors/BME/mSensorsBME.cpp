@@ -108,6 +108,7 @@ void mSensorsBME::Pre_Init(){
   
     sensor[settings.fSensorCount].bme = new Adafruit_BME280();
     if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
+      // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
       settings.fSensorCount++;
     }else{
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));

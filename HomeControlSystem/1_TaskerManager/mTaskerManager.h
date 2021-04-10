@@ -526,7 +526,7 @@ enum MODULE_IDS{
   #define pCONT_bme                             static_cast<mSensorsBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DS18B20
-  #include "5_Sensors/DB18/mSensorsDB18.h"
+  #include "5_Sensors/DB18x20/mSensorsDB18.h"
   #define pCONT_msdb18                          static_cast<mSensorsDB18*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS

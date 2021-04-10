@@ -377,10 +377,14 @@ int8_t mInterfaceLight::Tasker(uint8_t function){
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
     case FUNC_TEMPLATE_MODULE_LOAD:
+    case FUNC_TEMPLATE_DEVICE_LOAD:
       Template_Load();
       break;
     case FUNC_MODULE_INIT:
       LightModuleInit();
+      break;
+      case FUNC_EVERY_MINUTE:
+      // Template_Load(); //test
       break;
     case FUNC_POINTER_INIT:
 
@@ -709,7 +713,7 @@ void mInterfaceLight::EveryLoop(){
     }
   
   }
-
+  
   if(pCONT_set->Settings.light_settings.type == LT_WS2812){ 
     
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_WS2812 %d"),animation.mode_id);
@@ -717,13 +721,14 @@ void mInterfaceLight::EveryLoop(){
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
       case ANIMATION_MODE_EFFECTS_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_8EFFECTS_ID"));
         pCONT_lAni->SubTask_Flasher_Main();
         // light_power_state = true;
       break;
       #endif
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID:
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_NOTIFICATIONS_IDu"));
         pCONT_lAni->SubTask_Notifications();
       break;
       #endif

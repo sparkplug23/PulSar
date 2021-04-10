@@ -204,7 +204,7 @@ bool mSupport::I2cDevice(uint8_t addr)
     #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint8_t address = 1; address <= 127; address++) {
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
+      // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) {
     #ifdef ENABLE_LOG_LEVEL_INFO

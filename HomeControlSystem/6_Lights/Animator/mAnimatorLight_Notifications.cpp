@@ -702,10 +702,10 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
   // for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
   //   //you diAddLog_mP2(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_NEO_MODE_NOTIFICATIONS "Index [%d] RgbColor %d\t%d\t%d\t flash [%d]"),i,setcolour[i].r,setcolour[i].g,setcolour[i].b,setcolour[i].flash_enabled);
   // }
-
+// AddLog(LOG_LEVEL_TEST, PSTR("\t\tnotif.tSaved.Timeout = millis()"));
   notif.tSaved.Timeout = millis(); // resets timeout counter
   notif.tSaved.TimeoutCounter = millis();
-  pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_NOTIFICATIONS_ID;
+  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_NOTIFICATIONS_ID;
   notif.flags.fForcePanelUpdate = true;
 
 
