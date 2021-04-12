@@ -190,6 +190,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_01(){
   //Display on all pixels
   UpdateDesiredColourFromPaletteSelected();
 
+#ifdef ENABLE_DEVFEATURE_FIREPLACE_SEGMENT_EXTRA_GENERATE
   HsbColor colour_in = HsbColor(RgbColor(0));
   
  #ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE
@@ -206,6 +207,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_01(){
 
     // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
   
+  // This will be the introduction of segments into my code!!
     animation_colours[random(256,299)].DesiredColour = colour_in;
 
     // animation_colours[random(40,49)].DesiredColour = colour_in;
@@ -213,6 +215,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_01(){
   }
   
 #endif 
+#endif // ENABLE_DEVFEATURE_FIREPLACE_SEGMENT_EXTRA_GENERATE
+
+AddLog(LOG_LEVEL_TEST,PSTR("SubTask_Flasher_Animate_Function_FirePlace_01 %d"),animation_colours[0].DesiredColour.R);
 
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();

@@ -423,7 +423,7 @@ void mSettings::Function_Template_Load(){
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
   boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE

@@ -87,7 +87,7 @@ Garage
 **/
 // #define DEVICE_OILTANK
 // #define DEVICE_OILFURNACE
-// #define DEVICE_GARAGELIGHT
+#define DEVICE_GARAGELIGHT
 // #define DEVICE_TREADMILL
 
 /**
@@ -1770,56 +1770,35 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
   
   #define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 2
-  
-  // #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
+  #define SETTINGS_HOLDER 1
 
-  // #define USE_MODULE_SENSORS_MOTION
+  // Core
+  #define USE_MODULE_CORE_RULES
+  // Sensors 
+  #define USE_MODULE_SENSORS_INTERFACE 
+  #define USE_MODULE_SENSORS_MOTION
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
-  
-  #define USE_MODULE_CORE_RULES
-  
+  // Drivers
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 2
+  // Energy
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_ADE7953
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 2
-
   #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
 
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-//       #ifdef USE_MODULE_SENSORS_MOTION
-//       // "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-//       // "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-
-// //need to make no pullup versions
-
+      #ifdef USE_MODULE_SENSORS_MOTION
       "\"13\":\"" D_GPIO_FUNCTION_PIR_1_NP_CTR     "\","
       "\"5\":\"" D_GPIO_FUNCTION_PIR_2_NP_CTR     "\","
-//       #endif
-      
-//       #ifdef USE_MODULE_SENSORS_SWITCHES
-//       "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-//       "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-//       #endif
-
-
-//       #ifdef USE_MODULE_DRIVERS_RELAY
-//       "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\"," 
-//       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-//       #endif 
-//       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-
-      
+      #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
       "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
       "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
@@ -1828,7 +1807,7 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
-      #ifdef USE_MODULE_ENERGY_ADE7953 // I2C address 0x38
+      #ifdef USE_MODULE_ENERGY_ADE7953
       "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR  "\","
       "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
       "\"16\":\"" D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
@@ -1837,110 +1816,70 @@ Bathroom
       "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_TEMPERATURE_CTR  "\","
       #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-
-
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden"
-  // #define SET_POWERONSTATE_AS_ON
 
-  // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
-        "]"
-    
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+      "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D15:45:00\",\"OffTime\":\"00D00:00:00\"},"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"},"
     "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
   "}";
 
 
-  
   #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    "\"Rule0\":{" //switch example
+    "\"Rule0\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Motion\","    //sensor
-        //?#
-        "\"Function\":\"MotionStarted\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-
+        "\"Module\":\"Motion\","
+        "\"Function\":\"MotionStarted\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":0," //number, name, or all
-        //2
-        "\"State\":1,"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":1,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
-
-        //relay:timeon needs a way to specify which device
-        
-        // {"PowerName":0,"PowerState":1,"Relay":{"TimeOn":5}}
-
-
-        //relay 
       "}"
     "},"
-    "\"Rule1\":{" //switch example
+    "\"Rule1\":{"
       "\"Trigger\":{"
-      //module_id
-        "\"Module\":\"Motion\","    //sensor
-        //?
-        "\"Function\":\"MotionStarted\"," //eg. InputChange (TemperatureThreshold)
-        //[1]
-        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        //[0]
-        "\"State\":1" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Module\":\"Motion\","
+        "\"Function\":\"MotionStarted\","
+        "\"DeviceName\":1,"
+        "\"State\":1"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
-        // set power?
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        //1
-        "\"DeviceName\":1," //number, name, or all
-        //2
-        "\"State\":1,"//setpower
-        // Append other "normal" commands here? this would need storing
-        // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-        
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":1,"
+        "\"State\":1,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
-        //relay 
       "}"
     "}"
-    
-
   "}";
-
-  
-
-
 
 #endif
 

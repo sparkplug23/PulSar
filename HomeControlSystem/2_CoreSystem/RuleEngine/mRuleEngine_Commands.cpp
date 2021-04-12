@@ -3,22 +3,6 @@
 
 #ifdef USE_MODULE_CORE_RULES
 
-int8_t mRuleEngine::CheckAndExecute_JSONCommands(){
-
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CORE_RULES_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CORE_RULES_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-
 void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event){
 
   AddLog(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
@@ -187,19 +171,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_P
 }
 
 
-void mRuleEngine::parse_JSONCommand(){
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  } 
+void mRuleEngine::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   JsonParserObject jobj = 0;

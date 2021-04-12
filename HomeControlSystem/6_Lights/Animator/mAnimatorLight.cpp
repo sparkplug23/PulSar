@@ -30,7 +30,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
       init();
       break;
   }
-//return 0;
+  
   if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
   
   switch(function){
@@ -53,35 +53,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:{
       //EverySecond();
       //Settings_Default();
-
-      uint8_t new_colour[] = {255,1,2,3,4};
-
-            RgbColor colour;// = animation_colours[0].DesiredColour;
-      // Get colour
-      colour = RgbcctColor(
-        new_colour[0],
-        new_colour[1],
-        new_colour[2],
-        0,
-        0
-      );
-
-
-
-            // AddLog(LOG_LEVEL_TEST, PSTR( "RgbcctColor colour=%d,%d,%d"), // DEBUG_INSERT_PAGE_BREAK
-            // colour.R,
-            // colour.G,
-            // colour.B);
-      // pCONT_wif->wifi_counter_tester++;
-      // AddLog(LOG_LEVEL_INFO,PSTR("wifi_counter_tester=%d"),pCONT_wif->wifi_counter_tester);
-
-      //       Serial.println("HERE");
-      //       for(int i=0;i<45;i++){
-
-      // Serial.printf("%02d | %d\n\r",i,editable_mapped_array_data_array[i]);
-
-      //       }
-
       // pCONT_iLight->ShowInterface();
 
       // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
@@ -338,7 +309,6 @@ DEBUG_LINE;
   
   init(); //default values
 
-DEBUG_LINE;
   #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog(LOG_LEVEL_TEST,PSTR("mAnimatorLight::Settings_Default"));
   #endif

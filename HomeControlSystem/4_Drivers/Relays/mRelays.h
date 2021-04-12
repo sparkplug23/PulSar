@@ -66,7 +66,7 @@ class mRelays :
     }settings;
 
     int8_t CheckAndExecute_JSONCommands();
-    void   parse_JSONCommand(void);
+    void   parse_JSONCommand(JsonParserObject obj);
 
 #ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
