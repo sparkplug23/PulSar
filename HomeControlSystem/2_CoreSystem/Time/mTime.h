@@ -129,7 +129,7 @@ class mTime :
     void UpdateStoredRTCVariables();
     void initUpTime();
     void UpdateUpTime();
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     static const char* PM_MODULE_CORE_TIME_CTR;
     static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
@@ -142,6 +142,7 @@ class mTime :
       return sizeof(mTime);
     };
     #endif
+    void parse_JSONCommand(JsonParserObject obj);
 
 
     uint32_t uptime_seconds_nonreset = 0; //test new uptime with comparison of breaktime
@@ -151,6 +152,7 @@ class mTime :
     uint32_t GetTimeOfDay_Seconds(void);
     static const char* ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds, char* buffer, uint8_t buflen);
     static const char* ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen);
+    static const char* ConvertShortTime_HHMMSS(uint32_t* _time, char* buffer, uint8_t buflen);
     static time_short_t Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr);
     
     // Used to keep the last midnight time, this stops multiple midnight runs at the same midnight
@@ -159,6 +161,7 @@ class mTime :
     char* GetDateAndTimeCtr(uint8_t time_type, char* buffer, uint8_t buflen);
 
     time_short_t GetTimeShortNow();
+    uint32_t GetTimeShortNowU32();
 
     #ifdef USE_SUNRISE
       uint32_t JulianDate(const datetime_t &now);      

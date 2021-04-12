@@ -61,7 +61,7 @@ void mSAWMain::parsesub_Transmit(void){
 
 
 // Listen for manual doorbell presses from radios
-void mSAWMain::Tasker(uint8_t function){
+void mSAWMain::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:

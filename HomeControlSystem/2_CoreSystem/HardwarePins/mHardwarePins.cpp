@@ -14,7 +14,7 @@ void mHardwarePins::Template_Load(){
 
 }
 
-int8_t mHardwarePins::Tasker(uint8_t function){
+int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   // DEBUG_PRINTF("works=%d\n\r",works);
@@ -31,9 +31,19 @@ int8_t mHardwarePins::Tasker(uint8_t function){
       //ModuleSettings_ShowTemplateLog();
       //ModuleSettings_ShowActiveTemplate();
     break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
   }
 
 }
+
+
+void mHardwarePins::parse_JSONCommand(JsonParserObject obj){}
+
 
 void mHardwarePins::pre_init(){
 

@@ -10,7 +10,7 @@ void mLogging::init(void){
 }
 
 
-int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
+int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj){ // KEEP TASKER ON TOP
 
 // Serial.println("logging");
 //   DEBUG_PRINT_FUNCTION_NAME_TEST;
@@ -63,6 +63,7 @@ int8_t mLogging::Tasker(uint8_t function){ // KEEP TASKER ON TOP
 }//end
 
 
+void mLogging::parse_JSONCommand(JsonParserObject obj){};
 
 // for quick prototyping, set to test level
 

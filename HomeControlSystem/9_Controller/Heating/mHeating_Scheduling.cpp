@@ -1626,7 +1626,7 @@ void mHeating::init_program_scheduling(void){
 // }
 
 
-// int8_t mHeating::Tasker(uint8_t function){
+// int8_t mHeating::Tasker(uint8_t function, JsonParserObject obj){
 
 //   /************
 //    * INIT SECTION * 
@@ -1680,7 +1680,7 @@ void mHeating::init_program_scheduling(void){
 //     /************
 //      * COMMANDS SECTION * 
 //     *******************/
-//     case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
+//     case FUNC_JSON_COMMAND_ID:
 //       CheckAndExecute_JSONCommands();
 //     break;
 //     case FUNC_JSON_COMMAND_ID:

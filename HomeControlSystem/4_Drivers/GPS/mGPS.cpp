@@ -139,7 +139,7 @@ void mGPS::pre_init(){
 }
 
 
-int8_t mGPS::Tasker(uint8_t function){
+int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -366,11 +366,8 @@ uint32_t timeout = millis();
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -403,7 +400,7 @@ uint32_t timeout = millis();
 } // END Tasker
 
 
-// int8_t mGPS::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj), JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);

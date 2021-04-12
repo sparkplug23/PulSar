@@ -38,6 +38,10 @@ class mHardwarePins :
       return sizeof(mHardwarePins);
     };
     #endif
+    
+    
+    void parse_JSONCommand(JsonParserObject obj);
+    
 
     uint8_t works = 0;
 
@@ -101,7 +105,7 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
     bool JsonTemplate(const char* dataBuf);
     void TemplateJson();
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void pre_init(void);
 
 };

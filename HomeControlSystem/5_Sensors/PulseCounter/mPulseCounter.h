@@ -54,7 +54,7 @@ class mPulseCounter :
     char name_buffer[100]; //use single 1D klist array in memory
 
 
-     int8_t Tasker(uint8_t function);
+     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     #define DONE_COMPLETE false
     #define DONE_NOTCOMPLETE true

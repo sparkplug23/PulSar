@@ -34,7 +34,7 @@ class mBuzzer :
       uint8_t fEnableSensor = false;
     }settings;
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
     
 
@@ -61,8 +61,8 @@ class mBuzzer :
     void BuzzerEnabledBeep(uint32_t count, uint32_t duration);
     void BuzzerEvery100mSec();
     
-    int8_t CheckAndExecute_JSONCommands();
-    void   parse_JSONCommand(void);
+    void parse_JSONCommand(JsonParserObject obj);
+  
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

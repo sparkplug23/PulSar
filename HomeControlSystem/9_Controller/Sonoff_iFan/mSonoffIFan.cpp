@@ -9,7 +9,7 @@
 const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;
 const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR = D_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR;
 
-int8_t mSonoffIFan::Tasker(uint8_t function){
+int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -34,11 +34,8 @@ int8_t mSonoffIFan::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     case FUNC_SERIAL:
       SerialInput();

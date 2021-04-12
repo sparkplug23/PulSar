@@ -113,7 +113,7 @@ class mUltraSonicSensor :
       char detected_rtc_ctr[10];
     }presence_detect;
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Init(void);
     float GetSpeedOfSoundInMetres();
 

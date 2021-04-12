@@ -17,7 +17,7 @@ class mUpdates :
 
   public:
     mUpdates(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
     static const char* PM_MODULE_CORE_UPDATES_CTR;
@@ -36,9 +36,8 @@ class mUpdates :
     void init(void);
     void pre_init();
 
-    int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(void);
-
+    void parse_JSONCommand(JsonParserObject obj);
+    
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   

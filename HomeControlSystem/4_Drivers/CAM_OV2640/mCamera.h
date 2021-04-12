@@ -15,7 +15,7 @@ class mCameraOV2640 :
   private:
   public:
     mCameraOV2640(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     
     static const char* PM_MODULE_DRIVERS_CAMERA_OV2640_CTR;

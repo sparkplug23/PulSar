@@ -69,7 +69,7 @@ void mHBridge::init(void){
 
 }
 
-int8_t mHBridge::Tasker(uint8_t function){ 
+int8_t mHBridge::Tasker(uint8_t function, JsonParserObject obj){ 
 
   switch(function){
     case FUNC_PRE_INIT:

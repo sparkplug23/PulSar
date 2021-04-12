@@ -6,7 +6,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
 
 
 
-int8_t mSupport::Tasker(uint8_t function){
+int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
 
@@ -70,9 +70,14 @@ int8_t mSupport::Tasker(uint8_t function){
   // }
 
     break;
-    case FUNC_MQTT_COMMAND: 
-      parse_JSONCommand();
+
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
     break;
+
 
 
     case FUNC_WIFI_CONNECTED:
@@ -2566,28 +2571,7 @@ float mSupport::FastPrecisePowf(const float x, const float y)
 }
 
 
-
-
-
-
-
-
-
-
-//SYSTEM will be single level, basic commands in json format
-void mSupport::parse_JSONCommand(){
-
-  // Check if instruction is for me
-  if(mSearchCtrIndexOf(data_buffer.topic.ctr,"set/system")>=0){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CORE_SUPPORT_FRIENDLY_CTR));
-    #endif// ENABLE_LOG_LEVEL_INFO
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-  }else{
-    return; // not meant for here
-  }
-
-
+void mSupport::parse_JSONCommand(JsonParserObject obj){
 
   // StaticJsonDocument<300> doc;
   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);

@@ -34,7 +34,7 @@ void mStatusLEDs::init(void){
 }
 
 
-int8_t mStatusLEDs::Tasker(uint8_t function){
+int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -443,7 +443,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // }
 
-// int8_t mStatusLEDs::Tasker(uint8_t function){
+// int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
 //   // /************
 //   //  * INIT SECTION * 
@@ -505,7 +505,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } // END Tasker
 
 
-// int8_t mStatusLEDs::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);

@@ -36,7 +36,7 @@ public:
 
   void parsesub_Transmit(void);
 
-  int8_t Tasker(uint8_t function);
+  int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
   uint32_t tSavedDisabledTime;
 
   uint8_t fForceSendAllMQQTData = false;

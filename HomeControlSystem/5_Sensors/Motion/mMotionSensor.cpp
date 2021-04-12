@@ -6,7 +6,7 @@ const char* mMotionSensor::PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTIO
 const char* mMotionSensor::PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR = D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
 
 
-int8_t mMotionSensor::Tasker(uint8_t function){
+int8_t mMotionSensor::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -32,11 +32,8 @@ int8_t mMotionSensor::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -69,68 +66,6 @@ int8_t mMotionSensor::Tasker(uint8_t function){
 } // END function
 
 
-#ifndef DISABLE_WEBSERVER
-void mMotionSensor::WebAppend_Root_Draw_PageTable(){
-char buffer[50];
-for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){       
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>PIR Motion %s</td>"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_pir","?");   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-}
-}
-
-
-void mMotionSensor::WebPage_Root_AddHandlers(){
-  // Not needed
-}
-
-//append to internal buffer if any root messages table
-void mMotionSensor::WebAppend_Root_Status_Table(){
-
-  char buffer[20];
-
-  JsonBuilderI->Array_Start("tab_pir");// Class name
-  for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",sensor_id);
-
-        char colour_ctr[8];
-        uint32_t millis_elapsed = mTime::MillisElapsed(&pir_detect[sensor_id].tEndedTime);
-        // Motion in progress
-        if(pir_detect[sensor_id].isactive){
-          sprintf_P(colour_ctr,PSTR("#00ff00"));
-        }else
-        // If movement event has just finished
-        if(millis_elapsed<(1000*60)){
-          // Show colour as fading back to white over X seconds SINCE EVENT OVER
-          uint8_t colour_G = constrain(
-                                map(millis_elapsed,0,(1000*60),0,255)
-                                ,0,255 //increases with time
-                              );
-                              //Serial.printf("colour_G=%d\n\r",colour_G);
-          // sprintf(colour_ctr,"%s",
-          pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
-          //);
-        }
-        // no event show, just white
-        else{
-          sprintf_P(colour_ctr,PSTR("#ffffff"));
-        }
-
-
-      JsonBuilderI->Add("ih",
-        pCONT_time->ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      
-      //detected_rtc_ctr);
-      JsonBuilderI->Add("fc",colour_ctr);    
-    JsonBuilderI->Level_End();
-  }
-
-  JsonBuilderI->Array_End();
-
-}
-#endif // DISABLE_WEBSERVER
 
 void mMotionSensor::Pre_Init(void){
 
@@ -189,10 +124,6 @@ void mMotionSensor::Init(){
     pir_detect[sensor_id].state = PIR_Detected(sensor_id);
   }
 
-  #ifdef DEVICE_SIDEDOORLIGHT
-  settings.motion_trigger_type = MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID;
-  #endif
-
 }
 
 uint8_t mMotionSensor::PIR_Detected(uint8_t sensor_id){
@@ -210,54 +141,33 @@ const char* mMotionSensor::PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uin
 
 void mMotionSensor::EveryLoop(){
 
-  // pinMode(12, INPUT_PULLUP);
+  for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++)
+  {
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("MOTION"));
-
-  // Serial.println(digitalRead(12));
-  
-
-  for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-  //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_PIR "PIR %s %d"),PIR_Detected_Ctr(sensor_id),sensor_id);
-    if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state){
-      //if(pCONT_time->RtcTime.seconds_nonreset<20){ break; }
-      // pCONT->mqt->ppublish("status/motion/event",PIR_Detected_Ctr(sensor_id),false);
+    if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state)
+    {
       pir_detect[sensor_id].state = PIR_Detected(sensor_id);
 
-
-
-      if(pir_detect[sensor_id].state){
+      if(pir_detect[sensor_id].state)
+      {
         pir_detect[sensor_id].tDetectTime = millis(); 
-//        pir_detect[sensor_id].detected_time_of_day_seconds = pCONT_time->GetTimeOfDay_Seconds();
-
-AddLog(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
-        
-        pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNow();
-        
-        // memcpy(pir_detect[sensor_id].detected_rtc_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr));
+        pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNowU32();
         pir_detect[sensor_id].isactive = true;
 
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
+        #endif
+        
         #ifdef USE_MODULE_CORE_RULES
         pCONT_rules->New_Event(EM_MODULE_SENSORS_MOTION_ID, sensor_id);
         #endif
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_STARTED_ID);
 
-        if(pCONT_time->UpTime()>60){
-          if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
-            pCONT->Tasker_Interface(FUNC_SET_POWER_ON_ID);
-            #ifdef USE_MODULE_DRIVERS_RELAY
-              pCONT_mry->CommandSet_Timer_Decounter(60); //retrigger to 60 seconds
-            #endif // USE_MODULE_DRIVERS_RELAY
-          }
-        }
-
-      }else{
+      }
+      else
+      {
         pir_detect[sensor_id].tEndedTime = millis();
         pir_detect[sensor_id].isactive = false;
-
-        if(settings.motion_trigger_type == MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID){
-          pCONT->Tasker_Interface(FUNC_SET_POWER_OFF_ID);
-        }
 
         #ifdef USE_MODULE_CORE_RULES
         pCONT_rules->New_Event(EM_MODULE_SENSORS_MOTION_ID, sensor_id);
@@ -265,68 +175,12 @@ AddLog(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pir_detect[sensor_id].state=
         pCONT->Tasker_Interface(FUNC_EVENT_MOTION_ENDED_ID);
 
       }
-      // char buffer[20];
-      // char buffer2[20];
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "pir_detect \"%s\" @ %s"),
-      //                                   PIR_Detected_Ctr(sensor_id, buffer, sizeof(buffer)),
-      //                                   mTime::ConvertTimeOfDay_Seconds_HHMMSS(pir_detect[sensor_id].detected_time_of_day_seconds, buffer2, sizeof(buffer2))                                                                          
-      //         );
-
-      
-// char buffer[20];
-//       char buffer2[20];
-//       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_PIR "pir_detect %d @ %s"),
-//                                         pCONT_time->GetTimeOfDay_Seconds(),
-//                                         mTime::ConvertTimeOfDay_Seconds_HHMMSS(pCONT_time->GetTimeOfDay_Seconds(), buffer2, sizeof(buffer2))                                                                          
-//               );
-
-
       pir_detect[sensor_id].ischanged = true;
       mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }
   }
-  // Use short timer to automatically clear event
-  //if > 1 sec
-  //clear struct
-
-
-
 
 }
-
-
-
-int8_t mMotionSensor::CheckAndExecute_JSONCommands(){
-
-  if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-
-void mMotionSensor::parse_JSONCommand(){ //parse_Command() and pass packet (topic/len/payload/len structure)
-  
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  }  
-  JsonParserToken jtok = 0; 
-
-}
-
 
 /*********************************************************************************************************************************************
 ******** Data Builders (JSON + Pretty) **************************************************************************************************************************************

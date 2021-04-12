@@ -15,7 +15,7 @@ void mMoistureSensor::init(void){
 
 }
 
-void mMoistureSensor::Tasker(uint8_t function){
+void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:

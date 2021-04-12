@@ -29,12 +29,13 @@ class mExampleClass :
       return sizeof(mExampleClass);
     };
     #endif
+    void parse_JSONCommand(JsonParserObject obj);
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
     }settings;
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);

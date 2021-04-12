@@ -95,7 +95,7 @@ void EveryLoop();
     }settings;
 
     
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t CheckAndExecute_JSONCommands(void);
     void parse_JSONCommand(void);
 

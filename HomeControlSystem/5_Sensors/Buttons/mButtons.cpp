@@ -241,7 +241,7 @@ void mButtons::ButtonLoop(void)
 }
 
 
-int8_t mButtons::Tasker(uint8_t function){
+int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:

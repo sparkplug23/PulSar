@@ -85,7 +85,7 @@ void mSonoffIFan::parse_JSONCommand(void){
 
 
 
-// int8_t mSonoffIFan::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);

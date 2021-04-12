@@ -19,7 +19,7 @@ class mAddressableLight :
   public:
     mAddressableLight(){};
     void Init();
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static const char* PM_MODULE_LIGHTS_ADDRESSABLE_CTR;
     static const char* PM_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR;
@@ -37,8 +37,7 @@ class mAddressableLight :
 
     void FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0));
                 
-    int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(void);
+    void parse_JSONCommand(JsonParserObject obj);
 
     void SetPixelColorHardware(uint16_t index, RgbcctColor colour_hardware, bool flag_replicate_for_total_pixel_length = false);
     RgbcctColor GetPixelColorHardware(uint16_t index);

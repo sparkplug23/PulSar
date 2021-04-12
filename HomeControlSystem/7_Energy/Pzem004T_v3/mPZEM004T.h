@@ -71,7 +71,7 @@ class mEnergyPZEM004T :
     const uint32_t PZEM_AC_STABILIZE = 30;        // Number of seconds to stabilize configuration
 
     TasmotaModbus *PzemAcModbus;
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     enum AddressConfigSteps { ADDR_IDLE, ADDR_RECEIVE, ADDR_SEND };
 

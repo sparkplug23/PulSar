@@ -32,7 +32,7 @@ void mEnergyADE7953::Pre_Init(void)
 }
 
 
-int8_t mEnergyADE7953::Tasker(uint8_t function){
+int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     
   switch(function){
     /************

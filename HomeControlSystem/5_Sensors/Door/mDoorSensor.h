@@ -74,7 +74,7 @@ class mDoorSensor :
       void MQTTSendDoorLockIfChanged();
     #endif
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     //#ifdef MQTT
       void SubTasker_MQTTSender();

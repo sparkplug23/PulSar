@@ -18,6 +18,8 @@ typedef struct pir_detect_s{
   time_short_t detected_time;
 }pir_detect_t;
 
+#include "5_Sensors/_Interface/mSensorsInterface.h"
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -33,7 +35,7 @@ class mMotionSensor :
     void Init(void);
     void Pre_Init(void);
     // Tasker that is called on each loop
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // All SubTasks called by Tasker 
     void EveryLoop();
         
@@ -49,26 +51,27 @@ class mMotionSensor :
     };
     #endif
 
+    void parse_JSONCommand(JsonParserObject obj);
 
-    enum MOTION_TRIGGER_TYPE_IDS{
-      MOTION_TRIGGER_TYPE_REPORT_ONLY_ID=0,
-      MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID,
-      MOTION_TRIGGER_TYPE_LENGTH_ID
-    };
+
+    // enum MOTION_TRIGGER_TYPE_IDS{
+    //   MOTION_TRIGGER_TYPE_REPORT_ONLY_ID=0,
+    //   MOTION_TRIGGER_TYPE_COMMANDS_INTERNAL_POWER_COMMAND_ID,
+    //   MOTION_TRIGGER_TYPE_LENGTH_ID
+    // };
 
     struct SETTINGS{
       uint8_t sensors_active = 0;
       uint8_t fEnableSensor = false;
-      uint8_t motion_trigger_type = MOTION_TRIGGER_TYPE_REPORT_ONLY_ID;
+      // uint8_t motion_trigger_type = MOTION_TRIGGER_TYPE_REPORT_ONLY_ID;
     }settings;
-
-    void parse_JSONCommand();
-    int8_t CheckAndExecute_JSONCommands();
     
     #define MAXIMUM_SENSORS 3
     int8_t pin[MAXIMUM_SENSORS] = {-1, -1, -1};
     uint8_t pin_isinverted[MAXIMUM_SENSORS] = {0, 0, 0};
-    pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
+    // pir_detect_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
+    event_motion_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
+    // struct event_motion_s pir_detect2;//[MAXIMUM_SENSORS]; // up to 2 sensors
     
     #ifndef DISABLE_WEBSERVER
     void WebPage_Root_AddHandlers();

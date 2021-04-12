@@ -2,35 +2,8 @@
 #include "2_CoreSystem/Settings/mSettings.h"
 
 
-int8_t mSettings::CheckAndExecute_JSONCommands(){
-
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CORE_SETTINGS_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CORE_SETTINGS_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-
-void mSettings::parse_JSONCommand(){
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  } 
+void mSettings::parse_JSONCommand(JsonParserObject obj)
+{
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -39,10 +12,6 @@ void mSettings::parse_JSONCommand(){
    * Add command that will cause templates to be loaded overwriting settings, then commit to saving
 
    */
-
-
-
-
   
   if(jtok = obj[PM_JSON_SYSTEM_RESTART]){
     // if(jtok.isStr()){
@@ -62,8 +31,6 @@ void mSettings::parse_JSONCommand(){
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-
-
 
 
   if(jtok = obj[PM_JSON_DEVICENAME]){ 
@@ -286,7 +253,9 @@ void mSettings::parse_JSONCommand(){
 
 
 
+
 }
+
 
 
 

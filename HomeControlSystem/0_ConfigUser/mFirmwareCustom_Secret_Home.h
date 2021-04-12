@@ -149,7 +149,7 @@ Bathroom
  - rgbbedroomclock
  - candlewarmer
  **/
-#define DEVICE_BEDROOMSENSOR
+// #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_AIRPURIFIER
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_FLOORFAN1
@@ -1004,7 +1004,7 @@ Bathroom
       //   "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
       //   "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       // #endif //ESP266
-      #ifdef ESP32
+      // #ifdef ESP32
         #ifdef USE_MODULE_SENSORS_BME
         // "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
         // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
@@ -1013,7 +1013,7 @@ Bathroom
         // "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
         // "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
         "\"LBI\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-      #endif //ESP32
+      // #endif //ESP32
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1662,21 +1662,14 @@ Bathroom
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
-        // "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
-        // "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
       "],"
-      // "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
-      //   "\"" D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "\""
-      // "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_BUTTON_1_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
-        // "[40,170,67,3,30,19,2,25],"     // D3 group of 2                                 
-        // "[40,255,169,120,53,22,4,240],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
         "[40,255,100,29,205,201,168,203],"                                             
         "[40,255,100,29,205,248,248,249]"  
@@ -2216,79 +2209,44 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
 
-  // New bedroom sensor will include
-  /** 
-   * BME
-   * PIR
-   * Notification leds (install strip above door)
-   * Door position
-   * Light sensor (basic analog)
-   * Anything else will become a test device
-  */
-
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
+  /**
+   * BME              D1/D2
+   * PIR Motion       D6
+   * Door Position    D5
+   * Door Lock        D7
+   * BH1 Light        D1/D2
+   */
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_DOOR
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE //temp fix
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  /**
-   * BME              D1/D2
-   * DB18, 1 channel  D3
-   * PIR Motion       D7
-   * Doppler Motion   D6
-   * Door Position    D4
-   * Ultrasonic 
-   * Analog Light Sensor A0
-   */
-  #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18B20
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_DOOR
-  // #define USE_MODULE_SENSORS_ANALOG //as light sensor
-  // #define USE_MODULE_SENSORS_ULTRASONICS  
-  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-
-  
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"    
-      // #ifdef USE_MODULE_SENSORS_BUTTONS
-      // "\"D0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      // #endif
-      // #ifdef USE_MODULE_SENSORS_ULTRASONICS
-      // "\"D5\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      // "\"D0\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
-      // #endif  
       #ifdef USE_MODULE_SENSORS_BME
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      // #ifdef USE_MODULE_SENSORS_DS18B20
-      // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      // "\"D4\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      // #endif
-      // #ifdef USE_MODULE_DRIVERS_RELAY
-      // "\"D4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      // // "\"D0\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","   5/7 doors
-      // #endif
-//      "\"D5\":\"" D_GPIO_FUNCTION_FAN_IRSEND_CTR    "\","
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      // "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
       "\"D5\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
       "\"D7\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
       #endif
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-      // add status led to here
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2314,64 +2272,27 @@ Bathroom
     "\"ColourPalette\":43," //c12    43 is the colours for this christmas
     "\"BrightnessRGB\":100"
   "}";
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
   #define STRIP_SIZE_MAX                      50   
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "LED1"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "LED2"
-
-// maybe I need to delay template name loading until after init phase?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-      "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" "bedroomDOP" "\","
-        "\"" "bedroomPIR" "\""
+        "\"" "bedroom" "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" "Bedroom" "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" "speed_of_sound_ambient" "\","
-        "\"" "Bedroom02" "\","
-        "\"" "Bedroom03" "\","
-        "\"" "Bedroom04" "\","
-        "\"" "Bedroom05" "\","
-        "\"" "Bedroom06" "\","
-        "\"" "Bedroom07" "\""
-      "],"
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
-        "\"" "bedroomDOOR" "\""
+        "\"" "bedroomDOOR" "\","
+        "\"" "bedroomlock" "\""
       "]"
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
-        "[40,255,100,29,194,102,202,187],"     // D3 group of 2                                 
-        "[40,255,100,29,195,135,215,193],"
-        "[40,255,100,29,194,124,254,111],"   //D6 group of 3                                           
-        "[40,255,100,29,195,134,175,63],"                                             
-        "[40,255,100,29,195,135,126,242]"  
-
-                            
-        // "[40,0,32,23,59,71,5,141],"  
-        // "[40,0,66,109,59,71,5,172],"  
-        // "[40,0,118,128,59,71,5,227],"  
-        // "[40,0,83,19,59,71,6,66],"  
-        // "[40,0,114,20,59,71,5,19],"  
-        // "[40,0,108,65,59,71,4,202],"  
-        // "[40,0,40,61,59,71,4,134]"       
-
-      "]"  
     "}"
   "}";
-
 #endif
+
 #ifdef DEVICE_AIRPURIFIER
   #define DEVICENAME_CTR          "airpurifier"
   #define DEVICENAME_FRIENDLY_CTR "Air Purifier 1"

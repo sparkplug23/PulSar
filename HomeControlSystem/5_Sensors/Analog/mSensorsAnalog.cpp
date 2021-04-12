@@ -54,7 +54,7 @@ void mSensorsAnalog::EveryLoop(){
   //clear struct
 }
 
-int8_t mSensorsAnalog::Tasker(uint8_t function){
+int8_t mSensorsAnalog::Tasker(uint8_t function, JsonParserObject obj){
 
   // Run even when sensor is disabled (Will set fEnableSensor)
   switch(function){
@@ -87,13 +87,9 @@ int8_t mSensorsAnalog::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    // case FUNC_COMMAND:
-
-    // break;
-    // case FUNC_JSON_COMMAND:
-    //   //function_result = parse_JSONCommand();
-    //   parse_JSONCommand();
-    // break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
     case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
       // parsesub_JSONCommands();
     break;  

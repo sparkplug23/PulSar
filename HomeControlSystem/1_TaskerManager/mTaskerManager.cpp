@@ -119,6 +119,9 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new X();
   #endif
   // Sensors
+  #ifdef USE_MODULE_SENSORS_INTERFACE
+    pModule[EM_MODULE_SENSORS_INTERFACE_ID] = new mSensorsInterface();
+  #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
     pModule[EM_MODULE_SENSORS_BUTTONS_ID] = new mButtons();
   #endif
@@ -154,6 +157,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS_PRESENCE
     pModule[EM_MODULE_SENSORS_PRESENCE_ID] = new mPresence();
+  #endif
+  #ifdef USE_MODULE_SENSORS_BH1750
+    pModule[EM_MODULE_SENSORS_BH1750_ID] = new mBH1750();
   #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -211,7 +217,54 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     pCONT_rules->Tasker_Rules_Interface(function);
   }
   #endif
+
+  JsonParserObject obj = 0;
+  // JsonParser parser(parsing_buffer);
+  // char parsing_buffer[data_buffer.payload.len+1];
+  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+
+
+
+  // JsonParser parser(nullptr);//data_buffer.payload.ctr);
+
+  // JsonParser parser(data_buffer.payload.ctr);
+
+  // Method is jdson, so one off parse it (maybe this should be done before calling? passing globally)
   
+  switch(function)
+  {
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:    
+      // if(obj && GetModuleIDbyFriendlyName(topic)==i)
+      // else{break;}
+      // If match, switch target tasker to be the directed command
+    case FUNC_JSON_COMMAND_ID:
+    { 
+      
+      JsonParser parser(data_buffer.payload.ctr);
+      
+      // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
+      obj = parser.getRootObject();   
+      if (!obj) { 
+        #ifdef ENABLE_LOG_LEVEL_COMMANDS
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+        #endif //ENABLE_LOG_LEVEL_COMMANDS
+        break;
+      } 
+
+      for(uint8_t i=0;i<GetClassCount();i++)
+      { 
+        pModule[i]->Tasker(function, obj);
+      }
+      return 0;
+      // else{
+      //   AddLog(LOG_LEVEL_ERROR, PSTR("D_JSON_DESERIALIZATION_ERROR"));
+      //   AddLog(LOG_LEVEL_TEST, PSTR("D_JSON_DESERIALIZATION_ERROR=%d"),obj["test2"].getInt());   
+      // }
+    } 
+    break;
+  } //END switch
+
+
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
     switch_index = target_tasker ? target_tasker : i;
@@ -223,7 +276,21 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     uint32_t start_millis = millis();
     #endif
 
-    pModule[switch_index]->Tasker(function);
+    switch(function){
+      // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
+      case FUNC_JSON_COMMAND_ID: 
+        // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
+      //   if(obj)
+      //   {
+      //     // pModule[switch_index]->parse_JSONCommand(obj); // This should only happen if the function is enabled internally
+      //     pModule[switch_index]->Tasker(function,obj);
+      //   }
+      break;
+      default:
+        pModule[switch_index]->Tasker(function, obj);
+      break;
+    }
+
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis
@@ -300,6 +367,55 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 }
 
 
+/**
+ * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
+ If !0, a specific tasker will be called and this function will exit after completion
+ * */
+// int8_t mTaskerManager::Tasker_ParseCommands(uint8_t function, char* buffer, uint16_t buflen){//}, uint8_t target_tasker, bool flags_is_executing_rule){
+
+//   int8_t result = 0;
+
+//   // if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_MOTION_FRIENDLY_CTR)>=0){
+//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
+//   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//   //   parse_JSONCommand();
+//   //   return FUNCTION_RESULT_HANDLED_ID;
+//   // }else{
+//   //   return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+//   // }
+
+//   // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
+//   char parsing_buffer[data_buffer.payload.len+1];
+//   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+//   JsonParser parser(parsing_buffer);
+//   JsonParserObject obj = parser.getRootObject();   
+//   if (!obj) { 
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+//     #endif //ENABLE_LOG_LEVEL_COMMANDS
+//     return 0;
+//   }  
+//   // JsonParserToken jtok = 0;
+
+
+
+//   for(uint8_t i=0;i<GetClassCount();i++){
+
+
+//     // result = 
+//     pModule[i]->parse_JSONCommand(obj);
+    
+//     // Tasker(function);
+  
+//   } //end for
+
+
+//   return result;
+
+// }
+
+
+
 uint16_t mTaskerManager::GetClassCount(){
   return EM_MODULE_LENGTH_ID;
 }
@@ -325,6 +441,32 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c){
   }
   return -1;
 }
+
+// Get module unique id as intended for command
+// int16_t mTaskerManager::GetModule
+
+
+// GetModuleUniqueIDbyCommandToFriendlyName(char* set_topic_path){
+
+// int16_t result = -1;
+// // char name[100]
+
+//   char buffer[60];
+//   snprintf(buffer, sizeof(buffer), "set/%s", set_topic_path);
+
+//   char *p = strstr(toSearch,buffer);
+
+//   if(p != NULL){
+//     // return abs(toSearch - p); // get the position
+//     return true;
+//   }else{
+//     // return -1; //if null, it doesnt exist
+//     return false;
+//   }
+
+// return result;
+
+// }
 
 
 int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)

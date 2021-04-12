@@ -19,7 +19,7 @@ const char* mRuleEngine::PM_MODULE_CORE_RULES_FRIENDLY_CTR = D_MODULE_CORE_RULES
 // }
 
 
-int8_t mRuleEngine::Tasker(uint8_t function){
+int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 
     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT ));
 
@@ -74,12 +74,9 @@ int8_t mRuleEngine::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
-    break;   
+      parse_JSONCommand(obj);
+    break;
     // /************
     //  * WEBPAGE SECTION * 
     // *******************/

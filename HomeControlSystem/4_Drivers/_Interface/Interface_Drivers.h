@@ -168,7 +168,7 @@
 
 
 
-//     void Tasker(uint8_t function);
+//     void Tasker(uint8_t function, JsonParserObject obj = 0);
 //     void init(void);
 
 //     mTaskerManager *mcl = NULL;

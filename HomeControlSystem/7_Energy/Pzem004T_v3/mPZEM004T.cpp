@@ -188,7 +188,7 @@ void mEnergyPZEM004T::EveryLoop(){
 
 
 
-int8_t mEnergyPZEM004T::Tasker(uint8_t function){
+int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   

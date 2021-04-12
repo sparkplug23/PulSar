@@ -94,7 +94,7 @@ class mShellyDimmer :
   private:
   public:
     mShellyDimmer(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static const char* PM_MODULE_DRIVERS_SHELLY_DIMMER_CTR;
     static const char* PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR;

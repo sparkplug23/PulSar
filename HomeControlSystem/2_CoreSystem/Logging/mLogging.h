@@ -271,7 +271,7 @@ public:
     mLogging(){}; // Class constructor
     // mLogging(HardwareSerial* hs);
     void init(void);
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -285,8 +285,7 @@ public:
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
 
-    // template<typename T>
-    // void Debug_Printf(T format, )
+    void parse_JSONCommand(JsonParserObject obj);
 
     void handleTelnet();
 

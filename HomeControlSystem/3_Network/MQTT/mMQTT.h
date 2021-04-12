@@ -154,7 +154,7 @@ class mMQTT :
   public:
     mMQTT(){};
     void init(void);
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mMQTT);
@@ -171,9 +171,7 @@ class mMQTT :
 
     // char lwt_message_ondisconnect_ctr[50];#
   
-int8_t CheckAndExecute_JSONCommands();
-// void parse_JSONCommand(void);
-
+    void parse_JSONCommand(JsonParserObject obj);
 
     // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
     // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);

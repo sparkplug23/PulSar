@@ -3,19 +3,9 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-void mAnimatorLight::parse_JSONCommand(void){
+void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif// ENABLE_LOG_LEVEL_ERROR
-    return;
-  }  
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   char buffer[50];

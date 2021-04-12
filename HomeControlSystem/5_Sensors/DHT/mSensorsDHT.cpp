@@ -155,7 +155,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
 
 
 
-int8_t mSensorsDHT::Tasker(uint8_t function){
+int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
   
   // some functions must run regardless
   switch(function){

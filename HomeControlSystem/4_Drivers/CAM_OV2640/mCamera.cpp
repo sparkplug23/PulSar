@@ -1852,7 +1852,7 @@ void mCameraOV2640::setup_cam()
 // }
 
 
-int8_t mCameraOV2640::Tasker(uint8_t function){
+int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -1907,12 +1907,9 @@ AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
     /************
      * COMMANDS SECTION * 
     *******************/
-    // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-    //   CheckAndExecute_JSONCommands();
-    // break;
-    // case FUNC_JSON_COMMAND_ID:
-    //   parse_JSONCommand();
-    // break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
     // case FUNC_SET_DEVICE_POWER:
     //   SetPower();
     // break;

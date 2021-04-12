@@ -267,6 +267,9 @@
   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "light"
 //#endif
 // Sensors (Range 120-169
+
+  #define D_MODULE_SENSORS_INTERFACE_CTR              "mSensorsInterface"
+  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "sensors_interface"
 //#ifdef USE_MODULE_SENSORS_BUTTONS
   #define D_MODULE_SENSORS_BUTTONS_CTR              "mButtons"
   #define D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR              "buttons"
@@ -323,8 +326,8 @@
   #define D_MODULE_SENSORS_PULSECOUNTER_CTR              "mPulseCounter"
   #define D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR              "pulsecounter"
 
-  #define D_MODULE_SENSORS_PRESENCE_CTR              "mPresence"
-  #define D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR              "presence"
+  #define D_MODULE_SENSORS_BH1750_CTR              "mBH1750"
+  #define D_MODULE_SENSORS_BH1750_FRIENDLY_CTR              "bh1750"
 
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS

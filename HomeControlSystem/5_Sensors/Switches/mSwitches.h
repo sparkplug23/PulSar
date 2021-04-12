@@ -88,7 +88,7 @@ class mSwitches :
   public:
     mSwitches(){};
     
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
 
     static const char* PM_MODULE_SENSORS_SWITCHES_CTR;

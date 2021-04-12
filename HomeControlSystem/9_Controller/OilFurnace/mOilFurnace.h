@@ -177,7 +177,7 @@ void ConstructRoot_JSON_Table(JsonObject root);
     #define TANK_BOTTOM_RADIUSSQUARED_TIMES_PI_MM (3.14*TANK_BOTTOM_RADIUS_MM*TANK_BOTTOM_RADIUS_MM)
     #define TANK_LITRES_BELOW_PIPE (3.14*TANK_BOTTOM_RADIUS_MM*TANK_BOTTOM_RADIUS_MM*90)/1000000 // ie 1000cm3 = 1L so 1000cm3 to 1000000mm3
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
     uint32_t tUpdateOilReading;
     uint32_t tSaved;

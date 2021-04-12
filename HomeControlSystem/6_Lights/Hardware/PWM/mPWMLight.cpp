@@ -58,8 +58,8 @@ void mPWMLight::ShowHardware(){
 }
 
 
-int8_t mPWMLight::Tasker(uint8_t function){}
-void mPWMLight::parse_JSONCommand(void){}
+int8_t mPWMLight::Tasker(uint8_t function, JsonParserObject obj){}
+void mPWMLight::parse_JSONCommand(JsonParserObject obj){}
 
 
 /**********************************************************************************************************************************

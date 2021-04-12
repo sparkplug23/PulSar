@@ -40,7 +40,7 @@ class mEnergyADE7953 :
       uint8_t fEnableSensor = false;
     }settings;
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     #define XI2C_07                 7  // See I2CDEVICES.md
 

@@ -272,6 +272,9 @@ enum MODULE_IDS{
     EM_MODULE_LIGHTS_WLED_EFFECTS_ID,
   #endif
   // Sensors
+  #ifdef USE_MODULE_SENSORS_INTERFACE
+    EM_MODULE_SENSORS_INTERFACE_ID,
+  #endif
   #ifdef USE_MODULE_SENSORS_BUTTONS
     EM_MODULE_SENSORS_BUTTONS_ID,
   #endif
@@ -307,6 +310,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_SENSORS_PRESENCE
     EM_MODULE_SENSORS_PRESENCE_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_BH1750
+    EM_MODULE_SENSORS_BH1750_ID,
   #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -505,6 +511,10 @@ enum MODULE_IDS{
 #endif
 
 // Sensors (Range 120-169)
+#ifdef USE_MODULE_SENSORS_INTERFACE
+  #include "5_Sensors/_Interface/mSensorsInterface.h"
+  #define pCONT_iSensors                         static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
+#endif
 #ifdef USE_MODULE_SENSORS_BUTTONS
   #include "5_Sensors/Buttons/mButtons.h"
   #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
@@ -552,6 +562,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_PRESENCE
   #include "5_Sensors/Presence/mPresence.h"
   #define pCONT_presence                          static_cast<mPresence*>(pCONT->pModule[EM_MODULE_SENSORS_PRESENCE_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_BH1750
+  #include "5_Sensors/BH1750Light/mBH1750.h"
+  #define pCONT_presence                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
@@ -643,6 +657,9 @@ class mTaskerManager{
     
     int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0, bool flags_is_executing_rule = false);
 
+    // int8_t Tasker_ParseCommands(uint8_t function, char* buffer = nullptr, uint16_t buflen = 0);
+    
+    
     uint16_t GetClassSizeByID(uint8_t class_id);
 
     PGM_P GetModuleName(uint8_t id);
@@ -670,6 +687,9 @@ class mTaskerManager{
 
     uint8_t switch_index = 0;
     
+    // JsonParserObject obj = 0;
+    // JsonParser* parser = nullptr;//(parsing_buffer);
+      
     int16_t GetModuleIDbyFriendlyName(const char* c);
 
 };

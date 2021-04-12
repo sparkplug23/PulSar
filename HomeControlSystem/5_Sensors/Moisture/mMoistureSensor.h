@@ -23,7 +23,7 @@ class mMoistureSensor :
     // Init the class
     void init(void);
     // Tasker that is called on each loop
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // All SubTasks called by Tasker 
     
     static const char* PM_MODULE_SENSORS_MOTION_CTR;

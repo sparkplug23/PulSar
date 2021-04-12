@@ -352,6 +352,9 @@ void mSettings::SystemSettings_DefaultBody_Sensors(){
 
   Settings.sensors.flags.decimal_precision = 3;
 
+  Settings.SensorBits1.bh1750_1_resolution  = 1;
+  Settings.SensorBits1.bh1750_2_resolution  = 1;
+
   // Settings.flag_sensor.temperature_conversion = TEMP_CONVERSION;
   // Settings.flag_sensor.pressure_conversion = PRESSURE_CONVERSION;
   // Settings.flag_sensor.pressure_resolution = PRESSURE_RESOLUTION;

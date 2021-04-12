@@ -14,7 +14,7 @@ class mPWM{
   private:
   public:
     mPWM(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
     int8_t Tasker_Web(uint8_t function);

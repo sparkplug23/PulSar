@@ -43,7 +43,7 @@ class mHBridge{
 
   public:
     mHBridge(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
 
 

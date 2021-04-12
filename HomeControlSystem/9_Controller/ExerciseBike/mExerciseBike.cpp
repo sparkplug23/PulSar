@@ -51,7 +51,7 @@ void mExerciseBike::init(void){
 
 
 // Used for timed on or off events
-void mExerciseBike::Tasker(uint8_t function){
+void mExerciseBike::Tasker(uint8_t function, JsonParserObject obj){
 
  
   switch(function){

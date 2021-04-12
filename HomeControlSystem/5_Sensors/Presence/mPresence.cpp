@@ -1,15 +1,18 @@
-#include "mPresence.h" //to become motion
+#include "mPresence.h" 
+
+/***
+ * New joint motion triggered class, all future motion events will also trigger a response from this class (no rules required)
+ * */
 
 #ifdef USE_MODULE_SENSORS_PRESENCE 
 
 const char* mPresence::PM_MODULE_SENSORS_PRESENCE_CTR = D_MODULE_SENSORS_PRESENCE_CTR;
 const char* mPresence::PM_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR = D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR;
 
-int8_t mPresence::Tasker(uint8_t function){
+int8_t mPresence::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -31,6 +34,19 @@ int8_t mPresence::Tasker(uint8_t function){
     case FUNC_LOOP: 
       EveryLoop();
     break;  
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    case FUNC_EVENT_MOTION_STARTED_ID:
+    case FUNC_EVENT_MOTION_ENDED_ID:
+      // CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
+
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
+    break; 
     /************
      * RULES SECTION * 
     *******************/
@@ -63,24 +79,18 @@ int8_t mPresence::Tasker(uint8_t function){
 
 void mPresence::Pre_Init(void)
 {
-  // if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
-  // {
-  //   settings.fEnableSensor = true;
-  // }
 
 }
 
 
 void mPresence::Init(void)
 {
-
-
+  settings.fEnableSensor = true;
 }
 
 
 void mPresence::EveryLoop()
 {
-
 
 }
 
@@ -100,7 +110,7 @@ uint8_t mPresence::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mPresence::ConstructJSON_Sensor(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
+    JsonBuilderI->Add("motion", 0);
   return JsonBuilderI->End();
     
 }
@@ -129,8 +139,8 @@ void mPresence::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -139,8 +149,8 @@ void mPresence::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;

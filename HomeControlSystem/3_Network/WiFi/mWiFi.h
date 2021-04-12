@@ -69,7 +69,7 @@ class mWiFi :
     
     void WifiConnectAP(uint8_t ap_index);
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
     
 
@@ -80,6 +80,8 @@ class mWiFi :
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WIFI_ID; }
 
 
+    void parse_JSONCommand(JsonParserObject obj);
+   
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();
 

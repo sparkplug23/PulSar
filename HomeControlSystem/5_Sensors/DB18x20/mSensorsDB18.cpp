@@ -366,7 +366,7 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Data(){
 }
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
-int8_t mSensorsDB18::Tasker(uint8_t function){
+int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;
   
@@ -407,12 +407,9 @@ int8_t mSensorsDB18::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
-    break; 
+      parse_JSONCommand(obj);
+    break;
     /************
      * WEBPAGE SECTION * 
     *******************/

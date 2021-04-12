@@ -11,7 +11,7 @@ const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LI
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-int8_t mAnimatorLight::Tasker(uint8_t function){ 
+int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){ 
 
   int8_t function_result = 0;
 
@@ -102,11 +102,8 @@ int8_t mAnimatorLight::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -140,26 +137,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function){
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END FUNCTION
-
-
-
-
-int8_t mAnimatorLight::CheckAndExecute_JSONCommands(){
-
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_LIGHTS_ADDRESSABLE_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
 
 
 /*******************************************************************************************************************

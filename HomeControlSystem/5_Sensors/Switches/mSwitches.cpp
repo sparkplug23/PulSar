@@ -10,7 +10,7 @@ const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHE
 const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR = D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
 
 
-int8_t mSwitches::Tasker(uint8_t function){
+int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:

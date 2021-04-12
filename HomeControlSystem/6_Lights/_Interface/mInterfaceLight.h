@@ -769,10 +769,10 @@ void ShowInterface();
 
     void EveryLoop();
 
-    void SubTask_AutoOff();
+    void EverySecond_AutoOff();
     struct AUTO_OFF_SETTINGS{
       uint16_t time_decounter_secs = 0;
-      uint32_t tSaved = 0;
+      // uint32_t tSaved = 0;
     }auto_off_settings;
     
     uint32_t RgbColorto32bit(RgbColor rgb);
@@ -786,13 +786,12 @@ void ShowInterface();
     
     void Template_Load();
 
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
+    void parse_JSONCommand(JsonParserObject obj);
   
     int8_t Tasker_Web(uint8_t function);
     #include "6_Lights/_Interface/mInterfaceLight_Web.h"
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Init(void);
     
 
@@ -862,7 +861,7 @@ void ShowInterface();
 
     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
-    bool LightModuleInit(void);
+    bool Pre_Init(void);
 
     float    HueN2F(uint16_t hue);
     float    SatN2F(uint8_t sat);
@@ -893,44 +892,34 @@ void ShowInterface();
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-        void MQTTHandler_Init();
-        void MQTTHandler_Set_fSendNow();
-        void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Init();
+    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_TelePeriod();
+    
+    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
+    struct handler<mInterfaceLight> mqtthandler_sensor_ifchanged;
+    struct handler<mInterfaceLight> mqtthandler_sensor_teleperiod;
+    struct handler<mInterfaceLight> mqtthandler_debug_teleperiod;
+    struct handler<mInterfaceLight> mqtthandler_scene_teleperiod;
         
-        struct handler<mInterfaceLight>* mqtthandler_ptr;
-        void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-
-        // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-        struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
-        
-        // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
-        struct handler<mInterfaceLight> mqtthandler_sensor_ifchanged;
-        struct handler<mInterfaceLight> mqtthandler_sensor_teleperiod;
-        
-        // const char* postfix_topic_debug = "debug/parameters";
-        // to be PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PARAMETERS_CTR but needs to handle progmem
-        struct handler<mInterfaceLight> mqtthandler_debug_teleperiod;   
-
-        // const char* postfix_topic_scene = "scene";
-        struct handler<mInterfaceLight> mqtthandler_scene_teleperiod;
-            
-        // Extra module only handlers
-        // enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-        //   MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
-        //   MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID,
-        //   MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-        // };
-
- enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
+    enum MQTT_HANDLER_MODULE_IDS{
       MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
+      MQTT_HANDLER_MODULE_LENGTH_ID,
     };
-        
-      //,
-
-
-        // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
+    uint8_t mqtthandler_list_ids[3] = {
+      MQTT_HANDLER_SETTINGS_ID, 
+      MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, 
+      MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
+    };
+  
+    struct handler<mInterfaceLight>* mqtthandler_list_ptr[3] = {
+      &mqtthandler_settings_teleperiod, 
+      &mqtthandler_scene_teleperiod, 
+      &mqtthandler_debug_teleperiod
+    };
     #endif
 
     

@@ -3,22 +3,6 @@
 // #ifdef USE_MODULE_DRIVERS_SDCARD
 
 
-// int8_t mSDCard::CheckAndExecute_JSONCommands(){
-
-//   // Check if instruction is for me
-//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
-//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
-//     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//     parse_JSONCommand();
-//     return FUNCTION_RESULT_HANDLED_ID;
-//   }else{
-//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-//   }
-
-// }
-
 // void mSDCard::parse_JSONCommand(void){
 
 //   char buffer[50];

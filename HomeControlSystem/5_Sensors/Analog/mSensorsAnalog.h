@@ -19,7 +19,7 @@ class mSensorsAnalog :
     void Init(void);
     void Pre_Init(void);
     // Tasker that is called on each loop
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // All SubTasks called by Tasker 
     void EveryLoop();
 

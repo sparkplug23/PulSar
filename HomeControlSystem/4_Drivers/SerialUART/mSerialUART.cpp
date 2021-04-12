@@ -120,7 +120,7 @@ void mSerialUART::init_UART2_ISR(){
 #endif // ENABLE_UART2_ISR_BUFFERS
 
 
-int8_t mSerialUART::Tasker(uint8_t function){
+int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
 
 
 // Serial.println();
@@ -175,12 +175,9 @@ int8_t mSerialUART::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-    //   CheckAndExecute_JSONCommands();
-    // break;
-    // case FUNC_JSON_COMMAND_ID:
-    //   parse_JSONCommand();
-    // break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
     /************
      * MQTT SECTION * 
     *******************/

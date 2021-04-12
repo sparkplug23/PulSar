@@ -439,7 +439,7 @@ void mSDCard::pre_init(){
 }
 
 
-int8_t mSDCard::Tasker(uint8_t function){
+int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -464,11 +464,8 @@ int8_t mSDCard::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -501,7 +498,7 @@ int8_t mSDCard::Tasker(uint8_t function){
 } // END Tasker
 
 
-// int8_t mSDCard::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);

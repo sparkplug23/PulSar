@@ -117,10 +117,10 @@ bool loaded_default_for_moduled = false;
      * */
 
 
-    int8_t Tasker(uint8_t function);
-    int8_t CheckAndExecute_JSONCommands();
-    void   parse_JSONCommand();
-
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    
+    void parse_JSONCommand(JsonParserObject obj);
+ 
     enum RULE_DATA_ENCODING_IDS{
         ENCODING_BYTES_ID,
         RULE_DATA_ENCODING_8B8B16B_BYTES_ID,
@@ -167,6 +167,7 @@ bool loaded_default_for_moduled = false;
       EVENT_PART command; //introduce multiple commands? Create a vector of rules?
     }rules[D_MAX_RULES];
 
+    // This will need to become an array or queue, that way consecutive rules can trigger at the same time
     EVENT_PART event_triggered;
 
 

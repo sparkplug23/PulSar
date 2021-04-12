@@ -423,7 +423,7 @@ void mSettings::Function_Template_Load(){
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID
 
   boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE
@@ -454,11 +454,11 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
 // Settings will contain all jsoncommands for "CoreSystem"
 
 //overload fix when only one parameter is called
-int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){  
+int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t param1){  
 //   JsonObjectConst dummy; return Tasker(function, dummy);
 // }
 // template<typename T>
-// int8_t mSettings::Tasker(uint8_t function, T param1){ 
+// int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj), T param1){ 
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
@@ -640,13 +640,13 @@ int8_t mSettings::Tasker(uint8_t function){//}, uint8_t param1){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
 
+    /************
+     * xx SECTION * 
+    *******************/
 
     case FUNC_TEMPLATE_DEVICE_LOAD:
       Function_Template_Load();

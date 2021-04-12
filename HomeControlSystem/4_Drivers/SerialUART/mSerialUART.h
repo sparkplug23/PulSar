@@ -59,7 +59,7 @@ class mSerialUART{
   private:
   public:
     mSerialUART(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
     uart_isr_handle_t *handle_console_uart2;

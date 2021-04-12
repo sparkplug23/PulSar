@@ -1050,7 +1050,7 @@ void mEnergyInterface::Settings_Save(){
 
 
 
-int8_t mEnergyInterface::Tasker(uint8_t function){ 
+int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){ 
   // testing without pzem hardware
   // pCONT_set->energy_flg = 5; //?
 
@@ -1141,7 +1141,7 @@ int8_t mEnergyInterface::Tasker(uint8_t function){
   return function_result;
 
 }
-// int8_t mEnergyInterface::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       // parse_JSONCommand(obj);
@@ -1478,7 +1478,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 10; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;

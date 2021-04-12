@@ -6,7 +6,7 @@ const char* mTime::PM_MODULE_CORE_TIME_CTR = D_MODULE_CORE_TIME_CTR;
 const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDLY_CTR;
 
 
-int8_t mTime::Tasker(uint8_t function){
+int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
 
 // return 0;
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
@@ -105,6 +105,9 @@ int8_t mTime::Tasker(uint8_t function){
   }
 
 }//end
+
+
+void mTime::parse_JSONCommand(JsonParserObject obj){}
 
 void mTime::init(void){
   
@@ -431,7 +434,34 @@ time_short_t mTime::GetTimeShortNow(){
 
 }
 
+uint32_t mTime::GetTimeShortNowU32(){
+
+  // time_short_t now;
+
+  // now.Wday = RtcTime.Wday;
+  // now.hour = RtcTime.hour;
+  // now.minute = RtcTime.minute;
+  // now.second = RtcTime.second;
+
+  uint32_t now = (RtcTime.Wday<<24) | (RtcTime.hour<<16) | (RtcTime.minute<<8) | (RtcTime.second);
+  // uint32_t now2 = reinterpret_cast<uint32_t>(now);
+
+  return now;
+
+}
+
 const char* mTime::ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen){
+  
+  snprintf_P(buffer, buflen, 
+              PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+              time->hour, time->minute, time->second
+  );
+  return buffer;
+}
+
+const char* mTime::ConvertShortTime_HHMMSS(uint32_t* _time, char* buffer, uint8_t buflen){
+
+  time_short_t* time = reinterpret_cast<time_short_t*>(_time);
   
   snprintf_P(buffer, buflen, 
               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),

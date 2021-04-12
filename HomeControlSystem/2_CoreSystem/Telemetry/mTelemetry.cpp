@@ -7,7 +7,7 @@ const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TE
 
 
 
-int8_t mTelemetry::Tasker(uint8_t function){
+int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
@@ -38,6 +38,10 @@ int8_t mTelemetry::Tasker(uint8_t function){
   }
 
 }
+
+
+void mTelemetry::parse_JSONCommand(JsonParserObject obj){}
+
 
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER

@@ -964,7 +964,7 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     uint8_t blocking_force_animate_to_complete = true;
     uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
     
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
     static const char* PM_MODULE_LIGHTS_ANIMATOR_CTR;
@@ -973,8 +973,7 @@ void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_U
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
 
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
+    void parse_JSONCommand(JsonParserObject obj);
     
   #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
     void CommandSet_Flasher_FunctionID(uint8_t value);

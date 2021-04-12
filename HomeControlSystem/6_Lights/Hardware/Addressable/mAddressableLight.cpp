@@ -53,7 +53,7 @@ void mAddressableLight::ShowHardware(){
 }
 
 
-int8_t mAddressableLight::Tasker(uint8_t function){}
-void mAddressableLight::parse_JSONCommand(void){}
+int8_t mAddressableLight::Tasker(uint8_t function, JsonParserObject obj){}
+void mAddressableLight::parse_JSONCommand(JsonParserObject obj){}
 
 #endif // USE_DRIVER

@@ -10,7 +10,7 @@ uint8_t ina219_addresses[] = { INA219_ADDRESS1, INA219_ADDRESS2, INA219_ADDRESS3
 char ina219_types[] = "INA219";
 uint8_t ina219_count = 0;
 
-int8_t mEnergyINA219::Tasker(uint8_t function){
+int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;
   
@@ -60,8 +60,8 @@ int8_t mEnergyINA219::Tasker(uint8_t function){
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-      //function_result = parse_JSONCommand();
-    break;      
+      parse_JSONCommand(obj);
+    break; 
     /************
      * WEBPAGE SECTION * 
     *******************/

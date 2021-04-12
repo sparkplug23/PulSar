@@ -21,8 +21,8 @@ class mPWMLight :
   public:
     mPWMLight(){};
     void Init();
-    int8_t Tasker(uint8_t function); //TBR
-    void parse_JSONCommand(void);    //TBR
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0); //TBR
+    void parse_JSONCommand(JsonParserObject obj);    //TBR
     
     static const char* PM_MODULE_DRIVERS_PWM_CTR;
     static const char* PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR;

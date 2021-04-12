@@ -4,7 +4,7 @@ const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
 const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
 
 
-int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
+int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
 
@@ -70,12 +70,7 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
       /************
        * COMMANDS SECTION * 
       *******************/
-      case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-        CheckAndExecute_JSONCommands();
-      break;
-      case FUNC_JSON_COMMAND_ID:
-        parse_JSONCommand();
-      break;  
+     
     } // END switch
 
   }//enabled mqtt_enabled
@@ -83,42 +78,8 @@ int8_t mMQTT::Tasker(uint8_t function){ DEBUG_PRINT_FUNCTION_NAME;
 } // END function
 
 
+void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
-
-int8_t mMQTT::CheckAndExecute_JSONCommands(){
-
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_NETWORK_MQTT_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_NETWORK_MQTT_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-
-void mMQTT::parse_JSONCommand(void){
-
-
-// AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand"));
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  // AddLog(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    return;
-  }  
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
@@ -566,57 +527,15 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   // if (XdrvCall(FUNC_MQTT_DATA)) { return; }
 
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
-    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+    if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
-    // }
+    }
 
-    #ifdef ENABLE_DEVFEATURE_JSONPARSER
-    //  char parsing_buffer[data_buffer.payload.len+1];
-    //   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len);
-    //   JsonParser parser(parsing_buffer);
-
-      // JsonParser parser(data_buffer.payload.ctr);
-      // glob_parser = &parser;
-
-
-      pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
+    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
-  // String jsonStr = data_buffer.payload.ctr;  // Move from stack to heap to fix watchdogs (20180626)
-
-  
-  //       AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError %s"),data_buffer.payload.ctr); Serial.flush();
-
-
-
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("Deserialization \"%s\""),data_buffer.payload.ctr);
-      // JsonParser parser(data_buffer.payload.ctr);
-      // JsonParserObject root = parser.getRootObject(); 
-      
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("Deserialization \"%s\""),data_buffer.payload.ctr);
-      // if (!root) { 
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError FIRST"));
-      // }else{
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess FIRST")); Serial.flush();
-      // }
-      
-      // JsonParser parser2(data_buffer.payload.ctr);
-      // JsonParserObject root2 = parser2.getRootObject(); 
-      
-      // if (!root2) { 
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError SECOND"));
-      // }else{
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess SECOND")); Serial.flush();
-      // }
-      
-    //   else{
-
-    #endif // ENABLE_DEVFEATURE_JSONPARSER
-
-
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer.isserviced);
     #endif// ENABLE_LOG_LEVEL_INFO

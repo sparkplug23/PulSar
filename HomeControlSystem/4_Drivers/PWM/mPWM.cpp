@@ -229,7 +229,7 @@ void mPWM::pre_init(){
 }
 
 
-int8_t mPWM::Tasker(uint8_t function){
+int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -306,7 +306,7 @@ int8_t mPWM::Tasker(uint8_t function){
 } // END Tasker
 
 
-// int8_t mPWM::Tasker(uint8_t function, JsonObjectConst obj){
+// int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);

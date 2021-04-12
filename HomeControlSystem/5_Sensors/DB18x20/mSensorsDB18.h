@@ -61,7 +61,7 @@ class mSensorsDB18 :
     uint32_t tSavedMeasureSensor;
     uint8_t fWithinLimit;
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     void EveryLoop();
 

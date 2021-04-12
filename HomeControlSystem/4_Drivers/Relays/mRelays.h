@@ -86,7 +86,7 @@ class mRelays :
 
     const char* GetRelayNameStoredbyIDCtr(char* name_buffer, uint8_t name_buffer_space, uint8_t device_id);
 
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     void MQTTConnected();
 

@@ -148,7 +148,7 @@ class mEnergyINA219 :
     mEnergyINA219(){};
     void Pre_Init(void);
     void init(void);
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     struct SETTINGS{
       uint8_t fEnableSensor= false;

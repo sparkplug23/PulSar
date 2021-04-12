@@ -910,7 +910,7 @@ uint16_t WS2812FX::_usedSegmentData = 0;
 
 
 
-int8_t mWLEDEffects::Tasker(uint8_t function){
+int8_t mWLEDEffects::Tasker(uint8_t function, JsonParserObject obj){
 
   // Serial.println("mWLEDEffects::Tasker"); Serial.flush(); delay(1000);
 
@@ -942,11 +942,8 @@ int8_t mWLEDEffects::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
   } // end switch
     

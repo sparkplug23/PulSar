@@ -336,7 +336,7 @@ const uint16_t FLOATSZ = 16;                // Max number of characters in float
 // const uint16_t TOPSZ = 2;                 // Max number of characters in topic string
 // // const uint16_t MIN_MESSZ = 893;             // Min number of characters in MQTT message
 
-// const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
+const uint8_t SENSOR_MAX_MISS = 5;          // Max number of missed sensor reads before deciding it's offline
 const uint8_t MAX_NTP_SERVERS = 3;          // Max number of NTP servers
 
 // #ifdef USE_MQTT_TLS
@@ -536,6 +536,7 @@ enum XsnsFunctions {
   // FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
   FUNC_JSON_COMMAND_CHECK_TOPIC_ID,
   FUNC_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
+  // FUNC_JSON_COMMAND_START_PARSER_ID,
   // Wifi 
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
@@ -789,7 +790,7 @@ class mSettings :
     mSettings(){};
     
     //overload
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     static const char* PM_MODULE_CORE_SETTINGS_CTR;
     static const char* PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
@@ -1401,6 +1402,18 @@ struct DisplaySettings{
 
 
 
+typedef union {
+  uint8_t data;
+  struct {
+    uint8_t spare0 : 1;
+    uint8_t spare1 : 1;
+    uint8_t bh1750_2_resolution : 2;
+    uint8_t bh1750_1_resolution : 2;       // Sensor10 1,2,3
+    uint8_t hx711_json_weight_change : 1;  // Sensor34 8,x - Enable JSON message on weight change
+    uint8_t mhz19b_abc_disable : 1;        // Disable ABC (Automatic Baseline Correction for MHZ19(B) (0 = Enabled (default), 1 = Disabled with Sensor15 command)
+  };
+} SensorCfg1;
+
 //hold the parsed template from use
 // struct TemplateCurrent{
 //   // For testing only
@@ -1614,12 +1627,15 @@ struct SYSCFG {
 
   DeviceNameBuffer        device_name_buffer;
   
+  
+
   // Pulse Counter
   // unsigned long pulse_counter[MAX_COUNTERS];  // 5C0
   uint16_t      pulse_counter_type;        // 5D0
   uint16_t      pulse_counter_debounce;    // 5D2
   // Sensors
-  // SensorCfg1    SensorBits1;               // 717  On/Off settings used by Sensor Commands
+  SensorCfg1    SensorBits1;               // 717  On/Off settings used by Sensor Commands
+  
   //uint32_t      sensors[3];                // 7A4
   // Mcp230xxCfg   mcp230xx_config[16];       // 6F6
   // uint8_t       mcp230xx_int_prio;         // 716
@@ -1787,10 +1803,10 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 } RulesBitfield;
 
 
-
-int8_t CheckAndExecute_JSONCommands();
-void parse_JSONCommand();
-
+  
+  void parse_JSONCommand(JsonParserObject obj);
+  
+  
 
 // See issue https://github.com/esp8266/Arduino/issues/2913
 // #ifdef USE_ADC_VCC

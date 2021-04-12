@@ -26,7 +26,7 @@ class mSensorsBME :
     mSensorsBME(){};
     void Pre_Init(void);
     void init(void);
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static const char* PM_MODULE_SENSORS_BME_CTR;
     static const char* PM_MODULE_SENSORS_BME_FRIENDLY_CTR;

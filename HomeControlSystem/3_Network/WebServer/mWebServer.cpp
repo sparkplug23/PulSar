@@ -1097,7 +1097,7 @@ enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRES
 //  * Interface
 // *********************************************************************************************
 
-int8_t mWebServer::Tasker(uint8_t function){
+int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:

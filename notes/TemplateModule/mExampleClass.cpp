@@ -5,7 +5,7 @@
 const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_CTR = D_MODULE_SENSORS_EXAMPLE_CTR;
 const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR = D_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR;
 
-int8_t mExampleClass::Tasker(uint8_t function){
+int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
@@ -32,6 +32,12 @@ int8_t mExampleClass::Tasker(uint8_t function){
       EveryLoop();
     break;  
     /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
@@ -51,6 +57,13 @@ int8_t mExampleClass::Tasker(uint8_t function){
   return function_result;
 
 } // END function
+
+
+void mExampleClass::parse_JSONCommand(JsonParserObject obj)
+{
+
+}
+
 
 
 void mExampleClass::Pre_Init(void)

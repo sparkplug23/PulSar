@@ -278,7 +278,7 @@ void mOilFurnace::init_ultrasonic_sensor_parameters(){
 }
 
 
-int8_t mOilFurnace::Tasker(uint8_t function){
+int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -421,7 +421,7 @@ int8_t mOilFurnace::Tasker(uint8_t function){
   // }// END switch
 
 }
-int8_t mOilFurnace::Tasker(uint8_t function, JsonObjectConst obj){
+int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
       parse_JSONCommand(obj);

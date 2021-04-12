@@ -135,7 +135,7 @@ void mPulseCounter::SplitTask_UpdatePulseCounterSensors(uint8_t sensor_id, uint8
 
 
 
-void mPulseCounter::Tasker(uint8_t function){
+void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
   
   // some functions must run regardless
   switch(function){

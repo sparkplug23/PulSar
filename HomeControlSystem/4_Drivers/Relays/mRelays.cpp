@@ -72,7 +72,7 @@ void mRelays::init(void){
 }
 
 // Used for timed on or off events
-int8_t mRelays::Tasker(uint8_t function){
+int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;
   
@@ -103,11 +103,8 @@ int8_t mRelays::Tasker(uint8_t function){
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:
-      CheckAndExecute_JSONCommands();
-    break;
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand();
+      parse_JSONCommand(obj);
     break;
     case FUNC_SET_POWER_ON_ID:
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);

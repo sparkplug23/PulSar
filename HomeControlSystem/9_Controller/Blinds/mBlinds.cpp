@@ -18,7 +18,7 @@ void mBlinds::init(void){
 
 }
 
-int8_t mBlinds::Tasker(uint8_t function){ //Serial.println("mBlinds::Tasker");
+int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj){ //Serial.println("mBlinds::Tasker");
 
   switch(function){
     case FUNC_INIT:
@@ -47,7 +47,7 @@ int8_t mBlinds::Tasker(uint8_t function){ //Serial.println("mBlinds::Tasker");
 }
 
 
-int8_t mBlinds::Tasker(uint8_t function, JsonObjectConst obj){
+int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
   switch(function){
     case FUNC_JSON_COMMAND_OBJECT:
       parse_JSONCommand(obj);

@@ -1226,7 +1226,7 @@ class mWLEDEffects :
   public:
     mWLEDEffects(){};
     void Init();
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
 
 // led fx library object

@@ -10,7 +10,7 @@ const char* mWiFi::PM_MODULE_NETWORK_WIFI_CTR = D_MODULE_NETWORK_WIFI_CTR;
 const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
 
 // Used for timed on or off events
-int8_t mWiFi::Tasker(uint8_t function){
+int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
 //   DEBUG_PRINT_FUNCTION_NAME_TEST;
 
@@ -76,6 +76,9 @@ int8_t mWiFi::Tasker(uint8_t function){
 
 } // END function
 
+
+void mWiFi::parse_JSONCommand(JsonParserObject obj){};
+   
 
 
 

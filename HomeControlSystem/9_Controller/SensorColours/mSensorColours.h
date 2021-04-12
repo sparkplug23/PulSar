@@ -18,7 +18,7 @@ class mSensorColours {
   private:
   public:
     mSensorColours(){};
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
     void EverySecond();

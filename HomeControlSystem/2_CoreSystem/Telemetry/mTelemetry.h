@@ -70,7 +70,7 @@ class mTelemetry :
   public:
     mTelemetry(){};
     
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
     void WebPage_Root_AddHandlers();
 
@@ -88,6 +88,7 @@ class mTelemetry :
       return sizeof(mTelemetry);
     };
     #endif
+    void parse_JSONCommand(JsonParserObject obj);
 
     uint8_t ConstructJSON_Health(uint8_t json_level);
     uint8_t ConstructJSON_Settings(uint8_t json_level);

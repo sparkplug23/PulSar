@@ -48,7 +48,7 @@ void mDoorSensor::init(void){
 }
 
 
-int8_t mDoorSensor::Tasker(uint8_t function){
+int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 

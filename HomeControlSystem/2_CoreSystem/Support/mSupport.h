@@ -314,7 +314,7 @@ class mSupport :
   public:
     mSupport(){};
     
-    int8_t Tasker(uint8_t function);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
 
     static const char* PM_MODULE_CORE_SUPPORT_CTR;
@@ -439,10 +439,7 @@ class mSupport :
 
     Ticker tickerOSWatch;
 
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
-
-
+    void parse_JSONCommand(JsonParserObject obj);
 
     // Randomise array (aka std lib)
     template<typename DATA, typename LENGTH>
