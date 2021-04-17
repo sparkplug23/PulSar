@@ -314,6 +314,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_BH1750
     EM_MODULE_SENSORS_BH1750_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_SR04
+    EM_MODULE_SENSORS_SR04_ID,
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -328,7 +331,7 @@ enum MODULE_IDS{
     EM_MODULE_CONTROLLER_IRTRANSMITTER_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_OILFURNACE
-    EM_MODULE_CONTROLLER_OILFURNACE_ID,
+    EM_MODULE_CONTROLLER_TANKVOLUME_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
     EM_MODULE_CONTROLLER_EXERCISEBIKE_ID,
@@ -439,7 +442,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
-  #define pCONT_mdhbridge                           static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
+  #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_GPS
   #include "4_Drivers/GPS/mGPS.h"
@@ -447,7 +450,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
   #include "4_Drivers/SerialUART/mSerialUART.h"
-  #define pCONT_mdhbridge                           static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_ID])
+  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/ShellyDimmer/mShellyDimmer.h"
@@ -476,7 +479,7 @@ enum MODULE_IDS{
   #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  #include "7_Energy/PowerMeter/mPZEM004T.h"
+  #include "7_Energy/Pzem004T_v3/mPZEM004T.h"
   #define pCONT_pzem                            static_cast<mEnergyPZEM004T*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953
@@ -567,6 +570,10 @@ enum MODULE_IDS{
   #include "5_Sensors/BH1750Light/mBH1750.h"
   #define pCONT_presence                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_SR04
+  #include "5_Sensors/SR04/mSR04.h"
+  #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
+#endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -587,7 +594,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_CONTROLLER_OILFURNACE
   #include "9_Controller/OilFurnace/mOilFurnace.h"
-  #define pCONT_sbut                            static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CONTROLLER_OILFURNACE_ID])
+  #define pCONT_tankvolume                      static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
   #include "9_Controller/ExerciseBike/mExerciseBike.h"

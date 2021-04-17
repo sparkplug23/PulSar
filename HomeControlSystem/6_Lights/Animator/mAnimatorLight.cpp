@@ -61,6 +61,14 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
       //   AddLog(LOG_LEVEL_INFO, PSTR("Mixer routine \"%s\""), result);          
       // #endif // USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
 
+      #ifdef ENABLE_DEVFEATURE_DEBUG_GET_PIXEL_ZERO
+      RgbTypeColor col = stripbus->GetPixelColor(0);
+
+        AddLog(LOG_LEVEL_TEST, PSTR("getpixel[0] = %d,%d,%d"),col.R,col.G,col.B);
+
+
+      #endif
+
     }break;
     case FUNC_EVERY_MINUTE:
 

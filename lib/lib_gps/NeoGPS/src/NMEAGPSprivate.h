@@ -167,7 +167,7 @@
       
     // Serial.print( F("handle: ") );
     if(_fixesAvailable){
-// Serial.println( F("_fixesAvailable: ") );
+// Serial.printf( "_fixesAvailable: %d\n\r",_fixesAvailable );
     }
     return _fixesAvailable; 
     

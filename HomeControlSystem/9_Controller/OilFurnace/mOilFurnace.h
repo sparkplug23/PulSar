@@ -23,6 +23,8 @@ Manufacturer Warranty	2 Years
 
 #define USE_MQTT_OILFURNACE
 
+#define D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID 55
+
 //https://www.weather.gov/media/epz/wxcalc/speedOfSound.pdf
 /*
 To convert between degrees Celsius (°C) and Kelvin (K):
@@ -38,7 +40,7 @@ Tcelius = Tkelvin - 273.
 
 */
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CONTROLLER_OILFURNACE
 
@@ -48,27 +50,25 @@ Tcelius = Tkelvin - 273.
 
 #include "3_Network/MQTT/mMQTT.h"
 
-
-#include "1_TaskerManager/mTaskerManager.h"
-#include <ArduinoJson.h>
-#include "1_TaskerManager/mTaskerManager.h"
-
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR) "litres";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR) "furnace";
 
+const char kTitle_TableTitles_Root[] PROGMEM = 
+  "Row1" "|" 
+  "Update Rate/Speed" "|" 
+  "Update Amount" "|" 
+  "Pattern" "|" 
+  "Mode" "|" 
+  "Flasher Function" "|"
+  "Lighting Power" "|" 
+  "Lights Auto Off Timer";
 
-  const char kTitle_TableTitles_Root[] PROGMEM = 
-    "Row1" "|" 
-    "Update Rate/Speed" "|" 
-    "Update Amount" "|" 
-    "Pattern" "|" 
-    "Mode" "|" 
-    "Flasher Function" "|"
-    "Lighting Power" "|" 
-    "Lights Auto Off Timer";
 
+//OilFurnace to be renamed "TankVolume" to be generic to oil or water
 
-class mOilFurnace{
+class mOilFurnace :
+  public mTaskerInterface
+{ //mTankVolume
   public:
     //#define D_MODULE_TOPIC_NAME "oiltank"
 
@@ -79,17 +79,31 @@ class mOilFurnace{
 // #define D_TOPIC_SENSORS_IFCHANGED_OILFURNACE_BASIC    "status/sensors/ifchanged/oilfurnace"
 // #define D_TOPIC_SENSORS_IFCHANGED_OILFURNACE_DETAILED "status/sensors/ifchanged/oilfurnace/detailed"
 
+    static const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR;
+    static const char* PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_TANKVOLUME_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mOilFurnace);
+    };
+    #endif
+
+
     #define ULTRA_ECHO_PIN D1
     #define ULTRA_TRIG_PIN D2
-    #define FURNACE_MONITOR_PIN D3
+    // #define FURNACE_MONITOR_PIN D3
     #define LED_BLUE_PIN D4   // OUTPUT ONLY GPIO15
     #define DB_SENSOR_PIN D5
 
     
     #define WEB_HANDLE_JSON_OIL_SENSOR_TABLE "/fetch/tab_oil_specific.json"
-void WebPage_Root_AddHandlers();
-void WebSend_JSON_Table(AsyncWebServerRequest *request);
-void ConstructRoot_JSON_Table(JsonObject root);
+// void WebPage_Root_AddHandlers();
+// void WebSend_JSON_Table(AsyncWebServerRequest *request);
+// void ConstructRoot_JSON_Table(JsonObject root);
 
 
   #ifdef DEVICE_LIVINGROOMSENSOR
@@ -100,20 +114,20 @@ void ConstructRoot_JSON_Table(JsonObject root);
     #define MIN_ULTRASONIC_MS 3000
   #endif
 
-#ifdef FURNACE_MONITOR_PIN
-    // Reed switch active high (low when magnet is near)
-    #define FURNACEACTIVE() !digitalRead(FURNACE_MONITOR_PIN) //opened when high
-    #define FURNACEACTIVE_INIT() pinMode(FURNACE_MONITOR_PIN,INPUT_PULLUP)
-    #define FURNACEACTIVECTR FURNACEACTIVE() ? "On" : "Off"
-    struct FURNACEACTIVE_DETECT{
-      uint8_t state = false;
-      uint8_t isactive = false;
-      uint8_t ischanged = false;
-      uint32_t tSaved;
-      uint32_t tDetectTime;
-      //mytime event_time; // create function that gets and saves this ie event_time = TIMENOW();
-    }furnace_detect;
- #endif
+// #ifdef FURNACE_MONITOR_PIN
+//     // Reed switch active high (low when magnet is near)
+//     #define FURNACEACTIVE() !digitalRead(FURNACE_MONITOR_PIN) //opened when high
+//     #define FURNACEACTIVE_INIT() pinMode(FURNACE_MONITOR_PIN,INPUT_PULLUP)
+//     #define FURNACEACTIVECTR FURNACEACTIVE() ? "On" : "Off"
+//     struct FURNACEACTIVE_DETECT{
+//       uint8_t state = false;
+//       uint8_t isactive = false;
+//       uint8_t ischanged = false;
+//       uint32_t tSaved;
+//       uint32_t tDetectTime;
+//       //mytime event_time; // create function that gets and saves this ie event_time = TIMENOW();
+//     }furnace_detect;
+//  #endif
 
     // void (* const mof_Handlers[])(void) = { &pCONT->mof->init } ;
 
@@ -196,10 +210,9 @@ void ConstructRoot_JSON_Table(JsonObject root);
     void init_ultrasonic_sensor_parameters();
 
         
-    int8_t Tasker(uint8_t function, JsonObjectConst obj);
-    void parsesub_CheckAll(JsonObjectConst obj);
-    int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-    void parse_JSONCommand(JsonObjectConst obj);
+    // void parsesub_CheckAll(JsonObjectConst obj);
+    // int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    void parse_JSONCommand(JsonParserObject obj);
 
 
 
@@ -251,6 +264,8 @@ void ConstructRoot_JSON_Table(JsonObject root);
         //   }threshold;
         // }ultrasonic;
 
+
+
     struct OILTANK{
       struct SENSOR{
         uint8_t isvalid = false;  //only valid after its been ran once completely
@@ -295,6 +310,11 @@ void ConstructRoot_JSON_Table(JsonObject root);
       // struct SENSOR smooth_1hr_from_1m;
       struct SENSOR* ptr;
     }oiltank; //caled averaged in ultra
+
+/***
+ * 
+Move volume conversion to be a callback, so I can make them different by devices
+ */
 
     void SubTask_CopyAveragedSensorValues();
 

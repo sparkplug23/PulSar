@@ -327,7 +327,7 @@ class JsonBuilder{
     char ctr[10]; 
 
     for(uint16_t index=0;index<value_arr_len;index++){
-      if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }      // Add comma for any value after first
+      if(index){ *writer.length += sprintf(&writer.buffer[*writer.length],"%s",","); }      // Add comma for any value after first
       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",dtostrfd2(value_arr[index],3,ctr));  
     }
 

@@ -211,8 +211,8 @@
 // optionally, all the info for each satellite.
 //
 
-//#define NMEAGPS_PARSE_SATELLITES
-//#define NMEAGPS_PARSE_SATELLITE_INFO
+#define NMEAGPS_PARSE_SATELLITES
+#define NMEAGPS_PARSE_SATELLITE_INFO
 
 #ifdef NMEAGPS_PARSE_SATELLITES
   #define NMEAGPS_MAX_SATELLITES (20)

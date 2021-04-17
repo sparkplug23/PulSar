@@ -1,6 +1,8 @@
 #ifndef _USE_MODULE_DRIVERS_SERIAL_UART_H
 #define _USE_MODULE_DRIVERS_SERIAL_UART_H 0.3
 
+#define D_UNIQUE_MODULE_DRIVERS_SERIAL_UART_ID 45
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
@@ -8,12 +10,16 @@
 #define ENABLE_UART2_ISR_BUFFERS
 
 
+#define ENABLE_HARDWARE_UART_0
+#define ENABLE_HARDWARE_UART_1
+#define ENABLE_HARDWARE_UART_2
+
 #include <string.h>
 #include <strings.h>
 
 
 #include "freertos/ringbuf.h"
-static char tx_item[] = "test_item";
+// static char tx_item[] = "test_item";
 #include <stdio.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -52,46 +58,99 @@ void uart_intr_handle_u2_static(void* arg);
 // #include "FS.h"
 // #include "SD_MMC.h"
 
+    static uart_isr_handle_t *handle_console_uart2;
+
 #define BLINK_GPIO GPIO_NUM_2
 
-class mSerialUART{
+class mSerialUART :
+  public mTaskerInterface
+{
 
   private:
   public:
     mSerialUART(){};
+    
+    static const char* PM_MODULE_DRIVERS_SERIAL_UART_CTR;
+    static const char* PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SERIAL_UART_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SERIAL_UART_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSerialUART);
+    };
+    #endif
+
+
+
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
-    uart_isr_handle_t *handle_console_uart2;
     int8_t Tasker_Web(uint8_t function);
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
 
-    QueueHandle_t uart_queue;
-    const int uart_buffer_size = (1024 * 2);
+    /***
+     * UART2
+     * 
+     * */
+    #define RINGBUFFER_HANDLE_2_LENGTH 1000
 
+    QueueHandle_t uart2_event_queue_handle;//
+    const int uart2_rxtx_ring_buffer_size = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+    const int uart2_event_queue_size = 10;
     void  init_UART2_RingBuffer();
     void  init_UART2_ISR();
 
     static void IRAM_ATTR uart_intr_handle_u2(void);
 
     // Receive buffer to collect incoming data
-    uint8_t rxbuf2[256];
+    uint8_t rxbuf2[RINGBUFFER_HANDLE_2_LENGTH];
     // Register to collect data length
-    uint16_t urxlen2;
+    uint16_t urxlen2 = 0;
+    uint16_t GetReceiveBuffer2(char* output_buf, uint16_t output_len, char optional_read_until_char = 0);
 
-    #define RINGBUFFER_HANDLE_2_LENGTH 100000
-    struct UART2_SETTINGS{
-      RingbufHandle_t ringbuffer_handle;
+
+
+    /***
+     * UARTx
+     * 
+     * */
+
+
+    #define ENABLE_BUILTIN_LED_ACTIVITY_BLINKING
+
+    
+    struct UART_SETTINGS{
+      bool receive_interrupts_enable = false;
       uint8_t initialised = false;
-    }uart2_settings;
+      uint16_t baud = 115200;
+      RingbufHandle_t ringbuffer_handle;
+      struct GPIO{
+        int8_t tx = UART_PIN_NO_CHANGE;
+        int8_t rx = UART_PIN_NO_CHANGE;
+      }gpio;
+    };
+
+
 
     void init();
     void pre_init();
     int8_t pin = -1;
     struct SETTINGS{
       uint8_t fEnableModule = false;
-      uint8_t fShowManualSlider = false;
+
+      #ifdef ENABLE_HARDWARE_UART_0
+      UART_SETTINGS uart0;
+      #endif
+      #ifdef ENABLE_HARDWARE_UART_1
+      UART_SETTINGS uart1;
+      #endif
+      #ifdef ENABLE_HARDWARE_UART_2
+      UART_SETTINGS uart2;
+      #endif
     }settings;
 
     void CommandSet_CreateFile_WithName(char* value);
@@ -99,8 +158,8 @@ class mSerialUART{
     void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
     void CommandSet_ReadFile(const char* filename);
 
-    int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(void);
+    // int8_t CheckAndExecute_JSONCommands();
+    void parse_JSONCommand(JsonParserObject obj);
 
     uint8_t ConstructJSON_Scene(uint8_t json_method = 0);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
@@ -172,7 +231,7 @@ gpio_pad_select_gpio(BLINK_GPIO);
 
     init_UART0();
     init_UART1();
-    // pCONT_serial- init_UART2();
+    // pCONT_uart- init_UART2();
 
 
 //  uart_config_t uart_config = {
@@ -394,7 +453,7 @@ void init_UART2(){
 
 // // Setup UART buffered IO with event queue
 // const int uart_buffer_size = (1024 * 2);
-// QueueHandle_t uart_queue;
+// QueueHandle_t uart2_event_queue_handle;
 
     //Set UART log level
     // esp_log_level_set(TAG, ESP_LOG_INFO);
@@ -404,7 +463,7 @@ void init_UART2(){
 	// ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 17, 16, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     //Install UART driver, and get the queue.
-    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, uart_buffer_size, uart_buffer_size, 10, &uart_queue, 0));
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, uart_buffer_size, uart_buffer_size, 10, &uart2_event_queue_handle, 0));
 
 	// // release the pre registered UART handler/subroutine
 	ESP_ERROR_CHECK(uart_isr_free(UART_NUM_2));
@@ -435,18 +494,18 @@ void init_UART2(){
     //xTaskCreatePinnedToCore
     // xTaskCreatePinnedToCore()
     
-    // 	uart_queue = xQueueCreate( 10, sizeof( struct AMessage * ) );
- 	  // if( uart_queue == 0 )
+    // 	uart2_event_queue_handle = xQueueCreate( 10, sizeof( struct AMessage * ) );
+ 	  // if( uart2_event_queue_handle == 0 )
   	// {
-    //   // Serial.println("uart_queue FAILED!"); delay(4000);
+    //   // Serial.println("uart2_event_queue_handle FAILED!"); delay(4000);
   	// 	// Failed to create the queue.
   	// }
-    //   // Serial.println("uart_queue SUCESS!"); delay(4000);
+    //   // Serial.println("uart2_event_queue_handle SUCESS!"); delay(4000);
 
     // 	uart0_queue = xQueueCreate( 10, sizeof( struct AMessage * ) );
  	  // if( uart0_queue == 0 )
   	// {
-    //   // Serial.println("uart_queue FAILED!"); delay(4000);
+    //   // Serial.println("uart2_event_queue_handle FAILED!"); delay(4000);
   	// 	// Failed to create the queue.
   	// }
       // Serial.println("uar/t_queue SUCESS!"); delay(4000);
@@ -627,18 +686,18 @@ void UART_Loop(){
 //     // xRingbufferPrintInfo(uart2_settings.ringbuffer_handle);
 //     // //Receive an item from no-split ring buffer
 //     size_t item_size;
-//     char*  item = (char *)xRingbufferReceive(pCONT_serial->uart2_settings.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
+//     char*  item = (char *)xRingbufferReceive(pCONT_uart->uart2_settings.ringbuffer_handle, &item_size, pdMS_TO_TICKS(1000));
 
 //     //Check received item
 //     if (item != NULL) {
-//       Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(pCONT_serial->uart2_settings.ringbuffer_handle));
+//       Serial.printf("UART2:>%d %d sizeB=%d\n\r",item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->uart2_settings.ringbuffer_handle));
 //       //Print item
 //       for (int i = 0; i < item_size; i++) {
 //           Serial.printf("%c", item[i]);
 //       }
 //       //Return Item
-//       vRingbufferReturnItem(pCONT_serial->uart2_settings.ringbuffer_handle, (void *)item);
-//       Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(pCONT_serial->uart2_settings.ringbuffer_handle));
+//       vRingbufferReturnItem(pCONT_uart->uart2_settings.ringbuffer_handle, (void *)item);
+//       Serial.printf("\n\r sizeA=%d\n\r",xRingbufferGetCurFreeSize(pCONT_uart->uart2_settings.ringbuffer_handle));
 //     } else {
 //       //Failed to receive item
 //       Serial.printf("Failed to receive item\n");

@@ -9,15 +9,19 @@
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
+
+const char* mGPS::PM_MODULE_DRIVERS_GPS_CTR = D_MODULE_DRIVERS_GPS_CTR;
+const char* mGPS::PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR = D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
+
 gps_fix  fixcpp;// = nullptr; // This holds on to the latest values
 gps_fix  fix_saved;// = nullptr; // This holds on to the latest values
 
-static NMEAGPS   gps;
-static void GPSisr( uint8_t c )
-{
-  gps.handle( c );
+// static NMEAGPS   gps;
+// static void GPSisr( uint8_t c )
+// {
+//   gps.handle( c );
 
-} // GPSisr
+// } // GPSisr
 
 
 // /*********************************************************************************************/
@@ -25,9 +29,111 @@ static void GPSisr( uint8_t c )
 void mGPS::init(void)
 {
   
-  averaging = new AVERAGING_DATA<float>(100);
+  // averaging = new AVERAGING_DATA<float>(100);
+  
+  #ifdef ENABLE_UART2_ISR_BUFFERS
+  // init_UART2_RingBuffer();
+  // init_UART2_ISR();
+  #endif
+
+
+}
+
+#ifdef ENABLE_UART2_ISR_BUFFERS
+// void mGPS::init_UART2_RingBuffer()
+// {
+
+//   // uart2_settings.ringbuffer_handle = xRingbufferCreate(RINGBUFFER_HANDLE_2_LENGTH, RINGBUF_TYPE_BYTEBUF);
+//   // if (uart2_settings.ringbuffer_handle != NULL) {
+//   //   uart2_settings.initialised = true;
+//   // }
+
+//   // //init with dummy data  
+//   // char data_ctr[] = "UART2 RingBuf Init\0";
+//   // UBaseType_t res =  xRingbufferSend(pCONT_uart->uart2_settings.ringbuffer_handle, data_ctr, strlen(data_ctr), pdMS_TO_TICKS(1000));
+//   // if (res != pdTRUE) {
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
+//   //   uart2_settings.initialised = false; //disable if fault
+//   // }
+
+// }
+
+/*
+ * Define UART interrupt subroutine to ackowledge interrupt
+ */
+// void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
+// { 
+  
+//   uint16_t rx_fifo_len, status;
+//   uint16_t i = 0;
+//   // char
+  
+//   // gpio_pad_select_gpio(BLINK_GPIO);
+  
+//   /* Set the GPIO as a push/pull output */
+//   // gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+
+//   status = UART2.int_st.val; // read UART interrupt Status
+//   rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
+  
+//   while(rx_fifo_len){
+//     pCONT_gps->rxbuf2[i++] = UART2.fifo.rw_byte; // read all bytes
+//     rx_fifo_len--;
+//     // pCONT_gps->gps->handle(  UART2.fifo.rw_byte);
+
+//     // gpio_set_level(BLINK_GPIO, rx_fifo_len%2);
+//   }
+//   pCONT_gps->urxlen2 = i;
+
+//   // BaseType_t dummyval;
+//   // UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->uart2_settings.ringbuffer_handle, pCONT_uart->rxbuf2, pCONT_uart->urxlen2, &dummyval);
+  
+//   // if (res != pdTRUE) {
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR("Failed to send item"));
+//   // }
+
+//   // after reading bytes from buffer clear UART interrupt status
+//   uart_clear_intr_status(UART_NUM_2, UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);
+
+// }
+
+
+void mGPS::init_UART2_ISR(){
+
+  // esp_log_level_set(TAG, ESP_LOG_INFO);
+
+  // /* Configure parameters of an UART driver,
+  //   * communication pins and install the driver */
+  // uart_config_t uart_config = {
+  //   .baud_rate = 115200,
+  //   .data_bits = UART_DATA_8_BITS,
+  //   .parity = UART_PARITY_DISABLE,
+  //   .stop_bits = UART_STOP_BITS_1,
+  //   .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+  // };
+
+  // ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
+
+  // //Set UART log level
+	// ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 17, 16, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+  // // Install UART driver, and get the queue.
+  // ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, uart_buffer_size, uart_buffer_size, 10, &uart2_event_queue_handle, 0));
+
+	// // // release the pre registered UART handler/subroutine
+	// ESP_ERROR_CHECK(uart_isr_free(UART_NUM_2));
+
+  // uart_isr_register(
+  //   UART_NUM_2,
+  //   uart_intr_handle_u2_static,
+  //   NULL, 
+  //   ESP_INTR_FLAG_IRAM,
+  //   handle_console_uart2
+  // );
   
 }
+
+#endif // ENABLE_UART2_ISR_BUFFERS
+
 
 
 
@@ -123,7 +229,7 @@ void mGPS::pre_init(){
   //   DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
 
   // gpsPort.attachInterrupt( GPSisr );
-  gpsPort.begin(115200);
+  // gpsPort.begin(115200);
 
   fixcpp.init();
 
@@ -139,7 +245,7 @@ void mGPS::pre_init(){
 }
 
 
-int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj){
+int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -161,38 +267,132 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject ob
     case FUNC_LOOP:{
 
 
+      char buffer[100] = {0};
+      uint16_t buf_index = 0;
+      uint16_t bytes_in_line = pCONT_uart->GetReceiveBuffer2(buffer, sizeof(buffer), '\n');
 
-      uint32_t time = millis();
-          
-      while (gps->available( gpsPort )) {
-        fixcpp = gps->read();
+      if(bytes_in_line){
+        AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"%s\""), bytes_in_line, buffer);
+      }
+      // else{
+      //   AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"none\""), bytes_in_line);
+      // }
 
-        if(fixcpp.status > gps_fix::STATUS_NONE ){
+      bool new_data = false;
 
-          //save tmp solution when valid
-          fix_saved = fixcpp;
+      // uint32_t time = millis();
+      #ifdef USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
+      
+      while (bytes_in_line){//gps->available( gpsPort )) {
+        // fixcpp = gps->read();
 
-          // DEBUG_PORT.print( F("Location: ") );
-          if (fixcpp.valid.location) {
-            DEBUG_PORT.print( fixcpp.latitude(), 6 );
-            DEBUG_PORT.print( ',' );
-            DEBUG_PORT.print( fixcpp.longitude(), 6 );
-            DEBUG_PORT.print( ',' );
-            DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
-          }
+        char byte = buffer[buf_index++];
 
-          // DEBUG_PORT.print( F(", Altitude: ") );
-          if (fixcpp.valid.altitude)
-            DEBUG_PORT.print( fixcpp.altitude() );
+        gps->handle(byte);
 
-          DEBUG_PORT.println();
-        }
+        bytes_in_line--;
 
-        if(abs(millis()-time) > 1000){
-          break;
-        }
+        new_data = true;
+
+        // if(fixcpp.status > gps_fix::STATUS_NONE ){
+
+        //   //save tmp solution when valid
+        //   fix_saved = fixcpp;
+
+        //   // DEBUG_PORT.print( F("Location: ") );
+        //   // if (fixcpp.valid.location) {
+        //     DEBUG_PORT.print( fixcpp.latitude(), 6 );
+        //     DEBUG_PORT.print( ',' );
+        //     DEBUG_PORT.print( fixcpp.longitude(), 6 );
+        //     DEBUG_PORT.print( ',' );
+        //     DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
+        //   // }
+
+        //   // DEBUG_PORT.print( F(", Altitude: ") );
+        //   if (fixcpp.valid.altitude)
+        //     DEBUG_PORT.print( fixcpp.altitude() );
+
+        //   DEBUG_PORT.println();
+        // }
+
+        // if(abs(millis()-time) > 10){
+        //   break;
+        // }
 
       }
+
+      if (new_data)
+      {
+        // (gps->available()) {
+      // if (gps->available()) {
+        // AddLog(LOG_LEVEL_TEST, PSTR("gps->available() %d"),gps->available());
+      //   // Print all the things!
+      //   fixcpp = gps->read();
+        trace_all( DEBUG_PORT, *gps, gps->read() );
+        Serial.println();
+      //    if(fixcpp.status > gps_fix::STATUS_NONE ){
+
+      //     //save tmp solution when valid
+      //     fix_saved = fixcpp;
+
+      //     // DEBUG_PORT.print( F("Location: ") );
+      //     // if (fixcpp.valid.location) {
+      //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
+      //       DEBUG_PORT.print( ',' );
+      //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
+      //       DEBUG_PORT.print( ',' );
+      //       DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
+      //     // }
+
+      //     // DEBUG_PORT.print( F(", Altitude: ") );
+      //     if (fixcpp.valid.altitude)
+      //       DEBUG_PORT.print( fixcpp.altitude() );
+
+      //     DEBUG_PORT.println();
+      //   }
+      }
+
+      if (gps->overrun()) {
+        gps->overrun( false );
+        DEBUG_PORT.println( F("DATA OVERRUN: took too long to print GPS data!") );
+      }
+
+
+      #endif // USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
+
+      #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
+          
+      // while (gps->available( gpsPort )) {
+      //   fixcpp = gps->read();
+
+      // //   if(fixcpp.status > gps_fix::STATUS_NONE ){
+
+      // //     //save tmp solution when valid
+      // //     fix_saved = fixcpp;
+
+      // //     // DEBUG_PORT.print( F("Location: ") );
+      // //     // if (fixcpp.valid.location) {
+      // //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
+      // //       DEBUG_PORT.print( ',' );
+      // //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
+      // //       DEBUG_PORT.print( ',' );
+      // //       DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
+      // //     // }
+
+      // //     // DEBUG_PORT.print( F(", Altitude: ") );
+      // //     if (fixcpp.valid.altitude)
+      // //       DEBUG_PORT.print( fixcpp.altitude() );
+
+      // //     DEBUG_PORT.println();
+      // //   }
+
+      // //   if(abs(millis()-time) > 10){
+      // //     break;
+      // //   }
+
+      // }
+#endif
+      // Serial.printf("time=%d\n\r",millis()-time);
 
         
 // #ifdef ENABLE_DEVFEATURE_GPSTEST1
@@ -304,30 +504,32 @@ uint32_t timeout = millis();
     case FUNC_EVERY_SECOND: {
 
 
-  averaging->Add(1);
 
-      //  AVERAGING_DATA<float> averaging_data(10);
 
-        // for(int i=0;i<10;i++){
-        //   averaging_data[i] = i;
-        // }
+  // averaging->Add(1);
 
-        averaging->SetBoundaryLimits(0,300);
-        bool result = averaging->Add(123);
-        Serial.println(result);
-        // result = averaging_data.Add(456);
-        // Serial.println(result);
+  //     //  AVERAGING_DATA<float> averaging_data(10);
 
-        for(int i=0;i<10;i++){
-          Serial.print(averaging->data[i]);
-          Serial.println();
-          }
+  //       // for(int i=0;i<10;i++){
+  //       //   averaging_data[i] = i;
+  //       // }
 
-        // AddLog_Array(LOG_LEVEL_TEST, PSTR("test"), averaging_data[0], 10);
+  //       averaging->SetBoundaryLimits(0,300);
+  //       bool result = averaging->Add(123);
+  //       Serial.println(result);
+  //       // result = averaging_data.Add(456);
+  //       // Serial.println(result);
 
-        // SERIAL_PRINT_ARRAY("averaging_data",&averaging,10);
+  //       for(int i=0;i<10;i++){
+  //         Serial.print(averaging->data[i]);
+  //         Serial.println();
+  //         }
 
-        Serial.println(averaging->Mean());
+  //       // AddLog_Array(LOG_LEVEL_TEST, PSTR("test"), averaging_data[0], 10);
+
+  //       // SERIAL_PRINT_ARRAY("averaging_data",&averaging,10);
+
+  //       Serial.println(averaging->Mean());
 
       //  averaging_data[1];
 
@@ -612,22 +814,8 @@ void mGPS::MQTTHandler_Set_TelePeriod(){
 
 void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID,
-    MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID
-    //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
-  };
-  
-  struct handler<mGPS>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_gpspacket_minimal_teleperiod
-    //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DRIVERS_GPS_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, 
-    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-    mqtt_handler_id
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_GPS_ID,
+    mqtthandler_list_ptr, mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]), mqtt_handler_id
   );
 
 }

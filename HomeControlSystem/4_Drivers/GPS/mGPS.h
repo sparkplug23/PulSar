@@ -3,6 +3,8 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#define D_UNIQUE_MODULE_DRIVERS_GPS_ID 55
+
 #ifdef USE_MODULE_DRIVERS_GPS
 
 
@@ -16,6 +18,11 @@
 // #include <ublox/ubxmsg.h>
 // #define gpsPort Serial2
 #include <NMEAGPS.h>
+
+#include <Streamers.h>
+
+
+#define ENABLE_UART2_ISR_BUFFERS
 
 //=========
 #define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
@@ -280,16 +287,63 @@
 #include "SD_MMC.h"
 
 
+#include "freertos/ringbuf.h"
+// static char tx_item[] = "test_item";
+#include <stdio.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "driver/uart.h"
+#include "esp_log.h"
+#include "driver/gpio.h"
+#include "sdkconfig.h"
+#include "esp_intr_alloc.h"
+
+
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR) "gpspacket_minimal";
 
 
-class mGPS{
+class mGPS :
+  public mTaskerInterface
+{
 
   private:
   public:
     mGPS(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
+    
+    static const char* PM_MODULE_DRIVERS_GPS_CTR;
+    static const char* PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_GPS_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_GPS_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mGPS);
+    };
+    #endif
+
+    // Receive buffer to collect incoming data
+    uint8_t rxbuf2[256];
+    // Register to collect data length
+    uint16_t urxlen2;
+    uart_isr_handle_t *handle_console_uart2;
+
+    // void IRAM_ATTR uart_intr_handle_u2(void *arg);
+
+    QueueHandle_t uart2_event_queue_handle;
+    const int uart_buffer_size = (1024 * 2);
+
+    void  init_UART2_RingBuffer();
+    void  init_UART2_ISR();
+
+    static void IRAM_ATTR uart_intr_handle_u2(void);
+
+
 
     int8_t Tasker_Web(uint8_t function);
 
@@ -297,10 +351,7 @@ class mGPS{
     
 NMEAGPS*  gps = nullptr; // This parses the GPS characters
 // gps_fix*  fix_p = nullptr; // This holds on to the latest values
-AVERAGING_DATA<float>* averaging;
-
-// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-// void parse_JSONCommand(JsonObjectConst obj);
+// AVERAGING_DATA<float>* averaging;
 
 uint16_t test_val = 0;
 uint8_t dir = 0;
@@ -313,18 +364,21 @@ struct SETTINGS{
   uint8_t fShowManualSlider = false;
 }settings;
 
+struct GPS_LATEST{
+  uint8_t status = 0; // status = 0(invalid),1(now valid),2(previously valid)
+
+  int32_t latitideL = 0;
+  float latitude = 0;
+  int32_t longitudeL = 0;
+  float longitude = 0;
+  
 
 
-// void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
-// void createDir(fs::FS &fs, const char * path);
-// void removeDir(fs::FS &fs, const char * path);
-// void readFile(fs::FS &fs, const char * path);
-// void writeFile(fs::FS &fs, const char * path, const char * message);
-// void appendFile(fs::FS &fs, const char * path, const char * message);
-// void renameFile(fs::FS &fs, const char * path1, const char * path2);
-// void deleteFile(fs::FS &fs, const char * path);
-// void testFileIO(fs::FS &fs, const char * path);
 
+
+
+
+}gps_latest;
 
 void CommandSet_CreateFile_WithName(char* value);
 void CommandSet_SerialPrint_FileNames(const char* value);
@@ -334,7 +388,7 @@ void CommandSet_ReadFile(const char* filename);
 
 
 int8_t CheckAndExecute_JSONCommands();
-void parse_JSONCommand(void);
+void parse_JSONCommand(JsonParserObject obj);
 
 uint8_t ConstructJSON_Scene(uint8_t json_method);
 
@@ -375,6 +429,18 @@ void WebAppend_Root_Status_Table();
       //later also send byte packet method for testing over mqtt
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
+  uint8_t mqtthandler_list_ids[2] = {
+    MQTT_HANDLER_SETTINGS_ID,
+    MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID
+    //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
+  };
+  
+  struct handler<mGPS>* mqtthandler_list_ptr[2] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_gpspacket_minimal_teleperiod
+    //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
+  };
+
 
 
 };

@@ -66,13 +66,13 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MSAW_MODULE_ID] = new X();
   #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
-    pModule[EM_MODULE_DRIVERS_SDCARDID] = new X();
+    pModule[EM_MODULE_DRIVERS_SDCARDID] = new mSDCard();
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
-    pModule[EM_MODULE_DRIVERS_GPS_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_GPS_ID] = new mGPS();
   #endif
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new mSerialUART();
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new mShellyDimmer();
@@ -161,6 +161,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_BH1750
     pModule[EM_MODULE_SENSORS_BH1750_ID] = new mBH1750();
   #endif
+  #ifdef USE_MODULE_SENSORS_SR04
+    pModule[EM_MODULE_SENSORS_SR04_ID] = new mSR04();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
@@ -175,7 +178,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_CONTROLLER_IRTRANSMITTER_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_OILFURNACE
-    pModule[EM_MODULE_CONTROLLER_OILFURNACE_ID] = new X();
+    pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID] = new mOilFurnace();
   #endif
   #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
     pModule[EM_MODULE_CONTROLLER_EXERCISEBIKE_ID] = new X();

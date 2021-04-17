@@ -522,7 +522,7 @@ void mEnergyInterface::UpdateEnergyUsagePerMinute(){
     Energy.stats.kwh_per_minute_index = 0;
   }
 
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  // mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
 }
 
@@ -865,6 +865,8 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
   // Serial.println(JBI->GetBufferPtr()); Serial.flush();
   // delay(2000);
 
+  // AddLog(LOG_LEVEL_TEST, PSTR("mEnergyInterface::ConstructJSON_Sensor"));
+
   return JsonBuilderI->End();
 
 }
@@ -1103,6 +1105,8 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:
       //EnergyEverySecond();
       UpdateThresholdLimits();
+      //  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
     break;
     case FUNC_EVERY_MINUTE:
       //UpdateEnergyUsagePerMinute();

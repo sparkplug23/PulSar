@@ -294,7 +294,7 @@ NMEAGPS::decode_t NMEAGPS::handle( uint8_t c )
 // Serial.printf("NMEAGPS::handle res=%d\n\r",res);
 
   if (res == DECODE_COMPLETED) {
-    // Serial.printf("NMEAGPS::storeFix res=%d\n\r",res);
+    Serial.printf("NMEAGPS::storeFix res=%d\n\r",res);
     storeFix();
 
   } else if ((NMEAGPS_FIX_MAX == 0) && _available() && !is_safe()) {
@@ -342,14 +342,14 @@ void NMEAGPS::storeFix()
 
   if (room) {
     // YES, save it.
-    // Serial.println("room");
+    // Serial.printf("room %d\n\r",merging);
     //   Note: If FIX_MAX == 0, this just marks _fixesAvailable = true.
 
     #if NMEAGPS_FIX_MAX > 0
       if (merging == EXPLICIT_MERGING) {
         // Accumulate all sentences
         buffer[ _currentFix ] |= fix();
-        // Serial.println("merging == EXPLICIT_MERGING");
+        // Serial.printf("heading = %d\n\r",(int)buffer[0].heading());
       }
     #endif
 
@@ -734,7 +734,7 @@ bool NMEAGPS::parseGGA( char chr )
   #ifdef NMEAGPS_PARSE_GGA
     switch (fieldIndex) {
         case  1: 
-        Serial.printf("NMEAGPS::parseGGA parseTime %d\n\r",active_millis.GGA);
+        // Serial.printf("NMEAGPS::parseGGA parseTime %d\n\r",active_millis.GGA);
         
         return parseTime( chr );
         PARSE_LOC(2);

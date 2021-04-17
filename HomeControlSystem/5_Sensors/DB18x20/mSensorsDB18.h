@@ -50,8 +50,7 @@ class mSensorsDB18 :
       uint8_t  group_count = 0;
     }settings;
 
-    int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand();
+    void parse_JSONCommand(JsonParserObject obj);
 
     void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
 

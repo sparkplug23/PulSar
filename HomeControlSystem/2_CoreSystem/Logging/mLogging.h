@@ -269,7 +269,7 @@ class mLogging :
 {
 public:
     mLogging(){}; // Class constructor
-    // mLogging(HardwareSerial* hs);
+    
     void init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
@@ -331,24 +331,10 @@ public:
 
     #define TELNET_PORT 24
 
-    // WiFiServer* server = nullptr;
-    // WiFiClient* clientptr;
-    // WiFiClient client;
+    WiFiServer* TelnetServer;
+    WiFiClient Telnet;
 
-    
-// WiFiServer server(24);
-// // Initialize the client library
-// WiFiClient client;
-
-// declare telnet server (do NOT put in setup())
-WiFiServer* TelnetServer;//(24);
-WiFiClient Telnet;
-
-bool telnet_started = false;
-
-
-
-
+    bool telnet_started = false;
     
 };
 

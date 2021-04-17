@@ -14,6 +14,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
 //   DEBUG_PRINT_FUNCTION_NAME_TEST;
 
+      // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
 // Serial.println("wifi");
 //   DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
@@ -52,7 +53,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
       // #ifdef ESP32
     // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
+      AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
     // #endif// ENABLE_LOG_LEVEL_INFO
       // #endif
 

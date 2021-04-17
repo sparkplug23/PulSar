@@ -329,6 +329,9 @@
   #define D_MODULE_SENSORS_BH1750_CTR              "mBH1750"
   #define D_MODULE_SENSORS_BH1750_FRIENDLY_CTR              "bh1750"
 
+  #define D_MODULE_SENSORS_SR04_CTR              "mSR04"
+  #define D_MODULE_SENSORS_SR04_FRIENDLY_CTR              "sr04"
+
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS
   #define D_MODULE_CONTROLLER_BLINDS_CTR              "mBlinds"
@@ -351,8 +354,8 @@
   #define D_MODULE_CONTROLLER_IRTRANSMITTER_FRIENDLY_CTR              "infrared"
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_OILFURNACE
-  #define D_MODULE_CONTROLLER_OILFURNACE_CTR              "mOilFurnace"
-  #define D_MODULE_CONTROLLER_OILFURNACE_FRIENDLY_CTR              "oilfurnace"
+  #define D_MODULE_CONTROLLER_TANKVOLUME_CTR              "mTankVolume"
+  #define D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR              "tankvolume"
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
   #define D_MODULE_CONTROLLER_EXERCISEBIKE_CTR              "mExerciseBike"

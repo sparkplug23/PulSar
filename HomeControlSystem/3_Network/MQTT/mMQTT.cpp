@@ -524,7 +524,7 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   }
 
   // Method which checks if the data was directly meant for it (not json formatted but raw)
-  // if (XdrvCall(FUNC_MQTT_DATA)) { return; }
+  // if(pCONT->Tasker_Interface(FUNC_MQTT_DATA_ID)){ return; }
 
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
     if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {

@@ -443,41 +443,11 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
 }//end function
 
 
-int8_t mSensorsDB18::CheckAndExecute_JSONCommands(){
 
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
+void mSensorsDB18::parse_JSONCommand(JsonParserObject obj){
 
-}
-
-
-void mSensorsDB18::parse_JSONCommand(){
-
- // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  AddLog(LOG_LEVEL_TEST, PSTR("\"%s\""),parsing_buffer);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),parsing_buffer);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    return;
-  }  
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
-
-
 
   // Using a desired address, the sensor is searched for, then index (id) is updated
   if(jtok = obj[PM_JSON_SENSORADDRESS]){

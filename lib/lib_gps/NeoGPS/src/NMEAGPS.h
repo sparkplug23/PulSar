@@ -113,22 +113,22 @@ public:
     //   object is passed in so a char can be read if port.available().
 
     uint8_t available( Stream & port )
-      {
-        if (processing_style == PS_POLLING){
-          // Serial.printf("processing_style=%d\n\r",processing_style);
-          // if(port.available()>5){
-          //   // Serial.printf("port.available()=%d\n\r",port.available());
-          // }
-          while (port.available()){
-            handle( port.read() );
-    // Serial.print( F("handle: ") );
-          }
-        }
-        // if(_available()){
-        //   Serial.println("available");
+    {
+      if (processing_style == PS_POLLING){
+        // Serial.printf("processing_style=%d\n\r",processing_style);
+        // if(port.available()>5){
+        //   // Serial.printf("port.available()=%d\n\r",port.available());
         // }
-        return _available();
+        while (port.available()){
+          handle( port.read() );
+          // Serial.print( F("handle: ") );
+        }
       }
+      // if(_available()){
+      //   Serial.println("available");
+      // }
+      return _available();
+    }
     uint8_t available() const volatile { return _available(); };
 
     //.......................................................................

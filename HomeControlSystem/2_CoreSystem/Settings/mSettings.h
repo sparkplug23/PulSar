@@ -542,7 +542,8 @@ enum XsnsFunctions {
   // Mqtt
   FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
   FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
-  FUNC_MQTT_CHECK_REDUNCTION_LEVEL, //
+  FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
+  FUNC_MQTT_DATA_ID,//
   // 
 
   // Events (new internal triggers, if something happens trigger another... this will become rules)

@@ -62,7 +62,7 @@ int mUltraSonicSensor::GetDurationReading(void){
 
   // Return early
   if((abs(millis()-ultrasonic.tUltraSonicSensorReadLast)<blockingtime)){ // if not valid try again right away
-   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime"));
+   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "ultrasonic.tUltraSonicSensorReadLast<blockingtime %d"),blockingtime);
     return ultrasonic.duration;
   }
   #endif //   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
@@ -79,12 +79,25 @@ int mUltraSonicSensor::GetDurationReading(void){
   delayMicroseconds(10);
   digitalWrite(pin_trig, LOW);
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(pin_echo, HIGH);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
+  duration = pulseIn(pin_echo, HIGH);//, 40000);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
+
+//duration is microseconds
+// Reads the echoPin, returns the sound wave travel time in microseconds
+// duration = pulseIn(echoPin, HIGH);
+// Calculating the distance
+int distance= duration*0.034/2;
+// Prints the distance on the Serial Monitor
+// Serial.print("Distance: ");
+// Serial.println(distance);
+
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "Distance=%d"),distance);
+
+
   ultrasonic.duration_raw = duration;
 
   // CHANGE TO USE INTERRUPT BASED METHOD, IE trigger (turn on interrupt) and have it compare start millis and triggered millis (is pulse nano or millis?)
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d"),(int)duration);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d %dnew"),(int)duration, (int)(duration/58));
 
   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   //if outside possible range
@@ -203,6 +216,9 @@ int mUltraSonicSensor::GetDurationReading(void){
 
 }
 
+// float mUltraSonicSensor::GetDistanceMetresReading(void){
+//   return ultrasonic.duration*(0.034/2);
+// }
 float mUltraSonicSensor::GetDistanceCMReading(void){
   return ultrasonic.duration*(0.034/2);
 }
@@ -221,7 +237,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
         #ifdef USE_MODULE_SENSORS_DS18B20
         int tempsensorid = -1;
         float ambient_temperature;
-        if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)D_MODULE_SENSORS_DB18S20_ID))>=0){
+        if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)EM_MODULE_SENSORS_DB18S20_ID))>=0){
             if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
             ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
             
@@ -298,6 +314,9 @@ float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(int duration){
   //float speedofsound_inmillimetres = (speedofsound_inmetres*1000)/1000000; *1000 from m->mm, divide by 1E6 for Us
   float speedofsound_inmillimetres_permicroseconds = (speedofsound_inmetres)/1000;
 
+  float newtest = (duration/2)*0.034;
+  AddLog(LOG_LEVEL_TEST, PSTR("newtest=%d"),(int)newtest);
+
   //Serial.print("[ULTRA] speedofsound_inmillimetres_permicroseconds>> "); Serial.println(speedofsound_inmillimetres_permicroseconds);
   //float sos = GetSpeedOfSoundInMetres();
 
@@ -317,13 +336,15 @@ float mUltraSonicSensor::GetDistanceCMReadingAdjustedForTemp(void){
 // X times capturing 1 per tick (slow smoothing over time)
 void mUltraSonicSensor::SubTask_UltraSonicAverage(){
 
+  // AddLog(LOG_LEVEL_TEST, PSTR("mUltraSonicSensor::SubTask_UltraSonicAverage"));
+
   // 1 SECOND
   if(abs(millis()-averaged.instant.captured.tSaved)>1000){averaged.instant.captured.tSaved=millis();
     averaged.instant.final.distance_mm = GetDistanceMMReadingAdjustedForTemp(); //pin32
 
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
 
     averaged.instant.final.distance_cm = averaged.instant.final.distance_mm/10; //pin32
     averaged.instant.isvalid = true;
@@ -508,8 +529,10 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj){
             
       if(mTime::TimeReachedNonReset(&ultrasonic.tReadLast,1000)){//ultrasonic.settings.measure_rate_ms)){
         GetDurationReading(); 
+
+        float newdist = (5000*0.034)/2;
         
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms"),ultrasonic.duration,ultrasonic.settings.measure_rate_ms);
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms %dmetres %d"),ultrasonic.duration,ultrasonic.settings.measure_rate_ms,(int)newdist,(int)GetDistanceCMReading());
         
         if(ultrasonic.isvalid){ // stop trying
           ultrasonic.tReadLast = millis();
