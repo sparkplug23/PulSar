@@ -52,10 +52,10 @@
 /**
  * TaskerInterface Functions
  * */
-#define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
+// #define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
 #define D_FUNC_POINTER_INIT_CTR                             "POINTER_INIT"
 #define D_FUNC_TEMPLATE_LOAD_CTR                            "TEMPLATE_LOAD"
-#define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
+// #define D_FUNC_MODULE_INIT_CTR                              "MODULE_INIT"
 #define D_FUNC_PRE_INIT_CTR                                 "PRE_INIT"
 #define D_FUNC_INIT_CTR                                     "INIT"
 #define D_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR             "CONFIGURE_MODULES_FOR_DEVICE"

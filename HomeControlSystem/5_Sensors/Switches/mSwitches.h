@@ -113,6 +113,9 @@ class mSwitches :
       uint8_t  state     = false;
       // uint8_t  isactive  = false;
       uint8_t  ischanged = false;
+
+      // I need to adopt tas method, as switches can expand to much larger on esp32
+      // pins can stay here, but inverted will need set as flag
       int8_t pin = -1; // -1 is not active
 
       uint8_t active_state_value = false; //defualt active high

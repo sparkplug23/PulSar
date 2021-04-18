@@ -67,24 +67,40 @@ class mButtons :
 //  * Button support
 // \*********************************************************************************************/
 
+
+    struct SETTINGS{
+      uint8_t buttons_found = 0;
+
+    }settings;
+
 #define MAX_KEYS 4                 // Max number of keys or buttons
 
 // unsigned long button_debounce = 0;          // Button debounce timer
-uint16_t holdbutton[MAX_KEYS] = { 0 };      // Timer for button hold
-uint16_t dual_button_code = 0;              // Sonoff dual received code
 
+struct BUTTONS{
+  uint16_t holdbutton =0;      // Timer for button hold
+  uint8_t multiwindow = 0;      // Max time between button presses to record press count
+  uint8_t multipress = 0;       // Number of button presses within multiwindow
+  
+  uint8_t lastbutton = BUTTON_NOT_PRESSED_ID;  // Last button states
+  uint8_t active_state_value = false; //defualt active high
 
-uint8_t lastbutton[MAX_KEYS] = { BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID, BUTTON_NOT_PRESSED_ID };  // Last button states
-uint8_t multiwindow[MAX_KEYS] = { 0 };      // Max time between button presses to record press count
-uint8_t multipress[MAX_KEYS] = { 0 };       // Number of button presses within multiwindow
+  uint8_t  state     = false;
+  // uint8_t  isactive  = false;
+  uint8_t  ischanged = false;
+  int8_t pin = -1; // -1 is not active
+
+}buttons[MAX_KEYS];
 
 uint8_t dual_hex_code = 0;                  // Sonoff dual input flag
 uint8_t key_no_pullup = 0;                  // key no pullup flag (1 = no pullup)
 uint8_t key_inverted = 0;                   // Key inverted flag (1 = inverted)
-uint8_t buttons_found = 0;                  // Number of buttons found flag
+// uint8_t buttons_found = 0;                  // Number of buttons found flag
 
 // timereached_t tsaved_button_debounce;
 uint32_t tsaved_button_debounce;
+
+uint16_t dual_button_code = 0;              // Sonoff dual received code
 
 void ButtonPullupFlag(uint8 button_bit);
 void ButtonInvertFlag(uint8 button_bit);

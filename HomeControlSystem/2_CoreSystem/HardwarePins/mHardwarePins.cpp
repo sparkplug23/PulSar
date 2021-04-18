@@ -635,7 +635,9 @@ boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index) {
 }
 
 void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
-  pCONT_set->gpio_pin_new[lpin] = gpio; // remember pin in new method
+  // pCONT_set->gpio_pin_new[lpin] = gpio; // remember pin in new method
+
+  // pin_function[]
 
   //temp fix, remember it in old for legacy
   //#ifndef USE_NEW_GPIO_METHOD
@@ -661,6 +663,40 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
   // }
   digitalWrite(gpio_pin, state &1);
 }
+
+
+#ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+
+
+int8_t mHardwarePins::GetPinByIndex(uint8_t index)
+{
+  return gpio_pin_by_index[index];
+}
+
+int8_t mHardwarePins::GetPinIndexedLocation(uint8_t pin_number)
+{
+  for(uint8_t index = 0;index<MAX_USER_PINS;index++)
+  {
+    if(GetPinByIndex(index) == pin_number)
+    {
+      return index;
+    }
+  }
+  return -1;
+}
+
+bool mHardwarePins::SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
+{
+  int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
+  if(gpio_pin_index_location>=0) // Valid pin option
+  {
+    pin_functions[gpio_pin_index_location] = pin_function;
+    return true;
+  }
+  return false;
+}
+
+#endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 uint8_t mHardwarePins::ModuleNr()
 {
@@ -868,18 +904,19 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
   if (!val) { return false; }  // None
 
 #ifdef USE_MODULE_SENSORS_BUTTONS
-  if ((val >= GPIO_KEY1_ID) && (val < GPIO_KEY1_ID + MAX_KEYS)) {
-    offset = (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-  }
-  if ((val >= GPIO_KEY1_NP_ID) && (val < GPIO_KEY1_NP_ID + MAX_KEYS)) {
-    offset = -(GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-  }
-  if ((val >= GPIO_KEY1_INV_ID) && (val < GPIO_KEY1_INV_ID + MAX_KEYS)) {
-    offset = -(GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
-  }
-  if ((val >= GPIO_KEY1_INV_NP_ID) && (val < GPIO_KEY1_INV_NP_ID + MAX_KEYS)) {
-    offset = -(GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
-  }
+  // if ((val >= GPIO_KEY1_ID) && (val < GPIO_KEY1_ID + MAX_KEYS)) {
+  //   offset = (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
+  // }
+  // if ((val >= GPIO_KEY1_NP_ID) && (val < GPIO_KEY1_NP_ID + MAX_KEYS)) {
+  //   offset = -(GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
+  // }
+  // if ((val >= GPIO_KEY1_INV_ID) && (val < GPIO_KEY1_INV_ID + MAX_KEYS)) {
+  //   offset = -(GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
+  // }
+  // if ((val >= GPIO_KEY1_INV_NP_ID) && (val < GPIO_KEY1_INV_NP_ID + MAX_KEYS)) {
+  //   offset = -(GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
+  // }
+  AddLog(LOG_LEVEL_ERROR, PSTR("GetUsedInModule missing for buttons"));
 #endif
 #ifdef USE_MODULE_SENSORS_SWITCHES
   // if ((val >= GPIO_SWT1_ID) && (val < GPIO_SWT1_ID + MAX_SWITCHES)) {
@@ -975,6 +1012,10 @@ void mHardwarePins::GpioInit(void)
   
     #endif // ENABLE_LOG_LEVEL_INFO
   uint8_t mpin;
+  #ifdef ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
+  // New method stores "function in pin array" instead of "pin in function array"
+  uint16_t pin_function = GPIO_NONE_ID;
+  #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
   /**
    * Correcting for invalid module
@@ -1068,6 +1109,12 @@ void mHardwarePins::GpioInit(void)
   // Take module io and configure pins
   for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
     mpin = ValidPin(i, pCONT_set->my_module.io[i]);
+    
+  #ifdef ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
+    pin_function = pCONT_set->my_module.io[i]; //function number
+    int8_t gpio_pin_number = mpin;  //0+ if valid
+    // SetPinFunction(gpio_pin_number, pin_function);  
+  #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     if(mpin){
@@ -1091,21 +1138,21 @@ void mHardwarePins::GpioInit(void)
       // #endif // ENABLE_LOG_LEVEL_INFO
       // }else
       // #endif
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
-        pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
-        mpin -= (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-      }
-      else if ((mpin >= GPIO_KEY1_INV_ID) && (mpin < (GPIO_KEY1_INV_ID + MAX_KEYS))) {
-        pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
-        mpin -= (GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
-      }
-      else if ((mpin >= GPIO_KEY1_INV_NP_ID) && (mpin < (GPIO_KEY1_INV_NP_ID + MAX_KEYS))) {
-        pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
-        pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
-        mpin -= (GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
-      }else
-      #endif
+      // #ifdef USE_MODULE_SENSORS_BUTTONS
+      // if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
+      //   pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
+      //   mpin -= (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
+      // }
+      // else if ((mpin >= GPIO_KEY1_INV_ID) && (mpin < (GPIO_KEY1_INV_ID + MAX_KEYS))) {
+      //   pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
+      //   mpin -= (GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
+      // }
+      // else if ((mpin >= GPIO_KEY1_INV_NP_ID) && (mpin < (GPIO_KEY1_INV_NP_ID + MAX_KEYS))) {
+      //   pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+      //   pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+      //   mpin -= (GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
+      // }else
+      // #endif
 
       #ifdef USE_MODULE_DRIVERS_RELAY
       if ((mpin >= GPIO_REL1_INV_ID) && (mpin < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
@@ -1113,28 +1160,25 @@ void mHardwarePins::GpioInit(void)
         mpin -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
       }
       #endif
-
+      //LEDS
        if ((mpin >= GPIO_LED1_INV_ID) && (mpin < (GPIO_LED1_INV_ID + MAX_LEDS))) {
         bitSet(pCONT_set->led_inverted, mpin - GPIO_LED1_INV_ID);
         mpin -= (GPIO_LED1_INV_ID - GPIO_LED1_ID);
       }
+      
+      //PWM
       else if ((mpin >= GPIO_PWM1_INV_ID) && (mpin < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
         bitSet(pCONT_set->pwm_inverted, mpin - GPIO_PWM1_INV_ID);
         mpin -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
       }
+
+      //COUNTERS
       else if ((mpin >= GPIO_CNTR1_NP_ID) && (mpin < (GPIO_CNTR1_NP_ID + MAX_COUNTERS))) {
         bitSet(pCONT_set->counter_no_pullup, mpin - GPIO_CNTR1_NP_ID);
         mpin -= (GPIO_CNTR1_NP_ID - GPIO_CNTR1_ID);
       }
 
-     
-      #ifdef USE_PWM
-      // else if ((mpin >= AGPIO(GPIO_PWM1_INV_ID)) && (mpin < (AGPIO(GPIO_PWM1_INV_ID) + MAX_PWMS))) {
-      //   bitSet(pCONT_set->pwm_inverted, mpin - AGPIO(GPIO_PWM1_INV_ID));
-      //   mpin -= (AGPIO(GPIO_PWM1_INV_ID) - AGPIO(GPIO_PWM1_ID));
-      // }
-      #endif
-
+  
 
     }
   
@@ -1250,13 +1294,17 @@ void mHardwarePins::GpioInit(void)
   pCONT_set->devices_present = 0;
   pCONT_set->Settings.light_settings.type = 0;//LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
-  #endif // ENABLE_LOG_LEVEL_INFO
-  pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Tasker_Interface(FUNC_MODULE_INIT)"));
+  // #endif // ENABLE_LOG_LEVEL_INFO
+  // pCONT->Tasker_Interface(FUNC_MODULE_INIT); 
 
 
+// I do need a MODULE_TYPE sets light type, though, this may be a pin config then light_type json option
+// Perhaps a progmem json template for modules should be considered too, not just rules (or within where rules are)
 
+// FUNC_MODULE_INIT is the same as INIT for me, as it permits funtions to turn on, this can be removed
+// I do this from the main.cpp
 
   // if (XdrvCall(FUNC_MODULE_INIT)) {
   //   // Serviced
@@ -1369,22 +1417,15 @@ void mHardwarePins::GpioInit(void)
 
   if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
     pCONT_set->devices_present++;
-    pCONT_set->Settings.light_settings.type = LT_WS2812;
+    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE;
     // AddLog(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }else{
     // AddLog(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }
 #endif  // USE_WS2812
-// #ifdef USE_SM16716
-//   if (SM16716_ModuleSelected()) {
-//     Settings.light_settings.type += 3;
-//     Settings.light_settings.type |= LT_SM16716;
-//   }
-// #endif  // ifdef USE_SM16716
 
-  DEBUG_LINE;
-// Serial.flush();
-// while(1);
+
+
   // Basic PWM controls (PWM1-6)
   if (!pCONT_set->Settings.light_settings.type) {
     for (uint8_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only

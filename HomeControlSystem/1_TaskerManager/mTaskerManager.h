@@ -48,6 +48,7 @@
 #include "2_CoreSystem/mHardwareTemplates.h"                // Hardware configuration
 #include "2_CoreSystem/Support/BufferWriter.h"
 
+#include "1_TaskerManager/mTasks.h"
 #include <WiFiClient.h>
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)

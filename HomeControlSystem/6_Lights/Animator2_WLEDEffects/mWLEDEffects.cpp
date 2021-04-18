@@ -1523,7 +1523,7 @@ int8_t mWLEDEffects::GetEffectsModeIDbyName(const char* c){
   if(c=='\0') return -1;
   // pCONT_sup->SearchForTextIndexedID
   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_WS2812; }
+  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE; }
   return -1;
 }
 const char* mWLEDEffects::GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen){

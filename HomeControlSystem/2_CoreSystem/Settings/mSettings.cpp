@@ -22,7 +22,7 @@ const char* mSettings::GetTaskName(uint8_t task, char* buffer){
     default:
     case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
     case FUNC_TEMPLATE_MODULE_LOAD:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
-    case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
+    // case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
     case FUNC_PRE_INIT:                               return PM_FUNC_PRE_INIT_CTR;
     case FUNC_INIT:                                   return PM_FUNC_INIT_CTR;
     case FUNC_CONFIGURE_MODULES_FOR_DEVICE:           return PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR;

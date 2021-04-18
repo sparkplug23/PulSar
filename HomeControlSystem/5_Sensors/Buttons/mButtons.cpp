@@ -14,12 +14,12 @@ const char* mButtons::PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR = D_MODULE_SENSORS_
 
 // /********************************************************************************************/
 
-void mButtons::ButtonPullupFlag(uint8 button_bit)
+void mButtons::ButtonPullupFlag(uint8_t button_bit)
 {
   bitSet(key_no_pullup, button_bit);
 }
 
-void mButtons::ButtonInvertFlag(uint8 button_bit)
+void mButtons::ButtonInvertFlag(uint8_t button_bit)
 {
   bitSet(key_inverted, button_bit);
 }
@@ -28,21 +28,96 @@ void mButtons::ButtonInit(void)
 {
   
   AddLog(LOG_LEVEL_INFO, PSTR("ButtonInit"));
+// from pins
 
-  buttons_found = 0;
-  for (uint8_t i = 0; i < MAX_KEYS; i++) {
-    if (pCONT_pins->PinUsed(GPIO_KEY1_ID,i)) {
-      buttons_found++;
-      AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
-      pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID,i), 
-        bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+//this should be "pre_init" aka "pin_init"
+
+  // Check all possible pin options
+  settings.buttons_found = 0;    
+  for(uint8_t pin_id=GPIO_KEY1_ID;pin_id<GPIO_KEY1_ID+(MAX_KEYS*4);pin_id++){
+
+        // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_KEY1_ID+(MAX_BUTTONS*4));
+    if(pCONT_pins->PinUsed(pin_id)){
+        // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
+      
+      buttons[settings.buttons_found].pin = pCONT_pins->GetPin(pin_id);
+
+      // Standard pin, active high, with pulls 
+      if((pin_id >= GPIO_KEY1_ID)&&(pin_id < GPIO_KEY1_ID+MAX_KEYS)
+      ){
+        pinMode(buttons[settings.buttons_found].pin, INPUT_PULLUP);
+        buttons[settings.buttons_found].active_state_value = HIGH; //change to functions, so later this can be bitmapped internally
+      }else
+      // Inverted pin, active low, with pulls
+      if( (pin_id >= GPIO_KEY1_INV_ID)&&(pin_id < GPIO_KEY1_INV_ID+MAX_KEYS))
+      {
+        pinMode(buttons[settings.buttons_found].pin, INPUT_PULLUP);
+        buttons[settings.buttons_found].active_state_value = LOW;
+      }else
+      // Standard pin, active high, NO pulls
+      if((pin_id >= GPIO_KEY1_NP_ID)&&(pin_id < GPIO_KEY1_NP_ID+MAX_KEYS))
+      {
+        pinMode(buttons[settings.buttons_found].pin, INPUT);
+        buttons[settings.buttons_found].active_state_value = HIGH;
+      }else
+      // 
+      if(
+        (pin_id >= GPIO_KEY1_INV_NP_ID)&&
+        (pin_id < GPIO_KEY1_INV_NP_ID+MAX_KEYS)
+      ){
+        pinMode(buttons[settings.buttons_found].pin, INPUT);
+        buttons[settings.buttons_found].active_state_value = LOW;
+      }else{
+        // Serial.printf("NO MATCH GPIO_KEY1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+
+      }
+
+      // Get boot state of button (this may also be better placed in a delay task from boot)
+      buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);  
+      
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.buttons_found, buttons[settings.buttons_found].pin);
+      #endif // ENABLE_LOG_LEVEL_INFO
+      
+      if(settings.buttons_found++ >= MAX_KEYS){ break; }
+
+    } // if PinUsed
+  }//end for
+
+
+
+// if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
+//         pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
+//         mpin -= (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
+//       }
+//       else if ((mpin >= GPIO_KEY1_INV_ID) && (mpin < (GPIO_KEY1_INV_ID + MAX_KEYS))) {
+//         pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
+//         mpin -= (GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
+//       }
+//       else if ((mpin >= GPIO_KEY1_INV_NP_ID) && (mpin < (GPIO_KEY1_INV_NP_ID + MAX_KEYS))) {
+//         pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+//         pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
+//         mpin -= (GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
+//       }else
+
+  //original section below
+
+  // buttons_found = 0;
+  // for (uint8_t i = 0; i < MAX_KEYS; i++) {
+  //   if (pCONT_pins->PinUsed(GPIO_KEY1_ID,i)) {
+  //     buttons_found++;
+  //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found=%d"),buttons_found-1);
+  //     pinMode(pCONT_pins->GetPin(GPIO_KEY1_ID,i), 
+  //       bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
         
-      AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
-      bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
-      );
+  //     AddLog(LOG_LEVEL_INFO, PSTR("buttons_found pullup=%d %d"),buttons_found-1,
+  //     bitRead(key_no_pullup, i) ? INPUT : ((16 == pCONT_pins->GetPin(GPIO_KEY1_ID,i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP)
+  //     );
 
-    }
-  }
+  // Remember to include special care of GPIO16
+
+  //   }
+  // }
 }
 
 uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
@@ -100,7 +175,7 @@ void mButtons::ButtonHandler(void)
     //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON " " D_CODE " %04X"), dual_button_code);
     //     button = BUTTON_PRESSED_ID;
     //     if (0xF500 == dual_button_code) {                      // Button hold
-    //       holdbutton[button_index] = (loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) -1;
+    //       buttons[button_index].holdbutton = (loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) -1;
     //       hold_time_extent = 1;
     //     }
     //     dual_button_code = 0;
@@ -121,7 +196,7 @@ void mButtons::ButtonHandler(void)
       // }
       // else 
       {
-      if ((BUTTON_PRESSED_ID == button) && (BUTTON_NOT_PRESSED_ID == lastbutton[button_index])) {
+      if ((BUTTON_PRESSED_ID == button) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton)) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
           AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
           //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
@@ -131,15 +206,6 @@ void mButtons::ButtonHandler(void)
             // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
 
-
-            // #ifdef USE_MODULE_DRIVERS_RELAY
-            //   pCONT_mry->ExecuteCommandPower(button_index, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
-            //   // #ifdef ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS
-            //   //   AddLog(LOG_LEVEL_ERROR,PSTR("ENABLE_TEMPFIX_BLOCK_BUTTON_PRESS=%d"),1000);
-            //   //   delay(1000);
-            //   // #endif
-            // #endif
-
             #ifdef USE_MODULE_CORE_RULES
             pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,button);
             pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
@@ -147,8 +213,8 @@ void mButtons::ButtonHandler(void)
 
           //}
         // } else {
-        //   multipress[button_index] = (multiwindow[button_index]) ? multipress[button_index] +1 : 1;
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, multipress[button_index]);
+        //   buttons[button_index].multipress = (multiwindow[button_index]) ? buttons[button_index].multipress +1 : 1;
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), button_index +1, buttons[button_index].multipress);
         //   multiwindow[button_index] = loops_per_second / 2;  // 0.5 second multi press window
         // }
         // blinks = 201;
@@ -156,24 +222,24 @@ void mButtons::ButtonHandler(void)
 
 //held buttons
       if (BUTTON_NOT_PRESSED_ID == button) {
-        holdbutton[button_index] = 0;
+        buttons[button_index].holdbutton = 0;
       } else {
-        holdbutton[button_index]++;
+        buttons[button_index].holdbutton++;
         if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-          if (holdbutton[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
+          if (buttons[button_index].holdbutton == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
             pCONT_set->Settings.flag_system.button_single = 0;
             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_SETOPTION "13 0"));  // Disable single press only
             // ExecuteCommand(scmnd, SRC_BUTTON);
           }
         } else {
           if (pCONT_set->Settings.flag_system.button_restrict) {               // Button restriction
-            if (holdbutton[button_index] == loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button hold
-              multipress[button_index] = 0;
+            if (buttons[button_index].holdbutton == loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button hold
+              buttons[button_index].multipress = 0;
               // SendKey(0, button_index, 3);                // Execute Hold command via MQTT if ButtonTopic is set
             }
           } else {
-            if (holdbutton[button_index] == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
-              multipress[button_index] = 0;
+            if (buttons[button_index].holdbutton == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
+              buttons[button_index].multipress = 0;
               // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_RESET " 1"));
               // Serial.println("WARNING -- Disabled \"ExecuteCommand(scmnd, SRC_BUTTON);\" command from support_button");
               //ExecuteCommand(scmnd, SRC_BUTTON);
@@ -187,37 +253,37 @@ void mButtons::ButtonHandler(void)
         if (multiwindow[button_index]) {
           multiwindow[button_index]--;
         } else {
-          // if (!restart_flag && !holdbutton[button_index] && (multipress[button_index] > 0) && (multipress[button_index] < MAX_BUTTON_COMMANDS +3)) {
+          // if (!restart_flag && !buttons[button_index].holdbutton && (buttons[button_index].multipress > 0) && (buttons[button_index].multipress < MAX_BUTTON_COMMANDS +3)) {
           //   bool single_press = false;
-          //   if (multipress[button_index] < 3) {              // Single or Double press
+          //   if (buttons[button_index].multipress < 3) {              // Single or Double press
           //     if ((SONOFF_DUAL_R2 == my_module_type) || (SONOFF_DUAL == my_module_type) || (CH4 == my_module_type)) {
           //       single_press = true;
           //     } else  {
-          //       single_press = (pCONT_set->Settings.flag_system.button_swap +1 == multipress[button_index]);
-          //       multipress[button_index] = 1;
+          //       single_press = (pCONT_set->Settings.flag_system.button_swap +1 == buttons[button_index].multipress);
+          //       buttons[button_index].multipress = 1;
           //     }
           //   }
           //   if ((MI_DESK_LAMP == my_module_type) && (button_index == 0) && (rotary_changed)){// && (light_power_state)) {
           //     rotary_changed = 0;                            // Color temp changed, no need to turn of the light
           //   } else {
-          //     // if (single_press && SendKey(0, button_index + multipress[button_index], POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
+          //     // if (single_press && SendKey(0, button_index + buttons[button_index].multipress, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
           //     //   // Success
           //     // } else {
-          //     //   if (multipress[button_index] < 3) {          // Single or Double press
+          //     //   if (buttons[button_index].multipress < 3) {          // Single or Double press
           //     //     if (WifiState() > WIFI_RESTART) {          // WPSconfig, Smartconfig or Wifimanager active
           //     //       restart_flag = 1;
           //     //     } else {
-          //     //       //ExecuteCommandPower(button_index + multipress[button_index], POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
+          //     //       //ExecuteCommandPower(button_index + buttons[button_index].multipress, POWER_TOGGLE, SRC_BUTTON);  // Execute Toggle command internally
           //     //     }
           //     //   } else {                                     // 3 - 7 press
           //     //     if (!pCONT_set->Settings.flag_system.button_restrict) {
-          //     //       snprintf_P(scmnd, sizeof(scmnd), kCommands[multipress[button_index] -3]);
+          //     //       snprintf_P(scmnd, sizeof(scmnd), kCommands[buttons[button_index].multipress -3]);
           //     //       // ExecuteCommand(scmnd, SRC_BUTTON);
           //     //     }
           //     //   }
           //     // }
           //   }
-          //   multipress[button_index] = 0;
+          //   buttons[button_index].multipress = 0;
           // }
         }
       }
@@ -225,14 +291,14 @@ void mButtons::ButtonHandler(void)
       }//if serviced, single button, 4chan
     } // if (button_present)
     
-    lastbutton[button_index] = button;
+    buttons[button_index].lastbutton = button;
   }
 }
 
 void mButtons::ButtonLoop(void)
 {
 
-  if (buttons_found) {
+  if (settings.buttons_found) {
     if(mTime::TimeReached(&tsaved_button_debounce, pCONT_set->Settings.button_debounce)){
       ButtonHandler();
     }
@@ -321,7 +387,7 @@ void mButtons::WebAppend_Root_Status_Table(){
 
 bool mButtons::IsButtonActive(uint8_t id){
 // Needs to know what type the button is, low, high, no pullup etc
-  if(lastbutton[id] == LOW){
+  if(buttons[id].lastbutton == LOW){
     return true;
   }
   return false;
@@ -348,7 +414,7 @@ char* mButtons::IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen){
 uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, buttons_found);
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
   return JsonBuilderI->End();
 
 }
@@ -356,7 +422,7 @@ uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
+    // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
   return JsonBuilderI->End();
 
 }

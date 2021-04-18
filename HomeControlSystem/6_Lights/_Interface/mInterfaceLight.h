@@ -78,13 +78,14 @@ DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)       D_PIXEL_HARDWARE_TYPE_WS
 
 enum LightTypes_IDS{
   LT_BASIC, //relay?
+  // PWM types gives the amount of channels, but not the type of led, thats handled by rgbcw order
   LT_PWM1,    LT_PWM2, LT_PWM3,   LT_PWM4,  LT_PWM5,  LT_PWM6, LT_PWM7,
   LT_NU8,   LT_SERIAL1, LT_SERIAL2,   
   LT_LIGHT_INTERFACE_END,
   // Anything after this will not be handled in lightinterface
-  LT_WS2812, 
-  LT_ADDRESSABLE, //replacing above
-  LT_RGBW,  LT_RGBWC,
+  LT_ADDRESSABLE, 
+  // LT_ADDRESSABLE, //replacing above
+  LT_RGBW,  LT_RGBWC, // This are not needed, as they are either ADD or PWM
 };
 
 

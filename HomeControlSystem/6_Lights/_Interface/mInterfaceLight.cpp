@@ -116,7 +116,7 @@ bool mInterfaceLight::Pre_Init(void)
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
     // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
-    pCONT_set->Settings.light_settings.type = LT_WS2812; 
+    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE; 
   }
 
   if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
@@ -221,7 +221,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
   rgbcct_controller.setSubType(subtype);
   rgbcct_controller.setApplyBrightnessToOutput(false);
-  if(pCONT_set->Settings.light_settings.type == LT_WS2812){ //RGB only
+  if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
     rgbcct_controller.setColorMode(LCM_RGB);
   }else{
     rgbcct_controller.setColorMode(LCM_BOTH);
@@ -475,7 +475,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
 void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index, bool flag_replicate_for_total_pixel_length){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_WS2812:
+    case LT_ADDRESSABLE:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       pCONT_ladd->SetPixelColorHardware(index,colour_hardware, flag_replicate_for_total_pixel_length);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -495,7 +495,7 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardwar
 RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_WS2812:  
+    case LT_ADDRESSABLE:  
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       return pCONT_ladd->GetPixelColorHardware(index);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -516,7 +516,7 @@ RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 void mInterfaceLight::ShowInterface(){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_WS2812:  
+    case LT_ADDRESSABLE:  
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       return pCONT_ladd->ShowHardware();
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -538,10 +538,10 @@ void mInterfaceLight::ShowInterface(){
 
 void mInterfaceLight::EveryLoop(){
       
-  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_WS2812 HERE %d"),pCONT_set->Settings.light_settings.type);
+  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE HERE %d"),pCONT_set->Settings.light_settings.type);
   // Single colour methods
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
-     (pCONT_set->Settings.light_settings.type == LT_WS2812)){
+     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
@@ -556,9 +556,9 @@ void mInterfaceLight::EveryLoop(){
   
   }
   
-  if(pCONT_set->Settings.light_settings.type == LT_WS2812){ 
+  if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ 
     
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_WS2812 %d"),animation.mode_id);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
