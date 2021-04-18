@@ -646,7 +646,7 @@ void mSensorsDB18::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DB18S20_ID,
     mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    ARRAY_SIZE(mqtthandler_list_ptr),
     mqtt_handler_id
   );
 

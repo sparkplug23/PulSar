@@ -195,7 +195,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
     pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
     pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();
   #endif
 

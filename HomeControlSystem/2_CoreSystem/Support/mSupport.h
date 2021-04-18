@@ -8,6 +8,8 @@
 //using class, to save known sun position, maybe in support? azimuth, elevation, isvalid, age
 
 
+#define ARRAY_SIZE(_a) (sizeof((_a)) / sizeof((_a)[0]))
+
 
 #include "2_CoreSystem/mBaseConfig.h"
 

@@ -1872,6 +1872,8 @@ struct RUNTIME_VALUES{
   uint32_t tSavedUpdateLoopStatistics;
   uint8_t energy_driver;                    // Energy monitor configured
   uint8_t light_driver;                     // Light module configured
+
+
   
 }runtime_value;
 
@@ -1882,12 +1884,12 @@ uint8_t pin[GPIO_MAX_ID];                      // Possible pin configurations
 
 // new method which only holds the max pins to replace above array
 // #ifdef ESP8266
-uint8_t gpio_pin_new[MAX_GPIO_PIN] = { 0 };     // GPIO functions indexed by pin number
-// #endif  // ESP8266 - ESP32
+// uint8_t gpio_pin_new[MAX_GPIO_PIN] = { 0 };     // GPIO functions indexed by pin number
+// // #endif  // ESP8266 - ESP32
 
-#ifdef ESP32
-uint16_t gpio_pin[MAX_GPIO_PIN] = { 0 };    // GPIO functions indexed by pin number
-#endif  // ESP32
+// #ifdef ESP32
+// uint16_t gpio_pin[MAX_GPIO_PIN] = { 0 };    // GPIO functions indexed by pin number
+// #endif  // ESP32
 
 
 
