@@ -360,13 +360,6 @@ uint8_t jsonpair_count = jtok.size();
   ModuleSettings_FlashSerial();
 
 
-  // for(int i=0;i<20;i++){
-
-  //   DEBUG_PRINTF("pin[%d]=%d\n\r",i,pCONT_set->pin[i]);
-
-
-  // }
-
   DEBUG_LINE;
 
   // delay(5000);/
@@ -649,10 +642,10 @@ void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
 
 void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 {
-  if (pCONT_set->pin[gpio_pin] < 99) {
+  // if (pCONT_set->pin[gpio_pin] < 99) {
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "DigitalWrite(%d[%d],%d)"),pCONT_set->pin[gpio_pin],gpio_pin,state);
     digitalWrite(pCONT_set->pin[gpio_pin], state &1);
-  }
+  // }
 }
 void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state)
 {
@@ -1185,11 +1178,9 @@ void mHardwarePins::GpioInit(void)
     #ifdef USE_LEGACY_PIN_METHOD
       if (mpin){ 
         pCONT_set->pin[mpin] = i;
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
-    #endif // ENABLE_LOG_LEVEL_INFO
-
+        #ifdef ENABLE_LOG_LEVEL_INFO
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
+        #endif // ENABLE_LOG_LEVEL_INFO
       }
     #endif
     
@@ -1225,20 +1216,23 @@ void mHardwarePins::GpioInit(void)
   #endif
 
 #ifdef USE_SPI
-  spi_flg = ((((pin[GPIO_SPI_CS] < 99) && (pin[GPIO_SPI_CS] > 14)) || (pin[GPIO_SPI_CS] < 12)) || (((pin[GPIO_SPI_DC] < 99) && (pin[GPIO_SPI_DC] > 14)) || (pin[GPIO_SPI_DC] < 12)));
+
+  spi_flg = ((((GetPin(GPIO_SPI_CS] < 99) && (GetPin(GPIO_SPI_CS] > 14)) || (GetPin(GPIO_SPI_CS] < 12)) || (((GetPin(GPIO_SPI_DC] < 99) && (GetPin(GPIO_SPI_DC] > 14)) || (GetPin(GPIO_SPI_DC] < 12)));
   if (spi_flg) {
     for (uint16_t i = 0; i < GPIO_MAX; i++) {
-      if ((pin[i] >= 12) && (pin[i] <=14)) pin[i] = 99;
+      if ((GetPin(i] >= 12) && (GetPin(i] <=14)) GetPin(i] = 99;
     }
     my_module.io[12] = GPIO_SPI_MISO;
-    pin[GPIO_SPI_MISO] = 12;
+    GetPin(GPIO_SPI_MISO] = 12;
     my_module.io[13] = GPIO_SPI_MOSI;
-    pin[GPIO_SPI_MOSI] = 13;
+    GetPin(GPIO_SPI_MOSI] = 13;
     my_module.io[14] = GPIO_SPI_CLK;
-    pin[GPIO_SPI_CLK] = 14;
+    GetPin(GPIO_SPI_CLK] = 14;
   }
-  soft_spi_flg = ((pin[GPIO_SSPI_CS] < 99) && (pin[GPIO_SSPI_SCLK] < 99) && ((pin[GPIO_SSPI_MOSI] < 99) || (pin[GPIO_SSPI_MOSI] < 99)));
+  soft_spi_flg = ((GetPin(GPIO_SSPI_CS] < 99) && (GetPin(GPIO_SSPI_SCLK] < 99) && ((GetPin(GPIO_SSPI_MOSI] < 99) || (GetPin(GPIO_SSPI_MOSI] < 99)));
 #endif  // USE_SPI
+
+
 // #else // ESP32
 //   analogWriteFreqRange(0, Settings.pwm_frequency, Settings.pwm_range);
 
@@ -1373,7 +1367,7 @@ void mHardwarePins::GpioInit(void)
     // Configure relay pins
     for (uint8_t i = 0; i < MAX_RELAYS; i++) {
       if (PinUsed(GPIO_REL1_ID,i)) {
-        pinMode(pCONT_set->pin[GPIO_REL1_ID +i], OUTPUT);
+        pinMode(Pin(GPIO_REL1_ID, i), OUTPUT);
         pCONT_set->devices_present++;
         // if (MODULE_EXS_RELAY == pCONT_set->my_module_type) {
         //   digitalWrite(pCONT_set->pin[GPIO_REL1 +i], bitRead(pCONT->mry->rel_inverted, i) ? 1 : 0);

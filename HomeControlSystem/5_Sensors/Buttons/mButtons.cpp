@@ -149,12 +149,10 @@ uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
 void mButtons::ButtonHandler(void)
 {
   
-  if (pCONT_time->uptime.seconds_nonreset < 4) { 
-    
-    
-    // Serial.println("ButtonHandler block");
-    
-    return; } // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+  if (pCONT_time->uptime.seconds_nonreset < 4) // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+  {
+    return; 
+  } 
 
   uint8_t button = BUTTON_NOT_PRESSED_ID;
   uint8_t button_present = 0;
