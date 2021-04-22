@@ -773,7 +773,7 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //   root["module_id"] = pCONT_set->Settings.module;
 
 //   myio cmodule;
-//   pCONT_pins->ModuleGpios(&cmodule,pCONT_set->Settings.module);
+//   pCONT_pins->TemplateGPIOs(&cmodule,pCONT_set->Settings.module);
 
 //   JsonArray gpio_arr = root.createNestedArray("GPIO");
 //     for(uint8_t i=0;i<sizeof(cmodule);i++){ 
@@ -791,14 +791,14 @@ void mSupport::SlowAllTemplatesOnSerial(){
 //   AddLog_NoTime(LOG_LEVEL_TEST,PSTR("%s"), data_buffer.payload.ctr);
 
 
-//   for (uint8_t mod = 0; mod < sizeof(kModuleNiceList); mod++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//   for (uint8_t mod = 0; mod < sizeof(kModuleNiceList_IDS); mod++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
       
 //     DynamicJsonDocument doc2(700);
 //     JsonObject root2 = doc2.to<JsonObject>();
-//     uint8_t midx = pgm_read_byte(kModuleNiceList + mod);
+//     uint8_t midx = pgm_read_byte(kModuleNiceList_IDS + mod);
 
 //     myio cmodule;
-//     pCONT_pins->ModuleGpios(&cmodule,midx);
+//     pCONT_pins->TemplateGPIOs(&cmodule,midx);
   
 //     JsonArray gpio_arr2 = root2.createNestedArray("GPIO");
 //     for(int ii=0;ii<sizeof(cmodule);ii++){ 

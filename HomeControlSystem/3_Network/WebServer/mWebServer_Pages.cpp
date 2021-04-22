@@ -1031,8 +1031,8 @@ void mWebServer::HandleTemplateConfiguration(AsyncWebServerRequest *request)
 
   // if (pWebServer->hasParam("m")) {
   //  WSContentBegin(request, 200, CT_PLAIN);
-  //   for (uint8_t i = 0; i < sizeof(kModuleNiceList); i++) {  // "}2'%d'>%s (%d)}3" - "}2'0'>Sonoff Basic (1)}3"
-  //     uint8_t midx = pgm_read_byte(kModuleNiceList + i);
+  //   for (uint8_t i = 0; i < sizeof(kModuleNiceList_IDS); i++) {  // "}2'%d'>%s (%d)}3" - "}2'0'>Sonoff Basic (1)}3"
+  //     uint8_t midx = pgm_read_byte(kModuleNiceList_IDS + i);
   //     WSBufferAppend_P(response, HTTP_MODULE_TEMPLATE_REPLACE, midx, pCONT_sup->AnyModuleName(midx).c_str(), midx +1);
   //   }
   //   WSContentEnd(request);
@@ -1045,7 +1045,7 @@ void mWebServer::HandleTemplateConfiguration(AsyncWebServerRequest *request)
   //   uint8_t module_save = pCONT_set->Settings.module;
   //   pCONT_set->Settings.module = module;
   //   myio cmodule;
-  //   pCONT_sup->ModuleGpios(&cmodule);
+  //   pCONT_sup->TemplateGPIOs(&cmodule);
   //   gpio_flag flag = pCONT_sup->ModuleFlag();
   //   pCONT_set->Settings.module = module_save;
 
@@ -1146,17 +1146,17 @@ void mWebServer::HandleModuleConfiguration(AsyncWebServerRequest *request)
   // char stemp[20];  // Sensor name
   // uint8_t midx;
   // myio cmodule;
-  // pCONT_sup->ModuleGpios(&cmodule);
+  // pCONT_sup->TemplateGPIOs(&cmodule);
 
   // if (pWebServer->hasParam("m")) {
   //  WSContentBegin(request, 200, CT_PLAIN);
   //   uint8_t vidx = 0;
-  //   for (uint8_t i = 0; i <= sizeof(kModuleNiceList); i++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+  //   for (uint8_t i = 0; i <= sizeof(kModuleNiceList_IDS); i++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
   //     if (0 == i) {
   //       midx = USER_MODULE;
   //       vidx = 0;
   //     } else {
-  //       midx = pgm_read_byte(kModuleNiceList + (i-1)); // -1 to offset USER_MODULE
+  //       midx = pgm_read_byte(kModuleNiceList_IDS + (i-1)); // -1 to offset USER_MODULE
   //       vidx = midx +1;
   //     }
   //     //AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "hasParam(\"m\"),i=%d,midx=%d,vidx=%d"),i,midx,vidx);
@@ -1168,7 +1168,7 @@ void mWebServer::HandleModuleConfiguration(AsyncWebServerRequest *request)
   //   }
   //   WSContentEnd(request);
 
-  //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "sizeof(kModuleNiceList)=%d"),sizeof(kModuleNiceList));
+  //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "sizeof(kModuleNiceList_IDS)=%d"),sizeof(kModuleNiceList_IDS));
     
   //   return;
   // }
@@ -1256,7 +1256,7 @@ void mWebServer::ModuleSaveSettings(AsyncWebServerRequest *request)
   // pCONT_set->Settings.module = new_module;
   // pCONT_sup->SetModuleType();
   // myio cmodule;
-  // pCONT_sup->ModuleGpios(&cmodule);
+  // pCONT_sup->TemplateGPIOs(&cmodule);
   // String gpios = "";
   // for (uint8_t i = 0; i < sizeof(cmodule); i++) {
   //   if (pCONT_set->Settings.last_module != new_module) {

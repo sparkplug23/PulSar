@@ -740,9 +740,7 @@ void mLogging::StartTelnetServer(){
 //LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE, LOG_LEVEL_DEBUG_LOWLEVEL, LOG_LEVEL_ALL};
 
 
-const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* _buffer){
-  char* buffer;
-  SET_BUFFER_AS_GLOBAL_OR_LOCAL(buffer, _buffer);
+const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer){
   if(buffer == nullptr){ return D_NO_MATCH_CTR;}
   switch(id){
     default: 

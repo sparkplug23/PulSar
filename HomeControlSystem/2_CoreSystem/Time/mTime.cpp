@@ -1731,11 +1731,11 @@ void mTime::WifiPollNtp() {
   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
        pCONT_set->ntp_force_sync ) ) {                                          // Forced sync
- AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
+//  AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
 
     pCONT_set->ntp_force_sync = false;
     uint32_t ntp_time = WifiGetNtp();
-    AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
+    // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
 
     if (ntp_time > START_VALID_TIME) {
       pCONT_time->Rtc.utc_time = ntp_time;
@@ -1779,7 +1779,7 @@ uint32_t mTime::WifiGetNtp(void) {
     return 0;
   }
 
-  AddLog(LOG_LEVEL_TEST, PSTR("NTP: Name %s, IP %s"), ntp_server, time_server_ip.toString().c_str());
+  AddLog(LOG_LEVEL_TEST, PSTR("NTP: Server \"%s\", IP %s"), ntp_server, time_server_ip.toString().c_str());
 
   WiFiUDP udp;
 

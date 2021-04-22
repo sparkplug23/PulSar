@@ -108,7 +108,7 @@ typedef union {
 #include "1_TaskerManager/mTaskerManager.h"
 
 //#include "//2_CoreSystem/Languages/mLanguage.h"
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 #include "2_CoreSystem/mFirmwareDefaults.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
@@ -1212,6 +1212,7 @@ struct DeviceNameBuffer{ // size(230)
 struct Template_Config{
   uint8_t flags;
   uint8_t       base;        // 71F
+  // needs removed like tas and read directly into settings
   mytmplt       hardware;             // 720  29 bytes    parsed user template
   // char          full_ctr[MODULE_TEMPLATE_SIZE]; //for testing
 
@@ -1623,7 +1624,7 @@ struct RUNTIME_VALUES{
 // phased out, new tas method only records used pins, otherwise returns 99 for not set
 // instead of remembering giant list
 //THIS WONT BE HERE
-uint8_t pin[GPIO_MAX_ID];                      // Possible pin configurations
+// uint8_t pin[GPIO_MAX_ID];                      // Possible pin configurations
 
 // new method which only holds the max pins to replace above array
 // #ifdef ESP8266

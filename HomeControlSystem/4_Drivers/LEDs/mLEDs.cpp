@@ -6,6 +6,13 @@
 void mStatusLEDs::pre_init(void){
   
   settings.fEnableSensor = false;
+   //LEDS
+       if ((mpin >= GPIO_LED1_INV_ID) && (mpin < (GPIO_LED1_INV_ID + MAX_LEDS))) {
+        bitSet(pCONT_set->led_inverted, mpin - GPIO_LED1_INV_ID);
+        // mpin -= (GPIO_LED1_INV_ID - GPIO_LED1_ID);
+      }
+
+      
 
   if(pCONT_pins->PinUsed(GPIO_LED1_ID)) {  // not set when 255
     // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);

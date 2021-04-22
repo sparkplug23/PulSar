@@ -10,15 +10,11 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
-//#ifdef ENABLE_DEVFEATURE_JSONPARSER
-#include "JsonParser.h"
-//#endif // ENABLE_DEVFEATURE_JSONPARSER
+#include "6_Lights/_Interface/mInterfaceLight_Defines.h"
 
+#include "JsonParser.h"
 
 #include "6_Lights/Palette/mPalette.h"
-
-// #include "6_Lights/RGBCCT/RgbcctType.h"
-
 
 enum PIXEL_MULTIPLIER_MODE_IDS{
   PIXEL_MULTIPLIER_MODE_NONE_ID,

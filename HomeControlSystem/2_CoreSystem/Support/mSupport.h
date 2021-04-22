@@ -101,7 +101,7 @@ struct functionhandler {
 
 #include "1_TaskerManager/mTaskerManager.h"
 //#include "//2_CoreSystem/Languages/mLanguage.h"
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 #include "2_CoreSystem/Logging/mLogging.h"
 #include "2_CoreSystem/Time/mTime.h"
 #include "2_CoreSystem/Settings/mSettings.h"

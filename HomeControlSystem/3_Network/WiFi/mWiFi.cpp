@@ -52,9 +52,6 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 //  Serial.println(WiFi.localIP());
 
       // #ifdef ESP32
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
-    // #endif// ENABLE_LOG_LEVEL_INFO
       // #endif
 
       if (pCONT_set->Settings.flag_network.network_wifi) {
@@ -63,6 +60,13 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       }
             
       //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
+
+    break;
+    case FUNC_EVERY_MINUTE:
+
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+      // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
+    // #endif// ENABLE_LOG_LEVEL_INFO
 
     break;
     case FUNC_WIFI_CONNECTED:
@@ -632,7 +636,7 @@ void mWiFi::WifiCheckIp(void)
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
+  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
 
     #endif// ENABLE_LOG_LEVEL_INFO
   // return;
@@ -645,7 +649,8 @@ void mWiFi::WifiCheckIp(void)
 // #endif  // LWIP_IPV6=1
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "WiFi.status() = WL_CONNECTED"));
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
+    // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "Connected to IP:%s (%s) WiFi.status() = WL_CONNECTED")); //ip, ssid, connected uptime, connected total downtime
     #endif// ENABLE_LOG_LEVEL_INFO
 
     WifiSetState(1);
@@ -914,7 +919,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
         if (connection.counter <= 0) {
     #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
+          // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CHECKING_CONNECTION));
     #endif// ENABLE_LOG_LEVEL_INFO
           connection.counter = WIFI_CHECK_SEC;
           WifiCheckIp();

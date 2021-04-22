@@ -1,4 +1,6 @@
-#pragma once
+// #pragma once
+#ifndef _mHardwarePins_H_82
+#define _mHardwarePins_H_82
 
 #include <stdint.h>
 
@@ -31,7 +33,35 @@
 #define MAX_GPIO_PIN       17   // Number of supported GPIO
 #define MIN_FLASH_PINS     4    // Number of flash chip pins unusable for configuration (GPIO6, 7, 8 and 11)
 #define MAX_USER_PINS      13   // MAX_GPIO_PIN - MIN_FLASH_PINS  // GPIO12 + A0
-#define WEMOS_MODULE       0    // Wemos module
+#define WEMOS_MODULE       0    // Wemos module ie GERNIC IS FIRST ALWAYS
+
+
+// New method ESP8266
+// #ifdef ESP8266
+
+//to be moved
+#define MAX_GPI8_PIN       17   // Number of supported GPIO (0..16)
+#define FLASH_PINS         6    // Number of flash chip pins
+
+// #define MAX_GPIO_PIN       18   // Number of supported GPIO (0..16 + ADC0)
+#define ADC0_PIN           17   // Pin number of ADC0
+#define MIN_FLASH_PINS     4    // Number of flash chip pins unusable for configuration (GPIO6, 7, 8 and 11)
+// #define MAX_USER_PINS      14   // MAX_GPIO_PIN - MIN_FLASH_PINS
+// #define WEMOS_MODULE       17   // Wemos module
+
+
+
+// #endif // ESP8266
+
+// #define MAX_GPI8_PIN       17   // Number of supported GPIO (0..16)
+// #define FLASH_PINS         6    // Number of flash chip pins
+
+// #define MAX_GPIO_PIN       18   // Number of supported GPIO (0..16 + ADC0)
+// #define ADC0_PIN           17   // Pin number of ADC0
+// #define MIN_FLASH_PINS     4    // Number of flash chip pins unusable for configuration (GPIO6, 7, 8 and 11)
+// // #define MAX_USER_PINS      14   // MAX_GPIO_PIN - MIN_FLASH_PINS
+// // #define WEMOS_MODULE       17   // Wemos module
+
 
 const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
     0, 1, 2, 3, 4, 5, 
@@ -41,4 +71,9 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
     12, 13, 14, 15, 16
 };
 
+
+
 // Idea: Use bitpacked values to store what pins can have inputs, outputs, or other things on them
+
+
+#endif

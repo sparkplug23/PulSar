@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 #include "3_Network/MQTT/mMQTT.h"
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"
 

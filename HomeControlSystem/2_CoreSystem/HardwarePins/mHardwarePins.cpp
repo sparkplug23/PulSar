@@ -41,7 +41,6 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
 
 }
 
-
 void mHardwarePins::parse_JSONCommand(JsonParserObject obj){}
 
 
@@ -178,31 +177,31 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "FLAGS: %d"
   //     "BASE: %d"
   //   ),
-  // uint8_t real_gpio = 0;
+  uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
-  // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template2.full_ctr);
+  // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template.full_ctr);
   // DEBUG_PRINTF("Name: %s\n\r", pCONT_set->Settings.user_template2.hardware.name);
-  // for(uint8_t gpio=0;gpio<sizeof(pCONT_set->Settings.user_template2.hardware.gp.io);gpio++){
-  //   //get proper gpio number
+  for(uint8_t gpio=0;gpio<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);gpio++){
+    //get proper gpio number
 
-  //   switch(gpio){
-  //     case 0: real_gpio = 0; break;
-  //     case 1: real_gpio = 1; break;
-  //     case 2: real_gpio = 2; break;
-  //     case 3: real_gpio = 3; break;
-  //     case 4: real_gpio = 4; break;
-  //     case 5: real_gpio = 5; break;
-  //     case 6: real_gpio = 9; break;
-  //     case 7: real_gpio = 10; break;
-  //     case 8: real_gpio = 12; break;
-  //     case 9: real_gpio = 13; break;
-  //     case 10: real_gpio = 14; break;
-  //     case 11: real_gpio = 15; break;
-  //     case 12: real_gpio = 16; break;
-  //   }
+    switch(gpio){
+      case 0: real_gpio = 0; break;
+      case 1: real_gpio = 1; break;
+      case 2: real_gpio = 2; break;
+      case 3: real_gpio = 3; break;
+      case 4: real_gpio = 4; break;
+      case 5: real_gpio = 5; break;
+      case 6: real_gpio = 9; break;
+      case 7: real_gpio = 10; break;
+      case 8: real_gpio = 12; break;
+      case 9: real_gpio = 13; break;
+      case 10: real_gpio = 14; break;
+      case 11: real_gpio = 15; break;
+      case 12: real_gpio = 16; break;
+    }
 
-  //   DEBUG_PRINTF("\t%d(%d):%d\n\r",gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
-  // }
+    AddLog(LOG_LEVEL_TEST,PSTR("\t%d(%d):%d"),gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
+  }
   // DEBUG_PRINTF("FLAGS: %08X\n\r",pCONT_set->Settings.user_template2.flags);
   // DEBUG_PRINTF("BASE : %08X\n\r",pCONT_set->Settings.user_template2.base);
   // DEBUG_PRINTF("\n\r\n\r"); 
@@ -280,7 +279,7 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
     pCONT_set->boot_status.module_template_parse_success = true;
     // clear pins to none
-    for(int ii=0;ii<sizeof(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
+    for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }
     
@@ -298,7 +297,7 @@ uint8_t jsonpair_count = jtok.size();
       const char* key = jtok.getStr();
       
       pin_number = GetGPIONumberFromName(key);
-      // AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s\n\r"), pair_index, key);
+      AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s %d\n\r"), pair_index, key, pin_number);
 
       int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
       
@@ -307,7 +306,7 @@ uint8_t jsonpair_count = jtok.size();
         jtok.nextOne();
         const char* value = jtok.getStr();
         gpio_number = GetGPIOFunctionIDbyName(value);
-      // AddLog(LOG_LEVEL_INFO, PSTR("VALUE%d %s\n\r"), pair_index, value);
+        // AddLog(LOG_LEVEL_INFO, PSTR("gpio_number=%d\n\r"), gpio_number);
 
         if(gpio_number != -1){
           // only template pins
@@ -315,7 +314,8 @@ uint8_t jsonpair_count = jtok.size();
           // FULL pin list
           // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
           AddLog(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
-            pin_number, pin_number_array_index,
+            pin_number, 
+            pin_number_array_index,
             pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
           );
           // AddLog(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
@@ -376,6 +376,7 @@ uint8_t jsonpair_count = jtok.size();
 int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
 
   int8_t pin = -1;
+  #ifdef ESP8266
   //nodemcu/wemos named
   if     (strcmp(c,"D3")==0){ pin = 0; }
   else if(strcmp(c,"TX")==0){ pin = 1; }
@@ -420,10 +421,61 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   }
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
+  #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ESP8266
 
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #ifdef ESP32
+  //nodemcu/wemos named
+  if     (strcmp(c,"D3")==0){ pin = 0; }
+  else if(strcmp(c,"TX")==0){ pin = 1; }
+  else if(strcmp(c,"D4")==0){ pin = 2; }
+  else if(strcmp(c,"RX")==0){ pin = 3; }
+  else if(strcmp(c,"D2")==0){ pin = 4; }
+  else if(strcmp(c,"D1")==0){ pin = 5; }
+  else if(strcmp(c,"SD2")==0){ pin = 9; }
+  else if(strcmp(c,"SD3")==0){ pin = 10; }
+  else if(strcmp(c,"D6")==0){ pin = 12; }
+  else if(strcmp(c,"D7")==0){ pin = 13; }
+  else if(strcmp(c,"D5")==0){ pin = 14; }
+  else if(strcmp(c,"D8")==0){ pin = 15; }
+  else if(strcmp(c,"D0")==0){ pin = 16; }
+  else if(strcmp(c,"LBI")==0){ 
+    #ifdef LED_BUILTIN
+    pin = LED_BUILTIN; 
+    #else
+    pin = -1;
+    #endif   
+  }
+
+
+  // numbered
+  else if(strcmp(c,"0")==0){ pin = 0; }
+  else if(strcmp(c,"1")==0){ pin = 1; }
+  else if(strcmp(c,"2")==0){ pin = 2; }
+  else if(strcmp(c,"3")==0){ pin = 3; }
+  else if(strcmp(c,"4")==0){ pin = 4; }
+  else if(strcmp(c,"5")==0){ pin = 5; }
+  else if(strcmp(c,"9")==0){ pin = 9; }
+  else if(strcmp(c,"10")==0){ pin = 10; }
+  else if(strcmp(c,"12")==0){ pin = 12; }
+  else if(strcmp(c,"13")==0){ pin = 13; }
+  else if(strcmp(c,"14")==0){ pin = 14; }
+  else if(strcmp(c,"15")==0){ pin = 15; }
+  else if(strcmp(c,"16")==0){ pin = 16; }
+  else{
+    pin = -1;
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
+  }
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
+  #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ESP32
+
   return pin;
 
 }
@@ -438,6 +490,8 @@ int mHardwarePins::jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 
 
 void mHardwarePins::ParseModuleTemplate(){
+
+  // #if newname(1,2)
 
 }
 
@@ -524,6 +578,12 @@ int8_t mHardwarePins::UsablePinToTemplateArrayIndex(uint8_t pin)
   //   AddLog(LOG_LEVEL_INFO,PSTR("12-16 pin=%d to %d"),pin, pin-5);
   //   return pin-5;
   // }
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("UsablePinToTemplateArrayIndex: %d->%d"), 
+  //   pin,
+  //   gpio_pin_by_index[pin]
+  // );
+  
+  // return gpio_pin_by_index[pin];
 
   switch(pin){
     case 0: return 0;
@@ -544,107 +604,113 @@ int8_t mHardwarePins::UsablePinToTemplateArrayIndex(uint8_t pin)
     case 15: return 11;
     case 16: return 12;
   }
+
+    
+    // i, pCONT_set->my_module.io[i], mpin);
+
   
 
 
-  return -1;
+  // return -1;
 }
 
 
-
-
-/*********************************************************************************************\
- * GPIO Module and Template management
- * 
- * 
-
-
-
-
-
-
-
-Move to "mHardwarePins?" START
-
-
-
-
-
-
-
-
-
-
-
-
-
-\*********************************************************************************************/
-
-// #ifndef ARDUINO_ESP8266_RELEASE_2_3_0  // Fix core 2.5.x ISR not in IRAM Exception
-// uint32_t Pin(uint32_t gpio, uint32_t index) ICACHE_RAM_ATTR;
-// #endif
-
-
+int8_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
+  return Pin(gpio, index);
+}
 uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {
   return Pin(gpio, index);
 }
-// phase out for Getpin above
-uint32_t mHardwarePins::Pin(uint32_t gpio, uint32_t index) {
-// #ifdef ESP8266
-  uint16_t real_gpio = gpio + index;
-// #else  // ESP32
-//   uint16_t real_gpio = (gpio << 5) + index;
-// #endif  // ESP8266 - ESP32
-  // for (uint32_t i = 0; i < ARRAY_SIZE(gpio_pin); i++) {
-  //   if (gpio_pin[i] == real_gpio) {
-  //     return i;              // Pin number configured for gpio
-  //   }
-  // }
 
-  #ifdef USE_PIN_NEWMETHOD
-  for (uint32_t i = 0; i < sizeof(pCONT_set->pin); i++) {
-    // needs new pin array
-    if (pCONT_set->pin[i] == real_gpio) {
-      DEBUG_PRINTF("Pin number configured for gpio %d\n\r",i);
-      return i;              // Pin number configured for gpio
+
+/**
+ * @brief Searches for physical external pin number that a GPIO function is attached to ie "GetFunctionAttachedToPin"
+ * @note The use of IRAM_ATTR means function resides in instruction RAM, so will execute faster than without IRAM_ATTR which would have to retrieve array from flash each time into ram again (slower)
+ * @param gpio sensor, driver (eg Relay)
+ * @param index if more than one gpio was set (eg Relay1, Relay2)
+ * @return -1 if none found, or the pin number real_pin
+ */
+int8_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
+{
+  uint16_t real_gpio = gpio + index;
+
+  if(real_gpio == GPIO_NONE_ID)
+    return -1;
+
+  // Get any pins with gpio attached
+  for(uint16_t index_pin=0; index_pin<ARRAY_SIZE(pin_attached_gpio_functions); index_pin++)
+  {
+    if(pin_attached_gpio_functions[index_pin] == real_gpio) // gpio has been used for a pin
+    {
+      return gpio_pin_by_index[index_pin]; // real_pin
+      // AddLog(LOG_LEVEL_TEST, PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d"),gpio,index,real_pin);
     }
   }
-  return 99;                 // No pin used for gpio
-  #else
-    // return 
 
-    return pCONT_set->pin[real_gpio];
-
-
-  #endif
-
-
-
-  
+  return -1; // No pin was assigned with GPIO  
 }
 
+/**
+ * @brief Convert the real_pin number to its indexed position within pin_array
+ * @note 
+ * @param real_pin physical external pin number
+ * @return index position of pin in array
+ */
+int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
+  for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
+  {
+    if(real_pin == gpio_pin_by_index[index_pin])
+    {
+      return index_pin;
+    }
+  }
+  return -1;
+}
+
+/**
+ * @brief Returns true/false is the gpio is used on any pin
+ * @note 
+ * @param gpio sensor, driver (eg Relay)
+ * @param index if more than one gpio was set (eg Relay1, Relay2)
+ * @return true/false if GPIO is found
+ */
 boolean mHardwarePins::PinUsed(uint32_t gpio, uint32_t index) {
-  return (Pin(gpio, index) < 99); //<99 used, else not used
+  return (Pin(gpio, index) >= 0);
 }
 
-void mHardwarePins::SetPin(uint32_t lpin, uint32_t gpio) {
-  // pCONT_set->gpio_pin_new[lpin] = gpio; // remember pin in new method
+/**
+ * @brief Assigns a pin with a GPIO
+ * @note 
+ * @param lpin The real_pin number GPIO#
+ * @param gpio The actual hardware attached to the pin (eg led, relay, sensor data)
+ * @return none
+ */
+void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
 
-  // pin_function[]
+  // Adjust real_pin to internal indexpin
+  int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
 
-  //temp fix, remember it in old for legacy
-  //#ifndef USE_NEW_GPIO_METHOD
-  pCONT_set->pin[gpio] = lpin;
-  //#endif
+  if((internal_pin_index < MAX_GPIO_PIN) && (internal_pin_index>=0))
+  {
 
+  // // Check if valid gpio
+  // if(lpin<MAX_USER_PINS)
+  // {
+    pin_attached_gpio_functions[internal_pin_index] = gpio;
+  }
+  else{
+    AddLog(LOG_LEVEL_ERROR, PSTR("Error SetPin %d %d<%d"),gpio,internal_pin_index,MAX_GPIO_PIN);
+  }
 }
+
 
 
 void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 {
+  DigitalWrite(gpio_pin, 0, state);
   // if (pCONT_set->pin[gpio_pin] < 99) {
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "DigitalWrite(%d[%d],%d)"),pCONT_set->pin[gpio_pin],gpio_pin,state);
-    digitalWrite(pCONT_set->pin[gpio_pin], state &1);
+    // digitalWrite(pCONT_set->pin[gpio_pin], state &1);
   // }
 }
 void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state)
@@ -652,10 +718,15 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
   // if (PinUsed(gpio_pin, index)) {
   //   digitalWrite(GetPin(gpio_pin, index), state &1);
   // }else{
-    AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite %d %d"),gpio_pin,state &1);
-  // }
-  digitalWrite(gpio_pin, state &1);
+  //   AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite %d %d"),gpio_pin,state &1);
+  // // }
+  // digitalWrite(gpio_pin, state &1);
+
+  if (PinUsed(gpio_pin, index)) {
+    digitalWrite(Pin(gpio_pin, index), state &1);
+  }
 }
+
 
 
 #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
@@ -683,7 +754,7 @@ bool mHardwarePins::SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
   int8_t gpio_pin_index_location = GetPinIndexedLocation(gpio_pin_number);
   if(gpio_pin_index_location>=0) // Valid pin option
   {
-    pin_functions[gpio_pin_index_location] = pin_function;
+    pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
     return true;
   }
   return false;
@@ -700,8 +771,8 @@ uint8_t mHardwarePins::ModuleNr()
 
 bool mHardwarePins::ValidTemplateModule(uint8_t index)
 {
-  for (uint8_t i = 0; i < sizeof(kModuleNiceList); i++) {
-    if (index == pgm_read_byte(kModuleNiceList + i)) {
+  for (uint8_t i = 0; i < sizeof(kModuleNiceList_IDS); i++) {
+    if (index == pgm_read_byte(kModuleNiceList_IDS + i)) {
       return true;
     }
   }
@@ -715,6 +786,16 @@ bool mHardwarePins::ValidModule(uint8_t index)
 }
 
 bool mHardwarePins::ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index)
+{
+  // Outside valid gpio function range
+  if((pin_array[index] >= GPIO_SENSOR_END_ID) && (pin_array[index] < GPIO_USER_ID)){
+      return false;
+    }else{
+      return true;
+    }
+}
+
+bool mHardwarePins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 {
   // Outside valid gpio function range
   if((pin_array[index] >= GPIO_SENSOR_END_ID) && (pin_array[index] < GPIO_USER_ID)){
@@ -749,7 +830,7 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
 //Change to use function
 
 return GetModuleNameByID(index, buffer);
-    // return pCONT_sup->GetTextIndexed_P(buffer, buflen, index, kModules_Name_list);
+    // return pCONT_sup->GetTextIndexed_P(buffer, buflen, index, kModules_Name_list_ctr);
 
     
 
@@ -759,6 +840,46 @@ return GetModuleNameByID(index, buffer);
 
 
 
+#ifdef ESP8266
+// void GetInternalTemplate(void* ptr, uint32_t module, uint32_t option) {
+//   uint8_t module_template = pgm_read_byte(kModuleTemplateList + module);
+
+// //  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Template %d, Option %d"), module_template, option);
+
+//   // template8 = GPIO 0,1,2,3,4,5,9,10,12,13,14,15,16,Adc
+//   uint8_t template8[sizeof(mytmplt8285)] = { GPIO_NONE };
+//   if (module_template < TMP_WEMOS) {
+//     memcpy_P(&template8, &kModules8266[module_template], 6);
+//     memcpy_P(&template8[8], &kModules8266[module_template].gp.io[6], 6);
+//   } else {
+//     memcpy_P(&template8, &kModules8285[module_template - TMP_WEMOS], sizeof(template8));
+//   }
+
+// //  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)&template8, sizeof(mytmplt8285));
+
+//   // template16  = GPIO 0,1,2,3,4,5,9,10,12,13,14,15,16,Adc,Flg
+//   uint16_t template16[(sizeof(mytmplt) / 2)] = { GPIO_NONE };
+//   TemplateConvert(template8, template16);
+
+//   uint32_t index = 0;
+//   uint32_t size = sizeof(mycfgio);      // template16[module_template].gp
+//   switch (option) {
+//     case 2: {
+//       index = (sizeof(mytmplt) / 2) -1; // template16[module_template].flag
+//       size = 2;
+//       break;
+//     }
+//     case 3: {
+//       size = sizeof(mytmplt);           // template16[module_template]
+//       break;
+//     }
+//   }
+//   memcpy(ptr, &template16[index], size);
+
+// //  AddLog(LOG_LEVEL_DEBUG, PSTR("FNC: GetInternalTemplate option %d"), option);
+// //  AddLogBufferSize(LOG_LEVEL_DEBUG, (uint8_t *)ptr, size / 2, 2);
+// }
+#endif  // ESP8266
 
 const char* mHardwarePins::AnyModuleName2(uint8_t index)
 {
@@ -772,49 +893,67 @@ const char* mHardwarePins::AnyModuleName2(uint8_t index)
 }
 
 
-void mHardwarePins::ModuleGpios(myio *gp)
+void mHardwarePins::TemplateGPIOs(myio *gp)
 {
 
-  uint8_t *dest = (uint8_t *)gp;
+  uint16_t *dest = (uint16_t *)gp;
   memset(dest, GPIO_NONE_ID, sizeof(myio));
 
-  uint8_t src[sizeof(mycfgio)];
+  uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
+    
+    // sizeof(mycfgio)];
   if (USER_MODULE == pCONT_set->Settings.module) {
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("ModuleGpios memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
+    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TemplateGPIOs memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
     #endif // ENABLE_LOG_LEVEL_INFO
   } else {
     memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
+    
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));"));
+    // delay(3000);
+#ifdef ESP8266
+    // GetInternalTemplate(&src, Settings.module, 1);
+#endif  // ESP8266
+#ifdef ESP32
+    // memcpy_P(&src, &kModules[ModuleTemplate(Settings.module)].gp, sizeof(mycfgio));
+#endif  // ESP32
   }
   // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
 
-//  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)&src, sizeof(mycfgio));
+//  AddLogBuffer(LOG_LEVEL_DEBUG, (uint16_t *)&src, sizeof(mycfgio));
 
-  //AddLog_Array(LOG_LEVEL_DEBUG_MORE, "ModuleGpios::gp", (uint8_t *)&src, (uint8_t) sizeof(mycfgio));
+  //AddLog_Array(LOG_LEVEL_DEBUG_MORE, "TemplateGPIOs::gp", (uint16_t *)&src, (uint16_t) sizeof(mycfgio));
 
   uint8_t j = 0;
-  for (uint8_t i = 0; i < sizeof(mycfgio); i++) {
+  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io); i++) {
     if (6 == i) { j = 9; }
     if (8 == i) { j = 12; }
     dest[j] = src[i];
+    
+    AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs %d\t%d\t%d\t%d"),dest[j],j,src[i],i);
     j++;
   }
   // 11 85 00 85 85 00 00 00 00 00 00 00 15 38 85 00 00 81
 
-  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "ModuleGpios::gp", (uint8_t *)dest, (uint8_t)sizeof(mycfgio));
-//  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "TemplateGPIOs::gp", (uint8_t *)dest, (uint8_t)sizeof(mycfgio));
+  // AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
 }
 
-void mHardwarePins::ModuleGpios(myio *gp, uint8_t module_id)
+void mHardwarePins::TemplateGPIOs(myio *gp, uint8_t module_id)
 {
 
 //  Uses settings.module and copies into gpio struct
 
-  uint8_t *dest = (uint8_t *)gp;
+  // uint8_t *dest = (uint8_t *)gp;
+  // memset(dest, GPIO_NONE_ID, sizeof(myio));
+
+  // uint8_t src[sizeof(mycfgio)];
+  
+  uint16_t *dest = (uint16_t *)gp;
   memset(dest, GPIO_NONE_ID, sizeof(myio));
 
-  uint8_t src[sizeof(mycfgio)];
+  uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
   if (USER_MODULE == module_id) {
     
 DEBUG_LINE;
@@ -861,6 +1000,22 @@ void mHardwarePins::ModuleDefault(uint8_t module)
   if (USER_MODULE == module) { module = MODULE_WEMOS_ID; }  // Generic
   pCONT_set->Settings.user_template2.base = module;
   memcpy_P(&pCONT_set->Settings.user_template2.hardware, &kModules[module], sizeof(mytmplt));
+
+  // if (USER_MODULE == module) { module = WEMOS; }  // Generic
+  // Settings.user_template_base = module;
+
+// #ifdef ESP32
+//   module = ModuleTemplate(module);
+// #endif
+
+//   char name[TOPSZ];
+//   SettingsUpdateText(SET_TEMPLATE_NAME, GetTextIndexed(name, sizeof(name), module, kModuleNames));
+// #ifdef ESP8266
+//   GetInternalTemplate(&Settings.user_template, module, 3);
+// #endif  // ESP8266
+// #ifdef ESP32
+//   memcpy_P(&Settings.user_template, &kModules[module], sizeof(mytmplt));
+// #endif  // ESP32
 }
 
 void mHardwarePins::SetModuleType()
@@ -868,7 +1023,7 @@ void mHardwarePins::SetModuleType()
   pCONT_set->my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template2.base : pCONT_set->Settings.module;
 }
 
-uint8_t mHardwarePins::ValidPin(uint8_t pin, uint8_t gpio)
+uint8_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio)
 {
   uint8_t result = gpio;
 
@@ -887,7 +1042,7 @@ uint8_t mHardwarePins::ValidPin(uint8_t pin, uint8_t gpio)
 
 bool mHardwarePins::ValidGPIO(uint8_t pin, uint8_t gpio)
 {
-  return (GPIO_USER_ID == ValidPin(pin, gpio));  // Only allow GPIO_USER pins
+  return (GPIO_USER_ID == ValidPin_AdjustGPIO(pin, gpio));  // Only allow GPIO_USER pins
 }
 
 bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
@@ -896,30 +1051,6 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
 
   if (!val) { return false; }  // None
 
-#ifdef USE_MODULE_SENSORS_BUTTONS
-  // if ((val >= GPIO_KEY1_ID) && (val < GPIO_KEY1_ID + MAX_KEYS)) {
-  //   offset = (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-  // }
-  // if ((val >= GPIO_KEY1_NP_ID) && (val < GPIO_KEY1_NP_ID + MAX_KEYS)) {
-  //   offset = -(GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-  // }
-  // if ((val >= GPIO_KEY1_INV_ID) && (val < GPIO_KEY1_INV_ID + MAX_KEYS)) {
-  //   offset = -(GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
-  // }
-  // if ((val >= GPIO_KEY1_INV_NP_ID) && (val < GPIO_KEY1_INV_NP_ID + MAX_KEYS)) {
-  //   offset = -(GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
-  // }
-  AddLog(LOG_LEVEL_ERROR, PSTR("GetUsedInModule missing for buttons"));
-#endif
-#ifdef USE_MODULE_SENSORS_SWITCHES
-  // if ((val >= GPIO_SWT1_ID) && (val < GPIO_SWT1_ID + MAX_SWITCHES)) {
-  //   offset = (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-  // }
-  // if ((val >= GPIO_SWT1_NP_ID) && (val < GPIO_SWT1_NP_ID + MAX_SWITCHES)) {
-  //   offset = -(GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-  // }
-  AddLog(LOG_LEVEL_ERROR, PSTR("GetUsedInModule missing for switch"));
-#endif
   if ((val >= GPIO_REL1_ID) && (val < GPIO_REL1_ID + MAX_RELAYS)) {
     offset = (GPIO_REL1_INV_ID - GPIO_REL1_ID);
   }
@@ -927,12 +1058,12 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
     offset = -(GPIO_REL1_INV_ID - GPIO_REL1_ID);
   }
 
-  if ((val >= GPIO_LED1_ID) && (val < GPIO_LED1_ID + MAX_LEDS)) {
-    offset = (GPIO_LED1_INV_ID - GPIO_LED1_ID);
-  }
-  if ((val >= GPIO_LED1_INV_ID) && (val < GPIO_LED1_INV_ID + MAX_LEDS)) {
-    offset = -(GPIO_LED1_INV_ID - GPIO_LED1_ID);
-  }
+  // if ((val >= GPIO_LED1_ID) && (val < GPIO_LED1_ID + MAX_LEDS)) {
+  //   offset = (GPIO_LED1_INV_ID - GPIO_LED1_ID);
+  // }
+  // if ((val >= GPIO_LED1_INV_ID) && (val < GPIO_LED1_INV_ID + MAX_LEDS)) {
+  //   offset = -(GPIO_LED1_INV_ID - GPIO_LED1_ID);
+  // }
 
   if ((val >= GPIO_PWM1_ID) && (val < GPIO_PWM1_ID + MAX_PWMS)) {
     offset = (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
@@ -1004,7 +1135,8 @@ void mHardwarePins::GpioInit(void)
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MODULE "GpioInit"));
   
     #endif // ENABLE_LOG_LEVEL_INFO
-  uint8_t mpin;
+  // uint8_t mpin;
+  uint16_t mgpio;
   #ifdef ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
   // New method stores "function in pin array" instead of "pin in function array"
   uint16_t pin_function = GPIO_NONE_ID;
@@ -1018,7 +1150,7 @@ void mHardwarePins::GpioInit(void)
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_MODULE "!ValidModule"));
     #endif // ENABLE_LOG_LEVEL_INFO
     uint8_t module = MODULE;
-    if (!ValidModule(MODULE)) { module = MODULE_NODEMCU_ID; }
+    if (!ValidModule(MODULE)) { module = MODULE_WEMOS_ID; }
     pCONT_set->Settings.module = module;
     pCONT_set->Settings.last_module = module;
   }else{
@@ -1038,7 +1170,7 @@ void mHardwarePins::GpioInit(void)
   /**
    * Correcting for invalid gpio functions
    * */
-  for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.user_template2.hardware.gp); i++) {
+  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io); i++) {
     if(!ValidUserGPIOFunction(pCONT_set->Settings.user_template2.hardware.gp.io,i)){
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "!ValidUserGPIOFunction %d"),i);
@@ -1048,27 +1180,45 @@ void mHardwarePins::GpioInit(void)
   }
 
   myio def_gp;
-  ModuleGpios(&def_gp); // Get template values
-  for (uint8_t i = 0; i < sizeof(pCONT_set->Settings.module_pins); i++) { //all 17 pins
+  TemplateGPIOs(&def_gp); // Get template values
+
+   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
+    
+
+
+  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) { //all 17 pins
+    
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),pCONT_set->Settings.module_pins.io[i],i);
+    // #endif // ENABLE_LOG_LEVEL_INFO
+
+    uint16_t gpio = pCONT_set->Settings.module_pins.io[i];
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,pCONT_set->Settings.module_pins.io[i]);
+    
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(pCONT_set->Settings.module_pins.io,i)){
       pCONT_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     #endif // ENABLE_LOG_LEVEL_INFO
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = Settings.module_pins.io[%d]"),i);
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
     #endif // ENABLE_LOG_LEVEL_INFO
     }
     // Set any pins set in template
     if ((def_gp.io[i] > GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) {
       pCONT_set->my_module.io[i] = def_gp.io[i];
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
+      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d \"%S\""),
+        pCONT_set->my_module.io[i],
+        def_gp.io[i],
+        i,
+        GetGPIOFunctionNamebyID_P(pCONT_set->my_module.io[i])
+      );
     #endif // ENABLE_LOG_LEVEL_INFO
     }
     // else{
@@ -1081,9 +1231,9 @@ void mHardwarePins::GpioInit(void)
   // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", (uint8_t *)&pCONT_set->my_module.io, (uint8_t)sizeof(pCONT_set->my_module.io));
 
   // Reset all pins to be "unset"
-  for (uint16_t i = 0; i < GPIO_MAX_ID; i++) {
-    pCONT_set->pin[i] = 99;
-  }
+  // for (uint16_t i = 0; i < GPIO_MAX_ID; i++) {
+  //   pCONT_set->pin[i] = 99;
+  // }
 
 //   #ifdef ESP8266
 //   if ((Settings.my_adc0 >= ADC0_END) && (Settings.my_adc0 < ADC0_USER)) {
@@ -1100,22 +1250,42 @@ void mHardwarePins::GpioInit(void)
 // #endif
 
   // Take module io and configure pins
-  for (uint8_t i = 0; i < sizeof(pCONT_set->my_module.io); i++) {
-    mpin = ValidPin(i, pCONT_set->my_module.io[i]);
+  for (uint8_t pin = 0; pin < ARRAY_SIZE(pCONT_set->my_module.io); pin++) {
+
+  // uint8_t real_pin = UsablePinToTemplateArrayIndex(pCONT_set->my_module.io[i]);
+
+  // pin needs adjusting to indexed value
+
+  // uint8_t i = pin;
+  // if()
+
+  uint16_t gpio = pCONT_set->my_module.io[pin];
+  // uint8_t pin = i;
+  AddLog(LOG_LEVEL_DEBUG, PSTR("pin=%d, gpio=%d"), pin, gpio);
+
+  // // Get GPIO if pin is set
+  
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: %d %d %d"), i, pCONT_set->my_module.io[i], mgpio);
+
+    mgpio = ValidPin_AdjustGPIO(pin, gpio);
+
+    //mgpio is really the gpio attached to pin if allowed
     
-  #ifdef ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
-    pin_function = pCONT_set->my_module.io[i]; //function number
-    int8_t gpio_pin_number = mpin;  //0+ if valid
-    // SetPinFunction(gpio_pin_number, pin_function);  
-  #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
+  // #ifdef ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
+  //   // pin_function = pCONT_set->my_module.io[i]; //function number
+  //   // int8_t gpio_pin_number = mgpio;  //0+ if valid
+  //   // SetPinFunction(gpio_pin_number, pin_function);  
+  // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    if(mpin){
-    AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: gpio pin %02d, mpin %d"), i, mpin);
-    }
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: pin%d IO%d gpio_mgpio%d"), pin, pCONT_set->my_module.io[pin], mgpio);
 
-    if (mpin) {
+  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   // if(mgpio){
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: io %02d, mgpio %d"), i, mgpio);
+  //   // }
+  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
+
+    if (mgpio) {
 
       // // Test for special pin options, though, I could probably do this in their own module inits 
       // #ifdef USE_MODULE_SENSORS_SWITCHES
@@ -1148,44 +1318,40 @@ void mHardwarePins::GpioInit(void)
       // #endif
 
       #ifdef USE_MODULE_DRIVERS_RELAY
-      if ((mpin >= GPIO_REL1_INV_ID) && (mpin < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
-        bitSet(pCONT_mry->rel_inverted, mpin - GPIO_REL1_INV_ID);
-        mpin -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
+      if ((mgpio >= GPIO_REL1_INV_ID) && (mgpio < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
+        bitSet(pCONT_mry->rel_inverted, mgpio - GPIO_REL1_INV_ID);
+        mgpio -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
       }
       #endif
-      //LEDS
-       if ((mpin >= GPIO_LED1_INV_ID) && (mpin < (GPIO_LED1_INV_ID + MAX_LEDS))) {
-        bitSet(pCONT_set->led_inverted, mpin - GPIO_LED1_INV_ID);
-        mpin -= (GPIO_LED1_INV_ID - GPIO_LED1_ID);
-      }
+     
       
       //PWM
-      else if ((mpin >= GPIO_PWM1_INV_ID) && (mpin < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
-        bitSet(pCONT_set->pwm_inverted, mpin - GPIO_PWM1_INV_ID);
-        mpin -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
+      if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
+        bitSet(pCONT_set->pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
+        mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
       }
 
       //COUNTERS
-      else if ((mpin >= GPIO_CNTR1_NP_ID) && (mpin < (GPIO_CNTR1_NP_ID + MAX_COUNTERS))) {
-        bitSet(pCONT_set->counter_no_pullup, mpin - GPIO_CNTR1_NP_ID);
-        mpin -= (GPIO_CNTR1_NP_ID - GPIO_CNTR1_ID);
+      else if ((mgpio >= GPIO_CNTR1_NP_ID) && (mgpio < (GPIO_CNTR1_NP_ID + MAX_COUNTERS))) {
+        bitSet(pCONT_set->counter_no_pullup, mgpio - GPIO_CNTR1_NP_ID);
+        mgpio -= (GPIO_CNTR1_NP_ID - GPIO_CNTR1_ID);
       }
 
   
 
     }
   
-    #ifdef USE_LEGACY_PIN_METHOD
-      if (mpin){ 
-        pCONT_set->pin[mpin] = i;
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
-        #endif // ENABLE_LOG_LEVEL_INFO
-      }
-    #endif
+    // #ifdef USE_LEGACY_PIN_METHOD
+    //   if (mpin){ 
+    //     pCONT_set->pin[mpin] = i;
+    //     #ifdef ENABLE_LOG_LEVEL_INFO
+    //       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
+    //     #endif // ENABLE_LOG_LEVEL_INFO
+    //   }
+    // #endif
     
     //new way
-    if(mpin){ SetPin(i, mpin); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
+    if(mgpio){ SetPin(pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     
   }//end fof
 
@@ -1245,15 +1411,19 @@ void mHardwarePins::GpioInit(void)
 //new
 // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
   // Doing it here solves relay toggles at restart.
-  for (uint32_t i = 0; i < sizeof(pCONT_set->my_module.io); i++){//ARRAY_SIZE(my_module.io); i++) {
+  for (uint32_t i = 0; i < ARRAY_SIZE(pCONT_set->my_module.io);
+  
+  
+  // sizeof(pCONT_set->my_module.io); 
+  i++){//ARRAY_SIZE(my_module.io); i++) {
   DEBUG_LINE;
-    uint32_t mpin = ValidPin(i, pCONT_set->my_module.io[i]);
+    uint32_t mgpio = ValidPin_AdjustGPIO(i, pCONT_set->my_module.io[i]);
     
   DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mpin %d"), i, mpin);
+   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
     #endif // ENABLE_LOG_LEVEL_INFO
-    if (((i < 6) || (i > 11)) && (0 == mpin)) {  // Skip SPI flash interface
+    if (((i < 6) || (i > 11)) && (0 == mgpio)) {  // Skip SPI flash interface
 
       // if((i == 2)&&(pCONT_set->))
 
@@ -1264,7 +1434,6 @@ void mHardwarePins::GpioInit(void)
       #endif
     }
   }
-
 
 #ifdef ESP8266
 #ifdef USE_I2C
@@ -1451,8 +1620,7 @@ void mHardwarePins::GpioInit(void)
 
 int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   if(c=='\0'){ return -1; }
-  if(strcmp_P(c,PM_MODULE_NAME_NODEMCU_CTR)==0){              return MODULE_NODEMCU_ID; }
-  else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
+  if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_MAGICHOME_CTR)==0){       return MODULE_MAGICHOME_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY1_CTR)==0){         return MODULE_SHELLY1_ID; }
@@ -1469,7 +1637,6 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
 const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
   switch(id){
     default:
-    case MODULE_NODEMCU_ID:  memcpy_P(buffer, PM_MODULE_NAME_NODEMCU_CTR, sizeof(PM_MODULE_NAME_NODEMCU_CTR)); break;
     case MODULE_SONOFF_BASIC_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_CTR)); break;
     case MODULE_SONOFF_IFAN03_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_IFAN03_CTR, sizeof(PM_MODULE_NAME_SONOFF_IFAN03_CTR)); break;
     case MODULE_H801_ID:   memcpy_P(buffer, PM_MODULE_NAME_H801_CTR, sizeof(PM_MODULE_NAME_H801_CTR)); break;
@@ -1643,7 +1810,8 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
     case GPIO_NONE_ID: return PM_GPIO_FUNCTION_NONE_CTR;
     // case GPIO_NONE_ID: return PM_GPIO_NONE_CTR;
 
-//       GPIO_NONE_ID,         // Not used
+    case GPIO_RGB_DATA_ID: return PM_GPIO_FUNCTION_RGB_DATA_CTR;
+
 //   GPIO_KEY1_ID,           // Buttons
 //   GPIO_KEY1_NP_ID,
 //   GPIO_KEY1_INV_ID,
@@ -1660,6 +1828,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 //   GPIO_KEY4_NP_ID,
 //   GPIO_KEY4_INV_ID,
 //   GPIO_KEY4_INV_NP_ID,
+
       // case  GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR;            // User connected external switches
       case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
 //   GPIO_SWT1_NP_ID,
@@ -1698,24 +1867,28 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 //   GPIO_REL7_INV_ID,
 //   GPIO_REL8_ID,
 //   GPIO_REL8_INV_ID,
-//   GPIO_LED1_ID,           // Leds
-//   GPIO_LED1_INV_ID,
-//   GPIO_LED2_ID,
-//   GPIO_LED2_INV_ID,
-//   GPIO_LED3_ID,
-//   GPIO_LED3_INV_ID,
-//   GPIO_LED4_ID,
-//   GPIO_LED4_INV_ID,
-//   GPIO_PWM1_ID,           // RGB   Red   or C  Cold White
-//   GPIO_PWM1_INV_ID,
-//   GPIO_PWM2_ID,           // RGB   Green or CW Warm White
-//   GPIO_PWM2_INV_ID,
-//   GPIO_PWM3_ID,           // RGB   Blue
-//   GPIO_PWM3_INV_ID,
-//   GPIO_PWM4_ID,           // RGBW  (Cold) White
-//   GPIO_PWM4_INV_ID,
-//   GPIO_PWM5_ID,           // RGBCW Warm White
-//   GPIO_PWM5_INV_ID,
+
+    case GPIO_LED1_ID:      return PM_GPIO_FUNCTION_LED1_CTR;
+    case GPIO_LED1_INV_ID:  return PM_GPIO_FUNCTION_LED1_INV_CTR;
+    case GPIO_LED2_ID:      return PM_GPIO_FUNCTION_LED2_CTR;
+    case GPIO_LED2_INV_ID:  return PM_GPIO_FUNCTION_LED2_INV_CTR;
+    case GPIO_LED3_ID:      return PM_GPIO_FUNCTION_LED3_CTR;
+    case GPIO_LED3_INV_ID:  return PM_GPIO_FUNCTION_LED3_INV_CTR;
+    case GPIO_LED4_ID:      return PM_GPIO_FUNCTION_LED4_CTR;
+    case GPIO_LED4_INV_ID:  return PM_GPIO_FUNCTION_LED4_INV_CTR;
+
+    case GPIO_PWM1_ID:      return PM_GPIO_FUNCTION_PWM1_CTR;
+    case GPIO_PWM1_INV_ID:  return PM_GPIO_FUNCTION_PWM1_INV_CTR;
+    case GPIO_PWM2_ID:      return PM_GPIO_FUNCTION_PWM2_CTR;
+    case GPIO_PWM2_INV_ID:  return PM_GPIO_FUNCTION_PWM2_INV_CTR;
+    case GPIO_PWM3_ID:      return PM_GPIO_FUNCTION_PWM3_CTR;
+    case GPIO_PWM3_INV_ID:  return PM_GPIO_FUNCTION_PWM3_INV_CTR;
+    case GPIO_PWM4_ID:      return PM_GPIO_FUNCTION_PWM4_CTR;
+    case GPIO_PWM4_INV_ID:  return PM_GPIO_FUNCTION_PWM4_INV_CTR;
+    case GPIO_PWM5_ID:      return PM_GPIO_FUNCTION_PWM5_CTR;
+    case GPIO_PWM5_INV_ID:  return PM_GPIO_FUNCTION_PWM5_INV_CTR;
+
+
 //   GPIO_CNTR1_ID,          // Counters
 //   GPIO_CNTR1_NP_ID,
 //   GPIO_CNTR2_ID,

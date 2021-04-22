@@ -134,7 +134,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR) "setpixel_ma
  * */
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)                        "Slow Glow|Blend";     
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR)                       "Sequential"; 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR)                     "Solid RGBCCT"; 
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)                     D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR;//"Solid RGBCCT"; 
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR)         "SLOW_FADE_BRIGHTNESS_ALL";
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR)         "SLOW_FADE_SATURATION_ALL";
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR)      "SLOW_FADE_BRIGHTNESS_RANDOM";
@@ -444,7 +444,7 @@ void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
      * */
     EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID,     
     // Rgbcct effects, which use the different animator
-    EFFECTS_FUNCTION_SOLID_RGBCCT_ID,
+    EFFECTS_FUNCTION_SOLID_COLOUR_ID,
     /**
      * Palette is first drawn with certain lower brightness level, then
      * additional changes takes those colours and bumbs their brightness up to desired brightness
@@ -732,14 +732,14 @@ byte digits[14][7] = {                    // Lets define 10 numbers (0-9) with 7
 
   
   
-void SubTask_Flasher_Animate_Function_Solid_RGBCCT();
-void AnimUpdateMemberFunction_BlendStartingToDesiredColour_Solid_RGBCCT(const AnimationParam& param);
-struct AnimationColours_Solid_RGBCCT
+void SubTask_Flasher_Animate_Function_SOLID_COLOUR();
+void AnimUpdateMemberFunction_BlendStartingToDesiredColour_SOLID_COLOUR(const AnimationParam& param);
+struct AnimationColours_SOLID_COLOUR
     {
       RgbcctColor StartingColor;
       RgbcctColor DesiredColour;
     };
-    AnimationColours_Solid_RGBCCT animation_colours_rgbcct;
+    AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
 
 
 

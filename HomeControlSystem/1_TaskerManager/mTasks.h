@@ -54,6 +54,8 @@ enum XsnsFunctions {
   FUNC_UPTIME_1_MINUTES,
   FUNC_UPTIME_10_MINUTES,
   FUNC_UPTIME_60_MINUTES,
+  // Exact minutes to work aka time cron
+  // FUNC_AT_TIME_1_MINUTE,
   // Welcome message to show on boot after X seconds with config
   // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
   

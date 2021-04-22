@@ -1044,8 +1044,8 @@ void mSupport::CmndRestart(void)
 //   uint32_t midx = USER_MODULE;
 //   uint32_t lines = 1;
 //   bool jsflg = false;
-//   for (uint32_t i = 0; i <= sizeof(kModuleNiceList); i++) {
-//     if (i > 0) { midx = pgm_read_byte(kModuleNiceList + i -1); }
+//   for (uint32_t i = 0; i <= sizeof(kModuleNiceList_IDS); i++) {
+//     if (i > 0) { midx = pgm_read_byte(kModuleNiceList_IDS + i -1); }
 //     if (!jsflg) {
 //       Response_P(PSTR("{\"" D_JSON_MODULES "%d\":{"), lines);
 //     } else {
@@ -1053,7 +1053,7 @@ void mSupport::CmndRestart(void)
 //     }
 //     jsflg = true;
 //     uint32_t j = i ? midx +1 : 0;
-//     if ((ResponseAppend_P(PSTR("\"%d\":\"%s\""), j, AnyModuleName(midx).c_str()) > (LOGSZ - TOPSZ)) || (i == sizeof(kModuleNiceList))) {
+//     if ((ResponseAppend_P(PSTR("\"%d\":\"%s\""), j, AnyModuleName(midx).c_str()) > (LOGSZ - TOPSZ)) || (i == sizeof(kModuleNiceList_IDS))) {
 //       ResponseJsonEndEnd();
 //       MqttPublishPrefixTopic_P(RESULT_OR_STAT, XdrvMailbox.command);
 //       jsflg = false;
@@ -1067,7 +1067,7 @@ void mSupport::CmndRestart(void)
 // {
 //   if (XdrvMailbox.index < ARRAY_SIZE(Settings.my_gp.io)) {
 //     myio cmodule;
-//     ModuleGpios(&cmodule);
+//     TemplateGPIOs(&cmodule);
 //     if (ValidGPIO(XdrvMailbox.index, cmodule.io[XdrvMailbox.index]) && (XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < AGPIO(GPIO_SENSOR_END))) {
 //       bool present = false;
 //       for (uint32_t i = 0; i < ARRAY_SIZE(kGpioNiceList); i++) {
@@ -1141,7 +1141,7 @@ void mSupport::CmndRestart(void)
 // void CmndGpios(void)
 // {
 //   myio cmodule;
-//   ModuleGpios(&cmodule);
+//   TemplateGPIOs(&cmodule);
 //   uint32_t lines = 1;
 //   bool jsflg = false;
 //   for (uint32_t i = 0; i < ARRAY_SIZE(kGpioNiceList); i++) {
@@ -2419,8 +2419,8 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if (CMND_MODULES == command_code) {
 //       uint8_t midx = USER_MODULE;
-//       for (uint32_t i = 0; i <= sizeof(kModuleNiceList); i++) {
-//         if (i > 0) { midx = pgm_read_byte(kModuleNiceList + i -1); }
+//       for (uint32_t i = 0; i <= sizeof(kModuleNiceList_IDS); i++) {
+//         if (i > 0) { midx = pgm_read_byte(kModuleNiceList_IDS + i -1); }
 //         if (!jsflg) {
 //           Response_P(PSTR("{\"" D_JSON_MODULES "%d\":["), lines);
 //         } else {
@@ -2428,7 +2428,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         }
 //         jsflg = true;
 //         uint8_t j = i ? midx +1 : 0;
-//         if ((ResponseAppend_P(PSTR("\"%d (%s)\""), j, AnyModuleName(midx).c_str()) > (LOGSZ - TOPSZ)) || (i == sizeof(kModuleNiceList))) {
+//         if ((ResponseAppend_P(PSTR("\"%d (%s)\""), j, AnyModuleName(midx).c_str()) > (LOGSZ - TOPSZ)) || (i == sizeof(kModuleNiceList_IDS))) {
 //           ResponseAppend_P(PSTR("]}"));
 //           MqttPublishPrefixTopic_P(RESULT_OR_STAT, type);
 //           jsflg = false;
@@ -2459,7 +2459,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 // #endif  // USE_ADC_VCC
 //     else if ((CMND_GPIO == command_code) && (index < sizeof(Settings.module_pins))) {
 //       myio cmodule;
-//       ModuleGpios(&cmodule);
+//       TemplateGPIOs(&cmodule);
 //       if (ValidGPIO(index, cmodule.io[index]) && (payload >= 0) && (payload < GPIO_SENSOR_END)) {
 //         bool present = false;
 //         for (uint32_t i = 0; i < sizeof(kGpioNiceList); i++) {
@@ -2492,7 +2492,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //     }
 //     else if (CMND_GPIOS == command_code) {
 //       myio cmodule;
-//       ModuleGpios(&cmodule);
+//       TemplateGPIOs(&cmodule);
 //       uint8_t midx;
 //       for (uint32_t i = 0; i < sizeof(kGpioNiceList); i++) {
 //         midx = pgm_read_byte(kGpioNiceList + i);

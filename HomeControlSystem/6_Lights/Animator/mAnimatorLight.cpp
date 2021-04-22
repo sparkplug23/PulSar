@@ -334,50 +334,50 @@ DEBUG_LINE;
     //pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
 
 
-    // Check for user defined defaults
-    #ifdef DEFAULT_LIGHTING_TRANSITION_ORDER_ID
-      pCONT_iLight->animation.transition.order_id = 6;/*DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
-                                            DEFAULT_LIGHTING_TRANSITION_ORDER_ID:TRANSITION_ORDER_INORDER_ID;*/
-    #else
-      pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-    #endif
-    
-    #ifdef DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID
-      // pCONT_iLight->animation.transition.time_ms.map_id = 10;
-      /*DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
-                                                DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID:TIME_MAP_SECS_15_ID;*/
-      pCONT_iLight->animation.transition.time_ms = 2000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
-      pCONT_iLight->animation.flags.ftime_use_map = true;
-    #else
-      pCONT_iLight->animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
-      pCONT_iLight->animation.transition.time_ms.val = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
-      pCONT_iLight->animation.flags.ftime_use_map = true;
-    #endif
-
-    #ifdef DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID
-      // pCONT_iLight->animation.transition.rate_ms.map_id = 6;
-      /*DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
-                                                DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID:RATE_MAP_SECS_15_ID;*/
-      pCONT_iLight->animation.transition.rate_ms = 10000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
-      pCONT_iLight->animation.flags.frate_use_map = true;
-    #else
-      pCONT_iLight->animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
-      pCONT_iLight->animation.transition.rate_ms = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
-      pCONT_iLight->animation.flags.frate_use_map = true;
-    #endif
-
-    // #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
-    //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = 4;/*DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
-    //                         DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;*/
+    // // Check for user defined defaults
+    // #ifdef DEFAULT_LIGHTING_TRANSITION_ORDER_ID
+    //   pCONT_iLight->animation.transition.order_id = 6;/*DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
+    //                                         DEFAULT_LIGHTING_TRANSITION_ORDER_ID:TRANSITION_ORDER_INORDER_ID;*/
     // #else
-    //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
+    //   pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
     // #endif
+    
+    // #ifdef DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID
+    //   // pCONT_iLight->animation.transition.time_ms.map_id = 10;
+    //   /*DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
+    //                                             DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID:TIME_MAP_SECS_15_ID;*/
+    //   pCONT_iLight->animation.transition.time_ms = 2000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
+    //   pCONT_iLight->animation.flags.ftime_use_map = true;
+    // #else
+    //   pCONT_iLight->animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
+    //   pCONT_iLight->animation.transition.time_ms.val = 1000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
+    //   pCONT_iLight->animation.flags.ftime_use_map = true;
+    // // #endif
+
+    // // #ifdef DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID
+    //   // pCONT_iLight->animation.transition.rate_ms.map_id = 6;
+    //   /*DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
+    //                                             DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID:RATE_MAP_SECS_15_ID;*/
+    //   pCONT_iLight->animation.transition.rate_ms = 10000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+    //   pCONT_iLight->animation.flags.frate_use_map = true;
+    // // #else
+    // //   pCONT_iLight->animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
+    // //   pCONT_iLight->animation.transition.rate_ms = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
+    // //   pCONT_iLight->animation.flags.frate_use_map = true;
+    // // #endif
+
+    // // #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
+    // //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = 4;/*DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
+    // //                         DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;*/
+    // // #else
+    // //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
+    // // #endif
 
     #ifdef DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE
       // pCONT_iLight->animation.brightness = (float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f;//mSupport::WithinLimits(0,(float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f,1)
     #else
       // pCONT_iLight->animation.brightness = WithinLimits(0,(float)1/100.0f,1);
-      pCONT_iLight->animation.brightness = 1; //default ot 50% normally for power reasons
+      // pCONT_iLight->animation.brightness = 1; //default ot 50% normally for power reasons
     #endif
 
     #ifdef DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ
@@ -541,8 +541,8 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
       case EFFECTS_FUNCTION_SLOW_GLOW_ID:
         SubTask_Flasher_Animate_Function_Slow_Glow();
       break;
-       case EFFECTS_FUNCTION_SOLID_RGBCCT_ID:
-         SubTask_Flasher_Animate_Function_Solid_RGBCCT();
+       case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
+         SubTask_Flasher_Animate_Function_SOLID_COLOUR();
        break;
        case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
          SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();

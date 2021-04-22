@@ -169,6 +169,15 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
 
+
+// check pinused here to see if they are set properly
+
+// if(pCONT_pins->PinUsed(GPIO_RGB_DATA_ID))
+// {
+//   Serial.println("PinUsed RGB");
+//   Serial.println(pCONT_pins->GetPin(GPIO_RGB_DATA_ID));
+// }
+
 }
 
 /********************************************************************************************/

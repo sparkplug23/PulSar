@@ -844,7 +844,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 /**************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************
-********* Function_Solid_RGBCCT ie New Scene mode for cct strips **********************************************************************************************
+********* Function_SOLID_COLOUR ie New Scene mode for cct strips **********************************************************************************************
 ***************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************/
 
@@ -853,8 +853,8 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
  * Changes pixels randomly to new colour, with slow blending
  * Requires new colour calculation each call
  */
-void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
-  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function_Solid_RGBCCT"));
+void mAnimatorLight::SubTask_Flasher_Animate_Function_SOLID_COLOUR(){
+  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function_SOLID_COLOUR"));
   // Set palette pointer
   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
   // Set up colours
@@ -883,14 +883,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Solid_RGBCCT(){
   // Call the animator to blend from previous to new
   this->setAnimFunctionCallback(
     [this](const AnimationParam& param){
-      this->AnimUpdateMemberFunction_BlendStartingToDesiredColour_Solid_RGBCCT(param);
+      this->AnimUpdateMemberFunction_BlendStartingToDesiredColour_SOLID_COLOUR(param);
     }
   );
 }
 
 
 // simple blend function
-void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour_Solid_RGBCCT(const AnimationParam& param)
+void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour_SOLID_COLOUR(const AnimationParam& param)
 {   
 
   RgbcctColor output_colour = RgbcctColor::LinearBlend(

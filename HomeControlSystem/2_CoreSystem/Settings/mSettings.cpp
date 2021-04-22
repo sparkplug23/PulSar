@@ -793,8 +793,8 @@ void mSettings::SettingsLoad_CheckSuccessful(){
         }
       }
       if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
-        Settings.module = MODULE_NODEMCU_ID;             // Reset module to Sonoff Basic
-        Settings.last_module = MODULE_NODEMCU_ID;
+        Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
+        Settings.last_module = MODULE_WEMOS_ID;
       }
       //reset 7 times, then fail into safe boot awaiting OTA
       // HandleFailedBootFailBack();

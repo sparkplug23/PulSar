@@ -17,7 +17,7 @@
 
 
 //#include "//2_CoreSystem/Languages/mLanguage.h"
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 #ifdef ESP32
   #include <WiFi.h>

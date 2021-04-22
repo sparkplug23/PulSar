@@ -2,7 +2,7 @@
 #define MSYSTEMCONFIG2_H
 
 // File contains settings for the project that should not be edited by user
-g
+
 #include "stdint.h"
 // DEVICE named defines that set modules to use below
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
@@ -15,8 +15,8 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0
 #define FIRMWARE_VERSION_MINOR    90
-#define FIRMWARE_VERSION_CORE     60
-#define FIRMWARE_VERSION_MODULE   64
+#define FIRMWARE_VERSION_CORE     63
+#define FIRMWARE_VERSION_MODULE   66
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           11//                (random(1,1000))
@@ -50,20 +50,6 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
   // Enable debugging on only this module parts
   #define ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
-
-#endif
-#ifdef ENABLE_BUG_TRACING2
-  // #define ENABLE_SERIAL_FLUSH
-  //#define ENABLE_ADVANCED_DEBUGGING // new feature that only includes lowest level debugging when needed
-  // #define DEBUG_SERIAL_TESTING // Sets debug level of serial, else info for performance improvements
-  // #define DEBUG_MQTT_HANDLER
-  // #define DEBUG_FOR_FAULT
-  // #define USE_DEBUG_LINE  
-  // #define USE_DEBUG_LINE_LED
-
-  //  #define ENABLE_DELAYED_BOOT
-  
-  // #define ENABLE_LOG
 
 #endif
 

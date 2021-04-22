@@ -418,9 +418,8 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value){
 int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f){
 
   if(f=='\0') return -2;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_RGBCCT_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_COLOUR_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_RGBCCT_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_01_ID; }
   return -1;
 
@@ -433,7 +432,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
     case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
-    case EFFECTS_FUNCTION_SOLID_RGBCCT_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_RGBCCT_NAME_CTR);  break;
+    case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
     case EFFECTS_FUNCTION_FIREPLACE_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_01_NAME_CTR);  break;
   }
   return buffer;

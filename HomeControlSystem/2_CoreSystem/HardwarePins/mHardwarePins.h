@@ -8,7 +8,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 #ifdef ESP8266
   #define DRX 3
@@ -58,13 +58,13 @@ bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
 
     
   /**
-   * Instead of saving pins against their function indexed (ie index[rely1]=pin3)
-   * Save the function (16 bit) against a premapped gpio number indexes
+   * Module that is attached to the pin, indexed by ascending order of pins available on chip
    */
-  uint16_t pin_functions[MAX_USER_PINS];  
+  uint16_t pin_attached_gpio_functions[MAX_USER_PINS] = {0};  
 
 
 
+int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
 
     // uint8_t works = 0;
 
@@ -96,12 +96,15 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
     PGM_P GetGPIOFunctionNamebyID_P(uint8_t id);
 
     bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
+    bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
 
-    uint32_t Pin(uint32_t gpio, uint32_t index = 0);
+    int8_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
     boolean PinUsed(uint32_t gpio, uint32_t index = 0);
     void SetPin(uint32_t lpin, uint32_t gpio);
 
+
+    int8_t GetPinWithGPIO(uint16_t gpio, uint8_t index = 0);
     uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
@@ -117,12 +120,16 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
 
     const char* ModuleName(char* buffer, uint8_t buflen);
     void GpioInit(void);
-    void ModuleGpios(myio *gp);
-    void ModuleGpios(myio *gp, uint8_t module_id);
+
+
+    void TemplateGPIOs(myio *gp);
+    void TemplateGPIOs(myio *gp, uint8_t module_id);
+
+
     gpio_flag ModuleFlag();
     void ModuleDefault(uint8_t module);
     void SetModuleType();
-    uint8_t ValidPin(uint8_t pin, uint8_t gpio);
+    uint8_t ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio);
     bool ValidGPIO(uint8_t pin, uint8_t gpio);
     bool GetUsedInModule(uint8_t val, uint8_t *arr);
     bool JsonTemplate(const char* dataBuf);

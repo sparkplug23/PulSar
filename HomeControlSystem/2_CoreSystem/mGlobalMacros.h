@@ -108,14 +108,14 @@
   const uint8_t X[] PROGMEM =
 
 
-#define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \
-          if(Y == nullptr){ \
-            X = pCONT_sup->global_buffer; \
-          }else{ \
-            X = Y; \
-          }
+// #define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \
+//           if(Y == nullptr){ \
+//             X = pCONT_sup->global_buffer; \
+//           }else{ \
+//             X = Y; \
+//           }
 
-#define BUFFER_ISREADY() strlen(data_buffer.payload.ctr)?1:0
+// #define BUFFER_ISREADY() strlen(data_buffer.payload.ctr)?1:0
 
 
 #endif

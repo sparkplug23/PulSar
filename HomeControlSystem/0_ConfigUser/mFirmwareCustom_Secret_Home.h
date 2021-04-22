@@ -14,7 +14,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "2_CoreSystem/mHardwareTemplates.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 // //--------------------------------[Enable Device]-------------------------------------
 /**
@@ -2390,7 +2390,7 @@ Bathroom
   // #define USE_MODULE_CONTROLLER_BLINDS
   // #define USE_MODULE_DRIVERS_HBRIDGE
   
-  //   pCONT_set->Settings.module = MODULE_NODEMCU_ID;
+  //   pCONT_set->Settings.module = MODULE_WEMOS_ID;
   //   pCONT_set->Settings.module_pins.io[3] = GPIO_RGB_DATA_ID;
 #endif
 

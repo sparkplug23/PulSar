@@ -708,28 +708,63 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
 
   char buffer[30];
   JsonBuilderI->Start();
+    // JsonBuilderI->Level_Start(PM_JSON_GPIO);
+    // for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
+    //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
+    //     sprintf_P(buffer, PSTR("FUNC_%d"), i);
+    //     JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
+    //   }
+    // }
+    // JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start(PM_JSON_GPIO);
-    for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
-      if(pCONT_pins->PinUsed(i)){ // skip pins not configured
-        sprintf_P(buffer, PSTR("FUNC_%d"), i);
-        JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
+    for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++){ 
+      if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i])){ // skip pins not configured
+
+      // AddLog(LOG_LEVEL_TEST, PSTR("buffer=%s %d %d %d"),
+      // pCONT_pins->GetGPIOFunctionNamebyID_P(pCONT_pins->pin_attached_gpio_functions[i]),
+      // pCONT_pins->pin_attached_gpio_functions[i],
+      // pCONT_pins->GetPin(i),
+      // i 
+      // );
+
+
+        sprintf_P(buffer, PSTR("%s"), pCONT_pins->GetGPIOFunctionNamebyID_P(pCONT_pins->pin_attached_gpio_functions[i]));
+        JsonBuilderI->Add(buffer, pCONT_pins->GetPin(pCONT_pins->pin_attached_gpio_functions[i]));
       }
     }
+    
     JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start(PM_JSON_GPIO);
-    for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
-      if(pCONT_pins->PinUsed(i)){ // skip pins not configured
-        sprintf_P(buffer, PSTR("FUNC_%s"), pCONT_pins->GetGPIOFunctionNamebyID_P(i));
-        JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
-      }
-    }
-    JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start(D_JSON_GPIO "_map");
-    for(uint16_t i=0;i<100;i++){ 
-      sprintf_P(buffer, PSTR("%d"), i);
-      JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
-    }
-    JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_Start(D_JSON_GPIO "_map");
+    // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
+    //   sprintf_P(buffer, PSTR("%d"),
+      
+    //   gpio_pin_by_index[i]
+    //   //  i
+    //    );
+    //   JsonBuilderI->Add(buffer, pCONT_pins->GetPin(i));
+    // }
+    // JsonBuilderI->Level_End();
+
+    // Debug by printing all arrays out
+    JBI->Array_Start("pin_attached_gpio_functions");
+    for(int i=0; i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
+      JBI->Add(pCONT_pins->pin_attached_gpio_functions[i]);
+    JBI->Array_End();
+
+    JBI->Array_Start("user_template_io");
+    for(int i=0; i<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);i++)
+      JBI->Add(pCONT_set->Settings.user_template2.hardware.gp.io[i]);
+    JBI->Array_End();
+
+    JBI->Array_Start("getpin");
+    for(int i=0; i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
+      JBI->Add(pCONT_pins->GetPinWithGPIO(pCONT_pins->pin_attached_gpio_functions[i]));
+    JBI->Array_End();
+
+
+
+
+
   return JsonBuilderI->End();
 
 }
@@ -744,8 +779,12 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHea
     JsonBuilderI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
     myio cmodule;
-    pCONT_pins->ModuleGpios(&cmodule);
-    JsonBuilderI->Array_AddArray(PM_JSON_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
+    pCONT_pins->TemplateGPIOs(&cmodule);
+    // JsonBuilderI->Array_AddArray(PM_JSON_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
+    JBI->Array_Start_P(PM_JSON_GPIO);
+    for(int i=0;i<ARRAY_SIZE(cmodule.io);i++)
+      JBI->Add(cmodule.io[i]);
+    JBI->Array_End();
   return JsonBuilderI->End();
 }
 
