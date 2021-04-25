@@ -41,10 +41,13 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   // Displays
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
-    pModule[EM_MODULE_DISPLAYS_NEXTION_ID] = new X();
+    pModule[EM_MODULE_DISPLAYS_INTERFACE_ID] = new mDisplaysInterface();
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     pModule[EM_MODULE_DISPLAYS_NEXTION_ID] = new X();
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+    pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID] = new mOLED_SSD1306();
   #endif
   // Drivers (Range 40-129)
   #ifdef USE_MODULE_DRIVERS_INTERFACE
@@ -60,7 +63,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS_RELAY_ID] = new mRelays();
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
-    pModule[EM_MODULE_DRIVERS_PWM_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_PWM_ID] = new mPWM();
   #endif
   #ifdef USE_MODULE_DRIVERS_RF433MHZ
     pModule[EM_MSAW_MODULE_ID] = new X();

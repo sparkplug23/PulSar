@@ -494,12 +494,12 @@ void mSettings::SystemSettings_DefaultBody_Rules(){
 void mSettings::SystemSettings_DefaultBody_Displays(){
 
   Settings.display.model = 0;
-  Settings.display.mode = 1;
+  Settings.display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
   Settings.display.refresh = 2;
   Settings.display.rows = 2;
-  // Settings.display.cols[0] = 16;
-  // Settings.display.cols[1] = 8;
-  Settings.display.dimmer = 1;
+  Settings.display.cols[0] = 16;
+  Settings.display.cols[1] = 8;
+  Settings.display.dimmer = 7;//1;
   Settings.display.size = 1;
   Settings.display.font = 1;
   Settings.display.rotate = 0;
@@ -574,7 +574,7 @@ DEBUG_LINE;
   // Settings.flag_system.stop_flash_rotate = true;
   // stop_flash_rotate = true;//Settings.flag_system.stop_flash_rotate;
   // save_data_counter = Settings.save_data; 
-  runtime_value.sleep = Settings.sleep;
+  runtime_var.sleep = Settings.sleep;
 //  Settings.flag_system.value_units = 0;
 //  Settings.flag_system.stop_flash_rotate = 0;
 //  Settings.flag_system.interlock = 0;

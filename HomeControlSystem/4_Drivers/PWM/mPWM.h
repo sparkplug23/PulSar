@@ -1,6 +1,8 @@
 #ifndef _USE_MODULE_DRIVERS_PWM_H
 #define _USE_MODULE_DRIVERS_PWM_H 0.3
 
+#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 45
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_PWM
@@ -9,11 +11,28 @@
 #include <string.h>
 #include <strings.h>
 
-class mPWM{
+class mPWM :
+  public mTaskerInterface
+{
 
   private:
   public:
     mPWM(){};
+
+
+    static const char* PM_MODULE_DRIVERS_PWM_CTR;
+    static const char* PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_PWM_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_PWM_ID; }
+
+    
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mPWM);
+    };
+    #endif
+
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 

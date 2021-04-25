@@ -26,7 +26,7 @@ void mEnergyADE7953::Pre_Init(void)
       pCONT_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
       pCONT_iEnergy->Energy.voltage_common = true;               // Use common voltage
       // pCONT_iEnergy->Energy.frequency_common = true;             // Use common frequency
-      pCONT_set->runtime_value.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
+      pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
     }
   }
 }

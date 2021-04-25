@@ -21,4 +21,11 @@
 #include <ESP8266WiFi.h>
 #include "esp8266toEsp32.h"
 
+
+uint8_t _pwm_channel[PWM_SUPPORTED_CHANNELS] = { 99, 99, 99, 99, 99, 99, 99, 99 };
+uint32_t _pwm_frequency = 977;     // Default 977Hz
+
+uint8_t _pwm_bit_num = 10;         // Default 1023
+
+
 // ESP Stuff

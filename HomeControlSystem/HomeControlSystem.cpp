@@ -194,7 +194,7 @@ void loop(void)
     
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 
-  if(mTime::TimeReached(&pCONT_set->runtime_value.tSavedUpdateLoopStatistics, 1000)){
+  if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
@@ -214,13 +214,13 @@ void loop(void)
   #ifndef DISABLE_SLEEP
   if(pCONT_set->Settings.enable_sleep){
     if (pCONT_set->Settings.flag_network.sleep_normal) {
-      pCONT_sup->SleepDelay(pCONT_set->runtime_value.sleep);
+      pCONT_sup->SleepDelay(pCONT_set->runtime_var.sleep);
     } else {
 
       // Loop time < sleep length of time
-      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_value.sleep) {
+      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_var.sleep) {
         //delay by loop time
-        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_value.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_var.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
       } else {
 
         // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
@@ -236,7 +236,7 @@ void loop(void)
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
-  pCONT_sup->loop_delay_temp = pCONT_set->runtime_value.sleep; 
+  pCONT_sup->loop_delay_temp = pCONT_set->runtime_var.sleep; 
   if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0
   pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
   pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay_temp;

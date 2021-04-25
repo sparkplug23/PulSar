@@ -150,12 +150,12 @@ void mBuzzer::BuzzerBeep(uint32_t count, uint32_t on, uint32_t off, uint32_t tun
   Buzzer.enable = (Buzzer.count > 0);
   if (Buzzer.enable) {
     // if (pCONT_set->Settings.sleep > PWM_MAX_SLEEP) {
-    //   pCONT_set->runtime_value.sleep = PWM_MAX_SLEEP;   // Set a maxumum value of 10 milliseconds to ensure that buzzer periods are a bit more accurate
+    //   pCONT_set->runtime_var.sleep = PWM_MAX_SLEEP;   // Set a maxumum value of 10 milliseconds to ensure that buzzer periods are a bit more accurate
     // } else {
-    //   pCONT_set->runtime_value.sleep = pCONT_set->Settings.sleep;  // Or keep the current sleep if it's lower than 10
+    //   pCONT_set->runtime_var.sleep = pCONT_set->Settings.sleep;  // Or keep the current sleep if it's lower than 10
     // }
   } else {
-    // pCONT_set->runtime_value.sleep = pCONT_set->Settings.sleep;    // Restore original sleep
+    // pCONT_set->runtime_var.sleep = pCONT_set->Settings.sleep;    // Restore original sleep
     BuzzerSet(0);
   }
 }

@@ -413,8 +413,8 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_TIME,           pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->Add_FV(PM_JSON_UPTIME,      PSTR("\"%02dT%02d:%02d:%02d\""), pCONT_time->uptime.Yday,pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_time->uptime.seconds_nonreset);
-    JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime_value.sleep ? "Dynamic" : "Unknown");
-    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_set->runtime_value.sleep); // typ. 20
+    JsonBuilderI->Add(PM_JSON_SLEEPMODE,      pCONT_set->runtime_var.sleep ? "Dynamic" : "Unknown");
+    JsonBuilderI->Add(PM_JSON_SLEEP,          pCONT_set->runtime_var.sleep); // typ. 20
     JsonBuilderI->Add(PM_JSON_LOOPSSEC,       pCONT_sup->activity.cycles_per_sec); // typ. 50hz
     // JsonBuilderI->Add(PM_JSON_LOOPDELAY,      pCONT_sup->loop_delay_temp);
     JsonBuilderI->Add(PM_JSON_LOADAVERAGE,    pCONT_set->loop_load_avg); // average loops_per_second

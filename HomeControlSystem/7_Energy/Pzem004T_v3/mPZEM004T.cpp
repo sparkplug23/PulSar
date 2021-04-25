@@ -9,11 +9,11 @@ void mEnergyPZEM004T::Pre_Init(void)
 {
   #ifdef ESP8266
   if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
-    pCONT_set->runtime_value.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
+    pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
     settings.fEnableSensor = true;
   }
   #else
-  pCONT_set->runtime_value.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
+  pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
   settings.fEnableSensor = true;
   #endif//
 }
@@ -46,7 +46,7 @@ void mEnergyPZEM004T::Init(void)
     PzemAc.phase = 0;
     // AddLog(LOG_LEVEL_TEST,"mEnergyPZEM004T::init");
   } else {
-    pCONT_set->runtime_value.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
+    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
   }
 
   

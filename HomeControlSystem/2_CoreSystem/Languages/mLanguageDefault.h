@@ -176,15 +176,22 @@
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
 //#endif
+
+
 // Displays (30-39
 //#ifdef USE_MODULE_DISPLAYS_INTERFACE
-  // #define D_MODULE_DISPLAYS_NEXTION_CTR              "mNextionPanel"
-  // #define D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR              "nextionpanel"
+  #define D_MODULE_DISPLAYS_INTERFACE_CTR              "displays_interface"
+  #define D_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR              "displays_interface"
 //#endif
 //#ifdef USE_MODULE_DISPLAYS_NEXTION
   #define D_MODULE_DISPLAYS_NEXTION_CTR              "mNextionPanel"
   #define D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR              "nextionpanel"
 //#endif
+
+  #define D_MODULE_DISPLAYS_OLED_SSD1306_CTR      "display_1306"
+  #define D_MODULE_DISPLAYS_OLED_SSD1306_FRIENDLY_CTR              "display_1306"
+
+
 // Drivers (Range 40-129
 //#ifdef USE_MODULE_DRIVERS_INTERFACE
   // #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
@@ -861,6 +868,9 @@
 #define D_GPIO_FUNCTION_FAN_PWM1_CTR      "Fan PWM1"
 #define D_GPIO_FUNCTION_I2C_SCL_CTR       "I2C SCL"
 #define D_GPIO_FUNCTION_I2C_SDA_CTR       "I2C SDA"
+
+#define D_GPIO_FUNCTION_OLED_RESET_CTR "OLED Reset"
+
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"
 #define D_GPIO_FUNCTION_PIR_3_CTR         "PIR 3"
@@ -911,6 +921,13 @@
 
 #define D_GPIO_FUNCTION_HWSERIAL0_TX_CTR "HWSERIAL0_TX"
 #define D_GPIO_FUNCTION_HWSERIAL0_RX_CTR "HWSERIAL0_RX"
+
+#define D_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR "GPS Serial0 TX"
+#define D_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR "GPS Serial0 RX"
+#define D_GPIO_FUNCTION_GPS_SERIAL1_TX_CTR "GPS Serial1 TX"
+#define D_GPIO_FUNCTION_GPS_SERIAL1_RX_CTR "GPS Serial1 RX"
+#define D_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR "GPS Serial2 TX"
+#define D_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR "GPS Serial2 RX"
 
 #define D_GPIO_FUNCTION_LED1_CTR           D_GPIO_FUNCTION_LED_CTR "1"
 #define D_GPIO_FUNCTION_LED2_CTR           D_GPIO_FUNCTION_LED_CTR "2"
@@ -1011,6 +1028,22 @@
 #define D_GPIO_FUNCTION_FAN_IRSEND_CTR "Fan IRSend"
 #define D_GPIO_FUNCTION_ADE7953_IRQ_CTR "ADE7953_IRQ"
 
+
+#define D_GPIO_WEBCAM_DATA1_CTR     "Cam Data1"
+#define D_GPIO_WEBCAM_DATA2_CTR     "Cam Data2"
+#define D_GPIO_WEBCAM_DATA3_CTR     "Cam Data3"
+#define D_GPIO_WEBCAM_DATA4_CTR     "Cam Data4"
+#define D_GPIO_WEBCAM_DATA5_CTR     "Cam Data5"
+#define D_GPIO_WEBCAM_DATA6_CTR     "Cam Data6"
+#define D_GPIO_WEBCAM_DATA7_CTR     "Cam Data7"
+#define D_GPIO_WEBCAM_DATA8_CTR     "Cam Data8"
+#define D_GPIO_WEBCAM_XCLK_CTR      "Cam XCLK"
+#define D_GPIO_WEBCAM_PCLK_CTR      "Cam PCLK"
+#define D_GPIO_WEBCAM_HREF_CTR      "Cam HREF"
+#define D_GPIO_WEBCAM_VSYNC_CTR     "Cam VSYNC"
+#define D_GPIO_WEBCAM_SIOD_CTR      "Cam SIOD"
+#define D_GPIO_WEBCAM_SIOC_CTR      "Cam SIOC"
+#define D_GPIO_WEBCAM_PWDN_CTR      "Cam PWDN"
 
 /**
  *  Units

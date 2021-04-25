@@ -90,7 +90,7 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
     int16_t GetModuleIDbyName(const char* c);
     
     bool UsuableGPIOPin(uint8_t pin);
-    int8_t UsablePinToTemplateArrayIndex(uint8_t pin);
+    // int8_t UsablePinToTemplateArrayIndex(uint8_t pin);
 
     const char* GetGPIOFunctionNamebyID_P(uint8_t id, char* buffer);
     PGM_P GetGPIOFunctionNamebyID_P(uint8_t id);

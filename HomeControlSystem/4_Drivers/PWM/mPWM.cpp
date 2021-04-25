@@ -4,6 +4,11 @@
 
 #ifdef USE_MODULE_DRIVERS_PWM
 
+const char* mPWM::PM_MODULE_DRIVERS_PWM_CTR = D_MODULE_DRIVERS_PWM_CTR;
+const char* mPWM::PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR = D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
+
+
+
 /*********************************************************************************************\
   Sonoff iFan02 and iFan03
 \*********************************************************************************************/
@@ -192,7 +197,20 @@
 void mPWM::init(void)
 {
   
-  analogWriteFreq(25000);
+// #ifdef ESP8266
+// leave as default for testing
+  analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
+  analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
+//   #endif
+//   #ifdef ESP32
+
+// // analogWriteFreqRange(0, pCONT_set->Settings.pwm_frequency, pCONT_set->Settings.pwm_range);
+
+//   #endif
+
+  // analogWriteFreq(25000);
+
+
   // if (SONOFF_IFAN03 == my_module_type) {
   //   SetSerial(9600, TS_SERIAL_8N1);
   // }
@@ -226,6 +244,12 @@ void mPWM::pre_init(){
     settings.fEnableModule = true;
   }
 
+  if(pCONT_pins->PinUsed(GPIO_PWM1_ID)) {  // not set when 255
+    pin = pCONT_pins->GetPin(GPIO_PWM1_ID);
+    pinMode(pin, OUTPUT);
+    settings.fEnableModule = true;
+  }
+
 }
 
 
@@ -248,22 +272,22 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:    
+    case FUNC_EVERY_50_MSECOND:    
 
-      // if(test_val==0){
-      //   dir = 1;
-      // }else
-      // if(test_val>=1023){
-      //   dir = 0;
-      // }
+      if(test_val==0){
+        dir = 1;
+      }else
+      if(test_val>=1023){
+        dir = 0;
+      }
 
-      // if(dir==1){
-      //   test_val+=10;
-      // }else{
-      //   test_val-=10;
-      // }
+      if(dir==1){
+        test_val+=1;
+      }else{
+        test_val-=1;
+      }
 
-      // analogWrite(D4, test_val);
+      analogWrite(pin, test_val);
 
     break;
 //     case FUNC_EVERY_250_MSECOND:

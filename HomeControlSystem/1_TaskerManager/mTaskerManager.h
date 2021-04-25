@@ -195,10 +195,13 @@ enum MODULE_IDS{
   #endif
   // Displays
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
-    EM_MODULE_DISPLAYS_NEXTION_ID,
+    EM_MODULE_DISPLAYS_INTERFACE_ID,
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
     EM_MODULE_DISPLAYS_NEXTION_ID,
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+    EM_MODULE_DISPLAYS_OLED_SSD1306_ID,
   #endif
   // Drivers (Range 40-129)
   #ifdef USE_MODULE_DRIVERS_INTERFACE
@@ -407,12 +410,16 @@ enum MODULE_IDS{
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
-  // #include "3_Network/WebServer/mWebServer.h"
-  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAY_INTERFACE])
+  #include "8_Displays/_Interface/mDisplaysInterface.h"
+  #define pCONT_iDisp                               static_cast<mDisplaysInterface*>(pCONT->pModule[EM_MODULE_DISPLAYS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
   #include "8_Displays/Nextion/mNextionPanel.h"
   #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
+#endif
+#ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+  #include "8_Displays/OLED_SSD1606/mOLED_SSD1306.h"
+  #define pCONT_oled1306                            static_cast<mOLED_SSD1306*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
 #endif
 
 
@@ -435,7 +442,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
-  #define pCONT_nex                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
+  #define pCONT_pwm                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433MHZ
   #include "4_Drivers/SAWRadios/mSAWRadios.h"

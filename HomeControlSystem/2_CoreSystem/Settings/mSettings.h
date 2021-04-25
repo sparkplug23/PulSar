@@ -1135,12 +1135,40 @@ struct DisplaySettings{
   uint8_t       mode;              // 2D3
   uint8_t       refresh;           // 2D4
   uint8_t       rows;              // 2D5
-  // uint8_t       cols[2];           // 2D6
-  // uint8_t       address[8];        // 2D8
+  uint8_t       cols[2];           // 2D6
+  uint8_t       address[8];        // 2D8
   uint8_t       dimmer;            // 2E0
   uint8_t       size;              // 2E1
   uint8_t       font;              // 312
   uint8_t       rotate;            // 2FA
+
+  uint16_t      width;             // 774
+  uint16_t      height;            // 776
+   // End of single char array of 698 chars max ****************
+  // uint8_t       display_model;             // 2D2
+  // uint8_t       display_mode;              // 2D3
+  // uint8_t       display_refresh;           // 2D4
+  // uint8_t       display_rows;              // 2D5
+  // uint8_t       display_cols[2];           // 2D6
+  // uint8_t       display_address[8];        // 2D8
+  // uint8_t       display_dimmer;            // 2E0
+  // uint8_t       display_size;              // 2E1
+  // TimeRule      tflag[2];                  // 2E2
+  // uint16_t      pwm_frequency;             // 2E6
+  // power_t       power;                     // 2E8
+  // uint16_t      pwm_value[MAX_PWMS];       // 2EC
+  // int16_t       altitude;                  // 2F6
+  // uint16_t      tele_period;               // 2F8
+  // uint8_t       display_rotate;            // 2FA
+  // uint8_t       ledstate;                  // 2FB
+  // uint8_t       param[PARAM8_SIZE];        // 2FC  SetOption32 .. SetOption49
+  // int16_t       toffset[2];                // 30E
+  // uint8_t       display_font;              // 312
+  // DisplayOptions  display_options;         // 313
+
+  
+
+
 };
 
 
@@ -1245,6 +1273,20 @@ struct SettingsMQTT{
   char prefixtopic[50]; // "<devicename>/User extras?"
 
 };
+
+
+typedef union {
+  uint8_t data;
+  struct {
+  uint8_t type : 3;
+  uint8_t invert : 1;
+  uint8_t spare4 : 1;
+  uint8_t spare5 : 1;
+  uint8_t spare6 : 1;
+  uint8_t spare7 : 1;
+  };
+} DisplayOptions;
+
 
 #ifdef ESP32
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
@@ -1425,6 +1467,9 @@ struct SYSCFG {
 
   // SysBitfield4  flag4;                     // TEMP FIX
 // TO SORT
+
+ 
+
 
 #ifdef ESP32
 
@@ -1615,10 +1660,11 @@ struct RUNTIME_VALUES{
   uint32_t tSavedUpdateLoopStatistics;
   uint8_t energy_driver;                    // Energy monitor configured
   uint8_t light_driver;                     // Light module configured
-
+  uint8_t light_type;                       // Light types
+ 
 
   
-}runtime_value;
+}runtime_var;
 
 
 // phased out, new tas method only records used pins, otherwise returns 99 for not set

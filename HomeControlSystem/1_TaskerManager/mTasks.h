@@ -151,6 +151,25 @@ enum XsnsFunctions {
   // Debuging functions
   FUNC_DEBUG_CONFIGURE,
 
+/**
+ * @note Display driver interface (I could check if within range, it direct goes to that interface sub tasks)
+ * */
+  FUNC_DISPLAY_INIT_DRIVER, FUNC_DISPLAY_INIT, FUNC_DISPLAY_EVERY_50_MSECOND, 
+  //FUNC_DISPLAY_EVERY_SECOND,
+                     FUNC_DISPLAY_MODEL, FUNC_DISPLAY_MODE, FUNC_DISPLAY_POWER,
+                     FUNC_DISPLAY_CLEAR, FUNC_DISPLAY_DRAW_FRAME,
+                     FUNC_DISPLAY_DRAW_HLINE, FUNC_DISPLAY_DRAW_VLINE, FUNC_DISPLAY_DRAW_LINE,
+                     FUNC_DISPLAY_DRAW_CIRCLE, FUNC_DISPLAY_FILL_CIRCLE,
+                     FUNC_DISPLAY_DRAW_RECTANGLE, FUNC_DISPLAY_FILL_RECTANGLE,
+                     FUNC_DISPLAY_TEXT_SIZE, FUNC_DISPLAY_FONT_SIZE, FUNC_DISPLAY_ROTATION, FUNC_DISPLAY_DRAW_STRING,
+                     FUNC_DISPLAY_DIM, FUNC_DISPLAY_BLINKRATE,
+#ifdef USE_UFILESYS
+                     FUNC_DISPLAY_BATCH,
+#endif
+                     FUNC_DISPLAY_NUMBER, FUNC_DISPLAY_FLOAT, FUNC_DISPLAY_NUMBERNC, FUNC_DISPLAY_FLOATNC,
+                     FUNC_DISPLAY_RAW, FUNC_DISPLAY_LEVEL, FUNC_DISPLAY_SEVENSEG_TEXT, FUNC_DISPLAY_SEVENSEG_TEXTNC,
+                     FUNC_DISPLAY_SCROLLDELAY, FUNC_DISPLAY_CLOCK, FUNC_DISPLAY_SCROLLTEXT,
+
   /**
    * Group of "Events" functions, which are called when sections of the code execute
    * */

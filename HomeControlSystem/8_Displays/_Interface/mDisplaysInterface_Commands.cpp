@@ -1,0 +1,485 @@
+#include "mDisplaysInterface.h"
+
+#ifdef USE_MODULE_DISPLAYS_INTERFACE
+
+void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
+
+  char buffer[50];
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  
+  /***
+   * As order of importance, others that rely on previous commands must come after
+   * */
+  // int val = 0;
+  // jtok = obj["test"];
+    // AddLog(LOG_LEVEL_TEST, PSTR("val=%d"),jtok.getInt());
+
+  if(jtok = obj["DisplayText"]){
+    CmndDisplayText(jtok.getStr());
+  //   if(jtok.isStr()){
+  //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+  //       CommandSet_PaletteID(tmp_id);
+  //       data_buffer.isserviced++;
+  //     }
+  //   }else
+  //   if(jtok.isNum()){
+  //     CommandSet_PaletteID(jtok.getInt());
+  //     data_buffer.isserviced++;
+  //   }
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+  if(jtok = obj["ClearDisplay"]){
+
+    // create time out options where the screen can auto clear
+
+    pCONT_iDisp->renderer->clearDisplay();
+
+      // CmndDisplayText(jtok.getStr());
+
+
+  }
+
+  if(jtok = obj["DrawText"]){
+    CommandSet_DisplayText_Advanced_JSON(obj);
+
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DrawText" ));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+
+
+  }
+
+
+  if(jtok = obj["DisplayMode"]){
+    SetDisplayMode(jtok.getInt());
+  }
+
+  // mqtthandler_debug_teleperiod.flags.SendNow = true;
+
+}
+
+
+
+
+// /*********************************************************************************************\
+//  * Commands
+// \*********************************************************************************************/
+
+// void CmndDisplay(void) {
+//   Response_P(PSTR("{\"" D_PRFX_DISPLAY "\":{\"" D_CMND_DISP_MODEL "\":%d,\"" D_CMND_DISP_TYPE "\":%d,\"" D_CMND_DISP_WIDTH "\":%d,\"" D_CMND_DISP_HEIGHT "\":%d,\""
+//     D_CMND_DISP_MODE "\":%d,\"" D_CMND_DISP_DIMMER "\":%d,\"" D_CMND_DISP_SIZE "\":%d,\"" D_CMND_DISP_FONT "\":%d,\""
+//     D_CMND_DISP_ROTATE "\":%d,\"" D_CMND_DISP_INVERT "\":%d,\"" D_CMND_DISP_REFRESH "\":%d,\"" D_CMND_DISP_COLS "\":[%d,%d],\"" D_CMND_DISP_ROWS "\":%d}}"),
+//     pCONT_set->Settings.display.model, pCONT_set->Settings.display.options.type, pCONT_set->Settings.display.width, pCONT_set->Settings.display.height,
+//     pCONT_set->Settings.display.mode, changeUIntScale(pCONT_set->Settings.display.dimmer, 0, 15, 0, 100), pCONT_set->Settings.display.size, pCONT_set->Settings.display.font,
+//     pCONT_set->Settings.display.rotate, pCONT_set->Settings.display.options.invert, pCONT_set->Settings.display.refresh, pCONT_set->Settings.display.cols[0], pCONT_set->Settings.display.cols[1], pCONT_set->Settings.display.rows);
+// }
+
+// void CmndDisplayModel(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < DISPLAY_MAX_DRIVERS)) {
+//     uint32_t last_display_model = pCONT_set->Settings.display.model;
+//     pCONT_set->Settings.display.model = XdrvMailbox.payload;
+//     if (pCONT->Tasker_Interface(FUNC_DISPLAY_MODEL)) {
+//       pCONT_set->runtime_var.restart_flag = 2;  // Restart to re-init interface and add/Remove MQTT subscribe
+//     } else {
+//       pCONT_set->Settings.display.model = last_display_model;
+//     }
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.model);
+// }
+
+// void CmndDisplayType(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 7)) {
+//     pCONT_set->Settings.display.options.type = XdrvMailbox.payload;
+//     pCONT_set->runtime_var.restart_flag = 2;
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.options.type);
+// }
+
+// void CmndDisplayWidth(void) {
+//   if (XdrvMailbox.payload > 0) {
+//     if (XdrvMailbox.payload != pCONT_set->Settings.display.width) {
+//       pCONT_set->Settings.display.width = XdrvMailbox.payload;
+//       pCONT_set->runtime_var.restart_flag = 2;  // Restart to re-init width
+//     }
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.width);
+// }
+
+// void CmndDisplayHeight(void) {
+//   if (XdrvMailbox.payload > 0) {
+//     if (XdrvMailbox.payload != pCONT_set->Settings.display.height) {
+//       pCONT_set->Settings.display.height = XdrvMailbox.payload;
+//       pCONT_set->runtime_var.restart_flag = 2;  // Restart to re-init height
+//     }
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.height);
+// }
+
+// void CmndDisplayMode(void) {
+// #ifdef USE_DISPLAY_MODES1TO5
+// /*     Matrix / 7-segment   LCD / Oled                           TFT
+//  * 1 = Text up and time     Time
+//  * 2 = Date                 Local sensors                        Local sensors
+//  * 3 = Day                  Local sensors and time               Local sensors and time
+//  * 4 = Mqtt left and time   Mqtt (incl local) sensors            Mqtt (incl local) sensors
+//  * 5 = Mqtt up and time     Mqtt (incl local) sensors and time   Mqtt (incl local) sensors and time
+// */
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 5)) {
+//     uint32_t last_display_mode = pCONT_set->Settings.display.mode;
+//     pCONT_set->Settings.display.mode = XdrvMailbox.payload;
+
+//     if (disp_subscribed != (pCONT_set->Settings.display.mode &0x04)) {
+//       pCONT_set->runtime_var.restart_flag = 2;  // Restart to Add/Remove MQTT subscribe
+//     } else {
+//       if (last_display_mode && !pCONT_set->Settings.display.mode) {  // Switch to mode 0
+//         DisplayInit(DISPLAY_INIT_MODE);
+//         if (renderer) renderer->fillScreen(bg_color);
+//         else DisplayClear();
+//       } else {
+//         DisplayLogBufferInit();
+//         DisplayInit(DISPLAY_INIT_MODE);
+//       }
+//     }
+//   }
+// #endif  // USE_DISPLAY_MODES1TO5
+//   ResponseCmndNumber(pCONT_set->Settings.display.mode);
+// }
+
+// void CmndDisplayDimmer(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 100)) {
+//     pCONT_set->Settings.display.dimmer = changeUIntScale(XdrvMailbox.payload, 0, 100, 0, 15);  // Correction for Domoticz (0 - 15)
+//     if (pCONT_set->Settings.display.dimmer && !(disp_power)) {
+//       ExecuteCommandPower(disp_device, POWER_ON, SRC_DISPLAY);
+//     }
+//     else if (!pCONT_set->Settings.display.dimmer && disp_power) {
+//       ExecuteCommandPower(disp_device, POWER_OFF, SRC_DISPLAY);
+//     }
+//     if (renderer) {
+//       renderer->dim(pCONT_set->Settings.display.dimmer);
+//     } else {
+//       pCONT->Tasker_Interface(FUNC_DISPLAY_DIM);
+//     }
+//   }
+//   ResponseCmndNumber(changeUIntScale(pCONT_set->Settings.display.dimmer, 0, 15, 0, 100));
+// }
+
+// void CmndDisplaySize(void) {
+//   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= 4)) {
+//     pCONT_set->Settings.display.size = XdrvMailbox.payload;
+//     if (renderer) renderer->setTextSize(pCONT_set->Settings.display.size);
+//     //else DisplaySetSize(pCONT_set->Settings.display.size);
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.size);
+// }
+
+// void CmndDisplayFont(void) {
+//   if ((XdrvMailbox.payload >=0) && (XdrvMailbox.payload <= 4)) {
+//     pCONT_set->Settings.display.font = XdrvMailbox.payload;
+//     if (renderer) renderer->setTextFont(pCONT_set->Settings.display.font);
+//     //else DisplaySetFont(pCONT_set->Settings.display.font);
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.font);
+// }
+
+// void CmndDisplayRotate(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 4)) {
+//     if ((pCONT_set->Settings.display.rotate) != XdrvMailbox.payload) {
+// /*
+//       // Needs font info regarding height and width
+//       if ((pCONT_set->Settings.display.rotate &1) != (XdrvMailbox.payload &1)) {
+//         uint8_t temp_rows = pCONT_set->Settings.display.rows;
+//         pCONT_set->Settings.display.rows = pCONT_set->Settings.display.cols[0];
+//         pCONT_set->Settings.display.cols[0] = temp_rows;
+// #ifdef USE_DISPLAY_MODES1TO5
+//         DisplayReAllocScreenBuffer();
+// #endif  // USE_DISPLAY_MODES1TO5
+//       }
+// */
+//       pCONT_set->Settings.display.rotate = XdrvMailbox.payload;
+//       DisplayInit(DISPLAY_INIT_MODE);
+// #ifdef USE_DISPLAY_MODES1TO5
+//       DisplayLogBufferInit();
+// #endif  // USE_DISPLAY_MODES1TO5
+//     }
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.rotate);
+// }
+
+// void CmndDisplayInvert(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 1)) {
+//     pCONT_set->Settings.display.options.invert = XdrvMailbox.payload;
+//     if (renderer) renderer->invertDisplay(pCONT_set->Settings.display.options.invert);
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.options.invert);
+// }
+
+// void CmndDisplayRefresh(void) {
+//   if ((XdrvMailbox.payload >= 1) && (XdrvMailbox.payload <= 7)) {
+//     pCONT_set->Settings.display.refresh = XdrvMailbox.payload;
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.refresh);
+// }
+
+// void CmndDisplayColumns(void) {
+//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= 2)) {
+//     if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= DISPLAY_MAX_COLS)) {
+//       pCONT_set->Settings.display.cols[XdrvMailbox.index -1] = XdrvMailbox.payload;
+// #ifdef USE_DISPLAY_MODES1TO5
+//       if (1 == XdrvMailbox.index) {
+//         DisplayLogBufferInit();
+//         DisplayReAllocScreenBuffer();
+//       }
+// #endif  // USE_DISPLAY_MODES1TO5
+//     }
+//     ResponseCmndIdxNumber(pCONT_set->Settings.display.cols[XdrvMailbox.index -1]);
+//   }
+// }
+
+// void CmndDisplayRows(void) {
+//   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= DISPLAY_MAX_ROWS)) {
+//     pCONT_set->Settings.display.rows = XdrvMailbox.payload;
+// #ifdef USE_DISPLAY_MODES1TO5
+//     DisplayLogBufferInit();
+//     DisplayReAllocScreenBuffer();
+// #endif  // USE_DISPLAY_MODES1TO5
+//   }
+//   ResponseCmndNumber(pCONT_set->Settings.display.rows);
+// }
+
+// void CmndDisplayAddress(void) {
+//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= 8)) {
+//     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 255)) {
+//       pCONT_set->Settings.display.address[XdrvMailbox.index -1] = XdrvMailbox.payload;
+//     }
+//     ResponseCmndIdxNumber(pCONT_set->Settings.display.address[XdrvMailbox.index -1]);
+//   }
+// }
+
+// void CmndDisplayBlinkrate(void) {
+//   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 3)) {
+//     if (!renderer) {
+//       pCONT->Tasker_Interface(FUNC_DISPLAY_BLINKRATE);
+//     }
+//   }
+//   ResponseCmndNumber(XdrvMailbox.payload);
+// }
+
+// #ifdef USE_UFILESYS
+// void CmndDisplayBatch(void) {
+//   if (XdrvMailbox.data_len > 0) {
+//     if (!pCONT_set->Settings.display.mode) {
+//       Display_Text_From_File(XdrvMailbox.data);
+//     }
+//     ResponseCmndChar(XdrvMailbox.data);
+//   }
+// }
+// #endif
+
+void mDisplaysInterface::CmndDisplayText(const char* buffer) {
+  // if (disp_device && XdrvMailbox.data_len > 0) {
+
+// #ifndef USE_DISPLAY_MODES1TO5
+//     DisplayText();
+// #else
+//     if(pCONT_set->Settings.display.model == 15) {
+//       pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXT);
+//     } else if (!pCONT_set->Settings.display.mode) {
+      DisplayText(buffer);
+    // } else {
+    //   DisplayLogBufferAdd(XdrvMailbox.data);
+    // }
+// #endif  // USE_DISPLAY_MODES1TO5
+
+
+    // ResponseCmndChar(XdrvMailbox.data);
+  // }
+}
+
+
+/**
+ * @brief Parsing of direct to display method version 2, using json objects to control effects
+ * @param jobj The JsonParserObject from the command
+ * */
+/**
+ * 
+{
+  "ClearDisplay":1,
+  "DrawText":
+  [
+    {
+      "FontSize":1,
+      "Position":[0,0],
+      "Text":"TextBlock0"
+    },
+    {
+      "FontSize":1,
+      "Position":[0,40],
+      "Text":"TextBlock1"
+    }
+  ]
+}
+ * 
+ * */
+void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject jobj) {
+
+  JsonParserArray array = jobj["DrawText"];
+  JsonParserToken jtok = 0;
+
+  for(auto& object:array)
+  {
+    JsonParserObject obj1 = object;
+
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "obj1=%d" ), obj1.size());
+    
+    /**
+     * @note Change fontsize
+     * */
+    if(jtok = obj1["TextSize"])
+    {
+      SetTextSize(jtok.getInt());
+    }
+
+    /**
+     * @note Position of XY coordinate is always given as array
+     * */
+    if(jtok = obj1["Position"])
+    {
+      JsonParserArray arr_pos = obj1["Position"];
+      if(arr_pos.size() == 2)
+      {
+        SetCursor(arr_pos[0].getInt(), arr_pos[1].getInt());
+      }
+    }
+
+    /**
+     * @note This must be last, as previous formatting needs to be applied first
+     * */
+    if(jtok = obj1["Text"])
+    {
+      //Draw function
+      pCONT_iDisp->renderer->println(jtok.getStr());
+    }
+
+    pCONT_iDisp->renderer->Updateframe();
+
+  }
+
+
+
+// }else{
+//  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "!o2.isArray(" ));
+
+// }
+
+
+
+
+
+
+}
+
+
+
+// /*********************************************************************************************\
+//  * Currently 7-segement specific - should have been handled by (extended) DisplayText command
+// \*********************************************************************************************/
+
+// void CmndDisplayClear(void) {
+//   if (!renderer)
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_CLEAR);
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayNumber(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_NUMBER);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayFloat(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_FLOAT);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayNumberNC(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_NUMBERNC);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayFloatNC(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_FLOATNC);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayRaw(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_RAW);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayLevel(void) {
+//   bool result = false;
+//   if (!renderer) {
+//     result = pCONT->Tasker_Interface(FUNC_DISPLAY_LEVEL);
+//   }
+//   if(result) ResponseCmndNumber(XdrvMailbox.payload);
+// }
+
+// void CmndDisplaySevensegText(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXT);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayTextNC(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXTNC);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplaySevensegTextNC(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXTNC);
+//   }
+//   ResponseCmndChar(XdrvMailbox.data);
+// }
+
+// void CmndDisplayScrollDelay(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_SCROLLDELAY);
+//   }
+//   ResponseCmndNumber(XdrvMailbox.payload);
+// }
+
+// void CmndDisplayClock(void) {
+//   if (!renderer) {
+//     pCONT->Tasker_Interface(FUNC_DISPLAY_CLOCK);
+//   }
+//   ResponseCmndNumber(XdrvMailbox.payload);
+// }
+
+// void CmndDisplayScrollText(void) {
+//   bool result = false;
+//   if (!renderer) {
+//     result = pCONT->Tasker_Interface(FUNC_DISPLAY_SCROLLTEXT);
+//   }
+//   if(result) ResponseCmndChar(XdrvMailbox.data);
+// }
+
+
+#endif // USE_MODULE_LIGHTS_INTERFACE

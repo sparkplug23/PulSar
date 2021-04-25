@@ -177,6 +177,9 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "FLAGS: %d"
   //     "BASE: %d"
   //   ),
+
+AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+
   uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
   // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template.full_ctr);
@@ -184,21 +187,23 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   for(uint8_t gpio=0;gpio<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);gpio++){
     //get proper gpio number
 
-    switch(gpio){
-      case 0: real_gpio = 0; break;
-      case 1: real_gpio = 1; break;
-      case 2: real_gpio = 2; break;
-      case 3: real_gpio = 3; break;
-      case 4: real_gpio = 4; break;
-      case 5: real_gpio = 5; break;
-      case 6: real_gpio = 9; break;
-      case 7: real_gpio = 10; break;
-      case 8: real_gpio = 12; break;
-      case 9: real_gpio = 13; break;
-      case 10: real_gpio = 14; break;
-      case 11: real_gpio = 15; break;
-      case 12: real_gpio = 16; break;
-    }
+//change to pin getter
+    real_gpio = GetPinByIndex(gpio);
+    // switch(gpio){
+    //   case 0: real_gpio = 0; break;
+    //   case 1: real_gpio = 1; break;
+    //   case 2: real_gpio = 2; break;
+    //   case 3: real_gpio = 3; break;
+    //   case 4: real_gpio = 4; break;
+    //   case 5: real_gpio = 5; break;
+    //   case 6: real_gpio = 9; break;
+    //   case 7: real_gpio = 10; break;
+    //   case 8: real_gpio = 12; break;
+    //   case 9: real_gpio = 13; break;
+    //   case 10: real_gpio = 14; break;
+    //   case 11: real_gpio = 15; break;
+    //   case 12: real_gpio = 16; break;
+    // }
 
     AddLog(LOG_LEVEL_TEST,PSTR("\t%d(%d):%d"),gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
   }
@@ -219,7 +224,7 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Load = \"%s\""), buffer);
+  AddLog(LOG_LEVEL_DEBUG, PSTR("Load = \"%s\""), buffer);
   #endif // ENABLE_LOG_LEVEL_INFO
   
   JsonParser parser(buffer);
@@ -283,7 +288,7 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }
     
-    int8_t  pin_number = -1;
+    int8_t  real_pin = -1;
     int16_t gpio_number = -1;
           // AddLog(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
 
@@ -296,12 +301,13 @@ uint8_t jsonpair_count = jtok.size();
       jtok.nextOne(); //skip start of object
       const char* key = jtok.getStr();
       
-      pin_number = GetGPIONumberFromName(key);
-      AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s %d\n\r"), pair_index, key, pin_number);
+      real_pin = GetGPIONumberFromName(key);
+      AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
 
-      int8_t pin_number_array_index = UsablePinToTemplateArrayIndex(pin_number);
+      int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
+      AddLog(LOG_LEVEL_INFO, PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
       
-      if(pin_number_array_index>=0){
+      if(index_pin>=0){
       
         jtok.nextOne();
         const char* value = jtok.getStr();
@@ -310,17 +316,17 @@ uint8_t jsonpair_count = jtok.size();
 
         if(gpio_number != -1){
           // only template pins
-          pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index] = gpio_number; // non adjusted pin_number
+          pCONT_set->Settings.user_template2.hardware.gp.io[index_pin] = gpio_number; // non adjusted pin_number
           // FULL pin list
           // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
           AddLog(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
-            pin_number, 
-            pin_number_array_index,
-            pCONT_set->Settings.user_template2.hardware.gp.io[pin_number_array_index]
+            real_pin, 
+            index_pin,
+            pCONT_set->Settings.user_template2.hardware.gp.io[index_pin]
           );
           // AddLog(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
         }else{
-          AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\""),value);
+          AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\" %d"),value, gpio_number);
         }
 
       }// end UsuableGPIOPin
@@ -442,11 +448,11 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else if(strcmp(c,"D8")==0){ pin = 15; }
   else if(strcmp(c,"D0")==0){ pin = 16; }
   else if(strcmp(c,"LBI")==0){ 
-    #ifdef LED_BUILTIN
-    pin = LED_BUILTIN; 
-    #else
-    pin = -1;
-    #endif   
+    // #ifdef LED_BUILTIN
+    // pin = LED_BUILTIN; 
+    // #else
+    pin = 2;
+    // #endif   
   }
 
 
@@ -472,7 +478,7 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   }
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
+  AddLog(LOG_LEVEL_DEBUG, PSTR("GetGPIONumberFromName = %d"), pin);
   #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP32
 
@@ -556,63 +562,63 @@ bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
   return false;
 }
 
-// Return true/false if pin can be used (check for flash pins etc)
-int8_t mHardwarePins::UsablePinToTemplateArrayIndex(uint8_t pin)
-{
-  // Valid
-  // if ((pin >= 0) && (pin <= 5)){
-  //   AddLog(LOG_LEVEL_INFO,PSTR("0-5 pin=%d to %d"),pin, pin);
-  //   return pin;
-  // }
-  // // GPIO
-  // else if (((pin >= 6) && (pin <= 8))||(pin == 11)){
-  //   return -1; // Flash pins
-  // }
-  // // flash pins on 8265
-  // else if ((pin == 9) || (pin == 10)){ //(MODULE_WEMOS_ID == pCONT_set->Settings.module) // not on esp8625
-  //   AddLog(LOG_LEVEL_INFO,PSTR("9/10 pin=%d to %d"),pin, pin-3);
-  //   return pin-3; // Flash pins
-  // }
-  // // Valid
-  // else if ((pin >= 12) && (pin <= 16)){
-  //   AddLog(LOG_LEVEL_INFO,PSTR("12-16 pin=%d to %d"),pin, pin-5);
-  //   return pin-5;
-  // }
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("UsablePinToTemplateArrayIndex: %d->%d"), 
-  //   pin,
-  //   gpio_pin_by_index[pin]
-  // );
+// // Return true/false if pin can be used (check for flash pins etc)
+// int8_t mHardwarePins::UsablePinToTemplateArrayIndex(uint8_t pin)
+// {
+//   // Valid
+//   // if ((pin >= 0) && (pin <= 5)){
+//   //   AddLog(LOG_LEVEL_INFO,PSTR("0-5 pin=%d to %d"),pin, pin);
+//   //   return pin;
+//   // }
+//   // // GPIO
+//   // else if (((pin >= 6) && (pin <= 8))||(pin == 11)){
+//   //   return -1; // Flash pins
+//   // }
+//   // // flash pins on 8265
+//   // else if ((pin == 9) || (pin == 10)){ //(MODULE_WEMOS_ID == pCONT_set->Settings.module) // not on esp8625
+//   //   AddLog(LOG_LEVEL_INFO,PSTR("9/10 pin=%d to %d"),pin, pin-3);
+//   //   return pin-3; // Flash pins
+//   // }
+//   // // Valid
+//   // else if ((pin >= 12) && (pin <= 16)){
+//   //   AddLog(LOG_LEVEL_INFO,PSTR("12-16 pin=%d to %d"),pin, pin-5);
+//   //   return pin-5;
+//   // }
+//   // AddLog(LOG_LEVEL_DEBUG, PSTR("UsablePinToTemplateArrayIndex: %d->%d"), 
+//   //   pin,
+//   //   gpio_pin_by_index[pin]
+//   // );
   
-  // return gpio_pin_by_index[pin];
+//   // return gpio_pin_by_index[pin];
 
-  switch(pin){
-    case 0: return 0;
-    case 1: return 1;
-    case 2: return 2;
-    case 3: return 3;
-    case 4: return 4;
-    case 5: return 5;
-    case 6:
-    case 7:
-    case 8: return -1;
-    case 9: return 6;
-    case 10: return 7;
-    case 11: return -1;
-    case 12: return 8;
-    case 13: return 9;
-    case 14: return 10;
-    case 15: return 11;
-    case 16: return 12;
-  }
+//   switch(pin){
+//     case 0: return 0;
+//     case 1: return 1;
+//     case 2: return 2;
+//     case 3: return 3;
+//     case 4: return 4;
+//     case 5: return 5;
+//     case 6:
+//     case 7:
+//     case 8: return -1;
+//     case 9: return 6;
+//     case 10: return 7;
+//     case 11: return -1;
+//     case 12: return 8;
+//     case 13: return 9;
+//     case 14: return 10;
+//     case 15: return 11;
+//     case 16: return 12;
+//   }
 
     
-    // i, pCONT_set->my_module.io[i], mpin);
+//     // i, pCONT_set->my_module.io[i], mpin);
 
   
 
 
-  // return -1;
-}
+//   // return -1;
+// }
 
 
 int8_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
@@ -900,23 +906,30 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   memset(dest, GPIO_NONE_ID, sizeof(myio));
 
   uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
-    
+  
+  AddLog(LOG_LEVEL_DEBUG, PSTR("src size =%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+
     // sizeof(mycfgio)];
   if (USER_MODULE == pCONT_set->Settings.module) {
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
     #ifdef ENABLE_LOG_LEVEL_INFO
-    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TemplateGPIOs memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
+    AddLog(LOG_LEVEL_DEBUG, PSTR("USER_MODULE TemplateGPIOs memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
     #endif // ENABLE_LOG_LEVEL_INFO
   } else {
-    memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
     
     // AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));"));
     // delay(3000);
 #ifdef ESP8266
     // GetInternalTemplate(&src, Settings.module, 1);
+    memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
+    // AddLog(LOG_LEVEL_WARN, PSTR("???????FORCED Settings.module = 0 from %d"),pCONT_set->Settings.module);
 #endif  // ESP8266
 #ifdef ESP32
     // memcpy_P(&src, &kModules[ModuleTemplate(Settings.module)].gp, sizeof(mycfgio));
+    // AddLog(LOG_LEVEL_WARN, PSTR("FORCED Settings.module = 0 from %d"),pCONT_set->Settings.module);
+    // pCONT_set->Settings.module = 0;
+
+    memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
 #endif  // ESP32
   }
   // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
@@ -1088,33 +1101,6 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
 
 
 
-
-/*********************************************************************************************\
- * GPIO Module and Template management
- * 
- * 
-
-
-
-
-
-
-
-Move to "mHardwarePins?" END
-
-
-
-
-
-
-
-
-
-
-
-
-
-\*********************************************************************************************/
 void mHardwarePins::TemplateJson()
 {
   // Response_P(PSTR("{\"" D_JSON_NAME "\":\"%s\",\"" D_JSON_GPIO "\":["), pCONT_set->Settings.user_template.name);
@@ -1132,7 +1118,7 @@ void mHardwarePins::GpioInit(void)
 // delay(2000);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MODULE "GpioInit"));
+  AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MODULE "GpioInit"));
   
     #endif // ENABLE_LOG_LEVEL_INFO
   // uint8_t mpin;
@@ -1155,7 +1141,7 @@ void mHardwarePins::GpioInit(void)
     pCONT_set->Settings.last_module = module;
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule"));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule %d"),pCONT_set->Settings.module);
     #endif // ENABLE_LOG_LEVEL_INFO
   }
   SetModuleType();
@@ -1183,6 +1169,9 @@ void mHardwarePins::GpioInit(void)
   TemplateGPIOs(&def_gp); // Get template values
 
    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
+
+
+   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),2,def_gp.io[2]);
     
 
 
@@ -1209,8 +1198,9 @@ void mHardwarePins::GpioInit(void)
       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
     #endif // ENABLE_LOG_LEVEL_INFO
     }
+
     // Set any pins set in template
-    if ((def_gp.io[i] > GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) {
+    if ((def_gp.io[i] >= GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) { //ADDED >= to also copy NONE 
       pCONT_set->my_module.io[i] = def_gp.io[i];
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = def_gp.io[i]; %d %d %d \"%S\""),
@@ -1221,9 +1211,9 @@ void mHardwarePins::GpioInit(void)
       );
     #endif // ENABLE_LOG_LEVEL_INFO
     }
-    // else{
-    //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "ELSE my_module.io[i] = def_gp.io[i]; %d %d %d"),pCONT_set->my_module.io[i],def_gp.io[i],i);
-    // }
+    else{
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+    }
 
   }
   pCONT_set->my_module_flag = ModuleFlag();
@@ -1375,28 +1365,82 @@ void mHardwarePins::GpioInit(void)
   
 // while(1);
 
-#ifdef ESP8266
+// #ifdef ESP8266
 // leave as default for testing
   analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
   analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
-  #endif
+  // #endif
 
-#ifdef USE_SPI
+// #ifdef USE_SPI
 
-  spi_flg = ((((GetPin(GPIO_SPI_CS] < 99) && (GetPin(GPIO_SPI_CS] > 14)) || (GetPin(GPIO_SPI_CS] < 12)) || (((GetPin(GPIO_SPI_DC] < 99) && (GetPin(GPIO_SPI_DC] > 14)) || (GetPin(GPIO_SPI_DC] < 12)));
-  if (spi_flg) {
-    for (uint16_t i = 0; i < GPIO_MAX; i++) {
-      if ((GetPin(i] >= 12) && (GetPin(i] <=14)) GetPin(i] = 99;
-    }
-    my_module.io[12] = GPIO_SPI_MISO;
-    GetPin(GPIO_SPI_MISO] = 12;
-    my_module.io[13] = GPIO_SPI_MOSI;
-    GetPin(GPIO_SPI_MOSI] = 13;
-    my_module.io[14] = GPIO_SPI_CLK;
-    GetPin(GPIO_SPI_CLK] = 14;
-  }
-  soft_spi_flg = ((GetPin(GPIO_SSPI_CS] < 99) && (GetPin(GPIO_SSPI_SCLK] < 99) && ((GetPin(GPIO_SSPI_MOSI] < 99) || (GetPin(GPIO_SSPI_MOSI] < 99)));
-#endif  // USE_SPI
+//   spi_flg = ((((GetPin(GPIO_SPI_CS] < 99) && (GetPin(GPIO_SPI_CS] > 14)) || (GetPin(GPIO_SPI_CS] < 12)) || (((GetPin(GPIO_SPI_DC] < 99) && (GetPin(GPIO_SPI_DC] > 14)) || (GetPin(GPIO_SPI_DC] < 12)));
+//   if (spi_flg) {
+//     for (uint16_t i = 0; i < GPIO_MAX; i++) {
+//       if ((GetPin(i] >= 12) && (GetPin(i] <=14)) GetPin(i] = 99;
+//     }
+//     my_module.io[12] = GPIO_SPI_MISO;
+//     GetPin(GPIO_SPI_MISO] = 12;
+//     my_module.io[13] = GPIO_SPI_MOSI;
+//     GetPin(GPIO_SPI_MOSI] = 13;
+//     my_module.io[14] = GPIO_SPI_CLK;
+//     GetPin(GPIO_SPI_CLK] = 14;
+//   }
+//   soft_spi_flg = ((GetPin(GPIO_SSPI_CS] < 99) && (GetPin(GPIO_SSPI_SCLK] < 99) && ((GetPin(GPIO_SSPI_MOSI] < 99) || (GetPin(GPIO_SSPI_MOSI] < 99)));
+// #endif  // USE_SPI
+
+
+// #ifdef USE_SPI
+// #ifdef ESP8266
+//   // if (!TasmotaGlobal.soft_spi_enabled) {
+//   //   bool valid_cs = (ValidSpiPinUsed(GPIO_SPI_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_RC522_CS) ||
+//   //                    (ValidSpiPinUsed(GPIO_NRF24_CS) && ValidSpiPinUsed(GPIO_NRF24_DC)) ||
+//   //                    ValidSpiPinUsed(GPIO_ILI9341_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_ILI9341_DC) || // there are also boards without cs
+//   //                    ValidSpiPinUsed(GPIO_EPAPER29_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_EPAPER42_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_ILI9488_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_SSD1351_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_RA8876_CS) ||
+//   //                    ValidSpiPinUsed(GPIO_ST7789_DC) ||  // ST7789 CS may be omitted so chk DC too
+//   //                    ValidSpiPinUsed(GPIO_ST7789_CS) ||
+//   //                    (ValidSpiPinUsed(GPIO_SSD1331_CS) && ValidSpiPinUsed(GPIO_SSD1331_DC)) ||
+//   //                    ValidSpiPinUsed(GPIO_SDCARD_CS)
+//   //                   );
+//   //   // If SPI_CS and/or SPI_DC is used they must be valid
+//   //   TasmotaGlobal.spi_enabled = (valid_cs) ? SPI_MOSI_MISO : SPI_NONE;
+//   //   if (TasmotaGlobal.spi_enabled) {
+//   //     TasmotaGlobal.my_module.io[12] = AGPIO(GPIO_SPI_MISO);
+//   //     SetPin(12, AGPIO(GPIO_SPI_MISO));
+//   //     TasmotaGlobal.my_module.io[13] = AGPIO(GPIO_SPI_MOSI);
+//   //     SetPin(13, AGPIO(GPIO_SPI_MOSI));
+//   //     TasmotaGlobal.my_module.io[14] = AGPIO(GPIO_SPI_CLK);
+//   //     SetPin(14, AGPIO(GPIO_SPI_CLK));
+//   //   }
+//   // }
+// #endif  // ESP8266
+// #ifdef ESP32
+//   if (PinUsed(GPIO_SPI_CS) ||
+//       PinUsed(GPIO_RC522_CS) ||
+//       PinUsed(GPIO_NRF24_CS) ||
+//       PinUsed(GPIO_ILI9341_CS) ||
+//       PinUsed(GPIO_EPAPER29_CS) ||
+//       PinUsed(GPIO_EPAPER42_CS) ||
+//       PinUsed(GPIO_ILI9488_CS) ||
+//       PinUsed(GPIO_SSD1351_CS) ||
+//       PinUsed(GPIO_RA8876_CS) ||
+//       PinUsed(GPIO_ST7789_DC) ||  // ST7789 CS may be omitted so chk DC too
+//       PinUsed(GPIO_ST7789_CS) ||
+//       PinUsed(GPIO_SSD1331_CS) ||
+//       PinUsed(GPIO_SDCARD_CS)
+//      ) {
+//     uint32_t spi_mosi = (PinUsed(GPIO_SPI_CLK) && PinUsed(GPIO_SPI_MOSI)) ? SPI_MOSI : SPI_NONE;
+//     uint32_t spi_miso = (PinUsed(GPIO_SPI_CLK) && PinUsed(GPIO_SPI_MISO)) ? SPI_MISO : SPI_NONE;
+//     TasmotaGlobal.spi_enabled = spi_mosi + spi_miso;
+//   }
+// #endif  // ESP32
+//   AddLogSpi(1, Pin(GPIO_SPI_CLK), Pin(GPIO_SPI_MOSI), Pin(GPIO_SPI_MISO));
+// #endif  // USE_SPI
 
 
 // #else // ESP32
@@ -1435,19 +1479,22 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
-#ifdef ESP8266
 #ifdef USE_I2C
   pCONT_set->i2c_enabled = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
   if (pCONT_set->i2c_enabled)
   { 
     if(pCONT_sup->wire == nullptr)
     {
+      #ifdef ESP8266
       pCONT_sup->wire = new TwoWire();
+      #else
+      pCONT_sup->wire = new TwoWire(0);
+      #endif
     }
     pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
   } // i2c_enabled
 #endif  // USE_I2C
-#endif // ESP8266
+// #endif // ESP8266
 
 
 
@@ -1511,10 +1558,10 @@ void mHardwarePins::GpioInit(void)
     if (PinUsed(GPIO_PWM1_ID, i)) {
       pinMode(Pin(GPIO_PWM1_ID, i), OUTPUT);
       
-// #ifdef ESP32
-//       analogAttach(Pin(GPIO_PWM1, i),i);
-//       analogWriteFreqRange(i,Settings.pwm_frequency,Settings.pwm_range);
-// #endif
+#ifdef ESP32
+      analogAttach(Pin(GPIO_PWM1_ID, i),i);
+      // analogWriteFreqRange(i,pCONT_set->Settings.pwm_frequency,pCONT_set->Settings.pwm_range);
+#endif
 
 #ifdef ESP8266
       if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
@@ -1627,6 +1674,10 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY2P5_CTR)==0){         return MODULE_SHELLY2P5_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY_DIMMER2_CTR)==0){         return MODULE_SHELLY_DIMMER2_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
+
+  //esp32
+  else if(strcmp_P(c,PM_MODULE_NAME_CAM_AITHINKER_CTR)==0){         return MODULE_CAM_AITHINKER_ID; }
+
   else if(strcmp_P(c,PM_MODULE_NAME_USERMODULE_CTR)==0){      return USER_MODULE; }
 
   return -1;
@@ -1637,6 +1688,7 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
 const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
   switch(id){
     default:
+    #ifdef ESP8266
     case MODULE_SONOFF_BASIC_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_CTR)); break;
     case MODULE_SONOFF_IFAN03_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_IFAN03_CTR, sizeof(PM_MODULE_NAME_SONOFF_IFAN03_CTR)); break;
     case MODULE_H801_ID:   memcpy_P(buffer, PM_MODULE_NAME_H801_CTR, sizeof(PM_MODULE_NAME_H801_CTR)); break;
@@ -1644,6 +1696,10 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
     case MODULE_SHELLY1_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY1_CTR, sizeof(PM_MODULE_NAME_SHELLY1_CTR)); break;
     case MODULE_SHELLY2P5_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY2P5_CTR, sizeof(PM_MODULE_NAME_SHELLY2P5_CTR)); break;
     case MODULE_SHELLY_DIMMER2_ID:   memcpy_P(buffer, PM_MODULE_NAME_SHELLY_DIMMER2_CTR, sizeof(PM_MODULE_NAME_SHELLY_DIMMER2_CTR)); break;
+    #endif  // ESP8266
+    #ifdef ESP32
+    case MODULE_CAM_AITHINKER_ID:   memcpy_P(buffer, PM_MODULE_NAME_CAM_AITHINKER_CTR, sizeof(PM_MODULE_NAME_CAM_AITHINKER_CTR)); break;
+    #endif // ESP32
     case USER_MODULE:    memcpy_P(buffer, PM_MODULE_NAME_USERMODULE_CTR, sizeof(PM_MODULE_NAME_USERMODULE_CTR)); break;
 
   }
@@ -1693,6 +1749,8 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SCL_CTR)==0){  return GPIO_I2C_SCL_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SDA_CTR)==0){  return GPIO_I2C_SDA_ID; }
 
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_OLED_RESET_CTR)==0){  return GPIO_OLED_RESET_ID; }
+
   // #ifdef USE_MODULE_SENSORS_MOTION
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_1_CTR)==0){  return GPIO_PIR_1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIR_2_CTR)==0){  return GPIO_PIR_2_ID; }
@@ -1726,6 +1784,13 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
+
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR)==0){  return GPIO_GPS_SERIAL0_TX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR)==0){  return GPIO_GPS_SERIAL0_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_TX_CTR)==0){  return GPIO_GPS_SERIAL1_TX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_RX_CTR)==0){  return GPIO_GPS_SERIAL1_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR)==0){  return GPIO_GPS_SERIAL2_TX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR)==0){  return GPIO_GPS_SERIAL2_RX_ID; }
 
   
   //else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_CTR)==0){  return GPIO_LEDLNK_ID; }
@@ -1786,6 +1851,28 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ANALOG_POSITION_CTR)==0){  return GPIO_ANALOG_POSITION_ID; }
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADE7953_IRQ_CTR)==0){  return GPIO_ADE7953_IRQ_ID; }
+
+  #ifdef ESP32
+  // Webcam
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA1_CTR)==0){  return GPIO_WEBCAM_DATA1_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA2_CTR)==0){  return GPIO_WEBCAM_DATA2_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA3_CTR)==0){  return GPIO_WEBCAM_DATA3_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA4_CTR)==0){  return GPIO_WEBCAM_DATA4_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA5_CTR)==0){  return GPIO_WEBCAM_DATA5_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA6_CTR)==0){  return GPIO_WEBCAM_DATA6_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA7_CTR)==0){  return GPIO_WEBCAM_DATA7_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA8_CTR)==0){  return GPIO_WEBCAM_DATA8_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_XCLK_CTR)==0){   return GPIO_WEBCAM_XCLK_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_PCLK_CTR)==0){   return GPIO_WEBCAM_PCLK_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_HREF_CTR)==0){   return GPIO_WEBCAM_HREF_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_VSYNC_CTR)==0){  return GPIO_WEBCAM_VSYNC_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_SIOD_CTR)==0){   return GPIO_WEBCAM_SIOD_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_SIOC_CTR)==0){   return GPIO_WEBCAM_SIOC_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR)==0){   return GPIO_WEBCAM_PWDN_ID; }
+
+
+
+  #endif // ESP32
 
 
   return -1;
@@ -1853,6 +1940,8 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 
 
       case  GPIO_FAN_PWM1_ID: return PM_GPIO_FUNCTION_FAN_PWM1_CTR;           // Relays
+
+      case  GPIO_OLED_RESET_ID: return PM_GPIO_FUNCTION_OLED_RESET_CTR;           // Relays
 //   GPIO_REL2_ID,
 //   GPIO_REL2_INV_ID,
 //   GPIO_REL3_ID,
@@ -2090,6 +2179,33 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
     case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
     
     case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
+
+//GPS?
+//  case GPIO_GPS_SERIAL0_RX
+
+
+  #ifdef ESP32
+  // Webcam
+  case GPIO_WEBCAM_DATA1_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA1_CTR;
+  case GPIO_WEBCAM_DATA2_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA2_CTR;
+  case GPIO_WEBCAM_DATA3_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA3_CTR;
+  case GPIO_WEBCAM_DATA4_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA4_CTR;
+  case GPIO_WEBCAM_DATA5_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA5_CTR;
+  case GPIO_WEBCAM_DATA6_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA6_CTR;
+  case GPIO_WEBCAM_DATA7_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA7_CTR;
+  case GPIO_WEBCAM_DATA8_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA8_CTR;
+  case GPIO_WEBCAM_XCLK_ID: return PM_GPIO_FUNCTION_WEBCAM_XCLK_CTR;
+  case GPIO_WEBCAM_PCLK_ID: return PM_GPIO_FUNCTION_WEBCAM_PCLK_CTR;
+  case GPIO_WEBCAM_HREF_ID: return PM_GPIO_FUNCTION_WEBCAM_HREF_CTR;
+  case GPIO_WEBCAM_VSYNC_ID: return PM_GPIO_FUNCTION_WEBCAM_VSYNC_CTR;
+  case GPIO_WEBCAM_SIOD_ID: return PM_GPIO_FUNCTION_WEBCAM_SIOD_CTR;
+  case GPIO_WEBCAM_SIOC_ID: return PM_GPIO_FUNCTION_WEBCAM_SIOC_CTR;
+  case GPIO_WEBCAM_PWDN_ID: return PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR;
+
+
+
+  #endif // ESP32
+
 
 //    case GPIO_LEDLNK_INV_ID: return PM_GPIO_FUNCTION_LEDLNK_INV_CTR;
 

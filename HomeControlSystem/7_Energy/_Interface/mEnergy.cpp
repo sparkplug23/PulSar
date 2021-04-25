@@ -35,7 +35,7 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
 
 
 
-  if (pCONT_set->runtime_value.energy_driver) {
+  if (pCONT_set->runtime_var.energy_driver) {
     // // if (RtcSettingsValid()) {
     //   Energy.kWhtoday_offset = pCONT_set->RtcSettings.energy_kWhtoday;
     // // }
@@ -1066,7 +1066,7 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   // Only continue to remaining functions if sensor has been detected and enabled
-  if(!pCONT_set->runtime_value.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!pCONT_set->runtime_var.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
 
