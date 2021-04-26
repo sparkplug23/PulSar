@@ -45,6 +45,7 @@
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 #include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
+#include "1_TaskerManager/mTaskerManager_Defines.h"
 #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
 #include "2_CoreSystem/Support/BufferWriter.h"
 
