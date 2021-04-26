@@ -1,11 +1,11 @@
-#include "mExampleClass.h"
+#include "mSDCardLogger.h"
 
-#ifdef USE_MODULE_SENSORS_EXAMPLE
+#ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
 
-const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_CTR = D_MODULE_SENSORS_EXAMPLE_CTR;
-const char* mExampleClass::PM_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR = D_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR;
+const char* mSDCardLogger::PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_CTR;
+const char* mSDCardLogger::PM_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR;
 
-int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mSDCardLogger::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
@@ -59,14 +59,14 @@ int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mExampleClass::parse_JSONCommand(JsonParserObject obj)
+void mSDCardLogger::parse_JSONCommand(JsonParserObject obj)
 {
 
 }
 
 
 
-void mExampleClass::Pre_Init(void)
+void mSDCardLogger::Pre_Init(void)
 {
   if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
@@ -76,14 +76,14 @@ void mExampleClass::Pre_Init(void)
 }
 
 
-void mExampleClass::Init(void)
+void mSDCardLogger::Init(void)
 {
 
 
 }
 
 
-void mExampleClass::EveryLoop()
+void mSDCardLogger::EveryLoop()
 {
 
 
@@ -93,7 +93,7 @@ void mExampleClass::EveryLoop()
 
 
 
-uint8_t mExampleClass::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSDCardLogger::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -102,7 +102,7 @@ uint8_t mExampleClass::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mExampleClass::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mSDCardLogger::ConstructJSON_Sensor(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -118,9 +118,9 @@ uint8_t mExampleClass::ConstructJSON_Sensor(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mExampleClass::MQTTHandler_Init(){
+void mSDCardLogger::MQTTHandler_Init(){
 
-  struct handler<mExampleClass>* mqtthandler_ptr;
+  struct handler<mSDCardLogger>* mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -130,7 +130,7 @@ void mExampleClass::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExampleClass::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mSDCardLogger::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -140,7 +140,7 @@ void mExampleClass::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExampleClass::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mSDCardLogger::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -150,12 +150,12 @@ void mExampleClass::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExampleClass::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mSDCardLogger::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 
-void mExampleClass::MQTTHandler_Set_fSendNow(){
+void mSDCardLogger::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -164,7 +164,7 @@ void mExampleClass::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mExampleClass::MQTTHandler_Set_TelePeriod(){
+void mSDCardLogger::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -172,11 +172,21 @@ void mExampleClass::MQTTHandler_Set_TelePeriod(){
 } //end "MQTTHandler_Set_TelePeriod"
 
 
-void mExampleClass::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mSDCardLogger::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, 
-    EM_MODULE_SENSORS_EXAMPLE_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
-  );
+  uint8_t list_ids[] = {
+    MQTT_HANDLER_SETTINGS_ID, 
+    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+  };
+  
+  struct handler<mSDCardLogger>* list_ptr[] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
+
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_SDCARDLOGGER_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
 
 }
 

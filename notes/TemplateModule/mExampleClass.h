@@ -54,6 +54,18 @@ class mExampleClass :
     struct handler<mExampleClass> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
+    uint8_t list_ids[3] = {
+      MQTT_HANDLER_SETTINGS_ID, 
+      MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+      MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+    };
+    
+    struct handler<mExampleClass>* list_ptr[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
+
     //No extra handlers example
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     //with extra handlers example

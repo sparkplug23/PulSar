@@ -355,6 +355,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     EM_MODULE_CONTROLLER_DOORBELL_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
+    EM_MODULE_CONTROLLER_SDCARDLOGGER_ID,
+  #endif
   EM_MODULE_LENGTH_ID
 };
 
@@ -628,6 +631,10 @@ enum MODULE_IDS{
   #include "9_Controller/DoorBell/mDoorBell.h"
   #define pCONT_doorbell                        static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
+  #include "9_Controller/SDCardLogger/mSDCardLogger.h"
+  #define pCONT_sdcardlogger                    static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID])
+#endif
 
 #include  "1_TaskerManager/mTaskerInterface.h"
 
@@ -652,6 +659,11 @@ class mTaskerManager{
       return instance;
     };
 
+    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
+
+
+
+
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
 
@@ -661,11 +673,6 @@ class mTaskerManager{
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       char buffer_taskname[50];
     #endif
-
-    // std::vector<mTaskerInterface*> pModule;
-    // std::vector<uint8_t> mTasksIDs;
-
-    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
     uint8_t Instance_Init();
     uint8_t CheckPointersPass();

@@ -28,7 +28,7 @@ enum EM_DISPLAY_MODE_IDS{
   /**
    * Logs that are scrolling, values added to buffer will be appended
    * */
-  EM_DISPLAY_MODE_LOG_APPENDING_ID,
+  EM_DISPLAY_MODE_LOG_SCROLLING_ID,
   /**
    * Full log is shown across the display, no scrolling, buffer will be shown and can be updated directly (inline replace) since the whole log is updated
    * */

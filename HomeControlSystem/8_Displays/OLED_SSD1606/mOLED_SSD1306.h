@@ -52,8 +52,8 @@ class mOLED_SSD1306 :
     Adafruit_SSD1306 *oled1306;
 
     void InitDriver(void);
-    void ShowPrintAppendingLog(void);
-    void ShowPrintStaticLog();
+    void ShowScrollingLog(void);
+    void ShowStaticLog();
     void ShowUTCTime(void);
     void EverySecond(void);
 

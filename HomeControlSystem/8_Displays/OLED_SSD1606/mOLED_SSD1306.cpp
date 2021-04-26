@@ -114,15 +114,15 @@ void mOLED_SSD1306::EverySecond(void)
     case EM_DISPLAY_MODE_UTC_TIME_ID:
       ShowUTCTime();
       break;
-    case EM_DISPLAY_MODE_LOG_APPENDING_ID:
+    case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
     case EM_DISPLAY_MODE_LOCAL1_ID:
     case EM_DISPLAY_MODE_LOCAL2_ID:
     case EM_DISPLAY_MODE_MQTT1_ID:
     case EM_DISPLAY_MODE_MQTT2_ID:
-      ShowPrintAppendingLog();
+      ShowScrollingLog();
       break;
     case EM_DISPLAY_MODE_LOG_STATIC_ID:
-      ShowPrintStaticLog();
+      ShowStaticLog();
       break;
   }
 
@@ -188,7 +188,7 @@ void mOLED_SSD1306::InitDriver(void)
 /**
  * @brief Will take from log_buffer and fill screen_buffer, shifting the rows up
  * */
-void mOLED_SSD1306::ShowPrintAppendingLog(void)
+void mOLED_SSD1306::ShowScrollingLog(void)
 {
   
   // If no columns have been init, then first allocate memory
@@ -229,7 +229,7 @@ void mOLED_SSD1306::ShowPrintAppendingLog(void)
 /**
  * @brief Unlike AppendingLog method, this will only commit all of log_buffer into screen_buffer and display
  * */
-void mOLED_SSD1306::ShowPrintStaticLog(void)
+void mOLED_SSD1306::ShowStaticLog(void)
 {
   
   // If no columns have been init, then first allocate memory

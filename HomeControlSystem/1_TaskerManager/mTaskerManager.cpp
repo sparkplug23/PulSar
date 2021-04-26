@@ -2,6 +2,176 @@
 
 mTaskerManager* mTaskerManager::instance = nullptr;
 
+
+/**
+ * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
+ If !0, a specific tasker will be called and this function will exit after completion
+ * */
+int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
+
+  int8_t result = 0;
+
+  if(target_tasker){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+    #endif// ENABLE_LOG_LEVEL_INFO
+  }
+
+  #ifdef USE_MODULE_CORE_RULES
+  if(flags_is_executing_rule != true){
+    pCONT_rules->Tasker_Rules_Interface(function);
+  }
+  #endif
+
+  JsonParserObject obj = 0;
+  // JsonParser parser(parsing_buffer);
+  // char parsing_buffer[data_buffer.payload.len+1];
+  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+
+
+
+  // JsonParser parser(nullptr);//data_buffer.payload.ctr);
+
+  // JsonParser parser(data_buffer.payload.ctr);
+
+  // Method is jdson, so one off parse it (maybe this should be done before calling? passing globally)
+  
+  switch(function)
+  {
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:    
+      // if(obj && GetModuleIDbyFriendlyName(topic)==i)
+      // else{break;}
+      // If match, switch target tasker to be the directed command
+    case FUNC_JSON_COMMAND_ID:
+    { 
+      
+      JsonParser parser(data_buffer.payload.ctr);
+      
+      // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
+      obj = parser.getRootObject();   
+      if (!obj) { 
+        #ifdef ENABLE_LOG_LEVEL_COMMANDS
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+        #endif //ENABLE_LOG_LEVEL_COMMANDS
+        break;
+      } 
+
+      for(uint8_t i=0;i<GetClassCount();i++)
+      { 
+        pModule[i]->Tasker(function, obj);
+      }
+      return 0;
+      // else{
+      //   AddLog(LOG_LEVEL_ERROR, PSTR("D_JSON_DESERIALIZATION_ERROR"));
+      //   AddLog(LOG_LEVEL_TEST, PSTR("D_JSON_DESERIALIZATION_ERROR=%d"),obj["test2"].getInt());   
+      // }
+    } 
+    break;
+  } //END switch
+
+
+  for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
+
+    switch_index = target_tasker ? target_tasker : i;
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    #endif
+    
+    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+    uint32_t start_millis = millis();
+    #endif
+
+    switch(function){
+      // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
+      case FUNC_JSON_COMMAND_ID: 
+        // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
+      //   if(obj)
+      //   {
+      //     // pModule[switch_index]->parse_JSONCommand(obj); // This should only happen if the function is enabled internally
+      //     pModule[switch_index]->Tasker(function,obj);
+      //   }
+      break;
+      default:
+        pModule[switch_index]->Tasker(function, obj);
+      break;
+    }
+
+
+    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+    uint32_t end_millis = millis(); // Remember start millis
+    uint32_t this_millis = end_millis - start_millis; // Get this execution time 
+    #if defined(DEBUG_EXECUTION_TIME) // Get average
+    //if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
+      module_settings.execution_time_average_ms[i] += this_millis;
+      module_settings.execution_time_average_ms[i] /= 2; //gets average
+     // Get max
+      if(this_millis > module_settings.execution_time_max_ms[i]){
+        module_settings.execution_time_max_ms[i] = this_millis; // remember max
+      }
+    //}
+    #endif // DEBUG_EXECUTION_TIME
+    #endif
+    
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
+    #endif
+    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+      if(this_millis > 500){
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+      }
+    #endif
+
+    if(target_tasker!=0){
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+      #endif// ENABLE_LOG_LEVEL_INFO
+      break; //only run for loop for the class set. if 0, rull all
+    }
+    // Special flag that can be set to end interface ie event handled, no need to check others
+    if(fExitTaskerWithCompletion){
+      fExitTaskerWithCompletion=false;
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+      #endif// ENABLE_LOG_LEVEL_INFO
+      break; //only run for loop for the class set. if 0, rull all
+    }
+  
+  } //end for
+
+  DEBUG_LINE;
+  if(!pCONT_set->flag_boot_complete){
+    char buffer_taskname[50];
+    if(function != last_function){
+      uint8_t boot_percentage = map(function,0,FUNC_ON_BOOT_COMPLETE,0,100);
+      //5% = 1 bar, 20 bars total [B                   ]
+      //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
+      #ifndef DISABLE_SERIAL_LOGGING
+      DEBUG_PRINTF("[");
+      for(uint8_t percent=0;percent<100;percent+=5){  
+        if(percent<boot_percentage){ Serial.print((char)219); }else{ DEBUG_PRINTF(" "); }
+      }      
+      #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
+      #else
+      DEBUG_PRINTF("] %03d\n\r",boot_percentage);
+      #endif // ENABLE_DEBUG_FUNCTION_NAMES
+      #endif
+      //}
+      last_function = function;
+    }
+    if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
+  }//flag_boot_complete
+  
+  DEBUG_LINE;
+  #ifdef ENABLE_ADVANCED_DEBUGGING
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
+  #endif
+
+  return result;
+
+}
+
+
 uint8_t mTaskerManager::Instance_Init(){
   
   // Core
@@ -201,178 +371,11 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
     pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();
   #endif
-
-}
-
-/**
- * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
- If !0, a specific tasker will be called and this function will exit after completion
- * */
-int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
-
-  int8_t result = 0;
-
-  if(target_tasker){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
-    #endif// ENABLE_LOG_LEVEL_INFO
-  }
-
-  #ifdef USE_MODULE_CORE_RULES
-  if(flags_is_executing_rule != true){
-    pCONT_rules->Tasker_Rules_Interface(function);
-  }
+  #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
+    pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID] = new mSDCardLogger();
   #endif
 
-  JsonParserObject obj = 0;
-  // JsonParser parser(parsing_buffer);
-  // char parsing_buffer[data_buffer.payload.len+1];
-  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-
-
-
-  // JsonParser parser(nullptr);//data_buffer.payload.ctr);
-
-  // JsonParser parser(data_buffer.payload.ctr);
-
-  // Method is jdson, so one off parse it (maybe this should be done before calling? passing globally)
-  
-  switch(function)
-  {
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:    
-      // if(obj && GetModuleIDbyFriendlyName(topic)==i)
-      // else{break;}
-      // If match, switch target tasker to be the directed command
-    case FUNC_JSON_COMMAND_ID:
-    { 
-      
-      JsonParser parser(data_buffer.payload.ctr);
-      
-      // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
-      obj = parser.getRootObject();   
-      if (!obj) { 
-        #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-        #endif //ENABLE_LOG_LEVEL_COMMANDS
-        break;
-      } 
-
-      for(uint8_t i=0;i<GetClassCount();i++)
-      { 
-        pModule[i]->Tasker(function, obj);
-      }
-      return 0;
-      // else{
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("D_JSON_DESERIALIZATION_ERROR"));
-      //   AddLog(LOG_LEVEL_TEST, PSTR("D_JSON_DESERIALIZATION_ERROR=%d"),obj["test2"].getInt());   
-      // }
-    } 
-    break;
-  } //END switch
-
-
-  for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
-
-    switch_index = target_tasker ? target_tasker : i;
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-    #endif
-    
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-    uint32_t start_millis = millis();
-    #endif
-
-    switch(function){
-      // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
-      case FUNC_JSON_COMMAND_ID: 
-        // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
-      //   if(obj)
-      //   {
-      //     // pModule[switch_index]->parse_JSONCommand(obj); // This should only happen if the function is enabled internally
-      //     pModule[switch_index]->Tasker(function,obj);
-      //   }
-      break;
-      default:
-        pModule[switch_index]->Tasker(function, obj);
-      break;
-    }
-
-
-    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-    uint32_t end_millis = millis(); // Remember start millis
-    uint32_t this_millis = end_millis - start_millis; // Get this execution time 
-    #if defined(DEBUG_EXECUTION_TIME) // Get average
-    //if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
-      module_settings.execution_time_average_ms[i] += this_millis;
-      module_settings.execution_time_average_ms[i] /= 2; //gets average
-     // Get max
-      if(this_millis > module_settings.execution_time_max_ms[i]){
-        module_settings.execution_time_max_ms[i] = this_millis; // remember max
-      }
-    //}
-    #endif // DEBUG_EXECUTION_TIME
-    #endif
-    
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
-    #endif
-    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-      if(this_millis > 500){
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-      }
-    #endif
-
-    if(target_tasker!=0){
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
-      #endif// ENABLE_LOG_LEVEL_INFO
-      break; //only run for loop for the class set. if 0, rull all
-    }
-    // Special flag that can be set to end interface ie event handled, no need to check others
-    if(fExitTaskerWithCompletion){
-      fExitTaskerWithCompletion=false;
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
-      #endif// ENABLE_LOG_LEVEL_INFO
-      break; //only run for loop for the class set. if 0, rull all
-    }
-  
-  } //end for
-
-  DEBUG_LINE;
-  if(!pCONT_set->flag_boot_complete){
-    char buffer_taskname[50];
-    if(function != last_function){
-      uint8_t boot_percentage = map(function,0,FUNC_ON_BOOT_COMPLETE,0,100);
-      //5% = 1 bar, 20 bars total [B                   ]
-      //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
-      #ifndef DISABLE_SERIAL_LOGGING
-      DEBUG_PRINTF("[");
-      for(uint8_t percent=0;percent<100;percent+=5){  
-        if(percent<boot_percentage){ Serial.print((char)219); }else{ DEBUG_PRINTF(" "); }
-      }      
-      #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
-      #else
-      DEBUG_PRINTF("] %03d\n\r",boot_percentage);
-      #endif // ENABLE_DEBUG_FUNCTION_NAMES
-      #endif
-      //}
-      last_function = function;
-    }
-    if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
-  }//flag_boot_complete
-  
-  DEBUG_LINE;
-  #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
-  #endif
-
-  return result;
-
-}
-
-
+};
 /**
  * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
  If !0, a specific tasker will be called and this function will exit after completion
