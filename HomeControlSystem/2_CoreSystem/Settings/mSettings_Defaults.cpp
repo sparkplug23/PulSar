@@ -494,13 +494,13 @@ void mSettings::SystemSettings_DefaultBody_Rules(){
 void mSettings::SystemSettings_DefaultBody_Displays(){
 
   Settings.display.model = 0;
-  Settings.display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
+  Settings.display.mode = EM_DISPLAY_MODE_LOCAL1_ID;
   Settings.display.refresh = 2;
-  Settings.display.rows = 2;
+  Settings.display.rows = 4;
   Settings.display.cols[0] = 16;
   Settings.display.cols[1] = 8;
-  Settings.display.dimmer = 7;//1;
-  Settings.display.size = 1;
+  Settings.display.dimmer = 7;
+  Settings.display.size = 2;
   Settings.display.font = 1;
   Settings.display.rotate = 0;
 

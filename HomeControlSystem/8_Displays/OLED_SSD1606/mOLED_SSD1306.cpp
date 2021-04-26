@@ -43,16 +43,14 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if (!pCONT_iDisp->renderer){ return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
-      EveryLoop();
-    break;
     case FUNC_EVERY_SECOND:
-      RefreshDisplay();
+      EverySecond();
     break;
     /************
      * COMMANDS SECTION * 
@@ -103,98 +101,32 @@ void mOLED_SSD1306::Init(void)
 }
 
 
-void mOLED_SSD1306::EveryLoop()
+void mOLED_SSD1306::EverySecond(void)
 {
+  /**
+   * RefreshDisplay
+   * */
+  switch (pCONT_set->Settings.display.mode) {
+    case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
+    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID:
+      // Refresh not needed, drawn directly on execution
+      break;
+    case EM_DISPLAY_MODE_UTC_TIME_ID:
+      ShowUTCTime();
+      break;
+    case EM_DISPLAY_MODE_LOG_APPENDING_ID:
+    case EM_DISPLAY_MODE_LOCAL1_ID:
+    case EM_DISPLAY_MODE_LOCAL2_ID:
+    case EM_DISPLAY_MODE_MQTT1_ID:
+    case EM_DISPLAY_MODE_MQTT2_ID:
+      ShowPrintAppendingLog();
+      break;
+    case EM_DISPLAY_MODE_LOG_STATIC_ID:
+      ShowPrintStaticLog();
+      break;
+  }
 
 }
-
-
-uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
-
-}
-
-
-uint8_t mOLED_SSD1306::ConstructJSON_Sensor(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-  return JsonBuilderI->End();
-    
-}
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-void mOLED_SSD1306::MQTTHandler_Init(){
-
-  struct handler<mOLED_SSD1306>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-void mOLED_SSD1306::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mOLED_SSD1306::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, 
-    EM_MODULE_DISPLAYS_OLED_SSD1306_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
-  );
-
-}
-
-#endif
 
 
 void mOLED_SSD1306::InitDriver(void)
@@ -209,18 +141,18 @@ void mOLED_SSD1306::InitDriver(void)
     if (pCONT_sup->I2cSetDevice(OLED_ADDRESS1))
     {
       pCONT_set->Settings.display.address[0] = OLED_ADDRESS1;
-      pCONT_set->Settings.display.model = XDSP_02;
+      pCONT_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
     }
     else if (pCONT_sup->I2cSetDevice(OLED_ADDRESS2))
     {
       pCONT_set->Settings.display.address[0] = OLED_ADDRESS2;
-      pCONT_set->Settings.display.model = XDSP_02;
+      pCONT_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
     }
   }
 
   AddLog(LOG_LEVEL_INFO, PSTR("DSP: SD1306 address[0] %d"),pCONT_set->Settings.display.address[0]);
   
-  if(XDSP_02 == pCONT_set->Settings.display.model)
+  if(pCONT_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID)
   {
     pCONT_sup->I2cSetActiveFound(pCONT_set->Settings.display.address[0], "SSD1306");
 
@@ -253,37 +185,81 @@ void mOLED_SSD1306::InitDriver(void)
 }
 
 
-void mOLED_SSD1306::Ssd1306PrintLog(void)
+/**
+ * @brief Will take from log_buffer and fill screen_buffer, shifting the rows up
+ * */
+void mOLED_SSD1306::ShowPrintAppendingLog(void)
 {
-  pCONT_iDisp->disp_refresh--;
-  if (!pCONT_iDisp->disp_refresh) {
-    pCONT_iDisp->disp_refresh = pCONT_set->Settings.display.refresh;
-    if (!pCONT_iDisp->disp_screen_buffer_cols) { pCONT_iDisp->DisplayAllocScreenBuffer(); }
+  
+  // If no columns have been init, then first allocate memory
+  if (!pCONT_iDisp->screen_buffer.cols) { pCONT_iDisp->ScreenBuffer_Alloc(); }
 
-    char* txt = pCONT_iDisp->DisplayLogBuffer('\370');
-    if (txt != NULL) {
-      uint8_t last_row = pCONT_set->Settings.display.rows -1;
+  // Get pointer to row
+  char* txt = pCONT_iDisp->LogBuffer_GetRowPointer('\370');
+  if (txt != NULL) {
+    // Last row is row_size - 1 for indexing
+    uint8_t last_row = pCONT_set->Settings.display.rows -1;
 
-      pCONT_iDisp->renderer->clearDisplay();
-      pCONT_iDisp->renderer->setTextSize(pCONT_set->Settings.display.size);
-      pCONT_iDisp->renderer->setCursor(0,0);
-      for (byte i = 0; i < last_row; i++) {
-        strlcpy(pCONT_iDisp->disp_screen_buffer[i], pCONT_iDisp->disp_screen_buffer[i +1], pCONT_iDisp->disp_screen_buffer_cols);
-        pCONT_iDisp->renderer->println(pCONT_iDisp->disp_screen_buffer[i]);
-      }
-      strlcpy(pCONT_iDisp->disp_screen_buffer[last_row], txt, pCONT_iDisp->disp_screen_buffer_cols);
-      pCONT_iDisp->DisplayFillScreen(last_row);
+    // Start by clearing the display
+    pCONT_iDisp->renderer->clearDisplay();
+    pCONT_iDisp->renderer->setTextSize(pCONT_set->Settings.display.size);
+    pCONT_iDisp->renderer->setCursor(0,0);
 
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "[%s]"), pCONT_iDisp->disp_screen_buffer[last_row]);
-
-      pCONT_iDisp->renderer->println(pCONT_iDisp->disp_screen_buffer[last_row]);
-      pCONT_iDisp->renderer->Updateframe();
+    // Shift the logs by moving the rows from next into current and display this
+    for (byte i = 0; i < last_row; i++) {
+      strlcpy(pCONT_iDisp->screen_buffer.ptr[i], pCONT_iDisp->screen_buffer.ptr[i +1], pCONT_iDisp->screen_buffer.cols);
+      pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[i]);
     }
+    // Add new row
+    strlcpy(pCONT_iDisp->screen_buffer.ptr[last_row], txt, pCONT_iDisp->screen_buffer.cols);
+    // This is only done here, as the copied rows will have it done at this line when first commited to the screen_buffer
+    pCONT_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(last_row); 
+
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "[%s]"), pCONT_iDisp->screen_buffer.ptr[last_row]);
+
+    // Print last row
+    pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[last_row]);
+
+    // Commit display refresh
+    pCONT_iDisp->renderer->Updateframe();
   }
+
+}
+
+/**
+ * @brief Unlike AppendingLog method, this will only commit all of log_buffer into screen_buffer and display
+ * */
+void mOLED_SSD1306::ShowPrintStaticLog(void)
+{
+  
+  // If no columns have been init, then first allocate memory
+  if (!pCONT_iDisp->screen_buffer.cols) { pCONT_iDisp->ScreenBuffer_Alloc(); }
+
+  // Start by clearing the display
+  pCONT_iDisp->renderer->clearDisplay();
+  pCONT_iDisp->renderer->setTextSize(pCONT_set->Settings.display.size);
+  pCONT_iDisp->renderer->setCursor(0,0);
+
+  // Copy log_buffer contents into screen_buffer
+  for(int row_index=0; row_index<pCONT_set->Settings.display.rows; row_index++)
+  {
+    // Get log_buffer by row
+    char* row_ptr = pCONT_iDisp->LogBuffer_GetRowPointerByRowIndex(row_index);
+    // Move to screen_buffer
+    strlcpy(pCONT_iDisp->screen_buffer.ptr[row_index], row_ptr, pCONT_iDisp->screen_buffer.cols);
+    // Fill remaining spaces
+    pCONT_iDisp->ScreenBuffer_SetUnusedRowCharsToSpaceChar(row_index); 
+    // Write row to display
+    pCONT_iDisp->renderer->println(pCONT_iDisp->screen_buffer.ptr[row_index]);
+  }
+
+  // Commit display refresh
+  pCONT_iDisp->renderer->Updateframe();
+
 }
 
 
-void mOLED_SSD1306::Ssd1306Time(void)
+void mOLED_SSD1306::ShowUTCTime(void)
 {
 
   char line[12];
@@ -301,49 +277,59 @@ void mOLED_SSD1306::Ssd1306Time(void)
 }
 
 
-void mOLED_SSD1306::ShowModuleBuffer(void)
-{
-  char line[12];
 
-  sprintf(module_buffer,"test");
-  pCONT_iDisp->renderer->clearDisplay();
-  pCONT_iDisp->renderer->setTextSize(pCONT_set->Settings.display.size);
-  pCONT_iDisp->renderer->setTextFont(pCONT_set->Settings.display.font);
-  pCONT_iDisp->renderer->setCursor(0, 0);
-  // snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), pCONT_time->RtcTime.hour,  pCONT_time->RtcTime.minute,  pCONT_time->RtcTime.second);  // [ 12:34:56 ]
-  pCONT_iDisp->renderer->println(module_buffer);
-  pCONT_iDisp->renderer->println();
-  
-  // snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  pCONT_time->RtcTime.Mday,  pCONT_time->RtcTime.month,  pCONT_time->RtcTime.year);   // [01-02-2018]
-  // pCONT_iDisp->renderer->println(line);
+uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_method){
 
-  pCONT_iDisp->renderer->Updateframe();
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
+  return JsonBuilderI->End();
 
 }
 
 
-void mOLED_SSD1306::RefreshDisplay(void)
-{
-  if (!pCONT_iDisp->renderer) return;
+/*********************************************************************************************************************************************
+******** MQTT Stuff **************************************************************************************************************************
+**********************************************************************************************************************************************
+********************************************************************************************************************************************/
+
+void mOLED_SSD1306::MQTTHandler_Init(){
+
+  struct handler<mOLED_SSD1306>* mqtthandler_ptr;
+
+  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
   
-  switch (pCONT_set->Settings.display.mode) {
-    case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
-    case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID:
-      // Refresh not needed, drawn directly on execution
-      break;
-    case EM_DISPLAY_MODE_UTC_TIME_ID:
-      Ssd1306Time();
-      break;
-    case EM_DISPLAY_MODE_LOCAL1_ID:
-    case EM_DISPLAY_MODE_LOCAL2_ID:
-    case EM_DISPLAY_MODE_MQTT1_ID:
-    case EM_DISPLAY_MODE_MQTT2_ID:
-      Ssd1306PrintLog();
-      break;
-    case EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW:
-      ShowModuleBuffer();
-      break;
-  }
+} //end "MQTTHandler_Init"
+
+
+// Can these be replaced by mqtt shared function that gets the mqtt from the module
+void mOLED_SSD1306::MQTTHandler_Set_fSendNow(){
+
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+
+} //end "MQTTHandler_Init"
+
+
+void mOLED_SSD1306::MQTTHandler_Set_TelePeriod(){
+
+  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+
+} //end "MQTTHandler_Set_TelePeriod"
+
+
+void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+
+  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, 
+    EM_MODULE_DISPLAYS_OLED_SSD1306_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
+  );
 
 }
 
+#endif

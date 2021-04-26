@@ -177,9 +177,9 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "FLAGS: %d"
   //     "BASE: %d"
   //   ),
-
+#ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
-
+#endif
   uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
   // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template.full_ctr);
@@ -205,7 +205,9 @@ AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardw
     //   case 12: real_gpio = 16; break;
     // }
 
+#ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     AddLog(LOG_LEVEL_TEST,PSTR("\t%d(%d):%d"),gpio,real_gpio,pCONT_set->Settings.user_template2.hardware.gp.io[gpio]);
+#endif
   }
   // DEBUG_PRINTF("FLAGS: %08X\n\r",pCONT_set->Settings.user_template2.flags);
   // DEBUG_PRINTF("BASE : %08X\n\r",pCONT_set->Settings.user_template2.base);
@@ -222,10 +224,12 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
   // Read into local
   memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
 
+  #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
   AddLog(LOG_LEVEL_DEBUG, PSTR("Load = \"%s\""), buffer);
   #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   
   JsonParser parser(buffer);
   JsonParserObject obj = parser.getRootObject();   
@@ -319,11 +323,14 @@ uint8_t jsonpair_count = jtok.size();
           pCONT_set->Settings.user_template2.hardware.gp.io[index_pin] = gpio_number; // non adjusted pin_number
           // FULL pin list
           // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
+          
+          #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
           AddLog(LOG_LEVEL_INFO, PSTR("hardware.gp.io[%d/%d] = %d SET"), 
             real_pin, 
             index_pin,
             pCONT_set->Settings.user_template2.hardware.gp.io[index_pin]
           );
+          #endif
           // AddLog(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
         }else{
           AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\" %d"),value, gpio_number);

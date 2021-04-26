@@ -49,7 +49,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 // //#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
 // //#define ENABLE_LOG_LEVEL_ALL
   
- 
+//  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
 
 // Can only be used when hardware serial is enabled

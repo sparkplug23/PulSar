@@ -8,12 +8,40 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   
-  /***
-   * As order of importance, others that rely on previous commands must come after
-   * */
-  // int val = 0;
-  // jtok = obj["test"];
-    // AddLog(LOG_LEVEL_TEST, PSTR("val=%d"),jtok.getInt());
+  if(jtok = obj["DisplayModel"]){
+    pCONT_set->Settings.display.model = jtok.getInt();
+  }
+  if(jtok = obj["DisplayMode"]){
+    pCONT_set->Settings.display.mode = jtok.getInt();
+  }
+  if(jtok = obj["DisplayRefresh"]){
+    pCONT_set->Settings.display.refresh = jtok.getInt();
+  }
+  if(jtok = obj["DisplayRows"]){
+    pCONT_set->Settings.display.rows = jtok.getInt();
+  }
+  if(jtok = obj["DisplayCols"])
+  {
+    JsonParserArray arr_pos = jtok;
+    if(arr_pos.size() == 2)
+    {
+      pCONT_set->Settings.display.cols[0] = arr_pos[0].getInt();
+      pCONT_set->Settings.display.cols[1] = arr_pos[1].getInt();
+    }
+  }
+  if(jtok = obj["DisplayDimmer"]){
+    pCONT_set->Settings.display.dimmer = jtok.getInt();
+  }
+  if(jtok = obj["DisplaySize"]){
+    pCONT_set->Settings.display.size = jtok.getInt();
+  }
+  if(jtok = obj["DisplayFont"]){
+    pCONT_set->Settings.display.font = jtok.getInt();
+  }
+  if(jtok = obj["DisplayRotate"]){
+    pCONT_set->Settings.display.rotate = jtok.getInt();
+  }
+
 
   if(jtok = obj["DisplayText"]){
     CmndDisplayText(jtok.getStr());
@@ -28,9 +56,90 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   //     data_buffer.isserviced++;
   //   }
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+
+  /**
+   * @brief DisplayAddLog
+   * */
+  if(jtok = obj["DisplayAddLog"]){
+    if(jtok.isStr()){
+      CommandSet_DisplayAddLog(jtok.getStr());
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    #endif
+  }
+
+  /**
+   * @brief DisplayClearLog
+   * */
+  if(jtok = obj["DisplayClearLog"]){
+    if(jtok.isInt()){
+      CommandSet_DisplayClearLog(jtok.getInt());
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog %d"),jtok.getInt());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    #endif
+  }
+
+
+
+  /**
+   * @brief DisplayAddLog
+   * */
+  if(jtok = obj["DisplayAddStaticLog"]){
+    // if(jtok.isStr()){
+    //   CommandSet_DisplayAddLog(jtok.getStr());
+    // }
+
+    pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+    LogBuffer_Add((char*)jtok.getStr());
+
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    #endif
+  }
+
+
+
+  /**
+   * @brief DisplayStaticLog with direct index
+   * */
+  if(jtok = obj["DisplayStaticLog"].getObject()["Row"]){
+    uint8_t row_number = jtok.getInt();
+    if(jtok = obj["DisplayStaticLog"].getObject()["Text"]){
+      pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+      LogBuffer_AddRow((char*)jtok.getStr(), row_number);
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    #endif
+  }
+
+  /**
+   * @brief DisplayStaticLog with arrays per line
+   * */
+  if(jtok = obj["DisplayStaticLog"])
+  {
+    if(jtok.isArray())
+    {
+      pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+      JsonParserArray array = jtok;
+      uint8_t index = 0;
+      LogBuffer_Clear();
+      for(auto& object:array)
+      {
+        LogBuffer_AddRow((char*)object.getStr(), index++);
+      }
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    #endif
+  }
+
+
 
 
   if(jtok = obj["ClearDisplay"]){
@@ -55,7 +164,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   }
 
 
-  if(jtok = obj["DisplayMode"]){
+  if(jtok = obj[PM_JSON_DISPLAY_MODE]){
     SetDisplayMode(jtok.getInt());
   }
 
@@ -64,11 +173,50 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 }
 
 
-
-
 // /*********************************************************************************************\
 //  * Commands
 // \*********************************************************************************************/
+
+
+/**
+ * @brief CommandSet_DisplayAddLog
+ * */
+void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
+{  
+  SetDisplayMode(EM_DISPLAY_MODE_LOCAL1_ID);
+  LogBuffer_Add((char*)c);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  #endif
+}
+
+/**
+ * @brief CommandSet_DisplayClearLog
+ * */
+void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
+{  
+  LogBuffer_Clear(); 
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  #endif
+}
+
+
+/**
+ * @brief CommandSet_DisplayAddLog
+ * */
+// void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
+// {  
+//   SetDisplayMode(EM_DISPLAY_MODE_LOG_STATIC_ID);
+//   LogBuffer_Add((char*)c);
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   #endif
+// }
+
+
+
+
 
 // void CmndDisplay(void) {
 //   Response_P(PSTR("{\"" D_PRFX_DISPLAY "\":{\"" D_CMND_DISP_MODEL "\":%d,\"" D_CMND_DISP_TYPE "\":%d,\"" D_CMND_DISP_WIDTH "\":%d,\"" D_CMND_DISP_HEIGHT "\":%d,\""
@@ -141,7 +289,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 //         if (renderer) renderer->fillScreen(bg_color);
 //         else DisplayClear();
 //       } else {
-//         DisplayLogBufferInit();
+//         LogBuffer_Init();
 //         DisplayInit(DISPLAY_INIT_MODE);
 //       }
 //     }
@@ -196,14 +344,14 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 //         pCONT_set->Settings.display.rows = pCONT_set->Settings.display.cols[0];
 //         pCONT_set->Settings.display.cols[0] = temp_rows;
 // #ifdef USE_DISPLAY_MODES1TO5
-//         DisplayReAllocScreenBuffer();
+//         ScreenBuffer_ReAlloc();
 // #endif  // USE_DISPLAY_MODES1TO5
 //       }
 // */
 //       pCONT_set->Settings.display.rotate = XdrvMailbox.payload;
 //       DisplayInit(DISPLAY_INIT_MODE);
 // #ifdef USE_DISPLAY_MODES1TO5
-//       DisplayLogBufferInit();
+//       LogBuffer_Init();
 // #endif  // USE_DISPLAY_MODES1TO5
 //     }
 //   }
@@ -231,8 +379,8 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 //       pCONT_set->Settings.display.cols[XdrvMailbox.index -1] = XdrvMailbox.payload;
 // #ifdef USE_DISPLAY_MODES1TO5
 //       if (1 == XdrvMailbox.index) {
-//         DisplayLogBufferInit();
-//         DisplayReAllocScreenBuffer();
+//         LogBuffer_Init();
+//         ScreenBuffer_ReAlloc();
 //       }
 // #endif  // USE_DISPLAY_MODES1TO5
 //     }
@@ -244,8 +392,8 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 //   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= DISPLAY_MAX_ROWS)) {
 //     pCONT_set->Settings.display.rows = XdrvMailbox.payload;
 // #ifdef USE_DISPLAY_MODES1TO5
-//     DisplayLogBufferInit();
-//     DisplayReAllocScreenBuffer();
+//     LogBuffer_Init();
+//     ScreenBuffer_ReAlloc();
 // #endif  // USE_DISPLAY_MODES1TO5
 //   }
 //   ResponseCmndNumber(pCONT_set->Settings.display.rows);
@@ -289,9 +437,11 @@ void mDisplaysInterface::CmndDisplayText(const char* buffer) {
 //     if(pCONT_set->Settings.display.model == 15) {
 //       pCONT->Tasker_Interface(FUNC_DISPLAY_SEVENSEG_TEXT);
 //     } else if (!pCONT_set->Settings.display.mode) {
+#ifdef ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
       DisplayText(buffer);
+#endif // ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
     // } else {
-    //   DisplayLogBufferAdd(XdrvMailbox.data);
+    //   LogBuffer_Add(XdrvMailbox.data);
     // }
 // #endif  // USE_DISPLAY_MODES1TO5
 

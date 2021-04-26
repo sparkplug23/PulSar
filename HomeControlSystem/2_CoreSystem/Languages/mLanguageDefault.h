@@ -1183,6 +1183,9 @@
 #define D_JSON_CHANNELCOUNT "ChannelCount"
 // #define D_JSON_DATA "Data"
 #define D_JSON_DISTANCE "Distance"
+
+#define D_JSON_DISPLAY_MODE "DisplayMode"
+
 #define D_JSON_DNSSERVER "DNSServer"
 #define D_JSON_DONE "Done"
 #define D_JSON_DOWNTIME "Downtime"
