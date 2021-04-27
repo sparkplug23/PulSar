@@ -36,6 +36,10 @@ class mSDCardLogger :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
     
+    void EverySecond();
+    
+    void SubTask_UpdateOLED();
+    
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
 
@@ -55,6 +59,18 @@ class mSDCardLogger :
     //No extra handlers example
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     //with extra handlers example
+    
+    uint8_t list_ids[3] = {
+      MQTT_HANDLER_SETTINGS_ID, 
+      MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+      MQTT_HANDLER_SENSOR_TELEPERIOD_ID
+    };
+    
+    struct handler<mSDCardLogger>* list_ptr[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
     #endif // USE_MODULE_NETWORK_MQTT
 
 

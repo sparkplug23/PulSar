@@ -250,16 +250,36 @@ const char* state_ctr(void);
 
     }
 
+
+// Choose auto x when you want to work with copies.
+// Choose auto &x when you want to work with original items and may modify them.
+// Choose auto const &x when you want to work with original items and will not modify them.
+
     /****
      * "class-less" Pointer Member function that takes the struct handler which contains if/when a mqtt payload should
      * be sent. If a payload should sent, the formatted publish function is called.
      * */
-    template<typename T>
-    void MQTTHandler_Command(T& class_ptr, uint8_t class_id, handler<T>* handler_ptr)
-    {
 
+    /**
+     * @brief Function will take the struct storing the mqtt handler options, and check the variables, sending if required
+     * @param class_ptr Pointer to the instance of a class
+     * @param class_id  Numerical (Enum) value of the class, which is used to acquire the mqtt topic
+     * @param handler_ptr Pointer to the handler struct with timing and function to be called
+     * @param optional_desired_id Optional handler_id, if set (>=0) then only matching handler IDs will be sent. Used for group triggering by a type.
+     * @note  Optional desired_id will check if the handler id was set, and if it does not match, will return without servicing handler
+     * */
+    template<typename T>
+    void MQTTHandler_Command(T& class_ptr, uint8_t class_id, handler<T>* handler_ptr, int8_t optional_desired_id = -1)
+    {
+      // Sanity check
       if(handler_ptr == nullptr){
         return;
+      }
+      // Block non matching ids
+      if(optional_desired_id>=0)
+      {
+        if(optional_desired_id != handler_ptr->handler_id)
+          return;
       }
 
       #ifdef ENABLE_ADVANCED_DEBUGGING

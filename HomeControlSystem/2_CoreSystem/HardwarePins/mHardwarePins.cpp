@@ -440,44 +440,26 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   #endif // ESP8266
 
   #ifdef ESP32
-  //nodemcu/wemos named
-  if     (strcmp(c,"D3")==0){ pin = 0; }
-  else if(strcmp(c,"TX")==0){ pin = 1; }
-  else if(strcmp(c,"D4")==0){ pin = 2; }
-  else if(strcmp(c,"RX")==0){ pin = 3; }
-  else if(strcmp(c,"D2")==0){ pin = 4; }
-  else if(strcmp(c,"D1")==0){ pin = 5; }
-  else if(strcmp(c,"SD2")==0){ pin = 9; }
-  else if(strcmp(c,"SD3")==0){ pin = 10; }
-  else if(strcmp(c,"D6")==0){ pin = 12; }
-  else if(strcmp(c,"D7")==0){ pin = 13; }
-  else if(strcmp(c,"D5")==0){ pin = 14; }
-  else if(strcmp(c,"D8")==0){ pin = 15; }
-  else if(strcmp(c,"D0")==0){ pin = 16; }
-  else if(strcmp(c,"LBI")==0){ 
-    // #ifdef LED_BUILTIN
-    // pin = LED_BUILTIN; 
-    // #else
-    pin = 2;
-    // #endif   
+  
+  // Check for pin_array matching
+  char buffer[10];
+  for(uint8_t i=0; i<ARRAY_SIZE(gpio_pin_by_index); i++)
+  {
+    sprintf(buffer,"%d",gpio_pin_by_index[i]);
+    if(strcmp(c,buffer)==0)
+    {
+      pin = gpio_pin_by_index[i];
+      break;
+    }
   }
 
+  // Names for pins
+  if(strcmp(c,"LBI")==0){ 
+    pin = 2;
+  }
 
-  // numbered
-  else if(strcmp(c,"0")==0){ pin = 0; }
-  else if(strcmp(c,"1")==0){ pin = 1; }
-  else if(strcmp(c,"2")==0){ pin = 2; }
-  else if(strcmp(c,"3")==0){ pin = 3; }
-  else if(strcmp(c,"4")==0){ pin = 4; }
-  else if(strcmp(c,"5")==0){ pin = 5; }
-  else if(strcmp(c,"9")==0){ pin = 9; }
-  else if(strcmp(c,"10")==0){ pin = 10; }
-  else if(strcmp(c,"12")==0){ pin = 12; }
-  else if(strcmp(c,"13")==0){ pin = 13; }
-  else if(strcmp(c,"14")==0){ pin = 14; }
-  else if(strcmp(c,"15")==0){ pin = 15; }
-  else if(strcmp(c,"16")==0){ pin = 16; }
-  else{
+  if(pin<0)
+  {
     pin = -1;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
@@ -493,13 +475,13 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
 
 }
 
-int mHardwarePins::jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-  if (tok->type == JSMN_STRING && (int)strlen(s) == tok->len &&
-      strncmp(json + tok->start, s, tok->len) == 0) {
-    return 0;
-  }
-  return -1;
-}
+// int mHardwarePins::jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+//   if (tok->type == JSMN_STRING && (int)strlen(s) == tok->len &&
+//       strncmp(json + tok->start, s, tok->len) == 0) {
+//     return 0;
+//   }
+//   return -1;
+// }
 
 
 void mHardwarePins::ParseModuleTemplate(){
@@ -1792,6 +1774,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
 
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_TX_ID; }
+
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR)==0){  return GPIO_GPS_SERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR)==0){  return GPIO_GPS_SERIAL0_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_TX_CTR)==0){  return GPIO_GPS_SERIAL1_TX_ID; }
@@ -1842,6 +1827,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
+
+  
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
 
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }

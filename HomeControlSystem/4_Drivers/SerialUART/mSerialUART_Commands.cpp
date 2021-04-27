@@ -1,4 +1,35 @@
-// #include "mSerialUART.h"
+#include "mSerialUART.h"
+
+
+void mSerialUART::parse_JSONCommand(JsonParserObject obj){
+
+  
+
+//   if(obj.containsKey(D_JSON_FANSPEED)){
+//     int speed = obj[D_JSON_FANSPEED];
+//     test_val = speed;
+//     if(speed>0){
+//       analogWrite(pin, test_val);
+//     }else
+//     if(speed==1023){
+//       digitalWrite(pin, HIGH);      
+//     }else{
+//       digitalWrite(pin, LOW);
+//     }
+//     // if(speed>3){
+//     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+//     //   speed=0; //default off
+//     // }      
+//     // SetFanSpeed(speed, false);
+//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
+//     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+//     // isserviced++;
+//   }
+  
+  
+
+}
 
 // #ifdef USE_MODULE_DRIVERS_SDCARD
 

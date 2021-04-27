@@ -127,7 +127,7 @@ void mGPS::init_UART2_ISR(){
   //   uart_intr_handle_u2_static,
   //   NULL, 
   //   ESP_INTR_FLAG_IRAM,
-  //   handle_console_uart2
+  //   uart2_handle_console
   // );
   
 }

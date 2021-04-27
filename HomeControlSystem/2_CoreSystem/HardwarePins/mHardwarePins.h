@@ -85,7 +85,7 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
 
     void ModuleSettings_ShowActiveTemplate();
     
-const char* GetModuleNameByID(uint8_t id, char* buffer);
+    const char* GetModuleNameByID(uint8_t id, char* buffer);
 
     int16_t GetModuleIDbyName(const char* c);
     
@@ -115,7 +115,7 @@ const char* GetModuleNameByID(uint8_t id, char* buffer);
     bool ValidModule(uint8_t index);
     const char* AnyModuleName2(uint8_t index);
 
-    int jsoneq(const char *json, jsmntok_t *tok, const char *s) ;
+    // int jsoneq(const char *json, jsmntok_t *tok, const char *s) ;
     const char* AnyModuleName(uint8_t index, char* buffer, uint8_t buflen);
 
     const char* ModuleName(char* buffer, uint8_t buflen);

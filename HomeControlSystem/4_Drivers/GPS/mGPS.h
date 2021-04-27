@@ -331,7 +331,7 @@ class mGPS :
     uint8_t rxbuf2[256];
     // Register to collect data length
     uint16_t urxlen2;
-    uart_isr_handle_t *handle_console_uart2;
+    uart_isr_handle_t *uart2_handle_console;
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
 

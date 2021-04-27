@@ -107,22 +107,19 @@ void mOLED_SSD1306::EverySecond(void)
    * RefreshDisplay
    * */
   switch (pCONT_set->Settings.display.mode) {
+    default:
+    case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
+      ShowScrollingLog();
+      break;
+    case EM_DISPLAY_MODE_LOG_STATIC_ID:
+      ShowStaticLog();
+      break;
     case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
     case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_JSON_ID:
       // Refresh not needed, drawn directly on execution
       break;
     case EM_DISPLAY_MODE_UTC_TIME_ID:
       ShowUTCTime();
-      break;
-    case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
-    case EM_DISPLAY_MODE_LOCAL1_ID:
-    case EM_DISPLAY_MODE_LOCAL2_ID:
-    case EM_DISPLAY_MODE_MQTT1_ID:
-    case EM_DISPLAY_MODE_MQTT2_ID:
-      ShowScrollingLog();
-      break;
-    case EM_DISPLAY_MODE_LOG_STATIC_ID:
-      ShowStaticLog();
       break;
   }
 
