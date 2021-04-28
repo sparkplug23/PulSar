@@ -22,25 +22,16 @@
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#include "0_ConfigUser/mUserConfig_Secret.h"
 #endif // D_USER_MICHAEL // Include my personally named secret file
-
 #ifdef D_USER_MICHAEL // Include my personally named secret file
-#include "0_ConfigUser/mFirmwareCustom_Secret_Michael.h"
-#include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
+#include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
 #endif // D_USER_MICHAEL
+
+#include "0_ConfigUser/mUserConfig_Secret.h"
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
 #endif
-
-// #ifdef D_USER_MICHAEL // Include my personally named secret file
-// #include "0_ConfigUser/mFirmwareCustom_Secret_Michael.h"
-// #include "0_ConfigUser/mUserConfig_Secret_Michael.h"    
-// #else
-// #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-// #include "0_ConfigUser/mUserConfig_Secret.h"
-// #endif // D_USER_MICHAEL
 
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes

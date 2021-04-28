@@ -1446,9 +1446,10 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 //         {
 //             JsonObject obj = jsonDoc.as<JsonObject>();
 
-//     #ifndef ENABLE_DEVFEATURE_JSONPARSER
+
 //             pCONT_ladd->parse_JSONCommand(jsonDoc.as<JsonObjectConst>());
-//     #endif // ENABLE_DEVFEATURE_JSONPARSER
+
+
 
 //             for (JsonPair keyValue : obj) {
 //               // AddLog(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());

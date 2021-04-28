@@ -201,7 +201,7 @@ void AddLog(
 
   // SERIAL_DEBUG.printf("%s %d\r\n","telnet",millis());
   // LOG : TELNET
-  #ifdef ENABLE_TELNET_LOGGING // off by default for performance
+  // #ifdef ENABLE_TELNET_LOGGING // off by default for performance
   // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
     // if(pCONT_sto->server!=nullptr){ // needs ignored before it has been started!
     
@@ -222,7 +222,7 @@ void AddLog(
 
 
   // }
-  #endif
+  // #endif
 
   // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
   // LOG : WEBSERVER

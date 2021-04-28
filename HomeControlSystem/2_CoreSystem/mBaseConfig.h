@@ -1,17 +1,33 @@
+/**
+  @brief mBaseConfig.h - minimum defines required for default builds
+  @note Users "may" edit this file, but it is instead recommended to redefine them in "mUserConfig_Secret.h"
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 #ifndef MUSERCONFIG_DEFAULTS_H
 #define MUSERCONFIG_DEFAULTS_H
-
-//previously userconfig, which will optional be added via the bottom of here as overrides
-
-// Contains defaults
 
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#include "0_ConfigUser/mUserConfig_Secret.h"
 
 /*********************************************************************************************\
  * This file is one of two user configurable files
+ * 
+ * ATTENTION: Changes to this file WILL be erased with each git pull
  * 
  * "mUserConfig.h" lists all the parameters that users can set as default state when the device is reset.
  * To assert these settings after the initial flash, the SETTINGS_HOLDER should be changed to another number (1-65000)
@@ -26,14 +42,13 @@
  * these values are intended for advanced users to create defaults for flashing multiple devices for easier configuring.
 \*********************************************************************************************/
 
-// #define ESP8266
-//#define USE_CONFIG_OVERRIDE                      // Uncomment to use mUserConfig_Override.h file. See README.md
+#define USE_CONFIG_OVERRIDE                      // Uncomment to use mUserConfig_Override.h file. See README.md
 
 /*********************************************************************************************\
  * This MUST BE CHANGED for ANY parameters in this file to overwrite those saved in settings
 \*********************************************************************************************/
 #ifndef SETTINGS_HOLDER
-#define SETTINGS_HOLDER             4631              // [Reset 1] Change this value (max 32000) to load SECTION1 configuration parameters to flash
+#define SETTINGS_HOLDER             1              // [Reset 1] Change this value (max 32000) to load SECTION1 configuration parameters to flash
 #endif
 
 #define SERIALD Serial //serial debug
@@ -49,130 +64,84 @@
  * "_ID"      Same as "_NUM"
 \*********************************************************************************************/
 
-// -- Module Settings ----------------------------------------
-#define MODULE                 MODULE_WEMOS_ID      // [Module] Select default model from mHardwareTemplates.h
+/*********************************************************************************************\
+ *  Module Settings
+\*********************************************************************************************/
+#define MODULE                        MODULE_WEMOS_ID      // [Module] Select default model from mHardwareTemplates.h
 
-#define SAVE_DATA              1                 // [SaveData] Save changed parameters to Flash (0 = disable, 1 - 3600 seconds)
-#define SAVE_STATE             1                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
-#define BOOT_LOOP_OFFSET       1                 // [SetOption36] Number of boot loops before starting restoring defaults (0 = disable, 1..200 = boot loops offset)
+#define SAVE_DATA                     1                 // [SaveData] Save changed parameters to Flash (0 = disable, 1 - 3600 seconds)
+#define SAVE_STATE                    1                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
+#define BOOT_LOOP_OFFSET              1                 // [SetOption36] Number of boot loops before starting restoring defaults (0 = disable, 1..200 = boot loops offset)
 
-// -- Wifi ----------------------------------------
-#define WIFI_IP_ADDRESS        "0.0.0.0"         // [IpAddress1] Set to 0.0.0.0 for using DHCP or enter a static IP address
-#define WIFI_GATEWAY           "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
-#define WIFI_SUBNETMASK        "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
-#define WIFI_DNS               "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
+/*********************************************************************************************\
+ *  Wifi
+\*********************************************************************************************/
+#define WIFI_IP_ADDRESS               "0.0.0.0"         // [IpAddress1] Set to 0.0.0.0 for using DHCP or enter a static IP address
+#define WIFI_GATEWAY                  "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
+#define WIFI_SUBNETMASK               "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
+#define WIFI_DNS                      "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
 
-// #define STA_SSID1            ""                // [Ssid1] Wifi SSID
-// #define STA_PASS1            ""                // [Password1] Wifi password
-// #define STA_SSID2            ""                // [Ssid2] Optional alternate AP Wifi SSID
-// #define STA_PASS2            ""                // [Password2] Optional alternate AP Wifi password
-// #define STA_SSID3            ""                // [Ssid2] Optional alternate AP Wifi SSID
-// #define STA_PASS3            ""                // [Password2] Optional alternate AP Wifi password
+#define STA_SSID1                     ""                // [Ssid1] Wifi SSID
+#define STA_PASS1                     ""                // [Password1] Wifi password
+#define STA_SSID2                     ""                // [Ssid2] Optional alternate AP Wifi SSID
+#define STA_PASS2                     ""                // [Password2] Optional alternate AP Wifi password
+#define STA_SSID3                     ""                // [Ssid2] Optional alternate AP Wifi SSID
+#define STA_PASS3                     ""                // [Password2] Optional alternate AP Wifi password
 
-#define WIFI_CONFIG_TOOL       WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
-                                                 //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
-#define WIFI_CONFIG_NO_SSID    WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
-                                                 //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
-                                                 //   *** NOTE: When WPS is disabled by USE_WPS below, WIFI_WPSCONFIG will execute WIFI_MANAGER ***
-                                                 //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_NETWORK_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
-                                                 //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
+#define WIFI_CONFIG_TOOL              WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
+                                                        //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
+#define WIFI_CONFIG_NO_SSID           WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
+                                                        //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
+                                                        //   *** NOTE: When WPS is disabled by USE_WPS below, WIFI_WPSCONFIG will execute WIFI_MANAGER ***
+                                                        //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_CORE_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
+                                                        //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
 
-// -- Syslog --------------------------------------
-#define SYS_LOG_HOST           ""                // [LogHost] (Linux) syslog host
-#define SYS_LOG_PORT           514               // [LogPort] default syslog UDP port
-#define SYS_LOG_LEVEL          LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-#define SERIAL_LOG_LEVEL              LOG_LEVEL_DEBUG    // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-#define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_DEBUG    //LOG_LEVEL_TEST//LOG_LEVEL_ALL
+/*********************************************************************************************\
+ *  Logging
+\*********************************************************************************************/
+#define SYS_LOG_HOST                  ""                      // [LogHost] (Linux) syslog host
+#define SYS_LOG_PORT                  514                     // [LogPort] default syslog UDP port
+#define SYS_LOG_LEVEL                 LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
+#define SERIAL_LOG_LEVEL              LOG_LEVEL_DEBUG         // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
+#define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_DEBUG         // [SerialLogBoot] LOG_LEVEL_TEST//LOG_LEVEL_ALL
+#define WEB_LOG_LEVEL                 LOG_LEVEL_INFO          // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
+#define TELNET_LOG_LEVEL              LOG_LEVEL_DEBUG
+#define LOGTIME_DEFAULT_FORMAT        1                       //  true == short
 
+/*********************************************************************************************\
+ *  OTA
+\*********************************************************************************************/
+#define OTA_URL                       "http://minimal.bin"  // [OtaUrl]
 
+/*********************************************************************************************\
+ *  MQTT
+\*********************************************************************************************/
+#define USE_MODULE_NETWORKS_MQTT
+#define USE_MODULE_NETWORK_MQTT
+#define USE_MQTT
 
-#define ENABLE_DEVFEATURE_JSONPARSER
+#define MQTT_HOST                     "192.168.1.65"    // [MqttHost] Defined as either "X.X.X.X" for IP, or "NAME" for MDNS. 
+#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
+#define MQTT_HOST_DISCOVERY
+#ifdef USE_NETWORK_MDNS
+#define MDNS_MQTT_HOSTNAME1   "TOWER.local" 
+#define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
+#endif // #ifdef USE_NETWORK_MDNS
 
-//LOG_LEVEL_TEST //LOG_LEVEL_ALL LOG_LEVEL_TEST
-
-#define WEB_LOG_LEVEL          LOG_LEVEL_INFO    // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-
-#define ENABLE_TELNET_LOGGING
-#define TELNET_LOG_LEVEL       LOG_LEVEL_DEBUG
-
-#define LOGTIME_DEFAULT_FORMAT true //true == short
-
-#define PWM_MAX_SLEEP          10                // Sleep will be lowered to this value when light is on, to avoid flickering
-
-// -- Ota -----------------------------------------
-#define OTA_URL                "http://minimal.bin"  // [OtaUrl]
-
-// -- MQTT ----------------------------------------
-//#define MQTT_USE               1                 // [SetOption3] Select default MQTT use (0 = Off, 1 = On)
+#define MQTT_FINGERPRINT1             "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint1]
+#define MQTT_FINGERPRINT2             "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint2]
+#define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
+#define MQTT_USER                     "DVES_USER"       // [MqttUser] MQTT user
+#define MQTT_PASS                     "DVES_PASS"       // [MqttPassword] MQTT password
+#define MQTT_MAX_PACKET_SIZE          2000
 
 #define ENABLE_MQTT_DEBUG_TELEMETRY
 #define USE_MQTT_RETAINED_VERSION_HISTORY_CHECK
-
-#define USE_DEBUG_CLASS_SIZE
-
-//#define SEND_TEMPLATES_OVER_MQTT
-#define USE_MODULE_NETWORK_MQTT
-#define MQTT_HOST              "192.168.1.65"    // [MqttHost]
-#define MQTT_FINGERPRINT1      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint1]
-#define MQTT_FINGERPRINT2      "A5 02 FF 13 99 9F 8B 39 8E F1 83 4F 11 23 65 0B 32 36 FC 07"  // [MqttFingerprint2]
-#define MQTT_PORT              1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
-#define MQTT_USER              "DVES_USER"       // [MqttUser] MQTT user
-#define MQTT_PASS              "DVES_PASS"       // [MqttPassword] MQTT password
-
-#define MQTT_BUTTON_RETAIN     0                 // [ButtonRetain] Button may send retain flag (0 = off, 1 = on)
-#define MQTT_POWER_RETAIN      0                 // [PowerRetain] Power status message may send retain flag (0 = off, 1 = on)
-#define MQTT_SWITCH_RETAIN     0                 // [SwitchRetain] Switch may send retain flag (0 = off, 1 = on)
-#define MQTT_BUTTON_SWITCH_FORCE_LOCAL     0     // [SetOption61] Force local operation when button/switch topic is set (0 = off, 1 = on)
-
-#define MQTT_STATUS_OFF        "OFF"             // [StateText1] Command or Status result when turned off (needs to be a string like "0" or "Off")
-#define MQTT_STATUS_ON         "ON"              // [StateText2] Command or Status result when turned on (needs to be a string like "1" or "On")
-#define MQTT_CMND_TOGGLE       "TOGGLE"          // [StateText3] Command to send when toggling (needs to be a string like "2" or "Toggle")
-#define MQTT_CMND_HOLD         "HOLD"            // [StateText4] Command to send when button is kept down for over KEY_HOLD_TIME * 0.1 seconds (needs to be a string like "HOLD")
-
-// -- MQTT topics ---------------------------------
-#define MQTT_FULLTOPIC         "%topic%/%prefix%/" // [FullTopic] Subscribe and Publish full topic name - Legacy topic
-
-//#define ENABLE_RESTART_ON_MQTT_LOST
-
-#ifndef MQTT_MAX_PACKET_SIZE
-  #ifdef ENABLE_LOW_MEMORY_MODE
-    #define MQTT_MAX_PACKET_SIZE 800
-  #else
-    #define MQTT_MAX_PACKET_SIZE 2000
-  #endif
-#endif
-
-#ifndef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65
-#endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-
-
-
-
-#define D_MQTT_COMMAND        "set"
-#define D_MQTT_SYNC           "sync"
-
-// #ifdef USE_NETWORK_MDNS
-#define MDNS_MQTT_HOSTNAME1   "TOWER.local" 
-#define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
-// #endif // #ifdef USE_NETWORK_MDNS
-
-// %prefix% token options
-#define SUB_PREFIX             "set"            // [Prefix1] Sonoff devices subscribe to %prefix%/%topic% being SUB_PREFIX/MQTT_TOPIC and SUB_PREFIX/MQTT_GRPTOPIC
-#define PUB_PREFIX             "status"            // [Prefix2] Sonoff devices publish to %prefix%/%topic% being PUB_PREFIX/MQTT_TOPIC
-#define PUB_PREFIX2            "health"            // [Prefix3] Sonoff devices publish telemetry data to %prefix%/%topic% being PUB_PREFIX2/MQTT_TOPIC/UPTIME, POWER and TIME
-                                                 //   May be named the same as PUB_PREFIX                                                 //   May be named the same as PUB_PREFIX
-// %topic% token options (also ButtonTopic and SwitchTopic)
-// #define MQTT_TOPIC             DEVICENAME_CTR           // [Topic] (unique) MQTT device topic, set to 'PROJECT "_%06X"' for unique topic including device MAC address
-#define MQTT_GRPTOPIC          "sonoffs"         // [GroupTopic] MQTT Group topic
-#define MQTT_BUTTON_TOPIC      "0"               // [ButtonTopic] MQTT button topic, "0" = same as MQTT_TOPIC, set to 'PROJECT "_BTN_%06X"' for unique topic including device MAC address
-#define MQTT_SWITCH_TOPIC      "0"               // [SwitchTopic] MQTT button topic, "0" = same as MQTT_TOPIC, set to 'PROJECT "_SW_%06X"' for unique topic including device MAC address
-#define MQTT_CLIENT_ID         "DVES_%06X"       // [MqttClient] Also fall back topic using Chip Id = last 6 characters of MAC address
-
-// -- MQTT ----------------------------------------
-#define MQTT_TELE_RETAIN     0                   // Tele messages may send retain flag (0 = off, 1 = on)
-
 #define ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT
+
+#define D_MQTT_COMMAND                "set"
+#define D_MQTT_SYNC                   "sync"
+
 
 // -- MQTT - TLS ----------------------------------
   // !!! TLS uses a LOT OF MEMORY so be careful to enable other options at the same time !!!
@@ -183,7 +152,9 @@
 #define TELE_PERIOD            300               // [TelePeriod] Telemetry (0 = disable, 10 - 3600 seconds)
 #define TELE_ON_POWER          0                 // [SetOption59] send tele/STATE together with stat/RESULT (0 = Disable, 1 = Enable)
 
-// -- HTTP ----------------------------------------
+/*********************************************************************************************\
+ *  HTTP Webserver
+\*********************************************************************************************/
 #define WEB_SERVER             2                 // [WebServer] Web server (0 = Off, 1 = Start as User, 2 = Start as Admin)
 #define WEB_PASSWORD           ""                // [WebPassword] Web server Admin mode Password for WEB_USERNAME (empty string = Disable)
 #define FRIENDLY_NAME          DEVICENAME_FRIENDLY_CTR   // [FriendlyName] Friendlyname up to 32 characters used by webpages and Alexa
@@ -216,6 +187,8 @@
   #define D_COL_TEXT_MODULE_TITLE_CTR "#fff"
 #endif
 
+#define PWM_MAX_SLEEP          10                // Sleep will be lowered to this value when light is on, to avoid flickering
+
 
 // -- Time - Up to three NTP servers in your region
 #define NTP_SERVER1            "pool.ntp.org"       // [NtpServer1] Select first NTP server by name or IP address (129.250.35.250)
@@ -228,7 +201,7 @@
 #define TIME_DST_DAY           Sun               // Day of week (1 or Sun, 2 or Mon, 3 or Tue, 4 or Wed, 5 or Thu, 6 or Fri, 7 or Sat)
 #define TIME_DST_MONTH         Mar               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
 #define TIME_DST_HOUR          2                 // Hour (0 to 23)
-#define TIME_DST_OFFSET        +60              // Offset from UTC in minutes (-780 to +780)
+#define TIME_DST_OFFSET        +0              // Offset from UTC in minutes (-780 to +780)
 
 // -- Time - Start Standard Time and timezone offset from UTC in minutes
 #define TIME_STD_HEMISPHERE    North             // [TimeStd] Hemisphere (0 or North, 1 or South)
@@ -239,19 +212,19 @@
 #define TIME_STD_OFFSET        0                 // Offset from UTC in minutes (-780 to +780)
 
 // -- Location ------------------------------------
-#ifndef LATITUDE
-#define LATITUDE               50.858360         // [Latitude] Your location to be used with sunrise and sunset
-#define LONGITUDE              5.294442          // [Longitude] Your location to be used with sunrise and sunset
+#ifndef LATITUDE              // eg. Belfast, Northern Ireland
+#define LATITUDE               54.6         // [Latitude] Your location to be used with sunrise and sunset
+#define LONGITUDE              -5.92        // [Longitude] Your location to be used with sunrise and sunset
 #endif
 
 
 // -- Application ---------------------------------
-#define APP_TIMEZONE           99                 // [Timezone] +1 hour (Amsterdam) (-13 .. 14 = hours from UTC, 99 = use TIME_DST/TIME_STD)
+#define APP_TIMEZONE           0                 // [Timezone] +1 hour (Amsterdam) (-13 .. 14 = hours from UTC, 99 = use TIME_DST/TIME_STD)
 #define APP_LEDSTATE           LED_POWER         // [LedState] Function of led
                                                  //   (LED_OFF, LED_POWER, LED_MQTTSUB, LED_POWER_MQTTSUB, LED_MQTTPUB, LED_POWER_MQTTPUB, LED_MQTT, LED_POWER_MQTT)
 #define APP_LEDMASK            0xFFFF            // [LedMask] Assign Relay to Power led (0xFFFF is default)
 #define APP_PULSETIME          0                 // [PulseTime] Time in 0.1 Sec to turn off power for relay 1 (0 = disabled)
-#define APP_POWERON_STATE      POWER_ALL_OFF   // [PowerOnState] Power On Relay state
+#define APP_POWERON_STATE      POWER_ALL_SAVED   // [PowerOnState] Power On Relay state
                                                  //   (POWER_ALL_OFF, POWER_ALL_ON, POWER_ALL_SAVED_TOGGLE, POWER_ALL_SAVED, POWER_ALL_ALWAYS_ON, POWER_ALL_OFF_PULSETIME_ON)
 #define APP_BLINKTIME          10                // [BlinkTime] Time in 0.1 Sec to blink/toggle power for relay 1
 #define APP_BLINKCOUNT         10                // [BlinkCount] Number of blinks (0 = 32000)
@@ -294,16 +267,18 @@
 
 // -- HTTP ----------------------------------------
 // #ifndef DISABLE_WEBSERVER
-//   #define USE_MODULE_NETWORK_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
-  #define WEB_PORT             80                // Web server Port for User and Admin mode
+//   #define USE_MODULE_CORE_WEBSERVER                            // Enable web server and Wifi Manager (+66k code, +8k mem)
+//   #define WEB_PORT             80                // Web server Port for User and Admin mode
 //   #define WEB_USERNAME         "admin"           // Web server Admin mode user name
 // #endif
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
-  #define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
+  //#define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
   #define MQTT_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
-  #define WEBSERVER_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
+// -- mDNS ----------------------------------------
+// #define USE_NETWORK_MDNS           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)
+
 
 
 // -- Time ----------------------------------------
@@ -318,7 +293,7 @@
 //  #define USE_EXPRESSION                         // Add support for expression evaluation in rules (+3k2 code, +64 bytes mem)
 
 // -- Internal Analog input -----------------------
-#ifndef USE_MODULE_CONTROLLER_BLINDS
+#ifndef USE_MODULE_CUSTOM_BLINDS
   //#define USE_ADC_VCC                              // Display Vcc in Power status. Disable for use as Analog input on selected devices
 #endif
 
@@ -331,6 +306,9 @@
 
 // -- I2C sensors ---------------------------------
 #define USE_I2C                                  // I2C using library wire (+10k code, 0k2 mem, 124 iram)
+#define I2CDRIVERS_0_31        0xFFFFFFFF          // Enable I2CDriver0  to I2CDriver31
+#define I2CDRIVERS_32_63       0xFFFFFFFF          // Enable I2CDriver32 to I2CDriver63
+#define I2CDRIVERS_64_95       0xFFFFFFFF          // Enable I2CDriver64 to I2CDriver95
 
 #ifdef USE_I2C
   #define USE_SHT                                // Enable SHT1X sensor (+1k4 code)
@@ -369,49 +347,17 @@
 //  #define USE_MAX44009                           // Enable MAX44009 Ambient Light sensor (I2C addresses 0x4A and 0x4B) (+0k8 code)
 //  #define USE_SCD30                              // Enable Sensiron SCd30 CO2 sensor (I2C address 0x61) (+3k3 code)
   #define USE_ADE7953                            // Enable ADE7953 Energy monitor as used on Shelly 2.5 (I2C address 0x38) (+1k5)
-  // #define USE_I2C                                  // I2C using library wire (+10k code, 0k2 mem, 124 iram)
-#define I2CDRIVERS_0_31        0xFFFFFFFF          // Enable I2CDriver0  to I2CDriver31
-#define I2CDRIVERS_32_63       0xFFFFFFFF          // Enable I2CDriver32 to I2CDriver63
-#define I2CDRIVERS_64_95       0xFFFFFFFF          // Enable I2CDriver64 to I2CDriver95
-
-
 #endif  // USE_I2C
 
 // -- SPI sensors ---------------------------------
-#define USE_SPI          
+//#define USE_SPI                                  // Hardware SPI using GPIO12(MISO), GPIO13(MOSI) and GPIO14(CLK) in addition to two user selectable GPIOs(CS and DC)
+
 #ifdef USE_SPI
   #ifndef USE_DISPLAY
   #define USE_DISPLAY                            // Add SPI Display support for 320x240 and 480x320 TFT
   #endif
     #define USE_DISPLAY_ILI9341                  // [DisplayModel 4] Enable ILI9341 Tft 480x320 display (+19k code)
 //    #define USE_DISPLAY_EPAPER_29                 // [DisplayModel 5] Enable e-paper 2.9 inch display (+19k code)
-
-//  #define USE_DISPLAY                            // Add I2C Display Support (+2k code)
-    #define USE_DISPLAY_MODES1TO5                // Enable display mode 1 to 5 in addition to mode 0
-    #define USE_DISPLAY_LCD                      // [DisplayModel 1] [I2cDriver3] Enable Lcd display (I2C addresses 0x27 and 0x3F) (+6k code)
-    #define USE_DISPLAY_SSD1306                  // [DisplayModel 2] [I2cDriver4] Enable SSD1306 Oled 128x64 display (I2C addresses 0x3C and 0x3D) (+16k code)
-    #define USE_DISPLAY_MATRIX                   // [DisplayModel 3] [I2cDriver5] Enable 8x8 Matrix display (I2C adresseses see below) (+11k code)
-      #define MTX_ADDRESS1     0x71              // [DisplayAddress1] I2C address of first 8x8 matrix module
-      #define MTX_ADDRESS2     0x74              // [DisplayAddress2] I2C address of second 8x8 matrix module
-      #define MTX_ADDRESS3     0x75              // [DisplayAddress3] I2C address of third 8x8 matrix module
-      #define MTX_ADDRESS4     0x72              // [DisplayAddress4] I2C address of fourth 8x8 matrix module
-      #define MTX_ADDRESS5     0x73              // [DisplayAddress5] I2C address of fifth 8x8 matrix module
-      #define MTX_ADDRESS6     0x76              // [DisplayAddress6] I2C address of sixth 8x8 matrix module
-      #define MTX_ADDRESS7     0x00              // [DisplayAddress7] I2C address of seventh 8x8 matrix module
-      #define MTX_ADDRESS8     0x00              // [DisplayAddress8] I2C address of eigth 8x8 matrix module
-    #define USE_DISPLAY_SEVENSEG                 // [DisplayModel 11] [I2cDriver47] Enable sevenseg display (I2C 0x70-0x77) (<+11k code)
-//      #define USE_DISPLAY_SEVENSEG_COMMON_ANODE  // Enable support for common anode sevenseg displays
-                                                 // Multiple sevenseg displays are logically arranged vertically with MTX_ADDRESS1 at y=0,
-                                                 // MTX_ADDRESS2 at y=1, up to MTX_ADDRESS8 at y=7
-                                                 // Command: DisplayText [yn]8888
-                                                 // will display 8888 at sevenseg display at I2C address MTX_ADDRESS(n-1)
-                                                 // Each segment may be address Command: DisplayText [xn]m
-                                                 //  where n is 0..4 (4 digits and middle :) and m is decimal for bitmap of which segment to turn on.
-                                                 // Reference: https://cdn-learn.adafruit.com/downloads/pdf/adafruit-led-backpack.pdf
-    // #define SEVENSEG_ADDRESS1     0x70      // No longer used.  Use MTX_ADDRESS1 - MTX_ADDRESS8 instead to specify I2C address of sevenseg displays
-//    #define USE_DISPLAY_SH1106                   // [DisplayModel 7] [I2cDriver6] Enable SH1106 Oled 128x64 display (I2C addresses 0x3C and 0x3D)
-
-
 #endif  // USE_SPI
 
 #define USE_PWM
@@ -534,6 +480,13 @@
 //#define FIRMWARE_KNX_NO_EMULATION                // Create sonoff-knx with KNX but without Emulation
 //#define FIRMWARE_DISPLAYS                        // Create sonoff-display with display drivers enabled
 //#define FIRMWARE_MINIMAL                         // Create sonoff-minimal as intermediate firmware for OTA-MAGIC
+
+
+// Anything added by this file must "undef" then "ifdef" to replace it
+#ifdef USE_CONFIG_OVERRIDE
+#include "0_ConfigUser/mUserConfig_Secret.h"
+#endif
+
 
 #endif
 

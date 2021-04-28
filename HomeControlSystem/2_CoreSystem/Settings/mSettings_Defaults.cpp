@@ -153,7 +153,7 @@ void mSettings::SystemSettings_DefaultBody_MQTT(){
 
   strlcpy(Settings.mqtt.host, MQTT_HOST, sizeof(Settings.mqtt.host));
   Settings.mqtt.port = MQTT_PORT;
-  strlcpy(Settings.mqtt.client, MQTT_CLIENT_ID, sizeof(Settings.mqtt.client));
+  // strlcpy(Settings.mqtt.client, MQTT_CLIENT_ID, sizeof(Settings.mqtt.client));
   strlcpy(Settings.mqtt.user, MQTT_USER, sizeof(Settings.mqtt.user));
   strlcpy(Settings.mqtt.pwd, MQTT_PASS, sizeof(Settings.mqtt.pwd));
   // strlcpy(Settings.mqtt_topic, MQTT_TOPIC, sizeof(Settings.mqtt_topic));
@@ -586,10 +586,10 @@ DEBUG_LINE;
 //  Settings.flag_system.button_single = 0;
   Settings.flag_system.mqtt_enabled = true;
 //  Settings.flag_system.mqtt_response = 0;
-  Settings.flag_system.mqtt_power_retain = MQTT_POWER_RETAIN;
-  Settings.flag_system.mqtt_button_retain = MQTT_BUTTON_RETAIN;
-  Settings.flag_system.mqtt_switch_retain = MQTT_SWITCH_RETAIN;
-  Settings.flag_network.button_switch_force_local = MQTT_BUTTON_SWITCH_FORCE_LOCAL;
+  Settings.flag_system.mqtt_power_retain = 0;//MQTT_POWER_RETAIN;
+  Settings.flag_system.mqtt_button_retain = 0;//MQTT_BUTTON_RETAIN;
+  Settings.flag_system.mqtt_switch_retain = 0;//MQTT_SWITCH_RETAIN;
+  Settings.flag_network.button_switch_force_local =0;// MQTT_BUTTON_SWITCH_FORCE_LOCAL;
   Settings.flag_network.hass_tele_on_power = TELE_ON_POWER;
 //  Settings.flag_system.mqtt_sensor_retain = 0;
 //  Settings.flag_system.mqtt_offline = 0;
