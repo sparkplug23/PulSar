@@ -50,7 +50,7 @@
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/  
 // #define DEVICE_RGBROOF
-// #define DEVICE_RGBDELL
+#define DEVICE_RGBDELL
 // #define DEVICE_RGBNOTIFICATION_01           
 //#define DEVICE_RGBBEDLIGHT_TEST 
 //#define DEVICE_RGBCUSTOM_USER_01
@@ -575,7 +575,8 @@
   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  #define USE_MODULE_DRIVERS_LEDS
+
+  // #define USE_MODULE_DRIVERS_LEDS
   #define DISABLE_WEBSERVER
 
   //#define ENABLE_PIXEL_FUNCTION_AMBILIGHT
@@ -596,31 +597,29 @@
 
 
   #define STRIP_SIZE_MAX 133
-  
 
-  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
     "},"
-    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":15,"
+    "\"" D_JSON_SAT "\":90,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif

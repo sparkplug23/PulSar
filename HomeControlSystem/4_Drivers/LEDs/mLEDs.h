@@ -9,11 +9,11 @@
 
 #ifdef USE_MODULE_DRIVERS_LEDS  //rename as "custom" as controllers
 
-class mStatusLEDs {
+class mLEDs {
 
   private:
   public:
-    mStatusLEDs(){};
+    mLEDs(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     void init(void);
@@ -33,9 +33,9 @@ class mStatusLEDs {
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mStatusLEDs> mqtthandler_settings_teleperiod;
-    struct handler<mStatusLEDs> mqtthandler_sensor_ifchanged;
-    struct handler<mStatusLEDs> mqtthandler_sensor_teleperiod;
+    struct handler<mLEDs> mqtthandler_settings_teleperiod;
+    struct handler<mLEDs> mqtthandler_sensor_ifchanged;
+    struct handler<mLEDs> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;

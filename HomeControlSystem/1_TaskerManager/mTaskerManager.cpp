@@ -254,7 +254,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new mCameraOV2640();
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
-    pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new mLEDs();
   #endif
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();

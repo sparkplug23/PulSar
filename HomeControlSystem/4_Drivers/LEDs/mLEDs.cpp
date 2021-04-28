@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_DRIVERS_LEDS
 
 
-void mStatusLEDs::pre_init(void){
+void mLEDs::pre_init(void){
   
   settings.fEnableSensor = false;
    //LEDS
@@ -29,19 +29,19 @@ void mStatusLEDs::pre_init(void){
 }
 
 
-// uint8_t mStatusLEDs::IsDoorOpen(){
+// uint8_t mLEDs::IsDoorOpen(){
 //   return digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
 // }
 
 
-void mStatusLEDs::init(void){
+void mLEDs::init(void){
 
   // door_detect.state = IsDoorOpen();
 
 }
 
 
-int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -90,7 +90,7 @@ int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
 } // END function
 
-void mStatusLEDs::EveryLoop(){
+void mLEDs::EveryLoop(){
 
   // if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
   //   door_detect.state = IsDoorOpen();
@@ -109,7 +109,7 @@ void mStatusLEDs::EveryLoop(){
 }
 
 
-uint8_t mStatusLEDs::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);
@@ -118,7 +118,7 @@ uint8_t mStatusLEDs::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mStatusLEDs::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mLEDs::ConstructJSON_Sensor(uint8_t json_level){
   
   char buffer[50];
 
@@ -141,9 +141,9 @@ uint8_t mStatusLEDs::ConstructJSON_Sensor(uint8_t json_level){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mStatusLEDs::MQTTHandler_Init(){
+void mLEDs::MQTTHandler_Init(){
 
-  struct handler<mStatusLEDs>* mqtthandler_ptr;
+  struct handler<mLEDs>* mqtthandler_ptr;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -153,7 +153,7 @@ void mStatusLEDs::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Settings;
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -163,7 +163,7 @@ void mStatusLEDs::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Sensor;
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -173,12 +173,12 @@ void mStatusLEDs::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Sensor;
+  mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 
-void mStatusLEDs::MQTTHandler_Set_fSendNow(){
+void mLEDs::MQTTHandler_Set_fSendNow(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -187,7 +187,7 @@ void mStatusLEDs::MQTTHandler_Set_fSendNow(){
 } //end "MQTTHandler_Init"
 
 
-void mStatusLEDs::MQTTHandler_Set_TelePeriod(){
+void mLEDs::MQTTHandler_Set_TelePeriod(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -195,13 +195,13 @@ void mStatusLEDs::MQTTHandler_Set_TelePeriod(){
 } //end "MQTTHandler_Set_TelePeriod"
 
 
-void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
   uint8_t mqtthandler_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, MQTT_HANDLER_SENSOR_IFCHANGED_ID, MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mStatusLEDs>* mqtthandler_list_ptr[] = {
+  struct handler<mLEDs>* mqtthandler_list_ptr[] = {
     &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
   };
 
@@ -224,17 +224,17 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 /*********************************************************************************************/
 
-// // bool mStatusLEDs::IsModuleIfan(void)
+// // bool mLEDs::IsModuleIfan(void)
 // // {
 // //   return ((SONOFF_IFAN02 == my_module_type) || (SONOFF_IFAN03 == my_module_type));
 // // }
 
-// // uint8_t mStatusLEDs::MaxFanspeed(void)
+// // uint8_t mLEDs::MaxFanspeed(void)
 // // {
 // //   return MAX_FAN_SPEED;
 // // }
 
-// uint8_t mStatusLEDs::GetFanspeed(void)
+// uint8_t mLEDs::GetFanspeed(void)
 // {
 //   // if (ifan_fanspeed_timer) {
 //   //   return ifan_fanspeed_goal;                     // Do not show sequence fanspeed
@@ -259,19 +259,19 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 // // Probably to be handled using "light_interface?"
-// uint8_t mStatusLEDs::GetLightState(void)
+// uint8_t mLEDs::GetLightState(void)
 // {
 //   // return pCONT_mry->CommandGet_Relay_Power(0);
 //   return 0;
 // }
-// void mStatusLEDs::SetLightState(uint8_t state)
+// void mLEDs::SetLightState(uint8_t state)
 // {
 //   // pCONT_mry->CommandSet_Relay_Power(state);
 // }
 
 // /*********************************************************************************************/
 
-// void mStatusLEDs::SetFanspeed(uint8_t fanspeed, bool sequence)
+// void mLEDs::SetFanspeed(uint8_t fanspeed, bool sequence)
 // {
 //   ifan_fanspeed_timer = 0;                         // Stop any sequence
 //   ifan_fanspeed_goal = fanspeed;
@@ -304,7 +304,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // /*********************************************************************************************/
 
-// // void mStatusLEDs::SonoffIfanReceived(void)
+// // void mLEDs::SonoffIfanReceived(void)
 // // {
 // //   char svalue[32];
 
@@ -350,7 +350,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // //   }
 // // }
 
-// // bool mStatusLEDs::SerialInput(void)
+// // bool mLEDs::SerialInput(void)
 // // {
 // //   if (SONOFF_IFAN03 == my_module_type) {
 // //     if (0xAA == serial_in_byte) {               // 0xAA - Start of text
@@ -390,7 +390,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //  * Commands
 // \*********************************************************************************************/
 
-// void mStatusLEDs::CmndFanspeed(void)
+// void mLEDs::CmndFanspeed(void)
 // {
 //   // if (XdrvMailbox.data_len > 0) {
 //   //   if ('-' == XdrvMailbox.data[0]) {
@@ -410,7 +410,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // /*********************************************************************************************/
 
-// void mStatusLEDs::init(void)
+// void mLEDs::init(void)
 // {
 //   // if (SONOFF_IFAN03 == my_module_type) {
 //   //   SetSerial(9600, TS_SERIAL_8N1);
@@ -421,7 +421,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // }
 
-// void mStatusLEDs::SpeedRefresh(void)
+// void mLEDs::SpeedRefresh(void)
 // {
 //   // if (SONOFF_IFAN03 == my_module_type) {
 //     if (ifan_fanspeed_timer) {
@@ -440,7 +440,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // }
 
 
-// void mStatusLEDs::pre_init(){
+// void mLEDs::pre_init(){
   
 //   if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
 //     pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
@@ -450,7 +450,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // }
 
-// int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj){
+// int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
 //   // /************
 //   //  * INIT SECTION * 
@@ -512,7 +512,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } // END Tasker
 
 
-// int8_t mStatusLEDs::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
+// int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
 //       parse_JSONCommand(obj);
@@ -522,7 +522,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //     break;
 //   }
 // }
-// int8_t mStatusLEDs::CheckAndExecute_JSONCommands(JsonObjectConst obj){
+// int8_t mLEDs::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
 //   // Check if instruction is for me
 //   // if(mSupport::CheckSetTopicIsModulebyID())
@@ -537,9 +537,9 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // }
 
-// void mStatusLEDs::parse_JSONCommand(JsonObjectConst obj){
+// void mLEDs::parse_JSONCommand(JsonObjectConst obj){
 
-//   // Serial.println("mStatusLEDs::parsesub_Commands(JsonObjectConst obj)");
+//   // Serial.println("mLEDs::parsesub_Commands(JsonObjectConst obj)");
 
   
 
@@ -608,7 +608,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 
-// int8_t mStatusLEDs::Tasker_Web(uint8_t function){
+// int8_t mLEDs::Tasker_Web(uint8_t function){
 
 
 
@@ -718,7 +718,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 
 
-// uint8_t mStatusLEDs::ConstructJSON_Settings(uint8_t json_method){
+// uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_method){
   
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add_P("test",0);  
@@ -726,7 +726,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 // }
 
-// uint8_t mStatusLEDs::ConstructJSON_Sensor(uint8_t json_method){
+// uint8_t mLEDs::ConstructJSON_Sensor(uint8_t json_method){
 
 //   JsonBuilderI->Start();
 //     // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -744,7 +744,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // **********************************************************************************************************************************************
 // ********************************************************************************************************************************************/
 
-// void mStatusLEDs::MQTTHandler_Init(){
+// void mLEDs::MQTTHandler_Init(){
 
 //   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
 //   mqtthandler_ptr->tSavedLastSent = millis();
@@ -754,7 +754,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
 //   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Settings;
+//   mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Settings;
 
 //   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
 //   mqtthandler_ptr->tSavedLastSent = millis();
@@ -764,7 +764,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
 //   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Sensor;
+//   mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Sensor;
 
 //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
 //   mqtthandler_ptr->tSavedLastSent = millis();
@@ -774,12 +774,12 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
 //   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mStatusLEDs::ConstructJSON_Sensor;
+//   mqtthandler_ptr->ConstructJSON_function = &mLEDs::ConstructJSON_Sensor;
   
 // } //end "MQTTHandler_Init"
 
 
-// void mStatusLEDs::MQTTHandler_Set_fSendNow(){
+// void mLEDs::MQTTHandler_Set_fSendNow(){
 
 //   mqtthandler_settings_teleperiod.flags.SendNow = true;
 //   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -788,7 +788,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } //end "MQTTHandler_Init"
 
 
-// void mStatusLEDs::MQTTHandler_Set_TelePeriod(){
+// void mLEDs::MQTTHandler_Set_TelePeriod(){
 
 //   // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 //   // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
@@ -796,7 +796,7 @@ void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } //end "MQTTHandler_Set_TelePeriod"
 
 
-// void mStatusLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
+// void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 //   uint8_t mqtthandler_list_ids[] = {
 //     MQTT_HANDLER_SETTINGS_ID, 

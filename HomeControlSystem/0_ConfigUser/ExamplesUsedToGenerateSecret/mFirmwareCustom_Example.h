@@ -82,28 +82,6 @@
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  
-  #define STRIP_SIZE_MAX 50
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
-    "},"
-    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":5000,"
-    "\"ColourPalette\":\"" "Custom User 01" "\","
-    "\"BrightnessRGB\":100"
-  "}";
   #define STRIP_SIZE_MAX 60
   
   #define USE_LIGHTING_TEMPLATE
