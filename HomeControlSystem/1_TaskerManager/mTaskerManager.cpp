@@ -342,7 +342,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_HEATING
-    pModule[EM_MODULE_CONTROLLER_HEATING_ID] = new X();
+    pModule[EM_MODULE_CONTROLLER_HEATING_ID] = new mHeating();
   #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();

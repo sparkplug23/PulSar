@@ -1,6 +1,9 @@
 #ifndef MHEATING_H
 #define MHEATING_H 0.4
 
+#define D_UNIQUE_MODULE_CONTROLLER_HEATING_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_GROUP_MODULE_CONTROLLER_HEATING_ID    1    // Numerical accesending order of module within a group
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_CONTROLLER_HEATING
@@ -133,11 +136,27 @@ enum DEVICE_HEATING_ID{
     DEVICE_WB_ID=3
 };
 
-class mHeating{
+class mHeating :
+  public mTaskerInterface
+{
 
   private:
   public:
     mHeating(){};
+    
+    static const char* PM_MODULE_CONTROLLER_HEATING_CTR;
+    static const char* PM_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HEATING_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HEATING_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mHeating);
+    };
+    #endif
+
+
     void pre_init(void);
     void init(void);    
     
@@ -326,11 +345,11 @@ class mHeating{
     void SubTask_HeatingTemps(void);
     void SubTask_HeatingTemps_Ticker();
     void HeatingTemps(void);
-    uint8_t fForceHeatingTempUpdate = false;
+    // uint8_t fForceHeatingTempsUpdate = false;
     uint8_t fForceHeatingTempsUpdate = false;
-    uint8_t fRunTemp = false;
+    // uint8_t fRunTemp = false;
     uint8_t fHeatingTempsChanged = false;
-    uint8_t fForceHeatingTempsUpdateMQTT = true;
+    // uint8_t fForceHeatingTempsUpdateMQTT = true;
     uint8_t CheckIfROCExceedsNegativeLimit(uint8_t id);
 
     //   *******************************STATUS************************************************************
@@ -428,7 +447,7 @@ class mHeating{
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand();
+    void parse_JSONCommand(JsonParserObject obj);
 
     void SubTasker_HeatingTimers(void);
     void SubTasker_HeatingTemps(void);
@@ -458,12 +477,10 @@ class mHeating{
     
     uint32_t tSavedHeatingTemps,tSavedHeatingTemps2,tSavedHeatingTemps3;
 
-    // enum USERID{USERID_MICHAEL=0,USERID_DEIRDRE,USERID_RAYMOND};
-
     const char* GetDeviceNamebyIDCtr(uint8_t name, char* buffer, uint8_t buflen);
     int8_t GetScheduleModeIDByCtr(const char* c);
     int8_t GetDeviceIDbyName(const char* c);
-    int8_t GetUserIDbyName(const char* c);
+    // int8_t GetUserIDbyName(const char* c);
 
     // const char* GetUserNameByID(int8_t id, char* buffer);// = nullptr);
 
@@ -475,19 +492,15 @@ class mHeating{
     int8_t SubContructCtr_HardwareStatus();
     int8_t SubContructCtr_HardwareStatus_Long();
 
-
-//MEMMROY CLEAN UP
-    uint32_t tSavedSendActive;
-    unsigned long tSavedSendClimate;
-    unsigned long tSavedSlow;
-    uint32_t tSavedSendRateOfChange=millis();
-    uint8_t mSavedROC10m=0;
-    uint32_t tSavedForceUpdate = millis();
-    int cTicker;
-    uint8_t fSendSingleFunctionData = false;
+    // uint32_t tSavedSendActive;
+    // unsigned long tSavedSendClimate;
+    // unsigned long tSavedSlow;
+    // uint32_t tSavedSendRateOfChange=millis();
+    // uint8_t mSavedROC10m=0;
+    // uint32_t tSavedForceUpdate = millis();
+    // int cTicker;
+    // uint8_t fSendSingleFunctionData = false;
     const char* GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen);
-
-    // *************** MQTT ****************************************************************************************************
 
     int8_t GetWaterSensorIDbyShortName(const char* c);
     float GetWaterTempsRawByID(uint8_t device_id);
@@ -495,37 +508,17 @@ class mHeating{
     const char* GetSensorNameByID(uint8_t sensor_id, char* buffer, uint8_t buflen);
     const char* GetSensorNameLongbyID(uint8_t sensor_id, char* buffer, uint8_t buflen);
 
-    void MQQTSendHealth();
     uint8_t ConstructJSON_Health(uint8_t json_level = 0);
     uint8_t ConstructJSON_ProgramTimers(uint8_t json_level = 0);
     uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0);
-    void MQQTSendRGBUpstairsStatus();
-    uint8_t ConstructJSON_RGBUpstairsStatus();
-    void MQQTSendProgramTimersIfChanged();
-    void MQQTSendProgramTempsIfChanged();
-    void MQQTSendProgramTempsForced();
-    void MQQTSendPipesTempsIfChanged();
     uint8_t ConstructJSON_PipeTemps(uint8_t json_level = 0);
-    void MQQTSendPipesTempsLatest1m();
-    void MQQTSendPipesTempsLatest10m();
-    void MQQTSendPipesTempsROC1m();
     uint8_t ConstructJSON_PipeTempsROC1m(uint8_t json_level = 0);
-    void MQQTSendPipesTempsROC10m();
     uint8_t ConstructJSON_PipeTempsROC10m(uint8_t json_level = 0);
-    void MQQTSendClimateTempsIfChanged();
-    void MQQTSendClimateTempsLatest1m();
-    void MQQTSendClimateTempsLatest10m();
     uint8_t ConstructJSON_ClimateTemps(uint8_t json_level = 0);
-    void MQQTSendClimateTempsROC1m();
     uint8_t ConstructJSON_ClimateTempsROC1m(uint8_t json_level = 0);
-    void MQQTSendClimateTempsROC10m();
     uint8_t ConstructJSON_ClimateTempsROC10m(uint8_t json_level = 0);
-    void MQQTSendProgramsActive();
     uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0);
-    void MQQTSendProgramTimersForced();
-    void MQQTSendHardwareInfo();
     uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0);
-    void MQQTSendPipesTempsROC10s(void);
     uint8_t ConstructJSON_PipeTempsROC10s(uint8_t json_level = 0);
 
     uint32_t tSavedSendRateOfChange10s;
@@ -540,11 +533,8 @@ class mHeating{
 uint8_t ConstructJSON_Settings(uint8_t json_method);
 
 
-//FunctionHandler_Init
-
     void FunctionHandler_Init();
     void FunctionHandler_Loop();
-    struct functionhandler<mHeating>* functionhandler_ptr = nullptr;
   
 
     struct functionhandler<mHeating> functionhandler_status_message;
@@ -560,25 +550,26 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
     struct functionhandler<mHeating> functionhandler_programs_temps;
     void FunctionHandler_Programs_Temps(void);
 
-
-    // Hold list of handlers
-    // struct functionhandler<mHeating>* functionhandler_list_ptr[] = {
-    //   &functionhandler_status_message,
-    //   &functionhandler_status_message
-    // };
+    struct functionhandler<mHeating>* functionhandler_list[5] = {
+      &functionhandler_failsafe,
+      &functionhandler_status_message,
+      #ifdef USE_HEATING_PROFILE_ESTIMATION
+      &functionhandler_heating_profiles,
+      #endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
+      &functionhandler_relay_status,
+      &functionhandler_programs_timers,
+      &functionhandler_programs_temps
+    };
     
 
   
-  //#ifdef USE_CORE_MQTT 
+  #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mHeating> mqtthandler_settings_teleperiod;
     
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -603,32 +594,49 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    // const char* postfix_topic_program_timers = "program/timers";
+    struct handler<mHeating> mqtthandler_settings_teleperiod;
     struct handler<mHeating> mqtthandler_program_timers_ifchanged;
     struct handler<mHeating> mqtthandler_program_timers_teleperiod;
-    // const char* postfix_topic_program_temps = "program/temps";
     struct handler<mHeating> mqtthandler_program_temps_ifchanged;
     struct handler<mHeating> mqtthandler_program_temps_teleperiod;
-    // const char* postfix_topic_program_overview = "program/overview"; //active
     struct handler<mHeating> mqtthandler_program_overview_ifchanged;
     struct handler<mHeating> mqtthandler_program_overview_teleperiod;
-    // const char* postfix_topic_sensor_pipes = "sensors/pipes";
     struct handler<mHeating> mqtthandler_sensor_pipes_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_pipes_teleperiod;
     struct handler<mHeating> mqtthandler_sensor_pipes_roc1m;
     struct handler<mHeating> mqtthandler_sensor_pipes_roc10m;
-    // const char* postfix_topic_sensor_climate = "sensors/climate";
     struct handler<mHeating> mqtthandler_sensor_climate_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_climate_teleperiod;
     struct handler<mHeating> mqtthandler_sensor_climate_roc1m;
     struct handler<mHeating> mqtthandler_sensor_climate_roc10m;
-    // const char* postfix_topic_sensor_pipes_colours = "sensors/pipes/colours";
     struct handler<mHeating> mqtthandler_sensor_pipes_colours_ifchanged;
     struct handler<mHeating> mqtthandler_sensor_pipes_colours_teleperiod;
-    // const char* postfix_topic_relays = "relays";
     struct handler<mHeating> mqtthandler_relays_ifchanged;
     struct handler<mHeating> mqtthandler_relays_teleperiod;
-  //#endif
+  
+  struct handler<mHeating>* mqtthandler_list[19] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_program_timers_ifchanged,
+    &mqtthandler_program_timers_teleperiod,
+    &mqtthandler_program_temps_ifchanged,
+    &mqtthandler_program_temps_teleperiod,
+    &mqtthandler_program_overview_ifchanged,
+    &mqtthandler_program_overview_teleperiod,
+    &mqtthandler_sensor_pipes_ifchanged,
+    &mqtthandler_sensor_pipes_teleperiod,
+    &mqtthandler_sensor_pipes_roc1m,
+    &mqtthandler_sensor_pipes_roc10m,
+    &mqtthandler_sensor_climate_ifchanged,
+    &mqtthandler_sensor_climate_teleperiod,
+    &mqtthandler_sensor_climate_roc1m,
+    &mqtthandler_sensor_climate_roc10m,
+    &mqtthandler_sensor_pipes_colours_ifchanged,
+    &mqtthandler_sensor_pipes_colours_teleperiod,
+    &mqtthandler_relays_ifchanged,
+    &mqtthandler_relays_teleperiod
+  };
+
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

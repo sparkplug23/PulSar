@@ -37,8 +37,8 @@
 /**
  * Uncomment (by removing the double backslash `\\` for ONE line only) to select the active example
  * */
-// #define DEVICE_CUSTOM_USER_01
-// #define DEVICE_CUSTOM_USER_02
+// #define DEVICE_EXAMPLE_RGB_ADDRESSABLE
+// #define DEVICE_EXAMPLE_H801
 
 
 /************************************************************************************************************************************************************
@@ -54,7 +54,7 @@
 /**
  * Example: For WS28xx Addressable lights
  * */
-#ifdef DEVICE_CUSTOM_USER_01
+#ifdef DEVICE_EXAMPLE_RGB_ADDRESSABLE
   #define DEVICENAME_CTR            "rgbcustomuser01"
   #define DEVICENAME_FRIENDLY_CTR   "String Lights 01"
 
@@ -103,6 +103,31 @@
     "\"ColourPalette\":\"" "Custom User 01" "\","
     "\"BrightnessRGB\":100"
   "}";
+  #define STRIP_SIZE_MAX 60
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+    "},"
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  "}";
 
 #endif
 
@@ -110,12 +135,12 @@
 /**
  * Example: For PWM H801 Lights
  * */
-#ifdef DEVICE_CUSTOM_USER_02
+#ifdef DEVICE_EXAMPLE_H801
   #define DEVICENAME_CTR            "rgbcustomuser02"
   #define DEVICENAME_FRIENDLY_CTR   "PWM Lights 02"
   
-  #define USE_SERIAL_ALTERNATE_TX
-  #define FORCE_TEMPLATE_LOADING 
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -127,30 +152,34 @@
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
+  #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRB\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+    "},"
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME "\":1,"
+      "\"" D_JSON_RATE "\":5,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
-      
+          
 #endif
 
 

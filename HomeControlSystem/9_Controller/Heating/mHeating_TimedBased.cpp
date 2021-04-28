@@ -1793,7 +1793,7 @@ void mHeating::init_program_timers(void){
 //   if(jtok = obj[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
 //     program_temps[device_id].time_running.limit = jtok.getInt();
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TIME_RUNNING,D_JSON_LIMIT)),program_temps[device_id].time_running.limit);
-//     fForceHeatingTempUpdate = true;
+//     fForceHeatingTempsUpdate = true;
 //     data_buffer.isserviced++;
 //   }
 
@@ -1803,7 +1803,7 @@ void mHeating::init_program_timers(void){
 // // //     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
 // // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
 // // //     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-// // //     fForceHeatingTempUpdate = true;
+// // //     fForceHeatingTempsUpdate = true;
 // // //     data_buffer.isserviced++;
 // // //   }
 
@@ -1893,7 +1893,7 @@ void mHeating::init_program_timers(void){
 // //     program_temps[device_id].temp.desired = obj[D_JSON_TEMP][D_JSON_SET];
 // //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_SET,program_temps[device_id].temp.desired);
 // //     //Response_mP(S_JSON_COMMAND_NVALUE, D_SET,program_temps[device_id].temp.desired);
-// //     fForceHeatingTempUpdate = true;
+// //     fForceHeatingTempsUpdate = true;
 // //     data_buffer.isserviced++;
 // //   }
 

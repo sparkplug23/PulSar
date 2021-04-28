@@ -29,14 +29,16 @@
 
 #ifdef ESP32
 #include <WiFi.h>
-#ifndef DISABLE_NETWORK
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+  #include <AsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
 #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#endif
 #endif
 
 

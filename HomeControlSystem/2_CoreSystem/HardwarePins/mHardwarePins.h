@@ -11,7 +11,7 @@
 #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 #ifdef ESP8266
-  #define DRX 3
+  // #define DRX 3
   #include "2_CoreSystem/HardwarePins/mHardwarePins_Esp82xx.h"
 #endif
 #ifdef ESP32
@@ -47,14 +47,14 @@ class mHardwarePins :
     void parse_JSONCommand(JsonParserObject obj);
 
     
-#ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 
 int8_t GetPinByIndex(uint8_t index);
 int8_t GetPinIndexedLocation(uint8_t pin_number);
 bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
 
-#endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
     
   /**

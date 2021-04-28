@@ -494,7 +494,7 @@ void mSettings::SystemSettings_DefaultBody_Rules(){
 void mSettings::SystemSettings_DefaultBody_Displays(){
 
   Settings.display.model = 0;
-  Settings.display.mode = EM_DISPLAY_MODE_LOCAL1_ID;
+  Settings.display.mode = 0;//EM_DISPLAY_MODE_LOCAL1_ID;
   Settings.display.refresh = 2;
   Settings.display.rows = 4;
   Settings.display.cols[0] = 16;

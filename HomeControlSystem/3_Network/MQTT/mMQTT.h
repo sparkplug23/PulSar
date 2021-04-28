@@ -276,11 +276,11 @@ const char* state_ctr(void);
         return;
       }
       // Block non matching ids
-      if(optional_desired_id>=0)
-      {
-        if(optional_desired_id != handler_ptr->handler_id)
-          return;
-      }
+      // if(optional_desired_id>=0)  // need to change =0 default to -1
+      // {
+      //   if(optional_desired_id != handler_ptr->handler_id)
+      //     return;
+      // }
 
       #ifdef ENABLE_ADVANCED_DEBUGGING
         #ifndef DISABLE_SERIAL_LOGGING

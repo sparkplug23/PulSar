@@ -179,7 +179,7 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //   ),
 #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
-#endif
+#endif // ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
   // DEBUG_PRINTF("Template: %s\n\r", pCONT_set->Settings.user_template.full_ctr);
@@ -411,8 +411,6 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
     pin = -1;
     #endif   
   }
-
-
   // numbered
   else if(strcmp(c,"0")==0){ pin = 0; }
   else if(strcmp(c,"1")==0){ pin = 1; }
@@ -434,9 +432,9 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   }
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
-  #endif // ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
+    #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP8266
 
   #ifdef ESP32
@@ -466,9 +464,9 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   }
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR("GetGPIONumberFromName = %d"), pin);
-  #endif // ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_DEBUG, PSTR("GetGPIONumberFromName = %d"), pin);
+    #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP32
 
   return pin;
@@ -724,7 +722,7 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
 
 
 
-#ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 
 int8_t mHardwarePins::GetPinByIndex(uint8_t index)
@@ -755,7 +753,7 @@ bool mHardwarePins::SetPinFunction(int8_t gpio_pin_number, int8_t pin_function)
   return false;
 }
 
-#endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 uint8_t mHardwarePins::ModuleNr()
 {
@@ -1334,27 +1332,10 @@ void mHardwarePins::GpioInit(void)
     
   }//end fof
 
+  #ifdef ESP8266
+    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { Serial.set_tx(2); }
+  #endif
 
-//start each pin
-
-  if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) {
-    //#ifdef DISABLE_SERIAL_ALTERNATE_TX
-    #ifdef USE_SERIAL_ALTERNATE_TX
-    Serial.set_tx(2);
-    #endif // DISABLE_SERIAL_ALTERNATE_TX
-  }
-
-  // #ifdef USE_SERIAL_ALTERNATE_TX
-  //   Serial.set_tx(2);
-  //   Serial.println("WARNING: Untested"); Serial.flush();
-  // #endif
-
-  DEBUG_LINE; 
-  //delay(2000);
-  
-// while(1);
-
-// #ifdef ESP8266
 // leave as default for testing
   analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
   analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
@@ -1664,8 +1645,9 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY_DIMMER2_CTR)==0){         return MODULE_SHELLY_DIMMER2_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
 
-  //esp32
+  #ifdef ESP32
   else if(strcmp_P(c,PM_MODULE_NAME_CAM_AITHINKER_CTR)==0){         return MODULE_CAM_AITHINKER_ID; }
+  #endif
 
   else if(strcmp_P(c,PM_MODULE_NAME_USERMODULE_CTR)==0){      return USER_MODULE; }
 
@@ -1773,16 +1755,18 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
-
+#ifdef ESP32
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_TX_ID; }
-
+#endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR)==0){  return GPIO_GPS_SERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR)==0){  return GPIO_GPS_SERIAL0_RX_ID; }
+  #ifdef ESP32
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_TX_CTR)==0){  return GPIO_GPS_SERIAL1_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL1_RX_CTR)==0){  return GPIO_GPS_SERIAL1_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR)==0){  return GPIO_GPS_SERIAL2_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR)==0){  return GPIO_GPS_SERIAL2_RX_ID; }
+  #endif
 
   
   //else if(strcmp_P(c,PM_GPIO_FUNCTION_LEDLNK_CTR)==0){  return GPIO_LEDLNK_ID; }

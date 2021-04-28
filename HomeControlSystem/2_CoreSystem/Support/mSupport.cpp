@@ -206,7 +206,9 @@ void mSupport::ArduinoOTAInit(void)
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
     //#endif
     
-    ESP.restart(); //should only reach if the first failed
+    if(error != OTA_BEGIN_ERROR)
+      ESP.restart(); //should only reach if the first failed
+
   });
 
   ArduinoOTA.onEnd([this]()

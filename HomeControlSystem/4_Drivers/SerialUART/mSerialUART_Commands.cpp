@@ -1,5 +1,7 @@
 #include "mSerialUART.h"
 
+#ifdef USE_MODULE_DRIVERS_SERIAL_UART
+
 
 void mSerialUART::parse_JSONCommand(JsonParserObject obj){
 
@@ -195,4 +197,5 @@ void mSerialUART::parse_JSONCommand(JsonParserObject obj){
 
 // } 
 
-// #endif // USE_MODULE_LIGHTS_INTERFACE
+#endif // #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+

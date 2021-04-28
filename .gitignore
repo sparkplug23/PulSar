@@ -16,7 +16,7 @@ HomeControlSystem/0_ConfigUser/mUserConfig_Secret.h
 HomeControlSystem/0_ConfigUser/mUserConfig_Secret_Michael.h
 HomeControlSystem/0_ConfigUser/mFirmwareCustom_Secret.h
 HomeControlSystem/0_ConfigUser/mFirmwareCustom_Secret_Michael.h
-HomeControlSystem/9_Controller/UAVRecorder
+# HomeControlSystem/9_Controller/UAVRecorder
 
 ## Visual Studio Code specific ######
 .vscode

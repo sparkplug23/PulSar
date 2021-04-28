@@ -1,7 +1,9 @@
 #include "mDisplaysInterface.h"
 
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
-
+{
+  "DisplayStaticLog":["Open","file123456","V 12:34:56","2 kB"]
+}
 void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
   char buffer[50];

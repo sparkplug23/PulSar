@@ -121,9 +121,9 @@ enum FUNCTION_RESULT_IDS{
   // // #include <ESP8266mDNS.h>
   // #endif // #ifdef USE_NETWORK_MDNS
   
-#ifdef USE_DISCOVERY
-  #include <ESP8266mDNS.h>                  // MQTT, Webserver, Arduino OTA
-#endif  // USE_DISCOVERY
+  #ifdef USE_DISCOVERY
+    #include <ESP8266mDNS.h>                  // MQTT, Webserver, Arduino OTA
+  #endif  // USE_DISCOVERY
 
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
@@ -594,7 +594,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING
   #include "9_Controller/Heating/mHeating.h"
-  #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"

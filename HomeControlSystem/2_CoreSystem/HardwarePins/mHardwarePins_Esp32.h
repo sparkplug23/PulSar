@@ -52,9 +52,9 @@
 #define MIN_FLASH_PINS     4    // Number of flash chip pins unusable for configuration (GPIO6, 7, 8 and 11)
 #define MAX_USER_PINS      36   // MAX_GPIO_PIN - MIN_FLASH_PINS
 #define WEMOS_MODULE       0    // Wemos module
-#define USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #define USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
-#ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
     0, 1, 2, 3, 4, 5,
@@ -91,44 +91,44 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
 //         pCONT_pins->pin_attached_gpio_functions[gpio_pin_index_location] = pin_function;
 //     }
 // }
-#else
+// #else
 
-int8_t GetPinByIndex(uint8_t index)
-{
-    // If statements must be executed in accending order
-    if(index <= 5){
-        return index;
-    }else
-    if(index <= 8){
-        return -1;      // invalid pin
-    }else
-    if(index <= 10){
-        return index-3; // 3 pins skipped
-    }else
-    if(index <= 11){
-        return -1;      // invalid pin
-    }else
-    if(index <= 23){
-        return index-4; // 4 pins skipped
-    }else
-    if(index <= 24){
-        return -1;      // invalid pin
-    }else
-    if(index <= 36){
-        return index-5; // 5 pins skipped
-    }else
-    if(index <= 38){
-        return -1;      // invalid pin
-    }else
-    if(index <= 39){
-        return index-7; // 7 pins skipped
-    }
-    else{
-        return -1;
-    }
-}
+// int8_t GetPinByIndex(uint8_t index)
+// {
+//     // If statements must be executed in accending order
+//     if(index <= 5){
+//         return index;
+//     }else
+//     if(index <= 8){
+//         return -1;      // invalid pin
+//     }else
+//     if(index <= 10){
+//         return index-3; // 3 pins skipped
+//     }else
+//     if(index <= 11){
+//         return -1;      // invalid pin
+//     }else
+//     if(index <= 23){
+//         return index-4; // 4 pins skipped
+//     }else
+//     if(index <= 24){
+//         return -1;      // invalid pin
+//     }else
+//     if(index <= 36){
+//         return index-5; // 5 pins skipped
+//     }else
+//     if(index <= 38){
+//         return -1;      // invalid pin
+//     }else
+//     if(index <= 39){
+//         return index-7; // 7 pins skipped
+//     }
+//     else{
+//         return -1;
+//     }
+// }
 
-#endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+// #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 // This can also be achieved by if checks, ie if(pin in range) pin -= 5;
 // If I name the array&function the same, or with a macro, I can switch between both methods

@@ -1,6 +1,6 @@
-// #pragma once
-#ifndef _mHardwarePins_H_82
-#define _mHardwarePins_H_82
+#pragma once
+// #ifndef _mHardwarePins_H_82
+// #define _mHardwarePins_H_82
 
 #include <stdint.h>
 
@@ -69,11 +69,11 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
     9, 10, 
     // 11, 
     12, 13, 14, 15, 16
-}
+};
 
 
 
 // Idea: Use bitpacked values to store what pins can have inputs, outputs, or other things on them
 
 
-#endif
+// #endif
