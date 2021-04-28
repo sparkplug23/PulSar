@@ -11,6 +11,7 @@
 # .pio
 build
 firmware.map
+platformio_override.ini
 # FutureIdeas.txt
 HomeControlSystem/0_ConfigUser/mUserConfig_Secret.h
 HomeControlSystem/0_ConfigUser/mUserConfig_Secret_Michael.h
