@@ -1,7 +1,7 @@
 #ifndef mInterfaceController_H2
 #define mInterfaceController_H2 1.1
 
-#define D_USER_MICHAEL
+// #define D_USER_MICHAEL
 
 #include <Arduino.h>
 #include <stdint.h>
