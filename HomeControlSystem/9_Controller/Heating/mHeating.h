@@ -13,6 +13,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+   #define HEATING_DEVICE_MAX 4
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +29,7 @@
 // #define WEB_HANDLE_HEATING_TIMER "heat_timer"
 
 //disable  for debugging
-#define ENABLE_RELAY_CONTROLS
+// #define ENABLE_RELAY_CONTROLS
 
 // #define WEB_HANDLE_BUTTON_NAME_TEMP_SET "btte"
 // #define WEB_HANDLE_BUTTON_NAME_TIMER_SET "btti"
@@ -228,7 +229,7 @@ class mHeating :
     struct HEATING_STATUS{
       char message_ctr[100];
       char message_len = 0;
-    }heating_status[4];
+    }heating_status[HEATING_DEVICE_MAX];
 
 
     #ifdef USE_MODULE_NETWORK_WEBSERVER
@@ -238,14 +239,14 @@ class mHeating :
     #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
-    uint8_t time_map_timers_upstairs[4];// = {0, 60, 90, 120};
-    uint8_t time_map_timers_downstairs[4];// = {0, 60, 90, 120};
-    uint8_t time_map_timers_immersion[4];// = {0, 60, 90, 120};
-    uint8_t time_map_timers_boiler[4];// = {0, 60, 90, 120};
-    uint8_t    time_map_temps_upstairs[4];//                  = {0, 20, 23, 25};
-    uint8_t    time_map_temps_downstairs[4];//                = {0, 20, 23, 25};
-    uint8_t    time_map_temps_immersion[4];//                 = {0, 30, 40, 50};
-    uint8_t    time_map_temps_boiler[4];//                    = {0, 30, 40, 50};
+    // uint8_t time_map_timers_upstairs[HEATING_DEVICE_MAX];// = {0, 60, 90, 120};
+    // uint8_t time_map_timers_downstairs[HEATING_DEVICE_MAX];// = {0, 60, 90, 120};
+    // uint8_t time_map_timers_immersion[HEATING_DEVICE_MAX];// = {0, 60, 90, 120};
+    // uint8_t time_map_timers_boiler[HEATING_DEVICE_MAX];// = {0, 60, 90, 120};
+    // uint8_t    time_map_temps_upstairs[HEATING_DEVICE_MAX];//                  = {0, 20, 23, 25};
+    // uint8_t    time_map_temps_downstairs[HEATING_DEVICE_MAX];//                = {0, 20, 23, 25};
+    // uint8_t    time_map_temps_immersion[HEATING_DEVICE_MAX];//                 = {0, 30, 40, 50};
+    // uint8_t    time_map_temps_boiler[HEATING_DEVICE_MAX];//                    = {0, 30, 40, 50};
 
     void HandleTimerConfiguration(void);
     void HandleProgramTimerConfiguration();
@@ -260,7 +261,7 @@ class mHeating :
         float temperature_step;
         float temperature[HEATINGPROFILE_RESOLUTION];
         uint32_t duration_secs[HEATINGPROFILE_RESOLUTION];
-      }heating_profiles[4];
+      }heating_profiles[HEATING_DEVICE_MAX];
       void init_HeatingProfiles(); // read from memory
       void Save_HeatingProfiles();
       void Load_HeatingProfiles();
@@ -272,7 +273,7 @@ class mHeating :
     #endif
 
     // *************** TIMERS ****************************************************************************************************
-    #define HEATING_DEVICE_TIMERS_MAX 4
+ 
     struct HEATING_DEVICE_TIMERS{
       uint8_t device_name;
       int16_t time_minutes_on;
@@ -283,9 +284,9 @@ class mHeating :
       int16_t ischanged;
       int8_t user_id = -1; // who asked, -1 if not known
       
-      uint8_t mapped_defaults[4];
+      uint8_t mapped_defaults[HEATING_DEVICE_MAX];
 
-    }program_timers[HEATING_DEVICE_TIMERS_MAX];
+    }program_timers[HEATING_DEVICE_MAX];
     uint8_t isanychanged_timers=0;
     void HeatingTimers(void);
     uint8_t fForceHeatingTimerUpdate = false;
@@ -294,7 +295,6 @@ class mHeating :
 
     // *************** TEMPS/SCHEDULES ****************************************************************************************************
 
-    #define HEATING_DEVICE_TEMPS_MAX 4
     struct HEATING_DEVICE_TEMPS{
       uint8_t device_name; //phase out
       struct TIMERRUNNING{
@@ -324,22 +324,22 @@ class mHeating :
         uint8_t mapped_defaults[4];
       }temp;
       struct STATUS{
-        struct DATA{
-          uint8_t ctr[80];
-          uint8_t len = 0;
-        }data;
+      //   struct DATA{
+      //     uint8_t ctr[80];
+      //     uint8_t len = 0;
+      //   }data;
         uint8_t mode = 0;
-        uint8_t mode_next = 0; //stored for after splash
-        uint32_t tSplashTime = millis();
-        uint8_t msSplashtime = 2000; //seconds
+      //   uint8_t mode_next = 0; //stored for after splash
+      //   uint32_t tSplashTime = millis();
+      //   uint8_t msSplashtime = 2000; //seconds
       }status;
-      struct MQTT{
-        uint8_t fForceUpdate = false;
-        uint32_t tSavedUpdate = millis();
-        uint8_t rate = 5;
-      }mqtt;
-      int8_t user_id = -1; // who asked, -1 if not known
-    }program_temps[HEATING_DEVICE_TEMPS_MAX];
+      // struct MQTT{
+      //   uint8_t fForceUpdate = false;
+      //   uint32_t tSavedUpdate = millis();
+      //   uint8_t rate = 5;
+      // }mqtt;
+      // int8_t user_id = -1; // who asked, -1 if not known
+    }program_temps[HEATING_DEVICE_MAX];
 
     void SubTask_HeatingTemps_StatusMessage();
     void SubTask_HeatingTemps(void);
@@ -347,7 +347,7 @@ class mHeating :
     void HeatingTemps(void);
     // uint8_t fForceHeatingTempsUpdate = false;
     uint8_t fForceHeatingTempsUpdate = false;
-    // uint8_t fRunTemp = false;
+    uint8_t fRunTemp = false;
     uint8_t fHeatingTempsChanged = false;
     // uint8_t fForceHeatingTempsUpdateMQTT = true;
     uint8_t CheckIfROCExceedsNegativeLimit(uint8_t id);
@@ -362,6 +362,8 @@ class mHeating :
       uint8_t importance = 0; //0 low, 1 med, 2 high
     }status_message;
 
+
+void Every_Second();
 
 // ***************************************** RGB COLOURS ***********************************************/
 
@@ -437,7 +439,7 @@ class mHeating :
       PROGRAM relays;
       PROGRAM timers;
       PROGRAM temps;
-    }activeprograms[4];
+    }activeprograms[HEATING_DEVICE_MAX];
     const char* GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen);
 
     void SubTasker_MQTTSender(void);
@@ -448,6 +450,9 @@ class mHeating :
     
     int8_t CheckAndExecute_JSONCommands();
     void parse_JSONCommand(JsonParserObject obj);
+    
+    void CommandSet_ProgramTemperature_Desired_Temperature(uint8_t device_id, float value);
+    void CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_t value);
 
     void SubTasker_HeatingTimers(void);
     void SubTasker_HeatingTemps(void);
