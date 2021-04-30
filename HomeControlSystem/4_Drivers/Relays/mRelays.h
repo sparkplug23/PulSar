@@ -24,8 +24,8 @@ class mRelays :
   public:
     mRelays(){};
 
-    #ifndef RELAYS_CONNECTED
-      #define RELAYS_CONNECTED 4
+    #ifndef MAX_RELAYS
+      #define MAX_RELAYS 4
     #endif
 
     static const char* PM_MODULE_DRIVERS_RELAY_CTR;
@@ -40,6 +40,8 @@ class mRelays :
       return sizeof(mRelays);
     };
     #endif
+    
+    void pre_init(void);
 
 
     typedef union {
@@ -63,6 +65,7 @@ class mRelays :
 
       uint8_t fShowTable = false;
       uint8_t relays_connected = 0;
+      uint8_t fEnableSensor = false;
     }settings;
 
     int8_t CheckAndExecute_JSONCommands();
@@ -183,7 +186,7 @@ class mRelays :
      
       uint8_t ischanged = false;
 
-    }relay_status[RELAYS_CONNECTED];
+    }relay_status[MAX_RELAYS];
     
 bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
 

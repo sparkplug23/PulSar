@@ -268,7 +268,8 @@ const uint32_t POWER_MASK = 0xffffffffUL;   // Power (Relay) full mask
 \*********************************************************************************************/
 
 // Changes to the following MAX_ defines will impact settings layout
-const uint8_t MAX_RELAYS = 8;               // Max number of relays
+#define MAX_RELAYS 4
+// const uint8_t MAX_RELAYS = 8;               // Max number of relays
 const uint8_t MAX_INTERLOCKS = 4;           // Max number of interlock groups (MAX_RELAYS / 2)
 const uint8_t MAX_LEDS = 4;                 // Max number of leds
 

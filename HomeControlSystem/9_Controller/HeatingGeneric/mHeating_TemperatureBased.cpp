@@ -16,11 +16,11 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating2.h"
+#include "mHeating.h"
 
 #ifdef USE_MODULE_CONTROLLER_HEATING2
 
-void mHeating2::init_program_temps(void){
+void mHeating::init_program_temps(void){
 
   for(int device_id=0;device_id<HEATING_DEVICE_MAX;device_id++){
     program_temps[device_id].time_running.on=-1;
@@ -71,7 +71,7 @@ void mHeating2::init_program_temps(void){
 
 // Change to switch cases later for easier reading
 // Next step, accept temp controls for water methods
-void mHeating2::FunctionHandler_Programs_Temps(void){
+void mHeating::FunctionHandler_Programs_Temps(void){
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog(LOG_LEVEL_DEBUG, PSTR("FunctionHandler_Programs_Temps"));
@@ -258,7 +258,7 @@ void mHeating2::FunctionHandler_Programs_Temps(void){
 
 
 
-uint8_t mHeating2::CheckIfROCExceedsNegativeLimit(uint8_t id){
+uint8_t mHeating::CheckIfROCExceedsNegativeLimit(uint8_t id){
 
   // switch(id){
   //   case ID_DB18_DS: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.downstairs_pipe; break;
@@ -285,7 +285,7 @@ uint8_t mHeating2::CheckIfROCExceedsNegativeLimit(uint8_t id){
 // Maintaining for 0/120 minutes
 // Off : Unset
 // Waiting: Set for 07:00 (T-03:45)
-void mHeating2::SubTask_HeatingTemps_StatusMessage(){
+void mHeating::SubTask_HeatingTemps_StatusMessage(){
 
   // int16_t timeon;
   // char tmp[10];
@@ -356,7 +356,7 @@ void mHeating2::SubTask_HeatingTemps_StatusMessage(){
 // 24.4/30 = deg/min = 0.8133
 // 30/24.4 = minutes per degree
 //float temp_step = 1.0/100.0; //degree range 0-1
-void mHeating2::init_HeatingProfiles(){
+void mHeating::init_HeatingProfiles(){
 
   for(int device_id=0;device_id<4;device_id++){
 
@@ -397,7 +397,7 @@ void mHeating2::init_HeatingProfiles(){
   }
 }
 
-void mHeating2::FunctionHandler_Heating_Profiles(){
+void mHeating::FunctionHandler_Heating_Profiles(){
 
  // if(abs(millis()-tSavedHeatingProfiles)>60000){tSavedHeatingProfiles = millis();
 
@@ -411,13 +411,13 @@ void mHeating2::FunctionHandler_Heating_Profiles(){
 
 }
 
-uint32_t mHeating2::GetHeatingProfilesTimeMinutes(uint8_t device_id, float temp_now, float temp_target){
+uint32_t mHeating::GetHeatingProfilesTimeMinutes(uint8_t device_id, float temp_now, float temp_target){
   uint32_t seconds = GetHeatingProfilesTimeSeconds(device_id, temp_now, temp_target);
   uint32_t minutes = seconds/60;
   return minutes;
 }
 
-uint32_t mHeating2::GetHeatingProfilesTimeSeconds(uint8_t device_id, float temp_now, float temp_target){
+uint32_t mHeating::GetHeatingProfilesTimeSeconds(uint8_t device_id, float temp_now, float temp_target){
 
 uint32_t seconds=0;
 uint8_t index_now=20, index_target=30;
@@ -558,7 +558,7 @@ return seconds;
 
 
 
-void mHeating2::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
+void mHeating::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 
   // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   // JsonObject obj = doc.to<JsonObject>();
@@ -589,7 +589,7 @@ void mHeating2::ConstructJSON_HeatingProfile_Raw(uint8_t device_id){
 
 #endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
     
-const char* mHeating2::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
+const char* mHeating::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
   // if(buffer == nullptr){ return 0;}
   // switch(program_temps[device].status.mode){
   //   default:               
@@ -605,7 +605,7 @@ const char* mHeating2::GetTempModeByDeviceIDCtr(uint8_t device, char* buffer, ui
   //   D_UNKNOWN))));
 }
 
-const char* mHeating2::GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
+const char* mHeating::GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* buffer, uint8_t buflen){
   // if(buffer == nullptr){ return 0;}
   // return 0;
   // return 
@@ -625,7 +625,7 @@ const char* mHeating2::GetTempActiveProgramByDeviceIDCtr(uint8_t device, char* b
 
 //Update: when times changed (set forced), or 60s elapsed
 //new method, diving up Constructs if they are too big, return if all data was sent
-uint8_t mHeating2::ConstructJSON_ProgramTemps(uint8_t json_level){ //MQQTSendTimers
+uint8_t mHeating::ConstructJSON_ProgramTemps(uint8_t json_level){ //MQQTSendTimers
 // return false;
   char buffer[50];
   JsonBuilderI->Start();

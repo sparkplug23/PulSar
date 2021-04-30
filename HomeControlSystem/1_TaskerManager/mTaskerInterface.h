@@ -18,8 +18,7 @@ class mTaskerInterface
     #ifdef USE_DEBUG_CLASS_SIZE
     virtual uint16_t GetClassSize();
     #endif
-    // virtual float test123(){return 0;};// = 0;
-    // virtual void test1234(sensors_event_t* x){}//return 0;};// = 0;
+    
 
     /**
      * Get device count for each module that should be in module.settings

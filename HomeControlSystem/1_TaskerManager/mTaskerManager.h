@@ -595,8 +595,8 @@ enum MODULE_IDS{
   #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING2
-  #include "9_Controller/HeatingGeneric/mHeating2.h"
-  #define pCONT_heating2                        static_cast<mHeating2*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING2_ID])
+  #include "9_Controller/HeatingGeneric/mHeating.h"
+  #define pCONT_heating2                        static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING2_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"

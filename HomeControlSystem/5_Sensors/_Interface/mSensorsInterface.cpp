@@ -75,7 +75,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
           pmod->GetSensorReading(&val, sensor_id);
           if(val.type_list[0])
           {
-            AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR2_TYPE_AMBIENT_TEMPERATURE));
+            AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID));
           }
         }
       }
@@ -164,6 +164,9 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Start();
   // Ask all modules for their sensor count to get total (or check devicelist via type sensor)
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
+
+    
+
   return JsonBuilderI->End();
 
 }
@@ -172,7 +175,48 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add("motion", 0);
+
+#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+  for(auto& pmod:pCONT->pModule)
+  {
+    //Get any sensors in module
+    uint8_t sensors_available = pmod->GetSensorCount();
+
+    if(sensors_available)
+    {
+      JBI->Level_Start_P(PSTR("%S"),pmod->GetModuleFriendlyName());
+
+
+      for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+      {
+        sensors_reading_t val;
+        pmod->GetSensorReading(&val, sensor_id);
+        if(val.Valid())
+        {
+          JBI->Add(D_JSON_TEMPERATURE, val.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID));
+        }
+      }
+
+
+
+
+      JBI->Level_End();
+    }
+
+
+   
+  }
+
+
+  return JsonBuilderI->End();
+
+
+
+
+
+#endif
 
 
 
@@ -249,7 +293,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -257,7 +301,7 @@ void mSensorsInterface::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
@@ -267,7 +311,7 @@ void mSensorsInterface::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;

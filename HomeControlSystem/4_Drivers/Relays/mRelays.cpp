@@ -33,20 +33,114 @@ Relay Name:    ontime, offtime, timeon, last controlled by//
 */
 
 
+void mRelays::pre_init(void){
+  
+  settings.fEnableSensor = false;
+   //LEDS
+      //  if ((mpin >= GPIO_LED1_INV_ID) && (mpin < (GPIO_LED1_INV_ID + MAX_LEDS))) {
+      //   bitSet(pCONT_set->led_inverted, mpin - GPIO_LED1_INV_ID);
+      //   // mpin -= (GPIO_LED1_INV_ID - GPIO_LED1_ID);
+      // }
+
+      //  #ifdef USE_MODULE_DRIVERS_RELAY
+      // if ((mgpio >= GPIO_REL1_INV_ID) && (mgpio < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
+      //   bitSet(pCONT_mry->rel_inverted, mgpio - GPIO_REL1_INV_ID);
+      //   mgpio -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
+      // }
+      // #endif
+
+
+
+    // #ifdef USE_MODULE_DRIVERS_RELAY
+    // Configure relay pins
+    // for (uint8_t i = 0; i < MAX_RELAYS; i++) {
+    //   if (PinUsed(GPIO_REL1_ID,i)) {
+    //     pinMode(Pin(GPIO_REL1_ID, i), OUTPUT);
+    //     pCONT_set->devices_present++;
+    //     settings.fEnableSensor = true;
+    //     // if (MODULE_EXS_RELAY == pCONT_set->my_module_type) {
+    //     //   digitalWrite(pCONT_set->pin[GPIO_REL1 +i], bitRead(pCONT->mry->rel_inverted, i) ? 1 : 0);
+    //     //   if (i &1) { pCONT_set->devices_present--; }
+    //     // }
+    //   }
+    // }
+    // #endif
+
+    settings.relays_connected = 0;    
+  for(uint8_t pin_id=GPIO_REL1_ID;pin_id<GPIO_REL1_ID+(MAX_RELAYS*4);pin_id++){
+
+        // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_KEY1_ID+(MAX_BUTTONS*4));
+    if(pCONT_pins->PinUsed(pin_id)){
+        // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
+      
+      pinMode(pCONT_pins->Pin(pin_id), OUTPUT);
+        settings.fEnableSensor = true;
+        pCONT_set->devices_present++;
+      // buttons[settings.relays_connected].pin = pCONT_pins->GetPin(pin_id);
+
+      // Standard pin, active high, with pulls 
+      if((pin_id >= GPIO_REL1_ID)&&(pin_id < GPIO_REL1_ID+MAX_RELAYS)
+      ){
+        // pinMode(buttons[settings.relays_connected].pin, INPUT_PULLUP);
+        // buttons[settings.relays_connected].active_state_value = HIGH; //change to functions, so later this can be bitmapped internally
+      }else
+      // Inverted pin, active low, with pulls
+      if( (pin_id >= GPIO_REL1_INV_ID)&&(pin_id < GPIO_REL1_INV_ID+MAX_RELAYS))
+      {
+        // pinMode(buttons[settings.relays_connected].pin, INPUT_PULLUP);
+        // buttons[settings.relays_connected].active_state_value = LOW;
+
+        bitSet(pCONT_mry->rel_inverted, pin_id); //temp fix
+
+      }else
+      {
+        // Serial.printf("NO MATCH GPIO_KEY1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+      }
+
+      // Get boot state of button (this may also be better placed in a delay task from boot)
+      // buttons[settings.relays_connected].lastbutton = digitalRead(buttons[settings.relays_connected].pin);  
+      
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        // AddLog(LOG_LEVEL_TEST, PSTR("Relay %d %d %d"), pin_id, settings.relays_connected, buttons[settings.relays_connected].pin);
+      #endif // ENABLE_LOG_LEVEL_INFO
+      
+      if(settings.relays_connected++ >= MAX_RELAYS){ break; }
+
+    } // if PinUsed
+  }//end for
+
+
+
+
+
+  // if(pCONT_pins->PinUsed(GPIO_LED1_ID)) {  // not set when 255
+  //   // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
+  //   // if()
+  //   pinMode(pCONT_pins->GetPin(GPIO_LED1_ID), OUTPUT);
+  //   digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), HIGH); //OFF
+  //   settings.fEnableSensor = true;
+  // }else{
+  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_LED1_ID));
+  //   //disable pir code
+  // }
+
+
+}
+
 
 
 void mRelays::init(void){
 
-  settings.relays_connected = pCONT_set->devices_present; //phase out
+  // settings.relays_connected = pCONT_set->devices_present; //phase out
 
-  settings.relays_connected = RELAYS_CONNECTED;
+  // settings.relays_connected = MAX_RELAYS;
 
 
   // clear all settings to 0
   memset(&relay_status, 0, sizeof(relay_status));
 
   // Set defaults
-  for(int relay_id=0;relay_id<RELAYS_CONNECTED;relay_id++){
+  for(int relay_id=0;relay_id<MAX_RELAYS;relay_id++){
     relay_status[relay_id].timer_decounter.seconds = 0;
     relay_status[relay_id].timer_decounter.active = false;
   }
@@ -75,17 +169,22 @@ void mRelays::init(void){
 int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;
-  
+
+  /************
+   * INIT SECTION * 
+  *******************/
   switch(function){
-    /************
-     * INIT SECTION * 
-    *******************/
     case FUNC_PRE_INIT:
-      //pre_init();
+      pre_init();
     break;
     case FUNC_INIT:
       init();
     break;
+  }
+
+  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/

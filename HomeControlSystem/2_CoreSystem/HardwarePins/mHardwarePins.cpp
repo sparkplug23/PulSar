@@ -1262,45 +1262,8 @@ void mHardwarePins::GpioInit(void)
   //   // }
   //   // #endif // ENABLE_LOG_LEVEL_DEBUG
 
-    if (mgpio) {
-
-      // // Test for special pin options, though, I could probably do this in their own module inits 
-      // #ifdef USE_MODULE_SENSORS_SWITCHES
-      // // If button is a pullup type, record that its a pullup
-      // if (
-      //   ((mpin >= GPIO_SWT1_NP_ID)     && (mpin < (GPIO_SWT1_NP_ID + MAX_SWITCHES))) ||
-      //   ((mpin >= GPIO_SWT1_INV_NP_ID) && (mpin < (GPIO_SWT1_INV_NP_ID + MAX_SWITCHES)))
-      // ){
-      //   pCONT->mswh->SwitchPullupFlag(mpin - GPIO_SWT1_NP_ID);
-      //   mpin -= (GPIO_SWT1_NP_ID - GPIO_SWT1_ID);
-      // #ifdef ENABLE_LOG_LEVEL_INFO
-      //     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("#ifdef USE_MODULE_SENSORS_SWITCHES %d mpin=%d"), i, mpin);
-      // #endif // ENABLE_LOG_LEVEL_INFO
-      // }else
-      // #endif
-      // #ifdef USE_MODULE_SENSORS_BUTTONS
-      // if ((mpin >= GPIO_KEY1_NP_ID) && (mpin < (GPIO_KEY1_NP_ID + MAX_KEYS))) {
-      //   pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_NP_ID);       //  0 .. 3
-      //   mpin -= (GPIO_KEY1_NP_ID - GPIO_KEY1_ID);
-      // }
-      // else if ((mpin >= GPIO_KEY1_INV_ID) && (mpin < (GPIO_KEY1_INV_ID + MAX_KEYS))) {
-      //   pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_ID);      //  0 .. 3
-      //   mpin -= (GPIO_KEY1_INV_ID - GPIO_KEY1_ID);
-      // }
-      // else if ((mpin >= GPIO_KEY1_INV_NP_ID) && (mpin < (GPIO_KEY1_INV_NP_ID + MAX_KEYS))) {
-      //   pCONT_sbutton->ButtonPullupFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
-      //   pCONT_sbutton->ButtonInvertFlag(mpin - GPIO_KEY1_INV_NP_ID);   //  0 .. 3
-      //   mpin -= (GPIO_KEY1_INV_NP_ID - GPIO_KEY1_ID);
-      // }else
-      // #endif
-
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      if ((mgpio >= GPIO_REL1_INV_ID) && (mgpio < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
-        bitSet(pCONT_mry->rel_inverted, mgpio - GPIO_REL1_INV_ID);
-        mgpio -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
-      }
-      #endif
-     
+// Phasing section out : moving into their modules
+    if (mgpio) {    
       
       //PWM
       if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
@@ -1316,17 +1279,7 @@ void mHardwarePins::GpioInit(void)
 
   
 
-    }
-  
-    // #ifdef USE_LEGACY_PIN_METHOD
-    //   if (mpin){ 
-    //     pCONT_set->pin[mpin] = i;
-    //     #ifdef ENABLE_LOG_LEVEL_INFO
-    //       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("\n\rpin[%d] = %d \tmpin=%d\n\r"), mpin,pCONT_set->pin[mpin],i);
-    //     #endif // ENABLE_LOG_LEVEL_INFO
-    //   }
-    // #endif
-    
+    }    
     //new way
     if(mgpio){ SetPin(pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     
@@ -1554,21 +1507,6 @@ void mHardwarePins::GpioInit(void)
   }
   #endif
 
-
-
-    #ifdef USE_MODULE_DRIVERS_RELAY
-    // Configure relay pins
-    for (uint8_t i = 0; i < MAX_RELAYS; i++) {
-      if (PinUsed(GPIO_REL1_ID,i)) {
-        pinMode(Pin(GPIO_REL1_ID, i), OUTPUT);
-        pCONT_set->devices_present++;
-        // if (MODULE_EXS_RELAY == pCONT_set->my_module_type) {
-        //   digitalWrite(pCONT_set->pin[GPIO_REL1 +i], bitRead(pCONT->mry->rel_inverted, i) ? 1 : 0);
-        //   if (i &1) { pCONT_set->devices_present--; }
-        // }
-      }
-    }
-    #endif
   // }
 
   // for (uint8_t i = 0; i < MAX_LEDS; i++) {

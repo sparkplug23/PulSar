@@ -55,6 +55,10 @@ class mSensorsDB18 :
     void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
 
 
+
+
+
+
     void SplitTask_UpdateSensors(uint8_t sensor_id, uint8_t require_completion);
     uint8_t sReadSensor;
     uint32_t tSavedMeasureSensor;
@@ -169,6 +173,26 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     void printResolution(DallasTemperature* sensors, DeviceAddress deviceAddress);
     void printData(DeviceAddress deviceAddress);
     void PrintPipSensors(HardwareSerial* hs);
+
+    
+    
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.nSensorsFound;
+    }
+    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      Serial.println("OVERRIDE ACCESSED DHT");
+      if(index > DB18_SENSOR_MAX-1) {value->type_list.push_back(0); return ;}
+      value->type_list.push_back(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID);
+      value->data.push_back(sensor[index].reading.val);
+      value->sensor_id = index;
+    };
+
+
+
+
   
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0);

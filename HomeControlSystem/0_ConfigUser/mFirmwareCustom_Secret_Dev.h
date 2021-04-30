@@ -641,6 +641,7 @@
   #define DISABLE_WEBSERVER
   
   #define ENABLE_DEVFEATURE_HEATING_TEMPS_TESTING
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
   #define USE_BUILD_TYPE_CUSTOM
   #define USE_MODULE_CONTROLLER_HEATING2
@@ -648,12 +649,10 @@
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_DHT
   // #define USE_MODULE_SENSORS_BME
-
   #define USE_MODULE_SENSORS_DS18B20
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
   #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -661,16 +660,16 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
       // "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
       // "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
       // "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
       "\"D7\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       // "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
       "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
       
-      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR   "\""
+      // "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR   "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2228,7 +2227,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_SENSORS_BUTTONS
 
   #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
+  #define MAX_RELAYS 1
   #define USE_MODULE_DRIVERS_INTERFACE
     
   #define USE_BUILD_TYPE_LIGHTING
@@ -2724,7 +2723,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // // #define USE_MODULE_SENSORS_BUTTONS
 
   // #define USE_MODULE_DRIVERS_RELAY
-  // #define RELAYS_CONNECTED 1
+  // #define MAX_RELAYS 1
   // #define USE_MODULE_DRIVERS_INTERFACE
   
   // #define USE_BUILD_TYPE_LIGHTING
@@ -2902,7 +2901,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
-  #define RELAYS_CONNECTED 1
+  #define MAX_RELAYS 1
   
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
   
@@ -2959,7 +2958,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
-  #define RELAYS_CONNECTED 1
+  #define MAX_RELAYS 1
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -3155,7 +3154,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
 
   #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 1
+  #define MAX_RELAYS 1
   #define USE_MODULE_DRIVERS_INTERFACE
     
   // #define USE_MODULE_TEMPLATE
@@ -3228,7 +3227,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //remote controls for now
 
   // #define USE_MODULE_DRIVERS_RELAY
-  // #define RELAYS_CONNECTED 2
+  // #define MAX_RELAYS 2
   // #define USE_MODULE_DRIVERS_INTERFACE
     
 
@@ -3326,7 +3325,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //remote controls for now
 
   // #define USE_MODULE_DRIVERS_RELAY
-  // #define RELAYS_CONNECTED 2
+  // #define MAX_RELAYS 2
   // #define USE_MODULE_DRIVERS_INTERFACE
     
 
@@ -3751,7 +3750,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Power"
-  #define RELAYS_CONNECTED 1
+  #define MAX_RELAYS 1
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -3806,7 +3805,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_DRIVERS_RELAY
-  #define RELAYS_CONNECTED 2
+  #define MAX_RELAYS 2
   #define USE_MODULE_DRIVERS_INTERFACE
 
   // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON

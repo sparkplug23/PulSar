@@ -16,11 +16,11 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating2.h"
+#include "mHeating.h"
 
 #ifdef USE_MODULE_CONTROLLER_HEATING2
 
-void mHeating2::parse_JSONCommand(JsonParserObject obj){
+void mHeating::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   char buffer[50];
@@ -86,7 +86,7 @@ void mHeating2::parse_JSONCommand(JsonParserObject obj){
 }
 
 
-void mHeating2::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t device_id, float value)
+void mHeating::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t device_id, float value)
 {
 
   program_temps[device_id].temp.desired = value;
@@ -99,7 +99,7 @@ void mHeating2::CommandSet_ProgramTemperature_Desired_Temperature(uint8_t device
 }
 
 
-void mHeating2::CommandSet_ProgramTimer_TimeOn(uint8_t device_id, uint8_t value)
+void mHeating::CommandSet_ProgramTimer_TimeOn(uint8_t device_id, uint8_t value)
 {
 
   program_timers[device_id].time_minutes_on = value;
@@ -118,7 +118,7 @@ void mHeating2::CommandSet_ProgramTimer_TimeOn(uint8_t device_id, uint8_t value)
 
 
 
-void mHeating2::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, uint8_t value)
+void mHeating::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_id, uint8_t value)
 {
 
     program_temps[device_id].time_running.limit = value;
@@ -132,7 +132,7 @@ void mHeating2::CommandSet_ProgramTemperature_TimeRunning_Limit(uint8_t device_i
 
 
 
-void mHeating2::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_t value)
+void mHeating::CommandSet_ProgramTemperature_Schedule_Mode(uint8_t device_id, int8_t value)
 {
 
   program_temps[device_id].schedule.mode_sch = value;

@@ -1,5 +1,5 @@
 /*
-  mHeating2.cpp - Generic Heating Controller
+  mHeating.cpp - Generic Heating Controller
 
   Copyright (C) 2021  Michael
 
@@ -16,14 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating2.h"
+#include "mHeating.h"
 
 #ifdef USE_MODULE_CONTROLLER_HEATING2
 
-const char* mHeating2::PM_MODULE_CONTROLLER_HEATING2_CTR = D_MODULE_CONTROLLER_HEATING2_CTR;
-const char* mHeating2::PM_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR = D_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR;
+const char* mHeating::PM_MODULE_CONTROLLER_HEATING_CTR = D_MODULE_CONTROLLER_HEATING_CTR;
+const char* mHeating::PM_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR = D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR;
 
-int8_t mHeating2::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mHeating::Tasker(uint8_t function, JsonParserObject obj){
 
   /************
    * INIT SECTION * 
@@ -94,7 +94,7 @@ int8_t mHeating2::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
-void mHeating2::Every_Second()
+void mHeating::Every_Second()
 {
       //temp calculate always, later add flags to update it
       SubContructCtr_HardwareStatus();
@@ -129,13 +129,13 @@ Step 3 - Optional special heating controls
  * */
 
 
-void mHeating2::pre_init(void){
+void mHeating::pre_init(void){
 
   //init_success = true; // Begins true, anything bad sets to false
 
 }
 
-void mHeating2::init(void){
+void mHeating::init(void){
 
   for(uint8_t device_id=0;device_id<4;device_id++){ 
     SetHeatingRelay(device_id,RELAY_STATE_OFF); 
@@ -158,13 +158,13 @@ void mHeating2::init(void){
 }//end function
 
 
-void mHeating2::init_relay_driver_parameters(){
+void mHeating::init_relay_driver_parameters(){
   
 
 }
 
 
-void mHeating2::init_db18_sensor_parameters(){
+void mHeating::init_db18_sensor_parameters(){
 
   // Measure and report every second
   pCONT_msdb18->settings.rate_measure_ms = 1000;
@@ -177,7 +177,7 @@ void mHeating2::init_db18_sensor_parameters(){
 }
 
 
-void mHeating2::init_dht22_sensor_parameters(){
+void mHeating::init_dht22_sensor_parameters(){
 
   // pCONT_set->AddDeviceName(D_DHT_NAME_DOWNSTAIRS, D_MODULE_SENSORS_DHT_ID,   ID_DHT_DS);
   // pCONT_set->AddDeviceName(D_DHT_NAME_UPSTAIRS, D_MODULE_SENSORS_DHT_ID,     ID_DHT_US);
@@ -204,17 +204,17 @@ void mHeating2::init_dht22_sensor_parameters(){
 ************************************************************************************************************************************************/
 
 
-void mHeating2::SetHeatingRelay(uint8_t device_id, uint8_t state){
+void mHeating::SetHeatingRelay(uint8_t device_id, uint8_t state){
   pCONT_mry->CommandSet_Relay_Power(state,device_id); //index offset starts at 1
 }
 
 
-uint8_t mHeating2::GetHeatingRelay(uint8_t device_id){
+uint8_t mHeating::GetHeatingRelay(uint8_t device_id){
   return pCONT_mry->CommandGet_Relay_Power(device_id);//index offset starts at 1
 }
 
 
-uint8_t mHeating2::GetAnyHeatingRelay(){
+uint8_t mHeating::GetAnyHeatingRelay(){
   uint8_t oncount = 0;
   for(uint8_t i = 0;i < 4;i++){
     oncount += GetHeatingRelay(i);
@@ -223,7 +223,7 @@ uint8_t mHeating2::GetAnyHeatingRelay(){
 }
 
 
-void mHeating2::FunctionHandler_FailSafe(void){
+void mHeating::FunctionHandler_FailSafe(void){
 
   uint8_t fMessageToSend = false;
   char tmpctr[100] = {0}; 
@@ -265,7 +265,7 @@ void mHeating2::FunctionHandler_FailSafe(void){
 } //end fucntion
 
 
-void mHeating2::FunctionHandler_Relay_Status(){ DEBUG_LINE;
+void mHeating::FunctionHandler_Relay_Status(){ DEBUG_LINE;
 
   uint8_t relay_state = 0;
   for(int device_id=0;device_id<DEVICE_ID_TOTAL;device_id++){
@@ -297,7 +297,7 @@ void mHeating2::FunctionHandler_Relay_Status(){ DEBUG_LINE;
 // Methods I can use:
 //  - furnace active sensor without my own relays on, which means I need to listen for data from oilfurnace
 //  - if temp is above a limit (ie radiators when the pulse on and off) and if +ve ROC exceeds a value
-int8_t mHeating2::Tasker_PredictManualHeating(){
+int8_t mHeating::Tasker_PredictManualHeating(){
 
 //if ROC > X with programs off = on
 
@@ -313,7 +313,7 @@ int8_t mHeating2::Tasker_PredictManualHeating(){
 }
 
 
-void mHeating2::FunctionHandler_Programs_Timers(void){
+void mHeating::FunctionHandler_Programs_Timers(void){
 
   char buffer[50];
   DEBUG_LINE;
@@ -376,7 +376,7 @@ void mHeating2::FunctionHandler_Programs_Timers(void){
 
 /*********************************************************************** JSON Payload Constructors *********************************************************************************************/
 
-uint8_t mHeating2::ConstructJSON_ProgramTimers(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_ProgramTimers(uint8_t json_level){
 
   JsonBuilderI->Start();
   
@@ -400,7 +400,7 @@ uint8_t mHeating2::ConstructJSON_ProgramTimers(uint8_t json_level){
 
 
 // relays{ds,us},timers{ds,us},temps{ds,us} in simple 1 or 0
-uint8_t mHeating2::ConstructJSON_ProgramActive(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_ProgramActive(uint8_t json_level){
   JsonBuilderI->Start();
     JsonBuilderI->Level_Start_P(D_JSON_RELAY);   
       JsonBuilderI->Add(D_HEATING_SENSOR_NAME_SHORT_US, GetHeatingRelay(DEVICE_US_ID));
@@ -437,7 +437,7 @@ uint8_t mHeating2::ConstructJSON_ProgramActive(uint8_t json_level){
 }
 
 
-uint8_t mHeating2::ConstructJSON_HeatingRelays(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_HeatingRelays(uint8_t json_level){
 
   char buffer[50];
   JsonBuilderI->Start();
@@ -456,7 +456,7 @@ uint8_t mHeating2::ConstructJSON_HeatingRelays(uint8_t json_level){
 
 
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-uint8_t mHeating2::ConstructJSON_PipeTemps(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_PipeTemps(uint8_t json_level){
 
   char buffer[50];
   
@@ -476,7 +476,7 @@ uint8_t mHeating2::ConstructJSON_PipeTemps(uint8_t json_level){
 
 
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-uint8_t mHeating2::ConstructJSON_PipeTempsROC10s(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_PipeTempsROC10s(uint8_t json_level){
 
 return 0;
   // StaticJsonDocument<700> doc;
@@ -510,7 +510,7 @@ return 0;
 
 
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-uint8_t mHeating2::ConstructJSON_PipeTempsROC1m(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_PipeTempsROC1m(uint8_t json_level){
 
 return 0;
 //   for(uint8_t id=0;id<8;id++){
@@ -541,7 +541,7 @@ return 0;
 
 
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-uint8_t mHeating2::ConstructJSON_PipeTempsROC10m(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_PipeTempsROC10m(uint8_t json_level){
 
   return 0;
   // for(uint8_t id=0;id<8;id++){
@@ -570,7 +570,7 @@ uint8_t mHeating2::ConstructJSON_PipeTempsROC10m(uint8_t json_level){
 
 
 
-uint8_t mHeating2::ConstructJSON_ClimateTemps(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_ClimateTemps(uint8_t json_level){
 
   uint8_t ischanged=false, isvalid = false;
   char name_buffer_tmp[25];
@@ -595,7 +595,7 @@ uint8_t mHeating2::ConstructJSON_ClimateTemps(uint8_t json_level){
 }
 
 
-uint8_t mHeating2::ConstructJSON_ClimateTempsROC1m(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_ClimateTempsROC1m(uint8_t json_level){
 
   // for(int ii=0;ii<2;ii++){
 
@@ -621,7 +621,7 @@ uint8_t mHeating2::ConstructJSON_ClimateTempsROC1m(uint8_t json_level){
 
 }
 
-uint8_t mHeating2::ConstructJSON_ClimateTempsROC10m(uint8_t json_level){
+uint8_t mHeating::ConstructJSON_ClimateTempsROC10m(uint8_t json_level){
 
   // char namectr[3]; memset(&namectr,0,sizeof(namectr));
   // uint8_t ischanged=false;
@@ -659,7 +659,7 @@ uint8_t mHeating2::ConstructJSON_ClimateTempsROC10m(uint8_t json_level){
 
 
 
-uint8_t mHeating2::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mHeating::ConstructJSON_Settings(uint8_t json_method){
 
   return 0;
 
@@ -677,7 +677,7 @@ uint8_t mHeating2::ConstructJSON_Settings(uint8_t json_method){
 
 
 // Keeps the highest importance flag
-void mHeating2::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
+void mHeating::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
   if(thisvalue > *importanceset){
     *importanceset = thisvalue;
   }
@@ -686,7 +686,7 @@ void mHeating2::SetHighestImportance(uint8_t* importanceset, int8_t thisvalue){
 
 
 // returns > 0 for events added
-int8_t mHeating2::SubContructCtr_HardwareStatus(){
+int8_t mHeating::SubContructCtr_HardwareStatus(){
 
   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
   uint8_t fNotFirstItem = 0;
@@ -745,7 +745,7 @@ int8_t mHeating2::SubContructCtr_HardwareStatus(){
 }
 
 // returns > 0 for events added
-int8_t mHeating2::SubContructCtr_HardwareStatus_Long(){
+int8_t mHeating::SubContructCtr_HardwareStatus_Long(){
 
   //ORDER BY LEAST TO MOST IMPORTANT SO HIGHEST FLAG IS SET LAST
   uint8_t fNotFirstItem = 0;
@@ -800,7 +800,7 @@ int8_t mHeating2::SubContructCtr_HardwareStatus_Long(){
 
 
 
-int mHeating2::mapHeatingTempToHueColour(int val){
+int mHeating::mapHeatingTempToHueColour(int val){
    int val2 = mSupport::mapfloat(val,15.0,50.0,180,0); //float mSupport::mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
    if(val2<0){
      if(val2<-60){ //limit so we stay within purple and never looping as far as blue
@@ -812,7 +812,7 @@ int mHeating2::mapHeatingTempToHueColour(int val){
   return val2;
 }
 
-int mHeating2::mapHeatingTempToBrightness(int temp){
+int mHeating::mapHeatingTempToBrightness(int temp){
 
   int brightness;
 
@@ -835,7 +835,7 @@ int mHeating2::mapHeatingTempToBrightness(int temp){
 // ds:{temp:0,hue:0,bright:0},
 // us:{temp:0,hue:0,bright:0},
 // EFFECTS to be send seperate when programs change state
-uint8_t mHeating2::ConstructSON_PipeTempsByColours(uint8_t json_level){
+uint8_t mHeating::ConstructSON_PipeTempsByColours(uint8_t json_level){
 
   // StaticJsonDocument<800> doc;
   // JsonObject obj = doc.to<JsonObject>();
@@ -898,7 +898,7 @@ uint8_t mHeating2::ConstructSON_PipeTempsByColours(uint8_t json_level){
 
 
 
-void mHeating2::SetHeater(uint8_t device, uint8_t state){
+void mHeating::SetHeater(uint8_t device, uint8_t state){
 
   //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_HEATING_PROGRAM_TEMP "minutes_on [%d] > minutes_max [%d]"),program_temps[device_id].time_running.on,program_temps[device_id].time_running.limit);
 
@@ -946,7 +946,7 @@ void mHeating2::SetHeater(uint8_t device, uint8_t state){
 
 
 
-const char* mHeating2::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
+const char* mHeating::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
   
   switch(device_id){ 
     case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_SHORT_DS_CTR); break;
@@ -959,7 +959,7 @@ const char* mHeating2::GetDeviceNamebyIDCtr(uint8_t device_id, char* buffer, uin
 }
 
 
-const char* mHeating2::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
+const char* mHeating::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buflen){
   
   switch(device_id){ 
     case DEVICE_DS_ID: snprintf_P(buffer, buflen, PM_HEATING_SENSOR_NAME_LONG_DS_CTR); break;
@@ -971,7 +971,7 @@ const char* mHeating2::GetDeviceNameLongbyIDCtr(uint8_t device_id, char* buffer,
 
 }
 
-int8_t mHeating2::GetDeviceIDbyName(const char* c){
+int8_t mHeating::GetDeviceIDbyName(const char* c){
   if(c=='\0'){
     return -1;
   }
@@ -1001,9 +1001,9 @@ int8_t mHeating2::GetDeviceIDbyName(const char* c){
 
 
 
-void mHeating2::FunctionHandler_Init(){
+void mHeating::FunctionHandler_Init(){
   
-  struct functionhandler<mHeating2>* functionhandler_ptr = nullptr;
+  struct functionhandler<mHeating>* functionhandler_ptr = nullptr;
 
   functionhandler_ptr = &functionhandler_status_message;
   functionhandler_ptr->saved_millis = millis();
@@ -1012,7 +1012,7 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.run_always = false;
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_Program_Status;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_Program_Status;
   
   functionhandler_ptr = &functionhandler_failsafe;
   functionhandler_ptr->saved_millis = millis();
@@ -1021,7 +1021,7 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.run_always = false;
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_MINS_ID; 
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_FailSafe;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_FailSafe;
 
   #ifdef USE_HEATING_PROFILE_ESTIMATION  
   functionhandler_ptr = &functionhandler_heating_profiles;
@@ -1031,7 +1031,7 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.run_always = false;
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_Heating_Profiles;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_Heating_Profiles;
   #endif //#ifdef USE_HEATING_PROFILE_ESTIMATION
       
   functionhandler_ptr = &functionhandler_relay_status;
@@ -1041,7 +1041,7 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.run_always = false;
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_Relay_Status;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_Relay_Status;
 
   functionhandler_ptr = &functionhandler_programs_timers;
   functionhandler_ptr->saved_millis = millis();
@@ -1054,7 +1054,7 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_MINS_ID; 
   #endif
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_Programs_Timers;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_Programs_Timers;
   
   functionhandler_ptr = &functionhandler_programs_temps;
   functionhandler_ptr->saved_millis = millis();
@@ -1063,12 +1063,12 @@ void mHeating2::FunctionHandler_Init(){
   functionhandler_ptr->flags.run_always = false;
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_MINS_ID; 
   functionhandler_ptr->time_val = 1;
-  functionhandler_ptr->function = &mHeating2::FunctionHandler_Programs_Temps;
+  functionhandler_ptr->function = &mHeating::FunctionHandler_Programs_Temps;
     
 }
 
 
-void mHeating2::FunctionHandler_Loop()
+void mHeating::FunctionHandler_Loop()
 {  
   for(auto& handle:functionhandler_list){
     pCONT_sup->FunctionHandler_Call(*this, EM_MODULE_CONTROLLER_HEATING2_ID, handle);
@@ -1079,7 +1079,7 @@ void mHeating2::FunctionHandler_Loop()
 /**
  * Generate Messages for users to glance at via web or mqtt, timers, temps, schedules set? append the messages.
  * */
-void mHeating2::FunctionHandler_Program_Status(){
+void mHeating::FunctionHandler_Program_Status(){
 
   memset(&heating_status,0,sizeof(heating_status));
 
@@ -1110,9 +1110,9 @@ void mHeating2::FunctionHandler_Program_Status(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mHeating2::MQTTHandler_Init(){
+void mHeating::MQTTHandler_Init(){
 
-  struct handler<mHeating2>* mqtthandler_ptr;
+  struct handler<mHeating>* mqtthandler_ptr;
 
   //create "sendnow" (using handler) with passing construct level?
 
@@ -1125,7 +1125,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_Settings;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_Settings;
   
   mqtthandler_ptr = &mqtthandler_program_timers_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TIMERS_IFCHANGED_ID;
@@ -1136,7 +1136,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramTimers;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTimers;
   
   mqtthandler_ptr = &mqtthandler_program_timers_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TIMERS_TELEPERIOD_ID;
@@ -1147,7 +1147,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramTimers;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTimers;
 
   mqtthandler_ptr = &mqtthandler_program_temps_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TEMPS_IFCHANGED_ID;
@@ -1158,7 +1158,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTemps;
   
   mqtthandler_ptr = &mqtthandler_program_temps_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_TEMPS_TELEPERIOD_ID;
@@ -1169,7 +1169,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramTemps;
 
   mqtthandler_ptr = &mqtthandler_program_overview_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_OVERVIEW_IFCHANGED_ID;
@@ -1180,7 +1180,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramActive;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramActive;
   
   mqtthandler_ptr = &mqtthandler_program_overview_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_PROGRAM_OVERVIEW_TELEPERIOD_ID;
@@ -1191,7 +1191,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ProgramActive;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ProgramActive;
   
   mqtthandler_ptr = &mqtthandler_relays_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_TELEPERIOD_ID;
@@ -1202,7 +1202,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_HeatingRelays;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_HeatingRelays;
 
   mqtthandler_ptr = &mqtthandler_relays_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID;
@@ -1213,7 +1213,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_HeatingRelays;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_HeatingRelays;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_IFCHANGED_ID;
@@ -1224,7 +1224,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_PipeTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_TELEPERIOD_ID;
@@ -1235,7 +1235,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_PipeTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc1m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_ROC1M_ID;
@@ -1246,7 +1246,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_PipeTempsROC1m;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTempsROC1m;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_roc10m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_ROC10M_ID;
@@ -1257,7 +1257,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_PIPES_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_PipeTempsROC10m;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_PipeTempsROC10m;
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_CLIMATE_IFCHANGED_ID;
@@ -1268,7 +1268,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ClimateTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTemps;
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_CLIMATE_TELEPERIOD_ID;
@@ -1279,7 +1279,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ClimateTemps;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTemps;
 
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc1m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_CLIMATE_ROC1M_ID;
@@ -1290,7 +1290,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ClimateTempsROC1m;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTempsROC1m;
   
   mqtthandler_ptr = &mqtthandler_sensor_climate_roc10m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_CLIMATE_ROC10M_ID;
@@ -1301,7 +1301,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_CLIMATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructJSON_ClimateTempsROC10m;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructJSON_ClimateTempsROC10m;
 
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_COLOURS_IFCHANGED_ID;
@@ -1312,7 +1312,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PIPES_COLOUR_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructSON_PipeTempsByColours;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructSON_PipeTempsByColours;
   
   mqtthandler_ptr = &mqtthandler_sensor_pipes_colours_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_PIPES_COLOURS_TELEPERIOD_ID;
@@ -1323,7 +1323,7 @@ void mHeating2::MQTTHandler_Init(){
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PIPES_COLOUR_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHeating2::ConstructSON_PipeTempsByColours;
+  mqtthandler_ptr->ConstructJSON_function = &mHeating::ConstructSON_PipeTempsByColours;
 
   // Measure and report every second
   pCONT_msdb18->settings.rate_measure_ms = 1000;
@@ -1346,7 +1346,7 @@ void mHeating2::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mHeating2::MQTTHandler_Set_fSendNow()
+void mHeating::MQTTHandler_Set_fSendNow()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1356,7 +1356,7 @@ void mHeating2::MQTTHandler_Set_fSendNow()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mHeating2::MQTTHandler_Set_TelePeriod()
+void mHeating::MQTTHandler_Set_TelePeriod()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
@@ -1367,7 +1367,7 @@ void mHeating2::MQTTHandler_Set_TelePeriod()
 /**
  * @brief Check all handlers if they require action
  * */
-void mHeating2::MQTTHandler_Sender(uint8_t id)
+void mHeating::MQTTHandler_Sender(uint8_t id)
 {
   for(auto& handle:mqtthandler_list){
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_HEATING2_ID, handle, id);

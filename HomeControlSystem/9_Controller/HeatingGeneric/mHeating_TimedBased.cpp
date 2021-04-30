@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating2.h"
+#include "mHeating.h"
 
 /***
  * Time Based: 
@@ -26,13 +26,13 @@
 
 #ifdef USE_MODULE_CONTROLLER_HEATING2
 
-// void mHeating2::pre_init(void){
+// void mHeating::pre_init(void){
 
 //   //init_success = true; // Begins true, anything bad sets to false
 
 // }
 
-void mHeating2::init_program_timers(void){
+void mHeating::init_program_timers(void){
 
   for(int device_id=0;device_id<HEATING_DEVICE_MAX;device_id++){
     program_timers[device_id].time_minutes_on = -1;

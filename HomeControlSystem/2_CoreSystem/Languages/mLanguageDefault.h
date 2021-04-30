@@ -233,7 +233,7 @@
   #define D_MODULE_CONTROLLER_HEATING_CTR              "mHeating"
   #define D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR              "heating"
 //#endif
-  #define D_MODULE_CONTROLLER_HEATING2_CTR              "mHeating2"
+  #define D_MODULE_CONTROLLER_HEATING2_CTR              "mHeating"
   #define D_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR              "heating2"
 //#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #define D_MODULE_CONTROLLER_RADIATORFAN_CTR              "mRadiatorFan"
