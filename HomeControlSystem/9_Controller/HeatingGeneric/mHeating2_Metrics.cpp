@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating.h"
+#include "mHeating2.h"
 
 /***
  * Metrics: 
@@ -25,7 +25,7 @@
  * */
 
 
-#ifdef USE_MODULE_CONTROLLER_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING2
 
 
 #endif

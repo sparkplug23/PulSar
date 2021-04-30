@@ -6,6 +6,8 @@
 
 #include "stdint.h"
 
+#include "5_Sensors/_Interface/mSensorType.h"
+
 typedef struct event_motion_s{
   uint8_t  state     = false;
   uint8_t  isactive  = false;
@@ -51,6 +53,9 @@ class mSensorsInterface :
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
+
+    // sensor_t
+
     
     void CommandEvent_Motion(uint8_t event_type);
     

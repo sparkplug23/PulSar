@@ -37,6 +37,7 @@
 //#define DEVICE_BEDROOMBLINDS     
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
+#define DEVICE_HEATING2
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -44,7 +45,7 @@
 // #define DEVICE_GPSPARSER_TESTER
 // #define DEVICE_CAM_TESTER
 // #define DEVICE_CAMERA_DRIVEWAY
-#define DEVICE_H801_TESTER
+// #define DEVICE_H801_TESTER
 
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
@@ -618,6 +619,119 @@
     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
+#endif
+
+/**
+ * 
+ * */
+#ifdef DEVICE_HEATING2
+  #define DEVICENAME_CTR          "heating2"
+  #define DEVICENAME_FRIENDLY_CTR "Heating2"
+
+  // New heating controller, designed to work from single device to multizone system
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+   
+  // #define ENABLE_BUG_TRACING
+  //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
+  // #define ENABLE_HEATING_DEBUG_TIMES
+  #define DISABLE_WEBSERVER
+  
+  #define ENABLE_DEVFEATURE_HEATING_TEMPS_TESTING
+
+  #define USE_BUILD_TYPE_CUSTOM
+  #define USE_MODULE_CONTROLLER_HEATING2
+  
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_BME
+
+  #define USE_MODULE_SENSORS_DS18B20
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define RELAYS_CONNECTED 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      // "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      // "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      // "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      // "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      
+      // "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR   "\""/
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Upstairs"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Downstairs"
+  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Immersion"
+  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Water Boiler"
+
+  #define D_DHT_NAME_DOWNSTAIRS "Downstairs_DHT"
+  #define D_DHT_NAME_UPSTAIRS "Upstairs_DHT"
+
+  #define D_DB18_NAME_DOWNSTAIRS_PIPE "Downstairs_Pipe"
+  #define D_DB18_NAME_UPSTAIRS_PIPE "Upstairs_Pipe"
+  #define D_DB18_NAME_BOILER_PIPE "Boiler_Pipe"
+  #define D_DB18_NAME_IMMERSION_HEATER "Immersion_Heater"
+  #define D_DB18_NAME_TANK_TOP "Tank_Top"
+  #define D_DB18_NAME_TANK_MIDDLE "Tank_Middle"
+  #define D_DB18_NAME_TANK_BOTTOM "Tank_Bottom"
+  #define D_DB18_NAME_TANK_OUT "Tank_Out"
+
+  // maybe I need to delay template name loading until after init phase?
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DB18_NAME_DOWNSTAIRS_PIPE "\","
+        "\"" D_DB18_NAME_UPSTAIRS_PIPE "\","
+        "\"" D_DB18_NAME_BOILER_PIPE "\","
+        "\"" D_DB18_NAME_IMMERSION_HEATER "\","
+        "\"" D_DB18_NAME_TANK_BOTTOM "\","
+        "\"" D_DB18_NAME_TANK_OUT "\","
+        "\"" D_DB18_NAME_TANK_TOP "\","
+        "\"" D_DB18_NAME_TANK_MIDDLE "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DHT_NAME_DOWNSTAIRS "\","
+        "\"" D_DHT_NAME_UPSTAIRS "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                
+        "[40,255,152,171,193,23,4,231],"
+        "[40,255,131,6,194,23,4,59],"
+        "[40,255,204,226,193,23,4,30],"
+        "[40,255,136,105,53,22,4,114],"
+        "[40,255,50,176,193,23,4,197],"
+        "[40,255,216,108,53,22,4,102],"
+        "[40,255,162,167,53,22,4,27],"
+        "[40,255,219,93,53,22,4,239]"
+      "]"  
+    "}"
+  "}";
+  
 #endif
 
 #ifdef DEVICE_RGBDESK

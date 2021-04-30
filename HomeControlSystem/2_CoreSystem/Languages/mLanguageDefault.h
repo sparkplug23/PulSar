@@ -233,6 +233,8 @@
   #define D_MODULE_CONTROLLER_HEATING_CTR              "mHeating"
   #define D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR              "heating"
 //#endif
+  #define D_MODULE_CONTROLLER_HEATING2_CTR              "mHeating2"
+  #define D_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR              "heating2"
 //#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #define D_MODULE_CONTROLLER_RADIATORFAN_CTR              "mRadiatorFan"
   #define D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
@@ -1431,9 +1433,9 @@
 #define D_JSON_BRIGHTNESS_MIN "BrightnessMin"
 #define D_JSON_BRIGHTNESS_MAX "BrightnessMax"
 #define D_JSON_BRIGHTNESS_RGB "BrightnessRGB"
-#define D_JSON_BRIGHTNESS_RGB_255 "BrightnessRGB255"
+#define D_JSON_BRIGHTNESS_RGB_255 "BrightnessRGB_255"
 #define D_JSON_BRIGHTNESS_CCT  "BrightnessCCT"
-#define D_JSON_BRIGHTNESS_CCT255  "BrightnessCCT255"
+#define D_JSON_BRIGHTNESS_CCT_255  "BrightnessCCT_255"
 #define D_JSON_RANDOM_AMOUNT "RandomAmount"
 #define D_JSON_RANDOMISE_BRIGHTNESS_MODE "RandomiseBrightnessMode"
 
@@ -1465,7 +1467,7 @@
 #define D_JSON_CAPTURE_UPSECONDS "CaptureUpSeconds"
 #define D_JSON_IMPORTANCE "importance"
 #define D_JSON_INORDER "InOrder"
-#define D_JSON_LIMIT "limit"
+#define D_JSON_LIMIT "Limit"
 #define D_JSON_LASTREAD "LastRead"
 #define D_JSON_LENGTH "length"
 #define D_JSON_MAX "max"
@@ -1546,10 +1548,12 @@
 #define D_JSON_SCENE_NAME   "SceneName"
 
 #define D_JSON_SCHEDULE "Schedule"
+
 #define D_JSON_SCHEDULED_OFF D_OFF
-#define D_JSON_SCHEDULED_SET "scheduled_set"
-#define D_JSON_SCHEDULED_ON "scheduled_on"
-#define D_JSON_MANUAL_ON "manual_on"
+#define D_JSON_SCHEDULED_SET "Scheduled Set"
+#define D_JSON_SCHEDULED_ON "Scheduled ON"
+#define D_JSON_MANUAL_ON "Manual ON"
+
 #define D_JSON_TIME "Time"
 #define D_JSON_TIME_MS "TimeMs"
 #define D_JSON_TIME_SECS "TimeSecs"

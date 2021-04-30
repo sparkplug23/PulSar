@@ -1,7 +1,11 @@
 #ifndef mInterfaceController_H2
 #define mInterfaceController_H2 1.1
 
-// #define D_USER_MICHAEL
+#define D_USER_MICHAEL
+
+#ifdef D_USER_MICHAEL
+#warning "------------------------------------------------------------------------------- Development by Author, will not compile for others"
+#endif
 
 #include <Arduino.h>
 #include <stdint.h>
@@ -320,6 +324,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_HEATING
     EM_MODULE_CONTROLLER_HEATING_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_HEATING2
+    EM_MODULE_CONTROLLER_HEATING2_ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     EM_MODULE_CONTROLLER_RADIATORFAN_ID,
   #endif
@@ -586,6 +593,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_HEATING
   #include "9_Controller/Heating/mHeating.h"
   #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_HEATING2
+  #include "9_Controller/HeatingGeneric/mHeating2.h"
+  #define pCONT_heating2                        static_cast<mHeating2*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING2_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"

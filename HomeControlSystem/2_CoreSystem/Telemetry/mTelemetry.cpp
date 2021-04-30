@@ -708,6 +708,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
 
   char buffer[30];
   JsonBuilderI->Start();
+  JBI->Add("flag_serial_set_tx_set",pCONT_pins-> flag_serial_set_tx_set);
     // JsonBuilderI->Level_Start(PM_JSON_GPIO);
     // for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
     //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
@@ -778,6 +779,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHea
 
     JsonBuilderI->Add(PM_JSON_MODULENAME, pCONT_pins->AnyModuleName(pCONT_set->Settings.module, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_MODULEID,   pCONT_set->Settings.module);
+    JBI->Add("MyModuleType",pCONT_set->my_module_type);
     myio cmodule;
     pCONT_pins->TemplateGPIOs(&cmodule);
     // JsonBuilderI->Array_AddArray(PM_JSON_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));

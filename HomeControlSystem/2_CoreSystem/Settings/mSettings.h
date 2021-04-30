@@ -1254,7 +1254,7 @@ struct SystemName{
 struct SettingsMQTT{
   // char topic_prefix[50]; //temp remove
   
-   char          host[33];             // 1E9 - Keep together with below as being copied as one chunck with reset 6
+   char          host_address[33];             // 1E9 - Keep together with below as being copied as one chunck with reset 6
    uint16_t      port;                 // 20A - Keep together
   char          client[33];           // 20C - Keep together
   char          user[33];             // 22D - Keep together

@@ -124,14 +124,16 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
     CommandSet_BrtCT_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriCT());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+
+// Flip these so default is 0 to 100%, and the other is range controlled
   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
     data_buffer.isserviced++;

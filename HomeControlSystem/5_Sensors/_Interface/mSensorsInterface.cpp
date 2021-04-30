@@ -4,6 +4,31 @@
  * New joint motion triggered class, all future motion events will also trigger a response from this class (no rules required)
  * */
 
+// All sensors should have generic functions for getting their status
+// We should get it from their name, as this would be truly unique and doesnt need any module name or indexing (unless I use that as identifier)
+//
+
+/*
+
+struct to return "sensors"
+
+
+float GetSensorTemperature(module_id, sensor_id)
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+
+
 #ifdef USE_MODULE_SENSORS_INTERFACE 
 
 const char* mSensorsInterface::PM_MODULE_SENSORS_INTERFACE_CTR = D_MODULE_SENSORS_INTERFACE_CTR;
@@ -25,7 +50,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -34,6 +59,34 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP: 
       EveryLoop();
     break;  
+    case FUNC_EVERY_SECOND:{
+      Serial.println(sizeof(sensors_reading_t));
+      // Serial.println(pCONT_msdb18->GetSensorReading());
+      // Serial.println(pCONT_dht->GetSensorReading());
+      // Serial.println(pCONT_msdb18->test123());
+      // Serial.println(pCONT_dht->test123());
+      
+
+      for(auto& pmod:pCONT->pModule)
+      {
+        sensors_reading_t val;
+        pmod->GetSensorReading(&val);
+        if(val.type_list[0])
+        {
+          Serial.println(val.type_list[0]);
+          AddLog(LOG_LEVEL_TEST, PSTR("%S val.data[0]=%d"),pmod->GetModuleFriendlyName(),(int)val.GetValue(SENSOR2_TYPE_AMBIENT_TEMPERATURE));
+        }
+      }
+
+      
+      //   pModule[switch_index]->Tasker(function, obj);
+
+
+      // pCONT_msdb18->test1234(&val);
+      // Serial.println(val.data[0]);
+      // pCONT_dht->test1234(&val);
+      // Serial.println(val.data[0]);
+  }break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -107,6 +160,7 @@ void mSensorsInterface::CommandEvent_Motion(uint8_t event_type)
 uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
+  // Ask all modules for their sensor count to get total (or check devicelist via type sensor)
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
   return JsonBuilderI->End();
 

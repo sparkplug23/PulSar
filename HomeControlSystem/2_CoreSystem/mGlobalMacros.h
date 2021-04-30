@@ -21,6 +21,9 @@
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf
 
+#define DEBUGGING_PROCEED_ONLY_AFTER_MILLIS_SHOWS_STABLE(X) \
+              if(millis()<60000){ return X; } 
+
 // #define ENABLE_DEBUG123 //USE_SOFTWARE_SERIAL_DEBUG
 
 #if defined(ENABLE_DEBUG123)

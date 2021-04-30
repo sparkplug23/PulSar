@@ -49,6 +49,42 @@ class mSensorsDHT :
     #endif
 
     
+    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override{
+      Serial.println("OVERRIDE ACCESSED DHT");
+      value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
+      value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
+      value->data.push_back(sensor[index].instant.temperature);
+      value->data.push_back(sensor[index].instant.humidity);
+      value->sensor_id = index;
+    };
+
+// void mSensorsDHT::GetSensorValue(sensors_reading_t* value, uint8_t index = 0)
+// {
+
+//   value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
+//   value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
+
+//   value->data.push_back(sensor[index].instant.temperature);
+//   value->data.push_back(sensor[index].instant.humidity);
+
+//   value->sensor_id = index;
+
+// }
+
+
+
+// float test123() override
+//     {
+//       return 2;
+//     };
+
+//     void test1234(sensors_event_t* x) override
+//     {
+//       //return 2;
+//     };
+
+
   enum {
     AUTO_DETECT,
     DHT11,
@@ -71,7 +107,12 @@ class mSensorsDHT :
 
     struct SETTINGS{
       uint8_t sensor_active_count = 0;
+      uint16_t rate_measure_ms = 1000;
     }settings;
+
+    // sensors_event_t* GetSensorValue();
+    
+void GetSensorValue(sensors_reading_t* value);
 
 // struct DHTSTRUCT {
 //   uint8_t     pin;
@@ -83,21 +124,6 @@ class mSensorsDHT :
 //   float    h = NAN;
 // } Dht[MAX_SENSORS];
 
-
-
-    // uint32_t tSavedSendClimate,tSavedSendClimate1m;
-    // void MQQTSendClimateTempsIfChanged();
-    // void MQQTSendClimateTempsLatest1m();
-    // uint8_t mSavedSendClimate1m=0;
-    // //void ConstructJSON_ClimateTemps();
-    // void ConstructJSON_ClimateTemps();
-    // void MQQTSendClimateTempsROC1m();
-    // void ConstructJSON_ClimateTempsROC1m();
-    // void MQQTSendClimateTempsROC10m();
-    // void ConstructJSON_ClimateTempsROC10m();
-    // void SubTasker_MQTTSender();
-    // uint8_t mqtt_start_data_sent = 0;
-    // void MQQTSendClimateTempsLatest10m();
 
 
 

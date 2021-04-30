@@ -16,12 +16,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef _DRIVER_INTERFACE_HEATING_WEB_H
-#define _DRIVER_INTERFACE_HEATING_WEB_H 0.1
+#ifndef _DRIVER_INTERFACE_HEATING2_WEB_H
+#define _DRIVER_INTERFACE_HEATING2_WEB_H 0.1
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CONTROLLER_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING2
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 

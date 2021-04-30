@@ -1238,7 +1238,7 @@ void mHardwarePins::GpioInit(void)
 
   uint16_t gpio = pCONT_set->my_module.io[pin];
   // uint8_t pin = i;
-  AddLog(LOG_LEVEL_DEBUG, PSTR("pin=%d, gpio=%d"), pin, gpio);
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("pin=%d, gpio=%d"), pin, gpio);
 
   // // Get GPIO if pin is set
   
@@ -1333,7 +1333,11 @@ void mHardwarePins::GpioInit(void)
   }//end fof
 
   #ifdef ESP8266
-    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { Serial.set_tx(2); }
+    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
+      Serial.set_tx(2); 
+      flag_serial_set_tx_set = true;
+      
+      }
   #endif
 
 // leave as default for testing
@@ -1441,11 +1445,14 @@ void mHardwarePins::GpioInit(void)
 
       // if((i == 2)&&(pCONT_set->))
 
-      #ifndef USE_SERIAL_ALTERNATE_TX
+      // #ifndef USE_SERIAL_ALTERNATE_TX
         if (!((1 == i) || (3 == i))) {             // Skip serial
-          pinMode(i, INPUT);
+          if((MODULE_H801_ID == pCONT_set->my_module_type) && (i !=2 ))
+          {
+            pinMode(i, INPUT);
+          }
         }
-      #endif
+      // #endif
     }
   }
 

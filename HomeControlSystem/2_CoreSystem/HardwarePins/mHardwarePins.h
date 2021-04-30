@@ -56,6 +56,8 @@ bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
 
 // #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
+bool flag_serial_set_tx_set = false;
+
     
   /**
    * Module that is attached to the pin, indexed by ascending order of pins available on chip

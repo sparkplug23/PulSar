@@ -26,7 +26,7 @@
  #include "WProgram.h"
 #endif
 
-#include "mAdafruit_Sensor.h"
+// #include "mAdafruit_Sensor.h"
 #include <Wire.h>
 
 /**************************************************************************/

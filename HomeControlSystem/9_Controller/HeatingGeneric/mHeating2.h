@@ -16,11 +16,11 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef MHEATING_H
-#define MHEATING_H 0.4
+#ifndef MHEATING2_H
+#define MHEATING2_H 0.4
 
-#define D_UNIQUE_MODULE_CONTROLLER_HEATING_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_CONTROLLER_HEATING_ID    1    // Numerical accesending order of module within a group
+#define D_UNIQUE_MODULE_CONTROLLER_HEATING2_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_GROUP_MODULE_CONTROLLER_HEATING2_ID    1    // Numerical accesending order of module within a group
 
 /**
  * Moving forward, try making this heating work for all systems. "Heating" as a controller should accept any sensor, with any relays out
@@ -29,7 +29,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CONTROLLER_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING2
 
 
 #include <NeoPixelBus.h>
@@ -167,25 +167,29 @@ enum DEVICE_HEATING_ID{
     DEVICE_WB_ID=3
 };
 
-class mHeating :
+class mHeating2 :
   public mTaskerInterface
 {
 
   private:
   public:
-    mHeating(){};
+    mHeating2(){};
     
-    static const char* PM_MODULE_CONTROLLER_HEATING_CTR;
-    static const char* PM_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HEATING_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HEATING_ID; }
+    static const char* PM_MODULE_CONTROLLER_HEATING2_CTR;
+    static const char* PM_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HEATING2_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HEATING2_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
-      return sizeof(mHeating);
+      return sizeof(mHeating2);
     };
     #endif
+
+    // float GetSensorReading() override{
+    //   return 1;
+    // };
 
 
     void pre_init(void);
@@ -574,20 +578,20 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
     void FunctionHandler_Loop();
   
 
-    struct functionhandler<mHeating> functionhandler_status_message;
+    struct functionhandler<mHeating2> functionhandler_status_message;
     void FunctionHandler_Program_Status();
-    struct functionhandler<mHeating> functionhandler_failsafe;
+    struct functionhandler<mHeating2> functionhandler_failsafe;
     void FunctionHandler_FailSafe(void);
-    struct functionhandler<mHeating> functionhandler_heating_profiles;
+    struct functionhandler<mHeating2> functionhandler_heating_profiles;
     void FunctionHandler_Heating_Profiles(void);
-    struct functionhandler<mHeating> functionhandler_relay_status;
+    struct functionhandler<mHeating2> functionhandler_relay_status;
     void FunctionHandler_Relay_Status(void);
-    struct functionhandler<mHeating> functionhandler_programs_timers;
+    struct functionhandler<mHeating2> functionhandler_programs_timers;
     void FunctionHandler_Programs_Timers(void);
-    struct functionhandler<mHeating> functionhandler_programs_temps;
+    struct functionhandler<mHeating2> functionhandler_programs_temps;
     void FunctionHandler_Programs_Temps(void);
 
-    struct functionhandler<mHeating>* functionhandler_list[5] = {
+    struct functionhandler<mHeating2>* functionhandler_list[5] = {
       &functionhandler_failsafe,
       &functionhandler_status_message,
       #ifdef USE_HEATING_PROFILE_ESTIMATION
@@ -631,27 +635,27 @@ uint8_t ConstructJSON_Settings(uint8_t json_method);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    struct handler<mHeating> mqtthandler_settings_teleperiod;
-    struct handler<mHeating> mqtthandler_program_timers_ifchanged;
-    struct handler<mHeating> mqtthandler_program_timers_teleperiod;
-    struct handler<mHeating> mqtthandler_program_temps_ifchanged;
-    struct handler<mHeating> mqtthandler_program_temps_teleperiod;
-    struct handler<mHeating> mqtthandler_program_overview_ifchanged;
-    struct handler<mHeating> mqtthandler_program_overview_teleperiod;
-    struct handler<mHeating> mqtthandler_sensor_pipes_ifchanged;
-    struct handler<mHeating> mqtthandler_sensor_pipes_teleperiod;
-    struct handler<mHeating> mqtthandler_sensor_pipes_roc1m;
-    struct handler<mHeating> mqtthandler_sensor_pipes_roc10m;
-    struct handler<mHeating> mqtthandler_sensor_climate_ifchanged;
-    struct handler<mHeating> mqtthandler_sensor_climate_teleperiod;
-    struct handler<mHeating> mqtthandler_sensor_climate_roc1m;
-    struct handler<mHeating> mqtthandler_sensor_climate_roc10m;
-    struct handler<mHeating> mqtthandler_sensor_pipes_colours_ifchanged;
-    struct handler<mHeating> mqtthandler_sensor_pipes_colours_teleperiod;
-    struct handler<mHeating> mqtthandler_relays_ifchanged;
-    struct handler<mHeating> mqtthandler_relays_teleperiod;
+    struct handler<mHeating2> mqtthandler_settings_teleperiod;
+    struct handler<mHeating2> mqtthandler_program_timers_ifchanged;
+    struct handler<mHeating2> mqtthandler_program_timers_teleperiod;
+    struct handler<mHeating2> mqtthandler_program_temps_ifchanged;
+    struct handler<mHeating2> mqtthandler_program_temps_teleperiod;
+    struct handler<mHeating2> mqtthandler_program_overview_ifchanged;
+    struct handler<mHeating2> mqtthandler_program_overview_teleperiod;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_ifchanged;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_teleperiod;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_roc1m;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_roc10m;
+    struct handler<mHeating2> mqtthandler_sensor_climate_ifchanged;
+    struct handler<mHeating2> mqtthandler_sensor_climate_teleperiod;
+    struct handler<mHeating2> mqtthandler_sensor_climate_roc1m;
+    struct handler<mHeating2> mqtthandler_sensor_climate_roc10m;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_colours_ifchanged;
+    struct handler<mHeating2> mqtthandler_sensor_pipes_colours_teleperiod;
+    struct handler<mHeating2> mqtthandler_relays_ifchanged;
+    struct handler<mHeating2> mqtthandler_relays_teleperiod;
   
-  struct handler<mHeating>* mqtthandler_list[19] = {
+  struct handler<mHeating2>* mqtthandler_list[19] = {
     &mqtthandler_settings_teleperiod,
     &mqtthandler_program_timers_ifchanged,
     &mqtthandler_program_timers_teleperiod,

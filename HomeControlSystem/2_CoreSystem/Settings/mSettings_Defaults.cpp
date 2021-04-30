@@ -151,7 +151,7 @@ void mSettings::SystemSettings_DefaultBody_WebServer(){
 
 void mSettings::SystemSettings_DefaultBody_MQTT(){
 
-  strlcpy(Settings.mqtt.host, MQTT_HOST, sizeof(Settings.mqtt.host));
+  strlcpy(Settings.mqtt.host_address, MQTT_HOST, sizeof(Settings.mqtt.host_address));
   Settings.mqtt.port = MQTT_PORT;
   // strlcpy(Settings.mqtt.client, MQTT_CLIENT_ID, sizeof(Settings.mqtt.client));
   strlcpy(Settings.mqtt.user, MQTT_USER, sizeof(Settings.mqtt.user));

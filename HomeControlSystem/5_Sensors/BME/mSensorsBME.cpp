@@ -54,7 +54,7 @@ int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
+    //  parse_JSONCommand(obj);
     break;
     /************
      * WEBPAGE SECTION * 
@@ -127,7 +127,7 @@ void mSensorsBME::init(void){
     sensor[sensor_id].sReadSensor = SPLIT_TASK_SEC1_ID;    
   }
 
-  sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
+  sealevel_pressure = 1013.25;//SENSORS_PRESSURE_SEALEVELHPA;
   settings.measure_rate_ms = 1000;
   
 }

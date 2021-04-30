@@ -165,10 +165,12 @@ void mMQTT::init(void){
 
 
   //Set primary mqtt broker address as first
-  memset(pCONT_set->Settings.mqtt.hostname_ctr,0,sizeof(pCONT_set->Settings.mqtt.hostname_ctr));
-  #ifdef USE_NETWORK_MDNS
-  snprintf(pCONT_set->Settings.mqtt.hostname_ctr,sizeof(pCONT_set->Settings.mqtt.hostname_ctr),MDNS_MQTT_HOSTNAME1);//,strlen(MDNS_MQTT_HOSTNAME1));
-  #endif // #ifdef USE_NETWORK_MDNS
+  // COMES FROM DEFAULT SETTINGS
+  
+  // memset(pCONT_set->Settings.mqtt.hostname_ctr,0,sizeof(pCONT_set->Settings.mqtt.hostname_ctr));
+  // #ifdef USE_NETWORK_MDNS
+  // snprintf(pCONT_set->Settings.mqtt.hostname_ctr,sizeof(pCONT_set->Settings.mqtt.hostname_ctr),MDNS_MQTT_HOSTNAME1);//,strlen(MDNS_MQTT_HOSTNAME1));
+  // #endif // #ifdef USE_NETWORK_MDNS
 
   memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
 

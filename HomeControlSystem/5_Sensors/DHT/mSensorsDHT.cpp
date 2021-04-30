@@ -152,6 +152,30 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
 
 
 
+// void mSensorsDHT::GetSensorValue(sensors_reading_t* value, uint8_t index = 0)
+// {
+
+//   value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
+//   value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
+
+//   value->data.push_back(sensor[index].instant.temperature);
+//   value->data.push_back(sensor[index].instant.humidity);
+
+//   value->sensor_id = index;
+
+// }
+
+// void mSensorsDHT::GetSensorReading(sensors_event_t* value) override{
+//   // return 2;
+
+//   value->type_list.push_back(SENSOR_TYPE_AMBIENT_TEMPERATURE);
+//   value->type_list.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY);
+
+//   value->data.push_back(12);
+//   value->data.push_back(13);
+
+
+// };
 
 
 
@@ -174,6 +198,28 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP:
       EveryLoop();
     break;
+    case FUNC_EVERY_SECOND:{
+      // sensors_reading_t value;
+      // GetSensorValue(&value);
+      
+      // AddLog(LOG_LEVEL_TEST,PSTR("value =%d"),value.type);
+      // AddLog(LOG_LEVEL_TEST,PSTR("value0=%d %d"),bitRead(value.type,0),(int)value.temperature);
+      // AddLog(LOG_LEVEL_TEST,PSTR("value1=%d %d"),bitRead(value.type,1),(int)value.relative_humidity);
+      // AddLog(LOG_LEVEL_TEST,PSTR("value2=%d"),bitRead(value.type,2));
+
+      // AddLog(LOG_LEVEL_TEST,PSTR("value =%d"),(int)value.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE));
+
+
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_type_list =%d"),(int)value.type_list[0]);
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_type_list =%d"),(int)value.type_list[1]);
+
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_data0 =%d"),(int)value.v_data[0]);
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_data1 =%d"),(int)value.v_data[1]);
+
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_data0 =%d"),(int)value.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE));
+      // AddLog(LOG_LEVEL_TEST,PSTR("v_data1 =%d"),(int)value.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY));
+
+    }break;
     /************
      * WEBPAGE SECTION * 
     *******************/

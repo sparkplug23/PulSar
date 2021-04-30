@@ -16,13 +16,13 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating.h"
+#include "mHeating2.h"
 
-#ifdef USE_MODULE_CONTROLLER_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING2
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
-int8_t mHeating::Tasker_Web(uint8_t function){
+int8_t mHeating2::Tasker_Web(uint8_t function){
 
   switch(function){    
     case FUNC_WEB_COMMAND:
@@ -79,7 +79,7 @@ const char kButtonTitle_Temps_Boiler[]      PROGMEM = "OFF|30&deg;C|40&deg;C|50&
 
 
 
-void mHeating::WebAppend_Root_Draw_Table(){
+void mHeating2::WebAppend_Root_Draw_Table(){
 
   char buffer[50];
 
@@ -102,7 +102,7 @@ void mHeating::WebAppend_Root_Draw_Table(){
 
 
 //append to internal buffer if any root messages table
-void mHeating::WebAppend_Root_Status_Table(){
+void mHeating2::WebAppend_Root_Status_Table(){
   
   // if(settings.fShowTable){
 
@@ -276,8 +276,8 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
 }
 
 
-// void mHeating::WebAppend_Root_Draw_Program_Buttons(){
-  void mHeating::WebAppend_Root_ControlUI(){//}
+// void mHeating2::WebAppend_Root_Draw_Program_Buttons(){
+  void mHeating2::WebAppend_Root_ControlUI(){//}
   char listheading[30];
   // BufferWriterI->Append_P("\"%s\":[{\"ihr\":\"","heat_program_buttons_draw");
   // BufferWriterI->Append_P("%s",PSTR("{t}"));
@@ -356,7 +356,7 @@ char buffer[30];
 
 
 
-void mHeating::WebPage_Root_AddHandlers(){
+void mHeating2::WebPage_Root_AddHandlers(){
   
   /**
    * Root Page 
@@ -369,7 +369,7 @@ void mHeating::WebPage_Root_AddHandlers(){
 
 
 
-// void mHeating::WebCommand_Parse(void)
+// void mHeating2::WebCommand_Parse(void)
 // {
   
 //   if(pCONT_web->request_web_command == nullptr){ return; }

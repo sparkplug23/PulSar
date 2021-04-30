@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mHeating.h"
+#include "mHeating2.h"
 
 /***
  * Scheduling: 
@@ -26,15 +26,15 @@
  * */
 
 
-#ifdef USE_MODULE_CONTROLLER_HEATING
+#ifdef USE_MODULE_CONTROLLER_HEATING2
 
-// void mHeating::pre_init(void){
+// void mHeating2::pre_init(void){
 
 //   //init_success = true; // Begins true, anything bad sets to false
 
 // }
 
-void mHeating::init_program_scheduling(void){
+void mHeating2::init_program_scheduling(void){
 
   // datetime_t dummy_t;
 
@@ -58,7 +58,7 @@ void mHeating::init_program_scheduling(void){
 
 
 
-const char* mHeating::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen){
+const char* mHeating2::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen){
  
   switch(activeprogram_id){
     default:          snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH); break;
@@ -71,7 +71,7 @@ const char* mHeating::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char
 }
 
 // #ifdef USE_SCHEDULED_HEATING
-int8_t mHeating::GetScheduleModeIDByCtr(const char* c){
+int8_t mHeating2::GetScheduleModeIDByCtr(const char* c){
   if(c=='\0'){ return -1; }
   if(strcasecmp(c,D_JSON_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
   if(strcasecmp(c,D_JSON_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
@@ -79,7 +79,7 @@ int8_t mHeating::GetScheduleModeIDByCtr(const char* c){
   if(strcasecmp(c,D_JSON_MANUAL_ON)==0){ return SCHEDULED_MANUAL_ON_ID; }
   return -1; // none
 }
-const char* mHeating::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen){
+const char* mHeating2::GetScheduleNameCtrbyID(uint8_t mode, char* buffer, uint8_t buflen){
   switch(mode){
     case SCHEDULED_OFF_ID:       memcpy(buffer, D_JSON_SCHEDULED_OFF, sizeof(D_JSON_SCHEDULED_OFF)); break;
     case SCHEDULED_SET_ID:       memcpy(buffer, D_JSON_SCHEDULED_SET, sizeof(D_JSON_SCHEDULED_SET)); break;

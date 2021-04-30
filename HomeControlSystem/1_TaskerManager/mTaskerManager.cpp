@@ -2,7 +2,6 @@
 
 mTaskerManager* mTaskerManager::instance = nullptr;
 
-
 /**
  * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
  If !0, a specific tasker will be called and this function will exit after completion
@@ -343,6 +342,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_HEATING
     pModule[EM_MODULE_CONTROLLER_HEATING_ID] = new mHeating();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_HEATING2
+    pModule[EM_MODULE_CONTROLLER_HEATING2_ID] = new mHeating2();
   #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();
