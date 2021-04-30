@@ -48,10 +48,15 @@ class mSensorsDHT :
     };
     #endif
 
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.sensor_active_count;
+    }
     
-    
-    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override{
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
       Serial.println("OVERRIDE ACCESSED DHT");
+      if(index > MAX_SENSORS-1) {value->type_list.push_back(0); return ;}
       value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
       value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
       value->data.push_back(sensor[index].instant.temperature);
@@ -59,30 +64,7 @@ class mSensorsDHT :
       value->sensor_id = index;
     };
 
-// void mSensorsDHT::GetSensorValue(sensors_reading_t* value, uint8_t index = 0)
-// {
 
-//   value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
-//   value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
-
-//   value->data.push_back(sensor[index].instant.temperature);
-//   value->data.push_back(sensor[index].instant.humidity);
-
-//   value->sensor_id = index;
-
-// }
-
-
-
-// float test123() override
-//     {
-//       return 2;
-//     };
-
-//     void test1234(sensors_event_t* x) override
-//     {
-//       //return 2;
-//     };
 
 
   enum {

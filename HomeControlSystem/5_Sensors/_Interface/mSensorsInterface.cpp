@@ -69,12 +69,14 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 
       for(auto& pmod:pCONT->pModule)
       {
-        sensors_reading_t val;
-        pmod->GetSensorReading(&val);
-        if(val.type_list[0])
+        for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
         {
-          Serial.println(val.type_list[0]);
-          AddLog(LOG_LEVEL_TEST, PSTR("%S val.data[0]=%d"),pmod->GetModuleFriendlyName(),(int)val.GetValue(SENSOR2_TYPE_AMBIENT_TEMPERATURE));
+          sensors_reading_t val;
+          pmod->GetSensorReading(&val, sensor_id);
+          if(val.type_list[0])
+          {
+            AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR2_TYPE_AMBIENT_TEMPERATURE));
+          }
         }
       }
 

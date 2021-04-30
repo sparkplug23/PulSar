@@ -20,6 +20,11 @@ class mTaskerInterface
     #endif
     // virtual float test123(){return 0;};// = 0;
     // virtual void test1234(sensors_event_t* x){}//return 0;};// = 0;
+
+    /**
+     * Get device count for each module that should be in module.settings
+     * */
+    virtual uint8_t GetSensorCount(void) {return 0;}
     
     /**
      * Push 0 if none are used, maybe internalise
