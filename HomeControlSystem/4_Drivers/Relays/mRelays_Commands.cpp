@@ -181,7 +181,6 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
 
 	// Check state if it needs to toggle result
   ModifyStateNumberIfToggled(&state, CommandGet_Relay_Power(num));
-
   
   //error patch  within vaible range
   if(!((num>=0)&&(num<=settings.relays_connected))){

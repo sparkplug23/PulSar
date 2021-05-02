@@ -224,7 +224,7 @@ uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
       
       pir_detect[sensor_id].ischanged = false;
       
-      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 

@@ -101,12 +101,32 @@ void JsonBuilder::Array_Start(const char* key)
     if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":[",key);
 }
-void JsonBuilder::Array_Start_P(const char* key)
+// void JsonBuilder::Array_Start_P(const char* key)
+// {
+//     if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }
+//     if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+//     *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":[",key);
+// }
+
+void JsonBuilder::Array_Start_P(const char* keyP, ...)
 {
-    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }
+
+  if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }
+
     if((*writer.length>1)&&(writer.buffer[*writer.length-1]!='{')){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":[",key);
+
+  *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"");
+  
+  va_list arg;
+  va_start(arg, keyP);
+  *writer.length += vsnprintf_P(&writer.buffer[*writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-*writer.length, keyP, arg);
+  va_end(arg);
+
+  *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\":[");
 }
+
+
+
 void JsonBuilder::Array_Start() // only add the bracket for manual building
 {
     if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }

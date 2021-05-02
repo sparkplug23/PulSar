@@ -46,12 +46,14 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     // Search across all module names
     for(int module_list_id=0;module_list_id<pCONT->GetClassCount();module_list_id++){
 
-      module_id = module_list_id;//pCONT->mTasksIDs[module_list_id];
+      module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_list_id);
+      
+      // module_list_id;//pCONT->mTasksIDs[module_list_id];
       // module_settings.list[module_list_id];
 
-      sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_id));
+      sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_list_id));
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+      AddLog(LOG_LEVEL_DEBUG, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS    
   
       if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer]){ 
@@ -62,14 +64,15 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
         JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
         if(arr){  
           //Get devices already present
-          uint8_t device_count = pCONT_set->GetDeviceNameCount(module_id);
+          uint8_t device_count = DLI->GetDeviceNameCount(module_id);
           for(uint8_t id =0;id<arr.size();id++){
             jtok = arr[id];
             const char* device_name_ctr = jtok.getStr();
-            pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
+            // pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
+            DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             #ifdef ENABLE_LOG_LEVEL_COMMANDS
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
             #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
           } //if array
         }//if array

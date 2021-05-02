@@ -711,13 +711,15 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
   // if (PinUsed(gpio_pin, index)) {
   //   digitalWrite(GetPin(gpio_pin, index), state &1);
   // }else{
-  //   AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite %d %d"),gpio_pin,state &1);
   // // }
   // digitalWrite(gpio_pin, state &1);
 
-  if (PinUsed(gpio_pin, index)) {
-    digitalWrite(Pin(gpio_pin, index), state &1);
-  }
+  uint8_t real_pin = Pin(gpio_pin, index);
+
+    AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite %d %d %d %d"),gpio_pin,index, state &1,real_pin);
+  // if (PinUsed(gpio_pin, index)) {
+    digitalWrite(real_pin, state &1);
+  // }
 }
 
 
@@ -1051,12 +1053,12 @@ bool mHardwarePins::GetUsedInModule(uint8_t val, uint8_t *arr)
 
   if (!val) { return false; }  // None
 
-  if ((val >= GPIO_REL1_ID) && (val < GPIO_REL1_ID + MAX_RELAYS)) {
-    offset = (GPIO_REL1_INV_ID - GPIO_REL1_ID);
-  }
-  if ((val >= GPIO_REL1_INV_ID) && (val < GPIO_REL1_INV_ID + MAX_RELAYS)) {
-    offset = -(GPIO_REL1_INV_ID - GPIO_REL1_ID);
-  }
+  // if ((val >= GPIO_REL1_ID) && (val < GPIO_REL1_ID + MAX_RELAYS)) {
+  //   offset = (GPIO_REL1_INV_ID - GPIO_REL1_ID);
+  // }
+  // if ((val >= GPIO_REL1_INV_ID) && (val < GPIO_REL1_INV_ID + MAX_RELAYS)) {
+  //   offset = -(GPIO_REL1_INV_ID - GPIO_REL1_ID);
+  // }
 
   // if ((val >= GPIO_LED1_ID) && (val < GPIO_LED1_ID + MAX_LEDS)) {
   //   offset = (GPIO_LED1_INV_ID - GPIO_LED1_ID);

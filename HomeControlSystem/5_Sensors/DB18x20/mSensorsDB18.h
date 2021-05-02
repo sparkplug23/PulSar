@@ -183,9 +183,9 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      Serial.println("OVERRIDE ACCESSED DHT");
+      // Serial.println("OVERRIDE ACCESSED DB18");
       if(index > DB18_SENSOR_MAX-1) {value->type_list.push_back(0); return ;}
-      value->type_list.push_back(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID);
+      value->type_list.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data.push_back(sensor[index].reading.val);
       value->sensor_id = index;
     };

@@ -1,7 +1,51 @@
+
+#ifndef _MODULE_DRIVERS_INTERFACE_H
+#define _MODULE_DRIVERS_INTERFACE_H
+
+#define D_UNIQUE_MODULE_DRIVERS_INTERFACE_ID   40  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_GROUP_MODULE_DRIVERS_INTERFACE_ID    0    // Numerical accesending order of module within a group
+
+#include "stdint.h"
+
+
 // #ifndef _MNEXTIONPANEL2_H
 // #define _MNEXTIONPANEL2_H 0.2
 
 // #include "2_CoreSystem/mBaseConfig.h"
+// */
+
+// typedef enum
+// {
+//   SENSOR_TYPE_NONE_ID=0,
+//   SENSOR_TYPE_TEMPERATURE_ID,
+//   SENSOR_TYPE_RELATIVE_HUMIDITY_ID,
+//   SENSOR_TYPE_ACCELEROMETER_ROLL_ID,         /**< Gravity + linear acceleration */
+//   SENSOR_TYPE_ACCELEROMETER_PITCH_ID,        /**< Gravity + linear acceleration */
+//   SENSOR_TYPE_ACCELEROMETER_HEADING_ID,      /**< Gravity + linear acceleration */
+//   SENSOR_TYPE_MAGNETIC_FIELD_ID, 
+//   SENSOR_TYPE_ORIENTATION_ID, 
+//   SENSOR_TYPE_GYROSCOPE_ID, 
+//   SENSOR_TYPE_LIGHT_ID, 
+//   SENSOR_TYPE_PRESSURE_ID,
+//   SENSOR_TYPE_PROXIMITY_ID,
+//   SENSOR_TYPE_GRAVITY_ID,
+//   SENSOR_TYPE_LINEAR_ACCELERATION_ID,   /**< Acceleration not including gravity */
+//   SENSOR_TYPE_ROTATION_VECTOR_ID,
+//   SENSOR_TYPE_VOLTAGE_ID,
+//   SENSOR_TYPE_CURRENT_ID,
+//   SENSOR_TYPE_COLOR_ID,
+//   SENSOR_TYPE_LENGTH_ID
+// } sensors_type_t2;
+//like how sensors have a type
+
+// what the driver does, not how it does it (ie measures light, not what measured it)
+enum drivers_type_t{
+    DRIVER_TYPE_NONE_ID=0,
+    DRIVER_TYPE_HVAC_ID,
+    DRIVER_TYPE_COOLING_ID,
+
+    DRIVER_TYPE_LENGTH_ID,
+};
 
 // #ifdef USE_MODULE_DISPLAYS_NEXTION
 
@@ -449,3 +493,5 @@
 //  * 
 //  * 
 //  * */
+
+#endif // header

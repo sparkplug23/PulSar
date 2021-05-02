@@ -74,7 +74,8 @@ class JsonBuilder{
 
     void Array_Start();
     void Array_Start(const char* key);
-    void Array_Start_P(const char* key);
+    // void Array_Start_P(const char* key);
+    void Array_Start_P(const char* keyP, ...);
 
     void Array_End();
     

@@ -66,48 +66,83 @@ void mRelays::pre_init(void){
     // }
     // #endif
 
-    settings.relays_connected = 0;    
-  for(uint8_t pin_id=GPIO_REL1_ID;pin_id<GPIO_REL1_ID+(MAX_RELAYS*4);pin_id++){
+    settings.relays_connected = 0;
 
-        // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_KEY1_ID+(MAX_BUTTONS*4));
-    if(pCONT_pins->PinUsed(pin_id)){
-        // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
-      
-      pinMode(pCONT_pins->Pin(pin_id), OUTPUT);
+    /**
+     * Using a different index since gpio cant be used, and pin_number is not the same
+     * */    
+
+    // Lets check each type on their own, normal, inverted etc
+    for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
+    {
+      if(pCONT_pins->PinUsed(GPIO_REL1_ID, driver_index))
+      {
+        uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
+        pinMode(pin_number, OUTPUT);
         settings.fEnableSensor = true;
         pCONT_set->devices_present++;
-      // buttons[settings.relays_connected].pin = pCONT_pins->GetPin(pin_id);
-
-      // Standard pin, active high, with pulls 
-      if((pin_id >= GPIO_REL1_ID)&&(pin_id < GPIO_REL1_ID+MAX_RELAYS)
-      ){
-        // pinMode(buttons[settings.relays_connected].pin, INPUT_PULLUP);
-        // buttons[settings.relays_connected].active_state_value = HIGH; //change to functions, so later this can be bitmapped internally
+        if(settings.relays_connected++ >= MAX_RELAYS){ break; }
       }else
-      // Inverted pin, active low, with pulls
-      if( (pin_id >= GPIO_REL1_INV_ID)&&(pin_id < GPIO_REL1_INV_ID+MAX_RELAYS))
+      if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
       {
-        // pinMode(buttons[settings.relays_connected].pin, INPUT_PULLUP);
-        // buttons[settings.relays_connected].active_state_value = LOW;
-
-        bitSet(pCONT_mry->rel_inverted, pin_id); //temp fix
-
-      }else
-      {
-        // Serial.printf("NO MATCH GPIO_KEY1_NP_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+        uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
+        pinMode(pin_number, OUTPUT);
+        bitSet(rel_inverted, driver_index); //temp fix
+        settings.fEnableSensor = true;
+        pCONT_set->devices_present++;
+        if(settings.relays_connected++ >= MAX_RELAYS){ break; }
       }
+    }
 
-      // Get boot state of button (this may also be better placed in a delay task from boot)
-      // buttons[settings.relays_connected].lastbutton = digitalRead(buttons[settings.relays_connected].pin);  
-      
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        // AddLog(LOG_LEVEL_TEST, PSTR("Relay %d %d %d"), pin_id, settings.relays_connected, buttons[settings.relays_connected].pin);
-      #endif // ENABLE_LOG_LEVEL_INFO
-      
-      if(settings.relays_connected++ >= MAX_RELAYS){ break; }
 
-    } // if PinUsed
-  }//end for
+
+  //   uint8_t relay_index = 0;
+
+
+
+
+  // for(uint8_t pin_id=GPIO_REL1_ID;pin_id<GPIO_REL1_ID+(MAX_RELAYS*4);pin_id++){
+
+  //       // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_KEY1_ID+(MAX_BUTTONS*4));
+  //   if(pCONT_pins->PinUsed(pin_id)){
+  //       // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
+
+  //       uint8_t pin_number = pCONT_pins->Pin(pin_id);
+      
+  //       pinMode(pin_number, OUTPUT);
+  //       settings.fEnableSensor = true;
+  //       pCONT_set->devices_present++;
+  //     // buttons[settings.relays_connected].pin = pCONT_pins->GetPin(pin_id);
+
+  //     // Standard pin
+  //     if((pin_id >= GPIO_REL1_ID)&&(pin_id < GPIO_REL1_ID+MAX_RELAYS)
+  //     ){
+        
+        
+  //     }else
+  //     // Inverted pin, active low, with pulls
+  //     if( (pin_id >= GPIO_REL1_INV_ID)&&(pin_id < GPIO_REL1_INV_ID+MAX_RELAYS))
+  //     {
+  //       bitSet(rel_inverted, relay_index); //temp fix
+  //     }else
+  //     {
+  //       Serial.printf("NO MATCH GPIO_REL1_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
+  //     }
+
+  //     // Get boot state of button (this may also be better placed in a delay task from boot)
+  //     // buttons[settings.relays_connected].lastbutton = digitalRead(buttons[settings.relays_connected].pin);  
+      
+  //     #ifdef ENABLE_LOG_LEVEL_INFO
+  //       // AddLog(LOG_LEVEL_TEST, PSTR("Relay %d %d %d"), pin_id, settings.relays_connected, buttons[settings.relays_connected].pin);
+  //     #endif // ENABLE_LOG_LEVEL_INFO
+      
+  //     if(settings.relays_connected++ >= MAX_RELAYS){ break; }
+
+  //   } // if PinUsed
+
+
+  //   relay_index++ ; // increase relay count
+  // }//end for
 
 
 
@@ -434,7 +469,7 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
-  return pCONT_set->GetDeviceName(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
+  return DLI->GetDeviceNameWithEnumNumber(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
 }
 
 const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
@@ -461,7 +496,7 @@ int8_t mRelays::GetRelayIDbyName(const char* c){
   int8_t device_id;
   int8_t class_id = EM_MODULE_DRIVERS_RELAY_ID;
 
-  int16_t device_id_found = pCONT_set->GetDeviceIDbyName(c,device_id,class_id);
+  int16_t device_id_found = DLI->GetDeviceIDbyName(c,device_id,class_id);
   AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
   // show options
@@ -620,22 +655,26 @@ DEBUG_LINE;
     // #endif
 
 
-
+uint16_t gpio_pin = 0;
 
     for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
-        pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
 
-        // #ifdef ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS // leave mums, work on another
-        //   uint8_t led_pin = 13;
-        //   pinMode(led_pin,OUTPUT);
-        //   digitalWrite(led_pin,!state);
-        //   led_pin = 2;
-        //   pinMode(led_pin,OUTPUT);
-        //   digitalWrite(led_pin,!state);
-        // #endif
+
+        //tmp fix
+        if(bitRead(rel_inverted, i))
+        { //add the gpio mpin shift back in
+          gpio_pin = GPIO_REL1_INV_ID;          
+        }else{
+          gpio_pin = GPIO_REL1_ID;
+        }
+
+        pCONT_pins->DigitalWrite(gpio_pin +i, bitRead(rel_inverted, i) ? !state : state);
+
+        // pCONT_pins->DigitalWrite(GPIO_REL1_ID +i, bitRead(rel_inverted, i) ? !state : state);
+
 
       }else{
         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "ELSE i=%d,state=%d"),i,state);
@@ -869,6 +908,16 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
+
+    JBI->Array_Start_P(PSTR("rel_inverted"));
+      for(int8_t bits=0; bits<sizeof(rel_inverted)*8; bits++)
+      {
+        JBI->Add(bitRead(rel_inverted,bits));
+      }
+    JBI->Array_End();
+
+
+
   JsonBuilderI->End();
 
 }

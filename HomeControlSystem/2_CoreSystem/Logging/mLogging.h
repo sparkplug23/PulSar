@@ -201,11 +201,7 @@ extern "C" {
 
 //https://eli.thegreenplace.net/2014/variadic-templates-in-c/
 
-void AddLog(
-  #ifdef ENABLE_DEVFEATURE_BREAK_ADDLOG
-  uint8_t dummy,
-  #endif
-  uint8_t loglevel, PGM_P formatP, ...);
+void AddLog(uint8_t loglevel, PGM_P formatP, ...);
 
 
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);

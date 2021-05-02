@@ -222,7 +222,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
         JBI->Add("Default",settings.loaded_default_for_moduled);
       JBI->Level_End();
 
-      JsonBuilderI->Level_Start_P(name);//pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(name);//pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
 
         JsonBuilderI->Level_Start_P("Source");
             JsonBuilderI->Add("module_id", rules[id].trigger.module_id);

@@ -16,12 +16,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef _DRIVER_INTERFACE_HEATING2_WEB_H
-#define _DRIVER_INTERFACE_HEATING2_WEB_H 0.1
+#ifndef _DRIVER_INTERFACE_HVAC_WEB_H
+#define _DRIVER_INTERFACE_HVAC_WEB_H 0.1
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CONTROLLER_HEATING2
+#ifdef USE_MODULE_CONTROLLER_HVAC
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
@@ -41,7 +41,7 @@ int8_t Tasker_Web(uint8_t function);
 
 
 // const char HTTP_BTN_MENU_TIMER[] PROGMEM =
-//   "<p><form action='" WEB_HANDLE_HEATING_TIMER "' method='get'><button>" D_CONFIGURE_TIMER "</button></form></p>";
+//   "<p><form action='" WEB_HANDLE_HVAC_TIMER "' method='get'><button>" D_CONFIGURE_TIMER "</button></form></p>";
 
 // const char S_CONFIGURE_TIMER[] PROGMEM = D_CONFIGURE_TIMER;
 
@@ -181,7 +181,7 @@ int8_t Tasker_Web(uint8_t function);
 // const char HTTP_FORM_TIMER1[] PROGMEM =
 //   "<fieldset style='min-width:470px;text-align:center;'>"
 //   "<legend style='text-align:left;'><b>&nbsp;" D_TIMER_PARAMETERS "&nbsp;</b></legend>"
-//   "<form method='post' action='" WEB_HANDLE_HEATING_TIMER "' onsubmit='return st();'>"
+//   "<form method='post' action='" WEB_HANDLE_HVAC_TIMER "' onsubmit='return st();'>"
 //   "<br><input id='e0' type='checkbox'%s><b>" D_TIMER_ENABLE "</b><br><br><hr>"
 //   "<input id='t0' value='";
 // const char HTTP_FORM_TIMER2[] PROGMEM =

@@ -10,6 +10,15 @@ void mSettings::SettingsDefault(void)
   Settings.flag_system.stop_flash_rotate = true;
   stop_flash_rotate = true;
 
+  // Init new devicename buffer
+  DeviceNameListI->Init(
+    Settings.device_name_buffer.name_buffer,
+    sizeof(Settings.device_name_buffer.name_buffer),
+    Settings.device_name_buffer.class_id,
+    Settings.device_name_buffer.device_id,
+    DEVICENAMEBUFFER_NAME_INDEX_LENGTH
+  );
+
    //Serial.println("SettingsDefault");
   //  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
    SystemSettings_DefaultHeader();
@@ -475,8 +484,6 @@ void mSettings::SystemSettings_DefaultBody_Drivers(){
 
   // uint32_t      drivers[3];                // 794
   //memset(&Settings.drivers, 0xFF, 32);  // Enable all possible monitors, displays, drivers and sensors
-
-  ClearAllDeviceName();
 
 }
 

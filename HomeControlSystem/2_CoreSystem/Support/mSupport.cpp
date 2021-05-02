@@ -664,7 +664,7 @@ int16_t mSupport::findClosetArrayIndex_float(float* array, uint8_t array_len, fl
 }
 
 /*
-char* mHeating::append_str(char *here, const char *s) {
+char* mHVAC::append_str(char *here, const char *s) {
   int tmp = 0;
     while((*here++ = *s++)){tmp++;};
     Serial.println(tmp);
@@ -672,7 +672,7 @@ char* mHeating::append_str(char *here, const char *s) {
     return here;//-1;
 }
 
-char* mHeating::append_ul(char *here, unsigned long u) {
+char* mHVAC::append_ul(char *here, unsigned long u) {
     char buf[20];       // we "just know" this is big enough
 
     return append_str(here, ultoa(u, buf, 10));

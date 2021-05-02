@@ -515,6 +515,8 @@ extern "C" {
 // extern "C" uint32_t _SPIFFS_end;
 #endif
 
+#include "2_CoreSystem/DeviceNameList/mDeviceNameList.h"
+
 
 #ifdef ESP8266
 
@@ -555,12 +557,12 @@ class mSettings :
     void init(void);
 
     uint16_t CountCharInCtr(const char* tosearch, char tofind);
-    void ClearAllDeviceName(void);
+    // void ClearAllDeviceName(void);
     int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
 
     // int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
     // int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
-    int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id, int8_t class_id = -1);
+    // int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id = -1, int8_t class_id = -1);
 
     void Function_Template_Load();
 
@@ -1231,6 +1233,9 @@ struct DeviceNameBuffer{ // size(230)
   // delimeter name list
   char name_buffer[DEVICENAMEBUFFER_NAME_BUFFER_LENGTH];
   // index array that holds name_list sensor (class name, sensor number)
+  /**
+   * This needs to be the large unique identifier
+   * */
   int16_t class_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH]; //hold class id
   int8_t  device_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH];  //max of X sensors per module
 };
@@ -1527,14 +1532,14 @@ uint8_t flag_boot_complete = false;
 /**
  * Group of functions for storing/loading driver name list
  * */
-enum SETTINGS_DEVICENAME_LIST_IDS{
-  DEVICENAME_EMPTY_ID = -1,
-  DEVICENAME_DISABLED_ID = -2,
-};
-int8_t      AddDeviceName(const char* name_ctr, int16_t class_id = 1000, int8_t driver_id = 255);
-int8_t      RemoveDeviceName(const char* name_ctr, int16_t class_id = 1000, int8_t driver_id = 255);
-const char* GetDeviceName(int16_t class_id, int8_t driver_id, char* buffer, uint16_t buffer_size);
-int8_t      GetDeviceNameCount(int16_t class_id = 1000);
+// enum SETTINGS_DEVICENAME_LIST_IDS{
+//   DEVICENAME_EMPTY_ID = -1,
+//   DEVICENAME_DISABLED_ID = -2,
+// };
+// int8_t      AddDeviceName(const char* name_ctr, int16_t class_id = 1000, int8_t driver_id = 255);
+// int8_t      RemoveDeviceName(const char* name_ctr, int16_t class_id = 1000, int8_t driver_id = 255);
+// const char* GetDeviceNameWithEnumNumber(int16_t class_id, int8_t driver_id, char* buffer, uint16_t buffer_size);
+// int8_t      GetDeviceNameCount(int16_t class_id = 1000);
 
 
 
@@ -1769,7 +1774,7 @@ void CommandSet_SystemRestartID(uint8_t value);
 #define WEB_LOG_SIZE 400       // Max number of characters in weblog
 #endif // WEB_LOG_SIZE
 #ifndef LOG_BUFFER_SIZE
-#define LOG_BUFFER_SIZE 500
+#define LOG_BUFFER_SIZE 1000 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
 #endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load

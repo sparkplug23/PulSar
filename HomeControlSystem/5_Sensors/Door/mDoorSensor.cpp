@@ -212,7 +212,7 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
+  JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
   JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){

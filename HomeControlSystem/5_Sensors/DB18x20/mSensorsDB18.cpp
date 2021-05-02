@@ -176,12 +176,12 @@ void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t requ
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }else{
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if
@@ -220,7 +220,7 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
     
     if(sensor[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
 
-      JsonBuilderI->Level_Start(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+      JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
         JsonBuilderI->Add(D_JSON_ISVALID, sensor[sensor_id].reading.isvalid);
         JsonBuilderI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
@@ -312,7 +312,7 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
 
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){ //add number in name? List needed? also hold user defined name?
     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
       JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_db18","?");   
     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }
@@ -396,7 +396,7 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:{
       // char buffer[100];
       // uint8_t ii = 5;
-      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceName(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
+      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
     
     
       // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),0,GetCorrectedDeviceID(0)); 

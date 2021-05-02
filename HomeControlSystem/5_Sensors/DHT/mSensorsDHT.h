@@ -55,9 +55,9 @@ class mSensorsDHT :
     
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      Serial.println("OVERRIDE ACCESSED DHT");
+      // Serial.println("OVERRIDE ACCESSED DHT");
       if(index > MAX_SENSORS-1) {value->type_list.push_back(0); return ;}
-      value->type_list.push_back(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID);
+      value->type_list.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->type_list.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
       value->data.push_back(sensor[index].instant.temperature);
       value->data.push_back(sensor[index].instant.humidity);
@@ -94,7 +94,7 @@ class mSensorsDHT :
 
     // sensors_event_t* GetSensorValue();
     
-void GetSensorValue(sensors_reading_t* value);
+// void GetSensorValue(sensors_reading_t* value);
 
 // struct DHTSTRUCT {
 //   uint8_t     pin;

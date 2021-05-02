@@ -492,7 +492,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
     char buffer[50];
       
     JsonBuilderI->Start();
-      JsonBuilderI->Add("location", pCONT_set->GetDeviceName(EM_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("location", pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
       JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->End();
 

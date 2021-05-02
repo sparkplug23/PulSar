@@ -1285,12 +1285,11 @@ Bathroom
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
   //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
-  // #define ENABLE_HEATING_DEBUG_TIMES
+  // #define ENABLE_HVAC_DEBUG_TIMES
   #define DISABLE_WEBSERVER
 
-  #define USE_BUILD_TYPE_CUSTOM
   #define USE_MODULE_CONTROLLER_HEATING
-  #define ENABLE_DEVFEATURE_HEATING_TEMPS_TESTING
+  #define ENABLE_DEVFEATURE_HVAC_TEMPS_TESTING
   
   #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_DS18B20
@@ -2134,7 +2133,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
 
-  // Need to create default names for all class in GetDeviceName
+  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 
@@ -2267,7 +2266,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
 
-  // Need to create default names for all class in GetDeviceName
+  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
   // Add rules so button cycles through fan speeds
 
@@ -2300,7 +2299,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
 
-  // Need to create default names for all class in GetDeviceName
+  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 
@@ -2332,7 +2331,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
 
-  // Need to create default names for all class in GetDeviceName
+  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 

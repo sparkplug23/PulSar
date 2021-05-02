@@ -60,25 +60,25 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:{
-      Serial.println(sizeof(sensors_reading_t));
+      // Serial.println(sizeof(sensors_reading_t));
       // Serial.println(pCONT_msdb18->GetSensorReading());
       // Serial.println(pCONT_dht->GetSensorReading());
       // Serial.println(pCONT_msdb18->test123());
       // Serial.println(pCONT_dht->test123());
       
 
-      for(auto& pmod:pCONT->pModule)
-      {
-        for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
-        {
-          sensors_reading_t val;
-          pmod->GetSensorReading(&val, sensor_id);
-          if(val.type_list[0])
-          {
-            AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID));
-          }
-        }
-      }
+      // for(auto& pmod:pCONT->pModule)
+      // {
+      //   for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
+      //   {
+      //     sensors_reading_t val;
+      //     pmod->GetSensorReading(&val, sensor_id);
+      //     if(val.type_list[0])
+      //     {
+      //       AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
+      //     }
+      //   }
+      // }
 
       
       //   pModule[switch_index]->Tasker(function, obj);
@@ -195,7 +195,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
         pmod->GetSensorReading(&val, sensor_id);
         if(val.Valid())
         {
-          JBI->Add(D_JSON_TEMPERATURE, val.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE_ID));
+          JBI->Add(D_JSON_TEMPERATURE, val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
         }
       }
 
@@ -235,7 +235,7 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
       
   //     pir_detect[sensor_id].ischanged = false;
       
-  //     JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceName(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+  //     JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
   //     JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
   //     JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
   //triggering sensor (via module id)

@@ -340,11 +340,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING
-    pModule[EM_MODULE_CONTROLLER_HEATING_ID] = new mHeating();
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING2
-    pModule[EM_MODULE_CONTROLLER_HEATING2_ID] = new mHeating();
+  #ifdef USE_MODULE_CONTROLLER_HVAC
+    pModule[EM_MODULE_CONTROLLER_HVAC_ID] = new mHVAC();
   #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();
@@ -489,10 +486,30 @@ int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)
   }
 }
 
+/**
+ * @brief Using the unique ID each module must have, get the TaskerInterface array enum ID
+ * */
+int16_t mTaskerManager::GetVectorIndexbyModuleUniqueID(int16_t unique_id)
+{
+  for(int ii=0;ii<GetClassCount();ii++)
+  {
+    if(unique_id == pModule[ii]->GetModuleUniqueID())
+    {
+      return ii; //return array index
+    }
+  }
+  return -1;
+}
+
 
 uint16_t mTaskerManager::GetModuleUniqueIDbyVectorIndex(uint8_t id)
 {
   return pModule[id]->GetModuleUniqueID();
+}
+
+mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
+{
+  return pModule[GetVectorIndexbyModuleUniqueID(id)];
 }
 
 

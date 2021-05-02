@@ -29,7 +29,7 @@
 typedef enum
 {
   SENSOR_TYPE_NONE_ID=0,
-  SENSOR_TYPE_AMBIENT_TEMPERATURE_ID,
+  SENSOR_TYPE_TEMPERATURE_ID,
   SENSOR_TYPE_RELATIVE_HUMIDITY_ID,
   SENSOR_TYPE_ACCELEROMETER_ROLL_ID,         /**< Gravity + linear acceleration */
   SENSOR_TYPE_ACCELEROMETER_PITCH_ID,        /**< Gravity + linear acceleration */

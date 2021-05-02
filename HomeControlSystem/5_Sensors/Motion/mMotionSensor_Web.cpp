@@ -7,7 +7,7 @@ void mMotionSensor::WebAppend_Root_Draw_PageTable(){
 char buffer[50];
 for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){       
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>PIR Motion %s</td>"), pCONT_set->GetDeviceName(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+    BufferWriterI->Append_P(PSTR("<td>PIR Motion %s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_pir","?");   
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
 }

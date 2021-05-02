@@ -321,11 +321,8 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING
-    EM_MODULE_CONTROLLER_HEATING_ID,
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING2
-    EM_MODULE_CONTROLLER_HEATING2_ID,
+  #ifdef USE_MODULE_CONTROLLER_HVAC
+    EM_MODULE_CONTROLLER_HVAC_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     EM_MODULE_CONTROLLER_RADIATORFAN_ID,
@@ -427,8 +424,8 @@ enum MODULE_IDS{
 
 // Drivers (Range 40-129)
 #ifdef USE_MODULE_DRIVERS_INTERFACE
-  // #include "3_Network/WebServer/mWebServer.h"
-  // #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAY_INTERFACE])
+  #include "4_Drivers/_Interface/Interface_Drivers.h"
+  // #define pCONT_iDrivers                           static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
@@ -590,13 +587,9 @@ enum MODULE_IDS{
   #include "9_Controller/Blinds/mBlinds.h"
   #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_HEATING
-  #include "9_Controller/Heating/mHeating.h"
-  #define pCONT_heating                         static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_ID])
-#endif
-#ifdef USE_MODULE_CONTROLLER_HEATING2
-  #include "9_Controller/HeatingGeneric/mHeating.h"
-  #define pCONT_heating2                        static_cast<mHeating*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING2_ID])
+#ifdef USE_MODULE_CONTROLLER_HVAC
+  #include "9_Controller/HVAC/mHVAC.h"
+  #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "9_Controller/RadiatorFan/mRadiatorFan.h"
@@ -692,6 +685,10 @@ class mTaskerManager{
     uint16_t GetClassCount();
 
     bool ValidTaskID(uint8_t module_id);
+    
+    mTaskerInterface* GetModuleObjectbyUniqueID(uint16_t id);
+    
+    int16_t GetVectorIndexbyModuleUniqueID(int16_t);
 
     // enum 
 

@@ -1169,7 +1169,7 @@ void mEnergyInterface::WebAppend_Root_Draw_Table(){
       BufferWriterI->Append_P(PSTR("<th></th>"));
     }else{
       // BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), ii, PM_DLIM_LIST_TABLE_HEADERS));
-        BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceName(D_MODULE_DRIVERS_ENERGY_ID,col-1,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex    
+        BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,col-1,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex    
     }
   }    
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
@@ -1179,7 +1179,7 @@ void mEnergyInterface::WebAppend_Root_Draw_Table(){
     for(int col=0;col<Energy.phase_count+1;col++){
       if(col==0){ //row name
         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS));
-        // BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceName(D_MODULE_DRIVERS_ENERGY_ID,row,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+        // BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,row,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex
       }else{
         BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ener_tab");  
       }

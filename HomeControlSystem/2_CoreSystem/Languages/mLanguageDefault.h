@@ -230,11 +230,9 @@
   #define D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR              "blinds"
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_HEATING
-  #define D_MODULE_CONTROLLER_HEATING_CTR              "mHeating"
-  #define D_MODULE_CONTROLLER_HEATING_FRIENDLY_CTR              "heating"
+  #define D_MODULE_CONTROLLER_HVAC_CTR              "mHVAC"
+  #define D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR              "hvac"
 //#endif
-  #define D_MODULE_CONTROLLER_HEATING2_CTR              "mHeating"
-  #define D_MODULE_CONTROLLER_HEATING2_FRIENDLY_CTR              "heating2"
 //#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #define D_MODULE_CONTROLLER_RADIATORFAN_CTR              "mRadiatorFan"
   #define D_MODULE_CONTROLLER_RADIATORFAN_FRIENDLY_CTR              "radiatorfan"
@@ -1410,7 +1408,7 @@
 
 
 
-#define D_JSON_HEATING_DEVICE "HeatingDevice"
+#define D_JSON_HVAC_DEVICE "HeatingDevice"
 
 #define D_JSON_DEVIATION "Deviation"
 

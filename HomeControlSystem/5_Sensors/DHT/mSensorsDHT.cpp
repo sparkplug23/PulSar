@@ -291,7 +291,7 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Draw(){
       char name_buffer_tmp[25];
       // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
-      pCONT_set->GetDeviceName(D_MODULE_SENSORS_DHT_ID, ii, name_buffer_tmp, sizeof(name_buffer_tmp));
+      pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID, ii, name_buffer_tmp, sizeof(name_buffer_tmp));
 
       uint8_t multiline_enabled = false;
 
@@ -446,7 +446,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
   for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
     if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))&&(sensor[sensor_id].instant.isvalid)){
 
-      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceName(EM_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
         JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
@@ -456,6 +456,18 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
       JsonBuilderI->Level_End(); 
     }
   }
+  //   for(int dht_id=0;dht_id<2;dht_id++){
+  //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
+  //     JBI->Add(D_JSON_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
+  //     JBI->Add(D_JSON_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
+  //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
+  //     JBI->Add(D_JSON_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
+  //     // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
+  //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
+  //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
+  //     // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
+  //   JBI->Level_End();
+  // }
   
   return JsonBuilderI->End();
 
