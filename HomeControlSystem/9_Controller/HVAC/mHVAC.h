@@ -192,6 +192,7 @@ enum ZONE_MODES_8BITS_PACKED{
   ZONE_MODE_LENGTH_8BITS=128
 };
 
+//later another "sensor type" could be MQTT topic, ie if I have remote sensors, also http
 
 #define MAX_ZONES 4
 

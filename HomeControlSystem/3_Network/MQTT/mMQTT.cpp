@@ -676,7 +676,7 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
             );
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
+  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected(), strlen(data_buffer.payload.ctr));
   #endif// ENABLE_LOG_LEVEL_INFO
 
 }

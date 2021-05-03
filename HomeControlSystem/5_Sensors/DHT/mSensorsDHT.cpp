@@ -412,25 +412,9 @@ void mSensorsDHT::WebPage_Root_AddHandlers(){
 
 uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
-  //   D_DATA_BUFFER_CLEAR();
-  //   StaticJsonDocument<400> doc;
-  //   JsonObject root = doc.to<JsonObject>();
-
-  //   root["SensorCount"] = settings.sensor_active_count;
-
-  //   root["name_buffer"] = name_buffer;
-
-  //   root["sens_tele_rate"] =mqtthandler_sensor_teleperiod.tRateSecs;
-  //   root["sens_ifchanged_rate"] =mqtthandler_sensor_ifchanged.tRateSecs;
-  //   root["sett_tele_rate"] =mqtthandler_settings_teleperiod.tRateSecs;
-
-
-  //   data_buffer.payload.len = measureJson(root)+1;
-  //   serializeJson(doc,data_buffer.payload.ctr);
-    
-  // return (data_buffer.payload.len>3?1:0);
-
-  return 0;
+  JsonBuilderI->Start();
+    JBI->Add("SensorCount", settings.sensor_active_count);
+  return JsonBuilderI->End();
 
 }
 
@@ -455,6 +439,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
         JsonBuilderI->Level_End();   
       JsonBuilderI->Level_End(); 
     }
+
   }
   //   for(int dht_id=0;dht_id<2;dht_id++){
   //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
@@ -516,43 +501,35 @@ void mSensorsDHT::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mSensorsDHT::MQTTHandler_Set_fSendNow(){
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSensorsDHT::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSensorsDHT::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
 
-} //end "MQTTHandler_Init"
-
-
-void mSensorsDHT::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSensorsDHT::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DHT_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSensorsDHT::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DHT_ID, handle, id);
+  }
 }
 
 #endif

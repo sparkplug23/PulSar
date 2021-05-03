@@ -75,6 +75,16 @@ class ProgramTimer
 		{
 			return (time_on_seconds_decounter >= 0) ? true : false;
 		}
+    
+    /**
+     * @brief This will tell any connected relays etc they should be on
+     * @return 8bit packed value for [heat|fan|cool]
+     * */
+    uint8_t OutputDesiredState()
+    {
+      return IsRunning();
+    }
+
 
 		bool IsChanged()
 		{

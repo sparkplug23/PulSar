@@ -601,7 +601,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
+  mqtthandler_ptr->tRateSecs = 10; 
   #ifdef DEVICE_IMMERSIONSENSOR //temp fix
   mqtthandler_ptr->tRateSecs = 1; 
   #endif
@@ -613,47 +613,35 @@ void mSensorsDB18::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mSensorsDB18::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSensorsDB18::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSensorsDB18::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-  
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSensorsDB18>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_DB18S20_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    ARRAY_SIZE(mqtthandler_list_ptr),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSensorsDB18::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSensorsDB18::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
 
-////////////////////// END OF MQTT /////////////////////////
-
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSensorsDB18::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DB18S20_ID, handle, id);
+  }
+}
 
 #endif

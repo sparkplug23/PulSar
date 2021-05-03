@@ -100,13 +100,23 @@ void mHVAC::Every_Second()
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
     sensors_reading_t reading;
-    int16_t module_array_index = pCONT->GetVectorIndexbyModuleUniqueID(zone[zone_id].sensor.module_id);
-    pCONT->pModule[module_array_index]->GetSensorReading(&reading);
-    float measured_zone_temp = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
-    float measured_zone_hum  = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-    // Store current temperature
-    zone[zone_id].sensor.temperature = measured_zone_temp;
-    zone[zone_id].sensor.humidity = measured_zone_hum;
+    pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->GetSensorReading(&reading, zone[zone_id].sensor.index);
+    zone[zone_id].sensor.temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+    zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+  }
+
+  // Update mqtt faster if active  
+  for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
+  {
+    if(zone[zone_id].program_timer_method->IsRunning())
+    {
+      mqtthandler_program_timers_ifchanged.tRateSecs = 1;
+      break; // Stop if any are true
+    }
+    else
+    {
+      mqtthandler_program_timers_ifchanged.tRateSecs = 10;
+    }
   }
     
 
@@ -152,7 +162,7 @@ void mHVAC::init(void){
   // zone[3].sensor.index = 1;
 
   /**
-   * Configure relays out
+   * Configure relays out TEST PHASE STILL, NOT SET VIA JSON TEMPLATES
    * */
   for(uint8_t id=0; id<settings.active_zones; id++)
   {
@@ -161,9 +171,11 @@ void mHVAC::init(void){
     zone[id].output.driver_type.push_back(DRIVER_TYPE_HVAC_ID);
   }
 
+  #ifdef ENABLE_DEVFEATURE_HVAC_COOLING_ON_ZONE0_WITH_RELAY
   zone[0].output.module_ids.push_back(D_UNIQUE_MODULE_DRIVERS_RELAY_ID);
   zone[0].output.index.push_back(1);
   zone[0].output.driver_type.push_back(DRIVER_TYPE_COOLING_ID);
+  #endif
   
   
   for(uint8_t device_id=0;device_id<4;device_id++){ 
@@ -172,7 +184,7 @@ void mHVAC::init(void){
 
   // memset(&status_message, 0, sizeof(status_message));
 // 
-  init_program_timers();
+  // init_prog/ram_timers();
   // init_program_temps();
   // init_program_scheduling();
   
@@ -326,7 +338,7 @@ void mHVAC::SetZoneActive(uint8_t zone_id, uint8_t state)
     default:
     case ZONE_MODE_HEAT_8BITS:{
 
-      AddLog(LOG_LEVEL_INFO, PSTR("zone[%d].output.index[0]=%d"),zone_id, zone[zone_id].output.index[0]);
+      // AddLog(LOG_LEVEL_INFO, PSTR("zone[%d].output.index[0]=%d"),zone_id, zone[zone_id].output.index[0]);
 
       // Check if mode is permitted
       // if(zone[zone_id].bitpacked_modes_enabled,)
@@ -465,7 +477,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TIMERS_CTR;
@@ -487,7 +499,7 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_TEMPS_CTR;
@@ -509,11 +521,22 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PROGRAM_OVERVIEW_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHVAC::ConstructJSON_ProgramActive;
+  
+  mqtthandler_ptr = &mqtthandler_relays_ifchanged;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mHVAC::ConstructJSON_HeatingRelays;
   
   mqtthandler_ptr = &mqtthandler_relays_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_TELEPERIOD_ID;
@@ -526,23 +549,12 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mHVAC::ConstructJSON_HeatingRelays;
 
-  mqtthandler_ptr = &mqtthandler_relays_ifchanged;
-  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_DRIVERS_RELAYS_IFCHANGED_ID;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_RELAYS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mHVAC::ConstructJSON_HeatingRelays;
-  
   mqtthandler_ptr = &mqtthandler_sensor_zone_ifchanged;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_IFCHANGED_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_ZONE_CTR;
@@ -562,8 +574,8 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr = &mqtthandler_sensor_zone_roc1m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_ROC1M_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -573,8 +585,8 @@ void mHVAC::MQTTHandler_Init(){
   mqtthandler_ptr = &mqtthandler_sensor_zone_roc10m;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_SENSOR_ZONE_ROC10M_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->flags.PeriodicEnabled = false;
+  mqtthandler_ptr->flags.SendNow = false;
   mqtthandler_ptr->tRateSecs = 60*10; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
@@ -613,11 +625,18 @@ void mHVAC::MQTTHandler_Init(){
   // pCONT_msdb18->mqtthandler_sensor_teleperiod.tRateSecs = SEC_IN_HOUR;
   // pCONT_msdb18->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
 
+
+
   // //Reduce sensor lib from reporting to minimum
   // pCONT_dht->mqtthandler_sensor_ifchanged.tRateSecs = SEC_IN_HOUR;
   // pCONT_dht->mqtthandler_sensor_teleperiod.tRateSecs = SEC_IN_HOUR;
   // pCONT_dht->mqtthandler_settings_teleperiod.tRateSecs = SEC_IN_HOUR;
 
+
+  // for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
+  // {
+  //   pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->;
+  // }
   
 
 }

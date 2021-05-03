@@ -22,7 +22,7 @@ return potato;
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
 #else
-#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  1500
+#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  3000
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
 #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
@@ -557,12 +557,8 @@ class mSettings :
     void init(void);
 
     uint16_t CountCharInCtr(const char* tosearch, char tofind);
-    // void ClearAllDeviceName(void);
     int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
 
-    // int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
-    // int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
-    // int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id = -1, int8_t class_id = -1);
 
     void Function_Template_Load();
 

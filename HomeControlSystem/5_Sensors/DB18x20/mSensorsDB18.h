@@ -206,17 +206,20 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mSensorsDB18> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mSensorsDB18> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsDB18> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
+    struct handler<mSensorsDB18>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
     
   //#endif
 

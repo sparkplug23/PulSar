@@ -925,7 +925,8 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
 
-  char buffer[50];
+  char buffer[100];
+
 
   JsonBuilderI->Start();
     for(int device_id=0;device_id<settings.relays_connected;device_id++){
@@ -968,6 +969,7 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
         
       }
     }
+  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_Sensor %d"),JBI->GetLength());
   JsonBuilderI->End();
 
 }
@@ -1040,7 +1042,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
@@ -1050,7 +1052,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
@@ -1072,47 +1074,32 @@ void mRelays::MQTTHandler_Init(){
   
 } //end "MQTTHandler_Init"
 
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mRelays::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
 
-void mRelays::MQTTHandler_Set_fSendNow(){
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mRelays::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-  mqtthandler_scheduled_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mRelays::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_scheduled_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mRelays::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-  
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-    MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID
-  };
-  
-  struct handler<mRelays>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod,
-    &mqtthandler_scheduled_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_RELAY_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
+void mRelays::MQTTHandler_Sender(uint8_t id){
+    
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_RELAY_ID, handle, id);
+  }
 
 }
 

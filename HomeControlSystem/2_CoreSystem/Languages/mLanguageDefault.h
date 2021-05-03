@@ -1533,7 +1533,7 @@
 #define D_JSON_SET "Set"
 #define D_JSON_SENS1 "sens1"
 #define D_JSON_SENSORADDRESS "SensorAddress"
-#define D_JSON_SECS "secs"
+#define D_JSON_SECS "Secs"
 #define D_JSON_SIZE "size"
 #define D_JSON_SIGNIFICANTLY "significantly"
 #define D_JSON_STEP "step"

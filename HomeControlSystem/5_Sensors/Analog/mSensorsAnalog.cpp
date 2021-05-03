@@ -208,6 +208,8 @@ uint8_t mSensorsAnalog::ConstructJSON_Sensor(uint8_t json_level){
 
 void mSensorsAnalog::MQTTHandler_Init(){
 
+  struct handler<mSensorsAnalog>* mqtthandler_ptr;
+
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
@@ -238,42 +240,36 @@ void mSensorsAnalog::MQTTHandler_Disconnected(){
   // Nothing
 }
 
-void mSensorsAnalog::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSensorsAnalog::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSensorsAnalog::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID
-  };
-  
-  struct handler<mSensorsAnalog>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_ANALOG_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSensorsAnalog::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
-//////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSensorsAnalog::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSensorsAnalog::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_ANALOG_ID, handle, id);
+  }
+}
 
 #endif
 

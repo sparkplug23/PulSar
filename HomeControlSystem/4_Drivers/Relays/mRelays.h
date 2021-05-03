@@ -232,6 +232,14 @@ void SubTask_Every_Minute();
       MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
+      
+    struct handler<mRelays>* mqtthandler_list[4] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod,
+      &mqtthandler_scheduled_teleperiod
+    };
+
     
 };
 

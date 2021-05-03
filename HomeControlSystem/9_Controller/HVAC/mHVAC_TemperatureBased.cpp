@@ -86,6 +86,20 @@ void mHVAC::FunctionHandler_Programs_Temps(void){
     // Servicing program temps every second
     zone[zone_id].program_temp_method->EverySecond();
 
+    //  React if timer has started or ended
+    if(zone[zone_id].program_temp_method->IsChangedThenReset())
+    {
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("program_temp_method IsChangedThenReset %d"), zone_id);
+      if(zone[zone_id].program_temp_method->OutputDesiredState())
+      {
+        SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control
+      }
+      else
+      {
+        SetZoneActive(zone_id, 0);
+      }
+    }
+
   }
   
   // SubTask_HeatingTemps_StatusMessage();

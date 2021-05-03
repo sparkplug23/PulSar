@@ -1,9 +1,6 @@
 
 #include "2_CoreSystem/DeviceNameList/mDeviceNameList.h"
 
-// #define 
-
-// #ifdef ENABLE_DEVFEATURE_DEVICENAME_TEXTLIST_BY_UNIQUE_ID
 
 /* Null, because instance will be initialized on demand. */
 DeviceNameList* DeviceNameList::instance = nullptr;

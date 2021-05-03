@@ -55,7 +55,7 @@ class mSensorsDHT :
     
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      // Serial.println("OVERRIDE ACCESSED DHT");
+      // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
       if(index > MAX_SENSORS-1) {value->type_list.push_back(0); return ;}
       value->type_list.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->type_list.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
@@ -173,6 +173,11 @@ class mSensorsDHT :
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
       
+    struct handler<mSensorsDHT>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
 };
 #endif
 

@@ -71,9 +71,27 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
     // #endif
   }
 
-  if(jtok = obj[D_JSON_TEMPERATURE].getObject()["StartProgram"]){ 
+  if(jtok = obj[D_JSON_TEMPERATURE].getObject()["StartDesired"]){ 
     // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
-    zone[device_id].program_temp_method->StartProgram(jtok.getInt());
+    zone[device_id].program_temp_method->StartDesiredTemperature(jtok.getFloat());
+    data_buffer.isserviced++;
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // #endif
+  }
+
+  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_RUNNING].getObject()[D_JSON_LIMIT]){ 
+    // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
+    zone[device_id].program_temp_method->SetTimer_Running_Limit_Minutes(jtok.getInt());
+    data_buffer.isserviced++;
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());
+    // #endif
+  }
+
+  if(jtok = obj[D_JSON_TEMPERATURE].getObject()[D_JSON_TIME_MAINTAINING].getObject()[D_JSON_LIMIT]){ 
+    // CommandSet_ProgramTemperature_Mode(device_id,jtok.getInt()); 
+    zone[device_id].program_temp_method->SetTimer_Maintaining_Limit_Minutes(jtok.getInt());
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TEMPERATURE,D_JSON_MODE)), jtok.getInt());

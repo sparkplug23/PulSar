@@ -71,13 +71,18 @@ class mSensorsAnalog :
     void MQTTHandler_Disconnected();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mSensorsAnalog>* mqtthandler_ptr;
     struct handler<mSensorsAnalog> mqtthandler_settings_teleperiod;
     struct handler<mSensorsAnalog> mqtthandler_sensor_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     
+    struct handler<mSensorsAnalog>* mqtthandler_list[13] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged
+    };
+
+
   //#endif
 
 };

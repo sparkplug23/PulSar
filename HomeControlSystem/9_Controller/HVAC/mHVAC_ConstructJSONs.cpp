@@ -64,12 +64,16 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level){
         // JBI->Add(D_JSON_DATA, program_temps[zone_id].status.data.ctr);
       JBI->Level_End();
       JBI->Level_Start_P(D_JSON_TIME_RUNNING); 
-        // JBI->Add(D_JSON_ONTIME, program_temps[zone_id].time_running.on);
-        // JBI->Add(D_JSON_LIMIT, program_temps[zone_id].time_running.limit);        
+        JBI->Add(D_JSON_TIME_ON, zone[zone_id].program_temp_method->GetTimer_Running_Minutes() != -1 ? zone[zone_id].program_temp_method->GetTimer_Running_Minutes() : 0);
+        JBI->Add(D_JSON_TIME_ON_SECS, zone[zone_id].program_temp_method->GetTimer_Running_Seconds());  
+        JBI->Add(D_JSON_LIMIT, zone[zone_id].program_temp_method->GetTimer_Running_Limit_Minutes());
+        JBI->Add(D_JSON_LIMIT D_JSON_SECS, zone[zone_id].program_temp_method->GetTimer_Maintaining_Limit_Seconds());        
       JBI->Level_End();  
       JBI->Level_Start_P(D_JSON_TIME_MAINTAINING); 
-        // JBI->Add(D_JSON_ONTIME, program_temps[zone_id].time_maintaining.on);
-        // JBI->Add(D_JSON_LIMIT, program_temps[zone_id].time_maintaining.limit);        
+        JBI->Add(D_JSON_TIME_ON, zone[zone_id].program_temp_method->GetTimer_Maintaining_Minutes() != -1 ? zone[zone_id].program_temp_method->GetTimer_Maintaining_Minutes() : 0);
+        JBI->Add(D_JSON_TIME_ON_SECS, zone[zone_id].program_temp_method->GetTimer_Maintaining_Seconds());  
+        JBI->Add(D_JSON_LIMIT, zone[zone_id].program_temp_method->GetTimer_Maintaining_Minutes());
+        JBI->Add(D_JSON_LIMIT D_JSON_SECS, zone[zone_id].program_temp_method->GetTimer_Maintaining_Limit_Seconds());  
       JBI->Level_End();  
       JBI->Level_Start_P(D_JSON_TIME_TO_HEAT);
         //  time_to_heatobj[D_JSON_SECONDS] = GetHeatingProfilesTimeSeconds(zone_id,program_temps[zone_id].temp.current,program_temps[zone_id].temp.desired);
@@ -156,6 +160,8 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
     JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_HVAC_ID, zone_id, buffer, sizeof(buffer)));
       if(zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, zone[zone_id].sensor.temperature); }
       if(zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, zone[zone_id].sensor.humidity);       }
+      JBI->Add("ModuleID",zone[zone_id].sensor.module_id);
+      JBI->Add("Index",zone[zone_id].sensor.index);
     JBI->Level_End();
   }
   JBI->End();
