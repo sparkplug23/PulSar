@@ -1,3 +1,21 @@
+/*
+  mHVAC.cpp - HVAC Controller
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "mSensorsDHT.h"
 
 #ifdef USE_MODULE_SENSORS_DHT
@@ -5,10 +23,63 @@
 const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_CTR = D_MODULE_SENSORS_DHT_CTR;
 const char* mSensorsDHT::PM_MODULE_SENSORS_DHT_FRIENDLY_CTR = D_MODULE_SENSORS_DHT_FRIENDLY_CTR;
 
+int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
+  
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();
+    break;
+    case FUNC_INIT:
+      Init();
+    break;
+  }
+
+  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    case FUNC_LOOP:
+      EveryLoop();
+    break;
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case FUNC_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
+    break;
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Status_Table_Draw();
+    break;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table_Data();
+    break;
+    #endif //USE_MODULE_NETWORK_WEBSERVER
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init(); 
+    break;
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+  } // END switch
+  
+}// END Tasker
+
+
 
 void mSensorsDHT::Pre_Init(void){
 
-  fEnableSensor = false;
+  settings.fEnableSensor = false;
   settings.sensor_active_count = 0;
   
   if (pCONT_pins->PinUsed(GPIO_DHT11_1OF2_ID)) {  // not set when 255
@@ -31,6 +102,10 @@ void mSensorsDHT::Pre_Init(void){
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
+  }else{
+    
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
+    delay(2000);
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_2OF2_ID);
@@ -38,10 +113,21 @@ void mSensorsDHT::Pre_Init(void){
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
+  }else{
+    
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
+    delay(2000);
   }
+  // {"flag_serial_set_tx_set":0,"GPIO":{"DHT22_1":25},
+  // "pin_attached_gpio_functions":
+  // [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  // "user_template_io":
+  // [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  // "getpin":
+  // [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,25,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]}
 
   if(settings.sensor_active_count){
-    fEnableSensor = true;
+    settings.fEnableSensor = true;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "DHT Sensor Enabled"));
   }
 
@@ -56,12 +142,6 @@ void mSensorsDHT::Init(void){
     // sensor[sensor_id].name_ptr = sensor_unset_ctr;
   }
   
-  // uint8_t buffer_length = 0;
-  // memset(name_buffer,0,sizeof(name_buffer));
-  // for(int ii=0;ii<settings.sensor_active_count;ii++){
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s%d|","sens",ii);
-  // }
-
 }
 
 void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t require_completion){
@@ -150,124 +230,9 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
 
 }//end function
 
-
-
-// void mSensorsDHT::GetSensorValue(sensors_reading_t* value, uint8_t index = 0)
-// {
-
-//   value->type_list.push_back(SENSOR2_TYPE_AMBIENT_TEMPERATURE);
-//   value->type_list.push_back(SENSOR2_TYPE_RELATIVE_HUMIDITY);
-
-//   value->data.push_back(sensor[index].instant.temperature);
-//   value->data.push_back(sensor[index].instant.humidity);
-
-//   value->sensor_id = index;
-
-// }
-
-// void mSensorsDHT::GetSensorReading(sensors_event_t* value) override{
-//   // return 2;
-
-//   value->type_list.push_back(SENSOR_TYPE_AMBIENT_TEMPERATURE);
-//   value->type_list.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY);
-
-//   value->data.push_back(12);
-//   value->data.push_back(13);
-
-
-// };
-
-
-
-int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
-  
-  // some functions must run regardless
-  switch(function){
-    case FUNC_PRE_INIT:
-      Pre_Init();
-    break;
-  }
-
-  // Only continue to remaining functions if sensor has been detected and enabled
-  if(!fEnableSensor){ return 0; }
-
-  switch(function){
-    case FUNC_INIT:
-      Init();
-    break;
-    case FUNC_LOOP:
-      EveryLoop();
-    break;
-    case FUNC_EVERY_SECOND:{
-      // sensors_reading_t value;
-      // GetSensorValue(&value);
-      
-      // AddLog(LOG_LEVEL_TEST,PSTR("value =%d"),value.type);
-      // AddLog(LOG_LEVEL_TEST,PSTR("value0=%d %d"),bitRead(value.type,0),(int)value.temperature);
-      // AddLog(LOG_LEVEL_TEST,PSTR("value1=%d %d"),bitRead(value.type,1),(int)value.relative_humidity);
-      // AddLog(LOG_LEVEL_TEST,PSTR("value2=%d"),bitRead(value.type,2));
-
-      // AddLog(LOG_LEVEL_TEST,PSTR("value =%d"),(int)value.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE));
-
-
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_type_list =%d"),(int)value.type_list[0]);
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_type_list =%d"),(int)value.type_list[1]);
-
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_data0 =%d"),(int)value.v_data[0]);
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_data1 =%d"),(int)value.v_data[1]);
-
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_data0 =%d"),(int)value.GetValue(SENSOR_TYPE_AMBIENT_TEMPERATURE));
-      // AddLog(LOG_LEVEL_TEST,PSTR("v_data1 =%d"),(int)value.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY));
-
-    }break;
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:
-      WebPage_Root_AddHandlers();
-    break;
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-    break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
-    break;
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-  } // END switch
-  
-  DEBUG_LINE;
-
-}// END Tasker
-
 void mSensorsDHT::EveryLoop(){
   
   for (int sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
-
-//temp fix
-// if((sensor_id > settings.sensor_active_count)||(settings.sensor_active_count!=0)){
-
-  
-//   break;
-// }
-
 
     if(mTime::TimeReachedNonReset(&sensor[sensor_id].instant.tSavedMeasureClimate,1000)){
       if(!settings.sensor_active_count){ // Retry init if lost after found during boot
@@ -281,127 +246,8 @@ void mSensorsDHT::EveryLoop(){
       }
     }
   }//end for
-}
-
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-void mSensorsDHT::WebAppend_Root_Status_Table_Draw(){
-
-  for(int ii=0;ii<settings.sensor_active_count;ii++){ //add number in name? List needed? also hold user defined name?
-    
-      char name_buffer_tmp[25];
-      // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
-
-      pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID, ii, name_buffer_tmp, sizeof(name_buffer_tmp));
-
-      uint8_t multiline_enabled = false;
-
-
-    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      JsonBuilderI->Append_P(PSTR("<td>DHT%s %s %s</td>"), "22",multiline_enabled?"Temperature":"Climate",name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
-      
-    if(multiline_enabled){
-      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-        JsonBuilderI->Append_P(PSTR("<td>DHT%s Humidity %s</td>"), "22", name_buffer_tmp);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-    }
-    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dht","?");   
-    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  }
-}
-
-
-//append to internal buffer if any root messages table
-void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
-  
-  uint8_t sensor_counter = 0;
-
-  // JsonBuilderI->Append_P(PSTR("\"%s\":["),PSTR("tab_dht")); 
-  
-  JsonBuilderI->Array_Start("tab_dht");// Class name
-
-  for(int row=0;row<(2*settings.sensor_active_count);row++){
-    switch(row%2){
-      default:
-      case 0:{
-        
-        char float_ctr[10];
-        char colour_ctr[10];
-        char table_row[25]; memset(table_row,0,sizeof(table_row));       
-
-        char value_ctr[8];
-        pCONT_sup->dtostrfd(sensor[sensor_counter].instant.temperature,2,value_ctr);
-
-        sprintf(table_row,"%s&deg;%c",value_ctr,pCONT_sup->TempUnit());
-        
-        if(sensor[sensor_counter].instant.temperature<=25){
-          sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
-        }else
-        if(sensor[sensor_counter].instant.temperature>25){
-          sprintf(colour_ctr,"%s","#fcba03");
-        }else{
-          sprintf(colour_ctr,"%s","#ffffff");
-        }
-    
-        // JsonBuilderI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
-        //   table_row, colour_ctr
-        // );
-        
-        JsonBuilderI->Level_Start();
-          JsonBuilderI->Add("id",row);
-          JsonBuilderI->Add("ih",table_row);
-          JsonBuilderI->Add("fc",colour_ctr);
-        JsonBuilderI->Level_End();
-
-      }break;
-      case 1:{      
-
-        char float_ctr[10];
-        char colour_ctr[10];
-        char table_row[25]; memset(table_row,0,sizeof(table_row));        
-        
-        char value_ctr[8];
-        pCONT_sup->dtostrfd(sensor[sensor_counter].instant.humidity,2,value_ctr);
-
-        sprintf(table_row,"%s %%",value_ctr);
-        
-        if(sensor[sensor_counter].instant.humidity>70){
-          sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
-        }else
-        {
-          sprintf(colour_ctr,"%s","#ffffff");
-        }
-    
-        // JsonBuilderI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
-        //   table_row, colour_ctr
-        // );
-        
-        JsonBuilderI->Level_Start();
-          JsonBuilderI->Add("id",row);
-          JsonBuilderI->Add("ih",table_row);
-          JsonBuilderI->Add("fc",colour_ctr);
-        JsonBuilderI->Level_End();
-
-        sensor_counter++;
-      }break;
-    }
-  }
-  // *pCONT_web->buffer_writer_internal = (*pCONT_web->buffer_writer_internal) - 1;// remove extra comma
-  // JsonBuilderI->Append_P(PSTR("],")); 
-
-  JsonBuilderI->Array_End();
-}
-
-
-void mSensorsDHT::WebPage_Root_AddHandlers(){
-
-  /**
-   * Pages
-   * */
 
 }
-
-#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 /*********************************************************************************************************************************************
@@ -414,10 +260,13 @@ uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);
+    JBI->Array_Start("Pin");
+      JBI->Add(pin[0]);
+      JBI->Add(pin[1]);
+    JBI->Array_End();
   return JsonBuilderI->End();
 
 }
-
 
 
 // /************ CONSTRUCT JSON BUILDERS *****************************************************************************************************************************/
@@ -458,11 +307,6 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
 }
 
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
 
 void mSensorsDHT::MQTTHandler_Init(){
 

@@ -35,6 +35,14 @@ class mSensorsDHT :
     #define MAX_SENSORS 4
     int8_t pin[MAX_SENSORS] = {-1,-1,-1,-1};
     // DHTesp* dht[MAX_SENSORS];
+    
+    struct SETTINGS{
+      uint8_t  fEnableSensor = true;
+      uint8_t  sensor_active_count = 0; // count of sensors found    n:number found, c:case number for switches
+      uint16_t rate_measure_ms = 1000;
+      uint8_t  group_count = 0;
+    }settings;
+
 
     static const char* PM_MODULE_SENSORS_DHT_CTR;
     static const char* PM_MODULE_SENSORS_DHT_FRIENDLY_CTR;
@@ -75,7 +83,6 @@ class mSensorsDHT :
     RHT03    // Equivalent to DHT22
   };
 
-    uint8_t fEnableSensor= false;
 
     //#define D_MODULE_TOPIC_NAME "dht"
 
@@ -86,11 +93,6 @@ class mSensorsDHT :
     void WebAppend_Root_Status_Table_Data();
 
     // uint8_t fSensorCount = 0; // 0 also means not enabled
-
-    struct SETTINGS{
-      uint8_t sensor_active_count = 0;
-      uint16_t rate_measure_ms = 1000;
-    }settings;
 
     // sensors_event_t* GetSensorValue();
     

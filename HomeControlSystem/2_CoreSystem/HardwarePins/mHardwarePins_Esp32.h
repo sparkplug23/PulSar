@@ -54,6 +54,7 @@
 #define WEMOS_MODULE       0    // Wemos module
 // #define USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
+
 // #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {

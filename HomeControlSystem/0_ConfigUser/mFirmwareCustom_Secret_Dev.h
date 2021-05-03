@@ -37,7 +37,7 @@
 //#define DEVICE_BEDROOMBLINDS     
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
-#define DEVICE_HVAC_BEDROOM
+// #define DEVICE_HVAC_BEDROOM
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 

@@ -24,6 +24,7 @@
 
 #ifdef ESP32
   #include <WiFi.h>
+#include <ESPmDNS.h>
   #include "2_CoreSystem/Support/mSupport.h"
 #endif
 #ifdef ESP8266

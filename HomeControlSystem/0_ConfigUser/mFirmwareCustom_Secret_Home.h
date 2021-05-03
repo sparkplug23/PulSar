@@ -72,6 +72,7 @@ Hallway
  */
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_HEATING
+#define DEVICE_HEATING_ESP32
 // #define DEVICE_DOORBELLWALLCHIME
 
 /**
@@ -1419,6 +1420,159 @@ Bathroom
   "}";
   
 #endif
+
+
+#ifdef DEVICE_HEATING_ESP32
+  #define DEVICENAME_CTR          "heating32_tester"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+   
+  // #define ENABLE_BUG_TRACING
+  //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+  #define USE_INTERNAL_HOME_APS_ONLY
+
+  #define DISABLE_WEBSERVER
+
+  // #define USE_MODULE_CONTROLLER_HVAC
+  
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_DS18B20
+
+  // #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      // "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      // "\"12\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      // "\"14\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      // "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\""
+      // "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      // "\"4\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
+      // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Upstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Upstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
+  #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Downstairs_Pipe"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,152,171,193,23,4,231]"
+  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Upstairs_Pipe"
+  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,131,6,194,23,4,59]"
+  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
+  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,204,226,193,23,4,30]"
+  #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
+  #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,136,105,53,22,4,114]"
+  #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
+  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,50,176,193,23,4,197]"
+  #define D_DEVICE_SENSOR_DB18S20_5_NAME        "Tank_Middle"
+  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,216,108,53,22,4,102]"
+  #define D_DEVICE_SENSOR_DB18S20_6_NAME        "Tank_Bottom"
+  #define D_DEVICE_SENSOR_DB18S20_6_ADDRESS     "[40,255,162,167,53,22,4,27]"
+  #define D_DEVICE_SENSOR_DB18S20_7_NAME        "Tank_Out"
+  #define D_DEVICE_SENSOR_DB18S20_7_ADDRESS     "[40,255,219,93,53,22,4,239]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_6_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_7_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_6_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_7_ADDRESS ""
+      "]"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\",\"Cooling\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Cooling\"" "]"
+        "}"
+      "]"
+    "}"
+  "}";
+  
+#endif
+
+
+
 #ifdef DEVICE_DOORBELLWALLCHIME
   #define DEVICENAME_CTR          "doorbellwallchime"
   #define DEVICENAME_FRIENDLY_CTR "Doorbell Wall Chime"
