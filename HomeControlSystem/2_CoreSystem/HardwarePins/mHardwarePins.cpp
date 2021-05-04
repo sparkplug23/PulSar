@@ -178,7 +178,7 @@ void mHardwarePins::ModuleSettings_FlashSerial()
   //     "BASE: %d"
   //   ),
 #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+// AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)=%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
 #endif // ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   uint8_t real_gpio = 0;
   // DEBUG_PRINTF("\n\r");
@@ -214,6 +214,8 @@ AddLog(LOG_LEVEL_TEST, PSTR("ARRAY_SIZE(pCONT_set->Settings.user_template2.hardw
   // DEBUG_PRINTF("\n\r\n\r"); 
 
 }
+
+#ifndef EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
 void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
@@ -305,7 +307,7 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
       jtok.nextOne(); //skip start of object
       const char* key = jtok.getStr();
       
-      real_pin = GetGPIONumberFromName(key);
+      real_pin = GetRealPinNumberFromName(key);
       AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
@@ -383,10 +385,12 @@ void mHardwarePins::ReadModuleTemplateFromProgmem(){
 
 }
 
+#endif // EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
 //
 //const char PINS_WEMOS[] PROGMEM = "D3TXD4RXD2D1flashcFLFLolD6D7D5D8D0A0";
 
-int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
+int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
 
   int8_t pin = -1;
   #ifdef ESP8266
@@ -428,16 +432,16 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   else{
     pin = -1;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
+    AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetRealPinNumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetGPIONumberFromName = %d"), pin);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP8266
 
-  // #ifdef ESP32
+  #ifdef ESP32
   
   // Check for pin_array matching
   char buffer[10];
@@ -467,14 +471,14 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
   // {
   //   pin = -1;
   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetGPIONumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
+  //   AddLog(LOG_LEVEL_ERROR, PSTR("\t\tGetRealPinNumberFromName = %d PIN UNKNOWN for \"%s\""), pin, c);
   //   #endif // ENABLE_LOG_LEVEL_COMMANDS
   // }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR("GetGPIONumberFromName = %d"), pin);
+    AddLog(LOG_LEVEL_DEBUG, PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
-  // #endif // ESP32
+  #endif // ESP32
 
   return pin;
 
@@ -489,49 +493,6 @@ int8_t mHardwarePins::GetGPIONumberFromName(const char* c){
 // }
 
 
-void mHardwarePins::ParseModuleTemplate(){
-
-  // #if newname(1,2)
-
-}
-
-// bool mHardwarePins::JsonTemplate(const char* dataBuf)
-// {
-//   // {"NAME":"Generic","GPIO":[17,254,29,254,7,254,254,254,138,254,139,254,254],"FLAG":1,"BASE":255}
-
-//   // if (strlen(dataBuf) < 9) { return false; }  // Workaround exception if empty JSON like {} - Needs checks
-
-//   // StaticJsonDocument<350> doc;
-//   // DeserializationError error =  deserializeJson(doc, dataBuf);
-//   // JsonObject obj = doc.to<JsonObject>();
-
-//   // //StaticJsonBuffer<350> jb;  // 331 from https://arduinojson.org/v5/assistant/
-//   // //JsonObject& obj = jb.parseObject(dataBuf);
-
-//   // if (error) { return false; }
-//   // //if (!obj.success()) { return false; }
-
-//   // // All parameters are optional allowing for partial changes
-//   // const char* name = obj[D_JSON_NAME];
-//   // if (name != nullptr) {
-//   //   strlcpy(pCONT_set->Settings.user_template2.hardware.name, name, sizeof(pCONT_set->Settings.user_template2.hardware.name));
-//   // }
-//   // if (obj[D_JSON_GPIO].isNull()) {
-//   //   for (uint8_t i = 0; i < sizeof(mycfgio); i++) {
-//   //     pCONT_set->Settings.user_template2.hardware.gp.io[i] = obj[D_JSON_GPIO][i] | 0;
-//   //   }
-//   // }
-//   // if (obj[D_JSON_FLAG].isNull()) {
-//   //   uint8_t flag = obj[D_JSON_FLAG] | 0;
-//   //   memcpy(&pCONT_set->Settings.user_template2.hardware.flag, &flag, sizeof(gpio_flag));
-//   // }
-//   // if (obj[D_JSON_BASE].isNull()) {
-//   //   uint8_t base = obj[D_JSON_BASE];
-//   //   if ((0 == base) || !ValidTemplateModule(base -1)) { base = 18; }
-//   //   pCONT_set->Settings.user_template2.base = base -1;  // Default WEMOS
-//   // }
-//   return true;
-//}
 
 // Return true/false if pin can be used (check for flash pins etc)
 bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
@@ -555,64 +516,6 @@ bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
   
   return false;
 }
-
-// // Return true/false if pin can be used (check for flash pins etc)
-// int8_t mHardwarePins::UsablePinToTemplateArrayIndex(uint8_t pin)
-// {
-//   // Valid
-//   // if ((pin >= 0) && (pin <= 5)){
-//   //   AddLog(LOG_LEVEL_INFO,PSTR("0-5 pin=%d to %d"),pin, pin);
-//   //   return pin;
-//   // }
-//   // // GPIO
-//   // else if (((pin >= 6) && (pin <= 8))||(pin == 11)){
-//   //   return -1; // Flash pins
-//   // }
-//   // // flash pins on 8265
-//   // else if ((pin == 9) || (pin == 10)){ //(MODULE_WEMOS_ID == pCONT_set->Settings.module) // not on esp8625
-//   //   AddLog(LOG_LEVEL_INFO,PSTR("9/10 pin=%d to %d"),pin, pin-3);
-//   //   return pin-3; // Flash pins
-//   // }
-//   // // Valid
-//   // else if ((pin >= 12) && (pin <= 16)){
-//   //   AddLog(LOG_LEVEL_INFO,PSTR("12-16 pin=%d to %d"),pin, pin-5);
-//   //   return pin-5;
-//   // }
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR("UsablePinToTemplateArrayIndex: %d->%d"), 
-//   //   pin,
-//   //   gpio_pin_by_index[pin]
-//   // );
-  
-//   // return gpio_pin_by_index[pin];
-
-//   switch(pin){
-//     case 0: return 0;
-//     case 1: return 1;
-//     case 2: return 2;
-//     case 3: return 3;
-//     case 4: return 4;
-//     case 5: return 5;
-//     case 6:
-//     case 7:
-//     case 8: return -1;
-//     case 9: return 6;
-//     case 10: return 7;
-//     case 11: return -1;
-//     case 12: return 8;
-//     case 13: return 9;
-//     case 14: return 10;
-//     case 15: return 11;
-//     case 16: return 12;
-//   }
-
-    
-//     // i, pCONT_set->my_module.io[i], mpin);
-
-  
-
-
-//   // return -1;
-// }
 
 
 int8_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
@@ -665,6 +568,16 @@ int8_t mHardwarePins::ConvertRealPinToIndexPin(uint8_t real_pin){
     }
   }
   return -1;
+}
+
+/**
+ * @brief Convert the real_pin number to its indexed position within pin_array
+ * @note 
+ * @param real_pin physical external pin number
+ * @return index position of pin in array
+ */
+int8_t mHardwarePins::ConvertIndexPinToRealPin(uint8_t index_pin){
+  return gpio_pin_by_index[index_pin];
 }
 
 /**
@@ -807,11 +720,11 @@ bool mHardwarePins::ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index)
 bool mHardwarePins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 {
   // Outside valid gpio function range
-  if((pin_array[index] >= GPIO_SENSOR_END_ID) && (pin_array[index] < GPIO_USER_ID)){
-      return false;
-    }else{
+  // if((pin_array[index] >= GPIO_SENSOR_END_ID) && (pin_array[index] < GPIO_USER_ID)){
+  //     return false;
+  //   }else{
       return true;
-    }
+    // }
 }
 
 const char* mHardwarePins::ModuleName(char* buffer, uint8_t buflen)
@@ -901,103 +814,6 @@ const char* mHardwarePins::AnyModuleName2(uint8_t index)
   }
 }
 
-
-void mHardwarePins::TemplateGPIOs(myio *gp)
-{
-
-  uint16_t *dest = (uint16_t *)gp;
-  memset(dest, GPIO_NONE_ID, sizeof(myio));
-
-  uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
-  
-  AddLog(LOG_LEVEL_DEBUG, PSTR("src size =%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
-
-    // sizeof(mycfgio)];
-  if (USER_MODULE == pCONT_set->Settings.module) {
-    memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR("USER_MODULE TemplateGPIOs memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-  } else {
-    
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));"));
-    // delay(3000);
-#ifdef ESP8266
-    // GetInternalTemplate(&src, Settings.module, 1);
-    memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
-    // AddLog(LOG_LEVEL_WARN, PSTR("???????FORCED Settings.module = 0 from %d"),pCONT_set->Settings.module);
-#endif  // ESP8266
-#ifdef ESP32
-    // memcpy_P(&src, &kModules[ModuleTemplate(Settings.module)].gp, sizeof(mycfgio));
-    // AddLog(LOG_LEVEL_WARN, PSTR("FORCED Settings.module = 0 from %d"),pCONT_set->Settings.module);
-    // pCONT_set->Settings.module = 0;
-
-    memcpy_P(&src, &kModules[pCONT_set->Settings.module].gp, sizeof(mycfgio));
-#endif  // ESP32
-  }
-  // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
-
-//  AddLogBuffer(LOG_LEVEL_DEBUG, (uint16_t *)&src, sizeof(mycfgio));
-
-  //AddLog_Array(LOG_LEVEL_DEBUG_MORE, "TemplateGPIOs::gp", (uint16_t *)&src, (uint16_t) sizeof(mycfgio));
-
-  uint8_t j = 0;
-  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io); i++) {
-    if (6 == i) { j = 9; }
-    if (8 == i) { j = 12; }
-    dest[j] = src[i];
-    
-    AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs %d\t%d\t%d\t%d"),dest[j],j,src[i],i);
-    j++;
-  }
-  // 11 85 00 85 85 00 00 00 00 00 00 00 15 38 85 00 00 81
-
-  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "TemplateGPIOs::gp", (uint8_t *)dest, (uint8_t)sizeof(mycfgio));
-  // AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
-}
-
-void mHardwarePins::TemplateGPIOs(myio *gp, uint8_t module_id)
-{
-
-//  Uses settings.module and copies into gpio struct
-
-  // uint8_t *dest = (uint8_t *)gp;
-  // memset(dest, GPIO_NONE_ID, sizeof(myio));
-
-  // uint8_t src[sizeof(mycfgio)];
-  
-  uint16_t *dest = (uint16_t *)gp;
-  memset(dest, GPIO_NONE_ID, sizeof(myio));
-
-  uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
-  if (USER_MODULE == module_id) {
-    
-DEBUG_LINE;
-    memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
-  } else {
-DEBUG_LINE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-AddLog(LOG_LEVEL_DEBUG,PSTR("&kModules[module_id] %d"),module_id);
-    #endif // ENABLE_LOG_LEVEL_INFO
-    memcpy_P(&src, &kModules[module_id].gp, sizeof(mycfgio));
-  }
-  // 11 85 00 85 85 00 00 00 15 38 85 00 00 81
-DEBUG_LINE;
-//  AddLog_Array(LOG_LEVEL_DEBUG, "src", src, (uint8_t)sizeof(mycfgio));
-
-  uint8_t j = 0;
-  for (uint8_t i = 0; i < sizeof(mycfgio); i++) {
-    if (6 == i) { j = 9; }
-    if (8 == i) { j = 12; }
-    dest[j] = src[i];
-    j++;
-  }
-  // 11 85 00 85 85 00 00 00 00 00 00 00 15 38 85 00 00 81
-
-//  AddLog_Array(LOG_LEVEL_DEBUG, "gp", (uint8_t *)gp, (uint8_t)sizeof(myio));
-//  AddLogBuffer(LOG_LEVEL_DEBUG, (uint8_t *)gp, sizeof(myio));
-}
-
 gpio_flag mHardwarePins::ModuleFlag()
 {
   gpio_flag flag;
@@ -1043,20 +859,20 @@ uint8_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio)
 {
   uint8_t result = gpio;
 
-  #ifdef ESP8266
+  // #ifdef ESP8266
 
-  DEBUG_LINE;
-  if (((pin > 5) && (pin < 9)) || (11 == pin)) {
-    result = GPIO_NONE_ID;  // Disable flash pins GPIO6, GPIO7, GPIO8 and GPIO11
-  }
-  DEBUG_LINE;
-  // need to add my other boards here
-  if ((MODULE_WEMOS_ID == pCONT_set->Settings.module) && (!pCONT_set->Settings.flag_network.user_esp8285_enable)) {
-    if ((pin == 9) || (pin == 10)) { result = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
-  }
-  DEBUG_LINE;
+  // DEBUG_LINE;
+  // if (((pin > 5) && (pin < 9)) || (11 == pin)) {
+  //   result = GPIO_NONE_ID;  // Disable flash pins GPIO6, GPIO7, GPIO8 and GPIO11
+  // }
+  // DEBUG_LINE;
+  // // need to add my other boards here
+  // if ((MODULE_WEMOS_ID == pCONT_set->Settings.module) && (!pCONT_set->Settings.flag_network.user_esp8285_enable)) {
+  //   if ((pin == 9) || (pin == 10)) { result = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
+  // }
+  // DEBUG_LINE;
 
-  #endif
+  // #endif
 
   return result;
 }
@@ -1118,6 +934,9 @@ void mHardwarePins::TemplateJson()
   // ResponseAppend_P(PSTR("],\"" D_JSON_FLAG "\":%d,\"" D_JSON_BASE "\":%d}"), pCONT_set->Settings.user_template.flag, pCONT_set->Settings.user_template_base +1);
 }
 
+
+
+#ifndef EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
 
 void mHardwarePins::GpioInit(void)
@@ -1600,6 +1419,8 @@ void mHardwarePins::GpioInit(void)
 
 
 
+
+#endif// EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
 int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   if(c=='\0'){ return -1; }
