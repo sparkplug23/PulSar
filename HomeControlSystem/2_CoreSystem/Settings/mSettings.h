@@ -235,6 +235,7 @@ enum SWITCH_SPLIT_TASK_IDS{
   SPLIT_TASK_SEC7_ID,
   SPLIT_TASK_SEC8_ID,
   SPLIT_TASK_TIMEOUT_ID,
+  SPLIT_TASK_ERROR_ID,
   SPLIT_TASK_DONE_ID
 };
 
@@ -1238,7 +1239,7 @@ struct DeviceNameBuffer{ // size(230)
 
 
 
-#define MODULE_TEMPLATE_MAX_SIZE 300
+#define MODULE_TEMPLATE_MAX_SIZE 500
 struct Template_Config{
   uint8_t flags;
   uint8_t       base;        // 71F

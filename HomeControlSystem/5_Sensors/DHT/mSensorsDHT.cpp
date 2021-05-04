@@ -105,7 +105,7 @@ void mSensorsDHT::Pre_Init(void){
   }else{
     
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
-    delay(2000);
+    // delay(2000);
   }
   if (pCONT_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
     pin[settings.sensor_active_count] = pCONT_pins->GetPin(GPIO_DHT22_2OF2_ID);
@@ -113,10 +113,11 @@ void mSensorsDHT::Pre_Init(void){
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
-  }else{
+  }
+  else{
     
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
-    delay(2000);
+    // delay(2000);
   }
   // {"flag_serial_set_tx_set":0,"GPIO":{"DHT22_1":25},
   // "pin_attached_gpio_functions":
@@ -144,6 +145,9 @@ void mSensorsDHT::Init(void){
   
 }
 
+/**
+ * Needs complete rewrite
+ * */
 void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t require_completion){
 
   unsigned long timeout = millis();
@@ -153,9 +157,10 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
       unsigned long tmp = (abs(millis()-sensor[sensor_id].instant.tWithinLimit));
       if(tmp<=1000){
         break;
-      }else{
-        //Serial.print("retryingtoosoon-"); Serial.println(tmp);
       }
+      // else{
+      //   Serial.print("retryingtoosoon-"); Serial.println(tmp);
+      // }
     //}
 
     switch(sensor[sensor_id].instant.sUpdateClimateSensors){
@@ -171,7 +176,8 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
 
         // Check if any reads failed and exit early (to try again).
         if (sensor[sensor_id].dht->getStatus() != 0) {
-          //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
+          AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
+          sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_ERROR_ID;
           sensor[sensor_id].instant.isvalid = false;
         }else{
           sensor[sensor_id].instant.isvalid = true;
@@ -220,9 +226,14 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
     }
 
     if(abs(millis()-timeout)>=2000){
+      // Serial.println("if(abs(millis()-timeout)>=2000){");
       sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_TIMEOUT_ID;
       break;
     }
+    // else{
+      
+    //   Serial.println("ELSE if(abs(millis()-timeout)>=2000){");
+    // }
 
   }while(require_completion); // loops once even if false
 
@@ -242,8 +253,12 @@ void mSensorsDHT::EveryLoop(){
           if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_DONE_ID){ // when its finished, reset timer
             sensor[sensor_id].instant.sUpdateClimateSensors=SPLIT_TASK_SUCCESS_ID;
             sensor[sensor_id].instant.tSavedMeasureClimate = millis();
+          }else
+          if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_ERROR_ID){ 
+            sensor[sensor_id].instant.tSavedMeasureClimate = millis()+5000; //backoff for 5 seconds
           }
       }
+
     }
   }//end for
 
@@ -277,7 +292,9 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
   for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
-    if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))&&(sensor[sensor_id].instant.isvalid)){
+    if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))
+      //  &&(sensor[sensor_id].instant.isvalid)
+      ){
 
       JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
@@ -326,7 +343,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -336,7 +353,7 @@ void mSensorsDHT::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs;
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;

@@ -45,6 +45,17 @@
 #define DEBUG_PRINTF //Serial.printf
 #endif
 
+/**
+ * Use this macro to turn on delays that I can easily turn off again (in case I forget about one). Stoped using "delay" directly, do with macros
+ * */
+#define ENABLE_DEBUG_DELAYS
+#if defined(ENABLE_DEBUG_DELAYS)
+#define DEBUG_DELAY(x) delay(x)
+#else
+#define DEBUG_DELAY(x)
+#endif
+
+
 /*
 // ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
 

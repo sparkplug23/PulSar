@@ -72,7 +72,7 @@ Hallway
  */
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_HEATING
-#define DEVICE_HEATING_ESP32
+// #define DEVICE_HEATING_ESP32
 // #define DEVICE_DOORBELLWALLCHIME
 
 /**
@@ -1291,6 +1291,9 @@ Bathroom
   // #define ENABLE_HVAC_DEBUG_TIMES
   #define DISABLE_WEBSERVER
 
+  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
   #define USE_MODULE_CONTROLLER_HVAC
   
   #define USE_MODULE_SENSORS_INTERFACE  
@@ -1306,14 +1309,15 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
-      "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
       "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
       "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
-      "\"9\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+      // "\"9\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1423,7 +1427,7 @@ Bathroom
 
 
 #ifdef DEVICE_HEATING_ESP32
-  #define DEVICENAME_CTR          "heating32_tester"
+  #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
 
   #define FORCE_TEMPLATE_LOADING
@@ -1431,19 +1435,25 @@ Bathroom
    
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
+  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
   #define USE_INTERNAL_HOME_APS_ONLY
 
   #define DISABLE_WEBSERVER
+  #define ESP32
 
   // #define USE_MODULE_CONTROLLER_HVAC
   
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18B20
+  
+  #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 7
+  // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
 
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1451,19 +1461,19 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      // "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      // "\"12\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-      // "\"14\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
-      // "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\""
-      // "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      // "\"4\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\""
-      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"14\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
       // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1481,7 +1491,7 @@ Bathroom
 
   #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
   #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
-
+//flip these
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Downstairs_Pipe"
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,152,171,193,23,4,231]"
   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Upstairs_Pipe"

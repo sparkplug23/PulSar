@@ -42,7 +42,7 @@ void hw_wdt_enable(){
 void setup(void)
 { 
   // hw_wdt_disable();
-  
+    
   #ifndef USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
   #ifdef ESP32
   #ifdef DISABLE_ESP32_BROWNOUT

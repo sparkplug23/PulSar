@@ -76,13 +76,12 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
     
     void ParseModuleTemplate();
 
-    void ReadModuleTemplateFromProgmem();
 
     void ModuleSettings_ShowTemplateLog();
 
     void Template_Load();
 
-    int8_t GetGPIONumberFromName(const char* c);
+    int8_t GetRealPinNumberFromName(const char* c);
     int16_t GetGPIOFunctionIDbyName(const char* c);
 
     void ModuleSettings_ShowActiveTemplate();
@@ -125,7 +124,7 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
 
 
     void TemplateGPIOs(myio *gp);
-    void TemplateGPIOs(myio *gp, uint8_t module_id);
+    // void TemplateGPIOs(myio *gp, uint8_t module_id);
 
 
     gpio_flag ModuleFlag();
@@ -139,6 +138,22 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void pre_init(void);
+
+
+
+
+    bool ReadModuleTemplateFromProgmem();
+    void ModuleTemplateJsonParser(char* buffer);
+
+    int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
+
+
+
+
+
+
+
+
 
 };
 

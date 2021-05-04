@@ -23,6 +23,84 @@
 const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
 const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
 
+int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
+
+  int8_t function_result = 0;
+  
+  // some functions must run regardless
+  /************
+   * INIT SECTION * 
+  *******************/
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();
+    break;
+    case FUNC_INIT:
+      Init();
+    break;
+  }
+  
+  // Only continue to remaining functions if sensor has been detected and enabled
+  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP: 
+      EveryLoop();
+    break;  
+    case FUNC_EVERY_SECOND:{
+
+      // Pre_Init();
+      // char buffer[100];
+      // uint8_t ii = 5;
+      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
+    
+    
+      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),0,GetCorrectedDeviceID(0)); 
+      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),1,GetCorrectedDeviceID(1)); 
+
+    }
+    break;   
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Status_Table_Draw();
+    break;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table_Data();
+    break;
+    #endif //USE_MODULE_NETWORK_WEBSERVER
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init(); 
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+  }
+  
+  return function_result;
+
+}//end function
+
 
 void mSensorsDB18::Pre_Init(){
 
@@ -38,6 +116,9 @@ void mSensorsDB18::Pre_Init(){
     sensor_group[sensor_group_count].dallas->begin();
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
+    #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT
+    sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT;
+    #endif
     //increment that we have another sensor group added IF we have sensors attached
     if(sensor_group[sensor_group_count].sensor_count){
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB1 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
@@ -58,6 +139,9 @@ void mSensorsDB18::Pre_Init(){
     sensor_group[sensor_group_count].dallas->begin();
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
+    #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT
+    sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT;
+    #endif
     //increment that we have another sensor group added IF we have sensors attached
     if(sensor_group[sensor_group_count].sensor_count){
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
@@ -130,6 +214,8 @@ void mSensorsDB18::Init(void){
 
 
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
+          WDT_FEED();
+          WDT_RESET();
           sensor_count++; // increment how many is found
           //limit if number of sensors is reached
           if(sensor_count>DB18_SENSOR_MAX){ break; }
@@ -266,10 +352,28 @@ uint8_t mSensorsDB18::ConstructJSON_Settings(uint8_t json_level){
   JsonBuilderI->Add("found", db18_sensors_active);
 
   JsonBuilderI->Level_Start("Address");
+
     for(int id=0;id<settings.nSensorsFound;id++){
       snprintf(buffer, sizeof(buffer), "sens%d_%d_%d", id, sensor[id].address[6], sensor[id].address[7]);
       JsonBuilderI->Array_AddArray(buffer, &sensor[id].address[0], 8);
     }
+
+
+JBI->Add("pin0", sensor_group[0].pin);
+JBI->Add("pin1", sensor_group[1].pin);
+
+JBI->Add("pindb0", pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
+JBI->Add("pindb1", pCONT_pins->GetPin(GPIO_DSB_2OF2_ID));
+
+JBI->Add("pindb0PinUsed", pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID));
+JBI->Add("pindb1PinUsed", pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID));
+
+// JBI->Add("count1", sensor_group[0].dallas->getDeviceCount());
+// JBI->Add("count2", sensor_group[1].dallas->getDeviceCount());
+
+
+
+
   JsonBuilderI->Level_End();
 
 
@@ -383,82 +487,6 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Data(){
 
 }
 #endif // USE_MODULE_NETWORK_WEBSERVER
-
-int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
-
-  int8_t function_result = 0;
-  
-  // some functions must run regardless
-  /************
-   * INIT SECTION * 
-  *******************/
-  switch(function){
-    case FUNC_PRE_INIT:
-      Pre_Init();
-    break;
-    case FUNC_INIT:
-      Init();
-    break;
-  }
-  
-  // Only continue to remaining functions if sensor has been detected and enabled
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP: 
-      EveryLoop();
-    break;  
-    case FUNC_EVERY_SECOND:{
-      // char buffer[100];
-      // uint8_t ii = 5;
-      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
-    
-    
-      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),0,GetCorrectedDeviceID(0)); 
-      // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor[sensor_count%d].id = %d"),1,GetCorrectedDeviceID(1)); 
-
-    }
-    break;   
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-    break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init(); 
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-  }
-  
-  return function_result;
-
-}//end function
 
 
 

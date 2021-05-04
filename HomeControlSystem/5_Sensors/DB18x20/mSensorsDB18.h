@@ -80,50 +80,6 @@ class mSensorsDB18 :
     void WebAppend_Root_Status_Table_Data();
     #endif // USE_MODULE_NETWORK_WEBSERVER
 
-
-    // #ifdef DEVICE_MYBEDROOM
-    //   #define SENSOR1_NAME "inside"
-    //   DeviceAddress ADDRESS_S1 = {0x28,0xFF,0x64,0x99,0x1D,0xC2,0x7C,0x2B};
-    //   #define SENSOR2_NAME "outside"
-    //   DeviceAddress ADDRESS_S2 = {0x28,0xAA,0xDD,0x65,0x1D,0x13,0x02,0x71};
-    //   #define DB18_SENSOR_MAX 2
-    // #endif
-
-
-    // #ifdef DEVICE_RADIATORFAN
-    //   #define SENSOR1_NAME "inside"
-    //   DeviceAddress ADDRESS_S1 = {0x28,0xAA,0xE7,0x99,0x1D,0x13,0x02,0x2B};
-    //   #define SENSOR2_NAME "outside"
-    //   DeviceAddress ADDRESS_S2 = {0x28,0xAA,0xDD,0x65,0x1D,0x13,0x02,0x71};
-    //   #define DB18_SENSOR_MAX 2
-    // #endif
-    // #ifdef DEVICE_OILFURNACE
-    //   // #define SENSOR1_NAME "inflow"
-    //   // DeviceAddress ADDRESS_S1 = {0x28,0xAA,0x43,0x03,0x1E,0x13,0x02,0x19};
-    //   // #define SENSOR2_NAME "outflow"
-    //   // DeviceAddress ADDRESS_S2 = {0x28,0xFF,0xA9,0x78,0x35,0x16,0x04,0xF0};
-    //   // #define SENSOR3_NAME "outside"
-    //   // DeviceAddress ADDRESS_S3 = {0x28,0x8F,0x51,0x07,0x33,0x14,0x01,0xBD};
-    //   // #define SENSOR4_NAME "tank1"      // Dual sensors as backup
-    //   // DeviceAddress ADDRESS_S4 = {0x28,0xFF,0x64,0x1D,0xCD,0xC9,0xA8,0xCB};
-    //   // #define SENSOR5_NAME "tank2"      // Dual sensors as backup
-    //   // DeviceAddress ADDRESS_S5 = {0x28,0xFF,0x64,0x1D,0xCD,0xF8,0xF8,0xF9};
-    //   // #define DB18_SENSOR_MAX 5
-    // #endif
-    // #ifdef DEVICE_COFFEE
-    //   #define SENSOR1_NAME "heater"
-    //   DeviceAddress ADDRESS_S1 = {0x28,0xFF,0xD0,0xFF,0xC1,0x17,0x04,0xE6};
-    //   #define DB18_SENSOR_MAX 1
-    // #endif
-    // https://www.rapidtables.com/convert/number/ascii-hex-bin-dec-converter.html
-    
-    
-    // Device Address: 28FF641DCDC9A8CB Temp C: 25.94 Temp F: 78.69
-    // Requesting temperatures...DONE
-    // Device Address: 28FF641DCDF8F8F9 Temp C: 25.62 Temp F: 78.12
-    // Device Address: 28FF641DCDC9A8CB Temp C: 25.94 Temp F: 78.69
-
-
     #ifndef DB18_SENSOR_MAX
       #define DB18_SENSOR_MAX 12
     #endif
@@ -230,3 +186,51 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
 #endif
 
 #endif
+
+
+
+
+// // Data wire is plugged into port 2 on the Arduino
+// #define ONE_WIRE_BUS 22
+//   sensor_group[sensor_group_count].pin = ONE_WIRE_BUS;//pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
+//   sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);//sensor_group[sensor_group_count].pin);
+//   sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+//         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin test 1 Valid %d"),sensor_group[sensor_group_count].pin);
+//     sensor_group[sensor_group_count].dallas->begin();
+  
+// // // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+// // OneWire oneWire(ONE_WIRE_BUS);
+
+// // // Pass our oneWire reference to Dallas Temperature. 
+// // DallasTemperature sensors(&oneWire);
+  
+
+// // while(1){
+  
+//   // locate devices on the bus
+//   Serial.print("Locating devices...");
+//   Serial.print("Found ");
+//   Serial.print(sensor_group[sensor_group_count].dallas->getDeviceCount(), DEC);
+//   Serial.println(" devices.");
+  
+//   DeviceAddress insideThermometer;
+
+//   if (!sensor_group[sensor_group_count].dallas->getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
+
+//   // show the addresses we found on the bus
+//   Serial.print("Device 0 Address: ");
+//   for (uint8_t i = 0; i < 8; i++)
+//   {
+//     // zero pad the address if necessary
+//     if (insideThermometer[i] < 16) Serial.print("0");
+//     Serial.print(insideThermometer[i], HEX);
+//   }
+//   Serial.println();
+
+//   sensor_group[sensor_group_count].dallas->requestTemperatures(); // Send the command to get temperatures
+//   float tempC = sensor_group[sensor_group_count].dallas->getTempCByIndex(0);
+//   Serial.print("1Temperature for the device 1 (index 0) is: ");
+//   Serial.println(tempC);
+
+//   DEBUG_DELAY(2000);
+// // };

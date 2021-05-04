@@ -1,4 +1,4 @@
-// This library is free software; you can redistribute it and/or
+﻿// This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2.1 of the License, or (at your option) any later version.
@@ -15,10 +15,10 @@ extern "C" {
 
 // OneWire commands
 #define STARTCONVO      0x44  // Tells device to take a temperature reading and put it on the scratchpad
-#define COPYSCRATCH     0x48  // Copy EEPROM
-#define READSCRATCH     0xBE  // Read EEPROM
-#define WRITESCRATCH    0x4E  // Write to EEPROM
-#define RECALLSCRATCH   0xB8  // Reload from last known
+#define COPYSCRATCH     0x48  // Copy scratchpad to EEPROM
+#define READSCRATCH     0xBE  // Read from scratchpad
+#define WRITESCRATCH    0x4E  // Write to scratchpad
+#define RECALLSCRATCH   0xB8  // Recall from EEPROM to scratchpad
 #define READPOWERSUPPLY 0xB4  // Determine if device needs parasite power
 #define ALARMSEARCH     0xEC  // Query bus for devices with an alarm condition
 
@@ -33,30 +33,35 @@ extern "C" {
 #define COUNT_PER_C     7
 #define SCRATCHPAD_CRC  8
 
+// DSROM FIELDS
+#define DSROM_FAMILY    0
+#define DSROM_CRC       7
+
 // Device resolution
 #define TEMP_9_BIT  0x1F //  9 bit
 #define TEMP_10_BIT 0x3F // 10 bit
 #define TEMP_11_BIT 0x5F // 11 bit
 #define TEMP_12_BIT 0x7F // 12 bit
 
+#define MAX_CONVERSION_TIMEOUT		750
+
+// Alarm handler
 #define NO_ALARM_HANDLER ((AlarmHandler *)0)
 
-DallasTemperature::DallasTemperature()
-{
+
+DallasTemperature::DallasTemperature() {
 #if REQUIRESALARMS
 	setAlarmHandler(NO_ALARM_HANDLER);
 #endif
+    useExternalPullup = false;
 }
-DallasTemperature::DallasTemperature(OneWire* _oneWire)
-{
+
+DallasTemperature::DallasTemperature(OneWire* _oneWire) : DallasTemperature() {
 	setOneWire(_oneWire);
-#if REQUIRESALARMS
-	setAlarmHandler(NO_ALARM_HANDLER);
-#endif
 }
 
 bool DallasTemperature::validFamily(const uint8_t* deviceAddress) {
-	switch (deviceAddress[0]) {
+	switch (deviceAddress[DSROM_FAMILY]) {
 	case DS18S20MODEL:
 	case DS18B20MODEL:
 	case DS1822MODEL:
@@ -68,6 +73,21 @@ bool DallasTemperature::validFamily(const uint8_t* deviceAddress) {
 	}
 }
 
+/*
+ * Constructs DallasTemperature with strong pull-up turned on. Strong pull-up is mandated in DS18B20 datasheet for parasitic
+ * power (2 wires) setup. (https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf, p. 7, section 'Powering the DS18B20').
+ */
+DallasTemperature::DallasTemperature(OneWire* _oneWire, uint8_t _pullupPin) : DallasTemperature(_oneWire) {
+  setPullupPin(_pullupPin);
+}
+
+void DallasTemperature::setPullupPin(uint8_t _pullupPin) {
+	useExternalPullup = true;
+	pullupPin = _pullupPin;
+	pinMode(pullupPin, OUTPUT);
+	deactivateExternalPullup();
+}
+
 void DallasTemperature::setOneWire(OneWire* _oneWire) {
 
 	_wire = _oneWire;
@@ -77,6 +97,7 @@ void DallasTemperature::setOneWire(OneWire* _oneWire) {
 	bitResolution = 9;
 	waitForConversion = true;
 	checkForConversion = true;
+  autoSaveScratchPad = true;
 
 }
 
@@ -92,19 +113,19 @@ void DallasTemperature::begin(void) {
 	while (_wire->search(deviceAddress)) {
 
 		if (validAddress(deviceAddress)) {
-
-			if (!parasite && readPowerSupply(deviceAddress))
-				parasite = true;
-
-			bitResolution = max(bitResolution, getResolution(deviceAddress));
-
 			devices++;
+
 			if (validFamily(deviceAddress)) {
 				ds18Count++;
+
+				if (!parasite && readPowerSupply(deviceAddress))
+					parasite = true;
+
+				uint8_t b = getResolution(deviceAddress);
+				if (b > bitResolution) bitResolution = b;
 			}
 		}
 	}
-
 }
 
 // returns the number of devices found on the bus
@@ -118,7 +139,7 @@ uint8_t DallasTemperature::getDS18Count(void) {
 
 // returns true if address is valid
 bool DallasTemperature::validAddress(const uint8_t* deviceAddress) {
-	return (_wire->crc8(deviceAddress, 7) == deviceAddress[7]);
+	return (_wire->crc8(deviceAddress, 7) == deviceAddress[DSROM_CRC]);
 }
 
 // finds an address at a given index on the bus
@@ -152,7 +173,7 @@ bool DallasTemperature::isConnected(const uint8_t* deviceAddress) {
 bool DallasTemperature::isConnected(const uint8_t* deviceAddress,
 		uint8_t* scratchPad) {
 	bool b = readScratchPad(deviceAddress, scratchPad);
-	return b && (_wire->crc8(scratchPad, 8) == scratchPad[SCRATCHPAD_CRC]);
+	return b && !isAllZeros(scratchPad) && (_wire->crc8(scratchPad, 8) == scratchPad[SCRATCHPAD_CRC]);
 }
 
 bool DallasTemperature::readScratchPad(const uint8_t* deviceAddress,
@@ -197,33 +218,34 @@ void DallasTemperature::writeScratchPad(const uint8_t* deviceAddress,
 	_wire->write(scratchPad[LOW_ALARM_TEMP]); // low alarm temp
 
 	// DS1820 and DS18S20 have no configuration register
-	if (deviceAddress[0] != DS18S20MODEL)
+	if (deviceAddress[DSROM_FAMILY] != DS18S20MODEL)
 		_wire->write(scratchPad[CONFIGURATION]);
 
-	_wire->reset();
-
-	// save the newly written values to eeprom
-	_wire->select(deviceAddress);
-	_wire->write(COPYSCRATCH, parasite);
-	delay(20); // <--- added 20ms delay to allow 10ms long EEPROM write operation (as specified by datasheet)
-
-	if (parasite)
-		delay(10); // 10ms delay
-	_wire->reset();
-
+  if (autoSaveScratchPad)
+    saveScratchPad(deviceAddress);
+  else
+    _wire->reset();
 }
 
-bool DallasTemperature::readPowerSupply(const uint8_t* deviceAddress) {
-
-	bool ret = false;
+// returns true if parasite mode is used (2 wire)
+// returns false if normal mode is used (3 wire)
+// if no address is given (or nullptr) it checks if any device on the bus
+// uses parasite mode.
+// See issue #145
+bool DallasTemperature::readPowerSupply(const uint8_t* deviceAddress)
+{
+	bool parasiteMode = false;
 	_wire->reset();
-	_wire->select(deviceAddress);
+	if (deviceAddress == nullptr)
+		_wire->skip();
+	else
+		_wire->select(deviceAddress);
+
 	_wire->write(READPOWERSUPPLY);
 	if (_wire->read_bit() == 0)
-		ret = true;
+		parasiteMode = true;
 	_wire->reset();
-	return ret;
-
+	return parasiteMode;
 }
 
 // set resolution of all devices to 9, 10, 11, or 12 bits
@@ -232,74 +254,84 @@ void DallasTemperature::setResolution(uint8_t newResolution) {
 
 	bitResolution = constrain(newResolution, 9, 12);
 	DeviceAddress deviceAddress;
-	for (int i = 0; i < devices; i++) {
+	for (uint8_t i = 0; i < devices; i++) {
 		getAddress(deviceAddress, i);
 		setResolution(deviceAddress, bitResolution, true);
 	}
-
 }
 
+/*  PROPOSAL */
 
-//Mode	Resol	Conversion time
-//9 bits	0.5°C	93.75 ms
-//10 bits	0.25°C	187.5 ms
-//11 bits	0.125°C	375 ms
-//12 bits	0.0625°C	750 ms
 // set resolution of a device to 9, 10, 11, or 12 bits
 // if new resolution is out of range, 9 bits is used.
 bool DallasTemperature::setResolution(const uint8_t* deviceAddress,
-		uint8_t newResolution, bool skipGlobalBitResolutionCalculation) {
+                                      uint8_t newResolution, bool skipGlobalBitResolutionCalculation) {
 
-	// ensure same behavior as setResolution(uint8_t newResolution)
-	newResolution = constrain(newResolution, 9, 12);
+  bool success = false;
 
-	// return when stored value == new value
-	if (getResolution(deviceAddress) == newResolution)
-		return true;
+  // DS1820 and DS18S20 have no resolution configuration register
+  if (deviceAddress[DSROM_FAMILY] == DS18S20MODEL)
+  {
+    success = true;
+  }
+  else
+  {
 
-	ScratchPad scratchPad;
-	if (isConnected(deviceAddress, scratchPad)) {
+   // handle the sensors with configuration register
+    newResolution = constrain(newResolution, 9, 12);
+    uint8_t newValue = 0;
+    ScratchPad scratchPad;
 
-		// DS1820 and DS18S20 have no resolution configuration register
-		if (deviceAddress[0] != DS18S20MODEL) {
+    // we can only update the sensor if it is connected
+    if (isConnected(deviceAddress, scratchPad))
+    {
+      switch (newResolution) {
+        case 12:
+          newValue = TEMP_12_BIT;
+          break;
+        case 11:
+          newValue = TEMP_11_BIT;
+          break;
+        case 10:
+          newValue = TEMP_10_BIT;
+          break;
+        case 9:
+        default:
+          newValue = TEMP_9_BIT;
+          break;
+      }
 
-			switch (newResolution) {
-			case 12:
-				scratchPad[CONFIGURATION] = TEMP_12_BIT;
-				break;
-			case 11:
-				scratchPad[CONFIGURATION] = TEMP_11_BIT;
-				break;
-			case 10:
-				scratchPad[CONFIGURATION] = TEMP_10_BIT;
-				break;
-			case 9:
-			default:
-				scratchPad[CONFIGURATION] = TEMP_9_BIT;
-				break;
-			}
-			writeScratchPad(deviceAddress, scratchPad);
+      // if it needs to be updated we write the new value
+      if (scratchPad[CONFIGURATION] != newValue)
+      {
+		scratchPad[CONFIGURATION] = newValue;
+        writeScratchPad(deviceAddress, scratchPad);
+      }
+      // done
+      success = true;
+    }
+  }
 
-			// without calculation we can always set it to max
-			bitResolution = max(bitResolution, newResolution);
+  // do we need to update the max resolution used?
+  if (skipGlobalBitResolutionCalculation == false)
+  {
+    bitResolution = newResolution;
+    if (devices > 1)
+    {
+      for (uint8_t i = 0; i < devices; i++)
+      {
+        if (bitResolution == 12) break;
+        DeviceAddress deviceAddr;
+        getAddress(deviceAddr, i);
+        uint8_t b = getResolution(deviceAddr);
+        if (b > bitResolution) bitResolution = b;
+      }
+    }
+  }
 
-			if (!skipGlobalBitResolutionCalculation
-					&& (bitResolution > newResolution)) {
-				bitResolution = newResolution;
-				DeviceAddress deviceAddr;
-				for (int i = 0; i < devices; i++) {
-					getAddress(deviceAddr, i);
-					bitResolution = max(bitResolution,
-							getResolution(deviceAddr));
-				}
-			}
-		}
-		return true;  // new value set
-	}
-
-	return false;
-
+  return success;
 }
+
 
 // returns the global resolution
 uint8_t DallasTemperature::getResolution() {
@@ -311,7 +343,7 @@ uint8_t DallasTemperature::getResolution() {
 uint8_t DallasTemperature::getResolution(const uint8_t* deviceAddress) {
 
 	// DS1820 and DS18S20 have no resolution configuration register
-	if (deviceAddress[0] == DS18S20MODEL)
+	if (deviceAddress[DSROM_FAMILY] == DS18S20MODEL)
 		return 12;
 
 	ScratchPad scratchPad;
@@ -333,6 +365,7 @@ uint8_t DallasTemperature::getResolution(const uint8_t* deviceAddress) {
 	return 0;
 
 }
+
 
 // sets the value of the waitForConversion flag
 // TRUE : function requestTemperature() etc returns when conversion is ready
@@ -407,19 +440,21 @@ bool DallasTemperature::requestTemperaturesByAddress(
 // Continue to check if the IC has responded with a temperature
 void DallasTemperature::blockTillConversionComplete(uint8_t bitResolution) {
 
-	int delms = millisToWaitForConversion(bitResolution);
-	if (checkForConversion && !parasite) {
-		unsigned long now = millis();
-		while (!isConversionComplete() && (millis() - delms < now))
-			;
-	} else {
-		delay(delms);
-	}
+  if (checkForConversion && !parasite) {
+    unsigned long start = millis();
+    while (!isConversionComplete() && (millis() - start < MAX_CONVERSION_TIMEOUT ))
+      yield();
+  } else {
+    unsigned long delms = millisToWaitForConversion(bitResolution);
+    activateExternalPullup();
+    delay(delms);
+    deactivateExternalPullup();
+  }
 
 }
 
 // returns number of milliseconds to wait till conversion is complete (based on IC datasheet)
-int16_t DallasTemperature::millisToWaitForConversion(uint8_t bitResolution) {
+uint16_t DallasTemperature::millisToWaitForConversion(uint8_t bitResolution) {
 
 	switch (bitResolution) {
 	case 9:
@@ -432,6 +467,109 @@ int16_t DallasTemperature::millisToWaitForConversion(uint8_t bitResolution) {
 		return 750;
 	}
 
+}
+
+// returns number of milliseconds to wait till conversion is complete (based on IC datasheet)
+uint16_t DallasTemperature::millisToWaitForConversion() {
+  return millisToWaitForConversion(bitResolution);
+}
+
+// Sends command to one device to save values from scratchpad to EEPROM by index
+// Returns true if no errors were encountered, false indicates failure
+bool DallasTemperature::saveScratchPadByIndex(uint8_t deviceIndex) {
+  
+  DeviceAddress deviceAddress;
+  if (!getAddress(deviceAddress, deviceIndex)) return false;
+  
+  return saveScratchPad(deviceAddress);
+  
+}
+
+// Sends command to one or more devices to save values from scratchpad to EEPROM
+// If optional argument deviceAddress is omitted the command is send to all devices
+// Returns true if no errors were encountered, false indicates failure
+bool DallasTemperature::saveScratchPad(const uint8_t* deviceAddress) {
+  
+  if (_wire->reset() == 0)
+    return false;
+  
+  if (deviceAddress == nullptr)
+    _wire->skip();
+  else
+    _wire->select(deviceAddress);
+  
+  _wire->write(COPYSCRATCH,parasite);
+
+  // Specification: NV Write Cycle Time is typically 2ms, max 10ms
+  // Waiting 20ms to allow for sensors that take longer in practice
+  if (!parasite) {
+    delay(20);
+  } else {
+    activateExternalPullup();
+    delay(20);
+    deactivateExternalPullup();
+  }
+  
+  return _wire->reset() == 1;
+  
+}
+
+// Sends command to one device to recall values from EEPROM to scratchpad by index
+// Returns true if no errors were encountered, false indicates failure
+bool DallasTemperature::recallScratchPadByIndex(uint8_t deviceIndex) {
+
+  DeviceAddress deviceAddress;
+  if (!getAddress(deviceAddress, deviceIndex)) return false;
+  
+  return recallScratchPad(deviceAddress);
+
+}
+
+// Sends command to one or more devices to recall values from EEPROM to scratchpad
+// If optional argument deviceAddress is omitted the command is send to all devices
+// Returns true if no errors were encountered, false indicates failure
+bool DallasTemperature::recallScratchPad(const uint8_t* deviceAddress) {
+  
+  if (_wire->reset() == 0)
+    return false;
+  
+  if (deviceAddress == nullptr)
+    _wire->skip();
+  else
+    _wire->select(deviceAddress);
+  
+  _wire->write(RECALLSCRATCH,parasite);
+
+  // Specification: Strong pullup only needed when writing to EEPROM (and temp conversion)
+  unsigned long start = millis();
+  while (_wire->read_bit() == 0) {
+    // Datasheet doesn't specify typical/max duration, testing reveals typically within 1ms
+    if (millis() - start > 20) return false;
+    yield();
+  }
+  
+  return _wire->reset() == 1;
+  
+}
+
+// Sets the autoSaveScratchPad flag
+void DallasTemperature::setAutoSaveScratchPad(bool flag) {
+  autoSaveScratchPad = flag;
+}
+
+// Gets the autoSaveScratchPad flag
+bool DallasTemperature::getAutoSaveScratchPad() {
+  return autoSaveScratchPad;
+}
+
+void DallasTemperature::activateExternalPullup() {
+	if(useExternalPullup)
+		digitalWrite(pullupPin, LOW);
+}
+
+void DallasTemperature::deactivateExternalPullup() {
+	if(useExternalPullup)
+		digitalWrite(pullupPin, HIGH);
 }
 
 // sends command for one device to perform a temp conversion by index
@@ -451,9 +589,7 @@ float DallasTemperature::getTempCByIndex(uint8_t deviceIndex) {
 	if (!getAddress(deviceAddress, deviceIndex)) {
 		return DEVICE_DISCONNECTED_C;
 	}
-
 	return getTempC((uint8_t*) deviceAddress);
-
 }
 
 // Fetch temperature for device index
@@ -491,9 +627,9 @@ int16_t DallasTemperature::calculateTemperature(const uint8_t* deviceAddress,
 	 extended resolution temperature can then be calculated using the
 	 following equation:
 
-	 COUNT_PER_C - COUNT_REMAIN
+	                                  COUNT_PER_C - COUNT_REMAIN
 	 TEMPERATURE = TEMP_READ - 0.25 + --------------------------
-	 COUNT_PER_C
+	                                         COUNT_PER_C
 
 	 Hagai Shatz simplified this to integer arithmetic for a 12 bits
 	 value for a DS18S20, and James Cameron added legacy DS1820 support.
@@ -501,8 +637,8 @@ int16_t DallasTemperature::calculateTemperature(const uint8_t* deviceAddress,
 	 See - http://myarduinotoy.blogspot.co.uk/2013/02/12bit-result-from-ds18s20.html
 	 */
 
-	if (deviceAddress[0] == DS18S20MODEL) {
-		fpTemperature = ((fpTemperature & 0xfff0) << 3) - 16
+	if ((deviceAddress[DSROM_FAMILY] == DS18S20MODEL) && (scratchPad[COUNT_PER_C] != 0)) {
+		fpTemperature = ((fpTemperature & 0xfff0) << 3) - 32
 				+ (((scratchPad[COUNT_PER_C] - scratchPad[COUNT_REMAIN]) << 7)
 						/ scratchPad[COUNT_PER_C]);
 	}
@@ -591,12 +727,12 @@ void DallasTemperature::setUserDataByIndex(uint8_t deviceIndex, int16_t data) {
 
 // Convert float Celsius to Fahrenheit
 float DallasTemperature::toFahrenheit(float celsius) {
-	return (celsius * 1.8) + 32;
+	return (celsius * 1.8f) + 32.0f;
 }
 
 // Convert float Fahrenheit to Celsius
 float DallasTemperature::toCelsius(float fahrenheit) {
-	return (fahrenheit - 32) * 0.555555556;
+	return (fahrenheit - 32.0f) * 0.555555556f;
 }
 
 // convert from raw to Celsius
@@ -605,8 +741,21 @@ float DallasTemperature::rawToCelsius(int16_t raw) {
 	if (raw <= DEVICE_DISCONNECTED_RAW)
 		return DEVICE_DISCONNECTED_C;
 	// C = RAW/128
-	return (float) raw * 0.0078125;
+	return (float) raw * 0.0078125f;
 
+}
+
+// Convert from Celsius to raw returns temperature in raw integer format.
+// The rounding error in the conversion is smaller than 0.01°C
+// where the resolution of the sensor is at best 0.0625°C (in 12 bit mode).
+// Rounding error can be verified by running:
+//  for (float t=-55.; t<125.; t+=0.01)
+//  {
+//    Serial.println( DallasTemperature::rawToCelsius(DallasTemperature::celsiusToRaw(t))-t, 4 );
+//  }
+int16_t DallasTemperature::celsiusToRaw(float celsius) {
+
+    return static_cast<uint16_t>( celsius * 128.f );
 }
 
 // convert from raw to Fahrenheit
@@ -616,8 +765,19 @@ float DallasTemperature::rawToFahrenheit(int16_t raw) {
 		return DEVICE_DISCONNECTED_F;
 	// C = RAW/128
 	// F = (C*1.8)+32 = (RAW/128*1.8)+32 = (RAW*0.0140625)+32
-	return ((float) raw * 0.0140625) + 32;
+	return ((float) raw * 0.0140625f) + 32.0f;
 
+}
+
+// Returns true if all bytes of scratchPad are '\0'
+bool DallasTemperature::isAllZeros(const uint8_t * const scratchPad, const size_t length) {
+	for (size_t i = 0; i < length; i++) {
+		if (scratchPad[i] != 0) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 #if REQUIRESALARMS
