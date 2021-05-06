@@ -96,10 +96,10 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 
 
-#ifdef USE_BUILD_TYPE_ENERGY
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_PZEM004T_V3
-#endif
+// #ifdef USE_BUILD_TYPE_ENERGY
+//   #define USE_MODULE_ENERGY_INTERFACE
+//   #define USE_MODULE_ENERGY_PZEM004T_V3
+// #endif
 
 
 

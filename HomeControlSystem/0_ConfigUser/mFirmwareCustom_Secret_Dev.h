@@ -38,6 +38,7 @@
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
 // #define DEVICE_HVAC_BEDROOM
+#define DEVICE_BEDROOM_PZEM_TESTER
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -258,6 +259,54 @@
 
 #endif
 
+
+#ifdef DEVICE_BEDROOM_PZEM_TESTER
+  #define DEVICENAME_CTR          "bedroom_pzem"
+  #define DEVICENAME_FRIENDLY_CTR "Bedroom PZEM Tester"
+  #define ESP32
+    
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_PZEM004T_V3
+  #define USE_DEVFEATURE_ENABLE_PZEM004T_SERIAL2
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "[192,168,1,25]"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+      "]"  
+    "}"
+  "}";
+
+#endif
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_LIGHTING == RGB Lighting] ----------------------------
@@ -640,7 +689,7 @@
   #define DISABLE_WEBSERVER
   
   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
   #define USE_MODULE_CONTROLLER_HVAC
@@ -782,7 +831,7 @@
    
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
-  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
   #define ENABLE_DEBUG_DELAYS
 
@@ -1302,6 +1351,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+
   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
@@ -1309,8 +1359,10 @@
   // #define DISABLE_WEBSERVER 
 
   #define ENABLE_DEVFEATURE_DEBUG_GET_PIXEL_ZERO
-
   #define ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+  // #define ENABLE_DEVFEATURE_BASIC_NEOPIXEL_TEST
 
   //   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
 
@@ -1320,12 +1372,12 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+      "\"23\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
     "},"
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 50//100//256
+  #define STRIP_SIZE_MAX 48//100//256
   // #define STRIP_REPEAT_OUTPUT_MAX 256
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1334,8 +1386,8 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":400,"
-      "\"" D_JSON_RATE_MS "\":100,"
+      "\"" D_JSON_TIME_MS "\":2000,"
+      "\"" D_JSON_RATE_MS "\":5000,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
@@ -1344,7 +1396,7 @@
       "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
     "},"
     "\"ColourPalette\":\"Single Fire 01\","
-    "\"BrightnessRGB\":1"
+    "\"BrightnessRGB\":20"
   "}";
 
 // "{HardwareType":"WS28XX","Transition":{"TimeMs":400,"RateMs":100,"PixelUpdatePerc":10,"Order":"Random"},"AnimationMode":"Effects","Effects":{"Function":"FirePlace01"},"ColourPalette":"Single Fire 01","BrightnessRGB":5}
@@ -3791,7 +3843,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
-  #define ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   #define ESP32
 

@@ -53,6 +53,10 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #endif
 
+// Enable special debugs that trigger only regions
+// #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+
 #define ENABLE_LOG
 
 #ifdef ESP8266

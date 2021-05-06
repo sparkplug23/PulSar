@@ -87,6 +87,7 @@ public:
   inline bool isNum(void) const     { return (t->type >= JSMN_FLOAT) && (t->type <= JSMN_UINT); }
   inline bool isObject(void) const  { return (t->type == JSMN_OBJECT); }
   inline bool isArray(void) const   { return (t->type == JSMN_ARRAY); }
+  inline bool getType(void) const   { return t->type; }
 
   // move to token immediately after in the buffer
   void nextOne(void) { if (t->type != JSMN_INVALID) { t++; } }

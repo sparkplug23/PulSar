@@ -1,7 +1,7 @@
 /*
   TasmotaSerial.h - Implementation of software serial with hardware serial fallback for Tasmota
 
-  Copyright (C) 2020  Theo Arends
+  Copyright (C) 2021  Theo Arends
 
   This library is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -28,13 +28,6 @@
 #define TM_SERIAL_BAUDRATE           9600   // Default baudrate
 #define TM_SERIAL_BUFFER_SIZE        64     // Receive buffer size
 
-#include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
-#ifndef ARDUINO_ESP8266_RELEASE_2_3_0
-
-//DEBUG_ISSUE
-  #define TM_SERIAL_USE_IRAM                // Enable to use iram (+368 bytes)
-#endif
-
 #include <inttypes.h>
 #include <Stream.h>
 
@@ -42,24 +35,22 @@
 #include <HardwareSerial.h>
 #endif
 
-// #define ESP8266 //added by me
-
 class TasmotaSerial : public Stream {
   public:
     TasmotaSerial(int receive_pin, int transmit_pin, int hardware_fallback = 0, int nwmode = 0, int buffer_size = TM_SERIAL_BUFFER_SIZE);
     virtual ~TasmotaSerial();
 
-    bool begin(long speed, int stop_bits = 1);
-    bool begin();
-    bool hardwareSerial();
-    int peek();
+    bool begin(uint32_t speed = TM_SERIAL_BAUDRATE, uint32_t config = SERIAL_8N1);
+    bool hardwareSerial(void);
+    int peek(void);
 
-    virtual size_t write(uint8_t byte);
-    virtual int read();
-    virtual int available();
-    virtual void flush();
+    size_t write(uint8_t byte) override;
+    int read(void) override;
+    size_t read(char* buffer, size_t size);
+    int available(void) override;
+    void flush(void) override;
 
-    void rxRead();
+    void rxRead(void);
 
     uint32_t getLoopReadMetric(void) const { return m_bit_follow_metric; }
 

@@ -144,8 +144,10 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
 
   switch(transceive_mode)
   {
-    default:
+    default: // Restart new reading
     case TRANSCEIVE_REQUEST_READING_ID:
+    case TRANSCEIVE_RESPONSE_TIMEOUT_ID:
+    case TRANSCEIVE_RESPONSE_SUCCESS_ID:
 
       stats.start_time = millis();
       modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
@@ -169,7 +171,7 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
           AddLog(LOG_LEVEL_DEBUG_MORE, "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
           // if(modbus_buffer[0] == pCONT_iEnergy->address[device_id][3]){
-            AddLog(LOG_LEVEL_DEBUG_MORE, "Read SUCCESS");
+            AddLog(LOG_LEVEL_DEBUG, PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
             ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
             stats.success_reads++;
             stats.end_time = millis();
@@ -225,71 +227,31 @@ void mEnergyPZEM004T::ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer){
 
 void mEnergyPZEM004T::EveryLoop(){
 
-  if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms)){
+  if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms))
+  {
 
-    // transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
-    // AddLog(LOG_LEVEL_TEST, PSTR("mEnergyPZEM004T::EveryLoop \t%d"),millis());
+    SplitTask_UpdateSensor(active_sensor);
 
-    // uint32_t timeout = millis();
-    // for(
-      uint8_t sensor_id=0; //sensor_id<pCONT_iEnergy->Energy.phase_count; sensor_id++)
-    // {
-      // while(transceive_mode != TRANSCEIVE_RESPONSE_SUCCESS_ID)
-      // {
-        
-          // transceive_mode = TRANSCEIVE_REQUEST_READING_ID; // Restart
+    if(labs(millis()-timeout)>200)
+    {
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
+      transceive_mode = TRANSCEIVE_RESPONSE_TIMEOUT_ID;
+      timeout = millis();
+      stats.timeout_reads++;
+    }
 
-      //   if(transceive_mode == TRANSCEIVE_REQUEST_READING_ID)
-      // {
-      //   timeout = millis();
-      // }
-      // if(labs(millis()-timeout)>1000)
-      // {
-      //  transceive_mode = TRANSCEIVE_REQUEST_READING_ID; 
-      // }
-
-        SplitTask_UpdateSensor(active_sensor);
-
-        if(labs(millis()-timeout)>200)
-        {
-          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
-          transceive_mode = TRANSCEIVE_RESPONSE_SUCCESS_ID;
-          timeout = millis();
-          stats.timeout_reads++;
-        }
-
-        if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
-        {
-          // If needed, advance to next sensor
-          if(active_sensor < pCONT_iEnergy->Energy.phase_count-1)
-          {
-            active_sensor++;
-          }
-          else
-          {
-            active_sensor = 0; // reset to start or remain on single sensor 
-          }
-        }
-
-
-        // Failure
-        // if((transceive_mode == TRANSCEIVE_RESPONSE_TIMEOUT_ID)||(transceive_mode == TRANSCEIVE_RESPONSE_ERROR_ID))
-        // {
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR("TRANSCEIVE_RESPONSE_TIMEOUT_ID %d"), transceive_mode);
-        //   transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
-        //   measure_time.millis = millis(); // Reset for backoff
-        //   // break;
-        // }
-
-        // if(labs(millis()-data_modbus[sensor_id].measured_time)>(settings.rate_measure_ms+100))
-        // {
-        //   transceive_mode = TRANSCEIVE_REQUEST_READING_ID; // Restart
-        // }
-
-      // } 
-    // } // END for
-
-    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
+    {
+      // If needed, advance to next sensor
+      if(active_sensor < pCONT_iEnergy->Energy.phase_count)
+      {
+        // active_sensor++;
+      }
+      else
+      {
+        active_sensor = 0; // reset to start or remain on single sensor 
+      }
+    }
 
   }
 

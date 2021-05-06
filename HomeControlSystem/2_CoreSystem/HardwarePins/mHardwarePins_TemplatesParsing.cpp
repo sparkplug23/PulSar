@@ -4,7 +4,7 @@
  * Temporary file for copying over functions as I completely redo
  * */
 
-#ifdef EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+// #ifdef EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
 /**
  * @brief Function reads templates from progmem if available, then calls TemplateParser
@@ -21,12 +21,12 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
     // Read into local
     memcpy_P(buffer,MODULE_TEMPLATE,sizeof(MODULE_TEMPLATE));
 
-    #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+    #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
     AddLog(LOG_LEVEL_DEBUG, PSTR("Load = \"%s\""), buffer);
     #endif // ENABLE_LOG_LEVEL_INFO
-    #endif // ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+    #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
     ModuleTemplateJsonParser(buffer);
     return true;
@@ -110,7 +110,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
           // FULL pin list
           // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
           
-          #ifdef ENABLE_LOG_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+          #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
           AddLog(LOG_LEVEL_INFO, PSTR("hardware.gp.io[real%d/index%d] = gpio function %d SET"), 
             real_pin, 
             index_pin,
@@ -159,17 +159,21 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   // for(int i=0;i<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);i++){ dest[i] = i; }
   // Create a source copy too
   uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
+  
+  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   AddLog(LOG_LEVEL_DEBUG, PSTR("src size =%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
-
   AddLog(LOG_LEVEL_DEBUG, PSTR("pCONT_set->Settings.module =%d"),pCONT_set->Settings.module);
+  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   // Check if active module is simply a user_module, requiring no template reads
   if (pCONT_set->Settings.module == USER_MODULE) {
     // Simply read the user_configured gpio, skipping any progmem templates
     memcpy(&src, &pCONT_set->Settings.user_template2.hardware.gp, sizeof(mycfgio));
+    #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs Loading from user_template2"));
     #endif // ENABLE_LOG_LEVEL_INFO
+    #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   } 
   // Read templates from progmem, these will differ by esp8266, esp8285 and esp32
   else {
@@ -189,24 +193,30 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   }
 
   // For extensive debugging, print the source and destination before copying
+  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   AddLog_Array(LOG_LEVEL_TEST, PSTR("TemplateGPIO:src"), src,  ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
   AddLog_Array(LOG_LEVEL_TEST, PSTR("TemplateGPIO:dst"), dest, ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   uint8_t j = 0;
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io); i++) {    
     dest[j] = src[i];    
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Copying %d\ti%d\tp%d\t%d\ti%d"), dest[j],j, ConvertIndexPinToRealPin(dest[i]), src[i],i);
 
-
+    
+    #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     AddLog(LOG_LEVEL_DEBUG, PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), 
       dest[j],j, 
       i, ConvertIndexPinToRealPin(i)
       );
+    #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
     j++;
   }
 
+  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   AddLog_Array(LOG_LEVEL_TEST, PSTR("TemplateGPIO:dst2"), dest, ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
 }
 
@@ -264,8 +274,10 @@ void mHardwarePins::GpioInit(void)
   myio def_gp;
   TemplateGPIOs(&def_gp); // Get template values
 
+  #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
+  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) { //all pins
     
@@ -286,15 +298,18 @@ void mHardwarePins::GpioInit(void)
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
-    #endif // ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
+      #endif // ENABLE_LOG_LEVEL_INFO
     }
 
     // Set any pins set in template
     if ((def_gp.io[i] >= GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) { //ADDED >= to also copy NONE 
       pCONT_set->my_module.io[i] = def_gp.io[i];
-    #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+      if(pCONT_set->my_module.io[i] > GPIO_NONE_ID){
+      #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+      #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
         pCONT_set->my_module.io[i],
         def_gp.io[i],
@@ -302,7 +317,10 @@ void mHardwarePins::GpioInit(void)
         ConvertIndexPinToRealPin(i),
         GetGPIOFunctionNamebyID_P(pCONT_set->my_module.io[i])
       );
-    #endif // ENABLE_LOG_LEVEL_INFO
+      #endif // ENABLE_LOG_LEVEL_INFO
+      #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+      }
+      #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     }
     else{
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
@@ -675,4 +693,4 @@ void mHardwarePins::GpioInit(void)
 
 
 
-#endif // EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+// #endif // EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP

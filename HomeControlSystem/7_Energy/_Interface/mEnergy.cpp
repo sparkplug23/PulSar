@@ -105,6 +105,149 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
   
 }
 
+
+/**
+ * Init the default values, these will be configured before reading templates
+ * */
+void mEnergyInterface::Settings_Default()
+{
+  pCONT_iEnergy->Energy.phase_count = 1;
+  
+  for(int ii=0;ii<12;ii++)
+  {
+    address[ii][0] = 192;
+    address[ii][1] = 168;
+    address[ii][2] = 1;
+    address[ii][3] = 25;
+  }
+  
+  // name_buffer = &pCONT_set->Settings.energy_usage.name_buffer[0];
+
+  // uint8_t buffer_length = 0;
+  // // memset(name_buffer,0,sizeof(name_buffer));
+  // // for(int ii=0;ii<8;ii++){
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Mains"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Cooker"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Immersion"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","TumbleDryer"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Garage"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Shower"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Sockets"); 
+  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Kitchen"); 
+  // // }
+
+
+}
+
+
+// void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
+
+//   JsonParserToken jtok = 0; 
+//   int8_t tmp_id = 0;
+
+//   // Using a desired address, the sensor is searched for, then index (id) is updated
+//   // if(jtok = obj["Set"].getObject()[""]){
+     
+//   //   JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR];
+      
+//   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
+//   //   #endif // LOG_LEVEL_COMMANDS
+    
+//   //   uint8_t address_temp[8];
+//   //   uint8_t address_index = 0;
+//   //   uint8_t original_device_id = 0;
+    
+//   //   for(auto group_iter : array_group) {
+
+//   //     JsonParserArray array_sensor_address_iter = group_iter;
+//   //     memset(address_temp,0,sizeof(address_temp));
+//   //     address_index = 0;            
+//   //     for(auto address_id : array_sensor_address_iter) {
+//   //       int address = address_id.getInt();
+//   //       // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
+//   //       //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
+//   //       // #endif
+//   //       address_temp[address_index++] = address;
+//   //       // if(address_index>7){ break; } //error!
+//   //     }
+//   //     AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)4);
+//   //     SetIDWithAddress(original_device_id++, address_temp, address_index);
+
+//   //   }
+     
+//   // }
+
+// }
+
+
+
+void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  // Using a desired address, the sensor is searched for, then index (id) is updated
+  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR]){
+     
+    JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR];
+      
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
+    #endif // LOG_LEVEL_COMMANDS
+    
+    uint8_t address_temp[8];
+    uint8_t address_index = 0;
+    uint8_t original_device_id = 0;
+
+    uint8_t device_count = array_group.size();
+      // SetEnergyDeviceCount(device_count);
+    
+    for(auto group_iter : array_group) {
+
+      JsonParserArray array_sensor_address_iter = group_iter;
+      memset(address_temp,0,sizeof(address_temp));
+      address_index = 0;            
+      for(auto address_id : array_sensor_address_iter) {
+        int address = address_id.getInt();
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
+        //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
+        // #endif
+        address_temp[address_index++] = address;
+        // if(address_index>7){ break; } //error!
+      }
+      AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)4);
+      SetIDWithAddress(original_device_id++, address_temp, address_index);
+
+    }
+     
+  }
+
+}
+
+
+void mEnergyInterface::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_save, uint8_t address_length)
+{
+  
+  for(int ii=0;ii<address_length;ii++){
+    
+    address[address_id][ii] = address_to_save[ii];
+
+  }
+
+}
+
+
+void mEnergyInterface::SetEnergyDeviceCount(uint8_t address_length)
+{
+
+  pCONT_iEnergy->Energy.phase_count = address_length;
+
+  AddLog(LOG_LEVEL_TEST, PSTR("settings.found=%d"),pCONT_iEnergy->Energy.phase_count);
+
+}
+
+
 // /*********************************************************************************************\
 //  * Energy
 // \*********************************************************************************************/
@@ -458,6 +601,17 @@ void mEnergyInterface::EnergyEverySecond(void)
   //     SetAllPower(POWER_ALL_OFF, SRC_OVERTEMP);
   //   }
   // }
+  
+  for (uint32_t phase = 0; phase < Energy.phase_count; phase++) {
+        // Move into energy module
+        pCONT_iEnergy->Energy.voltage[phase]       = pCONT_pzem->data_modbus[phase].voltage;   
+        pCONT_iEnergy->Energy.current[phase]       = pCONT_pzem->data_modbus[phase].current;  
+        pCONT_iEnergy->Energy.active_power[phase]  = pCONT_pzem->data_modbus[phase].active_power; 
+        pCONT_iEnergy->Energy.frequency[phase]     = pCONT_pzem->data_modbus[phase].frequency;  
+        pCONT_iEnergy->Energy.power_factor[phase]  = pCONT_pzem->data_modbus[phase].power_factor;  
+        pCONT_iEnergy->Energy.energy2[phase]       = pCONT_pzem->data_modbus[phase].energy;  
+
+  }
   
   // Invalid data reset
   uint32_t data_valid = Energy.phase_count;
@@ -1025,24 +1179,6 @@ void mEnergyInterface::Settings_Load(){
 
 }
 
-void mEnergyInterface::Settings_Default(){
-  
-  // name_buffer = &pCONT_set->Settings.energy_usage.name_buffer[0];
-
-  // uint8_t buffer_length = 0;
-  // // memset(name_buffer,0,sizeof(name_buffer));
-  // // for(int ii=0;ii<8;ii++){
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Mains"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Cooker"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Immersion"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","TumbleDryer"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Garage"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Shower"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Sockets"); 
-  //   buffer_length+=sprintf(name_buffer+buffer_length,"%s|","Kitchen"); 
-  // // }
-
-}
 
 void mEnergyInterface::Settings_Save(){
 
@@ -1062,6 +1198,9 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
   switch(function){
     case FUNC_PRE_INIT:
       // Pre_Init();
+    break;
+    case FUNC_SETTINGS_DEFAULT:
+      Settings_Default();
     break;
   }
 
@@ -1114,6 +1253,21 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_MIDNIGHT:
     
     break;
+
+
+    case FUNC_SENSOR_UPDATED:
+
+//recalculate energy
+
+    break;
+
+
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break; 
     /************
      * WEBPAGE SECTION * 
     *******************/
@@ -1201,19 +1355,19 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
       JsonBuilderI->Level_Start();
         JsonBuilderI->Add("id",count++);
         //add for flag, to highlight row where power is "in use"/high
-        if(pCONT_pzem->pzem_modbus[device].active_power>30){
+        if(pCONT_pzem->data_modbus[device].active_power>30){
           JsonBuilderI->Add("fc","#ff0000");
         }else{
           JsonBuilderI->Add("fc","#ffffff");
         }
         // JsonBuilderI->Add_FV("ih","\"c%d d%d\"", count-1, device);
         switch(row){
-          case 0: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].voltage); break;
-          case 1: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].current); break;
-          case 2: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].active_power); break;
-          case 3: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].frequency); break;
-          case 4: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].power_factor); break;
-          case 5: JsonBuilderI->Add("ih",pCONT_pzem->pzem_modbus[device].energy); break;
+          case 0: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].voltage); break;
+          case 1: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].current); break;
+          case 2: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].active_power); break;
+          case 3: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].frequency); break;
+          case 4: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].power_factor); break;
+          case 5: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].energy); break;
         } //switch      
       JsonBuilderI->Level_End();
     }
@@ -1306,6 +1460,18 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Start();
 
     // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
+    
+    JBI->Level_Start("Address");
+    for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
+    {
+      JBI->Array_Start_P(PSTR("device%d"), ii);
+        for(int i=0;i<4;i++)
+        {
+          JBI->Add(address[ii][i]);
+        }
+      JBI->Array_End();
+    }
+    JBI->Level_End();
   
   return JsonBuilderI->End();
 

@@ -65,6 +65,10 @@ class mEnergyInterface :
     
 // int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
+    void SetIDWithAddress(uint8_t address_id, uint8_t* address_to_save, uint8_t address_length);
+    uint8_t address[MAX_ENERGY_SENSORS][4];// = {{0},{0}};
+    void SetEnergyDeviceCount(uint8_t address_length);
+    
 
     #ifdef ENABLE_PARAMETER_THRESHOLDS
 
@@ -188,7 +192,7 @@ void Settings_Save();
       uint8_t command_code = 0;
       uint8_t data_valid[MAX_ENERGY_SENSORS];// = { 0, 0, 0 };
 
-      uint8_t phase_count = 1;                      // Number of phases active
+      uint8_t phase_count = 0;                      // Number of phases active
       bool voltage_common = false;                  // Use single voltage and frequency
 
       bool voltage_available = true;                // Enable if voltage is measured
@@ -263,6 +267,8 @@ void Settings_Save();
   #endif
   void EnergyEverySecond(void);
   void EnergyCommandCalResponse(uint32_t nvalue);
+  
+  void parse_JSONCommand(JsonParserObject obj);
 
   // Commands
   void CmndEnergyReset(void);

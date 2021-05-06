@@ -186,15 +186,15 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // Default user names for palette
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID);ii++){ 
     sprintf(buffer, "User Test %02d", ii);
-    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID);ii++){ 
     sprintf(buffer, "Solid Rgbcct %02d", ii);
-    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
   for (int ii=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID);ii++){ 
     sprintf(buffer, "Encoded %02d", ii);
-    pCONT_set->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
 
   #ifdef USE_MODULE_LIGHTS_PWM

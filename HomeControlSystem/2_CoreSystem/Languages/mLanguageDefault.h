@@ -1381,6 +1381,7 @@
 #define D_JSON_ALTITUDE "altitude"
 #define D_JSON_AGE "age"
 #define D_JSON_ANY "Any"
+#define D_JSON_ACTIVE_POWER "ActivePower"
 #define D_JSON_CCT_PERCENTAGE "CCT_TempPercentage"
 #define D_JSON_CCT_TEMP "CCT_Temp"
 
@@ -1511,6 +1512,8 @@
 
 #define D_JSON_PIXELS_UPDATE_NUMBER "PixelUpdateNum"
 #define D_JSON_PIXELS_UPDATE_PERCENTAGE "PixelUpdatePerc"
+
+#define D_JSON_POWER_FACTOR "PowerFactor"
 
 #define D_JSON_PIXELNUM "pixelnum"
 #define D_JSON_PULSER "pulser"

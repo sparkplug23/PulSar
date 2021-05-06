@@ -68,7 +68,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
           for(uint8_t id =0;id<arr.size();id++){
             jtok = arr[id];
             const char* device_name_ctr = jtok.getStr();
-            // pCONT_set->AddDeviceName(device_name_ctr,module_id,device_count++);
+            // DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             #ifdef ENABLE_LOG_LEVEL_COMMANDS
             AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 

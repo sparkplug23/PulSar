@@ -496,7 +496,7 @@ void mSensorsDB18::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
 
   // Using a desired address, the sensor is searched for, then index (id) is updated
-  if(jtok = obj[PM_JSON_SENSORADDRESS]){
+  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR]){
      
     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
       

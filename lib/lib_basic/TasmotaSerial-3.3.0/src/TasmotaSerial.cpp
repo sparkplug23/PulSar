@@ -1,7 +1,7 @@
 /*
   TasmotaSerial.cpp - Implementation of software serial with hardware serial fallback for Tasmota
 
-  Copyright (C) 2020  Theo Arends
+  Copyright (C) 2021  Theo Arends
 
   This library is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -29,66 +29,26 @@ extern "C" {
 
 #ifdef ESP8266
 
-// for STAGE and pre-2.6, we can have a single wrapper using attachInterruptArg()
-void ICACHE_RAM_ATTR callRxRead(void *self) { ((TasmotaSerial*)self)->rxRead(); };
+void IRAM_ATTR callRxRead(void *self) { ((TasmotaSerial*)self)->rxRead(); };
 
 // As the Arduino attachInterrupt has no parameter, lists of objects
 // and callbacks corresponding to each possible GPIO pins have to be defined
 TasmotaSerial *tms_obj_list[16];
 
-#ifdef TM_SERIAL_USE_IRAM
-void ICACHE_RAM_ATTR tms_isr_0() { tms_obj_list[0]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_1() { tms_obj_list[1]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_2() { tms_obj_list[2]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_3() { tms_obj_list[3]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_4() { tms_obj_list[4]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_5() { tms_obj_list[5]->rxRead(); };
-// Pin 6 to 11 can not be used
-void ICACHE_RAM_ATTR tms_isr_12() { tms_obj_list[12]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_13() { tms_obj_list[13]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_14() { tms_obj_list[14]->rxRead(); };
-void ICACHE_RAM_ATTR tms_isr_15() { tms_obj_list[15]->rxRead(); };
-#else
-void tms_isr_0() { tms_obj_list[0]->rxRead(); };
-void tms_isr_1() { tms_obj_list[1]->rxRead(); };
-void tms_isr_2() { tms_obj_list[2]->rxRead(); };
-void tms_isr_3() { tms_obj_list[3]->rxRead(); };
-void tms_isr_4() { tms_obj_list[4]->rxRead(); };
-void tms_isr_5() { tms_obj_list[5]->rxRead(); };
-// Pin 6 to 11 can not be used
-void tms_isr_12() { tms_obj_list[12]->rxRead(); };
-void tms_isr_13() { tms_obj_list[13]->rxRead(); };
-void tms_isr_14() { tms_obj_list[14]->rxRead(); };
-void tms_isr_15() { tms_obj_list[15]->rxRead(); };
-#endif  // TM_SERIAL_USE_IRAM
-
-static void (*ISRList[16])() = {
-      tms_isr_0,
-      tms_isr_1,
-      tms_isr_2,
-      tms_isr_3,
-      tms_isr_4,
-      tms_isr_5,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      tms_isr_12,
-      tms_isr_13,
-      tms_isr_14,
-      tms_isr_15
-};
-
-#else  // ESP32
-
-  static int tasmota_serial_index = 2;  // Allow UART2 and UART1 only
-
 #endif  // ESP8266
+#ifdef ESP32
 
-TasmotaSerial::TasmotaSerial(int receive_pin, int transmit_pin, int hardware_fallback, int nwmode, int buffer_size)
-{
+#if CONFIG_IDF_TARGET_ESP32           // ESP32/PICO-D4
+static int tasmota_serial_index = 2;  // Allow UART2 and UART1 only
+#elif CONFIG_IDF_TARGET_ESP32S2       // ESP32-S2
+static int tasmota_serial_index = 1;  // Allow UART1 only
+#elif CONFIG_IDF_TARGET_ESP32C3       // ESP32-C3
+static int tasmota_serial_index = 1;  // Allow UART1 only
+#endif
+
+#endif  // ESP32
+
+TasmotaSerial::TasmotaSerial(int receive_pin, int transmit_pin, int hardware_fallback, int nwmode, int buffer_size) {
   m_valid = false;
   m_hardserial = false;
   m_hardswap = false;
@@ -110,6 +70,7 @@ TasmotaSerial::TasmotaSerial(int receive_pin, int transmit_pin, int hardware_fal
     m_hardswap = true;
   }
   else {
+    if ((m_rx_pin < 0) && (m_tx_pin < 0)) { return; }
     if (m_rx_pin > -1) {
       m_buffer = (uint8_t*)malloc(serial_buffer_size);
       if (m_buffer == NULL) return;
@@ -118,26 +79,22 @@ TasmotaSerial::TasmotaSerial(int receive_pin, int transmit_pin, int hardware_fal
       m_bit_start_time = m_bit_time + m_bit_time/3 - 500; // pre-compute first wait
       pinMode(m_rx_pin, INPUT);
       tms_obj_list[m_rx_pin] = this;
-#if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_2) || defined(ARDUINO_ESP8266_RELEASE_2_5_2)
-      attachInterrupt(m_rx_pin, ISRList[m_rx_pin], (m_nwmode) ? CHANGE : FALLING);
-#else
       attachInterruptArg(m_rx_pin, callRxRead, this, (m_nwmode) ? CHANGE : FALLING);
-#endif
     }
     if (m_tx_pin > -1) {
       pinMode(m_tx_pin, OUTPUT);
       digitalWrite(m_tx_pin, HIGH);
     }
   }
-#else  // ESP32
+#endif  // ESP8266
+#ifdef ESP32
   if (transmit_pin > 33) { return; }  // GPIO34 - GPIO39 are Input only
   m_hardserial = true;
-#endif  // ESP8266 - ESP32
+#endif  // ESP32
   m_valid = true;
 }
 
-TasmotaSerial::~TasmotaSerial()
-{
+TasmotaSerial::~TasmotaSerial(void) {
 #ifdef ESP8266
   if (!m_hardserial) {
     if (m_rx_pin > -1) {
@@ -149,64 +106,61 @@ TasmotaSerial::~TasmotaSerial()
     }
   }
 #endif  // ESP8266
+
+#ifdef ESP32
+  TSerial->end();
+  tasmota_serial_index++;
+#endif  // ESP32
 }
 
-bool TasmotaSerial::isValidGPIOpin(int pin)
-{
+bool TasmotaSerial::isValidGPIOpin(int pin) {
   return (pin >= -1 && pin <= 5) || (pin >= 12 && pin <= 15);
 }
 
+bool TasmotaSerial::begin(uint32_t speed, uint32_t config) {
+  if (!m_valid) { return false; }
+  if (config > 2) {
+    // Legacy support where software serial fakes two stop bits if either stop bits is 2 or parity is not None
+    m_stop_bits = ((config &0x30) >> 5) +1;
+    if ((1 == m_stop_bits) && (config &0x03)) {
+      m_stop_bits++;
+    }
+  } else {
+    m_stop_bits = ((config -1) &1) +1;
+#ifdef ESP8266
+    config = (2 == m_stop_bits) ? (uint32_t)SERIAL_8N2 : (uint32_t)SERIAL_8N1;
+#endif  // ESP8266
+#ifdef ESP32
+    config = (2 == m_stop_bits) ? SERIAL_8N2 : SERIAL_8N1;
+#endif  // ESP32
+  }
 
-  #define DEBUG_LINE_LED    pinMode(D4,OUTPUT);\
-                            digitalWrite(D4,LOW);\
-                            delay(500);\
-                            digitalWrite(D4,HIGH);\
-                            delay(500);\
-                            digitalWrite(D4,LOW);\
-                            delay(500);\
-                            digitalWrite(D4,HIGH);\
-                            delay(500);\
-                            digitalWrite(D4,LOW);\
-                            delay(500);\
-                            digitalWrite(D4,HIGH);\
-                            delay(500);\
-                            digitalWrite(D4,LOW);\
-                            delay(500);\
-                            digitalWrite(D4,HIGH);
-
-bool TasmotaSerial::begin(long speed, int stop_bits) {
-  m_stop_bits = ((stop_bits -1) &1) +1;
   if (m_hardserial) {
 #ifdef ESP8266
     Serial.flush();
-    if (2 == m_stop_bits) {
-      Serial.begin(speed, SERIAL_8N2);
-    } else {
-      Serial.begin(speed, SERIAL_8N1);
-    }
+    Serial.begin(speed, (SerialConfig)config);
     if (m_hardswap) {
       Serial.swap();
     }
-#else  // ESP32
+    if (serial_buffer_size > 256) {
+      Serial.setRxBufferSize(serial_buffer_size);
+    }
+#endif  // ESP8266
+#ifdef ESP32
     if (tasmota_serial_index > 0) {  // We only support UART1 and UART2 and keep UART0 for debugging
       m_uart = tasmota_serial_index;
       tasmota_serial_index--;
       TSerial = new HardwareSerial(m_uart);
+      TSerial->begin(speed, config, m_rx_pin, m_tx_pin);
       if (serial_buffer_size > 256) {
         TSerial->setRxBufferSize(serial_buffer_size);
-      }
-      if (2 == m_stop_bits) {
-        TSerial->begin(speed, SERIAL_8N2, m_rx_pin, m_tx_pin);
-      } else {
-        TSerial->begin(speed, SERIAL_8N1, m_rx_pin, m_tx_pin);
       }
     } else {
       m_valid = false;
     }
 //    Serial.printf("TSR: Using UART%d\n", m_uart);
-#endif  // ESP8266 - ESP32
+#endif  // ESP32
   } else {
-    //DEBUG_LINE_LED;
     // Use getCycleCount() loop to get as exact timing as possible
     m_bit_time = ESP.getCpuFreqMHz() * 1000000 / speed;
     m_bit_start_time = m_bit_time + m_bit_time/3 - (ESP.getCpuFreqMHz() > 120 ? 700 : 500); // pre-compute first wait
@@ -216,51 +170,51 @@ bool TasmotaSerial::begin(long speed, int stop_bits) {
   return m_valid;
 }
 
-bool TasmotaSerial::begin() {
-  return begin(TM_SERIAL_BAUDRATE);
-}
-
-bool TasmotaSerial::hardwareSerial() {
+bool TasmotaSerial::hardwareSerial(void) {
 #ifdef ESP8266
   return m_hardserial;
-#else
+#endif  // ESP8266
+#ifdef ESP32
   return false;  // On ESP32 do not mess with Serial0 buffers
-#endif
+#endif  // ESP32
 }
 
-void TasmotaSerial::flush() {
+void TasmotaSerial::flush(void) {
   if (m_hardserial) {
 #ifdef ESP8266
     Serial.flush();
-#else
-    TSerial->flush();
-#endif
+#endif  // ESP8266
+#ifdef ESP32
+    TSerial->flush();  // Flushes Tx only https://github.com/espressif/arduino-esp32/pull/4263
+    while (TSerial->available()) { TSerial->read(); }
+#endif  // ESP32
   } else {
     m_in_pos = m_out_pos = 0;
   }
 }
 
-int TasmotaSerial::peek() {
+int TasmotaSerial::peek(void) {
   if (m_hardserial) {
 #ifdef ESP8266
     return Serial.peek();
-#else
+#endif  // ESP8266
+#ifdef ESP32
     return TSerial->peek();
-#endif
+#endif  // ESP32
   } else {
     if ((-1 == m_rx_pin) || (m_in_pos == m_out_pos)) return -1;
     return m_buffer[m_out_pos];
   }
 }
 
-int TasmotaSerial::read()
-{
+int TasmotaSerial::read(void) {
   if (m_hardserial) {
 #ifdef ESP8266
     return Serial.read();
-#else
+#endif  // ESP8266
+#ifdef ESP32
     return TSerial->read();
-#endif
+#endif  // ESP32
   } else {
     if ((-1 == m_rx_pin) || (m_in_pos == m_out_pos)) return -1;
     uint32_t ch = m_buffer[m_out_pos];
@@ -269,14 +223,33 @@ int TasmotaSerial::read()
   }
 }
 
-int TasmotaSerial::available()
-{
+size_t TasmotaSerial::read(char* buffer, size_t size) {
+  if (m_hardserial) {
+#ifdef ESP8266
+    return Serial.read(buffer, size);
+#endif  // ESP8266
+#ifdef ESP32
+    return TSerial->read(buffer, size);
+#endif  // ESP32
+  } else {
+    if ((-1 == m_rx_pin) || (m_in_pos == m_out_pos)) { return 0; }
+    size_t count = 0;
+    for( ; size && (m_in_pos == m_out_pos) ; --size, ++count) {
+      *buffer++ = m_buffer[m_out_pos];
+      m_out_pos = (m_out_pos +1) % serial_buffer_size;
+    }
+    return count;
+  }
+}
+
+int TasmotaSerial::available(void) {
   if (m_hardserial) {
 #ifdef ESP8266
     return Serial.available();
-#else
+#endif  // ESP8266
+#ifdef ESP32
     return TSerial->available();
-#endif
+#endif  // ESP32
   } else {
     int avail = m_in_pos - m_out_pos;
     if (avail < 0) avail += serial_buffer_size;
@@ -284,23 +257,12 @@ int TasmotaSerial::available()
   }
 }
 
-#ifdef TM_SERIAL_USE_IRAM
 #define TM_SERIAL_WAIT_SND { while (ESP.getCycleCount() < (wait + start)) if (!m_high_speed) optimistic_yield(1); wait += m_bit_time; } // Watchdog timeouts
 #define TM_SERIAL_WAIT_SND_FAST { while (ESP.getCycleCount() < (wait + start)); wait += m_bit_time; }
 #define TM_SERIAL_WAIT_RCV { while (ESP.getCycleCount() < (wait + start)); wait += m_bit_time; }
 #define TM_SERIAL_WAIT_RCV_LOOP { while (ESP.getCycleCount() < (wait + start)); }
-#else
-#define TM_SERIAL_WAIT_SND { while (ESP.getCycleCount() < (wait + start)); wait += m_bit_time; }
-#define TM_SERIAL_WAIT_SND_FAST { while (ESP.getCycleCount() < (wait + start)); wait += m_bit_time; }
-#define TM_SERIAL_WAIT_RCV { while (ESP.getCycleCount() < (wait + start)); wait += m_bit_time; }
-#define TM_SERIAL_WAIT_RCV_LOOP { while (ESP.getCycleCount() < (wait + start)); }
-#endif
 
-#ifdef TM_SERIAL_USE_IRAM
-void ICACHE_RAM_ATTR TasmotaSerial::_fast_write(uint8_t b) {
-#else
-void TasmotaSerial::_fast_write(uint8_t b) {
-#endif
+void IRAM_ATTR TasmotaSerial::_fast_write(uint8_t b) {
   uint32_t wait = m_bit_time;
   uint32_t start = ESP.getCycleCount();
   // Start bit;
@@ -318,14 +280,14 @@ void TasmotaSerial::_fast_write(uint8_t b) {
   }
 }
 
-size_t TasmotaSerial::write(uint8_t b)
-{
+size_t TasmotaSerial::write(uint8_t b) {
   if (m_hardserial) {
 #ifdef ESP8266
     return Serial.write(b);
-#else
+#endif  // ESP8266
+#ifdef ESP32
     return TSerial->write(b);
-#endif
+#endif  // ESP32
   } else {
     if (-1 == m_tx_pin) return 0;
     if (m_high_speed) {
@@ -356,13 +318,7 @@ size_t TasmotaSerial::write(uint8_t b)
   }
 }
 
-#ifdef TM_SERIAL_USE_IRAM
-void ICACHE_RAM_ATTR TasmotaSerial::rxRead()
-{
-#else
-void TasmotaSerial::rxRead()
-{
-#endif
+void IRAM_ATTR TasmotaSerial::rxRead(void) {
   if (!m_nwmode) {
     int32_t loop_read = m_very_high_speed ? serial_buffer_size : 1;
     // Advance the starting point for the samples but compensate for the
