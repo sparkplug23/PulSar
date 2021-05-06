@@ -5,217 +5,32 @@
 const char* mEnergyPZEM004T::PM_MODULE_ENERGY_PZEM004T_CTR = D_MODULE_ENERGY_PZEM004T_CTR;
 const char* mEnergyPZEM004T::PM_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR = D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR;
 
-void mEnergyPZEM004T::Pre_Init(void)
-{
-  #ifdef ESP8266
-  if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
-    pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
-    settings.fEnableSensor = true;
-  }
-  #else
-  pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID;
-  settings.fEnableSensor = true;
-  #endif//
-}
-
-
-void mEnergyPZEM004T::Init(void)
-{
-
-  #ifdef ESP8266
-  PzemAcModbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM016_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
-  #endif
-
-  #ifdef USE_DEVFEATURE_ENABLE_PZEM004T_SERIAL2
-  PzemAcModbus = new TasmotaModbus(16, 17);
-  #endif
-
-
-  uint8_t result = PzemAcModbus->Begin(9600);
-    AddLog(LOG_LEVEL_TEST, PSTR("PzemAcModbus result = %d"),result);
-  if (result) {
-    // AddLog(LOG_LEVEL_TEST, PSTR("PzemAcModbus result = %d"),result);
-    if (2 == result) { pCONT_sup->ClaimSerial(); }   // If serial0 is used, disable logging
-    #ifdef DEVICE_CONSUMERUNIT
-      pCONT_iEnergy->Energy.phase_count = 8;
-    #endif 
-    #ifdef DEVICE_PZEM_TESTER
-      pCONT_iEnergy->Energy.phase_count = 2;
-    #endif
-
-    PzemAc.phase = 0;
-    // AddLog(LOG_LEVEL_TEST,"mEnergyPZEM004T::init");
-  } else {
-    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
-  }
-
-  
-
-}
-
-
-void mEnergyPZEM004T::ReadAndParse(void)
-{
-  //AddLog(LOG_LEVEL_TEST, PSTR("ReadAndParse"));
-
-  bool data_ready = PzemAcModbus->ReceiveReady();
-    
-  if (data_ready) {
-    uint8_t modbus_buffer[30];  // At least 5 + (2 * 10) = 25
-
-    uint8_t registers = 10;
-    if (ADDR_RECEIVE == PzemAc.address_step) {
-      registers = 2;     // Need 1 byte extra as response is F8 06 00 02 00 01 FD A3
-      PzemAc.address_step--;
-    }
-    uint8_t error = PzemAcModbus->ReceiveBuffer(modbus_buffer, registers);
-    //AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, PzemAcModbus->ReceiveCount());
-
-    if (error) {
-      AddLog(LOG_LEVEL_DEBUG, PSTR("PAC: PzemAc %d error %d"), PZEM_AC_DEVICE_ADDRESS + PzemAc.phase, error);
-    } else {
-      pCONT_iEnergy->Energy.data_valid[PzemAc.phase] = 0;
-      if (10 == registers) {
-
-        ParseModbusBuffer(&pzem_modbus[PzemAc.phase], modbus_buffer);  
-        
-        // Move into energy module
-        pCONT_iEnergy->Energy.voltage[PzemAc.phase]       = pzem_modbus[PzemAc.phase].voltage;   
-        pCONT_iEnergy->Energy.current[PzemAc.phase]       = pzem_modbus[PzemAc.phase].current;  
-        pCONT_iEnergy->Energy.active_power[PzemAc.phase]  = pzem_modbus[PzemAc.phase].active_power; 
-        pCONT_iEnergy->Energy.frequency[PzemAc.phase]     = pzem_modbus[PzemAc.phase].frequency;  
-        pCONT_iEnergy->Energy.power_factor[PzemAc.phase]  = pzem_modbus[PzemAc.phase].power_factor;  
-        pCONT_iEnergy->Energy.energy2[PzemAc.phase]       = pzem_modbus[PzemAc.phase].energy;  
-
-        // Serial.println(pCONT_iEnergy->Energy.voltage[PzemAc.phase]);
-
-        //temp fix
-        pCONT_iEnergy->Energy.energy += pCONT_iEnergy->Energy.energy2[PzemAc.phase];
-        PzemAc.energy += pCONT_iEnergy->Energy.energy2[PzemAc.phase];  
-
-
-// move to when sensor reading is done
-        // Records energy when all phases have been measured, remove this?
-        if (PzemAc.phase == pCONT_iEnergy->Energy.phase_count -1) {
-          sReadSensor = true; // last phase reached
-          if (PzemAc.energy > PzemAc.last_energy) {  // Handle missed phase
-            if (pCONT_time->uptime.seconds_nonreset > PZEM_AC_STABILIZE) {
-              //pCONT_iEnergy->EnergyUpdateTotal(PzemAc.energy, false);
-              AddLog(LOG_LEVEL_INFO,PSTR("PzemAc.energy=%d"),(int)PzemAc.energy);
-            }
-            PzemAc.last_energy = PzemAc.energy;
-          }
-          PzemAc.energy = 0;
-        }
-      }
-    }
-  }
-
-  if (0 == PzemAc.send_retry || data_ready) {
-    if (0 == PzemAc.phase) {
-      PzemAc.phase = pCONT_iEnergy->Energy.phase_count -1;
-    } else {
-      PzemAc.phase--; //remove? I dont want to remove phases
-    }
-    PzemAc.send_retry = ENERGY_WATCHDOG;
-
-    // Send for new value
-    if (ADDR_SEND == PzemAc.address_step) {
-      PzemAcModbus->Send(0xF8, 0x06, 0x0002, (uint16_t)PzemAc.address);
-      AddLog(LOG_LEVEL_INFO,PSTR("PzemAcModbus->Send(0xF8, 0x06, 0x0002, (uint16_t)PzemAc.address=%d)"),(uint16_t)PzemAc.address);
-      PzemAc.address_step--;
-    } else {
-      PzemAcModbus->Send(PZEM_AC_DEVICE_ADDRESS + PzemAc.phase, 0x04, 0, 10);      
-      AddLog(LOG_LEVEL_INFO,PSTR("PzemAcModbus->Send(ADD%d+phase%d, 0x04, 0, 10)"),PZEM_AC_DEVICE_ADDRESS,PzemAc.phase);
-    }
-
-  }
-  else {
-    AddLog(LOG_LEVEL_INFO,PSTR("PzemAcModbus->Send(PZEM) PzemAc.send_retry%d"),PzemAc.send_retry);
-    PzemAc.send_retry--;
-    if ((pCONT_iEnergy->Energy.phase_count > 1) && (0 == PzemAc.send_retry) && (pCONT_time->uptime.seconds_nonreset < PZEM_AC_STABILIZE)) {
-      //pCONT_iEnergy->Energy.phase_count--;  // Decrement phases if no response after retry within 30 seconds after restart
-    }
-  }
-
-}
-
-
-void mEnergyPZEM004T::ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer){
-  //           0     1     2     3     4     5     6     7     8     9           = ModBus register
-  //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  = Buffer index
-  // 01 04 14 08 D1 00 6C 00 00 00 F4 00 00 00 26 00 00 01 F4 00 64 00 00 51 34
-  // Id Cc Sz Volt- Current---- Power------ Energy----- Frequ PFact Alarm Crc--
-  mod->voltage       = (float)((buffer[3] << 8) + buffer[4]) / 10.0;                                                  // 6553.0 V
-  mod->current       = (float)((buffer[7] << 24) + (buffer[8] << 16) + (buffer[5] << 8) + buffer[6]) / 1000.0;        // 4294967.000 A
-  mod->active_power  = (float)((buffer[11] << 24) + (buffer[12] << 16) + (buffer[9] << 8) + buffer[10]) / 10.0;  // 429496729.0 W
-  mod->frequency     = (float)((buffer[17] << 8) + buffer[18]) / 10.0;                                              // 50.0 Hz
-  mod->power_factor  = (float)((buffer[19] << 8) + buffer[20]) / 100.0;  
-  mod->energy        = (float)((buffer[15] << 24) + (buffer[16] << 16) + (buffer[13] << 8) + buffer[14]);    
-
-}
-
-
-bool mEnergyPZEM004T::PzemAcCommand(void)
-{
-  bool serviced = true;
-
-  // if (CMND_MODULEADDRESS == pCONT_iEnergy->Energy.command_code) {
-  //   PzemAc.address = XdrvMailbox.payload;  // Valid addresses are 1, 2 and 3
-  //   PzemAc.address_step = ADDR_SEND;
-  // }
-  // else serviced = false;  // Unknown command
-
-  return serviced;
-}
-
-void mEnergyPZEM004T::EveryLoop(){
-
-  if(mTime::TimeReachedNonReset(&measure_time,1000)&&
-     mTime::TimeReached(&measure_time_backoff,(900/pCONT_iEnergy->Energy.phase_count))
-  ){ //125ms
-   
-    ReadAndParse(); 
-
-    if(sReadSensor==true){//Reset if all measured
-      measure_time.millis = millis();
-      sReadSensor = false;
-    }
-
-  }
-
-} // END EveryLoop
-
-
-
 int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
   // some functions must run regardless
   switch(function){
+    /************
+     * INIT SECTION * 
+    *******************/
     case FUNC_PRE_INIT:
       Pre_Init();
     break;
+    case FUNC_INIT:
+      Init();
+    break;
   }
-
-  // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
-     * INIT SECTION * 
-    *******************/
-    case FUNC_INIT:
-      Init();
-    break;
-    /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP: 
       EveryLoop();
-    break;  
+    break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -239,171 +54,360 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
+void mEnergyPZEM004T::Pre_Init(void)
+{
+  if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
+    pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
+    // set bit for drivers
+    settings.fEnableSensor = true;
+  }
+}
+
+
+void mEnergyPZEM004T::Init(void)
+{
+
+  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM016_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+
+  uint8_t result = modbus->Begin(9600);
+
+  AddLog(LOG_LEVEL_TEST, PSTR("modbus result = %d"),result);
+
+  if (result) {
+    // AddLog(LOG_LEVEL_TEST, PSTR("modbus result = %d"),result);
+    // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
+    // pCONT_sup->ClaimSerial();// also serial number );
+
+    // pCONT_iEnergy->Energy.phase_count = 1;
+    
+    // // Set via json command, default to 1
+    // #ifdef DEVICE_CONSUMERUNIT
+    //   pCONT_iEnergy->Energy.phase_count = 8;
+    // #endif 
+    // #ifdef DEVICE_PZEM_TESTER
+    //   pCONT_iEnergy->Energy.phase_count = 2;
+    // #else
+    // #endif
+
+    // AddLog(LOG_LEVEL_TEST,"mEnergyPZEM004T::init");
+  } else {
+    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
+    AddLog(LOG_LEVEL_ERROR, PSTR("modbus result = %d"),result);
+    // delay(3000);
+
+  }
+  pCONT_iEnergy->Energy.phase_count = 1;
+  if(pCONT_iEnergy->Energy.phase_count<=MAX_ENERGY_SENSORS)
+  {
+    data_modbus = new DATA_MODBUS[1];//pCONT_iEnergy->Energy.phase_count];
+    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
+  }
+
+  // data_modbus[0].voltage = 123;
+  // data_modbus[0].current = 456;
+  // data_modbus[0].voltage = 123;
+
+  // if(data_modbus)
+  // {
+  //   Serial.println("data_modbus");
+  // }
+  // else
+  // {
+  //   Serial.println("!data_modbus");
+
+
+  // }
+
+  // delay(5000);
+
+
+  // data_modbus[0].voltage = 1;
+  // data_modbus[1].voltage = 2;
+  // data_modbus[2].voltage = 3;
+
+  // Optional poll for all sensors?
+  // // Else its default
+  // settings.found = pCONT_iEnergy->Energy.phase_count;
+
+  // Init the default
+
+}
+
+
+
+/**
+ * I need to split this to read a single sensor, thus I can have different rates
+ * */
+void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
+{
+  // AddLog(LOG_LEVEL_TEST, PSTR("SplitTask_UpdateSensor %d %d"), device_id, transceive_mode);
+
+  switch(transceive_mode)
+  {
+    default:
+    case TRANSCEIVE_REQUEST_READING_ID:
+
+      stats.start_time = millis();
+      modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
+      
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), device_id, 0x04, 0, 10);
+
+      transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
+
+    break; // Allow follow into next mode
+    case TRANSCEIVE_AWAITING_RESPONSE_ID:
+
+      if(modbus->ReceiveReady())
+      {
+        uint8_t modbus_buffer[30] = {0};  // At least 5 + (2 * 10) = 25
+        uint8_t registers = 10;
+        uint8_t error = modbus->ReceiveBuffer(modbus_buffer, registers);
+
+        if(!error)
+        {
+          //AddLog_Array(LOG_LEVEL_DEBUG_MORE, PSTR("buffer"), modbus_buffer, (uint8_t)30);
+          AddLog(LOG_LEVEL_DEBUG_MORE, "ReceiveCount() %d", modbus->ReceiveCount());
+          // Check if response matches expected device
+          // if(modbus_buffer[0] == pCONT_iEnergy->address[device_id][3]){
+            AddLog(LOG_LEVEL_DEBUG_MORE, "Read SUCCESS");
+            ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
+            stats.success_reads++;
+            stats.end_time = millis();
+            stats.sample_time = stats.end_time - stats.start_time;
+          // }else{            
+          //   transceive_mode = TRANSCEIVE_RESPONSE_ERROR_ID;
+          // }
+          transceive_mode = TRANSCEIVE_RESPONSE_SUCCESS_ID;
+          timeout = millis();
+        }
+        else
+        {
+          AddLog(LOG_LEVEL_DEBUG, "error %d %d", modbus->ReceiveReady(), error);
+          transceive_mode = TRANSCEIVE_RESPONSE_ERROR_ID;
+        }
+      }
+
+    break;
+  }
+  
+}
+
+
+void mEnergyPZEM004T::ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer){
+  //           0     1     2     3     4     5     6     7     8     9           = ModBus register
+  //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  = Buffer index
+  // 01 04 14 08 D1 00 6C 00 00 00 F4 00 00 00 26 00 00 01 F4 00 64 00 00 51 34
+  // Id Cc Sz Volt- Current---- Power------ Energy----- Frequ PFact Alarm Crc--
+  mod->voltage       = (float)((buffer[3] << 8) + buffer[4]) / 10.0;                                                  // 6553.0 V
+  mod->current       = (float)((buffer[7] << 24) + (buffer[8] << 16) + (buffer[5] << 8) + buffer[6]) / 1000.0;        // 4294967.000 A
+  mod->active_power  = (float)((buffer[11] << 24) + (buffer[12] << 16) + (buffer[9] << 8) + buffer[10]) / 10.0;  // 429496729.0 W
+  mod->frequency     = (float)((buffer[17] << 8) + buffer[18]) / 10.0;                                              // 50.0 Hz
+  mod->power_factor  = (float)((buffer[19] << 8) + buffer[20]) / 100.0;  
+  mod->energy        = (float)((buffer[15] << 24) + (buffer[16] << 16) + (buffer[13] << 8) + buffer[14]); 
+  mod->measured_time = millis();
+
+}
+
+void mEnergyPZEM004T::ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer){
+  //           0     1     2     3     4     5     6     7     8     9           = ModBus register
+  //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  = Buffer index
+  // 01 04 14 08 D1 00 6C 00 00 00 F4 00 00 00 26 00 00 01 F4 00 64 00 00 51 34
+  // Id Cc Sz Volt- Current---- Power------ Energy----- Frequ PFact Alarm Crc--
+  mod->voltage       = (float)((buffer[3] << 8) + buffer[4]) / 10.0;                                                  // 6553.0 V
+  mod->current       = (float)((buffer[7] << 24) + (buffer[8] << 16) + (buffer[5] << 8) + buffer[6]) / 1000.0;        // 4294967.000 A
+  mod->active_power  = (float)((buffer[11] << 24) + (buffer[12] << 16) + (buffer[9] << 8) + buffer[10]) / 10.0;  // 429496729.0 W
+  mod->frequency     = (float)((buffer[17] << 8) + buffer[18]) / 10.0;                                              // 50.0 Hz
+  mod->power_factor  = (float)((buffer[19] << 8) + buffer[20]) / 100.0;  
+  mod->energy        = (float)((buffer[15] << 24) + (buffer[16] << 16) + (buffer[13] << 8) + buffer[14]);    
+
+}
+
+
+void mEnergyPZEM004T::EveryLoop(){
+
+  if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms)){
+
+    // transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
+    // AddLog(LOG_LEVEL_TEST, PSTR("mEnergyPZEM004T::EveryLoop \t%d"),millis());
+
+    // uint32_t timeout = millis();
+    // for(
+      uint8_t sensor_id=0; //sensor_id<pCONT_iEnergy->Energy.phase_count; sensor_id++)
+    // {
+      // while(transceive_mode != TRANSCEIVE_RESPONSE_SUCCESS_ID)
+      // {
+        
+          // transceive_mode = TRANSCEIVE_REQUEST_READING_ID; // Restart
+
+      //   if(transceive_mode == TRANSCEIVE_REQUEST_READING_ID)
+      // {
+      //   timeout = millis();
+      // }
+      // if(labs(millis()-timeout)>1000)
+      // {
+      //  transceive_mode = TRANSCEIVE_REQUEST_READING_ID; 
+      // }
+
+        SplitTask_UpdateSensor(active_sensor);
+
+        if(labs(millis()-timeout)>200)
+        {
+          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
+          transceive_mode = TRANSCEIVE_RESPONSE_SUCCESS_ID;
+          timeout = millis();
+          stats.timeout_reads++;
+        }
+
+        if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
+        {
+          // If needed, advance to next sensor
+          if(active_sensor < pCONT_iEnergy->Energy.phase_count-1)
+          {
+            active_sensor++;
+          }
+          else
+          {
+            active_sensor = 0; // reset to start or remain on single sensor 
+          }
+        }
+
+
+        // Failure
+        // if((transceive_mode == TRANSCEIVE_RESPONSE_TIMEOUT_ID)||(transceive_mode == TRANSCEIVE_RESPONSE_ERROR_ID))
+        // {
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR("TRANSCEIVE_RESPONSE_TIMEOUT_ID %d"), transceive_mode);
+        //   transceive_mode = TRANSCEIVE_REQUEST_READING_ID;
+        //   measure_time.millis = millis(); // Reset for backoff
+        //   // break;
+        // }
+
+        // if(labs(millis()-data_modbus[sensor_id].measured_time)>(settings.rate_measure_ms+100))
+        // {
+        //   transceive_mode = TRANSCEIVE_REQUEST_READING_ID; // Restart
+        // }
+
+      // } 
+    // } // END for
+
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
+  }
+
+} // END EveryLoop
+
+
+
 uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_method){
 
-  JsonBuilderI->Start();
-
-  JsonBuilderI->Add(D_JSON_CHANNELCOUNT,         0);
-  
-
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_COUNT, settings.found);
+  return JBI->End();
 
 }
 
 
 uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_method){
 
+  char buffer[40];
 
-  JsonBuilderI->Start();
+  JBI->Start();
+  for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
+  {
+    JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_ENERGY_PZEM004T_V3_ID, ii, buffer, sizeof(buffer)));
+      JBI->Add(D_JSON_VOLTAGE,      data_modbus[ii].voltage);
+      JBI->Add(D_JSON_CURRENT,      data_modbus[ii].current);
+      JBI->Add(D_JSON_ACTIVE_POWER, data_modbus[ii].active_power);
+      JBI->Add(D_JSON_FREQUENCY,    data_modbus[ii].frequency);
+      JBI->Add(D_JSON_POWER_FACTOR, data_modbus[ii].power_factor);
+      JBI->Add(D_JSON_ENERGY,       data_modbus[ii].energy);
+    JBI->Level_End();
+  }
 
-  JsonBuilderI->Add(D_JSON_VOLTAGE, pzem_modbus[0].voltage);
-  
+  JBI->Level_Start("stats");
+    JBI->Add("success", stats.success_reads);
+    JBI->Add("timeout", stats.timeout_reads);
+    JBI->Add("sample_time", stats.sample_time);
+    JBI->Add("start_time", stats.start_time);
+    JBI->Add("end_time", stats.end_time);
 
-  return JsonBuilderI->End();
+  JBI->Level_End();
+  return JBI->End();
 
-
-  // D_DATA_BUFFER_CLEAR();
-
-  // // DynamicJsonDocument doc(MQTT_MAX_PACKET_SIZE);
-  // // JsonObject root = doc.to<JsonObject>();
-
-  // // uint8_t ischanged = false;
-
-  // // char channel_ctr[3];
-  // // memset(channel_ctr,0,sizeof(channel_ctr));
-  // // // sprintf(channel_ctr,"%02d",channel);
-
-  // return 0;
-
-  // //   JsonObject kwh_per_minute_obj = root.createNestedObject("kwh_stats"); 
-  
-  // JsonObject channel0_obj = root.createNestedObject("channel0");
-    
-  //   channel0_obj["voltage"] = pCONT_iEnergy->Energy.voltage[0];
-  //   channel0_obj["current"] = pCONT_iEnergy->Energy.current[0];
-  //   channel0_obj["active_power"] = pCONT_iEnergy->Energy.active_power[0];
-  //   channel0_obj["frequency"] = pCONT_iEnergy->Energy.frequency[0];
-  //   channel0_obj["power_factor"] = pCONT_iEnergy->Energy.power_factor[0];
-  //   channel0_obj["energy"] = PzemAc.energy;
-
-  // JsonObject channel1_obj = root.createNestedObject("channel1");
-  //   channel1_obj["voltage"] = pCONT_iEnergy->Energy.voltage[1];
-  //   channel1_obj["current"] = pCONT_iEnergy->Energy.current[1];
-  //   channel1_obj["active_power"] = pCONT_iEnergy->Energy.active_power[1];
-  //   channel1_obj["frequency"] = pCONT_iEnergy->Energy.frequency[1];
-  //   channel1_obj["power_factor"] = pCONT_iEnergy->Energy.power_factor[1];
-  //   channel1_obj["energy"] = PzemAc.energy;
-
-    
-  // //   kwh_per_minute_obj["index"] = Energy.stats.kwh_per_minute_index;
-  // //   kwh_per_minute_obj["last_minutes_energy"] = Energy.stats.last_minutes_energy;
-  // //   kwh_per_minute_obj["current_energy"] = Energy.stats.current_energy;
-  // //   kwh_per_minute_obj["this_minutes_energy"] = Energy.stats.this_minutes_energy;
-
-
-  // // if(json_method >= JSON_LEVEL_DETAILED){
-  // //   JsonArray kwh_per_minute_arr = kwh_per_minute_obj.createNestedArray("kwh_per_minute"); 
-  // //   JsonArray kwh_each_minute_arr = kwh_per_minute_obj.createNestedArray("kwh_each_minute");  
-  // //   for (uint8_t min = 0; min < 60; min++) {
-  // //     kwh_per_minute_arr.add(pCONT_iEnergy->Energy.stats.kwh_per_minute[min]);
-  // //     kwh_each_minute_arr.add(pCONT_iEnergy->Energy.stats.kwh_each_minute[min]);
-  // //   }
-  // // }
-
-
-
-  // data_buffer.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer.payload.ctr);
-
-  
-  //   return data_buffer.payload.len>3?true:false;
-    
 }
 
 
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mEnergyPZEM004T::MQTTHandler_Init(){
 
-  struct handler<mEnergyPZEM004T>* mqtthandler_ptr;
+  struct handler<mEnergyPZEM004T>* ptr;
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
 
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_SENSOR_TELEPERIOD_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
 
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->handler_id = MQTT_HANDLER_SENSOR_IFCHANGED_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+} 
 
-
-void mEnergyPZEM004T::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mEnergyPZEM004T::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mEnergyPZEM004T::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mEnergyPZEM004T>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mEnergyPZEM004T::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
-////////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mEnergyPZEM004T::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mEnergyPZEM004T::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif
