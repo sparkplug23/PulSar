@@ -1000,7 +1000,7 @@ Bathroom
       //   "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       //   #endif
       //   "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
       //   "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
       //   "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       // #endif //ESP266
@@ -1010,7 +1010,7 @@ Bathroom
         // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
         #endif
         // "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-        // "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+        // "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
         // "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
         "\"LBI\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       // #endif //ESP32
@@ -1056,6 +1056,9 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
+/**
+ * Testing without ultrasonics until I get stable inside/outside PIR working
+ * */
 #ifdef DEVICE_LIVINGROOMSENSOR
   #define DEVICENAME_CTR          "livingroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Living Room Sensor"
@@ -1063,19 +1066,22 @@ Bathroom
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BME
+
+
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "DriveFront"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "LivingRoom"
   // #define D_DEVICE_SENSOR_MOTION_2_FRIENDLY_NAME_LONG "LivingRadar" // Test device
 
   #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "DriveFront"
 
-  #define USE_MODULE_SENSORS_ANALOG
+  // #define USE_MODULE_SENSORS_ANALOG
 
-  #define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
-  #define USE_MODULE_SENSORS_BME
   #define D_DEVICE_SENSOR_CLIMATE "LivingRoom"
 
   #define USE_MODULE_TEMPLATE

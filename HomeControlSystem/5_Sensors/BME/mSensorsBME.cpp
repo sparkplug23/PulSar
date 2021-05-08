@@ -1,49 +1,43 @@
+/*
+  mHVAC.cpp - mSensorsBME
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "mSensorsBME.h"
 
 #ifdef USE_MODULE_SENSORS_BME
-
 
 const char* mSensorsBME::PM_MODULE_SENSORS_BME_CTR = D_MODULE_SENSORS_BME_CTR;
 const char* mSensorsBME::PM_MODULE_SENSORS_BME_FRIENDLY_CTR = D_MODULE_SENSORS_BME_FRIENDLY_CTR;
 
 
 int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
-
-  int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     case FUNC_PRE_INIT:
       Pre_Init();
     break;
+    case FUNC_INIT:
+      Init();
+    break;
   }
 
-  // Only continue to remaining functions if sensor has been detected and enabled
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
-    /************
-     * INIT SECTION * 
-    *******************/
-    case FUNC_INIT:
-      init();
-    break;
-    /************
-     * SETTINGS SECTION * 
-    *******************/
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-      // Settings_Load();
-    break;
-    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-      // Settings_Save();
-    break;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-      // Settings_Default();
-    break;
-    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-      // Settings_Default();
-      // pCONT_set->SettingsSave(2);
-    break;
     /************
      * PERIODIC SECTION * 
     *******************/
@@ -84,11 +78,9 @@ int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return function_result;
+  return FUNCTION_RESULT_SUCCESS_ID;
 
 }
-
-
 
 
 void mSensorsBME::Pre_Init(){
@@ -120,17 +112,18 @@ void mSensorsBME::Pre_Init(){
 
 }
 
-void mSensorsBME::init(void){
+
+void mSensorsBME::Init(void){
 
   for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){    
     sensor[sensor_id].tSavedMeasureClimate = millis();
     sensor[sensor_id].sReadSensor = SPLIT_TASK_SEC1_ID;    
   }
 
-  sealevel_pressure = 1013.25;//SENSORS_PRESSURE_SEALEVELHPA;
   settings.measure_rate_ms = 1000;
   
 }
+
 
 void mSensorsBME::EveryLoop(){
     
@@ -153,97 +146,6 @@ void mSensorsBME::EveryLoop(){
 }
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mSensorsBME::WebAppend_Root_Status_Table_Draw(){
-
-  char value_ctr[8];
-  uint8_t sensor_counter = 0;
-    
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>BME%s Temperature</td>"), "280");
-    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr));   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>BME%s Humidity</td>"), "280");
-    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr));   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>BME%s Pressure</td>"), "280");
-    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr));   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  
-}
-
-
-//append to internal buffer if any root messages table
-void mSensorsBME::WebAppend_Root_Status_Table_Data(){
-  
-  uint8_t sensor_counter = 0;
-  char value_ctr[8];
-  char colour_ctr[10];
-
-  JsonBuilderI->Array_Start("tab_bme");// Class name
-  // BufferWriterI->Append_P(PSTR("\"%s\":["),PSTR("tab_bme")); 
-  for(int row=0;row<3;row++){
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-      switch(row){
-        default:
-        case 0:
-        
-          pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr);
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s&deg;%c\""),value_ctr,pCONT_sup->TempUnit());
-
-          if(sensor[sensor_counter].temperature<=25){
-            sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
-          }else
-          if(sensor[sensor_counter].temperature>25){
-            sprintf(colour_ctr,"%s","#fcba03");
-          }else{
-            sprintf(colour_ctr,"%s","#ffffff");
-          }      
-          JsonBuilderI->Add("fc",colour_ctr);
-
-        break;
-        case 1:    
-
-          pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr);
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s%%\""),value_ctr);
-       
-          if(sensor[sensor_counter].humidity>70){
-            sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
-          }else{
-            sprintf(colour_ctr,"%s","#ffffff");
-          }
-          JsonBuilderI->Add("fc",colour_ctr);
-
-        break;
-        case 2:     
-          
-          pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr);
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s hPa\""),value_ctr);
-          
-          if(sensor[sensor_counter].pressure>1000){
-            sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
-          }else{
-            sprintf(colour_ctr,"%s","#ffffff");
-          }
-          JsonBuilderI->Add("fc",colour_ctr);
-
-        break;
-      }
-      JsonBuilderI->Level_End();
- 
-  }
-  
-  JsonBuilderI->Array_End();
-
-}
-#endif // USE_MODULE_NETWORK_WEBSERVER
-
-
-// New function that breaks things up into switch statements
-// Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID
 void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
 
   unsigned long timeout = millis();
@@ -255,7 +157,6 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
       case SPLIT_TASK_SEC1_ID:
 
         sensor[sensor_id].bme->takeForcedMeasurement(); // has no effect in normal mode
-
         sensor[sensor_id].isvalid = true;
 
         if(
@@ -281,7 +182,7 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
         sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
         sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-        sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(sealevel_pressure);
+        sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
         AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
@@ -333,7 +234,7 @@ uint8_t mSensorsBME::ConstructJSON_Sensor(uint8_t json_level){
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
@@ -355,84 +256,78 @@ uint8_t mSensorsBME::ConstructJSON_Sensor(uint8_t json_level){
 ******** MQTT Stuff **************************************************************************************************************************************
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
+
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mSensorsBME::MQTTHandler_Init(){
 
-  struct handler<mSensorsBME>* mqtthandler_ptr;
+  struct handler<mSensorsBME>* ptr;
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Settings;
 
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
 
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 
-void mSensorsBME::MQTTHandler_Set_fSendNow(){
 
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSensorsBME::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSensorsBME::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-  
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSensorsBME>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_BME_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSensorsBME::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
-////////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSensorsBME::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSensorsBME::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

@@ -222,7 +222,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
         JBI->Add("Default",settings.loaded_default_for_moduled);
       JBI->Level_End();
 
-      JsonBuilderI->Level_Start_P(name);//pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(name);//DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
 
         JsonBuilderI->Level_Start_P("Source");
             JsonBuilderI->Add("module_id", rules[id].trigger.module_id);
@@ -287,6 +287,26 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
+uint8_t mRuleEngine::ConstructJSON_Sensor(uint8_t json_level){
+
+  char buffer[100];
+  JBI->Start();
+
+    JBI->Level_Start("EventTriggered");
+
+      JBI->Add("DeviceID", event_triggered.device_id);
+      JBI->Add("FunctionID", event_triggered.function_id);    
+      JBI->Add("ModuleID", event_triggered.module_id);    
+
+    JBI->Level_End();
+
+
+
+  JBI->End();
+
+}
+
+
 /*********************************************************************************************************************************************
 ******** MQTT **************************************************************************************************************************************
 **********************************************************************************************************************************************
@@ -310,15 +330,15 @@ void mRuleEngine::MQTTHandler_Init(){
   //mqtthandler_ptr->tRateSecs = 1;
   #endif
 
-//   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Sensor;
+  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Sensor;
 
 //   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
 //   mqtthandler_ptr->tSavedLastSent = millis();
@@ -346,139 +366,34 @@ void mRuleEngine::MQTTHandler_Init(){
   
 } //end "MQTTHandler_Init"
 
-
-void mRuleEngine::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-//   mqtthandler_sensor_ifchanged.flags.SendNow = true;
-//   mqtthandler_sensor_teleperiod.flags.SendNow = true;
-//   mqtthandler_scheduled_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mRuleEngine::MQTTHandler_Set_TelePeriod(){
-
-//   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_scheduled_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mRuleEngine::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-  
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    // MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    // MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-    // MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID
-  };
-  
-  struct handler<mRuleEngine>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    // &mqtthandler_sensor_ifchanged,
-    // &mqtthandler_sensor_teleperiod,
-    // &mqtthandler_scheduled_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CORE_RULES_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mRuleEngine::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mRuleEngine::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
 
-// void mTaskerManager::Tasker_Rules_Init(){
+void mRuleEngine::MQTTHandler_Sender(uint8_t id){
+    
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_RULES_ID, handle, id);
+  }
 
-//   // struct BUTTON_PRESSED_EVENT{
-//   //   uint8_t index = 0;
-//   //   uint8_t state_now = 0;
-//   //   uint8_t state_prev = 0;
-//   //   uint8_t press_type = 0; //single (0), multiple (1-10), long (11)
-//   // }button_event;
-
-//   // pCONT->AllocateEventBuffer(pCONT->rules[0].)
-
-//   // D_RULE_BASIC_01_INDEX_INDEX_ID,
-//   // D_RULE_BASIC_01_INDEX_STATE_ID,
-//   // D_RULE_BASIC_01_INDEX_ID,
-//   // D_RULE_BASIC_01_INDEX_ID,
-//   // D_RULE_BASIC_01_INDEX_ID
-//   // rules[0].trigger.encoding = 0; // type switch
-//   // rules[0].trigger.value.data = reinterpret_cast<uint8_t*>(&button_event);
-
-
-//   //test 1: switch 1 = relay 1, switch 2 = relay 2
-
-//   // rules[0].trigger.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-//   // rules[0].trigger.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-//   // rules[0].trigger.device_id = 0;
-//   // rules[0].trigger.value.data[0] = 2; //switch type toggle
-//   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[0].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
-//   // rules[0].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[0].command.device_id = 0;
-//   // rules[0].command.value.data[0] = 2; //toggle
-//   // rules[0].command.value.data[2] = 100; //on level, 100%
-//   // #endif // D_MODULE_DRIVERS_RELAY_ID
-//   // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-//   // rules[0].command.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-//   // rules[0].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[0].command.index = 0;
-//   // rules[0].command.state = 2; //toggle
-//   // #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
-
-
-//   // rules[1].trigger.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-//   // rules[1].trigger.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-//   // rules[1].trigger.device_id = 1; //switch1
-//   // rules[1].trigger.value.data[0] = 2; //switch type toggle
-//   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[1].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
-//   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[1].command.device_id = 1; //relay0
-//   // rules[1].command.value.data[0] = 2; //toggle
-//   // rules[1].command.value.data[2] = 100; //on level, 100%
-//   // #endif // D_MODULE_DRIVERS_RELAY_ID
-//   // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-//   // rules[1].command.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-//   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[1].command.index = 0;
-//   // rules[1].command.state = 2; //toggle
-//   // #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
-
-
-  
-//   // rules[1].trigger.module_id = D_MODULE_SENSORS_SWITCHES_ID;
-//   // rules[1].trigger.function_id = FUNC_EVENT_INPUT_STATE_CHANGED;
-//   // // rules[1].trigger.encoding = 0; // type switch
-//   // // rules[1].trigger.value.data = reinterpret_cast<uint8_t*>(&button_event);
-//   // rules[1].trigger.index = 1;
-//   // rules[1].trigger.state = 2; //toggle
-//   // #ifdef D_MODULE_DRIVERS_RELAY_ID
-//   // rules[1].command.module_id = EM_MODULE_DRIVERS_RELAY_ID;
-//   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[1].command.index = 0;
-//   // rules[1].command.state = 2; //toggle
-//   // #endif // D_MODULE_DRIVERS_RELAY_ID
-//   // #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-//   // rules[1].command.module_id = D_MODULE_DRIVERS_SHELLY_DIMMER_ID;
-//   // rules[1].command.function_id = FUNC_EVENT_SET_POWER;
-//   // rules[1].command.index = 1;
-//   // rules[1].command.state = 2; //toggle
-//   // #endif // USE_MODULE_DRIVERS_SHELLY_DIMMER
-  
-
-
-
-
-
-
-  
-// }
+}
 
 
 #endif // USE_MODULE_CORE_RULES

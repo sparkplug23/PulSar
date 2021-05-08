@@ -211,7 +211,7 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_method){
 
     JsonBuilderI->Start();
       char buffer[80];
-      JsonBuilderI->Add(D_JSON_LOCATION, pCONT_set->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_DOORBELL_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_DOORBELL_ID, 0, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&doorbell_switch.detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, doorbell_switch.isactive ? "detected": "over");
     JsonBuilderI->End();

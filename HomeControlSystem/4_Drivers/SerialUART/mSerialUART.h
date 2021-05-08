@@ -100,7 +100,7 @@ class mSerialUART :
     static void IRAM_ATTR uart_intr_handle_u2(void);
 
     // Receive buffer to collect incoming data
-    uint8_t rxbuf2[RINGBUFFER_HANDLE_2_LENGTH];
+    uint8_t rxbuf2[RINGBUFFER_HANDLE_2_LENGTH] = {0};
     // Register to collect data length
     uint16_t urxlen2 = 0;
     uint16_t GetReceiveBuffer2(char* output_buf, uint16_t output_len, char optional_read_until_char = 0);

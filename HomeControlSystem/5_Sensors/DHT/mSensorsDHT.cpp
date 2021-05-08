@@ -1,5 +1,5 @@
 /*
-  mHVAC.cpp - HVAC Controller
+  mHVAC.cpp - mSensorsDHT
 
   Copyright (C) 2021  Michael
 

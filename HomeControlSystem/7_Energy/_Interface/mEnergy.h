@@ -5,6 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#include <vector>
 // #include "2_CoreSystem/mBaseConfig.h"
 
 // #include "2_CoreSystem/mFirmwareDefaults.h"
@@ -65,8 +66,10 @@ class mEnergyInterface :
     
 // int8_t Tasker(uint8_t function, JsonObjectConst obj);
 
-    void SetIDWithAddress(uint8_t address_id, uint8_t* address_to_save, uint8_t address_length);
-    uint8_t address[MAX_ENERGY_SENSORS][4];// = {{0},{0}};
+    void SetIDWithAddress(uint8_t address_id, uint8_t address_to_save);//, uint8_t address_length);
+    uint8_t GetAddressWithID(uint8_t address_id);
+    // uint8_t address[MAX_ENERGY_SENSORS][4];// = {{0},{0}};
+    std::vector<uint8_t> address;
     void SetEnergyDeviceCount(uint8_t address_length);
     
 
@@ -302,6 +305,7 @@ void Settings_Save();
   // #endif  // USE_ENERGY_MARGIN_DETECTION
 
   void parse_JSONCommand();
+  void parse_JSONCommand_BootSafe(JsonParserObject obj);
 
 
 

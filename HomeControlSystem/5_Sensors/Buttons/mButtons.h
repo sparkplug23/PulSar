@@ -49,7 +49,6 @@ class mButtons :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
-    
 
     static const char* PM_MODULE_SENSORS_BUTTONS_CTR;
     static const char* PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR;
@@ -70,8 +69,12 @@ class mButtons :
 
     struct SETTINGS{
       uint8_t buttons_found = 0;
+      uint8_t fEnableSensor = false;
 
     }settings;
+
+    
+bool ModuleEnabled();
 
 #define MAX_KEYS 4                 // Max number of keys or buttons
 
@@ -85,6 +88,10 @@ struct BUTTONS{
   uint8_t lastbutton = BUTTON_NOT_PRESSED_ID;  // Last button states
   uint8_t active_state_value = false; //defualt active high
 
+  /**
+   * @note isactive will always signify active or not
+   * */
+  uint8_t  isactive     = false;
   uint8_t  state     = false;
   // uint8_t  isactive  = false;
   uint8_t  ischanged = false;
@@ -104,7 +111,7 @@ uint16_t dual_button_code = 0;              // Sonoff dual received code
 
 void ButtonPullupFlag(uint8_t button_bit);
 void ButtonInvertFlag(uint8_t button_bit);
-void ButtonInit(void);
+void Pre_Init(void);
 uint8_t ButtonSerial(uint8_t serial_in_byte);
 void ButtonHandler(void);
 void ButtonLoop(void);
@@ -131,15 +138,19 @@ bool IsButtonActive(uint8_t id);
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mButtons> mqtthandler_settings_teleperiod;
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
     struct handler<mButtons> mqtthandler_sensor_ifchanged;
     struct handler<mButtons> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     
+    struct handler<mButtons>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
+
   //#endif
 
 

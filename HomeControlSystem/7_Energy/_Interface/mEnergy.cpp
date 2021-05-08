@@ -5,6 +5,125 @@
 const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
 const char* mEnergyInterface::PM_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR = D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR;
 
+
+int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj)
+{
+
+  int8_t function_result = 0;
+  
+  switch(function){
+    case FUNC_PRE_INIT:
+      // Pre_Init();
+    break;
+    case FUNC_SETTINGS_DEFAULT:
+      Settings_Default();
+    break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand_BootSafe(obj);
+    break; 
+  }
+
+  // if(!pCONT_set->runtime_var.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * INIT SECTION * 
+    *******************/
+    case FUNC_INIT:
+      Init();
+    break;
+    /************
+     * SETTINGS SECTION * 
+    *******************/
+    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+    //   Settings_Load();
+    // break;
+    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+    //   Settings_Save();
+    // break;
+    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
+    //   Settings_Default();
+    // break;
+    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+    //   Settings_Default();
+    //   // pCONT_set->SettingsSave(2);
+    // break;
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP: 
+      // EveryLoop();
+    break;  
+    // case FUNC_EVERY_200_MSECOND:
+    //   //Energy200ms();
+    // break;
+    case FUNC_EVERY_SECOND:
+      //EnergyEverySecond();
+      UpdateThresholdLimits();
+      //  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
+    break;
+    case FUNC_EVERY_MINUTE:
+      //UpdateEnergyUsagePerMinute();
+    break;
+    case FUNC_EVERY_MIDNIGHT:
+    
+    break;
+
+
+    case FUNC_SENSOR_UPDATED:
+
+//recalculate energy
+
+    break;
+
+
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break; 
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Draw_Table();
+    break;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break;
+    #endif //USE_MODULE_NETWORK_WEBSERVER
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+  }
+  
+  return function_result;
+
+}
+
+
+
+
+
+
+
+
+
 const char HTTP_ENERGY_SNS1[] PROGMEM =
   "{s}" D_POWERUSAGE_APPARENT "{m}%s " D_UNIT_VA "{e}"
   "{s}" D_POWERUSAGE_REACTIVE "{m}%s " D_UNIT_VAR "{e}"
@@ -111,15 +230,17 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
  * */
 void mEnergyInterface::Settings_Default()
 {
-  pCONT_iEnergy->Energy.phase_count = 1;
+  pCONT_iEnergy->Energy.phase_count = 0;
   
-  for(int ii=0;ii<12;ii++)
-  {
-    address[ii][0] = 192;
-    address[ii][1] = 168;
-    address[ii][2] = 1;
-    address[ii][3] = 25;
-  }
+  // for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
+  // {
+  //   //Make minimal possible
+  //   address.push_back(ii);
+  //   // address[ii][0] = 192;
+  //   // address[ii][1] = 168;
+  //   // address[ii][2] = 1;
+  //   // address[ii][3] = 25;
+  // }
   
   // name_buffer = &pCONT_set->Settings.energy_usage.name_buffer[0];
 
@@ -180,10 +301,28 @@ void mEnergyInterface::Settings_Default()
 
 // }
 
+/**
+ * @brief "BootSafe" means these are commands that may be called before init
+ * */
+void mEnergyInterface::parse_JSONCommand_BootSafe(JsonParserObject obj)
+{
+
+  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand_BootSafe"));
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  // Using a desired address, the sensor is searched for, then index (id) is updated
+  if(jtok = obj["Energy"].getObject()["DeviceCount"])
+  {
+    SetEnergyDeviceCount(jtok.getInt());
+  }
+
+}
 
 
 void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
 
+    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
@@ -205,35 +344,67 @@ void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
     
     for(auto group_iter : array_group) {
 
-      JsonParserArray array_sensor_address_iter = group_iter;
-      memset(address_temp,0,sizeof(address_temp));
-      address_index = 0;            
-      for(auto address_id : array_sensor_address_iter) {
-        int address = address_id.getInt();
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
-        //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
-        // #endif
-        address_temp[address_index++] = address;
-        // if(address_index>7){ break; } //error!
-      }
-      AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)4);
-      SetIDWithAddress(original_device_id++, address_temp, address_index);
+      // JsonParserArray array_sensor_address_iter = group_iter;
+      // memset(address_temp,0,sizeof(address_temp));
+      // address_index = 0;            
+      // for(auto address_id : array_sensor_address_iter) {
+      //   int address = address_id.getInt();
+      //   // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
+      //   //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
+      //   // #endif
+      //   address_temp[address_index++] = address;
+      //   // if(address_index>7){ break; } //error!
+      // }
+      // AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)4);
+      // AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)4);
+      AddLog(LOG_LEVEL_TEST, PSTR(" group_iter.getInt()) = %d"),  group_iter.getInt());
+      SetIDWithAddress(original_device_id++, group_iter.getInt());//, address_index);
 
     }
      
   }
 
+  // else{
+    
+  //     AddLog(LOG_LEVEL_TEST, PSTR(" NOT FOUND group_iter.getInt()) = %d"));
+  // }
+
 }
 
 
-void mEnergyInterface::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_save, uint8_t address_length)
+void mEnergyInterface::SetIDWithAddress(uint8_t address_id, uint8_t address_to_save)//, uint8_t address_length)
 {
   
-  for(int ii=0;ii<address_length;ii++){
+  // for(int ii=0;ii<address_length;ii++){
     
-    address[address_id][ii] = address_to_save[ii];
+  //   address[address_id][ii] = address_to_save[ii];
 
+    // address.insert(address_id, 2);//*address_to_save);
+    address.push_back(address_to_save);
+
+  // }
+
+}
+
+uint8_t mEnergyInterface::GetAddressWithID(uint8_t address_id)//, uint8_t* address_to_get, uint8_t address_length)
+{
+  // if(address_id > address.size()-1)
+  // {
+  // return 0;
+  //   }
+  // AddLog(LOG_LEVEL_TEST, PSTR("address.size() = %d"),address.size());
+
+  if(address.size())
+  {
+    
+  // for(int ii=0;ii<address_length;ii++){
+    return address[address_id];
+  //   address[address_id][ii] = address_to_save[ii];
   }
+    // address.insert(address_id, 2);//*address_to_save);
+    // address.push_back(*address_to_save);
+return 0;
+  // }
 
 }
 
@@ -243,7 +414,7 @@ void mEnergyInterface::SetEnergyDeviceCount(uint8_t address_length)
 
   pCONT_iEnergy->Energy.phase_count = address_length;
 
-  AddLog(LOG_LEVEL_TEST, PSTR("settings.found=%d"),pCONT_iEnergy->Energy.phase_count);
+  AddLog(LOG_LEVEL_TEST, PSTR("Energy.phase_count=%d"),pCONT_iEnergy->Energy.phase_count);
 
 }
 
@@ -1187,118 +1358,6 @@ void mEnergyInterface::Settings_Save(){
 }
 
 
-
-int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){ 
-  // testing without pzem hardware
-  // pCONT_set->energy_flg = 5; //?
-
-  int8_t function_result = 0;
-  
-  // some functions must run regardless
-  switch(function){
-    case FUNC_PRE_INIT:
-      // Pre_Init();
-    break;
-    case FUNC_SETTINGS_DEFAULT:
-      Settings_Default();
-    break;
-  }
-
-  // Only continue to remaining functions if sensor has been detected and enabled
-  if(!pCONT_set->runtime_var.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-  // DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO();
-
-  switch(function){
-    /************
-     * INIT SECTION * 
-    *******************/
-    case FUNC_INIT:
-      Init();
-    break;
-    /************
-     * SETTINGS SECTION * 
-    *******************/
-    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-    //   Settings_Load();
-    // break;
-    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-    //   Settings_Save();
-    // break;
-    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-    //   Settings_Default();
-    // break;
-    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-    //   Settings_Default();
-    //   // pCONT_set->SettingsSave(2);
-    // break;
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP: 
-      // EveryLoop();
-    break;  
-    // case FUNC_EVERY_200_MSECOND:
-    //   //Energy200ms();
-    // break;
-    case FUNC_EVERY_SECOND:
-      //EnergyEverySecond();
-      UpdateThresholdLimits();
-      //  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-
-    break;
-    case FUNC_EVERY_MINUTE:
-      //UpdateEnergyUsagePerMinute();
-    break;
-    case FUNC_EVERY_MIDNIGHT:
-    
-    break;
-
-
-    case FUNC_SENSOR_UPDATED:
-
-//recalculate energy
-
-    break;
-
-
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break; 
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Draw_Table();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-  }
-  
-  return function_result;
-
-}
 // int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj), JsonObjectConst obj){
 //   switch(function){
 //     case FUNC_JSON_COMMAND_OBJECT:
@@ -1323,7 +1382,7 @@ void mEnergyInterface::WebAppend_Root_Draw_Table(){
       BufferWriterI->Append_P(PSTR("<th></th>"));
     }else{
       // BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), ii, PM_DLIM_LIST_TABLE_HEADERS));
-        BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,col-1,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex    
+        BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,col-1,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex    
     }
   }    
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
@@ -1333,7 +1392,7 @@ void mEnergyInterface::WebAppend_Root_Draw_Table(){
     for(int col=0;col<Energy.phase_count+1;col++){
       if(col==0){ //row name
         BufferWriterI->Append_P(PSTR("<th>%s</th>"), pCONT_sup->GetTextIndexed_P(buffer, sizeof(buffer), row, PM_DLIM_LIST_TABLE_HEADERS));
-        // BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,row,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex
+        // BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_DRIVERS_ENERGY_ID,row,buffer,sizeof(buffer)));//"Animation List Tester");      //titles are fixed, so send them here using getindex
       }else{
         BufferWriterI->Append_P(PSTR("<td>{dc}%s'>" D_DEFAULT_HTML_VALUE "</div></td>"),"ener_tab");  
       }
@@ -1465,10 +1524,10 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
     for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
     {
       JBI->Array_Start_P(PSTR("device%d"), ii);
-        for(int i=0;i<4;i++)
-        {
-          JBI->Add(address[ii][i]);
-        }
+        // for(int i=0;i<4;i++)
+        // {
+          JBI->Add(address[ii]);
+        // }
       JBI->Array_End();
     }
     JBI->Level_End();

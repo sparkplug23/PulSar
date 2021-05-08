@@ -203,7 +203,7 @@ void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
     if(col==0){ //first column blank
       BufferWriterI->Append_P(PSTR("<th></th>"));
     }else{
-      BufferWriterI->Append_P(PSTR("<td>%s</td>"), pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,col-1,buffer,sizeof(buffer)));
+      BufferWriterI->Append_P(PSTR("<td>%s</td>"), DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,col-1,buffer,sizeof(buffer)));
     }
   }    
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
@@ -374,7 +374,7 @@ uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     // if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(pCONT_set->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,sensor_id,buffer,sizeof(buffer))); 
+      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_INA219_ID,sensor_id,buffer,sizeof(buffer))); 
 
 
       JsonBuilderI->Add("ina219_current_multiplier",ina219_current_multiplier);

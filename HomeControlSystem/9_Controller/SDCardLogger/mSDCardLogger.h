@@ -37,8 +37,16 @@ class mSDCardLogger :
     void EveryLoop();
     
     void EverySecond();
+
+    struct SDCARD_DATA{
+      bool isopened = false;
+
+
+    }sdcard_status;
     
     void SubTask_UpdateOLED();
+    
+    void CommandSet_SDCard_OpenClose_Toggle();
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

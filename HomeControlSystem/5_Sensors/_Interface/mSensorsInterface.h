@@ -49,6 +49,8 @@ class mSensorsInterface :
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
+      // move this into settings so all devices can share it
+      float sealevel_pressure; 
     }settings;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);

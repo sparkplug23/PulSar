@@ -1,3 +1,21 @@
+/*
+  mHVAC.cpp - mSensorsBME
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef MSENSORSBME_H
 #define MSENSORSBME_H 0.2
 
@@ -25,7 +43,7 @@ class mSensorsBME :
   public:
     mSensorsBME(){};
     void Pre_Init(void);
-    void init(void);
+    void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static const char* PM_MODULE_SENSORS_BME_CTR;
@@ -39,10 +57,6 @@ class mSensorsBME :
       return sizeof(mSensorsBME);
     };
     #endif
-
-
-
-    float sealevel_pressure; 
 
     struct SETTINGS{
       uint8_t fEnableSensor= false;
@@ -90,7 +104,7 @@ class mSensorsBME :
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
+    #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
@@ -100,11 +114,17 @@ class mSensorsBME :
     struct handler<mSensorsBME> mqtthandler_settings_teleperiod;
     struct handler<mSensorsBME> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsBME> mqtthandler_sensor_teleperiod;
+ 
+    struct handler<mSensorsBME>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     
-  //#endif
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 #endif

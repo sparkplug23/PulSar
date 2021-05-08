@@ -38,6 +38,19 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
+   case FUNC_LOOP:
+
+    if(pCONT_uart->urxlen2)
+    {
+    Serial.println(pCONT_uart->urxlen2);
+    for(int i=0;i<100;i++){   Serial.print(pCONT_uart->rxbuf2[i]); }
+    Serial.println();
+    pCONT_uart->urxlen2 = 0; // reset
+    }
+    ESP_LOGI("test", "Initializing SD card");
+
+
+   break;
     case FUNC_EVERY_SECOND:{
       
       // AddLog(LOG_LEVEL_INFO, PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
@@ -180,6 +193,9 @@ void mSerialUART::Init(void)
     init_UART2_ISR();
   }
   #endif // ENABLE_HARDWARE_UART_2
+
+  
+esp_log_level_set("test", ESP_LOG_VERBOSE);
   
 }
 
@@ -255,16 +271,19 @@ void mSerialUART::init_UART2_ISR(){
     uart2_handle_console        // Pointer to return handle. If non-NULL, a handle for the interrupt will be returned here.
   );
   
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("init_UART2_ISR Started %d buffer size"),settings.uart2.ring_buffer_size_rx);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART2_ISR Started %d buffer size"),settings.uart2.ring_buffer_size_rx);
 
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   gpio_pad_select_gpio(BLINK_GPIO);
   gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
   gpio_set_level(BLINK_GPIO, LOW); // Turn off by default
   #endif
+esp_log_level_set("*", ESP_LOG_VERBOSE);
+esp_log_level_set("test", ESP_LOG_VERBOSE);
+  
+    ESP_LOGV("test", "Initializing SD card");
 
 }
-
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
@@ -275,10 +294,14 @@ void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
   
   uint16_t rx_fifo_len, status;
   uint16_t i = 0; 
+// char* test_str = "uart_intr_handle_u2_static.\n";
+// uart_write_bytes(UART_NUM_0, (const char*)test_str, strlen(test_str));
 
   status = UART2.int_st.val; // read UART interrupt Status
   rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
-  
+
+  // uint32_t timeout = millis();
+  // 
   while(rx_fifo_len--)
   {
     pCONT_uart->rxbuf2[i++] = UART2.fifo.rw_byte; // read all bytes
@@ -286,11 +309,15 @@ void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
     {
       break;
     }
+    // if(abs(millis()-timeout)>50)
+    // {
+    //   break;
+    // }
   }
   pCONT_uart->urxlen2 = i;
 
-  BaseType_t dummyval;
-  UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart2.ringbuffer_handle, pCONT_uart->rxbuf2, pCONT_uart->urxlen2, &dummyval);
+  // BaseType_t dummyval;
+  // UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart2.ringbuffer_handle, pCONT_uart->rxbuf2, pCONT_uart->urxlen2, &dummyval);
   
   // after reading bytes from buffer clear UART interrupt status
   uart_clear_intr_status(UART_NUM_2, UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);

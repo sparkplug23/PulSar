@@ -250,6 +250,7 @@ bool loaded_default_for_moduled = false;
     // void Tasker_Rules_Init();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
 
 
     void MQTTHandler_Init();
@@ -260,7 +261,7 @@ bool loaded_default_for_moduled = false;
 
     struct handler<mRuleEngine> mqtthandler_settings_teleperiod;
     // struct handler<mRuleEngine> mqtthandler_sensor_ifchanged;
-    // struct handler<mRuleEngine> mqtthandler_sensor_teleperiod;
+    struct handler<mRuleEngine> mqtthandler_sensor_teleperiod;
     // struct handler<mRuleEngine> mqtthandler_scheduled_teleperiod;
 
     // Extra module only handlers
@@ -269,6 +270,11 @@ bool loaded_default_for_moduled = false;
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
+    
+    struct handler<mRuleEngine>* mqtthandler_list[2] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_teleperiod
+    };
 
 };
 

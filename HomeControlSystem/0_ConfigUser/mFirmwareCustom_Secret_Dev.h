@@ -148,7 +148,7 @@
 //     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_JSON_GPIOC "\":{"
 //       "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-//       "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+//       "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
 //       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
 //       "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
 //     "},"
@@ -209,7 +209,7 @@
       //   "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       //   #endif
       //   "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
       //   "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
       //   "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       // #endif //ESP266
@@ -219,7 +219,7 @@
         // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
         #endif
         // "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-        // "\"3\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+        // "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
         // "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
         "\"LBI\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       #endif //ESP32
@@ -278,7 +278,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM016_RX_CTR "\"," 
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
@@ -286,23 +286,32 @@
   "}";
 
   #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains"
-  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "[192,168,1,25]"
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Test"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "24"
+  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "25"
+  #define ENERGY_SENSORS_DYNAMIC_TEMPFIX 2
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
-        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
-        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ""
       "]"  
+    "},"
+    "\"" D_JSON_ENERGY "\":{"
+        "\"DeviceCount\":2"    
     "}"
   "}";
 
@@ -1393,9 +1402,11 @@
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
+      // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
+      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Single Fire 01\","
+    // "\"ColourPalette\":\"Single Fire 01\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
     "\"BrightnessRGB\":20"
   "}";
 
@@ -3826,138 +3837,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #endif // DEVICE_GPSPARSER_TESTER
 
-/**
- * 1) Serial0 is debugging, and will be disabled
- * 2) Serial1 is RSS samples in as superframes
- * 3) Serial2 is GPS input (9600)
- * 4) GPSParser using my hardware, as fast as possible
- * 5) OLED screen to give sd card status
- * 6) SDCard records superframe+gpsfix
- * 7) Need button to open/close sd (or dupont short? or small surface mount)
- * 
- * **/
-#ifdef DEVICE_SDLOGGER1_TESTER
-  #define DEVICENAME_CTR            "sdlogger1_tester"
-  #define DEVICENAME_FRIENDLY_CTR   "SD & GPS Logger Tester"
-
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-  #define ESP32
-
-  #define USE_MODULE_CONTROLLER_SDCARDLOGGER
-
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SSD1306
-  #define USE_DISPLAY_MODES1TO5
-  // #define SHOW_SPLASH
-
-  #define ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
-
-  #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
-
-  #define ENABLE_SERIAL_FLUSH
-
-  #define USE_MODULE_DRIVERS_INTERFACE
-// #define USE_MODULE_DRIVERS_GPS
-
-  #define USE_MODULE_DRIVERS_SERIAL_UART
-  #define USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
-
-  //Interrupt method
-  // #define NMEAGPS_INTERRUPT_PROCESSING
-
-  #define ENABLE_UART2_ISR_BUFFERS
-
-  #define NEOGPS_USE_SERIAL1
-
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED 192,168,1,116
-
-  #define USE_DEVFEATURE_RINGBUFFERS
-
-  // #define USE_MODULE_DRIVERS_SERIAL_UART
-
-  #define NMEAGPS_PARSE_SAVE_MILLIS
-  
-#include <GPSport.h>
-
-// FEATURE
-// Create an "alert" mqtt topic that all devices will broadcast important info on
-
-#define ENABLE_DEVFEATURE_GPSTEST1
-
-  // #define DISABLE_WEBSERVER
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-
-      // OLED screen
-      #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      // "\"2\":\"" D_GPIO_FUNCTION_OLED_RESET_CTR   "\","
-      #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
-
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\","
-      #endif 
-
-      // 2 push buttons
-
-      // SD card
-
-      // GPS
-
-      // Serial data logger (just receives into a buffer)
-      
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
-
-
-
-
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    // "\"" D_JSON_DEVICENAME "\":{"
-    //   "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-    //     "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-    //   "],"
-    //   "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-    //     "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-    //   "]"
-    // "}"
-    
-    "\"" D_JSON_DISPLAY_MODE "\":6"
-  "}";
-
-
-
-
-
-
-
-#endif // DEVICE_GPSPARSER_TESTER
-
 
 
 /**
@@ -4326,6 +4205,194 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #endif // DEVICE_ESP32_DEVKIT_BASIC
 
+
+/**
+ * 1) Serial0 is debugging, and will be disabled
+ * 2) Serial1 is RSS samples in as superframes
+ * 3) Serial2 is GPS input (9600)
+ * 4) GPSParser using my hardware, as fast as possible
+ * 5) OLED screen to give sd card status
+ * 6) SDCard records superframe+gpsfix
+ * 7) Need button to open/close sd (or dupont short? or small surface mount)
+ * 
+ * Configure dummy data, and feed it into both UART_GPS and UART_RSS simultaneously,
+ * Echo both directly out of UART_RSS_TX onto putty, leave it working all the time (laptop side)
+ * 
+ * 
+ * 1 - Check what gps can do, can I enter it into ublox? Does this improve speed, let me do manual decoding?
+ * Test 1 - Create long wire for gps to sit in window and give active gps data
+ * 
+ * STEPS # - uncomment just the section below it, so I can quickly test configs as I go, only uncomment one step at a time
+ * 
+ * **/
+#ifdef DEVICE_SDLOGGER1_TESTER
+  #define DEVICENAME_CTR            "sdlogger1_tester"
+  #define DEVICENAME_FRIENDLY_CTR   "SD & GPS Logger Tester"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  /**
+   *  - Test Buttons
+   * */
+  // #define USE_MODULE_SENSORS_BUTTONS
+  /**
+   *  - Enable rule triggers
+   * */
+  // #define USE_MODULE_CORE_RULES
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BUTTONS
+  /**
+   *  - Add triggered function in sdcard that will toggle sd later via button
+   * */
+  // #define USE_MODULE_CORE_RULES
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_CONTROLLER_SDCARDLOGGER
+  /**
+   *  - Enable displays, and show button pressed on it
+   * */
+  // #define USE_MODULE_CORE_RULES
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_CONTROLLER_SDCARDLOGGER
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  /**
+   *  - Get stable uart2 ringbuffer
+   * */
+  // #define USE_MODULE_DRIVERS_SERIAL_UART
+  // #define USE_DEVFEATURE_RINGBUFFERS // Rename, its simply a uart method, to use ringbuffers method vs basic read/poll
+  // #define ENABLE_UART2_ISR_BUFFERS
+  // #define ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
+  /**
+   *  - Read GPS Data into UART_GPS and UART_RSS (as dummy data)
+   * */
+  // #define USE_MODULE_CORE_RULES
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_CONTROLLER_SDCARDLOGGER
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  // #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_SERIAL_UART
+  // #define USE_DEVFEATURE_RINGBUFFERS // Rename, its simply a uart method, to use ringbuffers method vs basic read/poll
+  // #define ENABLE_UART2_ISR_BUFFERS
+
+
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+  #define ESP32
+
+  // 
+
+  // #define USE_MODULE_SENSORS_BUTTONS
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  // #define USE_DISPLAY_MODES1TO5
+  // #define SHOW_SPLASH
+
+
+//   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
+
+//   #define ENABLE_SERIAL_FLUSH
+
+//   #define USE_MODULE_DRIVERS_INTERFACE
+// // #define USE_MODULE_DRIVERS_GPS
+
+//   
+//   #define USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
+
+//   //Interrupt method
+//   // #define NMEAGPS_INTERRUPT_PROCESSING
+
+//   
+
+//   #define NEOGPS_USE_SERIAL1
+
+//   // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED 192,168,1,116
+
+//   #define USE_DEVFEATURE_RINGBUFFERS
+
+//   // #define USE_MODULE_DRIVERS_SERIAL_UART
+
+//   #define NMEAGPS_PARSE_SAVE_MILLIS
+  
+  // #include <GPSport.h>
+
+  // FEATURE
+  // Create an "alert" mqtt topic that all devices will broadcast important info on
+
+  // #define ENABLE_DEVFEATURE_GPSTEST1
+
+  // #define DISABLE_WEBSERVER
+
+  //   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
+
+  //   #define USE_MODULE_SENSORS_SWITCHES
+  //   #define USE_MODULE_SENSORS_ANALOG
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+
+      // OLED screen
+      #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      // "\"2\":\"" D_GPIO_FUNCTION_OLED_RESET_CTR   "\","
+      #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
+
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"22\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\","
+      #endif 
+
+      // 2 push buttons
+
+      // SD card
+
+      // GPS
+
+      // Serial data logger (just receives into a buffer)
+      
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+
+
+
+
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    // "\"" D_JSON_DEVICENAME "\":{"
+    //   "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+    //     "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+    //   "],"
+    //   "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+    //     "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+    //   "]"
+    // "}"
+    
+    "\"" D_JSON_DISPLAY_MODE "\":6"
+  "}";
+
+
+
+
+
+
+
+#endif // DEVICE_GPSPARSER_TESTER
 
 
 

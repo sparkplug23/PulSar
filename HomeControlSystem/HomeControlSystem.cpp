@@ -147,6 +147,8 @@ void setup(void)
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
+  // Init any dynamic memory buffers
+  pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
   // Used to show progress of boot in logs
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 

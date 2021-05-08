@@ -68,7 +68,7 @@ void mExampleClass::parse_JSONCommand(JsonParserObject obj)
 
 void mExampleClass::Pre_Init(void)
 {
-  if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
+  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_MODBUS_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   {
     settings.fEnableSensor = true;
   }

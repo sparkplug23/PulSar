@@ -22,7 +22,16 @@ enum XsnsFunctions {
   
   
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
+
+  // This will run AFTER json templates
   FUNC_POST_INIT,    // similar to FUNC_CONFIGURE_MODULES_FOR_DEVICE, will run immediately after init
+
+  /**
+   * Eg. parse_jsonCommand from template sets energy (pzem) to have X sensors during boot. Prior to leaving setup, this will be called to refresh these buffers based on the latest dynamic buffers needed
+   * */
+  FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID,
+  
+
   FUNC_FUNCTION_LAMBDA_INIT,
   FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES,   // Use defaults in code
   FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE, // Load values from settings struct and overwrite module values

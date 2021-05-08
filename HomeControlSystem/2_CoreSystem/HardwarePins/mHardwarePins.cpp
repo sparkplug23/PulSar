@@ -1588,7 +1588,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM004_RX_CTR)==0){  return GPIO_PZEM004_RX_ID; }
   // #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM016_RX_CTR)==0){  return GPIO_PZEM016_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR)==0){  return GPIO_PZEM0XX_MODBUS_RX_ID; }
   // #endif
   // #ifdef USE_MODULE_SENSORS_ULTRASONICS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SR04_ECHO_CTR)==0){  return GPIO_SR04_ECHO_ID; }
@@ -1831,7 +1831,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
   case  GPIO_PZEM004_RX_ID: return PM_GPIO_FUNCTION_PZEM004_RX_CTR;     
 #endif   
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  case  GPIO_PZEM016_RX_ID: return PM_GPIO_FUNCTION_PZEM016_RX_CTR;  
+  case  GPIO_PZEM0XX_MODBUS_RX_ID: return PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR;  
 #endif
 // // #ifdef USE_PZEM_DC
 //   GPIO_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface

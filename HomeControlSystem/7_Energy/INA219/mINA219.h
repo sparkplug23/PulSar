@@ -1,6 +1,9 @@
 #ifndef MSENSORSINA219_H
 #define MSENSORSINA219_H 0.1
 
+#define D_UNIQUE_MODULE_ENERGY_INA219_ID    132
+#define D_GROUP_MODULE_ENERGY_INA219_ID      2
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_ENERGY_INA219

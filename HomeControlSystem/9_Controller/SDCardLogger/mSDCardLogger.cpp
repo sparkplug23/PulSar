@@ -5,11 +5,11 @@
 const char* mSDCardLogger::PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_CTR;
 const char* mSDCardLogger::PM_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR;
 
+
 int8_t mSDCardLogger::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -40,11 +40,17 @@ int8_t mSDCardLogger::Tasker(uint8_t function, JsonParserObject obj){
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_BUTTON_PRESSED:
-      RulesEvent_Button_Pressed();
-    break;
+    // case FUNC_EVENT_BUTTON_PRESSED:
+    //   RulesEvent_Button_Pressed();
+    // break;
     #endif// USE_MODULE_CORE_RULES
 
+    /************
+     * TRIGGERS SECTION * 
+    *******************/
+    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+      CommandSet_SDCard_OpenClose_Toggle();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -79,10 +85,9 @@ void mSDCardLogger::parse_JSONCommand(JsonParserObject obj)
 }
 
 
-
 void mSDCardLogger::Pre_Init(void)
 {
-  // if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
+  // if (pCONT_pins->PinUsed(GPIO_PZEM0XX_MODBUS_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
   // {
     settings.fEnableSensor = true;
   // }
@@ -119,10 +124,6 @@ void mSDCardLogger::Init(void)
     #endif
 
 
-
-
-
-
 }
 
 
@@ -150,14 +151,20 @@ void mSDCardLogger::SubTask_UpdateOLED()
   //[Val 123456] // Val Err for GPS fix, showing UTC time
   //[ ] //Also show lat/long so I know its working
   //[] packets received on serialRSS in thousands
-
+#ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[25];
   snprintf(buffer, sizeof(buffer), "%s %s","Op","fMillis123456");
   pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
 
+  snprintf(buffer, sizeof(buffer), "%s",sdcard_status.isopened?"Open":"CLOSED");
+  pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+
+
+  
   snprintf(buffer, sizeof(buffer), "%s %s","Op",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
+  #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
 }
 
