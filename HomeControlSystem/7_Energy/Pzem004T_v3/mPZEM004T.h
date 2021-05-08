@@ -1,22 +1,35 @@
+/*
+  mPZEM004T.h - PZEM004T v3 MODBUS
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H 0.1
 
-#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID    131
+#define D_UNIQUE_MODULE_ENERGY_PZEM004T_ID    132
 #define D_GROUP_MODULE_ENERGY_PZEM004T_ID      2
 
 #include "1_TaskerManager/mTaskerManager.h"
-// #include "2_CoreSystem/mBaseConfig.h"
-
-// #include "2_CoreSystem/mFirmwareDefaults.h"
-// #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-// #include "2_CoreSystem/mSystemConfig.h"
-
-// // #define USE_MODULE_ENERGY_PZEM004T_V3
 
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
 
 #include <TasmotaSerial.h>
 #include <TasmotaModbus.h>
+
+#define ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT 900
 
 // #include "1_TaskerManager/mTaskerManager.h"
 // http://innovatorsguru.com/wp-content/uploads/2019/06/PZEM-004T-V3.0-Datasheet-User-Manual.pdf
@@ -28,6 +41,7 @@ class mEnergyPZEM004T :
 	  mEnergyPZEM004T(){};
     void Pre_Init(void);
     void Init(void);
+    void Post_Init();
     void Settings_Default();
 
     static const char* PM_MODULE_ENERGY_PZEM004T_CTR;
@@ -47,10 +61,12 @@ class mEnergyPZEM004T :
       uint8_t found = 0;
       uint16_t rate_measure_ms = 1000;
       // uint8_t sensor_count = 1;
+      uint8_t active_sensor = 0;
     }settings;
 
     void EveryLoop();    
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void AllocateDynamicMemory();
     
     #ifndef MAX_ENERGY_SENSORS
       #define MAX_ENERGY_SENSORS 12
@@ -69,17 +85,7 @@ class mEnergyPZEM004T :
 
     TasmotaModbus *modbus;
     timereached_t measure_time;
-    uint8_t active_sensor = 0;
-
-    struct PZEM_MODBUS{
-      float voltage;
-      float current;
-      float active_power;
-      float frequency;
-      float power_factor;
-      float energy;  
-    }pzem_modbus;//[MAX_ENERGY_SENSORS];
-
+    uint32_t timeout = millis();
     
     struct DATA_MODBUS{
       float voltage;
@@ -99,13 +105,13 @@ class mEnergyPZEM004T :
       uint32_t start_time = 0;
       uint32_t end_time = 0;
     }stats;
-uint32_t timeout = millis();
+
     DATA_MODBUS* data_modbus = nullptr;
 
     void ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer);
-    void ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer);
 
     void SplitTask_UpdateSensor(uint8_t device_id);
+    void parse_JSONCommand(JsonParserObject obj);
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

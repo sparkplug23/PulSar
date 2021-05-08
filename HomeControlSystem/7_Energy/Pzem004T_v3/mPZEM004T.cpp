@@ -1,3 +1,22 @@
+/*
+  mPZEM004T.cpp - PZEM004T v3 MODBUS
+  I will perhaps later add v1/2 into this as another type, since only the read function and address will vary
+
+  Copyright (C) 2021  Michael
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "mPZEM004T.h"
 
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
@@ -20,6 +39,9 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT:
       Init();
     break;
+    case FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID:
+      AllocateDynamicMemory();
+    break;
   }
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -31,6 +53,12 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP: 
       EveryLoop();
     break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break; 
     /************
      * MQTT SECTION * 
     *******************/
@@ -54,9 +82,56 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
+void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj){
+
+  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  
+  if(jtok = obj[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR].getObject()["SearchForDevices"])
+  {
+
+      uint8_t found_address = 0;
+      uint8_t modbus_buffer[30] = {0}; 
+
+      for(uint8_t address_search=0;address_search<30;address_search++)
+      {
+
+        modbus->Send(address_search, 0x04, 0, 10);      
+        found_address = 0;
+        timeout = millis();
+        while(abs(millis()-timeout)<200)
+        {
+
+          // ESP.wdtFeed();
+
+          if(modbus->ReceiveReady())
+          { 
+            uint8_t error = modbus->ReceiveBuffer(modbus_buffer, 10);
+            found_address = modbus_buffer[2]; // addres byte
+            AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address =%d %d FOUND"),found_address,address_search);
+            break;
+          }
+        }
+        
+        AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address =%d %d"),found_address,address_search);
+
+      }
+
+
+
+  }
+   
+}
+
+
+
+
+
 void mEnergyPZEM004T::Pre_Init(void)
 {
-  if (pCONT_pins->PinUsed(GPIO_PZEM016_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
+
+  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_MODBUS_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
     pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
     // set bit for drivers
     settings.fEnableSensor = true;
@@ -67,7 +142,7 @@ void mEnergyPZEM004T::Pre_Init(void)
 void mEnergyPZEM004T::Init(void)
 {
 
-  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM016_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM0XX_MODBUS_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
 
   uint8_t result = modbus->Begin(9600);
 
@@ -76,62 +151,81 @@ void mEnergyPZEM004T::Init(void)
   if (result) {
     // AddLog(LOG_LEVEL_TEST, PSTR("modbus result = %d"),result);
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-    // pCONT_sup->ClaimSerial();// also serial number );
-
-    // pCONT_iEnergy->Energy.phase_count = 1;
-    
-    // // Set via json command, default to 1
-    // #ifdef DEVICE_CONSUMERUNIT
-    //   pCONT_iEnergy->Energy.phase_count = 8;
-    // #endif 
-    // #ifdef DEVICE_PZEM_TESTER
-    //   pCONT_iEnergy->Energy.phase_count = 2;
-    // #else
-    // #endif
-
-    // AddLog(LOG_LEVEL_TEST,"mEnergyPZEM004T::init");
+    pCONT_sup->ClaimSerial();// also serial number );
   } else {
     pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
     AddLog(LOG_LEVEL_ERROR, PSTR("modbus result = %d"),result);
-    // delay(3000);
-
+    settings.fEnableSensor = false;
+    return;
   }
-  pCONT_iEnergy->Energy.phase_count = 1;
-  if(pCONT_iEnergy->Energy.phase_count<=MAX_ENERGY_SENSORS)
-  {
-    data_modbus = new DATA_MODBUS[1];//pCONT_iEnergy->Energy.phase_count];
-    pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
-  }
+    // pCONT_set->runtime_var.energy_driver = pCONT_iEnergy->ENERGY_MODULE_NONE_ID;
 
-  // data_modbus[0].voltage = 123;
-  // data_modbus[0].current = 456;
-  // data_modbus[0].voltage = 123;
-
-  // if(data_modbus)
-  // {
-  //   Serial.println("data_modbus");
-  // }
-  // else
-  // {
-  //   Serial.println("!data_modbus");
-
-
-  // }
-
-  // delay(5000);
-
-
-  // data_modbus[0].voltage = 1;
-  // data_modbus[1].voltage = 2;
-  // data_modbus[2].voltage = 3;
-
-  // Optional poll for all sensors?
-  // // Else its default
-  // settings.found = pCONT_iEnergy->Energy.phase_count;
-
+  // pCONT_iEnergy->Energy.phase_count = ENERGY_SENSORS_DYNAMIC_TEMPFIX;
   // Init the default
 
 }
+
+/**
+ * This will likely be merged into an energy type
+ * */
+void mEnergyPZEM004T::AllocateDynamicMemory()
+{
+
+  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "ALLOCATE for %d sensors"),pCONT_iEnergy->Energy.phase_count);
+
+  if(pCONT_iEnergy->Energy.phase_count<=MAX_ENERGY_SENSORS)
+  {
+    data_modbus = new DATA_MODBUS[pCONT_iEnergy->Energy.phase_count];
+  }
+
+  // Optional poll for all sensors?
+  // // Else its default
+  settings.found = pCONT_iEnergy->Energy.phase_count;
+
+  
+}
+
+void mEnergyPZEM004T::EveryLoop(){
+
+  if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms))
+  {
+
+    SplitTask_UpdateSensor(settings.active_sensor);
+
+    if(labs(millis()-timeout)>ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT)
+    {
+      AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
+      transceive_mode = TRANSCEIVE_RESPONSE_TIMEOUT_ID;
+      timeout = millis();
+      stats.timeout_reads++;
+    }
+
+    if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
+    {
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    }
+
+    if(
+      (transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID) ||
+      (transceive_mode == TRANSCEIVE_RESPONSE_TIMEOUT_ID)
+    )
+    { // If needed, advance to next sensor
+      if(settings.active_sensor < pCONT_iEnergy->Energy.phase_count-1)
+      {
+        settings.active_sensor++;
+      }
+      else
+      {
+        settings.active_sensor = 0; // reset to start or remain on single sensor 
+        measure_time.millis = millis();
+      }
+      AddLog(LOG_LEVEL_DEBUG, PSTR("settings.active_sensor = %d"),settings.active_sensor);
+    }
+
+  }
+
+} // END EveryLoop
+
 
 
 
@@ -150,9 +244,11 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_RESPONSE_SUCCESS_ID:
 
       stats.start_time = millis();
-      modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
+      timeout = millis();
+      // modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
+      modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
       
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), device_id, 0x04, 0, 10);
+      AddLog(LOG_LEVEL_DEBUG,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);
 
       transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
 
@@ -180,7 +276,6 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
           //   transceive_mode = TRANSCEIVE_RESPONSE_ERROR_ID;
           // }
           transceive_mode = TRANSCEIVE_RESPONSE_SUCCESS_ID;
-          timeout = millis();
         }
         else
         {
@@ -210,54 +305,6 @@ void mEnergyPZEM004T::ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer){
 
 }
 
-void mEnergyPZEM004T::ParseModbusBuffer(PZEM_MODBUS* mod, uint8_t* buffer){
-  //           0     1     2     3     4     5     6     7     8     9           = ModBus register
-  //  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24  = Buffer index
-  // 01 04 14 08 D1 00 6C 00 00 00 F4 00 00 00 26 00 00 01 F4 00 64 00 00 51 34
-  // Id Cc Sz Volt- Current---- Power------ Energy----- Frequ PFact Alarm Crc--
-  mod->voltage       = (float)((buffer[3] << 8) + buffer[4]) / 10.0;                                                  // 6553.0 V
-  mod->current       = (float)((buffer[7] << 24) + (buffer[8] << 16) + (buffer[5] << 8) + buffer[6]) / 1000.0;        // 4294967.000 A
-  mod->active_power  = (float)((buffer[11] << 24) + (buffer[12] << 16) + (buffer[9] << 8) + buffer[10]) / 10.0;  // 429496729.0 W
-  mod->frequency     = (float)((buffer[17] << 8) + buffer[18]) / 10.0;                                              // 50.0 Hz
-  mod->power_factor  = (float)((buffer[19] << 8) + buffer[20]) / 100.0;  
-  mod->energy        = (float)((buffer[15] << 24) + (buffer[16] << 16) + (buffer[13] << 8) + buffer[14]);    
-
-}
-
-
-void mEnergyPZEM004T::EveryLoop(){
-
-  if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms))
-  {
-
-    SplitTask_UpdateSensor(active_sensor);
-
-    if(labs(millis()-timeout)>200)
-    {
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
-      transceive_mode = TRANSCEIVE_RESPONSE_TIMEOUT_ID;
-      timeout = millis();
-      stats.timeout_reads++;
-    }
-
-    if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
-    {
-      // If needed, advance to next sensor
-      if(active_sensor < pCONT_iEnergy->Energy.phase_count)
-      {
-        // active_sensor++;
-      }
-      else
-      {
-        active_sensor = 0; // reset to start or remain on single sensor 
-      }
-    }
-
-  }
-
-} // END EveryLoop
-
-
 
 uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_method){
 
@@ -285,14 +332,20 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_method){
     JBI->Level_End();
   }
 
+  // float error_rate_perc = (float)(stats.success_reads+stats.timeout_reads)/(float);
+  float errors = stats.timeout_reads;
+  float total = stats.success_reads;//+stats.timeout_reads;
+  float error_rate_perc = (errors/total)*100;
+
   JBI->Level_Start("stats");
     JBI->Add("success", stats.success_reads);
     JBI->Add("timeout", stats.timeout_reads);
+    JBI->Add("error_rate_perc", error_rate_perc);
     JBI->Add("sample_time", stats.sample_time);
     JBI->Add("start_time", stats.start_time);
     JBI->Add("end_time", stats.end_time);
-
   JBI->Level_End();
+
   return JBI->End();
 
 }
@@ -320,7 +373,7 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
+  ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
