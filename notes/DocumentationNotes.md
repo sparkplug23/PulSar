@@ -19,7 +19,7 @@ These folders can be summarised as follows:
   * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output.
 
 
-# Description of what each folder contains
+# Module Details
 
 ## ConfigUser
 
