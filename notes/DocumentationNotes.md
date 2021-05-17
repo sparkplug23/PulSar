@@ -51,6 +51,7 @@ The complete list of modules/sensors are:
  * `Motion` (Motion, PIR, Doppler)
  * `Presence` (Occupancy)
  * `PulseCounter` (Counter^)
+ * `RemoteSensor` (Any)
  * `Rotaty` (Rotational Counter?)
  * `SeeSawSoil` (Moisture)
  * `SR04` (Distance)
