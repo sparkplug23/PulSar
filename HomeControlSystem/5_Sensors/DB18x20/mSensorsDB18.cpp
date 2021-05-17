@@ -556,6 +556,12 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
       if(memcmp(sensor[sensor_count].address,address_to_find,sizeof(sensor[sensor_count].address))==0){ // 0 means equal
 
 
+//temp fix
+/**
+ * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
+ * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
+ * This means, on setting name, I should search for the address of X and put it into index X.. swap?
+ * */
         sensor[sensor_count].address_id = address_id;   
         // sensor[original_device_id].id = sensor_count;    
       
@@ -655,7 +661,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Sensor;
-  
+
 } //end "MQTTHandler_Init"
 
 

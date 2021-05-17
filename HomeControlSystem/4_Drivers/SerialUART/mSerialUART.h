@@ -33,6 +33,7 @@
 
 static const char *TAG = "uart_events";
 
+void uart_intr_handle_u1_static(void* arg);
 void uart_intr_handle_u2_static(void* arg);
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR) "uartinfo";
@@ -58,6 +59,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR) "uartinfo";
 // #include "FS.h"
 // #include "SD_MMC.h"
 
+static uart_isr_handle_t *uart1_handle_console;
 static uart_isr_handle_t *uart2_handle_console;
 
 #define BLINK_GPIO GPIO_NUM_2
@@ -87,6 +89,25 @@ class mSerialUART :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
+/***
+     * UART1
+     * 
+     * */
+    #define RINGBUFFER_HANDLE_1_LENGTH 1000
+
+    #ifdef ENABLE_UART_RINGBUFFERS
+    void  init_UART1_RingBuffer();
+    #endif // ENABLE_UART_RINGBUFFERS
+
+    void  init_UART1_ISR();
+
+    static void IRAM_ATTR uart_intr_handle_u1(void);
+
+    // Receive buffer to collect incoming data
+    uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
+    // Register to collect data length
+    uint16_t urxlen1 = 0;
+    uint16_t GetReceiveBuffer1(char* output_buf, uint16_t output_len, char optional_read_until_char = 0);
 
     /***
      * UART2
@@ -94,7 +115,10 @@ class mSerialUART :
      * */
     #define RINGBUFFER_HANDLE_2_LENGTH 1000
 
+    #ifdef ENABLE_UART_RINGBUFFERS
     void  init_UART2_RingBuffer();
+    #endif // ENABLE_UART_RINGBUFFERS
+
     void  init_UART2_ISR();
 
     static void IRAM_ATTR uart_intr_handle_u2(void);

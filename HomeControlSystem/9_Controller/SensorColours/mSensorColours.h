@@ -1,6 +1,9 @@
 #ifndef _MCUSE_MODULE_CONTROLLER_SENSORCOLOURS_H
 #define _MCUSE_MODULE_CONTROLLER_SENSORCOLOURS_H 0.3
 
+#define D_UNIQUE_MODULE_CONTROLLER_SENSOR_COLOURS_ID   230  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_GROUP_MODULE_CONTROLLER_SENSOR_COLOURS_ID    5    // Numerical accesending order of module within a group
+
 /**
  * Using sensor readings, to generate colour palettes
  * This will be part of the new "sensor_struct" to hold all types
@@ -13,77 +16,46 @@
 
 #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
 
-class mSensorColours {
+class mSensorColours :
+  public mTaskerInterface
+{
 
   private:
   public:
     mSensorColours(){};
+
+
+    static const char* PM_MODULE_CONTROLLER_SENSOR_COLOURS_CTR;
+    static const char* PM_MODULE_CONTROLLER_SENSOR_COLOURS_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SENSOR_COLOURS_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_SENSOR_COLOURS_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SENSOR_COLOURS_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSensorColours);
+    };
+    #endif
+
+
+
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
 
     void EverySecond();
 
+void parse_JSONCommand(JsonParserObject obj);
 int8_t Tasker_Web(uint8_t function);
 
-// const char kSonoffIfanCommands[] PROGMEM = "|"  // No prefix
-//   D_CMND_FANSPEED;
-
-// void (* const SonoffIfanCommand[])(void) PROGMEM = {
-//   &CmndFanspeed };
-
-uint8_t ifan_fanspeed_timer = 0;
-uint8_t ifan_fanspeed_goal = 0;
-bool ifan_receive_flag = false;
-bool ifan_restart_flag = true;
-
-
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
+//move back into function long term for stability as its only temp needed
+  uint8_t encoded_gradient_temp_array[200];
 
 void init();
 void pre_init();
 
-int8_t pin = -1;
-
-uint16_t pwm_range_max = 1023;
-uint16_t pwm_range_min = 1;
-
-uint8_t set_fan_speed = 0;//0,1,2,3
-uint16_t set_fan_pwm = 0;//0,1,2,3
-
-
 struct SETTINGS{
   uint8_t fEnableModule = false;
 }settings;
-
-uint8_t GetLightState(void);
-void SetLightState(uint8_t state);
-
-
-bool IsModuleIfan(void);
-uint8_t MaxFanspeed(void);
-uint8_t GetFanspeed(void);
-void SetFanspeed(uint8_t fanspeed, bool sequence);
-void SonoffIfanReceived(void);
-bool SerialInput(void);
-void CmndFanspeed(void);
-void SpeedRefresh(void);
-
-
-    // #define CEILINGFAN_TOGGLE  0xA55595
-    // #define CEILINGFAN_DIMM    0xA55955
-    // #define CEILINGFAN_SPEED0  0xA55655
-    // #define CEILINGFAN_SPEED1  0xA55557
-    // #define CEILINGFAN_SPEED2  0xA55565
-    // #define CEILINGFAN_SPEED3  0xA5655B
-    // #define ONE_BIT_TIME 1252 //+- 30 std
-    // #define ZERO_BIT_TIME 439 //+- 30 std
-
-    //void AddToJsonObject_AddHardware(JsonObject root);
-    void AddToHardwareMessage();
-
-    
-void CommandSet_FanSpeed_Manual(uint16_t value);
 
 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
@@ -114,6 +86,12 @@ void WebAppend_Root_Status_Table();
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
     struct handler<mSensorColours> mqtthandler_sensor_ifchanged;
     struct handler<mSensorColours> mqtthandler_sensor_teleperiod;
+    
+  struct handler<mSensorColours>* mqtthandler_list[3] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 

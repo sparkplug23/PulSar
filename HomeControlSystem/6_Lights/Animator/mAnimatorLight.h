@@ -300,7 +300,8 @@ class mAnimatorLight :
                                       bool colour_is_additive = false,
                                       bool values_are_percentage_of_strip_size = false
     );
-void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
+    
+    void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
 
     uint8_t counter_test = 0;
     uint8_t test_flag = false;

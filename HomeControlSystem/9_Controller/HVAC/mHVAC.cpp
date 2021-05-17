@@ -25,6 +25,10 @@ const char* mHVAC::PM_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR = D_MODULE_CONTROLLER_
 
 int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj){
 
+  //FUTURE ZONE of upstairs climate will be URL/wireless method updated every 10, instead of reading any hardware
+  // REMOVE DHT from upstairs loop. 
+  // immersion relay and sensors will be only wired thing, to be replaced with ethernet POE later back to main controller
+
   /************
    * INIT SECTION * 
   *******************/

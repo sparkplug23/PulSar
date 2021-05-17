@@ -251,11 +251,13 @@ int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int8_t device
             PSTR(
               "\n\rSearching \"%s\"\n\r"
               "Found \"%s\" @ index %d\n\r"
-              "del count/index pos %d\n\r"
+              "delimeter_count %d\n\r"
+              "delimeter_within_class_count %d\n\r"
             ),         
             name_tofind,
             p_start_of_found,
             p_start_of_found - haystack, // pointer distance
+            delimeter_count,
             delimeter_within_class_count
           );
           #endif // ENABLE_LOG_LEVEL_INFO

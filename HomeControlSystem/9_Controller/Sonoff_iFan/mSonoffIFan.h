@@ -26,9 +26,6 @@ class mSonoffIFan :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
-
     static const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR;
     static const char* PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
@@ -43,6 +40,8 @@ class mSonoffIFan :
     struct SETTINGS{
       uint8_t fEnableModule = false;
     }settings;
+
+    void parse_JSONCommand(JsonParserObject obj);
 
     uint8_t ifan_fanspeed_timer = 0;
     uint8_t ifan_fanspeed_goal = 0;
@@ -66,7 +65,7 @@ class mSonoffIFan :
     void WebAppend_Root_Status_Table();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Power(uint8_t json_method = 0);
 
   
     void MQTTHandler_Init();
@@ -76,11 +75,16 @@ class mSonoffIFan :
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     struct handler<mSonoffIFan> mqtthandler_settings_teleperiod;
-    struct handler<mSonoffIFan> mqtthandler_sensor_ifchanged;
-    struct handler<mSonoffIFan> mqtthandler_sensor_teleperiod;
+    struct handler<mSonoffIFan> mqtthandler_power_ifchanged;
+    struct handler<mSonoffIFan> mqtthandler_power_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
+    struct handler<mSonoffIFan>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_power_ifchanged,
+      &mqtthandler_power_teleperiod
+    };
 
 };
 

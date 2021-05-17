@@ -3,84 +3,89 @@
 #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
 
 
-int8_t mSensorColours::CheckAndExecute_JSONCommands(){
+// int8_t mSensorColours::CheckAndExecute_JSONCommands(){
 
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
+//   // Check if instruction is for me
+//   if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
+//     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//     parse_JSONCommand();
+//     return FUNCTION_RESULT_HANDLED_ID;
+//   }else{
+//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+//   }
 
-}
+// }
 
-void mSensorColours::parse_JSONCommand(void){
-
-  char buffer[50];
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  }  
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-  
-  // /***
-  //  * As order of importance, others that rely on previous commands must come after
-  //  * */
-
-  // if(jtok = obj[PM_JSON_FANSPEED_MANUAL]){
-  // //   if(jtok.isStr()){
-  // //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-  // //       CommandSet_PaletteID(tmp_id);
-  // //       data_buffer.isserviced++;
-  // //     }
-  // //   }else
-  //   if(jtok.isNum()){
-  //     CommandSet_FanSpeed_Manual(jtok.getInt());
-  //     set_fan_pwm = jtok.getInt();
-  //     set_fan_speed = map(jtok.getInt(),1,1023,0,3);
-  //     data_buffer.isserviced++;
-  //   }
-  // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-  // //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-  
-
-  // if(jtok = obj[PM_JSON_FANSPEED]){
-  // //   if(jtok.isStr()){
-  // //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-  // //       CommandSet_PaletteID(tmp_id);
-  // //       data_buffer.isserviced++;
-  // //     }
-  // //   }else
-  //   if(jtok.isNum()){
-  //     CommandSet_FanSpeed_Manual(map(jtok.getInt(),0,3,1,1023)); //fix
-  //     set_fan_pwm = map(jtok.getInt(),0,3,1,1023);
-  //     set_fan_speed = jtok.getInt();
-  //     data_buffer.isserviced++;
-  //   }
-  // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-  // //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-  
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+void mSensorColours::parse_JSONCommand(JsonParserObject obj)
+{
 
 }
+
+// void mSensorColours::parse_JSONCommand(void){
+
+//   char buffer[50];
+
+//   // Need to parse on a copy
+//   char parsing_buffer[data_buffer.payload.len+1];
+//   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+//   JsonParser parser(parsing_buffer);
+//   JsonParserObject obj = parser.getRootObject();   
+//   if (!obj) { 
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+//     #endif //ENABLE_LOG_LEVEL_COMMANDS
+//     return;
+//   }  
+//   JsonParserToken jtok = 0; 
+//   int8_t tmp_id = 0;
+  
+//   // /***
+//   //  * As order of importance, others that rely on previous commands must come after
+//   //  * */
+
+//   // if(jtok = obj[PM_JSON_FANSPEED_MANUAL]){
+//   // //   if(jtok.isStr()){
+//   // //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+//   // //       CommandSet_PaletteID(tmp_id);
+//   // //       data_buffer.isserviced++;
+//   // //     }
+//   // //   }else
+//   //   if(jtok.isNum()){
+//   //     CommandSet_FanSpeed_Manual(jtok.getInt());
+//   //     set_fan_pwm = jtok.getInt();
+//   //     set_fan_speed = map(jtok.getInt(),1,1023,0,3);
+//   //     data_buffer.isserviced++;
+//   //   }
+//   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+//   // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
+//   // }
+  
+
+//   // if(jtok = obj[PM_JSON_FANSPEED]){
+//   // //   if(jtok.isStr()){
+//   // //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+//   // //       CommandSet_PaletteID(tmp_id);
+//   // //       data_buffer.isserviced++;
+//   // //     }
+//   // //   }else
+//   //   if(jtok.isNum()){
+//   //     CommandSet_FanSpeed_Manual(map(jtok.getInt(),0,3,1,1023)); //fix
+//   //     set_fan_pwm = map(jtok.getInt(),0,3,1,1023);
+//   //     set_fan_speed = jtok.getInt();
+//   //     data_buffer.isserviced++;
+//   //   }
+//   // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+//   // //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//   // //   #endif // ENABLE_LOG_LEVEL_DEBUG
+//   // }
+  
+//   mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
+// }
 
 
 
@@ -92,20 +97,20 @@ void mSensorColours::parse_JSONCommand(void){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mSensorColours::CommandSet_FanSpeed_Manual(uint16_t value){
+// void mSensorColours::CommandSet_FanSpeed_Manual(uint16_t value){
 
-  analogWrite(pin, value);
+//   analogWrite(pin, value);
 
-AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
+// AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
 
 
-//   char buffer[20];
-//   pCONT_set->Settings.light_settings.type = value;
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
-//   #endif // ENABLE_LOG_LEVEL_COMMANDS
-} 
+// //   char buffer[20];
+// //   pCONT_set->Settings.light_settings.type = value;
+// //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+// //   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// } 
 // int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
 //   if(c=='\0') return -1;
 //   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }

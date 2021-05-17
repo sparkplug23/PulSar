@@ -3,40 +3,10 @@
 #ifdef USE_MODULE_DRIVERS_SDCARD
 
 
-int8_t mSDCard::CheckAndExecute_JSONCommands(){
+void mSDCard::parse_JSONCommand(JsonParserObject obj){
 
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR)>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
-
-}
-
-void mSDCard::parse_JSONCommand(void){
-
-  char buffer[50];
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  }  
   JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-    
+
 
   if(jtok = obj["ListDir"]){
 
@@ -79,10 +49,45 @@ void mSDCard::parse_JSONCommand(void){
     CommandSet_ReadFile(jtok.getStr());
     
   }
+
+
+  /**
+   * Set flag, write 100 single bytes, 1 per second
+   * */
+  if(jtok = obj["Debug"].getObject()["WriteTest"]){
+
+    // CommandSet_ReadFile(jtok.getStr());
+    debug.bytes_to_write = jtok.getInt();
+    debug.test_mode = WRITE_BYTES_ID;
+
+  }
+
+  if(jtok = obj["Debug"].getObject()["OpenFile"]){
+
+    // CommandSet_ReadFile(jtok.getStr());
+    // debug.bytes_to_write = jtok.getInt();
+    // debug.test_mode = WRITE_BYTES_ID;
+    uint8_t buffer[5] = {0,1,2,3,4};
+    uint8_t close_decounter = 10;
+    writer_settings.status = FILE_STATUS_OPENING_ID;
+    SubTask_Append_To_Open_File(buffer, 5);
+
+  }
+
   
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
+  // /**
+  //  * Set flag, write 512 bytes, same time
+  //  * */
+  // if(jtok = obj["Debug"].getObject()["LargeWriteTest"]){
+
+  //   // CommandSet_ReadFile(jtok.getStr());
+
+  // }
+  MQTTHandler_Set_fSendNow();
 
 }
+
 
 
 /******************************************************************************************************************************
@@ -93,7 +98,7 @@ void mSDCard::parse_JSONCommand(void){
 
 void mSDCard::CommandSet_ReadFile(const char* filename){
 
-  readFile(SD_MMC, filename);
+  readFile(SD, filename);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
@@ -113,9 +118,9 @@ void mSDCard::CommandSet_WriteFile(const char* filename, const char* data){
   char filename_with_extention[50];
   sprintf(filename_with_extention, "%s.txt", filename);
   if(data == nullptr){
-    writeFile(SD_MMC, filename_with_extention, "Empty File!");
+    writeFile(SD, filename_with_extention, "Empty File!");
   }else{
-    writeFile(SD_MMC, filename_with_extention, "Hello ");
+    writeFile(SD, filename_with_extention, "Hello ");
   }
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -134,7 +139,7 @@ void mSDCard::CommandSet_WriteFile(const char* filename, const char* data){
 void mSDCard::CommandSet_CreateFile_WithName(char* value){
 
 //   analogWrite(pin, value);
-  createDir(SD_MMC, "/mydir");
+  createDir(SD, "/mydir");
 
 // AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
@@ -154,9 +159,9 @@ void mSDCard::CommandSet_CreateFile_WithName(char* value){
 void mSDCard::CommandSet_SerialPrint_FileNames(const char* dirname){
 
   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("TESTListDir")), dirname);
-  listDir(SD_MMC, dirname, 0);
+  listDir(SD, dirname, 0);
 
-  // listDir(SD_MMC, "/", 0);
+  // listDir(SD, "/", 0);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ListDir")), dirname);

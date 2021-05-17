@@ -633,6 +633,9 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
     // digitalWrite(pCONT_set->pin[gpio_pin], state &1);
   // }
 }
+/**
+ * @note GPIO_FUNC is used here to retrieve the real pin to be set, it is not digitalWrite(physical_pin, val)
+ * */
 void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state)
 {
   // if (PinUsed(gpio_pin, index)) {
@@ -1544,6 +1547,8 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_TX_CTR)==0){  return GPIO_HWSERIAL0_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL0_RX_CTR)==0){  return GPIO_HWSERIAL0_RX_ID; }
 #ifdef ESP32
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_RX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL2_RING_BUFFER_TX_ID; }
 #endif
@@ -1588,7 +1593,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM004_RX_CTR)==0){  return GPIO_PZEM004_RX_ID; }
   // #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR)==0){  return GPIO_PZEM0XX_MODBUS_RX_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR)==0){  return GPIO_PZEM0XX_RX_MODBUS_ID; }
   // #endif
   // #ifdef USE_MODULE_SENSORS_ULTRASONICS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SR04_ECHO_CTR)==0){  return GPIO_SR04_ECHO_ID; }
@@ -1831,7 +1836,7 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
   case  GPIO_PZEM004_RX_ID: return PM_GPIO_FUNCTION_PZEM004_RX_CTR;     
 #endif   
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  case  GPIO_PZEM0XX_MODBUS_RX_ID: return PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR;  
+  case  GPIO_PZEM0XX_RX_MODBUS_ID: return PM_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR;  
 #endif
 // // #ifdef USE_PZEM_DC
 //   GPIO_PZEM017_RX_ID,     // PZEM-003_ID,017 Serial Modbus interface
@@ -1952,6 +1957,17 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 
 
   #ifdef ESP32
+
+  case GPIO_HWSERIAL1_RING_BUFFER_RX_ID: return PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR;
+  case GPIO_HWSERIAL1_RING_BUFFER_TX_ID: return PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR;
+  case GPIO_HWSERIAL2_RING_BUFFER_RX_ID: return PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR;
+  case GPIO_HWSERIAL2_RING_BUFFER_TX_ID: return PM_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR;
+
+
+
+
+
+
   // Webcam
   case GPIO_WEBCAM_DATA1_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA1_CTR;
   case GPIO_WEBCAM_DATA2_ID: return PM_GPIO_FUNCTION_WEBCAM_DATA2_CTR;

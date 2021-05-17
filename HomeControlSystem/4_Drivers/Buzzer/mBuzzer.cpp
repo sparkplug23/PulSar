@@ -109,7 +109,8 @@ void mBuzzer::BuzzerSet(uint32_t state) {
     }
   } else {
     //AddLog(LOG_LEVEL_DEBUG, PSTR("BUZ:pCONT_pins->DigitalWrite %d %d"),Buzzer.pin,state);
-    pCONT_pins->DigitalWrite(Buzzer.pin, 0, state);     // Buzzer On/Off
+    // pCONT_pins->DigitalWrite(Buzzer.pin, 0, state);     // Buzzer On/Off
+    digitalWrite(Buzzer.pin, state);     // Buzzer On/Off
   }
 
 }

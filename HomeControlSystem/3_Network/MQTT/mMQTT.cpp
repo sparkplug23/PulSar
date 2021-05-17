@@ -1,5 +1,6 @@
 #include "mMQTT.h"
 
+// #ifdef USE_MODULE_NETWORK_MQTT
 const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
 const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
 
@@ -529,12 +530,16 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
   // if(pCONT->Tasker_Interface(FUNC_MQTT_DATA_ID)){ return; }
 
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
-    if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+      LoggingLevels level = LOG_LEVEL_DEBUG_MORE;
+      #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+      level = LOG_LEVEL_TEST;
+      #endif
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWTopic   [len:%d] %s"),data_buffer.topic.len,  data_buffer.topic.ctr);
+      AddLog(level, PSTR(D_LOG_MQTT "<-- NEWPayload [len:%d] %s"),data_buffer.payload.len,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
-    }
+    // }
 
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
@@ -832,3 +837,5 @@ const char* mMQTT::state_ctr(void){
 }
 
 
+
+// #endif // USE_MODULE_NETWORK_MQTT

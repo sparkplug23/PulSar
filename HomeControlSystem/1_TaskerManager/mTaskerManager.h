@@ -56,7 +56,7 @@
 #endif
 #ifdef ESP32
   #include "2_CoreSystem/Support/SupportESP32.h"
-  #define SupportHardware SupportESP32
+  #define mSupportHardware SupportESP32
 #endif
 
 // #include <variant>
@@ -183,9 +183,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_WIFI
     EM_MODULE_NETWORK_WIFI_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_MQTT
+  // #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
-  #endif 
+  // #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
@@ -317,6 +317,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_SR04
     EM_MODULE_SENSORS_SR04_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
+    EM_MODULE_SENSORS_REMOTE_DEVICE_ID,
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -397,10 +400,10 @@ enum MODULE_IDS{
   #include "3_Network/WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_MQTT
+// #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/MQTT/mMQTT.h"
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
-#endif 
+// #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
@@ -580,6 +583,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_SR04
   #include "5_Sensors/SR04/mSR04.h"
   #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
+  #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
+  #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"

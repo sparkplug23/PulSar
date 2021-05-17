@@ -161,7 +161,12 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
   char level_buffer[10];
-  
+
+  bool isconnected = false;
+  #ifdef USE_MODULE_NETWORK_WIFI
+  isconnected = pCONT_wif->connection.fConnected;
+  #endif
+
   #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
   if (loglevel <= pCONT_set->Settings.seriallog_level) {
@@ -170,7 +175,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
       SERIAL_DEBUG.printf(PSTR("R%05d%c %02d%02d %s %s\r\n"), 
         ESP.getFreeHeap(), //4 * (sp - g_pcont->stack), 
-        pCONT_wif->connection.fConnected ? 'Y' : 'N',
+        isconnected ? 'Y' : 'N',
         pCONT_time->uptime.minute,pCONT_time->uptime.second,
         pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),
         pCONT_set->log_data
@@ -682,22 +687,22 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 int Response_mP(const char* format, ...)     // Content send snprintf_P char data
 {
 
-if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
+// if(pCONT_time->uptime.seconds_nonreset<60){ return 0 ;}
 
-  memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
+//   memset(&pCONT_set->response_msg,0,sizeof(pCONT_set->response_msg));
 
-  // This uses char strings. Be aware of sending %% if % is needed
-  va_list args;
-  va_start(args, format);
-  int len = vsnprintf_P(pCONT_set->response_msg, RESPONSE_MESSAGE_BUFFER_SIZE, format, args);
-  va_end(args);
+//   // This uses char strings. Be aware of sending %% if % is needed
+//   va_list args;
+//   va_start(args, format);
+//   int len = vsnprintf_P(pCONT_set->response_msg, RESPONSE_MESSAGE_BUFFER_SIZE, format, args);
+//   va_end(args);
 
-  //Share on serial/telnet
-  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
-  //Send via mqtt
-  #ifdef USE_MODULE_NETWORK_MQTT
-  pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
-  #endif
+//   //Share on serial/telnet
+//   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "%s"),pCONT_set->response_msg);
+//   //Send via mqtt
+//   #ifdef USE_MODULE_NETWORK_MQTT
+//   pCONT_mqtt->ppublish("status/result",pCONT_set->response_msg,false);
+//   #endif
   
   return 0;// len;
 }

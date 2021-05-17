@@ -3,6 +3,9 @@
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
+const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
+const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR = D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
+
 
 int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -35,9 +38,11 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
             fOpenHABDataStreamActive = false;
           }
         }
+        
+      EverySecond_SendScreenInfo();
     break;
     case FUNC_EVERY_MINUTE:
-      EverySecond_SendScreenInfo();
+      // EverySecond_SendScreenInfo();
     break;
     case FUNC_EVERY_HOUR:
       Command_SetPage(settings.page);   //temp fix
@@ -64,12 +69,10 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); 
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_TelePeriod();
     break;
     case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
+      MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
       mqttConnected();
@@ -373,52 +376,37 @@ void mNextionPanel::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
-
-
-void mNextionPanel::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-  mqtthandler_energystats_ifchanged.flags.SendNow = true;
-  mqtthandler_energystats_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mNextionPanel::MQTTHandler_Set_TelePeriod(){
-
-  // mqtthandler_settings_teleperiod.tRateSecs = mcl->mset->Settings.sensors.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = mcl->mset->Settings.sensors.teleperiod_secs;
-  // mqtthandler_energystats_teleperiod.tRateSecs = mcl->mset->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mNextionPanel::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mNextionPanel>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_DISPLAYS_NEXTION_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
 }
 
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mNextionPanel::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
 
-////////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mNextionPanel::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mNextionPanel::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle, id);
+  }
+}
 
 #endif

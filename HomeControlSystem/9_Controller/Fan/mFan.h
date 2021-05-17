@@ -1,6 +1,8 @@
 #ifndef _MCUSE_MODULE_CONTROLLER_FANEILINGFAN_H
 #define _MCUSE_MODULE_CONTROLLER_FANEILINGFAN_H 0.3
 
+#define D_UNIQUE_MODULE_CONTROLLER_FAN_PWM_ID 145
+
 // PWM Fan and Sonoff Fan to be brought together? One fan controller, different output methods
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -11,46 +13,41 @@
 
 #include <Arduino.h>
 
-// #include <ArduinoJson.h>
-
 #include <string.h>
 #include <strings.h>
 
-// #define D_TASKNAME_CEILINGFAN "ceilingfan" //Used as part of mqtt command
-
-// const uint8_t MAX_FAN_SPEED = 4;            // Max number of iFan02 fan speeds (0 .. 3)
-
-// const uint8_t kIFan02Speed[MAX_FAN_SPEED] = { 0x00, 0x01, 0x03, 0x05 };
-// const uint8_t kIFan03Speed[MAX_FAN_SPEED +2] = { 0x00, 0x01, 0x03, 0x04, 0x05, 0x06 };
-// const uint8_t kIFan03Sequence[MAX_FAN_SPEED][MAX_FAN_SPEED] = {{0, 2, 2, 2}, {0, 1, 2, 4}, {1, 1, 2, 5}, {4, 4, 5, 3}};
-
-
 DEFINE_PGM_CTR(kListFanControls_pwm) "Off|Low|Medium|High";
 
-class mFan {
+class mFan :
+  public mTaskerInterface
+{
 
   private:
   public:
     mFan(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
+
+    static const char* PM_MODULE_CONTROLLER_FAN_PWM_CTR;
+    static const char* PM_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_FAN_PWM_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_FAN_PWM_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mSonoffIFan);
+    };
+    #endif
+
+    void parse_JSONCommand(JsonParserObject obj);
 
 int8_t Tasker_Web(uint8_t function);
-
-// const char kSonoffIfanCommands[] PROGMEM = "|"  // No prefix
-//   D_CMND_FANSPEED;
-
-// void (* const SonoffIfanCommand[])(void) PROGMEM = {
-//   &CmndFanspeed };
 
 uint8_t ifan_fanspeed_timer = 0;
 uint8_t ifan_fanspeed_goal = 0;
 bool ifan_receive_flag = false;
 bool ifan_restart_flag = true;
 
-
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
 
 void init();
 void pre_init();
@@ -81,15 +78,6 @@ bool SerialInput(void);
 void CmndFanspeed(void);
 void SpeedRefresh(void);
 
-
-    // #define CEILINGFAN_TOGGLE  0xA55595
-    // #define CEILINGFAN_DIMM    0xA55955
-    // #define CEILINGFAN_SPEED0  0xA55655
-    // #define CEILINGFAN_SPEED1  0xA55557
-    // #define CEILINGFAN_SPEED2  0xA55565
-    // #define CEILINGFAN_SPEED3  0xA5655B
-    // #define ONE_BIT_TIME 1252 //+- 30 std
-    // #define ZERO_BIT_TIME 439 //+- 30 std
 
     //void AddToJsonObject_AddHardware(JsonObject root);
     void AddToHardwareMessage();
@@ -129,6 +117,11 @@ void WebAppend_Root_Status_Table();
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
+  struct handler<mFan>* mqtthandler_list[3] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
 
 };
 

@@ -38,8 +38,6 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #define MODULE                 MODULE_BASIC   // [Module] Select default model
 #endif
 
-#define USE_LEGACY_PIN_METHOD
-
 //Minimal
 #define USE_MODULE_CORE_HARDWAREPINS
 #define USE_MODULE_CORE_SETTINGS
@@ -50,7 +48,15 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #define USE_MODULE_CORE_RULES
 
 #define USE_MODULE_NETWORK_WIFI
-// #define USE_MODULE_NETWORK_MQTT
+#define USE_MODULE_NETWORK_MQTT
+
+
+#ifndef USE_MODULE_NETWORK_WIFI
+  #warning "USE_MODULE_NETWORK_WIFI" has not been defined -- NO WIFI!
+#endif
+#ifndef USE_MODULE_NETWORK_MQTT
+  #warning "USE_MODULE_NETWORK_MQTT" has not been defined -- NO MQTT!
+#endif
 
 
 // /*********************************************************************************************\

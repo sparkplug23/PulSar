@@ -73,7 +73,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   {
       //     sensors_reading_t val;
       //     pmod->GetSensorReading(&val, sensor_id);
-      //     if(val.type_list[0])
+      //     if(val.type[0])
       //     {
       //       AddLog(LOG_LEVEL_TEST, PSTR("%S %d|%d val.data[%d]=%d"),pmod->GetModuleFriendlyName(), sensor_id, pmod->GetSensorCount(), sensor_id, (int)val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
       //     }
@@ -185,10 +185,10 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
     //Get any sensors in module
     uint8_t sensors_available = pmod->GetSensorCount();
 
+    AddLog(LOG_LEVEL_TEST, PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
+
     if(sensors_available)
     {
-      JBI->Level_Start_P(PSTR("%S"),pmod->GetModuleFriendlyName());
-
 
       for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
       {
@@ -196,14 +196,17 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
         pmod->GetSensorReading(&val, sensor_id);
         if(val.Valid())
         {
-          JBI->Add(D_JSON_TEMPERATURE, val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
+          JBI->Level_Start_P(PSTR("%S_%d"),pmod->GetModuleFriendlyName(),sensor_id);
+            JBI->Add(D_JSON_TEMPERATURE, val.GetValue(SENSOR_TYPE_TEMPERATURE_ID));
+            JBI->Add(D_JSON_HUMIDITY, val.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID));
+          JBI->Level_End();
         }
+        // else{
+        //   AddLog(LOG_LEVEL_TEST, PSTR("GetSensorCount =INVALID"));
+        //   Serial.println(sensor_data.data[0]);
+        // }
       }
 
-
-
-
-      JBI->Level_End();
     }
 
 
@@ -224,6 +227,117 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
   return JsonBuilderI->End();
     
 }
+
+
+/**
+ * @brief For any connected temperature sensors, display their colour as a full brightness rgb colour
+ * */
+uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_method){
+
+  JsonBuilderI->Start();
+
+// #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+char buffer[50];
+
+  for(auto& pmod:pCONT->pModule)
+  {
+    //Get any sensors in module
+    uint8_t sensors_available = pmod->GetSensorCount();
+    uint16_t module_id = pCONT->GetVectorIndexbyModuleUniqueID(pmod->GetModuleUniqueID());
+
+    if(sensors_available)
+    {
+      JBI->Level_Start_P(PSTR("Temperature"));//,pmod->GetModuleFriendlyName());
+
+      for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+      {
+        sensors_reading_t val;
+        pmod->GetSensorReading(&val, sensor_id);
+        if(val.Valid())
+        {
+
+int8_t device_name_id = sensor_id;
+#ifdef USE_MODULE_SENSORS_DS18B20
+//temp fix
+if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+{
+  device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
+}
+#endif // USE_MODULE_SENSORS_DS18B20
+
+
+          JBI->Add(
+            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            val.GetValue(SENSOR_TYPE_TEMPERATURE_ID)
+          );
+        }
+      }
+
+      JBI->Level_End();
+
+      #ifdef USE_MODULE_LIGHTS_INTERFACE
+      JBI->Level_Start_P(PSTR("HeatMap"));//,pmod->GetModuleFriendlyName());
+
+      for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+      {
+        sensors_reading_t val;
+        pmod->GetSensorReading(&val, sensor_id);
+        if(val.Valid())
+        {
+
+int8_t device_name_id = sensor_id;
+#ifdef USE_MODULE_SENSORS_DS18B20
+//temp fix
+/**
+ * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
+ * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
+ * This means, on setting name, I should search for the address of X and put it into index X.. swap?
+ * */
+if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+{
+  device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
+}
+
+#endif// USE_MODULE_SENSORS_DS18B20
+          // Convert into colour
+          float temperature = val.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+          RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps(temperature,0);
+
+
+          JBI->Add_FV(
+            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            PSTR("\"%02X%02X%02X\""),
+            colour.R, colour.G, colour.B
+          );
+        }
+      }
+
+      JBI->Level_End();
+      #endif // USE_MODULE_LIGHTS_INTERFACE
+    }
+
+
+   
+  }
+
+
+  return JsonBuilderI->End();
+
+
+
+
+
+// #endif
+
+
+
+  return JsonBuilderI->End();
+    
+}
+
+
+
 
 uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
 
@@ -320,6 +434,19 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
 
+  mqtthandler_ptr = &mqtthandler_sensor_temperature_colours;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 10; 
+  #ifdef DEVICE_IMMERSIONSENSOR //temp fix
+  mqtthandler_ptr->tRateSecs = 1; 
+  #endif
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_TEMPERATURE_COLOURS_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
+
   //motion events
   mqtthandler_ptr = &mqtthandler_motion_event_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -330,33 +457,40 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Motion_Event;
-  
-} //end "MQTTHandler_Init"
 
-
-void mSensorsInterface::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSensorsInterface::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSensorsInterface::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_INTERFACE_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
-
+ 
 }
 
-////////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSensorsInterface::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSensorsInterface::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSensorsInterface::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_INTERFACE_ID, handle, id);
+  }
+}
+
 
 #endif

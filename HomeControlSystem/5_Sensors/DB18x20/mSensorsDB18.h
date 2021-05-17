@@ -55,10 +55,6 @@ class mSensorsDB18 :
     void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
 
 
-
-
-
-
     void SplitTask_UpdateSensors(uint8_t sensor_id, uint8_t require_completion);
     uint8_t sReadSensor;
     uint32_t tSavedMeasureSensor;
@@ -91,6 +87,10 @@ class mSensorsDB18 :
       DeviceAddress address = {0}; //phase out
       // uint8_t address_stored[8];
       int8_t sensor_group_id = -1; // which pin it comes from 
+
+      /**
+       * @brief method is not right, I need to align this with devicename ids, so sensor[id] where id matches devicename should be configured
+       * */
       int8_t address_id = -1; //set this manually with template, else, as 0 (check for any -1, set incremented and name "sens01")
       struct READING{
         float val;
@@ -140,8 +140,8 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       // Serial.println("OVERRIDE ACCESSED DB18");
-      if(index > DB18_SENSOR_MAX-1) {value->type_list.push_back(0); return ;}
-      value->type_list.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      if(index > DB18_SENSOR_MAX-1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data.push_back(sensor[index].reading.val);
       value->sensor_id = index;
     };
@@ -162,11 +162,12 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
+    // void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
+    // void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
+
     struct handler<mSensorsDB18> mqtthandler_settings_teleperiod;
-    void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mSensorsDB18> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsDB18> mqtthandler_sensor_teleperiod;
-    void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;

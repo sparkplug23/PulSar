@@ -1,10 +1,15 @@
 #include "mWiFi.h"
 
+
+#ifdef USE_MODULE_NETWORK_WIFI
+
 #ifdef ESP8266
 extern "C" {
  #include "user_interface.h"
 }
 #endif
+
+#warning "figure out how to disable this completely for testing on fireplace, but for logger"
 
 const char* mWiFi::PM_MODULE_NETWORK_WIFI_CTR = D_MODULE_NETWORK_WIFI_CTR;
 const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
@@ -1503,3 +1508,4 @@ const char* mWiFi::GetWiFiConfigTypeCtr(void){
 
 //#endif
 
+#endif // USE_MODULE_NETWORK_WIFI

@@ -21,6 +21,8 @@ typedef struct event_motion_s{
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_TEMPERATURE_COLOURS_CTR)     "sensors/colours";
+  
 
 #ifdef USE_MODULE_SENSORS_INTERFACE
 
@@ -63,6 +65,7 @@ class mSensorsInterface :
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_method = 0);
     uint8_t ConstructJSON_Motion_Event(uint8_t json_method = 0);
 
   
@@ -76,6 +79,7 @@ class mSensorsInterface :
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
+    struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
@@ -87,17 +91,18 @@ class mSensorsInterface :
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
     
-    uint8_t list_ids[4] = {
-      MQTT_HANDLER_SETTINGS_ID, 
-      MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-      MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-      MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID
-    };
+    // uint8_t list_ids[4] = {
+    //   MQTT_HANDLER_SETTINGS_ID, 
+    //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
+    //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
+    //   MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID
+    // };
     
-    struct handler<mSensorsInterface>* list_ptr[4] = {
+    struct handler<mSensorsInterface>* mqtthandler_list[5] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod,
+      &mqtthandler_sensor_temperature_colours,
       &mqtthandler_motion_event_ifchanged
     };
     #endif // USE_MODULE_NETWORK_MQTT

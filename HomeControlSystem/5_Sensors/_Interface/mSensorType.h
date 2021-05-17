@@ -54,7 +54,7 @@ typedef enum
  * */
 typedef struct
 {
-  std::vector<uint8_t> type_list;
+  std::vector<uint8_t> type;
   std::vector<float> data;
   uint8_t sensor_id;
   float    max_value;                       /**< maximum value of this sensor's value in SI units */
@@ -65,18 +65,36 @@ typedef struct
    * @param type sensor_type identifier
    * @param index default is 1 (ie only one instance of that sensor_type), if more than 1 exist (eg multiple temp sensor readings) then indexing can return which one
    * */
-  float GetValue(uint8_t type, uint8_t index = 1)
+  float GetValue(uint8_t type_search, uint8_t index = 1)
   {    
-    for(uint8_t i=0;i<type_list.size();i++)
+    for(uint8_t i=0;i<type.size();i++)
     {
       // I will want to expand this method so it can return if more than 1 of the same data_type exists
-      if(type == type_list[i])
+      if(type_search == type[i])
       {
-        // Serial.printf("type == type_list[i] %d %d %d %d %d\n\r",type,type_list[i],i,type_list.size(),(int)data[1]);
+        // Serial.printf("type == type[i] %d %d %d %d %d\n\r",type,type[i],i,type.size(),(int)data[1]);
         return data[i];
       }
     }
     return -1; //invalid reading
+  };
+  /**
+   * @brief If more than one variable is used, return its value
+   * @param type sensor_type identifier
+   * @param index default is 1 (ie only one instance of that sensor_type), if more than 1 exist (eg multiple temp sensor readings) then indexing can return which one
+   * */
+  bool HasValue(uint8_t type_search, uint8_t index = 1)
+  {    
+    for(uint8_t i=0;i<type.size();i++)
+    {
+      // I will want to expand this method so it can return if more than 1 of the same data_type exists
+      if(type_search == type[i])
+      {
+        // Serial.printf("type == type[i] %d %d %d %d %d\n\r",type,type[i],i,type.size(),(int)data[1]);
+        return true;
+      }
+    }
+    return false; //invalid reading
   };
   bool Valid()
   {

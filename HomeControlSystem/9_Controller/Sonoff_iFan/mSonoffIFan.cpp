@@ -9,8 +9,9 @@
 const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;
 const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR = D_MODULE_CONTROLLER_CEILINGFAN_FRIENDLY_CTR;
 
-int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj){
-
+int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj)
+{
+  
   /************
    * INIT SECTION * 
   *******************/
@@ -25,9 +26,6 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonParserOb
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_EVERY_SECOND:    
-
-    break;
     case FUNC_EVERY_250_MSECOND:
       SpeedRefresh();
     break;
@@ -47,7 +45,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonParserOb
     case FUNC_EVENT_SET_SPEED_ID:
       RulesEvent_Set_Speed();
     break;
-    #endif// USE_MODULE_CORE_RULES
+    #endif
     /************
      * MQTT SECTION * 
     *******************/
@@ -68,7 +66,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj), JsonParserOb
   *******************/  
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif
 
 } // END Tasker
 
@@ -272,8 +270,6 @@ bool mSonoffIFan::SerialInput(void)
 }
 
 
-/*********************************************************************************************/
-
 void mSonoffIFan::init(void)
 {
   if(pCONT_set->my_module_type == MODULE_SONOFF_IFAN03_ID){
@@ -312,7 +308,7 @@ uint8_t mSonoffIFan::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mSonoffIFan::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mSonoffIFan::ConstructJSON_Power(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -322,12 +318,7 @@ uint8_t mSonoffIFan::ConstructJSON_Sensor(uint8_t json_method){
 }
 
 
-
-
-/*********************************************************************************************************************************************
-******** MQTT **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mSonoffIFan::MQTTHandler_Init(){
 
@@ -343,64 +334,59 @@ void mSonoffIFan::MQTTHandler_Init(){
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Settings;
 
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
+  mqtthandler_ptr = &mqtthandler_power_teleperiod;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 600; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Power;
 
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
+  mqtthandler_ptr = &mqtthandler_power_ifchanged;
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Sensor;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mSonoffIFan::ConstructJSON_Power;
   
-} //end "MQTTHandler_Init"
-
-
-void mSonoffIFan::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSonoffIFan::MQTTHandler_Set_TelePeriod(){
-
-  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSonoffIFan::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSonoffIFan>* list_p[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_SONOFF_IFAN_ID,
-    list_p, list_ids, sizeof(list_p)/sizeof(list_p[0]), mqtt_handler_id
-  );
-
 }
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSonoffIFan::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSonoffIFan::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mSonoffIFan::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_SONOFF_IFAN_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

@@ -1,11 +1,7 @@
 #include "2_CoreSystem/Telemetry/mTelemetry.h"
 
-// Keep Telemetry on its own, so either MQTT or WebUI can poll for it
-
 const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
 const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
-
-
 
 int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -41,8 +37,6 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
 
 
 void mTelemetry::parse_JSONCommand(JsonParserObject obj){}
-
-
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mTelemetry::WebPage_Root_AddHandlers(){
@@ -114,266 +108,231 @@ void mTelemetry::WebPage_Root_AddHandlers(){
 
 
 
-#ifdef USE_MODULE_NETWORK_MQTT
+// #ifdef USE_MODULE_NETWORK_MQTT
 
 
 
 void mTelemetry::MQTTHandler_Init(){
 
-  handler<mTelemetry>* mqtthandler_ptr;
+  handler<mTelemetry>* p;
 
-  mqtthandler_ptr = &mqtthandler_health;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Health;
+  p = &mqtthandler_health;
+  p->handler_id = MQTT_HANDLER_SYSTEM_HEALTH_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Health;
   
-  mqtthandler_ptr = &mqtthandler_settings;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings;
+  p = &mqtthandler_settings;
+  p->handler_id = MQTT_HANDLER_SYSTEM_SETTINGS_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings;
   
-  mqtthandler_ptr = &mqtthandler_log;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Log;
+  p = &mqtthandler_log;
+  p->handler_id = MQTT_HANDLER_SYSTEM_LOG_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Log;
   
-  mqtthandler_ptr = &mqtthandler_firmware;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Firmware;
+  p = &mqtthandler_firmware;
+  p->handler_id = MQTT_HANDLER_SYSTEM_FIRMWARE_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Firmware;
   
-  mqtthandler_ptr = &mqtthandler_memory;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Memory;
+  p = &mqtthandler_memory;
+  p->handler_id = MQTT_HANDLER_SYSTEM_MEMORY_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Memory;
   
-  mqtthandler_ptr = &mqtthandler_network;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NETWORK_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Network;
+  p = &mqtthandler_network;
+  p->handler_id = MQTT_HANDLER_SYSTEM_NETWORK_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_NETWORK_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Network;
   
-  mqtthandler_ptr = &mqtthandler_mqtt;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MQTT_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_MQTT;
+  p = &mqtthandler_mqtt;
+  p->handler_id = MQTT_HANDLER_SYSTEM_MQTT_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MQTT_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_MQTT;
   
-  mqtthandler_ptr = &mqtthandler_time;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Time;
+  p = &mqtthandler_time;
+  p->handler_id = MQTT_HANDLER_SYSTEM_TIME_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TIME_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Time;
   
-  mqtthandler_ptr = &mqtthandler_devices;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Devices;
+  p = &mqtthandler_devices;
+  p->handler_id = MQTT_HANDLER_SYSTEM_DEVICES_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEVICES_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Devices;
   
-  mqtthandler_ptr = &mqtthandler_reboot;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
+  p = &mqtthandler_reboot;
+  p->handler_id = MQTT_HANDLER_SYSTEM_REBOOT_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
   
-  mqtthandler_ptr = &mqtthandler_reboot_event;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR;  
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_ALL;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
+  p = &mqtthandler_reboot_event;
+  p->handler_id = MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = false;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR;  
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_ALL;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
 
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-  mqtthandler_ptr = &mqtthandler_debug_pins;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins;
+  p = &mqtthandler_debug_pins;
+  p->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins;
 
-  mqtthandler_ptr = &mqtthandler_debug_template;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_TEMPLATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Template;
+  p = &mqtthandler_debug_template;
+  p->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_TEMPLATE_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Template;
 
-  mqtthandler_ptr = &mqtthandler_debug_moduleinterface;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_ModuleInterface;
+  p = &mqtthandler_debug_moduleinterface;
+  p->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = SEC_IN_HOUR; 
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_ModuleInterface;
   #endif
   
-  mqtthandler_ptr = &mqtthandler_debug_minimal;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
-  mqtthandler_ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;// MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Minimal;
+  p = &mqtthandler_debug_minimal;
+  p->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID;
+  p->tSavedLastSent = millis();
+  p->flags.PeriodicEnabled = true;
+  p->flags.SendNow = true;
+  p->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;// MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  p->json_level = JSON_LEVEL_DETAILED;
+  p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
+  p->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Minimal;
 
 } //end "MQTTHandler_Init"
 
 
-
-void mTelemetry::MQTTHandler_Set_fSendNow(){
-  mqtthandler_health.flags.SendNow = true;
-  mqtthandler_settings.flags.SendNow = true;
-  // mqtthandler_parameters.flags.SendNow = true;
-  mqtthandler_log.flags.SendNow = true;
-  mqtthandler_firmware.flags.SendNow = true;
-  mqtthandler_memory.flags.SendNow = true;
-  mqtthandler_network.flags.SendNow = true;
-  mqtthandler_mqtt.flags.SendNow = true;
-  mqtthandler_time.flags.SendNow = true;
-  mqtthandler_devices.flags.SendNow = true;
-  mqtthandler_reboot.flags.SendNow = true;
-  mqtthandler_debug_pins.flags.SendNow = true;
-  mqtthandler_debug_template.flags.SendNow = true;
-  mqtthandler_debug_moduleinterface.flags.SendNow = true;
-  mqtthandler_debug_minimal.flags.SendNow = true;
-
-
-
-} //end "MQTTHandler_Init
-
-
-void mTelemetry::MQTTHandler_Set_TelePeriod(){
-
-  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-//move system sender INTO telemetry class, remove intermediatery functions
-void mTelemetry::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  #ifdef ENABLE_ADVANCED_DEBUGGING
-    AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
-  #endif
-    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_TEST " MQQTHandler_System_Sender"));
-  
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SYSTEM_HEALTH_ID,
-    MQTT_HANDLER_SYSTEM_SETTINGS_ID,
-    MQTT_HANDLER_SYSTEM_LOG_ID,
-    MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
-    MQTT_HANDLER_SYSTEM_MEMORY_ID,
-    MQTT_HANDLER_SYSTEM_NETWORK_ID,
-    MQTT_HANDLER_SYSTEM_MQTT_ID,
-    MQTT_HANDLER_SYSTEM_TIME_ID,
-    MQTT_HANDLER_SYSTEM_DEVICES_ID,
-    MQTT_HANDLER_SYSTEM_REBOOT_ID,
-    MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
-      MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
-      MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
-      MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID
-    #endif
-  };
-  
-  struct handler<mTelemetry>* mqtthandler_list_ptr[] = {
-    &mqtthandler_health, &mqtthandler_settings,
-    &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
-    &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
-    &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      &mqtthandler_debug_pins, &mqtthandler_debug_template,
-      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
-    #endif
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(
-    *this, EM_MODULE_CORE_TELEMETRY_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, 
-    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-    mqtt_handler_id
-  );
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mTelemetry::MQTTHandler_Set_fSendNow()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
-#endif // USE_MODULE_NETWORK_MQTT
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mTelemetry::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mTelemetry::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle, id);
+  }
+}
+
+// #endif // USE_MODULE_NETWORK_MQTT
 
 
 

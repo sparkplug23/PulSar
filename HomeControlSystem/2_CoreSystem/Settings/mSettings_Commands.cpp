@@ -282,9 +282,13 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
   // animation.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
   // animation.transition.pixels_to_update_as_percentage = value;
 
+#ifdef USE_MODULE_NETWORK_WIFI
+   
   if(value == 1){
     pCONT_wif->EspRestart();
   }
+  #endif // ifdef USE_MODULE_NETWORK_WIFI
+   
   
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);

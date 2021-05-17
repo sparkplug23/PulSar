@@ -40,19 +40,24 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
    case FUNC_LOOP:
 
-    if(pCONT_uart->urxlen2)
-    {
-    Serial.println(pCONT_uart->urxlen2);
-    for(int i=0;i<100;i++){   Serial.print(pCONT_uart->rxbuf2[i]); }
-    Serial.println();
-    pCONT_uart->urxlen2 = 0; // reset
-    }
-    ESP_LOGI("test", "Initializing SD card");
+    // if(pCONT_uart->urxlen2)
+    // {
+    // Serial.println(pCONT_uart->urxlen2);
+    // for(int i=0;i<10;i++){   Serial.print(pCONT_uart->rxbuf2[i]); }
+    // Serial.println();
+    // pCONT_uart->urxlen2 = 0; // reset
+    // }
 
 
    break;
-    case FUNC_EVERY_SECOND:{
-      
+  case FUNC_EVERY_SECOND:{
+
+    AddLog(LOG_LEVEL_TEST, PSTR("[%d] \"%s\""),pCONT_uart->urxlen2,pCONT_uart->rxbuf2);
+
+    // Serial.println(pCONT_uart->urxlen2);
+    // for(int i=0;i<10;i++){   Serial.print((char)pCONT_uart->rxbuf2[i]); }
+    // Serial.println();
+    ESP_LOGI("test", "Initializing SD card");
       // AddLog(LOG_LEVEL_INFO, PSTR("buffU2=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
   
       // xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
@@ -75,14 +80,16 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
       //   Serial.printf("Failed to receive item\n");
       // }
 
-      // char buffer[100] = {0};
-      // uint16_t bytes_in_line = GetReceiveBuffer2(buffer, sizeof(buffer), '\n');
+      char buffer[100] = {0};
+      uint16_t bytes_in_line = GetReceiveBuffer2(buffer, sizeof(buffer), '\n');
 
-      // if(buffer){
-      //   AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"%s\""), bytes_in_line, buffer);
-      // }else{
-      //   AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"none\""), bytes_in_line);
-      // }
+      if(buffer){
+        AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"%s\""), bytes_in_line, buffer);
+      }else{
+        AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"none\""), bytes_in_line);
+      }
+      
+    ESP_LOGI("test", "FUNC_EVERY_SECOND");
 
     }
     break;
@@ -186,6 +193,14 @@ void mSerialUART::Pre_Init_Pins()
 void mSerialUART::Init(void)
 {
 
+  #ifdef ENABLE_HARDWARE_UART_1
+  if(settings.uart1.receive_interrupts_enable)
+  {
+    init_UART1_RingBuffer();
+    init_UART1_ISR();
+  }
+  #endif // ENABLE_HARDWARE_UART_1
+
   #ifdef ENABLE_HARDWARE_UART_2
   if(settings.uart2.receive_interrupts_enable)
   {
@@ -207,6 +222,7 @@ esp_log_level_set("test", ESP_LOG_VERBOSE);
 ******************************************************************************************************************************************************************************************************************************************/
 
 #ifdef ENABLE_HARDWARE_UART_2
+#ifdef ENABLE_UART_RINGBUFFERS
 void mSerialUART::init_UART2_RingBuffer()
 {
 
@@ -223,6 +239,8 @@ void mSerialUART::init_UART2_RingBuffer()
   }
 
 }
+
+#endif // ENABLE_UART_RINGBUFFERS
 
 /**
  * @brief init UART2 ISR routine
@@ -278,13 +296,19 @@ void mSerialUART::init_UART2_ISR(){
   gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
   gpio_set_level(BLINK_GPIO, LOW); // Turn off by default
   #endif
-esp_log_level_set("*", ESP_LOG_VERBOSE);
-esp_log_level_set("test", ESP_LOG_VERBOSE);
+// esp_log_level_set("*", ESP_LOG_VERBOSE);
+// esp_log_level_set(TAG, ESP_LOG_INFO);
+
+// std::cout << "x" << std::flush;
   
-    ESP_LOGV("test", "Initializing SD card");
+//     ESP_LOGI(TAG, "Initializing SD card");
 
 }
 
+// // Receive buffer to collect incoming data
+// uint8_t rxbuf[256];
+// // Register to collect data length
+// uint16_t urxlen;
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
  * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
@@ -293,26 +317,25 @@ void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
 { 
   
   uint16_t rx_fifo_len, status;
-  uint16_t i = 0; 
-// char* test_str = "uart_intr_handle_u2_static.\n";
-// uart_write_bytes(UART_NUM_0, (const char*)test_str, strlen(test_str));
+  uint16_t i = 0;
 
   status = UART2.int_st.val; // read UART interrupt Status
   rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
 
   // uint32_t timeout = millis();
-  // 
-  while(rx_fifo_len--)
+  
+  while(rx_fifo_len)
   {
     pCONT_uart->rxbuf2[i++] = UART2.fifo.rw_byte; // read all bytes
-    if(i>=RINGBUFFER_HANDLE_2_LENGTH-1)
-    {
-      break;
-    }
+    // if(i>=RINGBUFFER_HANDLE_2_LENGTH-1)
+    // {
+    //   break;
+    // }
     // if(abs(millis()-timeout)>50)
     // {
     //   break;
     // }
+    rx_fifo_len--;
   }
   pCONT_uart->urxlen2 = i;
 
@@ -325,6 +348,25 @@ void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   gpio_set_level(BLINK_GPIO, !gpio_get_level(BLINK_GPIO));
   #endif
+
+
+// uint16_t rx_fifo_len, status;
+//   uint16_t i;
+  
+//   status = UART0.int_st.val; // read UART interrupt Status
+//   rx_fifo_len = UART0.status.rxfifo_cnt; // read number of bytes in UART buffer
+  
+//   while(rx_fifo_len){
+//    rxbuf[i++] = UART0.fifo.rw_byte; // read all bytes
+//    rx_fifo_len--;
+//  }
+  
+//  // after reading bytes from buffer clear UART interrupt status
+//  uart_clear_intr_status(UART_NUM_2, UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);
+
+
+
+  // uart_write_bytes(UART_NUM_0, (const char*) "RX Done", 7);
 
 }
 
@@ -409,6 +451,11 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_method){
   JsonBuilderI->Start();  
 
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
+
+    JBI->Level_Start("UART2");
+      JBI->Add("receive_interrupts_enable", settings.uart2.receive_interrupts_enable);
+    JBI->Level_End();
+
     // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
 

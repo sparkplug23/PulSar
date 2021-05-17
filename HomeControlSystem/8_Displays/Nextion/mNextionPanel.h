@@ -1,6 +1,9 @@
 #ifndef _MNEXTIONPANEL2_H
 #define _MNEXTIONPANEL2_H 0.2
 
+#define D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_GROUP_MODULE_DISPLAYS_NEXTION_ID    1    // Numerical accesending order of module within a group
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
@@ -60,10 +63,28 @@
 
 
 
-class mNextionPanel{
+class mNextionPanel :
+  public mTaskerInterface
+{
   public:
     mNextionPanel(){};
     void pre_init();
+    
+    
+    static const char* PM_MODULE_DISPLAYS_NEXTION_CTR;
+    static const char* PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_NEXTION_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID; }
+
+    #ifdef USE_DEBUG_CLASS_SIZE
+    uint16_t GetClassSize(){
+      return sizeof(mNEXTION);
+    };
+    #endif
+    void parse_JSONCommand(JsonParserObject obj);
+
+
 
   //#define USE_NEXTION_SOFTWARE_SERIAL
 
@@ -307,10 +328,6 @@ void WebCommand_Parse(void);
 
 
 
-
-    int8_t CheckAndExecute_JSONCommands();
-    void    parse_JSONCommand();
-
     void mqttConnected();
     void mqttDisconnected();
     void mqttCallback(String &strTopic, String &strPayload);
@@ -417,6 +434,14 @@ void WebCommand_Parse(void);
     struct handler<mNextionPanel> mqtthandler_energystats_ifchanged;
     struct handler<mNextionPanel> mqtthandler_energystats_teleperiod;
   //#endif
+
+  
+  struct handler<mNextionPanel>* mqtthandler_list[3] = {
+    &mqtthandler_settings_teleperiod,
+    &mqtthandler_sensor_ifchanged,
+    &mqtthandler_sensor_teleperiod
+  };
+
 
   
 

@@ -71,7 +71,7 @@ Hallway
   - hallway table
  */
 // #define DEVICE_RADIATORFAN
-// #define DEVICE_HEATING
+#define DEVICE_HEATING
 // #define DEVICE_HEATING_ESP32
 // #define DEVICE_DOORBELLWALLCHIME
 
@@ -106,7 +106,7 @@ Masterbedroom
   - non camera home display
  */
 // #define DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING
-// #define DEVICE_MASTERBEDROOMSENSOR
+//define DEVICE_MASTERBEDROOMSENSOR
 // #define DEVICE_FLOORFAN2
 
 /**
@@ -128,6 +128,7 @@ Masterbedroom
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
 // #define DEVICE_LANDINGPANEL
+// #define DEVICE_LANDINGPANEL2
 // #define DEVICE_IMMERSIONSENSOR
 
 /**
@@ -155,7 +156,6 @@ Bathroom
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_BEDROOMBLINDS
-
 
 
 /**************************************************************************************************************************************************
@@ -968,56 +968,44 @@ Bathroom
 #ifdef DEVICE_CONSUMERUNIT
   #define DEVICENAME_CTR          "consumerunit"
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
-  
+  #define ESP32
+    
   #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-  
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_PZEM004T_V3
-  #define USE_DEVFEATURE_ENABLE_PZEM004T_SERIAL2
-
-  // #define USE_MODULE_SENSORS_BME
-  #define D_DEVICE_SENSOR_CLIMATE "Downstairs Toilet"
-
-  #define ESP32
-
-  // #define ENABLE_BUG_TRACING
-  
-  // #define USE_SOFTWARE_SERIAL_DEBUG
-  //#define DISABLE_SERIAL_LOGGING //temp measure
-
-  // Switching to esp32 for dual serial ports, to enable isolated pzem serial traffic until I can be assured I can disable serial0 on the esp8266
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      // #ifdef ESP266
-      //   #ifdef USE_MODULE_SENSORS_BME
-      //   "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      //   "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      //   #endif
-      //   "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
-      //   "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
-      //   "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-      // #endif //ESP266
-      // #ifdef ESP32
+    "\"" D_JSON_GPIOC "\":{"      
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
         #ifdef USE_MODULE_SENSORS_BME
-        // "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-        // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+        "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+        "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
         #endif
-        // "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-        // "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
-        // "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
-        "\"LBI\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-      // #endif //ESP32
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
+  #define D_DEVICE_SENSOR_CLIMATE "Downstairs Toilet"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "17"
+  #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "18"
+  #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "19"
+  #define D_DEVICE_SENSOR_PZEM004T_4_ADDRESS "20"
+  #define D_DEVICE_SENSOR_PZEM004T_5_ADDRESS "21"
+  #define D_DEVICE_SENSOR_PZEM004T_6_ADDRESS "22"
+  #define D_DEVICE_SENSOR_PZEM004T_7_ADDRESS "23"
+  
   #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains"
   #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Cooker"
   #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "Tumble Dryer"
@@ -1027,7 +1015,6 @@ Bathroom
   #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "Sockets"
   #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "Kitchen Sockets"
   
-  // Drivers, Sensors and lights?
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
@@ -1044,7 +1031,32 @@ Bathroom
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
       "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_2_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_3_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_4_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_5_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_6_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_7_ADDRESS ""
+      "]"  
+    "},"
+    "\"" D_JSON_ENERGY "\":{"
+        "\"DeviceCount\":8"    
     "}"
   "}";
 
@@ -1299,30 +1311,33 @@ Bathroom
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
-  #define USE_MODULE_CONTROLLER_HVAC
-  
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
+  
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "masterbedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "MasterBedroom"
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
 
+  #define USE_MODULE_CONTROLLER_HVAC
+  
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
       "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
       "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
-      // "\"9\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
+      "\"D7\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1338,8 +1353,10 @@ Bathroom
   #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
   #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
 
-  #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
   #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
+
+  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
 
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Downstairs_Pipe"
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,152,171,193,23,4,231]"
@@ -1382,6 +1399,9 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
         "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
       "],"
+      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+      "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
@@ -1403,7 +1423,7 @@ Bathroom
     "},"
     "\"" "HVACZone" "\":{"
       "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\","
         "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
@@ -2273,16 +2293,27 @@ Bathroom
 
 #endif
 
+/**
+ * Potentionally to be merged with landingpanel controller
+ * BME, RGB
+ * DHT in place, not part of sensor (wired to heating) 
+ * */
 #ifdef DEVICE_MASTERBEDROOMSENSOR
   #define DEVICENAME_CTR          "masterbedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Master Bedroom Sensor"
 
   #define FORCE_TEMPLATE_LOADING
      
-  // #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_DHT
-  
-  // #define USE_MODULE_SENSORS_ANALOG
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+  #define STRIP_SIZE_MAX 4
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2290,16 +2321,37 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"2\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      #endif
       #ifdef USE_MODULE_SENSORS_BME
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif  
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      #endif
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":4,"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grbwc\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":8"
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":350,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "MasterBedroom"
@@ -2310,10 +2362,7 @@ Bathroom
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-      "],"
+      "]"
     "}"
   "}";
 
@@ -2325,20 +2374,16 @@ Bathroom
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  
-  // #define ENABLE_BUG_TRACING
 
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+  #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_CONTROLLER_SONOFF_IFAN
-  // #define USE_MODULE_CONTROLLER_FAN // new fan method, set fan type as sonoff_ifan using ifdefs for now
-  // #define ENABLE_DEVFEATURE_FANTYPE_IFAN03
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 4
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -2346,8 +2391,6 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
-
-  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 
@@ -2453,24 +2496,15 @@ Bathroom
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  
-  // #define ENABLE_BUG_TRACING
-
-  #define USE_MODULE_DRIVERS_BUZZER
 
   #define USE_MODULE_CORE_RULES
-
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+  #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_CONTROLLER_SONOFF_IFAN
-  // #define USE_MODULE_CONTROLLER_FAN // new fan method, set fan type as sonoff_ifan using ifdefs for now
-  // #define ENABLE_DEVFEATURE_FANTYPE_IFAN03
-
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 4
-  #define USE_MODULE_DRIVERS_INTERFACE
-
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2479,11 +2513,6 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
-
-  // Need to create default names for all class in GetDeviceNameWithEnumNumber
-
-  // Add rules so button cycles through fan speeds
-
 
 #endif
 
@@ -2493,18 +2522,16 @@ Bathroom
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  
-  // #define ENABLE_BUG_TRACING
 
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+  #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_CONTROLLER_SONOFF_IFAN
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 4
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -2512,8 +2539,6 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
-
-  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 
@@ -2523,20 +2548,16 @@ Bathroom
   
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-  
-  // #define ENABLE_BUG_TRACING
 
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_SONOFF_TEMPORARY_SHOW_LED_STATUS
+  #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_CONTROLLER_SONOFF_IFAN
-  // #define USE_MODULE_CONTROLLER_FAN // new fan method, set fan type as sonoff_ifan using ifdefs for now
-  // #define ENABLE_DEVFEATURE_FANTYPE_IFAN03
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 4
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -2544,8 +2565,6 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_IFAN03_CTR "\""
   "}";
-
-  // Need to create default names for all class in GetDeviceNameWithEnumNumber
 
 #endif
 
@@ -2617,10 +2636,10 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-
+//esp32 now
 #ifdef DEVICE_LANDINGPANEL
   #define DEVICENAME_CTR            "landingpanel"
-  #define DEVICENAME_FRIENDLY_CTR   "Landing Control Panel"
+  #define DEVICENAME_FRIENDLY_CTR   "Landing Panel ESP8266"
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -2628,10 +2647,11 @@ Bathroom
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
-  #define STRIP_SIZE_MAX 40
+  #define STRIP_SIZE_MAX 36
   
   #define DISABLE_WEBSERVER
 
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_MOTION
 
@@ -2646,12 +2666,142 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
+  
+  // #define USE_MODULE_TEMPLATE
+  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  //   "\"" D_JSON_GPIOC "\":{"      
+  //     #ifdef USE_MODULE_SENSORS_BME
+  //     "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+  //     "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+  //     #endif
+  //     #ifdef USE_MODULE_SENSORS_MOTION
+  //     "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+  //     #endif
+  //     "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+  //     "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+  //     // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+  //     "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+  //   "},"
+  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  // "}";
+
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":40,"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgbwc\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":8"
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Landing"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "_Doppler" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+/**
+ * This will become the final version of this panel, but requires animation fixing first
+ * */
+#ifdef DEVICE_LANDINGPANEL2
+  #define DEVICENAME_CTR            "landingpanel2"
+  #define DEVICENAME_FRIENDLY_CTR   "Landing Panel ESP32 Tester"
+
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  // #define USE_SK6812_METHOD_DEFAULT
+  // #define STRIP_SIZE_MAX 40
+  
+  #define DISABLE_WEBSERVER
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_MOTION
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  // #define USE_MODULE_TEMPLATE
+  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  //   "\"" D_JSON_GPIOC "\":{"
+  //     #ifdef USE_MODULE_SENSORS_BME
+  //     "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+  //     "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+  //     #endif
+  //     #ifdef USE_MODULE_SENSORS_MOTION
+  //     "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+  //     #endif
+  //     "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+  //   "},"
+  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  // "}";
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      // #ifdef USE_MODULE_SENSORS_BME
+      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      // #endif
+      // #ifdef USE_MODULE_SENSORS_MOTION
+      // "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      // #endif
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2772,6 +2922,10 @@ Bathroom
 
 #endif
 
+
+/**
+ * via sensor_interface, temps of all sensors will also generate a heatmap
+ * */
 #ifdef DEVICE_IMMERSIONSENSOR
   #define DEVICENAME_CTR          "immersionsensor"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Sensor"
@@ -2779,21 +2933,16 @@ Bathroom
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR
+  #define USE_MODULE_SENSORS_DS18B20
   
   #define USE_MODULE_CONTROLLER_SENSORCOLOURS
      
-  #define USE_MODULE_SENSORS_DS18B20
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2801,8 +2950,7 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"  
-      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","      
       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""

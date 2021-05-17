@@ -131,7 +131,7 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj){
 void mEnergyPZEM004T::Pre_Init(void)
 {
 
-  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_MODBUS_RX_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
+  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID)) {
     pCONT_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_PZEM004T_ID; // use bit logic also
     // set bit for drivers
     settings.fEnableSensor = true;
@@ -142,7 +142,7 @@ void mEnergyPZEM004T::Pre_Init(void)
 void mEnergyPZEM004T::Init(void)
 {
 
-  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM0XX_MODBUS_RX_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
+  modbus = new TasmotaModbus(pCONT_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS_ID), pCONT_pins->GetPin(GPIO_PZEM0XX_TX_ID));
 
   uint8_t result = modbus->Begin(9600);
 
@@ -189,9 +189,9 @@ void mEnergyPZEM004T::EveryLoop(){
 
   if(mTime::TimeReachedNonReset(&measure_time,settings.rate_measure_ms))
   {
-
+    
     SplitTask_UpdateSensor(settings.active_sensor);
-
+    
     if(labs(millis()-timeout)>ENERGY_PZEM004T_MEASURE_RATE_MS_TIMEOUT)
     {
       AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "TRANSCEIVE_RESPONSE_TIMEOUT_ID 1"));
@@ -243,14 +243,18 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
     case TRANSCEIVE_RESPONSE_TIMEOUT_ID:
     case TRANSCEIVE_RESPONSE_SUCCESS_ID:
 
-      stats.start_time = millis();
       timeout = millis();
-      // modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
-      modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
-      
-      AddLog(LOG_LEVEL_DEBUG,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);
 
-      transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
+      if(mTime::TimeReached(&tSaved_backoff, 10))
+      {
+        stats.start_time = millis();
+        // modbus->Send(pCONT_iEnergy->address[device_id][3], 0x04, 0, 10);      
+        modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
+        
+        AddLog(LOG_LEVEL_DEBUG,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);
+
+        transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
+      }
 
     break; // Allow follow into next mode
     case TRANSCEIVE_AWAITING_RESPONSE_ID:

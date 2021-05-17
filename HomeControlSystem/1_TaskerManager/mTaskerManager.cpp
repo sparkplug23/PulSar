@@ -213,7 +213,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DISPLAYS_INTERFACE_ID] = new mDisplaysInterface();
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-    pModule[EM_MODULE_DISPLAYS_NEXTION_ID] = new X();
+    pModule[EM_MODULE_DISPLAYS_NEXTION_ID] = new mNextionPanel();
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
     pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID] = new mOLED_SSD1306();
@@ -238,7 +238,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MSAW_MODULE_ID] = new X();
   #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
-    pModule[EM_MODULE_DRIVERS_SDCARDID] = new mSDCard();
+    pModule[EM_MODULE_DRIVERS_SDCARD_ID] = new mSDCard();
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     pModule[EM_MODULE_DRIVERS_GPS_ID] = new mGPS();
@@ -336,6 +336,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_SR04
     pModule[EM_MODULE_SENSORS_SR04_ID] = new mSR04();
   #endif
+  #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
+    pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID] = new mRemoteDevice();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
@@ -359,13 +362,13 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID] = new mSonoffIFan();
   #endif
   #ifdef USE_MODULE_CONTROLLER_FAN
-    pModule[EM_MODULE_CONTROLLER_FAN_ID] = new X();
+    pModule[EM_MODULE_CONTROLLER_FAN_ID] = new mFan();
   #endif
   #ifdef USE_MODULE_CONTROLLER_TREADMILL
     pModule[EM_MODULE_CONTROLLER_TREADMILL_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
-    pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID] = new X();
+    pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID] = new mSensorColours();
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
     pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();

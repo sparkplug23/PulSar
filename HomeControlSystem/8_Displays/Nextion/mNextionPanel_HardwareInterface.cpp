@@ -620,7 +620,7 @@ void mNextionPanel::EverySecond_SendScreenInfo(){
   sprintf(rtc_ctr, "%02d:%02d:%02d",
   pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
 
-  SetAttribute_Txt(settings.page,5,rtc_ctr);
+  SetAttribute_Txt(settings.page,1,rtc_ctr);
   
   // char health_ctr[40]; memset(health_ctr,'\0',sizeof(health_ctr));
   // sprintf(health_ctr, "%c%c%c %d",

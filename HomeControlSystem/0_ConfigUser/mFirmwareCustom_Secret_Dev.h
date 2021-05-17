@@ -14,7 +14,6 @@
 // #define DEVICE_FORCED_TO_BE_TESTER
 #define DISABLE_WEBSERVER
 #define FORCE_TEMPLATE_LOADING
-#define USE_MODULE_NETWORK_MQTT
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -33,12 +32,13 @@
 // #define DEVICE_RGBFIREPLACE_TESTER  
 // #define DEVICE_RGBDESK        
 // #define DEVICE_RGBDISPLAY_GARAGE   
-// #define DEVICE_RGBMICRO3 //Alpha tester, before rgbroof "RGBROOF2"      
-//#define DEVICE_BEDROOMBLINDS     
+// #define DEVICE_RGBSTRING_LIGHTS1
+// #define DEVICE_BEDROOMBLINDS     
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
 // #define DEVICE_HVAC_BEDROOM
-#define DEVICE_BEDROOM_PZEM_TESTER
+// #define DEVICE_BEDROOM_PZEM_TESTER
+// #define DEVICE_RGBDELL
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -52,8 +52,6 @@
 /**
  *  LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- LIGHTING -- 
 **/  
-// #define DEVICE_RGBROOF
-// #define DEVICE_RGBDELL
 // #define DEVICE_RGBNOTIFICATION_01           
 //#define DEVICE_RGBBEDLIGHT_TEST 
 //#define DEVICE_RGBCUSTOM_USER_01
@@ -148,7 +146,7 @@
 //     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_JSON_GPIOC "\":{"
 //       "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-//       "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
+//       "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
 //       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
 //       "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
 //     "},"
@@ -209,7 +207,7 @@
       //   "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       //   #endif
       //   "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
+      //   "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       //   "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
       //   "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       // #endif //ESP266
@@ -219,7 +217,7 @@
         // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
         #endif
         // "\"1\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-        // "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
+        // "\"3\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
         // "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
         "\"LBI\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
       #endif //ESP32
@@ -278,7 +276,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_MODBUS__RX_CTR "\"," 
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
@@ -499,28 +497,18 @@
 
 
 
-#ifdef DEVICE_RGBROOF
-  #define DEVICENAME_CTR            "rgbroof"
-  #define DEVICENAME_FRIENDLY_CTR   "Bedroom String Lights"
+#ifdef DEVICE_RGBSTRING_LIGHTS1
+  #define DEVICENAME_CTR            "rgbstring_lights1"
+  #define DEVICENAME_FRIENDLY_CTR   "String Lights 1"
 
   #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
+  #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  #define DISABLE_WEBSERVER
   
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -532,9 +520,7 @@
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  
-  #define STRIP_SIZE_MAX 100//256
-  #define STRIP_REPEAT_OUTPUT_MAX 256
+  #define STRIP_SIZE_MAX 100
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -545,19 +531,19 @@
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_TIME_MS "\":9000,"
+      "\"" D_JSON_RATE_MS "\":30000,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Single Fire 01\","//Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":2"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
 
 #endif
@@ -615,8 +601,8 @@
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
     "\"TimeMs\":0,"
-    "\"ColourPalette\":\"" "User 01" "\","
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"" "User 01" "\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
@@ -707,6 +693,10 @@
   #define USE_MODULE_SENSORS_DHT
   // #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -749,6 +739,8 @@
   #define D_DEVICE_SENSOR_DHT_0_NAME "Room_DHT"
   #define D_DEVICE_SENSOR_DHT_1_NAME "Desk_DHT"
 
+  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
@@ -784,6 +776,9 @@
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
         "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
       "],"
+      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+      "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
@@ -806,7 +801,7 @@
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
         "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
       "\"" "SetOutput" "\":["
         "{"
@@ -1062,7 +1057,7 @@
     "\"" D_JSON_SAT "\":100,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Radar"
@@ -1126,8 +1121,8 @@
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
     "\"TimeMs\":5000,"
-    "\"ColourPalette\":19," //c12    43 is the colours for this christmas
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\":19," //c12    43 is the colours for this christmas
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
@@ -1275,8 +1270,8 @@
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
@@ -1342,7 +1337,7 @@
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
@@ -1365,7 +1360,8 @@
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
-  // #define DISABLE_WEBSERVER 
+  #define DISABLE_WEBSERVER 
+  #define DISABLE_NETWORK
 
   #define ENABLE_DEVFEATURE_DEBUG_GET_PIXEL_ZERO
   #define ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
@@ -1402,12 +1398,12 @@
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+      "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
+      // "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    // "\"ColourPalette\":\"Single Fire 01\","
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":20"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
+    // "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":20"
   "}";
 
 // "{HardwareType":"WS28XX","Transition":{"TimeMs":400,"RateMs":100,"PixelUpdatePerc":10,"Order":"Random"},"AnimationMode":"Effects","Effects":{"Function":"FirePlace01"},"ColourPalette":"Single Fire 01","BrightnessRGB":5}
@@ -1482,9 +1478,9 @@
       // "\"" D_JSON_FUNCTION "\":"  "1"
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    // "\"ColourPalette\":\"Single Fire 01\","
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
     // "\"Brightness\":1"
 
     
@@ -1554,8 +1550,8 @@
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":10"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":10"
   "}";
 
 #endif
@@ -1711,7 +1707,7 @@ use black etherhetn czble in dads rooms for it
       "\"Mode\":3"
     "},"
     "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
-    "\"BrightnessRGB\":20"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":20"
 
   "}";
 
@@ -1815,7 +1811,7 @@ use black etherhetn czble in dads rooms for it
     //   "\"Mode\":3"
     // "},"
     // "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
-    // "\"BrightnessRGB\":20"
+    // "\"" D_JSON_BRIGHTNESS_RGB "\":20"
 
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     #ifdef STRIP_SIZE_MAX
@@ -1837,9 +1833,9 @@ use black etherhetn czble in dads rooms for it
     // "\"CCT_Temp\": 152,"
     // "\"Hue\":25,"
     // "\"Sat\":100,"
-    "\"ColourPalette\":41,"
+    "\"" D_JSON_COLOUR_PALETTE "\":41,"
     "\"BrightnessCCT\":10,"
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
 
   "}";
 
@@ -1901,9 +1897,9 @@ use black etherhetn czble in dads rooms for it
     // "\"CCT_Temp\": 152,"
     // "\"Hue\":25,"
     // "\"Sat\":100,"
-    "\"ColourPalette\":41,"
+    "\"" D_JSON_COLOUR_PALETTE "\":41,"
     "\"BrightnessCCT\":10,"
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
 
   "}";
 
@@ -2048,7 +2044,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
       "\"Mode\":3"
     "},"
     "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
 
   "}";
 
@@ -2120,8 +2116,8 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":30,\"RateMs\":2000},"
     "\"TimeMs\":1000,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\":43," //c12    43 is the colours for this christmas
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
@@ -2212,8 +2208,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":30,\"RateMs\":2000},"
     "\"TimeMs\":1000,"
-    "\"ColourPalette\": 43,"
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_COLOUR_PALETTE "\": 43,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 
@@ -2648,8 +2644,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_EFFECTS "\":{" 
   //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
   //   "},"
-  //   "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-  //   "\"BrightnessRGB\":100"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   // "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
@@ -2746,8 +2742,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_EFFECTS "\":{" 
   //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
   //   "},"
-  //   "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-  //   "\"BrightnessRGB\":100"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   // "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
@@ -2822,9 +2818,9 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     // "\"CCT_Temp\": 152,"
     // "\"Hue\":25,"
     // "\"Sat\":100,"
-    "\"ColourPalette\":41,"
+    "\"" D_JSON_COLOUR_PALETTE "\":41,"
     "\"BrightnessCCT\":10,"
-    "\"BrightnessRGB\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
@@ -3057,8 +3053,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 //     "},"
 //     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":60000},"
 //     "\"TimeMs\":30000,"
-//     "\"ColourPalette\":43," //c12    43 is the colours for this christmas
-//     "\"BrightnessRGB\":100"
+//     "\"" D_JSON_COLOUR_PALETTE "\":43," //c12    43 is the colours for this christmas
+//     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
 //   "}";
 //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
 //   // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
@@ -3654,6 +3650,12 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
+
+  #define ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
+
+  // Test hardware, receive bedroom sensor as remote device
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
   
   #define USE_MODULE_DRIVERS_PWM
   #define USE_MODULE_CONTROLLER_FAN
@@ -3761,8 +3763,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   //   "\"" D_JSON_EFFECTS "\":{" 
   //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
   //   "},"
-  //   "\"ColourPalette\":\"Single Fire 01\","//Christmas MultiColoured Warmer\","
-  //   "\"BrightnessRGB\":2"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","//Christmas MultiColoured Warmer\","
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":2"
   // "}";
 
 
@@ -3829,8 +3831,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
-    "\"ColourPalette\":\"Single Fire 01\","//Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":2"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","//Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":2"
   "}";
 
 
@@ -4232,6 +4234,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
+  #define USE_MODULE_NETWORK_MQTT
+
   /**
    *  - Test Buttons
    * */
@@ -4259,11 +4263,15 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_DISPLAYS_INTERFACE
   // #define USE_MODULE_DISPLAYS_OLED_SSD1306
   /**
+   *  - Try sd open, basic write, close
+   * */
+  #define USE_MODULE_DRIVERS_SDCARD
+  /**
    *  - Get stable uart2 ringbuffer
    * */
   // #define USE_MODULE_DRIVERS_SERIAL_UART
-  // #define USE_DEVFEATURE_RINGBUFFERS // Rename, its simply a uart method, to use ringbuffers method vs basic read/poll
-  // #define ENABLE_UART2_ISR_BUFFERS
+  // // #define ENABLE_UART2_ISR_BUFFERS
+  // #define ENABLE_UART_RINGBUFFERS
   // #define ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   /**
    *  - Read GPS Data into UART_GPS and UART_RSS (as dummy data)
@@ -4276,11 +4284,10 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_DISPLAYS_OLED_SSD1306
   // #define USE_MODULE_DRIVERS_INTERFACE
   // #define USE_MODULE_DRIVERS_SERIAL_UART
-  // #define USE_DEVFEATURE_RINGBUFFERS // Rename, its simply a uart method, to use ringbuffers method vs basic read/poll
   // #define ENABLE_UART2_ISR_BUFFERS
 
 
-  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
 
   #define ESP32
 
@@ -4338,35 +4345,39 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    // "\"" D_JSON_GPIOC "\":{"
 
-      // OLED screen
-      #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      // "\"2\":\"" D_GPIO_FUNCTION_OLED_RESET_CTR   "\","
-      #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
+    //   // OLED screen
+    //   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+    //   "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+    //   "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+    //   // "\"2\":\"" D_GPIO_FUNCTION_OLED_RESET_CTR   "\","
+    //   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"22\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\","
-      #endif 
+    //   #ifdef USE_MODULE_SENSORS_BUTTONS
+    //   "\"22\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\","
+    //   #endif 
 
-      // 2 push buttons
+    //   // 2 push buttons
 
-      // SD card
+    //   // SD card
 
-      // GPS
+    //   // GPS
 
-      // Serial data logger (just receives into a buffer)
+    //   // Serial data logger (just receives into a buffer)
       
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+    //   "\"22\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+    //   "\"23\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+
+
+    //   "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+    //   "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
 
 
 
 
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
+    //   "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    // "},"
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 

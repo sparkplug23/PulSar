@@ -208,7 +208,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
           sensor[sensor_id].instant.dewPoint = sensor[sensor_id].dht->computeDewPoint(newValues.temperature, newValues.humidity);
           sensor[sensor_id].instant.cr = sensor[sensor_id].dht->getComfortRatio(cf, newValues.temperature, newValues.humidity);
 
-          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
+          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
       
           sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_DONE_ID;
         }
@@ -255,7 +255,7 @@ void mSensorsDHT::EveryLoop(){
             sensor[sensor_id].instant.tSavedMeasureClimate = millis();
           }else
           if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_ERROR_ID){ 
-            sensor[sensor_id].instant.tSavedMeasureClimate = millis()+5000; //backoff for 5 seconds
+            sensor[sensor_id].instant.tSavedMeasureClimate = millis();//+5000; //backoff for 5 seconds
           }
       }
 

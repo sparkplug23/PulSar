@@ -3,9 +3,12 @@
 
 #define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
 
-#include "2_CoreSystem/mBaseConfig.h"
+#include "1_TaskerManager/mTaskerManager.h"
+  #ifdef USE_MODULE_NETWORK_WIFI
 
 // #define ENABLE_WIFI_DEVELOPMENT
+
+#include "2_CoreSystem/mBaseConfig.h"
 
 #ifdef ESP32
 #include <esp8266toEsp32.h>
@@ -16,7 +19,6 @@
 #endif
 #include "2_CoreSystem/Logging/mLogging.h"
 
-#include "1_TaskerManager/mTaskerManager.h"
 
 
 //#include "//2_CoreSystem/Languages/mLanguage.h"
@@ -173,3 +175,5 @@ struct {
 };
 
 #endif
+
+#endif //   #ifdef USE_MODULE_NETWORK_WIFI

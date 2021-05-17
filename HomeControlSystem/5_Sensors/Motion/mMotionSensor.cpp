@@ -224,9 +224,15 @@ uint8_t mMotionSensor::ConstructJSON_Sensor(uint8_t json_level){
       
       pir_detect[sensor_id].ischanged = false;
       
+      //Phase out
       JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+
+      JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+        JBI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+        JBI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+      JBI->Level_End();
 
       //if another is yet to send, then reset the mqtt_handler to fire immeditely again!
       //if any mtion flag remains, then set mqtt again

@@ -3,6 +3,9 @@
 
 #define D_UNIQUE_MODULE_NETWORK_MQTT_ID 21
 
+#include "2_CoreSystem/mFirmwareDefaults.h"
+
+#ifdef USE_MODULE_NETWORK_MQTT
 #include <stdint.h>
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -403,3 +406,5 @@ const char* state_ctr(void);
 
 };
 #endif
+
+#endif //  USE_MODULE_NETWORK_MQTT

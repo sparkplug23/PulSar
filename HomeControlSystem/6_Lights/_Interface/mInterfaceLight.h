@@ -637,6 +637,7 @@ void LightCalcPWMRange();
     void CommandSet_PixelHardwareTypeID(uint8_t value);
     void CommandSet_LightPowerState(uint8_t value);
 
+void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     // Global and shared with activergb
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);

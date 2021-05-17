@@ -1768,15 +1768,15 @@ void CommandSet_SystemRestartID(uint8_t value);
 // }data_buffer_old;
 
 #ifndef WEB_LOG_SIZE
-#define WEB_LOG_SIZE 400       // Max number of characters in weblog
+#define WEB_LOG_SIZE 200       // Max number of characters in weblog
 #endif // WEB_LOG_SIZE
 #ifndef LOG_BUFFER_SIZE
-#define LOG_BUFFER_SIZE 1000 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
+#define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
 #endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
-#define RESPONSE_MESSAGE_BUFFER_SIZE 100
-char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE];
+// #define RESPONSE_MESSAGE_BUFFER_SIZE 100
+// char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE];
 
 
 const char* GetTelePeriodJsonLevelCtr(char* buffer);

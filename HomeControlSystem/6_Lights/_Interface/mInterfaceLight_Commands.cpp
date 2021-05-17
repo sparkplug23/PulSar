@@ -64,6 +64,15 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
+  if(jtok = obj[PM_JSON_RGB]){ // Must accept "RRGGBBCC" and "RR,GG,BB,CC"
+    CommandSet_ActiveSolidPalette_RGB_Ctr(jtok.getStr());
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  
   if(jtok = obj[PM_JSON_HUE]){ // Assume range 0-359
     CommandSet_ActiveSolidPalette_Hue_360(jtok.getInt());
     data_buffer.isserviced++;
@@ -789,6 +798,78 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 
   
 
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** RGB *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+/**
+ * @param rgb Accepts both "RRGGBBWW" and "RR,GG,BB,WW", use of "#" will also be checked and omitted
+ * */
+void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
+{
+
+  uint32_t colour32bit = 0;
+  bool hash_used = false;
+  bool delimeter_used = false;
+  if(strstr(rgb,"#")!=NULL){ hash_used = true; }
+  if(strstr(rgb,",")!=NULL){ delimeter_used = true; }
+
+  // if(delimeter_used)
+  // {
+    // to be done, with iterator moving across for rgb and rgbw can be parsed
+  // }
+
+  if(hash_used)
+  {
+    colour32bit = (long) strtol( &rgb[1], NULL, 16);
+  }
+  else
+  {
+    colour32bit = (long) strtol( &rgb[0], NULL, 16);
+  }
+
+  RgbwColor colour = RgbwColor(0);
+  // Check if upper 8 bits are set
+  if(colour32bit&0xFF000000)
+  { //4 colours
+    colour.R = colour32bit >> 24; //RGB
+    colour.G = colour32bit >> 16; //RGB
+    colour.B = colour32bit >> 8 & 0xFF; //RGB
+    colour.W = colour32bit & 0xFF; //RGB
+  }else{
+    colour.R = colour32bit >> 16; //RGB
+    colour.G = colour32bit >> 8 & 0xFF; //RGB
+    colour.B = colour32bit & 0xFF; //RGB
+  }
+
+ 
+  // Serial.println("HER"); Serial.flush();
+  rgbcct_controller.setRGB(colour.R, colour.G, colour.B);
+  animation.flags.fForceUpdate = true;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getrgb());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "%d  %d,%d,%d,%d"), colour32bit, colour.R, colour.G, colour.B, colour.W);
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+  
+
+// //   if(!obj[D_JSON_RGB].isNull()){
+// //     const char* rgbpacked = obj[D_JSON_RGB];
+// //     uint32_t colour32bit = 0;
+// //     RgbColor rgb;
+// //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+// //     // // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+// //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
+// //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// //   }
+
+
+
+
+}
  
 
 /******************************************************************************************************************************

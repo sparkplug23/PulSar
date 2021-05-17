@@ -1,18 +1,11 @@
-#ifndef MSENSORSDHT_H
-#define MSENSORSDHT_H 0.2
+#ifndef REMOTE_DEVICE_H
+#define REMOTE_DEVICE_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_DHT_ID 125
+#define D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID 135
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_DHT
-
-#include "stdint.h"
-// #include "2_CoreSystem/Time/mTime.h"
-// class mTime;
-#include "DHTesp.h"
-class DHTesp;
-#include "1_TaskerManager/mTaskerManager.h"
+#ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 #include <ESPAsyncTCP.h>
@@ -21,20 +14,27 @@ class DHTesp;
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mSensorsDHT :
+#include "5_Sensors/_Interface/mSensorType.h"
+
+class mRemoteDevice :
   public mTaskerInterface
 {
 
   private:
   public:
-    mSensorsDHT(){};
+    mRemoteDevice(){};
     // Configure pins, call sensor sub classes and init if need be
     void Pre_Init(void);
     // Configure variables
     void Init(void);
     #define MAX_SENSORS 4
     int8_t pin[MAX_SENSORS] = {-1,-1,-1,-1};
+
+    
+    void parse_JSONCommand(JsonParserObject obj);
     // DHTesp* dht[MAX_SENSORS];
+
+    sensors_reading_t sensor_data;
     
     struct SETTINGS{
       uint8_t  fEnableSensor = true;
@@ -44,15 +44,15 @@ class mSensorsDHT :
     }settings;
 
 
-    static const char* PM_MODULE_SENSORS_DHT_CTR;
-    static const char* PM_MODULE_SENSORS_DHT_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DHT_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_DHT_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DHT_ID; }
+    static const char* PM_MODULE_SENSORS_REMOTE_DEVICE_CTR;
+    static const char* PM_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_REMOTE_DEVICE_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR; }
+    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_REMOTE_DEVICE_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
-      return sizeof(mSensorsDHT);
+      return sizeof(mRemoteDevice);
     };
     #endif
 
@@ -63,13 +63,26 @@ class mSensorsDHT :
     
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-      if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-      value->data.push_back(sensor[index].instant.temperature);
-      value->data.push_back(sensor[index].instant.humidity);
-      value->sensor_id = index;
+      Serial.printf("OVERRIDE ACCESSED REMOTE DEVICE %d\n\r",index);//Serial.println(sensor[index].instant.temperature);
+      
+      // Need to copy each part
+      value->type = sensor_data.type;
+      value->data = sensor_data.data;
+      value->sensor_id = sensor_data.sensor_id;
+      value->max_value = sensor_data.max_value;
+      value->min_value = sensor_data.min_value;
+      value->resolution = sensor_data.resolution;     
+
+
+      // if(sensor_data.data.size()==0)
+      // {Serial.printf("OVERRIDE ACCESSED REMOTE sensor_data.data.size()==0\n\r");
+      //   value->type.push_back(0);
+      //   return;
+      // }
+      // value = &sensor_data;
+      // // value->Valid
+      // // Serial.printf("value=%d",value->data.size());
+      // Serial.println(sensor_data.data[0]);
     };
 
 
@@ -86,7 +99,7 @@ class mSensorsDHT :
 
     //#define D_MODULE_TOPIC_NAME "dht"
 
-    // #define WEB_HANLDE_JSON_DHT_SENSOR_TABLE "/fetch/tab_dht_sensor.json"
+    // #define WEB_HANLDE_JSON_REMOTE_DEVICE_SENSOR_TABLE "/fetch/tab_REMOTE_DEVICE_sensor.json"
     void EveryLoop();
 
     void WebAppend_Root_Status_Table_Draw();
@@ -128,7 +141,7 @@ class mSensorsDHT :
     float tmp_float;
 
     struct SENSORDATA{
-      DHTesp* dht;
+      // DHTesp* dht;
       struct TYPE{
         float temperature;
         float humidity;
@@ -168,14 +181,14 @@ class mSensorsDHT :
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mSensorsDHT> mqtthandler_settings_teleperiod;
-    struct handler<mSensorsDHT> mqtthandler_sensor_ifchanged;
-    struct handler<mSensorsDHT> mqtthandler_sensor_teleperiod;
+    struct handler<mRemoteDevice> mqtthandler_settings_teleperiod;
+    struct handler<mRemoteDevice> mqtthandler_sensor_ifchanged;
+    struct handler<mRemoteDevice> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
       
-    struct handler<mSensorsDHT>* mqtthandler_list[3] = {
+    struct handler<mRemoteDevice>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod

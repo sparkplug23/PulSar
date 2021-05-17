@@ -2353,7 +2353,13 @@ void mSupport::CheckResetConditions()
     #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
     #endif// ENABLE_LOG_LEVEL_INFO
+    
+#ifdef USE_MODULE_NETWORK_WIFI
+   
+   // THIS should be moved into this class
         pCONT_wif->EspRestart();
+        
+#endif USE_MODULE_NETWORK_WIFI
       }
     }
 

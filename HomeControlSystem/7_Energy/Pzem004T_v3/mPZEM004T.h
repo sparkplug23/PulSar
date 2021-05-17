@@ -86,6 +86,7 @@ class mEnergyPZEM004T :
     TasmotaModbus *modbus;
     timereached_t measure_time;
     uint32_t timeout = millis();
+    uint32_t tSaved_backoff = millis();
     
     struct DATA_MODBUS{
       float voltage;

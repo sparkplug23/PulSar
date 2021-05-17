@@ -40,24 +40,24 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         // #endif// ENABLE_LOG_LEVEL_INFO
       }
 
-      if(mTime::TimeReached(&testtime,1)){ // 10 secs then 60 secs
-        // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "TEST %s"),uptime.hhmmss_ctr);    
-        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
-        //       pCONT_sup->DebugFreeMem();
+      // if(mTime::TimeReached(&testtime,1)){ // 10 secs then 60 secs
+      //   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "TEST %s"),uptime.hhmmss_ctr);    
+      //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "FreeRam %d"), ESP.getFreeHeap());
+      //   //       pCONT_sup->DebugFreeMem();
         
-        #ifndef DISABLE_SERIAL_LOGGING
-        // if(ESP.getFreeHeap()<4000){
-        //   // Serial.printf("WARNING FreeRam %d\n\r", ESP.getFreeHeap()); Serial.flush();
-        // }
-        #endif
-      }
+      //   #ifndef DISABLE_SERIAL_LOGGING
+      //   // if(ESP.getFreeHeap()<4000){
+      //   //   // Serial.printf("WARNING FreeRam %d\n\r", ESP.getFreeHeap()); Serial.flush();
+      //   // }
+      //   #endif
+      // }
       
     }break;
     case FUNC_EVERY_SECOND:{
 
       //Serial.println(GetUptime());
       
-      pCONT_time->WifiPollNtp();
+      WifiPollNtp();
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
         UpdateStoredRTCVariables();
@@ -98,7 +98,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
     #endif// ENABLE_LOG_LEVEL_INFO
-      pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
+     pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
     }
     break;
     #endif // USE_MODULE_NETWORK_MQTT
@@ -150,6 +150,7 @@ void mTime::init(void){
 
 bool mTime::CheckOrStartNTPService(){
 
+  #ifdef USE_MODULE_NETWORK_WIFI
   if(pCONT_wif->WifiCheckIpConnected()){
     // If just connected, and not already started
     if(!settings.timeclient_is_started){ 
@@ -160,6 +161,7 @@ bool mTime::CheckOrStartNTPService(){
   }else{    
     //Serial.println("CheckOrStartNTPService False");
   }
+  #endif // USE_MODULE_NETWORK_WIFI
 
   if(!settings.timeclient_is_started){
     fTimeSet = false;

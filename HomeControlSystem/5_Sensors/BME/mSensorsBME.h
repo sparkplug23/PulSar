@@ -17,7 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #ifndef MSENSORSBME_H
-#define MSENSORSBME_H 0.2
+#define MSENSORSBME_H
 
 #define D_UNIQUE_MODULE_SENSORS_BME_ID 143
 
@@ -27,7 +27,6 @@
 
 #include <Wire.h>
 #include <SPI.h>
-// #include "5_Sensors/BME/internal/mAdafruit_Sensor.h"
 #include "5_Sensors/BME/internal/Adafruit_BME280.h"
 
 class Adafruit_BME280;
@@ -100,6 +99,26 @@ class mSensorsBME :
       uint8_t sReadSensor;
       Adafruit_BME280* bme = NULL;
     }sensor[MAX_SENSORS];
+
+    
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.fSensorCount;
+    }
+    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
+      if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+      value->data.push_back(sensor[index].temperature);
+      value->data.push_back(sensor[index].humidity);
+      value->sensor_id = index;
+    };
+
+
+
         
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

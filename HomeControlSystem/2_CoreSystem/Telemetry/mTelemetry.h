@@ -149,6 +149,8 @@ class mTelemetry :
 
     // uint32_t loop_delay_temp = 100;
 
+// #ifdef USE_MODULE_NETWORK_MQTT
+
     //use new syntax
     enum STATUS_SYSTEM_IDS{
       MQTT_HANDLER_SYSTEM_ALL_ID = 0,
@@ -196,6 +198,19 @@ class mTelemetry :
       handler<mTelemetry> mqtthandler_debug_moduleinterface;
       handler<mTelemetry> mqtthandler_debug_minimal;
     #endif
+    
+  struct handler<mTelemetry>* mqtthandler_list[15] = {
+    &mqtthandler_health, &mqtthandler_settings,
+    &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
+    &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
+    &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+      &mqtthandler_debug_pins, &mqtthandler_debug_template,
+      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
+    #endif
+  };
+
+// #endif // USE_MODULE_NETWORK_MQTT
 
 };
 
