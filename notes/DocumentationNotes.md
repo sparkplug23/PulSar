@@ -17,3 +17,26 @@ These folders can be summarised as follows:
   * `7_Energy` - All modules that receive power data from connected hardware, connceted via GPIO pins.
   * `8_Displays` - Special drivers for controlling connected displays.
   * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output.
+
+
+# Description of what each folder contains
+
+## ConfigUser
+
+## TaskerManager
+
+## CoreSystem
+
+## Network
+
+## Drivers
+
+## Sensors
+
+## Lights
+
+## Energy
+
+## Displays
+
+## Controller
