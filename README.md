@@ -109,7 +109,7 @@ The modules are used to measure aspects of the surrounding environment, currentl
 
 This program is licensed under GPL-3.0
 
-# How to use the project
+<!-- # How to use the project
 Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different environments. 
 
 ## Configure
@@ -154,7 +154,7 @@ build_flags = ${common.build_flags}
                 -w
 upload_protocol = espota
 upload_port = 192.168.1.79
-```
+``` -->
 
 
 # How to use the project (Notes in its most recent form)
