@@ -37,30 +37,30 @@ This folder contains the code required to read all connected devices that report
 
 The complete list of sensors are:
 
-ModuleName | Measures | Pin Interface | GPIO Pins
-| :--- | :--- | :--- | :--- 
-`Interface` | Unifying resources and readings
-`ADS1115ADC` | (Voltage)
-`Analog` | (Voltage)
- * `APDS9960` (Proximity)
- * `BH1750` (Light)
- * `BME` (Temperature, Humidity, Pressure)
- * `Buttons` (MomentaryChanges)
- * `Counters` (Counter, Frequency)
- * `DB18x20` (Temperature)
- * `DHT` (Temperature, Humidity)
- * `Door` (Open/Closed)
- * `Moisture` (Moisture)
- * `Motion` (Motion, PIR, Doppler)
- * `Presence` (Occupancy)
- * `PulseCounter` (Counter^)
- * `RemoteSensor` (Any)
- * `Rotaty` (Rotational Counter?)
- * `SeeSawSoil` (Moisture)
- * `SR04` (Distance)
- * `Switches` (StateChanges)
- * `TSL2516` (Lux)
- * `Ultrasonic` (Distance, same as SR04?)
+ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supply Voltage
+| :--- | :--- | :--- | :---  | :---  | :--- 
+`Interface` | Unifying resources and readings | |
+`ADS1115ADC` | Voltage | | I2C |
+`Analog` | Voltage | 0..1023 | Analog | |
+`APDS9960` | Proximity |  |
+`BH1750` | Light | | I2C
+`BME` | Temperature <BR> Humidity <BR> Pressure | -40…85°C (±1.0°C) <BR> 0..100 (±3%) <BR> 300...1100 hPa (±0.25%) | I2C <BR> SPI | `"I2C SCL"`, `"I2C SDA"` <BR> (GPIO_I2C_SCL_ID, GPIO_I2C_SDA_ID) | 3.3V
+`Buttons` | MomentaryChanges || Digital
+`Counters` | Counter <BR> Frequency
+`DB18x20` | Temperature
+`DHT` | Temperature <BR> Humidity || | | 3-5V
+`Door` | Open/Closed
+`Moisture` | Moisture
+`Motion` | Motion <BR> PIR <BR> Doppler
+`Presence` | Occupancy
+`PulseCounter` | Counter^
+`RemoteSensor` | Any
+`Rotaty` | Rotational Counter?
+`SeeSawSoil` | Moisture
+`SR04` | Distance
+`Switches` | StateChanges
+`TSL2516` | Lux
+`Ultrasonic` | Distance <BR> same as SR04?
 
  ### InterfaceSensor
  Unifying resources and readings
@@ -70,22 +70,24 @@ ModuleName | Measures | Pin Interface | GPIO Pins
  ### APDS9960 (Proximity)
  ### BH1750 (Light)
  ### BME (Temperature, Humidity, Pressure)
- * `Buttons` (MomentaryChanges)
- * `Counters` (Counter, Frequency)
- * `DB18x20` (Temperature)
- * `DHT` (Temperature, Humidity)
- * `Door` (Open/Closed)
- * `Moisture` (Moisture)
- * `Motion` (Motion, PIR, Doppler)
- * `Presence` (Occupancy)
- * `PulseCounter` (Counter^)
- * `RemoteSensor` (Any)
- * `Rotaty` (Rotational Counter?)
- * `SeeSawSoil` (Moisture)
- * `SR04` (Distance)
- * `Switches` (StateChanges)
- * `TSL2516` (Lux)
- * `Ultrasonic` (Distance, same as SR04?)
+ https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/
+
+`Buttons` (MomentaryChanges)
+`Counters` (Counter, Frequency)
+`DB18x20` (Temperature)
+`DHT` (Temperature, Humidity)
+`Door` (Open/Closed)
+`Moisture` (Moisture)
+`Motion` (Motion, PIR, Doppler)
+`Presence` (Occupancy)
+`PulseCounter` (Counter^)
+`RemoteSensor` (Any)
+`Rotaty` (Rotational Counter?)
+`SeeSawSoil` (Moisture)
+`SR04` (Distance)
+`Switches` (StateChanges)
+`TSL2516` (Lux)
+`Ultrasonic` (Distance, same as SR04?)
 
 ## Lights
 
