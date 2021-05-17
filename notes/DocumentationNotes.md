@@ -4,7 +4,7 @@ This file will be the outline of documentation to come later, with bullet points
 
 The project has a layout with related code being grouped into classes, also reffered to as "modules", since each class performs a specialised task. The modules are further grouped by the type of task they perform (e.g., Networking, Sensors) and placed into their own folders [Figure 1].
 
-![image](https://user-images.githubusercontent.com/35019746/118504784-bc8c9400-b723-11eb-8e76-422709fb901c.png)
+![image](https://user-images.githubusercontent.com/35019746/118510354-cc5aa700-b728-11eb-8245-7344dad1cb4a.png)
 
 These folders can be summarised as follows:
   * `0_ConfigUser` - Allows configuring what sections of the project should be included, configurable by the user.
