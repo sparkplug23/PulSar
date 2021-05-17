@@ -59,7 +59,30 @@ The complete list of modules/sensors are:
  * `TSL2516` (Lux)
  * `Ultrasonic` (Distance, same as SR04?)
 
-The following list are the sensors currently supported
+ ### InterfaceSensor
+ Unifying resources and readings
+ 
+ ### ADS1115ADC (Voltage)
+ * `Analog` (Voltage)
+ * `APDS9960` (Proximity)
+ * `BH1750` (Light)
+ * `BME` (Temperature, Humidity, Pressure)
+ * `Buttons` (MomentaryChanges)
+ * `Counters` (Counter, Frequency)
+ * `DB18x20` (Temperature)
+ * `DHT` (Temperature, Humidity)
+ * `Door` (Open/Closed)
+ * `Moisture` (Moisture)
+ * `Motion` (Motion, PIR, Doppler)
+ * `Presence` (Occupancy)
+ * `PulseCounter` (Counter^)
+ * `RemoteSensor` (Any)
+ * `Rotaty` (Rotational Counter?)
+ * `SeeSawSoil` (Moisture)
+ * `SR04` (Distance)
+ * `Switches` (StateChanges)
+ * `TSL2516` (Lux)
+ * `Ultrasonic` (Distance, same as SR04?)
 
 ## Lights
 
