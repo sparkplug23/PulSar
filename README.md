@@ -34,7 +34,7 @@ Projects which gave me invaluable ideas of code that aided development:
 - [Tasmota](https://github.com/arendst/Tasmota/releases/latest)
 - [WLED](https://github.com/Aircoookie/WLED)
 
-## Features already supported by the project
+<!-- ## Features already supported by the project
 
 ### Drivers
 These modules are used to control elements, currently these include:
@@ -95,15 +95,15 @@ The modules are used to measure aspects of the surrounding environment, currentl
 - Radiator Fan (ie. use temperature sensor for enclosed radiators to activate ducted fans for improved room heating)
 - Scheduler (TBD. A method of holding tasks to be run at a later or exact time)
 - SD Card Logger
-- Treadmill ie Sensor readings mapped into estimated outputs (eg. Using linear voltage to mph conversion for treadmill distances)
+- Treadmill ie Sensor readings mapped into estimated outputs (eg. Using linear voltage to mph conversion for treadmill distances) -->
 
-## Features under development for future integration
-- TBA
+<!-- ## Features under development for future integration
+- TBA -->
 
 ## Notes
 - This project name is a placeholder, and will change later in development.
 - Written with VSCode IDE with PlatformIO.
-- [x]<sup>1</sup> extra comment.
+<!-- - [x]<sup>1</sup> extra comment. -->
 
 ## License
 
