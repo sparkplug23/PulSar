@@ -33,6 +33,33 @@ These folders can be summarised as follows:
 
 ## Sensors
 
+This folder contains the code required to read all connected devices that report measurements from the real world. The first module in this folder, is the interface module, which contains shared resources that all sensors use and is responsible for enabling unified sensor readings, effectively acting as an application layer so any other module can access sensor readings by type, without requiring knowledge of the physical connected hardware. 
+
+The complete list of modules/sensors are:
+ * `Interface` Unifying resources and readings
+ * `ADS1115ADC` (Voltage)
+ * `Analog` (Voltage)
+ * `APDS9960` (Proximity)
+ * `BH1750` (Light)
+ * `BME` (Temperature, Humidity, Pressure)
+ * `Buttons` (MomentaryChanges)
+ * `Counters` (Counter, Frequency)
+ * `DB18x20` (Temperature)
+ * `DHT` (Temperature, Humidity)
+ * `Door` (Open/Closed)
+ * `Moisture` (Moisture)
+ * `Motion` (Motion, PIR, Doppler)
+ * `Presence` (Occupancy)
+ * `PulseCounter` (Counter^)
+ * `Rotaty` (Rotational Counter?)
+ * `SeeSawSoil` (Moisture)
+ * `SR04` (Distance)
+ * `Switches` (StateChanges)
+ * `TSL2516` (Lux)
+ * `Ultrasonic` (Distance, same as SR04?)
+
+The following list are the sensors currently supported
+
 ## Lights
 
 ## Energy
