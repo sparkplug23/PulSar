@@ -1,6 +1,6 @@
 This file will be the outline of documentation to come later, with bullet points describing what each module can do, and plans for the future.
 
-#Overview
+# Overview
 
 The project has a layout with related code being grouped into classes, also reffered to as "modules", since each class performs a specialised task. The modules are further grouped by the type of task they perform (e.g., Networking, Sensors) and placed into their own folders [Figure 1].
 
