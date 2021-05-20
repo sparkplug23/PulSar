@@ -1,5 +1,5 @@
 #ifndef _USE_MODULE_DRIVERS_GPS_H
-#define _USE_MODULE_DRIVERS_GPS_H 0.1
+#define _USE_MODULE_DRIVERS_GPS_H
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -7,302 +7,34 @@
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
-
 #include <string.h>
 #include <strings.h>
 
 #define NMEAGPS_DERIVED_TYPES
 #define NMEAGPS_PARSE_PROPRIETARY
-// #include <NeoGPS_cfg.h>
-// #include <ublox/ubxGPS.h>
-// #include <ublox/ubxmsg.h>
-// #define gpsPort Serial2
-#include <NMEAGPS.h>
-
-#include <Streamers.h>
-
-
-#define ENABLE_UART2_ISR_BUFFERS
-
-//=========
-#define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
-          Serial.printf("\n\r%s=",NAME); \
-          for(int i=0;i<LENGTH;i++){\
-          Serial.print(VALUE[i]);\
-          Serial.printf(",");\
-          }\
-          Serial.println();
-
-#include <GPSport.h>
-
-// //-----------------------------------------------------------------
-// //  Derive a class to add the state machine for starting up:
-// //    1) The status must change to something other than NONE.
-// //    2) The GPS leap seconds must be received
-// //    3) The UTC time must be received
-// //    4) All configured messages are "requested"
-// //         (i.e., "enabled" in the ublox device)
-// //  Then, all configured messages are parsed and explicitly merged.
-
-// class MyGPS : public ubloxGPS
-// {
-// public:
-
-//     enum
-//       {
-//         GETTING_STATUS, 
-//         GETTING_LEAP_SECONDS, 
-//         GETTING_UTC, 
-//         RUNNING
-//       }
-//         state NEOGPS_BF(8);
-
-//     MyGPS( Stream *device ) : ubloxGPS( device )
-//     {
-//       state = GETTING_STATUS;
-//     }
-
-//     //--------------------------
-
-//     void get_status()
-//     {
-//       // static bool acquiring = false;
-
-//       // if (fix().status == gps_fix::STATUS_NONE) {
-//       //   static uint32_t dotPrint;
-//       //   bool            requestNavStatus = false;
-
-//       //   if (!acquiring) {
-//       //     acquiring = true;
-//       //     dotPrint = millis();
-//       //     DEBUG_PORT.print( F("Acquiring...") );
-//       //     requestNavStatus = true;
-
-//       //   } else if (millis() - dotPrint > 1000UL) {
-//       //     dotPrint = millis();
-//       //     // DEBUG_PORT << '.';
-
-//       //     static uint8_t requestPeriod;
-//       //     if ((++requestPeriod & 0x07) == 0)
-//       //       requestNavStatus = true;
-//       //   }
-
-//       //   if (requestNavStatus)
-//       //     // Turn on the UBX status message
-//       //     enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS );
-
-//       // } else {
-//       //   if (acquiring)
-//       //   //   DEBUG_PORT << '\n';
-//       //   // DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
-
-//       //   #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
-//       //       defined(UBLOX_PARSE_TIMEGPS)
-
-//       //     if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
-//       //       DEBUG_PORT.println( F("enable TIMEGPS failed!") );
-
-//       //     state = GETTING_LEAP_SECONDS;
-//       //   #else
-//       //     start_running();
-//       //     state = RUNNING;
-//       //   #endif
-//       // }
-//     } // get_status
-
-//     //--------------------------
-
-//     void get_leap_seconds()
-//     {
-//       // #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
-//       //     defined(UBLOX_PARSE_TIMEGPS)
-
-//       //   if (GPSTime::leap_seconds != 0) {
-//       //     // DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
-
-//       //     if (!disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
-//       //       DEBUG_PORT.println( F("disable TIMEGPS failed!") );
-
-//       //     #if defined(UBLOX_PARSE_TIMEUTC)
-//       //       if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
-//       //         DEBUG_PORT.println( F("enable TIMEUTC failed!") );
-//       //       state = GETTING_UTC;
-//       //     #else
-//       //       start_running();
-//       //     #endif
-//       //   }
-//       // #endif
-
-//     } // get_leap_seconds
-
-//     //--------------------------
-
-//     void get_utc()
-//     {
-//       // #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
-//       //     defined(UBLOX_PARSE_TIMEUTC)
-
-//       //   lock();
-//       //     bool            safe = is_safe();
-//       //     NeoGPS::clock_t sow  = GPSTime::start_of_week();
-//       //     NeoGPS::time_t  utc  = fix().dateTime;
-//       //   unlock();
-
-//       //   if (safe && (sow != 0)) {
-//       //     // DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
-//       //     // DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
-
-//       //     start_running();
-//       //   }
-//       // #endif
-
-//     } // get_utc
-
-//     //--------------------------
-
-//     void start_running()
-//     {
-//       // bool enabled_msg_with_time = false;
-
-//       // #if defined(UBLOX_PARSE_POSLLH)
-//       //   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH ))
-//       //     DEBUG_PORT.println( F("enable POSLLH failed!") );
-
-//       //   enabled_msg_with_time = true;
-//       // #endif
-
-//       // #if defined(UBLOX_PARSE_PVT)
-//       //   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_PVT ))
-//       //     DEBUG_PORT.println( F("enable PVT failed!") );
-
-//       //   enabled_msg_with_time = true;
-//       // #endif
-
-//       // #if defined(UBLOX_PARSE_VELNED)
-//       //   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED ))
-//       //     DEBUG_PORT.println( F("enable VELNED failed!") );
-
-//       //   enabled_msg_with_time = true;
-//       // #endif
-
-//       // #if defined(UBLOX_PARSE_DOP)
-//       //   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP ))
-//       //     DEBUG_PORT.println( F("enable DOP failed!") );
-//       //   else
-//       //     DEBUG_PORT.println( F("enabled DOP.") );
-
-//       //   enabled_msg_with_time = true;
-//       // #endif
-
-//       // #if defined(UBLOX_PARSE_SVINFO)
-//       //   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_SVINFO ))
-//       //     DEBUG_PORT.println( F("enable SVINFO failed!") );
-        
-//       //   enabled_msg_with_time = true;
-//       // #endif
-
-//       // #if defined(UBLOX_PARSE_TIMEUTC)
-
-//       //   #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
-//       //     if (enabled_msg_with_time &&
-//       //         !disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
-//       //       DEBUG_PORT.println( F("disable TIMEUTC failed!") );
-
-//       //   #elif defined(GPS_FIX_TIME) | defined(GPS_FIX_DATE)
-//       //     // If both aren't defined, we can't convert TOW to UTC,
-//       //     // so ask for the separate UTC message.
-//       //     if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC ))
-//       //       DEBUG_PORT.println( F("enable TIMEUTC failed!") );
-//       //   #endif
-
-//       // #endif
-
-//       // state = RUNNING;
-//       // trace_header( DEBUG_PORT );
-
-//     } // start_running
-
-//     //--------------------------
-
-//     bool running()
-//     {
-//       // switch (state) {
-//       //   case GETTING_STATUS      : get_status      (); break;
-//       //   case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
-//       //   case GETTING_UTC         : get_utc         (); break;
-//       // }
-
-//       // return (state == RUNNING);
-
-//     } // running
-
-// } NEOGPS_PACKED;
-
-// // Construct the GPS object and hook it to the appropriate serial device
-// static MyGPS gps( &gpsPort );
-
-// // #ifdef NMEAGPS_INTERRUPT_PROCESSING
-// //   static void GPSisr( uint8_t c )
-// //   {
-// //     gps.handle( c );
-// //   }
-// // #endif
-
-// // //--------------------------
-
-// // static void configNMEA( uint8_t rate )
-// // {
-// //   // for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
-// //   //   ublox::configNMEA( gps, (NMEAGPS::nmea_msg_t) i, rate );
-// //   // }
-// // }
-
-// // //--------------------------
-
-// // static void disableUBX()
-// // {
-// //   // gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
-// //   // gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC );
-// //   // gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED );
-// //   // gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH );
-// //   // gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
-// // }
-
-/*
- * Connect the SD card to the following pins:
- *
- * SD Card | ESP32
- *    D2       12
- *    D3       13
- *    CMD      15
- *    VSS      GND
- *    VDD      3.3V
- *    CLK      14
- *    VSS      GND
- *    D0       2  (add 1K pull up after flashing)
- *    D1       4
- */
-
-#include "FS.h"
-#include "SD_MMC.h"
-
-
-#include "freertos/ringbuf.h"
-// static char tx_item[] = "test_item";
-#include <stdio.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/uart.h"
-#include "esp_log.h"
-#include "driver/gpio.h"
-#include "sdkconfig.h"
-#include "esp_intr_alloc.h"
-
+#ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
+#define gpsPort Serial2
+#endif // USE_DEVFEATURE_GPS_POLLING_INPUT
+
+#include "4_Drivers/GPS/internal/NMEA_Parser.h"
+#include "4_Drivers/GPS/internal/types/Streamers.h"
+
+// #define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
+//           Serial.printf("\n\r%s=",NAME); \
+//           for(int i=0;i<LENGTH;i++){\
+//           Serial.print(VALUE[i]);\
+//           Serial.printf(",");\
+//           }\
+//           Serial.println();
+
+#define MILLISECONDS_IN_DAY 86400000
+#define DEBUG_PORT Serial 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR) "gpspacket_minimal";
-
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR) "gpspacket_required";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR)    "debug/parsing";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR)    "debug/all";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR)    "micro";
 
 class mGPS :
   public mTaskerInterface
@@ -312,7 +44,6 @@ class mGPS :
   public:
     mGPS(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
     
     static const char* PM_MODULE_DRIVERS_GPS_CTR;
     static const char* PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
@@ -320,89 +51,91 @@ class mGPS :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_GPS_ID; }
 
-    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mGPS);
     };
     #endif
 
-    // Receive buffer to collect incoming data
-    uint8_t rxbuf2[256];
-    // Register to collect data length
-    uint16_t urxlen2;
-    uart_isr_handle_t *uart2_handle_console;
+    void EveryLoop_InputMethod_PollingSerial_Internal();
+    void EveryLoop_InputMethod_PollingSerial_Bytes();
+    void EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
+    void EveryLoop_PollForGPSData(Stream& port);
+    void EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
 
-    // void IRAM_ATTR uart_intr_handle_u2(void *arg);
-
-    QueueHandle_t uart2_event_queue_handle;
-    const int uart_buffer_size = (1024 * 2);
-
-    void  init_UART2_RingBuffer();
-    void  init_UART2_ISR();
-
-    static void IRAM_ATTR uart_intr_handle_u2(void);
-
-
-
-    int8_t Tasker_Web(uint8_t function);
-
-    #define WEB_HANDLE_SDCARD_SLIDER "fan_speed"
+    struct INTERNAL_BUFFER{
+      uint16_t buflen = 0;
+      uint16_t bufused = 0;
+      uint8_t* buffer = nullptr;
+    }gps_receive_buffer;
     
-NMEAGPS*  gps = nullptr; // This parses the GPS characters
-// gps_fix*  fix_p = nullptr; // This holds on to the latest values
-// AVERAGING_DATA<float>* averaging;
+    /**
+     * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
+     * */
+    GPS_FIX   gps_result_parsing;
+    /**
+     * @note Stores a valid solution, merged from the parsing fix
+     * */
+    GPS_FIX   gps_result_stored;
 
-uint16_t test_val = 0;
-uint8_t dir = 0;
+    uint32_t tSaved_SplashFix = millis();
 
-void init();
-void pre_init();
-int8_t pin = -1;
-struct SETTINGS{
-  uint8_t fEnableModule = false;
-  uint8_t fShowManualSlider = false;
-}settings;
+    NMEAGPS*  gps_parser = nullptr; // This parses the GPS characters
 
-struct GPS_LATEST{
-  uint8_t status = 0; // status = 0(invalid),1(now valid),2(previously valid)
-
-  int32_t latitideL = 0;
-  float latitude = 0;
-  int32_t longitudeL = 0;
-  float longitude = 0;
-  
-
-
-
-
-
-
-}gps_latest;
-
-void CommandSet_CreateFile_WithName(char* value);
-void CommandSet_SerialPrint_FileNames(const char* value);
-void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
+    void init();
+    void pre_init();
+    struct SETTINGS{
+      uint8_t fEnableModule = false;
+      uint8_t fShowManualSlider = false;
+    }settings;
     
-void CommandSet_ReadFile(const char* filename);
+    /**
+     * @brief Updated with `gps_result_stored` to include the exact data I need
+     * */
+    struct GPS_DESIRED{
+      uint8_t status = 0; // status = 0(invalid),1(now valid),2(previously valid)
+
+      int32_t latitideL = 0;
+      float latitude = 0;
+      int32_t longitudeL = 0;
+      float longitude = 0;
 
 
-int8_t CheckAndExecute_JSONCommands();
-void parse_JSONCommand(JsonParserObject obj);
 
-uint8_t ConstructJSON_Scene(uint8_t json_method);
-
-void WebCommand_Parse(void);
+      uint32_t milliseconds_of_day =  MILLISECONDS_IN_DAY;
 
 
-void WebAppend_Root_Draw_PageTable();
-void WebAppend_Root_Status_Table();
+
+
+      
+    }gps_latest;
+
+
+    void CommandSet_CreateFile_WithName(char* value);
+    void CommandSet_SerialPrint_FileNames(const char* value);
+    void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
+        
+    void CommandSet_ReadFile(const char* filename);
+
+
+    int8_t CheckAndExecute_JSONCommands();
+    void parse_JSONCommand(JsonParserObject obj);
+
+    uint8_t ConstructJSON_Scene(uint8_t json_method);
+
+    void WebCommand_Parse(void);
+
+
+    void WebAppend_Root_Draw_PageTable();
+    void WebAppend_Root_Status_Table();
 
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_method = 0);
     uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_method = 0);
-
+    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_method = 0);
+    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_method = 0);
+    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_method = 0);
   
   //#ifdef USE_CORE_MQTT 
 
@@ -414,33 +147,27 @@ void WebAppend_Root_Status_Table();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     struct handler<mGPS> mqtthandler_gpspacket_minimal_teleperiod;
-
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
+    struct handler<mGPS> mqtthandler_gpspacket_required;
     struct handler<mGPS> mqtthandler_settings_teleperiod;
+    struct handler<mGPS> mqtthandler_gpspacket_debug;
+    struct handler<mGPS> mqtthandler_gpspacket_micro;
+    struct handler<mGPS> mqtthandler_gpspacket_all;
     
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mGPS> mqtthandler_sensor_ifchanged;
-    struct handler<mGPS> mqtthandler_sensor_teleperiod;
-    
-    // const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
       //later also send byte packet method for testing over mqtt
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
-  uint8_t mqtthandler_list_ids[2] = {
-    MQTT_HANDLER_SETTINGS_ID,
-    MQTT_HANDLER_MODULE_GPSPACKET_MINIMAL_IFCHANGED_ID
-    //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
-  };
-  
-  struct handler<mGPS>* mqtthandler_list_ptr[2] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_gpspacket_minimal_teleperiod
-    //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
-  };
-
+      
+    struct handler<mGPS>* mqtthandler_list[6] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_gpspacket_minimal_teleperiod,
+      &mqtthandler_gpspacket_required,
+      &mqtthandler_gpspacket_all,
+      &mqtthandler_gpspacket_micro,
+      &mqtthandler_gpspacket_debug
+    };
 
 
 };
@@ -448,3 +175,181 @@ void WebAppend_Root_Status_Table();
 #endif
 
 #endif
+
+// #include "globals.h"
+// #include "main.h"
+// //#include "transceive.h"
+
+// #define GPS_SC_1 0xB5
+// #define GPS_SC_2 0x62
+
+// #define NAV_CLASS 0x01  
+// int ublox_NAV_LENGTH_idx;
+// #define NAV_AOPSTATUS_ID     0x06 
+// #define NAV_AOPSTATUS_LENGTH 52
+// #define NAV_PVT_ID           0x07 
+// #define NAV_PVT_LENGTH       84
+// #define NAV_CLOCK_ID         0x22 
+// #define NAV_CLOCK_LENGTH     20
+// #define NAV_POSLLH_ID        0x02 
+// #define NAV_POSLLH_LENGTH    28
+
+// #define NAV_STATUS_ID        0x03 
+// #define NAV_STATUS_LENGTH    16
+// #define NAV_SOL_ID           0x06 
+// #define NAV_SOL_LENGTH       52
+// #define NAV_TIMEUTC_ID       0x21 
+// #define NAV_TIMEUTC_LENGTH   20
+// #define NAV_TIMEGPS_ID       0x20 
+// #define NAV_TIMEGPS_LENGTH   16
+// #define NAV_TIMEVELNED_ID       0x12 
+// #define NAV_TIMEVELNED_LENGTH   36
+
+// unsigned char gps_parsed_status[3];
+// int flag_gps_data_ready_to_parse;
+// unsigned char encodebuffer[70];
+// int encodebuffer_index;
+// int flag_save_gps_data;
+// unsigned long encoded_sequence;
+// unsigned char gpspacketwaiting;
+        
+// //#define unsigned char U1
+
+// void init_gps(void);
+// void SendGPStoUART(void);
+
+// struct NAV_POSLLH{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      unsigned long iTOW_ms;
+//      signed long lon_deg_scaled_e7;
+//      signed long lat_deg_scaled_e7;
+//      long height_mm;
+//      long hMSL_mm;
+//      unsigned long hAcc_mm;
+//      unsigned long vAcc_mm;
+// }nav_posllh;
+// extern struct NAV_POSLLH *ptr_NAV_POSLLH_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_POSLLH *ptr_NAV_POSLLH_r;//Declare a pointer that is used to read point to structures
+
+// struct NAV_TIMEUTC{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      U4 iTOW_ms;
+//      U4 tAcc_ns;
+//      I4 nano_ns;
+//      U2 year;
+//      U1 month;
+//      U1 day;
+//      U1 hour;
+//      U1 min;
+//      U1 sec;
+// }nav_timeutc;
+// extern struct NAV_TIMEUTC *ptr_NAV_TIMEUTC_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_TIMEUTC *ptr_NAV_TIMEUTC_r;//Declare a pointer that is used to read point to structures
+
+// struct NAV_TIMEGPS{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      U4 iTOW_ms;
+//      U4 fTOW_ns;
+//      I2 week;
+//      I1 leapS_s;
+//      X1 valid;
+//      U4 tAcc_ns;
+// }nav_timegps;
+// extern struct NAV_TIMEGPS *ptr_NAV_TIMEGPS_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_TIMEGPS *ptr_NAV_TIMEGPS_r;//Declare a pointer that is used to read point to structures
+
+// struct NAV_STATUS{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      U4 iTOW_ms;
+//      U1 gpsFix;
+//      X1 flags;
+//      X1 fixStat;
+//      X1 flags2;
+//      U4 ttff;
+//      U4 msss;
+// }nav_status;
+// extern struct NAV_STATUS *ptr_NAV_STATUS_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_STATUS *ptr_NAV_STATUS_r;//Declare a pointer that is used to read point to structures
+
+// struct NAV_SOL{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      U4 iTOW_ms;
+//      I4 fTOW_ns;  
+//      I2 week_weeks;
+//      U1 gpsFix;
+//      X1 flags;
+//      I4 ecefX;
+//      I4 ecefY;
+//      I4 ecefZ;
+//      U4 pAcc;
+//      I4 ecefVX;
+//      I4 ecefVY;
+//      I4 ecefVZ; 
+//      U4 sAcc;
+//      U2 pDOP;
+// }nav_sol;
+// extern struct NAV_SOL *ptr_NAV_SOL_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_SOL *ptr_NAV_SOL_r;//Declare a pointer that is used to read point to structures
+
+// struct NAV_VELNED{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 payload_length;
+//      U4 iTOW_ms;
+//      I4 velN;  
+//      I4 velE;
+//      I4 velD;
+//      U4 speed3D;
+//      U4 speed2D;
+//      I4 heading;
+// }nav_velned;
+// extern struct NAV_VELNED *ptr_NAV_VELNED_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_VELNED *ptr_NAV_VELNED_r;//Declare a pointer that is used to read point to structures
+
+
+// struct NAV_DESIRED{ //means I can refer to Local_GPSData as just "Local_GPSData" but the compiler sees it as "struct Local_GPSData"
+//      U1 gps_length;
+//      U4 iTOW_ms;
+//      I4 fTOW_ns;
+//      I2 week_weeks;
+//      U1 gpsFix;
+//      I4 lon_deg_scaled_e7;
+//      I4 lat_deg_scaled_e7;
+//      I4 height_mm;
+//      I4 hMSL_mm;         
+//      U4 speed3D;
+//      U4 speed2D;
+//      I4 heading;
+// }nav_desired;
+// extern struct NAV_DESIRED *ptr_NAV_DESIRED_w;//Declare a pointer that is used to write point to structures
+// extern struct NAV_DESIRED *ptr_NAV_DESIRED_r;//Declare a pointer that is used to read point to structures
+
+
+
+
+// // OLD TO REMOVE
+// int flag_gps_data_ready_to_parse;
+// unsigned char encodegpsbuffer[70];
+// int encodegpsbuffer_index;
+// int flag_save_gps_data;
+// unsigned long enconded_gps_sequence;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

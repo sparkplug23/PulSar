@@ -29,6 +29,7 @@
 #endif // D_USER_MICHAEL // Include my personally named secret file
 #ifdef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/mUserConfig_Secret.h"

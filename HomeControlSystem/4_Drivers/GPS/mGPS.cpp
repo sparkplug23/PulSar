@@ -1,141 +1,24 @@
 #include "mGPS.h"
 
-// For now, lets use polling for gps data until I get the rest working for it
-// I might want to move this into the "controller" method, or simply require it needs other drivers? cross-drivers, does this make sense??
-// Using that, a uart ISR can work to get the data, with maybe using the optional FreeRTOS method for triggering a parse event after message is complete? see how gps lib works
-
-
-// I will inject my gps data in a formatted (searchable) way into the rss/sd card data stream, matlab later will find the nearest, the interopolate from either points beside it
+/***
+ * Modes: Polling, Interrupt, Being feed from another module aka ringbuffers
+ * 
+ * */
 
 #ifdef USE_MODULE_DRIVERS_GPS
-
 
 const char* mGPS::PM_MODULE_DRIVERS_GPS_CTR = D_MODULE_DRIVERS_GPS_CTR;
 const char* mGPS::PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR = D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
 
-gps_fix  fixcpp;// = nullptr; // This holds on to the latest values
-gps_fix  fix_saved;// = nullptr; // This holds on to the latest values
+// GPS_FIX  fixcpp;// = nullptr; // This holds on to the latest values
+// GPS_FIX  fix_saved;// = nullptr; // This holds on to the latest values
 
-// static NMEAGPS   gps;
+// static NMEAGPS   gps_parser;
 // static void GPSisr( uint8_t c )
 // {
-//   gps.handle( c );
+//   gps_parser.handle( c );
 
 // } // GPSisr
-
-
-// /*********************************************************************************************/
-
-void mGPS::init(void)
-{
-  
-  // averaging = new AVERAGING_DATA<float>(100);
-  
-  #ifdef ENABLE_UART2_ISR_BUFFERS
-  // init_UART2_RingBuffer();
-  // init_UART2_ISR();
-  #endif
-
-
-}
-
-#ifdef ENABLE_UART2_ISR_BUFFERS
-// void mGPS::init_UART2_RingBuffer()
-// {
-
-//   // uart2_settings.ringbuffer_handle = xRingbufferCreate(RINGBUFFER_HANDLE_2_LENGTH, RINGBUF_TYPE_BYTEBUF);
-//   // if (uart2_settings.ringbuffer_handle != NULL) {
-//   //   uart2_settings.initialised = true;
-//   // }
-
-//   // //init with dummy data  
-//   // char data_ctr[] = "UART2 RingBuf Init\0";
-//   // UBaseType_t res =  xRingbufferSend(pCONT_uart->uart2_settings.ringbuffer_handle, data_ctr, strlen(data_ctr), pdMS_TO_TICKS(1000));
-//   // if (res != pdTRUE) {
-//   //   AddLog(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
-//   //   uart2_settings.initialised = false; //disable if fault
-//   // }
-
-// }
-
-/*
- * Define UART interrupt subroutine to ackowledge interrupt
- */
-// void IRAM_ATTR uart_intr_handle_u2_static(void *arg)
-// { 
-  
-//   uint16_t rx_fifo_len, status;
-//   uint16_t i = 0;
-//   // char
-  
-//   // gpio_pad_select_gpio(BLINK_GPIO);
-  
-//   /* Set the GPIO as a push/pull output */
-//   // gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-
-//   status = UART2.int_st.val; // read UART interrupt Status
-//   rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
-  
-//   while(rx_fifo_len){
-//     pCONT_gps->rxbuf2[i++] = UART2.fifo.rw_byte; // read all bytes
-//     rx_fifo_len--;
-//     // pCONT_gps->gps->handle(  UART2.fifo.rw_byte);
-
-//     // gpio_set_level(BLINK_GPIO, rx_fifo_len%2);
-//   }
-//   pCONT_gps->urxlen2 = i;
-
-//   // BaseType_t dummyval;
-//   // UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->uart2_settings.ringbuffer_handle, pCONT_uart->rxbuf2, pCONT_uart->urxlen2, &dummyval);
-  
-//   // if (res != pdTRUE) {
-//   //   AddLog(LOG_LEVEL_ERROR, PSTR("Failed to send item"));
-//   // }
-
-//   // after reading bytes from buffer clear UART interrupt status
-//   uart_clear_intr_status(UART_NUM_2, UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);
-
-// }
-
-
-void mGPS::init_UART2_ISR(){
-
-  // esp_log_level_set(TAG, ESP_LOG_INFO);
-
-  // /* Configure parameters of an UART driver,
-  //   * communication pins and install the driver */
-  // uart_config_t uart_config = {
-  //   .baud_rate = 115200,
-  //   .data_bits = UART_DATA_8_BITS,
-  //   .parity = UART_PARITY_DISABLE,
-  //   .stop_bits = UART_STOP_BITS_1,
-  //   .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
-  // };
-
-  // ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
-
-  // //Set UART log level
-	// ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 17, 16, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-  // // Install UART driver, and get the queue.
-  // ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, uart_buffer_size, uart_buffer_size, 10, &uart2_event_queue_handle, 0));
-
-	// // // release the pre registered UART handler/subroutine
-	// ESP_ERROR_CHECK(uart_isr_free(UART_NUM_2));
-
-  // uart_isr_register(
-  //   UART_NUM_2,
-  //   uart_intr_handle_u2_static,
-  //   NULL, 
-  //   ESP_INTR_FLAG_IRAM,
-  //   uart2_handle_console
-  // );
-  
-}
-
-#endif // ENABLE_UART2_ISR_BUFFERS
-
-
-
 
 
 void mGPS::pre_init(){
@@ -144,105 +27,45 @@ void mGPS::pre_init(){
 //   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
 //     pin = pCONT_pins->GetPin(GPIO_FAN_SDCARD1_ID);
 //     pinMode(pin, OUTPUT);
-//     settings.fEnableModule = true;
+    settings.fEnableModule = true;
 //   }
 
-  gps = new NMEAGPS(); // This parses the GPS characters
-//   fix = new gps_fix(); // This holds on to the latest values
+  gps_parser = new NMEAGPS(); // This parses the GPS characters
+//   fix = new GPS_FIX(); // This holds on to the latest values
 
 
+}
+
+
+void mGPS::init(void)
+{
+
+  
+gps_receive_buffer.bufused = 0;
+gps_receive_buffer.buflen = 200;
+gps_receive_buffer.buffer = new uint8_t[gps_receive_buffer.buflen];
 
 #ifdef ENABLE_DEVFEATURE_GPSTEST1
-// Start the normal trace output
-  // DEBUG_PORT.begin(9600);
-  // while (!DEBUG_PORT)
-  //   ;
-
-  // DEBUG_PORT.print( F("ublox binary protocol example started.\n") );
-  // // DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';
-  // // DEBUG_PORT << F("ubloxGPS object size = ") << sizeof(ubloxGPS) << '\n';
-  // // DEBUG_PORT << F("MyGPS object size = ") << sizeof(gps) << '\n';
-  // DEBUG_PORT.println( F("Looking for GPS device on " GPS_PORT_NAME) );
-  // DEBUG_PORT.flush();
-
-//   // Start the UART for the GPS device
-//   #ifdef NMEAGPS_INTERRUPT_PROCESSING
-//     gpsPort.attachInterrupt( GPSisr );
-//   #endif
-//   gpsPort.begin(9600);
-
-//   // Turn off the preconfigured NMEA standard messages
-//   configNMEA( 0 );
-
-//   // Turn off things that may be left on by a previous build
-//   disableUBX();
-
-//   #if 0
-//     // Test a Neo M8 message -- should be rejected by Neo-6 and Neo7
-//     ublox::cfg_nmea_v1_t test;
-
-//     test.always_output_pos  = false; // invalid or failed
-//     test.output_invalid_pos = false;
-//     test.output_invalid_time= false;
-//     test.output_invalid_date= false;
-//     test.use_GPS_only       = false;
-//     test.output_heading     = false; // even if frozen
-//     test.__not_used__       = false;
-
-//     test.nmea_version = ublox::cfg_nmea_v1_t::NMEA_V_4_0;
-//     test.num_sats_per_talker_id = ublox::cfg_nmea_v1_t::SV_PER_TALKERID_UNLIMITED;
-
-//     test.compatibility_mode = false;
-//     test.considering_mode   = true;
-//     test.max_line_length_82 = false;
-//     test.__not_used_1__     = 0;
-
-//     test.filter_gps    = false;
-//     test.filter_sbas   = false;
-//     test.__not_used_2__= 0;
-//     test.filter_qzss   = false;
-//     test.filter_glonass= false;
-//     test.filter_beidou = false;
-//     test.__not_used_3__= 0;
-
-//     test.proprietary_sat_numbering = false;
-//     test.main_talker_id = ublox::cfg_nmea_v1_t::MAIN_TALKER_ID_GP;
-//     test.gsv_uses_main_talker_id = true;
-//     test.beidou_talker_id[0] = 'G';
-//     test.beidou_talker_id[1] = 'P';
-
-//     DEBUG_PORT << F("CFG_NMEA result = ") << gps.send( test );
-//   #endif
-
-//   while (!gps.running())
-//     if (gps.available( gpsPort ))
-//       gps.read();
-
+ 
+  #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
+    gpsPort.begin(9600);
+  #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
   DEBUG_PORT.println( F("NMEASDlog.ino started!") );
   DEBUG_PORT.print( F("fix size = ") );
-  DEBUG_PORT.println( sizeof(gps_fix) );
+  DEBUG_PORT.println( sizeof(GPS_FIX) );
   DEBUG_PORT.print( NMEAGPS_FIX_MAX );
   DEBUG_PORT.println( F(" GPS updates can be buffered.") );
   
-  // if (gps.merging != NMEAGPS::EXPLICIT_MERGING)
-  //   DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
-
-  // gpsPort.attachInterrupt( GPSisr );
-  // gpsPort.begin(115200);
-
-  fixcpp.init();
-
-  
-  //  Configure the GPS.  These are commands for MTK GPS devices.  Other
-  //    brands will have different commands.
-  // gps.send_P( &gpsPort, F("PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0") ); // RMC only for MTK GPS devices
-  // gps.send_P( &gpsPort, F("PMTK220,100") ); // 10Hz update rate for MTK GPS devices
-
+  if (gps_parser->merging != NMEAGPS::EXPLICIT_MERGING)
+    DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
 
 #endif
-
+  
 }
+
+
+
 
 
 int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
@@ -257,14 +80,22 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     init();
   }
 
-  // Only continue in to tasker if module was configured properly
-  //if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:{
+
+      // EveryLoop_InputMethod_PollingSerial_Internal();
+      // EveryLoop_InputMethod_PollingSerial_Bytes();
+      // EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
+      
+      EveryLoop_PollForGPSData(Serial2);
+      EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
+
+      #ifdef ENABLE_DEVFEATURE_GPS_INTERRUPT_METHOD
 
 
       char buffer[100] = {0};
@@ -280,288 +111,11 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 
       bool new_data = false;
 
-      // uint32_t time = millis();
-      #ifdef USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
-      
-      while (bytes_in_line){//gps->available( gpsPort )) {
-        // fixcpp = gps->read();
+      #endif // ENABLE_DEVFEATURE_GPS_INTERRUPT_METHOD
 
-        char byte = buffer[buf_index++];
-
-        gps->handle(byte);
-
-        bytes_in_line--;
-
-        new_data = true;
-
-        // if(fixcpp.status > gps_fix::STATUS_NONE ){
-
-        //   //save tmp solution when valid
-        //   fix_saved = fixcpp;
-
-        //   // DEBUG_PORT.print( F("Location: ") );
-        //   // if (fixcpp.valid.location) {
-        //     DEBUG_PORT.print( fixcpp.latitude(), 6 );
-        //     DEBUG_PORT.print( ',' );
-        //     DEBUG_PORT.print( fixcpp.longitude(), 6 );
-        //     DEBUG_PORT.print( ',' );
-        //     DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
-        //   // }
-
-        //   // DEBUG_PORT.print( F(", Altitude: ") );
-        //   if (fixcpp.valid.altitude)
-        //     DEBUG_PORT.print( fixcpp.altitude() );
-
-        //   DEBUG_PORT.println();
-        // }
-
-        // if(abs(millis()-time) > 10){
-        //   break;
-        // }
-
-      }
-
-      if (new_data)
-      {
-        // (gps->available()) {
-      // if (gps->available()) {
-        // AddLog(LOG_LEVEL_TEST, PSTR("gps->available() %d"),gps->available());
-      //   // Print all the things!
-      //   fixcpp = gps->read();
-        trace_all( DEBUG_PORT, *gps, gps->read() );
-        Serial.println();
-      //    if(fixcpp.status > gps_fix::STATUS_NONE ){
-
-      //     //save tmp solution when valid
-      //     fix_saved = fixcpp;
-
-      //     // DEBUG_PORT.print( F("Location: ") );
-      //     // if (fixcpp.valid.location) {
-      //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
-      //       DEBUG_PORT.print( ',' );
-      //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
-      //       DEBUG_PORT.print( ',' );
-      //       DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
-      //     // }
-
-      //     // DEBUG_PORT.print( F(", Altitude: ") );
-      //     if (fixcpp.valid.altitude)
-      //       DEBUG_PORT.print( fixcpp.altitude() );
-
-      //     DEBUG_PORT.println();
-      //   }
-      }
-
-      if (gps->overrun()) {
-        gps->overrun( false );
-        DEBUG_PORT.println( F("DATA OVERRUN: took too long to print GPS data!") );
-      }
-
-
-      #endif // USE_DEVFEATURE_GPS_FROM_SERIAL2_BUFFER
-
-      #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
-          
-      // while (gps->available( gpsPort )) {
-      //   fixcpp = gps->read();
-
-      // //   if(fixcpp.status > gps_fix::STATUS_NONE ){
-
-      // //     //save tmp solution when valid
-      // //     fix_saved = fixcpp;
-
-      // //     // DEBUG_PORT.print( F("Location: ") );
-      // //     // if (fixcpp.valid.location) {
-      // //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
-      // //       DEBUG_PORT.print( ',' );
-      // //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
-      // //       DEBUG_PORT.print( ',' );
-      // //       DEBUG_PORT.print( fixcpp.altitude_cm(), 6 ); DEBUG_PORT.print( "cm" );
-      // //     // }
-
-      // //     // DEBUG_PORT.print( F(", Altitude: ") );
-      // //     if (fixcpp.valid.altitude)
-      // //       DEBUG_PORT.print( fixcpp.altitude() );
-
-      // //     DEBUG_PORT.println();
-      // //   }
-
-      // //   if(abs(millis()-time) > 10){
-      // //     break;
-      // //   }
-
-      // }
-#endif
-      // Serial.printf("time=%d\n\r",millis()-time);
-
-        
-// #ifdef ENABLE_DEVFEATURE_GPSTEST1
-
-
-//   if (gps.available( gpsPort ))
-//     // trace_all( DEBUG_PORT, gps, gps.read() );
-
-//   // If the user types something, reset the message configuration
-//   //   back to a normal set of NMEA messages.  This makes it
-//   //   convenient to switch to another example program that
-//   //   expects a typical set of messages.  This also saves
-//   //   putting those config messages in every other example.
-
-//   if (DEBUG_PORT.available()) {
-//     do { DEBUG_PORT.read(); } while (DEBUG_PORT.available());
-//     DEBUG_PORT.println( F("Stopping...") );
-
-//     configNMEA( 1 );
-//     disableUBX();
-//     gpsPort.flush();
-//     gpsPort.end();
-
-//     DEBUG_PORT.println( F("STOPPED.") );
-//     for (;;);
-//   }
-
-// if(gps->available( gpsPort )){
-  // if(Serial2.available()){
-  //   while (Serial2.available( )) {
-  //     char in = Serial2.read();
-  //     Serial.print(in);
-  //   }
-  // }
-// }
-
-uint32_t timeout = millis();
-
-
-    // while (gps->available( gpsPort )) {
-    //     // gps_fix  
-    //     fixcpp = gps->read();
-
-    //     // // Serial.print( millis() );
-    //     // Serial.print( F(" LocationNEW: ") );
-    //     // // // if (fix.valid.location) {
-    //     //   DEBUG_PORT.print( fixcpp.latitude(), 6 );
-    //     //   DEBUG_PORT.print( ',' );
-    //     //   DEBUG_PORT.print( fixcpp.longitude(), 6 );
-    //     // // }
-
-    //     // DEBUG_PORT.print( F(", Altitude: ") );
-    //     // // if (fix.valid.altitude)
-    //     //   DEBUG_PORT.print( fix.altitude() );
-        
-    // // Serial.print( millis() );
-    // // Serial.print( F(" LocationWHILE: ") );
-    // // // if (fix.valid.location) {
-    // //   DEBUG_PORT.print( fix2.latitude(), 6 );
-    // //   DEBUG_PORT.print( ',' );
-    // //   DEBUG_PORT.print( fix2.longitude(), 6 );
-    // // // }
-
-    // // DEBUG_PORT.print( F(", Altitude: ") );
-    // // // if (fix.valid.altitude)
-    // //   DEBUG_PORT.print( fix2.altitude() );
-
-    // // DEBUG_PORT.println();
-    //   if (gps->nmeaMessage == LAST_SENTENCE_IN_INTERVAL){
-
-
-    //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
-    //       DEBUG_PORT.print( 'llllllllllllll,' );
-    //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
-
-
-    //   }
-
-
-    // if(mTime::TimeReached(&timeout, 2000)){
-      
-    //     AddLog(LOG_LEVEL_TEST,PSTR(" Forced blocked loop timeout!!") );
-    //     AddLog(LOG_LEVEL_TEST,PSTR(" LocationTO: ") );
-    //     // // if (fix.valid.location) {
-    //       DEBUG_PORT.print( fixcpp.dateTime.seconds);
-
-
-    //       DEBUG_PORT.print( fixcpp.latitude(), 6 );
-    //       DEBUG_PORT.print( ',' );
-    //       DEBUG_PORT.print( fixcpp.longitude(), 6 );
-
-          
-
-
-
-    // }
-
-    // //     DEBUG_PORT.println();
-    // }
-
-    
-
-
-    
-
-    // #endif
     break;
     }
     case FUNC_EVERY_SECOND: {
-
-
-
-
-  // averaging->Add(1);
-
-  //     //  AVERAGING_DATA<float> averaging_data(10);
-
-  //       // for(int i=0;i<10;i++){
-  //       //   averaging_data[i] = i;
-  //       // }
-
-  //       averaging->SetBoundaryLimits(0,300);
-  //       bool result = averaging->Add(123);
-  //       Serial.println(result);
-  //       // result = averaging_data.Add(456);
-  //       // Serial.println(result);
-
-  //       for(int i=0;i<10;i++){
-  //         Serial.print(averaging->data[i]);
-  //         Serial.println();
-  //         }
-
-  //       // AddLog_Array(LOG_LEVEL_TEST, PSTR("test"), averaging_data[0], 10);
-
-  //       // SERIAL_PRINT_ARRAY("averaging_data",&averaging,10);
-
-  //       Serial.println(averaging->Mean());
-
-      //  averaging_data[1];
-
-        // Serial.print( millis() );
-        // AddLog(LOG_LEVEL_TEST,PSTR(" LocationSEC: ") );
-        // // // if (fix.valid.location) {
-        //   DEBUG_PORT.print( fixcpp.latitude(), 6 );
-        //   DEBUG_PORT.print( ',' );
-        //   DEBUG_PORT.print( fixcpp.longitude(), 6 );
-        // // }
-  
-    // fix = gps->read();
-    // //   DEBUG_PORT.print( fix.latitude(), 6 );
-    // //   DEBUG_PORT.print( ',' );
-    // //   DEBUG_PORT.println( fix.longitude(), 6 );
-
-    // //    fix = gps.read();
-
-    // // Serial.print( millis() );
-    // Serial.print( F(" LocationSECOND: ") );
-    // // if (fix.valid.location) {
-    //   DEBUG_PORT.print( fix->latitude(), 6 );
-    //   DEBUG_PORT.print( ',' );
-    //   DEBUG_PORT.print( fix->longitude(), 6 );
-    // // }
-
-    // DEBUG_PORT.print( F(", Altitude: ") );
-    // // if (fix.valid.altitude)
-    //   DEBUG_PORT.print( fix->altitude() );
-
-    // DEBUG_PORT.println();
-
 
     }     
     break;
@@ -602,451 +156,244 @@ uint32_t timeout = millis();
 } // END Tasker
 
 
-// int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj), JsonParserObject obj), JsonParserObject obj), JsonObjectConst obj){
-//   switch(function){
-//     case FUNC_JSON_COMMAND_OBJECT:
-//       parse_JSONCommand(obj);
-//     break;
-//     case FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC:
-//       return CheckAndExecute_JSONCommands(obj);
-//     break;
-//   }
-// }
-// int8_t mGPS::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 
-//   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ifan")>=0){
-//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_HEATING));
-//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//       parse_JSONCommand(obj);
-//       return FUNCTION_RESULT_HANDLED_ID;
-//   }else{
-//     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-//   }
+#ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
+/**
+ * Method A: Check Serial port directly, and read bytes into parser
+ * @note timeout is used so loop is not blocking 
+ * */
+void mGPS::EveryLoop_InputMethod_PollingSerial_Internal()
+{
 
-// }
+  uint32_t time = millis();
+      
+  while (gps_parser->available( gpsPort )) {
+    gps_result_parsing = gps_parser->read();
+
+    if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
+
+      //save tmp solution when valid
+      gps_result_stored = gps_result_parsing;
+
+      DEBUG_PORT.print( F("Location: ") );
+        DEBUG_PORT.print( gps_result_parsing.latitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( gps_result_parsing.altitude_cm(), 6 ); 
+        DEBUG_PORT.print( "cm" );
+
+      DEBUG_PORT.print( F(", Altitude: ") );
+      if (gps_result_parsing.valid.altitude)
+        DEBUG_PORT.print( gps_result_parsing.altitude() );
+
+      DEBUG_PORT.println();
+    }
+
+    if(abs(millis()-time) > 10){
+      break;
+    }
+
+  }
+
+} // END fucntion
+
+void mGPS::EveryLoop_InputMethod_PollingSerial_Bytes()
+{
+
+  uint32_t timeout = millis();
+  bool bytes_waiting = false;
+  bool gps_fix_reading = false;
+
+  while(Serial2.available())
+  {
+    // Read bytes in
+    gps_parser->parser_byte_in(Serial2.read());
+
+    // Check on fix status
+    gps_result_parsing = gps_parser->read();
+    if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
+    {
+      gps_fix_reading = true;
+      gps_result_stored = gps_result_parsing; // Save reading
+    }
+
+    // Check for timeout    
+    if(abs(millis()-timeout) > 10){
+      break;
+    }
+  }
+
+  // If ready, print only every second
+  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
+  {
+
+    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
+    DEBUG_PORT.print( "cm" );
+    DEBUG_PORT.print( F(", Altitude: ") );
+    if (gps_result_stored.valid.altitude)
+      DEBUG_PORT.print( gps_result_stored.altitude() );
+    DEBUG_PORT.println();
+    
+  }
+
+}
+
+/**
+ * Reading into a buffer, then pushing that data into the parser
+ * */
+void mGPS::EveryLoop_InputMethod_PollingSerial_BytesToBuffer()
+{
+
+  uint32_t timeout = millis();
+  bool bytes_waiting = false;
+  bool gps_fix_reading = false;
+
+  char buffer[400] = {0};
+  uint8_t buflen = 0;
+
+  while(Serial2.available())
+  {
+    if(buflen < 400)
+    {
+      buffer[buflen++] = Serial2.read();
+    }
+    else
+    {
+      break; // exceeded buffer
+    } 
+
+    // Check for timeout    
+    if(abs(millis()-timeout) > 10){
+      break;
+    }
+  }
+
+
+  //if any data found
+  if(buflen)
+  {  
+    AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),buflen, buffer);
+    // Read bytes in
+    for(int ii=0;ii<buflen;ii++)
+    {
+      gps_parser->parser_byte_in(buffer[ii]);
+
+      // Check on fix status
+      gps_result_parsing = gps_parser->read();
+      if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
+      {
+        gps_fix_reading = true;
+        gps_result_stored = gps_result_parsing; // Save reading
+      }
+    }
+
+  }
+
+
+  // If ready, print only every second
+  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
+  {
+
+    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
+    DEBUG_PORT.print( "cm" );
+    DEBUG_PORT.print( F(", Altitude: ") );
+    if (gps_result_stored.valid.altitude)
+      DEBUG_PORT.print( gps_result_stored.altitude() );
+    DEBUG_PORT.println();
+    
+  }
+
+}
+
+void mGPS::EveryLoop_PollForGPSData(Stream& port)
+{
+
+  uint32_t timeout = millis();
+  while(port.available())
+  {
+    if(gps_receive_buffer.bufused < gps_receive_buffer.buflen)
+    {
+      gps_receive_buffer.buffer[gps_receive_buffer.bufused++] = port.read();
+    }
+    else
+    {
+      AddLog(LOG_LEVEL_ERROR, PSTR("buffer overflow"));
+      break; // exceeded buffer
+    } 
+
+    // Check for timeout    
+    if(abs(millis()-timeout) > 5){
+      break;
+    }
+  }
+
+}
 
 
 /**
- * This will replace what PIC32 had, must also include the sample number? instead of sample, lets encode esp32 millis as extra parameter
- * The RSS samples of 50 rss will now also append millis from here, so when it appends the time from the ISR, add millis into it (so make special ISR for UART2)
- * Instead of "ConstructJSON_" I will also create a "ConstructRAWBytePacked_" for the sd method
+ * Reading into a buffer, then pushing that data into the parser
  * */
-uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
+void mGPS::EveryLoop_InputMethod_PollingSerial_BytesFromBuffer()
+{
 
-  char buffer[30];
-  
-  JsonBuilderI->Start();  
+  bool bytes_waiting = false;
+  bool gps_fix_reading = false;
 
-    JsonBuilderI->Level_Start("Millis");
-      JsonBuilderI->Add("GGA",millis()-gps->active_millis.GGA);
-      JsonBuilderI->Add("GLL",millis()-gps->active_millis.GLL);
-      JsonBuilderI->Add("GSA",millis()-gps->active_millis.GSA);
-      JsonBuilderI->Add("GST",millis()-gps->active_millis.GST);
-      JsonBuilderI->Add("GSV",millis()-gps->active_millis.GSV);
-      JsonBuilderI->Add("RMC",millis()-gps->active_millis.RMC);
-      JsonBuilderI->Add("VTG",millis()-gps->active_millis.VTG);
-      JsonBuilderI->Add("ZDA",millis()-gps->active_millis.ZDA);
-    JsonBuilderI->Level_End();
+  //if any data found
+  if(gps_receive_buffer.bufused)
+  {  
+    // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
+    // Read bytes in
+    for(int ii=0;ii<gps_receive_buffer.bufused;ii++)
+    {
+      gps_parser->parser_byte_in(gps_receive_buffer.buffer[ii]);
 
+      // Check on fix status
+      gps_result_parsing = gps_parser->read();
+      if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
+      {
+        gps_fix_reading = true;
+        gps_result_stored |= gps_result_parsing; // Save reading
+      }
+    }
 
-    JsonBuilderI->Level_Start("Location");
-      JsonBuilderI->Add("latitudeL", fix_saved.latitudeL()); 
-      JsonBuilderI->Add("latitude", fix_saved.latitude());
-      JsonBuilderI->Add("longitudeL", fix_saved.longitudeL());
-      JsonBuilderI->Add("longitude", fix_saved.longitude());
-    JsonBuilderI->Level_End();
+    // Reset buffer
+    gps_receive_buffer.bufused = 0;
+    memset(gps_receive_buffer.buffer,0,gps_receive_buffer.buflen);
 
-    JsonBuilderI->Level_Start("Altitude");
-      JsonBuilderI->Add("altitude_cm", fix_saved.altitude_cm()); 
-      JsonBuilderI->Add("altitude", fix_saved.altitude());
-      JsonBuilderI->Add("altitude_ft", fix_saved.altitude_ft());
-    JsonBuilderI->Level_End();
-
-
-    JsonBuilderI->Level_Start("Speed");
-      JsonBuilderI->Add("speed_mkn", fix_saved.speed_mkn()); 
-      JsonBuilderI->Add("speed", fix_saved.speed());
-      JsonBuilderI->Add("speed_kph", fix_saved.speed_kph());
-      JsonBuilderI->Add("speed_metersph", fix_saved.speed_metersph());
-      JsonBuilderI->Add("speed_mph", fix_saved.speed_mph());
-    JsonBuilderI->Level_End();
-
-    JsonBuilderI->Level_Start("Heading");
-      JsonBuilderI->Add("heading_cd", fix_saved.heading_cd()); 
-      JsonBuilderI->Add("heading", fix_saved.heading());
-    JsonBuilderI->Level_End();
-
-    JsonBuilderI->Level_Start("geoidHt");
-      JsonBuilderI->Add("geoidHeight_cm", fix_saved.geoidHeight_cm()); 
-      JsonBuilderI->Add("geoidHeight", fix_saved.geoidHeight());
-    JsonBuilderI->Level_End();
-
-    JsonBuilderI->Add("satellites", fix_saved.satellites); 
-
-    JsonBuilderI->Level_Start("Dilution");
-      JsonBuilderI->Add("hdop", fix_saved.hdop); 
-      JsonBuilderI->Add("vdop", fix_saved.vdop);
-      JsonBuilderI->Add("pdop", fix_saved.pdop);
-      JsonBuilderI->Add("lat_err", fix_saved.lat_err());
-      JsonBuilderI->Add("lon_err", fix_saved.lon_err());
-      JsonBuilderI->Add("alt_err", fix_saved.alt_err());
-      JsonBuilderI->Add("spd_err", fix_saved.spd_err());
-      JsonBuilderI->Add("hdg_err", fix_saved.hdg_err());
-      JsonBuilderI->Add("spd_err", fix_saved.spd_err());
-      JsonBuilderI->Add("time_err", fix_saved.time_err());
-    JsonBuilderI->Level_End();
+  }
 
 
+  // If ready, print only every second
+  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
+  {
 
-
-
-    /*
-  
-  #ifdef GPS_FIX_LOCATION_DMS
-    DMS_t latitudeDMS;
-    DMS_t longitudeDMS;
-  #endif
-
-*/
-
-
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
-  return JsonBuilderI->End();
+    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
+    DEBUG_PORT.print( ',' );
+    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
+    DEBUG_PORT.print( "cm" );
+    DEBUG_PORT.print( F(", Altitude: ") );
+    if (gps_result_stored.valid.altitude)
+      DEBUG_PORT.print( gps_result_stored.altitude() );
+    DEBUG_PORT.println();
+    
+  }
 
 }
 
 
-uint8_t mGPS::ConstructJSON_Settings(uint8_t json_method){
-
-  // Active rgbcct palette used as scene
-
-  //Serial.println("mGPS::ConstructJSON_Settings");
-
-  char buffer[30];
-  
-  JsonBuilderI->Start();  
-
-  // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
-  // active_id, plus the values below
-  // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
-  //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  
-    // JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    // JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    // JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
-    JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
-  return JsonBuilderI->End();
-
-}
-
-
-////////////////////// START OF MQTT /////////////////////////
-
-void mGPS::MQTTHandler_Init(){
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Settings;
-
-
-  mqtthandler_ptr = &mqtthandler_gpspacket_minimal_teleperiod; //also ifchanged together
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_GPSPacket_Minimal;
-
-  
-//   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Scene;
-
-//   mqtthandler_ptr = &mqtthandler_sensdebug_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Debug;
-
-} //end "MQTTHandler_Init"
-
-
-void mGPS::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  // mqtthandler_animation_teleperiod.flags.SendNow = true;
-  // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
-//   mqtthandler_scene_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mGPS::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_GPS_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]), mqtt_handler_id
-  );
-
-}
-
-
-// void mGPS::parse_JSONCommand(JsonObjectConst obj){
-
-  
-
-//   if(obj.containsKey(D_JSON_FANSPEED)){
-//     int speed = obj[D_JSON_FANSPEED];
-//     test_val = speed;
-//     if(speed>0){
-//       analogWrite(pin, test_val);
-//     }else
-//     if(speed==1023){
-//       digitalWrite(pin, HIGH);      
-//     }else{
-//       digitalWrite(pin, LOW);
-//     }
-//     // if(speed>3){
-//     //   Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
-//     //   speed=0; //default off
-//     // }      
-//     // SetFanSpeed(speed, false);
-//     // AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-//     // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
-//     // isserviced++;
-//   }
-  
-  
-
-// }
-
-
-
-
-// int8_t mGPS::Tasker_Web(uint8_t function){
-
-//   switch(function){
-//     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
-
-//       // create command list
-//       // char dlist[100]; memset(dlist,0,sizeof(dlist));
-//       // pCONT_sup->AppendDList(dlist, D_JSON_LIGHTPOWER);
-//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-//       // pCONT_sup->AppendDList(dlist, D_JSON_FANSPEED);
-
-//       uint8_t button_values[5] = {2, 0, 1, 2, 3}; //toggle, fanspeed0-3
-          
-//       // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Fan Controls"),"");
-
-//       char button_value_ctr[10];
-//       char button_key_ctr[50];
-//       char button_text_ctr[30];
-
-//       // BufferWriterI->Append_P(PSTR("{t}<tr>"));
-
-//       if(settings.fShowManualSlider){
-//         BufferWriterI->Append_P(PSTR("<div> Fan Speed </div>"), test_val);
-//         BufferWriterI->Append_P(HTTP_MSG_SLIDER_GRADIENT3,  // Brightness - Black to White
-//           WEB_HANDLE_SDCARD_SLIDER,               // c - Unique HTML id
-//           PSTR("#000"), PSTR("#eee"),   // Black to White
-//           4,                 // sl4 - Unique range HTML id - Used as source for Saturation begin color
-//           0, 1023,  // Range 0/1 to 100%
-//           test_val,
-//           WEB_HANDLE_SDCARD_SLIDER
-//         );           // d0 - Value id is related to lc("d0", value) and WebGetArg(request,"d0", tmp, sizeof(tmp));
-//       }
-
-//         // for(uint8_t button_id=0;button_id<5;button_id++){
-//         //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR, 
-//         //                             100/(button_id==0?1:4),
-//         //                             button_id==0?"4":"", 
-//         //                             "buttonh",
-//         //                             pCONT_sup->GetTextIndexed_P(button_key_ctr, sizeof(button_key_ctr), button_id, dlist), 
-//         //                             pCONT_sup->p_snprintf(button_value_ctr, sizeof(button_value_ctr), "%d", button_values[button_id]),
-//         //                             pCONT_sup->GetTextIndexed_P(button_text_ctr, sizeof(button_text_ctr), button_id, kListFanControls),
-//         //                             ""
-//         //                         );
-//         //   // LightPower button gets its own row
-//         //   if(button_id==0){ BufferWriterI->Append_P(PSTR("</tr><tr>")); }
-//         // }
-//       // BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-
-//     }break; 
-//     case FUNC_WEB_COMMAND:
-//       WebCommand_Parse();      
-//     break;
-//   }
-
-// }
-
-
-
-// void mGPS::WebCommand_Parse(void)
-// {
-//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "mRGBAnimator::WebCommand_Parse"));
-
-//   char tmp[100];
-
-//   uint8_t  arg_value = 0;
-//  if(pCONT_web->request_web_command == nullptr){
-//   Serial.println("nullptr"); 
-//   return; 
-// }
-
-//   char arg_ctr[30]; memset(arg_ctr,0,sizeof(arg_ctr));
-  
-//   sprintf_P(arg_ctr,PSTR(WEB_HANDLE_SDCARD_SLIDER));
-//   if (pCONT_web->request_web_command->hasParam(arg_ctr)) {
-//     pCONT_web->WebGetArg(pCONT_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
-//     arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
-//     test_val = arg_value;
-
-//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-//       analogWrite(pin, test_val);
-//     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
-//     // SetRefreshLEDs();
-//   }
-
-// }
-
-
-
-// uint8_t mGPS::ConstructJSON_Settings(uint8_t json_method){
-  
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add_P("test",0);  
-//   JsonBuilderI->End();
-
-// }
-
-// uint8_t mGPS::ConstructJSON_Sensor(uint8_t json_method){
-
-//   JsonBuilderI->Start();
-//     JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
-//     JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
-//   JsonBuilderI->End();
-
-// }
-
-
-
-
-// /*********************************************************************************************************************************************
-// ******** MQTT **************************************************************************************************************************************
-// **********************************************************************************************************************************************
-// ********************************************************************************************************************************************/
-
-// void mGPS::MQTTHandler_Init(){
-
-//   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 600; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Settings;
-
-//   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 600; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Sensor;
-
-//   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mGPS::ConstructJSON_Sensor;
-  
-// } //end "MQTTHandler_Init"
-
-
-// void mGPS::MQTTHandler_Set_fSendNow(){
-
-//   mqtthandler_settings_teleperiod.flags.SendNow = true;
-//   mqtthandler_sensor_ifchanged.flags.SendNow = true;
-//   mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-// } //end "MQTTHandler_Init"
-
-
-// void mGPS::MQTTHandler_Set_TelePeriod(){
-
-//   // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-// } //end "MQTTHandler_Set_TelePeriod"
-
-
-// void mGPS::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-//   uint8_t flag_handle_all = false, handler_found = false
-//   if(mqtt_handler_id == MQTT_HANDLER_ALL_ID){ flag_handle_all = true; } //else run only the one asked for
-
-//   // change switch to use array of pointers?
-//   do{
-
-//     switch(mqtt_handler_id){
-//       case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-//       case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-//       case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-//       default: handler_found=false; break; // nothing 
-//     } // switch
-
-//     // Pass handlers into command to test and (ifneeded) execute
-//     if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_DRIVERS_SDCARD_ID,mqtthandler_ptr); }
-
-//     // stop searching
-//     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}
-
-//   }while(flag_handle_all);
-
-// }
-
-////////////////////// END OF MQTT /////////////////////////
+#endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
 
 #endif

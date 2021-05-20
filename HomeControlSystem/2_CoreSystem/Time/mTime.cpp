@@ -281,7 +281,18 @@ bool mTime::TimeReachedNonReset(uint32_t* tSaved, uint32_t ElapsedTime){
 
 // Time elapsed function that updates the time when true
 uint32_t mTime::MillisElapsed(uint32_t* tSaved){
-  return abs(millis()-*tSaved);
+  return labs(millis()-*tSaved);
+}
+
+/**
+ * @brief Get the millis from saved millis count to now
+ * */
+uint32_t mTime::MillisElapsed(uint32_t tSaved)
+{
+  // uint64_t time = millis()-tSaved;
+  if(millis()<=tSaved)
+    return 0;
+  return labs(millis()-tSaved);
 }
 
 

@@ -255,6 +255,7 @@ void RtcSync(void);
     static bool MillisReached(uint32_t* tTarget);
     static bool TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime);
     static uint32_t MillisElapsed(uint32_t* tSaved);
+    static uint32_t MillisElapsed(uint32_t tSaved);
 
     timereached_t testtime;
 

@@ -46,6 +46,14 @@ void mHardwarePins::parse_JSONCommand(JsonParserObject obj){}
 
 void mHardwarePins::pre_init(){
 
+  #ifdef DEBUG_PIN1_GPIO
+    DEBUG_PIN1_INIT();
+  #endif
+  #ifdef DEBUG_PIN2_GPIO
+    DEBUG_PIN2_INIT();
+  #endif
+
+
 }
 
 

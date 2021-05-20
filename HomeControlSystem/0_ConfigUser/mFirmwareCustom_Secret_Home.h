@@ -71,7 +71,7 @@ Hallway
   - hallway table
  */
 // #define DEVICE_RADIATORFAN
-#define DEVICE_HEATING
+// #define DEVICE_HEATING
 // #define DEVICE_HEATING_ESP32
 // #define DEVICE_DOORBELLWALLCHIME
 
@@ -988,8 +988,8 @@ Bathroom
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
         #ifdef USE_MODULE_SENSORS_BME
-        "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-        "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+        "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+        "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
         #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
@@ -1232,6 +1232,36 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
+
+/**
+ * o/w 5v        dht_5v, 
+ * w/o ground    dht_g, bme_g, db18_g
+ * g/w 3v        bme_3v, db18_3v
+ * w/g           dht_sig
+ * bl/w          db18_sig
+ * w/bl
+ * br/w I2c      bme_a
+ * w/br I2c      bme_d
+ * */
+
+/**
+ * 3 pin
+ * PIR
+ * 
+ * 
+ * */
+
+/**
+ * 3pin
+ * fan connector
+ * *
+ * 12v
+ * pwm recieved
+ * ground
+ * 
+ * */
+
+
       #ifdef USE_MODULE_SENSORS_DHT
       "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       #endif
@@ -1790,9 +1820,11 @@ Bathroom
   #define DEVICENAME_CTR          "gazebcon"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
 
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define D_DEVICE_SENSOR_CLIMATE "Outside"
 
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_DRIVERS_RELAY
   

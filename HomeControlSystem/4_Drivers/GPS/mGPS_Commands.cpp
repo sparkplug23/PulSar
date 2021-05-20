@@ -52,7 +52,7 @@ void mGPS::parse_JSONCommand(JsonParserObject obj){
     
   // }
   
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  // mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
 }
 
