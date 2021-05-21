@@ -28,11 +28,14 @@ class BufferWriter{
 
     void Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size);
     void Start();
+    void Clear();
     bool End();
     char* GetPtr();
     uint16_t* GetLengthPtr();
     uint16_t GetLength();
     uint16_t GetBufferSize();
+
+    //FUTURE, create iterator that gets values
 
     template <typename T>
     T GetLength(){

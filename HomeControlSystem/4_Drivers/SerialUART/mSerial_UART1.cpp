@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
 
 #ifdef ENABLE_HARDWARE_UART_1
-#ifdef ENABLE_UART_RINGBUFFERS
+
 void mSerialUART::init_UART1_RingBuffer()
 {
 
@@ -20,8 +20,6 @@ void mSerialUART::init_UART1_RingBuffer()
   }
 
 }
-
-#endif // ENABLE_UART_RINGBUFFERS
 
 /**
  * @brief init UART1 ISR routine

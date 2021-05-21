@@ -14,7 +14,8 @@ char* BufferWriter::GetPtr(){
   return writer.buffer;
 }
 uint16_t BufferWriter::GetLength(){
-  return *writer.length;
+  return strlen(writer.buffer);
+  // return *writer.length; // needs testing, was not working
 }
 uint16_t* BufferWriter::GetLengthPtr(){
   return writer.length;
@@ -29,6 +30,12 @@ void BufferWriter::Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size
   writer.length = _length;
   writer.buffer_size = _buffer_size;
   Start();
+}
+void BufferWriter::Clear()
+{
+    if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) { return; }  
+    memset(writer.buffer,0,writer.buffer_size);
+    *writer.length = 0;
 }
 void BufferWriter::Start()
 {

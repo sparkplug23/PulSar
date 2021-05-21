@@ -7,6 +7,156 @@
 // #undef CORE_DEBUG_LEVEL
 // #endif
 
+/**
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * For me, use new line
+ * */
+uint16_t mSerialUART::GetReceiveBuffer2(char* output_buf, uint16_t output_len, char optional_read_until_char, bool flag_clear_buffer_after_read)
+{
+  uint16_t bytes_to_read =0;
+// xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
+      // //Receive an item from no-split ring buffer
+      size_t item_size;
+      // Wait at most 1ms to read from buffer
+      char*  item = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
+
+      //Check received item
+      if (item != NULL) {
+        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        //Print item
+        // for(int i = 0; i < item_size; i++) {
+        //   Serial.printf("%c", item[i]);          
+        // }
+
+        bytes_to_read = item_size > output_len ? output_len : item_size;
+
+        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // Read from buffer
+        // snprintf(output_buf, output_len)
+        memcpy(output_buf,item,bytes_to_read*sizeof(char));
+
+        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+
+
+// if(flag_clear_buffer_after_read)
+// {
+        //Return Item
+        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
+        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+// }
+      } 
+      // else {
+      //   //Failed to receive item EMPTY
+      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      // }
+
+  return bytes_to_read;
+
+}
+/**
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * For me, use new line
+ * */
+uint16_t mSerialUART::GetReceiveBufferPartial2(char* output_buf, uint16_t output_len, char optional_read_until_char, bool flag_clear_buffer_after_read)
+{
+  uint16_t bytes_to_read =0;
+// xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
+      // //Receive an item from no-split ring buffer
+      size_t item_size;
+      // Wait at most 1ms to read from buffer
+      char*  item = (char *)xRingbufferReceiveUpTo(pCONT_uart->settings.uart2.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100), output_len);
+
+      //Check received item
+      if (item != NULL) {
+        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        //Print item
+        // for(int i = 0; i < item_size; i++) {
+        //   Serial.printf("%c", item[i]);          
+        // }
+
+        bytes_to_read = item_size > output_len ? output_len : item_size;
+
+        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // Read from buffer
+        // snprintf(output_buf, output_len)
+        memcpy(output_buf,item,bytes_to_read*sizeof(char));
+
+        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+
+
+// if(flag_clear_buffer_after_read)
+// {
+        //Return Item
+        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)item); // Free memory
+        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+// }
+      } 
+      // else {
+      //   //Failed to receive item EMPTY
+      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      // }
+
+  return bytes_to_read;
+
+}
+
+
+
+/**
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * For me, use new line
+ * */
+uint16_t mSerialUART::GetReceiveBuffer1(char* output_buf, uint16_t output_len, char optional_read_until_char, bool flag_clear_buffer_after_read)
+{
+  uint16_t bytes_to_read =0;
+// xRingbufferPrintInfo(settings.uart2.ringbuffer_handle);
+      // //Receive an item from no-split ring buffer
+      size_t item_size;
+      // Wait at most 1ms to read from buffer
+      char*  item = (char *)xRingbufferReceive(pCONT_uart->settings.uart1.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100));
+
+      //Check received item
+      if (item != NULL) {
+        // AddLog(LOG_LEVEL_TEST, PSTR("UART2:>%d %d sizeB=%d"),item_size,millis(),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+        //Print item
+        // for(int i = 0; i < item_size; i++) {
+        //   Serial.printf("%c", item[i]);          
+        // }
+
+        bytes_to_read = item_size > output_len ? output_len : item_size;
+
+        // AddLog(LOG_LEVEL_TEST, PSTR("bytes_to_read=%d, item_size=%d, output_len=%d"),bytes_to_read,item_size,output_len);
+        // Read from buffer
+        // snprintf(output_buf, output_len)
+        memcpy(output_buf,item,bytes_to_read*sizeof(char));
+
+        AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),output_buf);
+
+
+// if(flag_clear_buffer_after_read)
+// {
+        //Return Item
+        vRingbufferReturnItem(pCONT_uart->settings.uart1.ringbuffer_handle, (void *)item); // Free memory
+        // AddLog(LOG_LEVEL_TEST, PSTR("sizeA=%d"),xRingbufferGetCurFreeSize(pCONT_uart->settings.uart2.ringbuffer_handle));
+// }
+      } 
+      // else {
+      //   //Failed to receive item EMPTY
+      //   // AddLog(LOG_LEVEL_TEST, PSTR("Failed to receive item"));
+      // }
+
+  return bytes_to_read;
+
+}
+
+
+
 // #define CORE_DEBUG_LEVEL 3
 // #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 

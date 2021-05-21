@@ -10,63 +10,6 @@
 const char* mGPS::PM_MODULE_DRIVERS_GPS_CTR = D_MODULE_DRIVERS_GPS_CTR;
 const char* mGPS::PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR = D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
 
-// GPS_FIX  fixcpp;// = nullptr; // This holds on to the latest values
-// GPS_FIX  fix_saved;// = nullptr; // This holds on to the latest values
-
-// static NMEAGPS   gps_parser;
-// static void GPSisr( uint8_t c )
-// {
-//   gps_parser.handle( c );
-
-// } // GPSisr
-
-
-void mGPS::pre_init(){
-
-//change this into the fan module
-//   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
-//     pin = pCONT_pins->GetPin(GPIO_FAN_SDCARD1_ID);
-//     pinMode(pin, OUTPUT);
-    settings.fEnableModule = true;
-//   }
-
-  gps_parser = new NMEAGPS(); // This parses the GPS characters
-//   fix = new GPS_FIX(); // This holds on to the latest values
-
-
-}
-
-
-void mGPS::init(void)
-{
-
-  
-gps_receive_buffer.bufused = 0;
-gps_receive_buffer.buflen = 200;
-gps_receive_buffer.buffer = new uint8_t[gps_receive_buffer.buflen];
-
-#ifdef ENABLE_DEVFEATURE_GPSTEST1
- 
-  #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
-    gpsPort.begin(9600);
-  #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
-
-  DEBUG_PORT.println( F("NMEASDlog.ino started!") );
-  DEBUG_PORT.print( F("fix size = ") );
-  DEBUG_PORT.println( sizeof(GPS_FIX) );
-  DEBUG_PORT.print( NMEAGPS_FIX_MAX );
-  DEBUG_PORT.println( F(" GPS updates can be buffered.") );
-  
-  if (gps_parser->merging != NMEAGPS::EXPLICIT_MERGING)
-    DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
-
-#endif
-  
-}
-
-
-
-
 
 int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -88,33 +31,73 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP:{
 
-      // EveryLoop_InputMethod_PollingSerial_Internal();
-      // EveryLoop_InputMethod_PollingSerial_Bytes();
-      // EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
-      
-      EveryLoop_PollForGPSData(Serial2);
-      EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
+      #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
+        // EveryLoop_InputMethod_PollingSerial_Internal();
+        // EveryLoop_InputMethod_PollingSerial_Bytes();
+        // EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
+        EveryLoop_PollForGPSData(Serial2);
+        EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
+      #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
-      #ifdef ENABLE_DEVFEATURE_GPS_INTERRUPT_METHOD
+      #ifdef ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
 
-
-      char buffer[100] = {0};
-      uint16_t buf_index = 0;
-      uint16_t bytes_in_line = pCONT_uart->GetReceiveBuffer2(buffer, sizeof(buffer), '\n');
-
-      if(bytes_in_line){
-        AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"%s\""), bytes_in_line, buffer);
+      BufferWriterI->Clear();
+      uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+      if(strlen(BufferWriterI->GetPtr())){
+        // AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
       }
-      // else{
-      //   AddLog(LOG_LEVEL_TEST, PSTR("size=%d, \"none\""), bytes_in_line);
-      // }
+          
+      bool bytes_waiting = false;
+      bool gps_fix_reading = false;
 
-      bool new_data = false;
+      //if any data found
+      if(strlen(BufferWriterI->GetPtr()))
+      {  
+        char* pbuffer = BufferWriterI->GetPtr();
+        // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
+        // Read bytes in
+        for(int ii=0;ii<BufferWriterI->GetLength();ii++)
+        {
+          gps_parser->parser_byte_in(pbuffer[ii]);
+
+          // Check on fix status
+          gps_result_parsing = gps_parser->read();
+          if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
+          {
+            gps_fix_reading = true;
+            gps_result_stored |= gps_result_parsing; // Save reading
+          }
+        }
+
+        // Reset buffer
+        // gps_receive_buffer.bufused = 0;
+        // memset(gps_receive_buffer.buffer,0,gps_receive_buffer.buflen);
+
+      }
+
+
+      // If ready, print only every second
+      if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
+      {
+
+        DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
+        DEBUG_PORT.print( "cm" );
+        DEBUG_PORT.print( F(", Altitude: ") );
+        if (gps_result_stored.valid.altitude)
+          DEBUG_PORT.print( gps_result_stored.altitude() );
+        DEBUG_PORT.println();
+        
+      }
 
       #endif // ENABLE_DEVFEATURE_GPS_INTERRUPT_METHOD
 
+      }
     break;
-    }
+    // }
     case FUNC_EVERY_SECOND: {
 
     }     
@@ -156,244 +139,35 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 } // END Tasker
 
 
+void mGPS::pre_init(){
 
-#ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
-/**
- * Method A: Check Serial port directly, and read bytes into parser
- * @note timeout is used so loop is not blocking 
- * */
-void mGPS::EveryLoop_InputMethod_PollingSerial_Internal()
-{
-
-  uint32_t time = millis();
-      
-  while (gps_parser->available( gpsPort )) {
-    gps_result_parsing = gps_parser->read();
-
-    if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
-
-      //save tmp solution when valid
-      gps_result_stored = gps_result_parsing;
-
-      DEBUG_PORT.print( F("Location: ") );
-        DEBUG_PORT.print( gps_result_parsing.latitude(), 6 );
-        DEBUG_PORT.print( ',' );
-        DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
-        DEBUG_PORT.print( ',' );
-        DEBUG_PORT.print( gps_result_parsing.altitude_cm(), 6 ); 
-        DEBUG_PORT.print( "cm" );
-
-      DEBUG_PORT.print( F(", Altitude: ") );
-      if (gps_result_parsing.valid.altitude)
-        DEBUG_PORT.print( gps_result_parsing.altitude() );
-
-      DEBUG_PORT.println();
-    }
-
-    if(abs(millis()-time) > 10){
-      break;
-    }
-
-  }
-
-} // END fucntion
-
-void mGPS::EveryLoop_InputMethod_PollingSerial_Bytes()
-{
-
-  uint32_t timeout = millis();
-  bool bytes_waiting = false;
-  bool gps_fix_reading = false;
-
-  while(Serial2.available())
-  {
-    // Read bytes in
-    gps_parser->parser_byte_in(Serial2.read());
-
-    // Check on fix status
-    gps_result_parsing = gps_parser->read();
-    if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
-    {
-      gps_fix_reading = true;
-      gps_result_stored = gps_result_parsing; // Save reading
-    }
-
-    // Check for timeout    
-    if(abs(millis()-timeout) > 10){
-      break;
-    }
-  }
-
-  // If ready, print only every second
-  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
-  {
-
-    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
-    DEBUG_PORT.print( "cm" );
-    DEBUG_PORT.print( F(", Altitude: ") );
-    if (gps_result_stored.valid.altitude)
-      DEBUG_PORT.print( gps_result_stored.altitude() );
-    DEBUG_PORT.println();
-    
-  }
-
-}
-
-/**
- * Reading into a buffer, then pushing that data into the parser
- * */
-void mGPS::EveryLoop_InputMethod_PollingSerial_BytesToBuffer()
-{
-
-  uint32_t timeout = millis();
-  bool bytes_waiting = false;
-  bool gps_fix_reading = false;
-
-  char buffer[400] = {0};
-  uint8_t buflen = 0;
-
-  while(Serial2.available())
-  {
-    if(buflen < 400)
-    {
-      buffer[buflen++] = Serial2.read();
-    }
-    else
-    {
-      break; // exceeded buffer
-    } 
-
-    // Check for timeout    
-    if(abs(millis()-timeout) > 10){
-      break;
-    }
-  }
-
-
-  //if any data found
-  if(buflen)
-  {  
-    AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),buflen, buffer);
-    // Read bytes in
-    for(int ii=0;ii<buflen;ii++)
-    {
-      gps_parser->parser_byte_in(buffer[ii]);
-
-      // Check on fix status
-      gps_result_parsing = gps_parser->read();
-      if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
-      {
-        gps_fix_reading = true;
-        gps_result_stored = gps_result_parsing; // Save reading
-      }
-    }
-
-  }
-
-
-  // If ready, print only every second
-  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
-  {
-
-    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
-    DEBUG_PORT.print( "cm" );
-    DEBUG_PORT.print( F(", Altitude: ") );
-    if (gps_result_stored.valid.altitude)
-      DEBUG_PORT.print( gps_result_stored.altitude() );
-    DEBUG_PORT.println();
-    
-  }
-
-}
-
-void mGPS::EveryLoop_PollForGPSData(Stream& port)
-{
-
-  uint32_t timeout = millis();
-  while(port.available())
-  {
-    if(gps_receive_buffer.bufused < gps_receive_buffer.buflen)
-    {
-      gps_receive_buffer.buffer[gps_receive_buffer.bufused++] = port.read();
-    }
-    else
-    {
-      AddLog(LOG_LEVEL_ERROR, PSTR("buffer overflow"));
-      break; // exceeded buffer
-    } 
-
-    // Check for timeout    
-    if(abs(millis()-timeout) > 5){
-      break;
-    }
-  }
+  settings.fEnableModule = true;
+  gps_parser = new NMEAGPS(); 
 
 }
 
 
-/**
- * Reading into a buffer, then pushing that data into the parser
- * */
-void mGPS::EveryLoop_InputMethod_PollingSerial_BytesFromBuffer()
+void mGPS::init(void)
 {
-
-  bool bytes_waiting = false;
-  bool gps_fix_reading = false;
-
-  //if any data found
-  if(gps_receive_buffer.bufused)
-  {  
-    // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
-    // Read bytes in
-    for(int ii=0;ii<gps_receive_buffer.bufused;ii++)
-    {
-      gps_parser->parser_byte_in(gps_receive_buffer.buffer[ii]);
-
-      // Check on fix status
-      gps_result_parsing = gps_parser->read();
-      if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
-      {
-        gps_fix_reading = true;
-        gps_result_stored |= gps_result_parsing; // Save reading
-      }
-    }
-
-    // Reset buffer
+ 
+  #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
     gps_receive_buffer.bufused = 0;
-    memset(gps_receive_buffer.buffer,0,gps_receive_buffer.buflen);
+    gps_receive_buffer.buflen = 200;
+    gps_receive_buffer.buffer = new uint8_t[gps_receive_buffer.buflen];
+    gpsPort.begin(9600);
+  #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
-  }
-
-
-  // If ready, print only every second
-  if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
-  {
-
-    DEBUG_PORT.print( gps_result_stored.latitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.longitude(), 6 );
-    DEBUG_PORT.print( ',' );
-    DEBUG_PORT.print( gps_result_stored.altitude_cm(), 6 );  
-    DEBUG_PORT.print( "cm" );
-    DEBUG_PORT.print( F(", Altitude: ") );
-    if (gps_result_stored.valid.altitude)
-      DEBUG_PORT.print( gps_result_stored.altitude() );
-    DEBUG_PORT.println();
-    
-  }
-
+  DEBUG_PORT.println( F("NMEASDlog.ino started!") );
+  DEBUG_PORT.print( F("fix size = ") );
+  DEBUG_PORT.println( sizeof(GPS_FIX) );
+  DEBUG_PORT.print( NMEAGPS_FIX_MAX );
+  DEBUG_PORT.println( F(" GPS updates can be buffered.") );
+  
+  if (gps_parser->merging != NMEAGPS::EXPLICIT_MERGING)
+    DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
+  
 }
 
-
-#endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
 
 #endif

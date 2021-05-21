@@ -11,10 +11,6 @@
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
-#ifdef ENABLE_MODULE_DRIVERS_GPS_WIRELESS_FEATURES_FOR_DEBUGGING
-
-
-
 uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
 
   char buffer[30];
@@ -457,8 +453,5 @@ void mGPS::MQTTHandler_Sender(uint8_t id)
 
 
 
-
-
-#endif
 
 #endif

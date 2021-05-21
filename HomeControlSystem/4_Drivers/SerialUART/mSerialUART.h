@@ -90,63 +90,38 @@ class mSerialUART :
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
 
+    uint16_t GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint16_t buflen, char optional_read_until_char = 0, bool flag_clear_buffer_after_read = true);
+
     /***
      * UART1
      * 
      * */
     #define RINGBUFFER_HANDLE_1_LENGTH 100
-
-    #ifdef ENABLE_UART_RINGBUFFERS
     void  init_UART1_RingBuffer();
-    #endif // ENABLE_UART_RINGBUFFERS
-
     void  init_UART1_ISR();
-
-    // static void IRAM_ATTR UART1_ISR_Static(void);
-
     // Receive buffer to collect incoming data
     uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
     // Register to collect data length
     uint16_t urxlen1 = 0;
-    uint16_t GetReceiveBuffer1(char* output_buf, uint16_t output_len, char optional_read_until_char = 0, bool flag_clear_buffer_after_read = true);
-    // uint16_t GetReceiveBuffer1(char* output_buf, uint16_t output_len, char optional_read_until_char = 0);
 
     /***
      * UART2
      * 
      * */
     #define RINGBUFFER_HANDLE_2_LENGTH 1000
-
-    #ifdef ENABLE_UART_RINGBUFFERS
     void  init_UART2_RingBuffer();
-    #endif // ENABLE_UART_RINGBUFFERS
-
     void  init_UART2_ISR();
-
-    // static void IRAM_ATTR uart_intr_handle_u2(void);
-
     // Receive buffer to collect incoming data
-    char rxbuf2[200] = {0};
+    char rxbuf2[RINGBUFFER_HANDLE_2_LENGTH] = {0};
     // Register to collect data length
     uint16_t urxlen2 = 0;
-    uint16_t GetReceiveBuffer2(char* output_buf, uint16_t output_len, char optional_read_until_char = 0, bool flag_clear_buffer_after_read = true);
-    uint16_t GetReceiveBufferPartial2(char* output_buf, uint16_t output_len, char optional_read_until_char = 0, bool flag_clear_buffer_after_read = true);
 
-
-
-    /***
-     * UARTx
-     * 
-     * */
-
-
-    #define ENABLE_BUILTIN_LED_ACTIVITY_BLINKING
-
+    // #define ENABLE_BUILTIN_LED_ACTIVITY_BLINKING
     
     struct UART_SETTINGS{
       bool receive_interrupts_enable = false;
       uint8_t initialised = false;
-      uint16_t baud = 115200;
+      int baud = 115200; //must be int
       RingbufHandle_t ringbuffer_handle;
       QueueHandle_t event_queue_handle;
       int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2

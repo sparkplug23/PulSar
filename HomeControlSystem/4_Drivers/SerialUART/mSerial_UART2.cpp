@@ -5,7 +5,7 @@
 
 
 #ifdef ENABLE_HARDWARE_UART_2
-#ifdef ENABLE_UART_RINGBUFFERS
+
 void mSerialUART::init_UART2_RingBuffer()
 {
 
@@ -22,8 +22,6 @@ void mSerialUART::init_UART2_RingBuffer()
   }
 
 }
-
-#endif // ENABLE_UART_RINGBUFFERS
 
 /**
  * @brief init UART2 ISR routine
@@ -79,7 +77,7 @@ void mSerialUART::init_UART2_ISR(){
   gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
   gpio_set_level(BLINK_GPIO, LOW); // Turn off by default
   #endif
-  
+
 }
 
 
@@ -98,7 +96,7 @@ void IRAM_ATTR UART2_ISR_Static(void *arg)
   status = UART2.int_st.val; // read UART interrupt Status
   rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
 
-  while(UART2.status.rxfifo_cnt)
+  while(rx_fifo_len)
   {
     pCONT_uart->rxbuf2[i++] = UART2.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp32s2 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
     if(i>=RINGBUFFER_HANDLE_2_LENGTH-1)
