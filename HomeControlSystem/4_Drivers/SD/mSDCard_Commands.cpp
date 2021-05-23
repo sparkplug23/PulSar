@@ -67,7 +67,7 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
     // CommandSet_ReadFile(jtok.getStr());
     // debug.bytes_to_write = jtok.getInt();
     // debug.test_mode = WRITE_BYTES_ID;
-    uint8_t buffer[5] = {0,1,2,3,4};
+    char buffer[5] = {0,1,2,3,4};
     uint8_t close_decounter = 10;
     writer_settings.status = FILE_STATUS_OPENING_ID;
     SubTask_Append_To_Open_File(buffer, 5);

@@ -376,6 +376,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
     pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID] = new mSDCardLogger();
   #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+    pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID] = new mSerialPositionalLogger();
+  #endif
 
 };
 /**

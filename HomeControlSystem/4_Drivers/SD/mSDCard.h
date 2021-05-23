@@ -53,6 +53,7 @@
 #include "SPI.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR) "file_writer";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR) "debug/writetimes";
 
 // #include "FS.h"
 // #include "SD_MMC.h"
@@ -117,6 +118,17 @@ struct SETTINGS{
 }settings;
 
 
+struct DEBUG_WRITE_TIMES{
+
+  uint8_t write_test_count = 0;
+  uint32_t complete_write_duration = 0;
+  uint32_t write_byte_count = 0;
+
+}debug_write_times;
+
+void SDCardSpeedDebug();
+void SDCardBulkSpeedTest(uint8_t test_number, uint32_t bytes_to_write);
+
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 void createDir(fs::FS &fs, const char * path);
@@ -142,10 +154,12 @@ void CommandSet_ReadFile(const char* filename);
  * */
 enum FILE_STATUS_IDS{
   FILE_STATUS_NOT_STARTED=0,
+  // Transitional state, will run once
   FILE_STATUS_OPENING_ID,
+  // 
   FILE_STATUS_OPENED_ID,
-  FILE_STATUS_APPEND_ID,
-  FILE_STATUS_CLOSE_ID,
+  // FILE_STATUS_APPEND_ID,
+  FILE_STATUS_CLOSING_ID,
   FILE_STATUS_CLOSED_ID
 };
 struct WRITE{
@@ -155,7 +169,7 @@ struct WRITE{
 
 }writer_settings;
 int close_decounter = -1;
-void SubTask_Append_To_Open_File(uint8_t* buffer = nullptr, uint16_t buflen = 0);
+void SubTask_Append_To_Open_File(char* buffer = nullptr, uint16_t buflen = 0);
 
 
 
@@ -177,6 +191,7 @@ void WebAppend_Root_Status_Table();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_FileWriter(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Debug_WriteTimes(uint8_t json_method = 0);
 
   
   //#ifdef USE_CORE_MQTT 
@@ -189,12 +204,14 @@ void WebAppend_Root_Status_Table();
 
     struct handler<mSDCard> mqtthandler_settings_teleperiod;
     struct handler<mSDCard> mqtthandler_file_writer;
+    struct handler<mSDCard> mqtthandler_debug_write_times;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-    struct handler<mSDCard>* mqtthandler_list[2] = {
+    struct handler<mSDCard>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
-      &mqtthandler_file_writer
+      &mqtthandler_file_writer,
+      &mqtthandler_debug_write_times
     };
 
 

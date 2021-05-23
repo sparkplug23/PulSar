@@ -245,9 +245,9 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
   JBI->Level_End();
 
   JBI->Level_Start("Location");
-    JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
+    // JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
     JsonBuilderI->Add("latitude", gps_result_stored.latitude());
-    JsonBuilderI->Add("longitudeL", gps_result_stored.longitudeL());
+    // JsonBuilderI->Add("longitudeL", gps_result_stored.longitudeL());
     JsonBuilderI->Add("longitude", gps_result_stored.longitude());
   JBI->Level_End();
 

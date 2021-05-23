@@ -30,38 +30,40 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP:{
 
+      // EveryLoop_RingBuffers_To_SDCard
+
         // if(debug.bytes_to_write == 0)
         // {
         //     debug.test_mode = STANDBY_ID; //stop trying
         // }else
-        if(debug.test_mode == WRITE_BYTES_ID)
-        {
-            //Open card
-            debug.write_time.opened.push_back(millis());
-            char filename[50] = {0};
-            uint8_t textmessage[50] = {0};
-            sprintf(filename, "/debugfile%d.txt",1);// millis());
+        // if(debug.test_mode == WRITE_BYTES_ID)
+        // {
+        //     //Open card
+        //     debug.write_time.opened.push_back(millis());
+        //     char filename[50] = {0};
+        //     uint8_t textmessage[50] = {0};
+        //     sprintf(filename, "/debugfile%d.txt",1);// millis());
 
-            // For loop write
-            uint8_t j = 0;
-            for(int i=0;i<debug.bytes_to_write;i++)
-            {
-                // sprintf(textmessage, "%d", j);
-                textmessage[j] = i;
-                if(j++>9){ j = 0; }
-                // appendFile(SD, filename, textmessage);
-                write_append_array(SD, filename, textmessage, 10);
+        //     // For loop write
+        //     uint8_t j = 0;
+        //     for(int i=0;i<debug.bytes_to_write;i++)
+        //     {
+        //         // sprintf(textmessage, "%d", j);
+        //         textmessage[j] = i;
+        //         if(j++>9){ j = 0; }
+        //         // appendFile(SD, filename, textmessage);
+        //         write_append_array(SD, filename, textmessage, 10);
 
-            }
+        //     }
 
-            // close card
-            debug.write_time.closed.push_back(millis());
-
-
-            debug.test_mode = STANDBY_ID;
+        //     // close card
+        //     debug.write_time.closed.push_back(millis());
 
 
-        }
+        //     debug.test_mode = STANDBY_ID;
+
+
+        // }
 
     }
     break;
@@ -69,21 +71,29 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 
         // Open SD card, show directory
 
-        if(close_decounter==0)
-        {
-    writer_settings.status = FILE_STATUS_CLOSE_ID;
-    SubTask_Append_To_Open_File();
+//         if(close_decounter==0)
+//         {
+//     writer_settings.status = FILE_STATUS_CLOSE_ID;
+//     SubTask_Append_To_Open_File();
 
-        }else{
-          close_decounter--;
-        }
+//         }else{
+//           close_decounter--;
+//         }
 
 
-//   listDir(SD, "/", 0);
-    readFile(SD, "/debugfile1.txt");
+// //   listDir(SD, "/", 0);
+//     readFile(SD, "/debugfile1.txt");
 
+
+
+      // SDCardSpeedDebug();
 
     
+    break;
+
+    case FUNC_EVERY_MINUTE:
+
+
     break;
     /************
      * COMMANDS SECTION * 
@@ -169,6 +179,8 @@ void mSDCard::pre_init(){
 //     settings.fEnableModule = true;
 //   }
 
+//chip select pin needs setting
+
 }
 
 
@@ -206,6 +218,26 @@ uint8_t mSDCard::ConstructJSON_FileWriter(uint8_t json_method)
 
 }
 
+/**
+ * @brief Created for write time tests of sector sizes
+ * */
+uint8_t mSDCard::ConstructJSON_Debug_WriteTimes(uint8_t json_method)
+{
+
+  char buffer[30];
+  
+  JBI->Start();  
+
+    JBI->Level_Start("512B");
+      JBI->Add("CompleteWriteTime", debug_write_times.complete_write_duration);
+      JBI->Add("BytesWritten", debug_write_times.write_byte_count);
+    JBI->Level_End();
+
+
+  return JBI->End();
+
+}
+
 
 void mSDCard::MQTTHandler_Init(){
 
@@ -230,6 +262,16 @@ void mSDCard::MQTTHandler_Init(){
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mSDCard::ConstructJSON_FileWriter;
+
+  mqtthandler_ptr = &mqtthandler_debug_write_times;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Debug_WriteTimes;
 
 }
 

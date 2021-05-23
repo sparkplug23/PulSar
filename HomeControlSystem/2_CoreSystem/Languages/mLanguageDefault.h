@@ -274,6 +274,10 @@
 #define D_MODULE_CONTROLLER_SDCARDLOGGER_FRIENDLY_CTR "sdcardlogger"
 
 
+#define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR "serial_positional_logger"
+#define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR "serial_positional_logger"
+
+
 
 
 

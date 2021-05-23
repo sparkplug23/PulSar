@@ -126,7 +126,7 @@ void mSDCard::write_append_array(fs::FS &fs, const char * path, uint8_t* buffer,
     // }
 }
 
-void mSDCard::SubTask_Append_To_Open_File(uint8_t* buffer, uint16_t buflen)
+void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 {
   switch(writer_settings.status)
   {
@@ -140,8 +140,10 @@ void mSDCard::SubTask_Append_To_Open_File(uint8_t* buffer, uint16_t buflen)
       }
       AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Opened!"),writer_settings.file_name);
 
+      writer_settings.status = FILE_STATUS_OPENED_ID;
+
     // break;
-    case FILE_STATUS_APPEND_ID:
+    case FILE_STATUS_OPENED_ID:
 
       for(int i=0; i<buflen; i++)
       {
@@ -149,11 +151,13 @@ void mSDCard::SubTask_Append_To_Open_File(uint8_t* buffer, uint16_t buflen)
       }
 
     break;
-    case FILE_STATUS_CLOSE_ID:
+    case FILE_STATUS_CLOSING_ID:
         
       AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Closed!"),writer_settings.file_name);
 
       stored_file.close();
+
+      writer_settings.status = FILE_STATUS_CLOSED_ID;
 
     break;
 

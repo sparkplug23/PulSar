@@ -358,6 +358,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
     EM_MODULE_CONTROLLER_SDCARDLOGGER_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+    EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID,
+  #endif
   EM_MODULE_LENGTH_ID
 };
 
@@ -638,6 +641,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
   #include "9_Controller/SDCardLogger/mSDCardLogger.h"
   #define pCONT_sdcardlogger                    static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+  #include "9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
+  #define pCONT_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
 #endif
 
 #include  "1_TaskerManager/mTaskerInterface.h"

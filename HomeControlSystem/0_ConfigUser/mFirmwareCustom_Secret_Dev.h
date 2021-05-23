@@ -33,6 +33,7 @@
 // #define DEVICE_RGBDESK        
 // #define DEVICE_RGBDISPLAY_GARAGE   
 // #define DEVICE_RGBSTRING_LIGHTS1
+// #define DEVICE_RGBSTRING_LIGHTS2 //heart
 // #define DEVICE_BEDROOMBLINDS     
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
@@ -543,6 +544,59 @@
     "},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
     "\"" D_JSON_BRIGHTNESS_RGB "\":0"
+  "}";
+
+#endif
+
+
+
+#ifdef DEVICE_RGBSTRING_LIGHTS2
+  #define DEVICENAME_CTR            "rgbstring_lights2"
+  #define DEVICENAME_FRIENDLY_CTR   "String Lights 2"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 50
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":9000,"
+      "\"" D_JSON_RATE_MS "\":30000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+    "},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 #endif
