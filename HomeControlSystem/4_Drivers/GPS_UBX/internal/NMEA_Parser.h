@@ -29,7 +29,7 @@ typedef PGM_P str_P;
 
 
 #include "GPSfix.h"
-#include "4_Drivers/GPS/internal/configs/NMEAGPS_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/configs/NMEAGPS_cfg.h"
 
 #include "2_CoreSystem/Logging/mLogging.h"
 

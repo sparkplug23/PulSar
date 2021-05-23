@@ -18,7 +18,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "4_Drivers/GPS/internal/configs/NeoGPS_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
 
   #define PGM_P const char *
 

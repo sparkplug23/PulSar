@@ -657,6 +657,27 @@ void SleepDelay(uint32_t mseconds);
     static int mSearchCtrIndexOf(const char* toSearch, const char* toFind);
     static int mSearchNCtrIndexOf(const char* toSearch, int length,const char* toFind);
     static int NumDigits(int x);
+
+    
+template <typename T>
+static uint8_t NumDigitsT(T x)
+{
+    x = abs(x); //remove any negative numbers
+    return (x < 10 ? 1 :
+        (x < 100 ? 2 :
+        (x < 1000 ? 3 :
+        (x < 10000 ? 4 :
+        (x < 100000 ? 5 :
+        (x < 1000000 ? 6 :
+        (x < 10000000 ? 7 :
+        (x < 100000000 ? 8 :
+        (x < 1000000000 ? 9 :
+        10)))))))));
+}
+
+
+
+
     static void PrintDebugger(char *in, unsigned char length);
     static int memsearch(const char* dataset, int datasetLength, const char* target, int targetLen);
     static uint16_t NumCtr2Num(char* numctr, uint8_t numberlength);

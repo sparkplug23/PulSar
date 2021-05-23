@@ -459,7 +459,7 @@ enum MODULE_IDS{
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_GPS
-  #include "4_Drivers/GPS/mGPS.h"
+  #include "4_Drivers/GPS_UBX/mGPS.h"
   #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pModule[EM_MODULE_DRIVERS_GPS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART

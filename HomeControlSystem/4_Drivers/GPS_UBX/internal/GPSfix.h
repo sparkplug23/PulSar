@@ -18,19 +18,19 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "4_Drivers/GPS/internal/configs/NeoGPS_cfg.h"
-#include "4_Drivers/GPS/internal/configs/GPSfix_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/configs/GPSfix_cfg.h"
 
 #if defined( GPS_FIX_DATE ) | defined( GPS_FIX_TIME )
-  #include "4_Drivers/GPS/internal/types/NeoTime.h"
+  #include "4_Drivers/GPS_UBX/internal/types/NeoTime.h"
 #endif
 
 #ifdef GPS_FIX_LOCATION_DMS
-  #include "4_Drivers/GPS/internal/types/DMS.h"
+  #include "4_Drivers/GPS_UBX/internal/types/DMS.h"
 #endif
 
 #ifdef GPS_FIX_LOCATION
-  #include "4_Drivers/GPS/internal/types/Location.h"
+  #include "4_Drivers/GPS_UBX/internal/types/Location.h"
 #endif
 
 /**

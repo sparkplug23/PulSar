@@ -243,17 +243,79 @@ void mSerialPositionalLogger::SubTask_Debug_BasicFileWriteTest()
 void mSerialPositionalLogger::SubTask_UpdateOLED()
 {
 
+#ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
+  char line_ctr[15] = {0};
+  char buffer[15] = {0};
+
+  pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+
+  /**
+   * Row 1
+   * GPS data
+   * 
+   * */
+  float latitude = pCONT_gps->gps_result_stored.latitudeL();
+  uint32_t latitude_U32 = (uint32_t)latitude;
+  uint8_t latitude_num_digits = mSupport::NumDigitsT(latitude_U32);
+  uint32_t latitude_three_largest_chars = 0;
+  if(latitude_num_digits>3){
+    latitude_three_largest_chars = latitude_U32;
+    for(int i=0;i<latitude_num_digits-3;i++)
+    {
+      latitude_three_largest_chars /= 10;
+    }
+  }else{
+    latitude_three_largest_chars = latitude_U32;
+  }
+
+  float longitude = pCONT_gps->gps_result_stored.longitudeL();
+  uint32_t longitude_U32 = (uint32_t)fabs(longitude);
+  uint8_t longitude_num_digits = mSupport::NumDigitsT(longitude_U32);
+  uint32_t longitude_three_largest_chars = 0;
+  if(longitude_num_digits>3){
+    longitude_three_largest_chars = longitude_U32;
+    for(int i=0;i<longitude_num_digits-3;i++)
+    {
+      longitude_three_largest_chars /= 10;
+    }
+  }else{
+    longitude_three_largest_chars = longitude_U32;
+  }
+
+  AddLog(LOG_LEVEL_TEST, PSTR("SubTask_UpdateOLED %d %d %d"), latitude_U32, latitude_num_digits, latitude_three_largest_chars);
+
+  char quality[4] = {0};
+  //if valid, then simply show valid, if not, show satellites
+  if(pCONT_gps->gps_result_stored.valid.location)
+  {
+    snprintf(quality, sizeof(quality), "%s", "Val");  
+  }else{
+    // if(pCONT_gps->gps_result_stored.satellites<10)
+    // {
+      snprintf(quality, sizeof(quality), "%02d", pCONT_gps->gps_result_stored.satellites);  
+    // }else{
+    //   snprintf(quality, sizeof(quality), " 9+");        
+    // }
+  }
+
+//https://cdn-shop.adafruit.com/datasheets/PMTK_A08.pdf
+
+
+  snprintf(line_ctr, sizeof(line_ctr), "%03d %03d %s",
+    latitude_three_largest_chars, 
+    longitude_three_largest_chars,
+    quality
+    // pCONT_gps->gps_result_stored.satellites,
+    // pCONT_gps->gps_result_stored.valid.location?'V':'E' //this needs updating regardless or V/A in RMC, to include timeouts without new updates
+  );
+  pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
+
   //Test display messages
   //[1234567890123456]
   //[Op f123456] // Op/Cd for open and closed file, f# where # is GPS time for file name (although also using random in case gps is not working ie millis+gpsUTC)
   //[Val 123456] // Val Err for GPS fix, showing UTC time
   //[ ] //Also show lat/long so I know its working
   //[] packets received on serialRSS in thousands
-#ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-  pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
-  char buffer[25];
-  snprintf(buffer, sizeof(buffer), "%s %s","Op","fMillis123456");
-  pCONT_iDisp->LogBuffer_AddRow(buffer, 0);
 
   snprintf(buffer, sizeof(buffer), "%s",sdcard_status.isopened?"Open":"CLOSED");
   pCONT_iDisp->LogBuffer_AddRow(buffer, 1);

@@ -16,8 +16,8 @@
 #define gpsPort Serial2
 #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
-#include "4_Drivers/GPS/internal/NMEA_Parser.h"
-#include "4_Drivers/GPS/internal/types/Streamers.h"
+#include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
+#include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
 
 // #define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
 //           Serial.printf("\n\r%s=",NAME); \

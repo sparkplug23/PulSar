@@ -18,7 +18,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "4_Drivers/GPS/internal/types/NeoTime.h"
+#include "4_Drivers/GPS_UBX/internal/types/NeoTime.h"
 
 class GPSTime
 {

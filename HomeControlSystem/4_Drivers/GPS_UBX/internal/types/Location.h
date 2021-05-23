@@ -1,7 +1,7 @@
 #ifndef NEOGPS_LOCATION_H
 #define NEOGPS_LOCATION_H
 
-#include "4_Drivers/GPS/internal/configs/NeoGPS_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
 
 //  Copyright (C) 2014-2017, SlashDevin
 //
