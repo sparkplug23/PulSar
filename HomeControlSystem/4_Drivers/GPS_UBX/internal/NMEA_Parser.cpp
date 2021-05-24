@@ -298,9 +298,9 @@ NMEAGPS::decode_t NMEAGPS::handle( uint8_t c )
   // AddLog(LOG_LEVEL_TEST, PSTR("handle = %c"), c);
 
   if (res == DECODE_COMPLETED) {
-    #ifdef DEBUG_NMEA_GPS
-    Serial.printf("NMEAGPS::storeFix res=%d\n\r",res);
-    #endif
+    // #ifdef DEBUG_NMEA_GPS
+    // Serial.printf("NMEAGPS::storeFix res=%d\n\r",res);
+    // #endif
     storeFix();
   } else if ((NMEAGPS_FIX_MAX == 0) && _available() && !is_safe()) {
     // No buffer, and m_fix is was modified by the last char

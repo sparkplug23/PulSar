@@ -451,6 +451,13 @@ void trace_header( Print & outs )
 
 void trace_all( Print & outs, const NMEAGPS &gps, const GPS_FIX &fix )
 {
+  outs << F("MICHAEL\n\r");
+
+  // outs << fix.location.lat;
+
+
+  Serial.println(fix.longitudeL());
+
   outs << fix;
 
   #if defined(NMEAGPS_TIMESTAMP_FROM_INTERVAL) | defined(NMEAGPS_TIMESTAMP_FROM_PPS)

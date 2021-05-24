@@ -129,11 +129,11 @@ ubloxGPS::decode_t ubloxGPS::decode( char c )
     decode_t res = DECODE_CHR_OK;
     uint8_t chr = c;
 
-//Serial.print( '-' );
-//Serial.print( rxState );
-//Serial.print( 'x' );
-//Serial.print( toHexDigit(c >> 4) );
-//Serial.print( toHexDigit(c) );
+// Serial.print( '-' );
+// Serial.print( rxState );
+// Serial.print( 'x' );
+// Serial.print( toHexDigit(c >> 4) );
+// Serial.println( toHexDigit(c) );
 
     switch ((ubxState_t) rxState) {
 
@@ -357,6 +357,9 @@ bool ubloxGPS::wait_for_ack()
 
 void ubloxGPS::write( const msg_t & msg )
 {
+
+Serial.println("ubloxGPS::write");
+
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
 
@@ -372,7 +375,7 @@ void ubloxGPS::write( const msg_t & msg )
 
   sent.msg_class = msg.msg_class;
   sent.msg_id    = msg.msg_id;
-//trace << F("::write ") << msg.msg_class << F("/") << msg.msg_id << endl;
+// Serial << F("::write ") << msg.msg_class << F("/") << msg.msg_id << endl;
 }
 
 //---------------------------------------------------------
@@ -417,7 +420,7 @@ void ubloxGPS::write_P( const msg_t & msg )
 
 bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
-//trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
+// trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
   bool ok = true;
 
   write( msg );
@@ -438,7 +441,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
   if (waiting()) {
     ok = wait_for_ack();
 
-    #if 0
+    #if 1
       Serial.print( F("wait_for_ack ") );
       if (ok)
         Serial.print( F("ok! ") );
@@ -472,10 +475,13 @@ bool ubloxGPS::parseField( char c )
 
   uint8_t chr = c;
 
+// Serial.printf("rx().msg_class=%d\n\r",rx().msg_class);
+// Serial.printf("rx().msg_id=%d\n\r",rx().msg_id);
   switch (rx().msg_class) {
 
     case UBX_NAV: //=================================================
 //if (chrCount == 0) Serial << F(" NAV ") << (uint8_t) rx().msg_id;
+
       switch (rx().msg_id) {
         case UBX_NAV_STATUS : return parseNavStatus ( chr );
         case UBX_NAV_POSLLH : return parseNavPosLLH ( chr );
@@ -925,6 +931,7 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
 {
   bool ok = true;
 
+// Serial.printf("ubloxGPS::parseNavPosLLH=%d\n\r",chr);
 //if (chrCount == 0) trace << F( "velned ");
   #ifdef UBLOX_PARSE_POSLLH
     switch (chrCount) {
@@ -935,6 +942,7 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
 
       #if defined( GPS_FIX_LOCATION ) | defined( GPS_FIX_LOCATION_DMS )
         case 4:
+        
           NMEAGPS_INVALIDATE( location );
         case 5: case 6: case 7:
           #ifdef GPS_FIX_LOCATION
@@ -949,6 +957,10 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
               m_fix.longitudeDMS.From( scratchpad.U4 );
             #endif
           }
+          
+Serial.printf("ubloxGPS::parseNavPosLLH  case 4: =%d\n\r",m_fix.location._lon);
+
+
           break;
         case 8: case 9: case 10: case 11:
           #ifdef GPS_FIX_LOCATION
@@ -1268,6 +1280,7 @@ bool ubloxGPS::parseNavSVInfo( uint8_t chr )
 {
   bool ok = true;
 
+// Serial.printf("ubloxGPS::parseNavSVInfo=%d\n\r",chr);
 //if (chrCount == 0) trace << F("svinfo ");
   #ifdef UBLOX_PARSE_SVINFO
     switch (chrCount) {

@@ -57,7 +57,7 @@ public:
 
         } else if (millis() - dotPrint > 1000UL) {
           dotPrint = millis();
-          // DEBUG_PORT << '.';
+          DEBUG_PORT << '.';
 
           static uint8_t requestPeriod;
           if ((++requestPeriod & 0x07) == 0)
@@ -70,8 +70,8 @@ public:
 
       } else {
         if (acquiring)
-        //   DEBUG_PORT << '\n';
-        // DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
+          DEBUG_PORT << '\n';
+        DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
 
         #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE) & \
             defined(UBLOX_PARSE_TIMEGPS)
@@ -95,7 +95,7 @@ public:
           defined(UBLOX_PARSE_TIMEGPS)
 
         if (GPSTime::leap_seconds != 0) {
-          // DEBUG_PORT << F("Acquired leap seconds: ") << GPSTim//e::leap_seconds << '\n';
+          DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
 
           if (!disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
             DEBUG_PORT.println( F("disable TIMEGPS failed!") );
@@ -107,6 +107,8 @@ public:
           #else
             start_running();
           #endif
+        }else{
+          Serial.println("GPSTime::leap_seconds == 0)");
         }
       #endif
 
@@ -126,8 +128,8 @@ public:
         unlock();
 
         if (safe && (sow != 0)) {
-          // DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
-          // DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
+          DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
+          DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
 
           start_running();
         }
@@ -203,6 +205,7 @@ public:
 
     bool running()
     {
+      // Serial.printf("bool running() %d\n\r", state);
       switch (state) {
         case GETTING_STATUS      : get_status      (); break;
         case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
@@ -218,12 +221,6 @@ public:
 // Construct the GPS object and hook it to the appropriate serial device
 static MyGPS gps( &gpsPort );
 
-#ifdef NMEAGPS_INTERRUPT_PROCESSING
-  static void GPSisr( uint8_t c )
-  {
-    gps.handle( c );
-  }
-#endif
 
 //--------------------------
 
@@ -261,11 +258,8 @@ void setup1()
   // DEBUG_PORT.println( F("Looking for GPS device on " GPS_PORT_NAME) );
   DEBUG_PORT.flush();
 
-  // Start the UART for the GPS device
-  #ifdef NMEAGPS_INTERRUPT_PROCESSING
-    gpsPort.attachInterrupt( GPSisr );
-  #endif
   gpsPort.begin(9600);
+  // gpsPort.begin(921600);
 
   // Turn off the preconfigured NMEA standard messages
   configNMEA( 0 );
@@ -273,81 +267,235 @@ void setup1()
   // Turn off things that may be left on by a previous build
   disableUBX();
 
-//  #if 0
-//    // Test a Neo M8 message -- should be rejected by Neo-6 and Neo7
-//    ublox::cfg_nmea_v1_t test;
-//
-//    test.always_output_pos  = false; // invalid or failed
-//    test.output_invalid_pos = false;
-//    test.output_invalid_time= false;
-//    test.output_invalid_date= false;
-//    test.use_GPS_only       = false;
-//    test.output_heading     = false; // even if frozen
-//    test.__not_used__       = false;
-//
-//    test.nmea_version = ublox::cfg_nmea_v1_t::NMEA_V_4_0;
-//    test.num_sats_per_talker_id = ublox::cfg_nmea_v1_t::SV_PER_TALKERID_UNLIMITED;
-//
-//    test.compatibility_mode = false;
-//    test.considering_mode   = true;
-//    test.max_line_length_82 = false;
-//    test.__not_used_1__     = 0;
-//
-//    test.filter_gps    = false;
-//    test.filter_sbas   = false;
-//    test.__not_used_2__= 0;
-//    test.filter_qzss   = false;
-//    test.filter_glonass= false;
-//    test.filter_beidou = false;
-//    test.__not_used_3__= 0;
-//
-//    test.proprietary_sat_numbering = false;
-//    test.main_talker_id = ublox::cfg_nmea_v1_t::MAIN_TALKER_ID_GP;
-//    test.gsv_uses_main_talker_id = true;
-//    test.beidou_talker_id[0] = 'G';
-//    test.beidou_talker_id[1] = 'P';
-//
-//    DEBUG_PORT << F("CFG_NMEA result = ") << gps.send( test );
-//  #endif
-
-  while (!gps.running())
-    if (gps.available( gpsPort ))
-      gps.read();
+  // while (!gps.running())
+  //   if (gps.available( gpsPort ))
+  //     gps.read();
 }
 
 //--------------------------
 
+    // /**
+    //  * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
+    //  * */
+    // GPS_FIX   gps_result_parsing;
+    // /**
+    //  * @note Stores a valid solution, merged from the parsing fix
+    //  * */
+    // GPS_FIX   gps_result_stored;
+
+
 void loop1()
 {
-  if (gps.available( gpsPort ))
-    // trace_all( DEBUG_PORT, gps, gps.read() );
-  //   Serial << 
-  // outs << fix;
 
-  // If the user types something, reset the message configuration
-  //   back to a normal set of NMEA messages.  This makes it
-  //   convenient to switch to another example program that
-  //   expects a typical set of messages.  This also saves
-  //   putting those config messages in every other example.
+  // Serial.println("void loop1()");
 
-  if (DEBUG_PORT.available()) {
-    do { DEBUG_PORT.read(); } while (DEBUG_PORT.available());
-    DEBUG_PORT.println( F("Stopping...") );
+  uint32_t time = millis();
+      
+  while (gps.available( gpsPort )) {
+  Serial.println("void loop1()");
+    pCONT_gps->gps_result_parsing = gps.read();
 
-    configNMEA( 1 );
-    disableUBX();
-    gpsPort.flush();
-    gpsPort.end();
+        DEBUG_PORT.print( pCONT_gps->gps_result_parsing.longitude(), 6 );
 
-    DEBUG_PORT.println( F("STOPPED.") );
-    for (;;);
+    if(pCONT_gps->gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
+
+      //save tmp solution when valid
+      pCONT_gps->gps_result_stored = pCONT_gps->gps_result_parsing;
+
+      DEBUG_PORT.print( F("Location: ") );
+        DEBUG_PORT.print( pCONT_gps->gps_result_parsing.latitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( pCONT_gps->gps_result_parsing.longitude(), 6 );
+        DEBUG_PORT.print( ',' );
+        DEBUG_PORT.print( pCONT_gps->gps_result_parsing.altitude_cm(), 6 ); 
+        DEBUG_PORT.print( "cm" );
+
+      DEBUG_PORT.print( F(", Altitude: ") );
+      if (pCONT_gps->gps_result_parsing.valid.altitude)
+        DEBUG_PORT.print( pCONT_gps->gps_result_parsing.altitude() );
+
+      DEBUG_PORT.println();
+    }
+
+    if(abs(millis()-time) > 100){
+      break;
+    }
+
   }
+  // // while (!gps.running())
+  // //   if (gps.available( gpsPort ))
+  // //     gps.read();
+
+  // uint32_t time = millis();
+
+  // while (gps.available( gpsPort )) {
+  // // if (gps.available( gpsPort ))
+  //   // trace_all( DEBUG_PORT, gps, gps.read() );
+  // //   Serial << 
+  // // outs << fix;  
+  // gps_result_parsing = gps.read();
+  // // if(gps_result_parsing.satellites != 0)
+  // // {
+  //   AddLog(LOG_LEVEL_TEST, PSTR("gps_result_parsing.satellites=%d"),gps_result_parsing.satellites);
+  // // }
+
+  //   if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
+
+  //     //save tmp solution when valid
+  //     gps_result_stored = gps_result_parsing;
+
+  //     DEBUG_PORT.print( F("Location: ") );
+  //       DEBUG_PORT.print( gps_result_parsing.latitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.altitude_cm(), 6 ); 
+  //       DEBUG_PORT.print( "cm" );
+
+  //     DEBUG_PORT.print( F(", Altitude: ") );
+  //     if (gps_result_parsing.valid.altitude)
+  //       DEBUG_PORT.print( gps_result_parsing.altitude() );
+
+  //     DEBUG_PORT.println();
+
+  //   }
+  // // }
+
+  //     if(abs(millis()-time) > 10){
+  //       break;
+  //     }
+  // //   AddLog(LOG_LEVEL_TEST, PSTR("sat=%d"),gps.satellites);
+
+  // // If the user types something, reset the message configuration
+  // //   back to a normal set of NMEA messages.  This makes it
+  // //   convenient to switch to another example program that
+  // //   expects a typical set of messages.  This also saves
+  // //   putting those config messages in every other example.
+
+  // // if (DEBUG_PORT.available()) {
+  // //   do { DEBUG_PORT.read(); } while (DEBUG_PORT.available());
+  // //   DEBUG_PORT.println( F("Stopping...") );
+
+  // //   configNMEA( 1 );
+  // //   disableUBX();
+  // //   gpsPort.flush();
+  // //   gpsPort.end();
+
+  // //   DEBUG_PORT.println( F("STOPPED.") );
+  // //   for (;;);
+  // // }
+  // }
+}
+
+void loop2()
+{
+
+  
+  // // Serial.println("void loop1()");
+
+  // uint32_t time = millis();
+      
+  // while (gps.available( gpsPort )) {
+  // Serial.println("void loop1()");
+  //   gps_result_parsing = gps.read();
+
+  //       DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
+
+  //   if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
+
+  //     //save tmp solution when valid
+  //     gps_result_stored = gps_result_parsing;
+
+  //     DEBUG_PORT.print( F("Location: ") );
+  //       DEBUG_PORT.print( gps_result_parsing.latitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.altitude_cm(), 6 ); 
+  //       DEBUG_PORT.print( "cm" );
+
+  //     DEBUG_PORT.print( F(", Altitude: ") );
+  //     if (gps_result_parsing.valid.altitude)
+  //       DEBUG_PORT.print( gps_result_parsing.altitude() );
+
+  //     DEBUG_PORT.println();
+  //   }
+
+  //   if(abs(millis()-time) > 100){
+  //     break;
+  //   }
+
+  // }
+  // // while (!gps.running())
+  // //   if (gps.available( gpsPort ))
+  // //     gps.read();
+
+  // uint32_t time = millis();
+
+  // while (gps.available( gpsPort )) {
+  // // if (gps.available( gpsPort ))
+  //   // trace_all( DEBUG_PORT, gps, gps.read() );
+  // //   Serial << 
+  // // outs << fix;  
+  // gps_result_parsing = gps.read();
+  // // if(gps_result_parsing.satellites != 0)
+  // // {
+  //   AddLog(LOG_LEVEL_TEST, PSTR("gps_result_parsing.satellites=%d"),gps_result_parsing.satellites);
+  // // }
+
+  //   if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
+
+  //     //save tmp solution when valid
+  //     gps_result_stored = gps_result_parsing;
+
+  //     DEBUG_PORT.print( F("Location: ") );
+  //       DEBUG_PORT.print( gps_result_parsing.latitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.longitude(), 6 );
+  //       DEBUG_PORT.print( ',' );
+  //       DEBUG_PORT.print( gps_result_parsing.altitude_cm(), 6 ); 
+  //       DEBUG_PORT.print( "cm" );
+
+  //     DEBUG_PORT.print( F(", Altitude: ") );
+  //     if (gps_result_parsing.valid.altitude)
+  //       DEBUG_PORT.print( gps_result_parsing.altitude() );
+
+  //     DEBUG_PORT.println();
+
+  //   }
+  // // }
+
+  //     if(abs(millis()-time) > 10){
+  //       break;
+  //     }
+  // //   AddLog(LOG_LEVEL_TEST, PSTR("sat=%d"),gps.satellites);
+
+  // // If the user types something, reset the message configuration
+  // //   back to a normal set of NMEA messages.  This makes it
+  // //   convenient to switch to another example program that
+  // //   expects a typical set of messages.  This also saves
+  // //   putting those config messages in every other example.
+
+  // // if (DEBUG_PORT.available()) {
+  // //   do { DEBUG_PORT.read(); } while (DEBUG_PORT.available());
+  // //   DEBUG_PORT.println( F("Stopping...") );
+
+  // //   configNMEA( 1 );
+  // //   disableUBX();
+  // //   gpsPort.flush();
+  // //   gpsPort.end();
+
+  // //   DEBUG_PORT.println( F("STOPPED.") );
+  // //   for (;;);
+  // // }
+  // }
 }
 
 
 
 int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 
+          // Serial.println(DEBUG_INSERT_PAGE_BREAK "mGPS::Tasker");
   /************
    * INIT SECTION * 
   *******************/
@@ -358,10 +506,12 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     init();
     setup1();
 
-
   }
 
-  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+          // Serial.println( "ngs.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABL");
+
 
   switch(function){
     /************
@@ -369,7 +519,30 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP:{
 
-loop1();
+  if (!gps.running())
+    if (gps.available( gpsPort ))
+      gps.read();
+
+
+// loop1();
+loop2();
+
+if (gps.available( gpsPort ))
+{
+
+GPS_FIX fix_tmp = gps.read();
+
+  trace_all( DEBUG_PORT, gps, fix_tmp );
+  gps_result_stored |= fix_tmp;
+  Serial.println("gps.read().latitudeL()");
+  Serial.println(fix_tmp.latitudeL());
+  Serial.println(gps_result_stored.latitudeL());
+}
+
+if(gps.read().latitudeL() != 0)
+{
+Serial.println(gps.read().latitudeL());
+}
 
 
       // #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
@@ -441,6 +614,15 @@ loop1();
     // }
     case FUNC_EVERY_SECOND: {
 
+        //   Serial.println("gps.enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH )" );
+
+        // if (!gps.enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH ))
+        // {
+        //   Serial.println( F("enable POSLLH failed!") );
+        // }
+        // else{
+        //   Serial.println( F("enable POSLLH success!") );
+        // }
     }     
     break;
     /************
@@ -483,7 +665,9 @@ loop1();
 void mGPS::pre_init(){
 
   settings.fEnableModule = true;
+  #ifdef ENABLE_GPS_PARSER_NMEA
   gps_parser = new NMEAGPS(); 
+  #endif
 
 }
 
@@ -504,9 +688,11 @@ void mGPS::init(void)
   DEBUG_PORT.print( NMEAGPS_FIX_MAX );
   DEBUG_PORT.println( F(" GPS updates can be buffered.") );
   
+  #ifdef ENABLE_GPS_PARSER_NMEA
   if (gps_parser->merging != NMEAGPS::EXPLICIT_MERGING)
     DEBUG_PORT.println( F("Warning: EXPLICIT_MERGING should be enabled for best results!") );
-  
+  #endif // ENABLE_GPS_PARSER_NMEA
+
 }
 
 

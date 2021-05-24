@@ -17,6 +17,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+  #ifdef ENABLE_GPS_PARSER_NMEA
     JsonBuilderI->Level_Start("Millis");
       JsonBuilderI->Add("GGA",gps_parser->active_millis.GGA);
       JsonBuilderI->Add("GLL",gps_parser->active_millis.GLL);
@@ -39,6 +40,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
       JsonBuilderI->Add("ZDA",millis()-gps_parser->active_millis.ZDA);
     JsonBuilderI->Level_End();
 
+  #endif // ENABLE_GPS_PARSER_NMEA
     // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
 
@@ -57,6 +59,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+  // #ifdef ENABLE_GPS_PARSER_NMEA
     JsonBuilderI->Level_Start("Location");
       JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
       JsonBuilderI->Add("latitude", gps_result_stored.latitude());
@@ -118,6 +121,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
 */
 
 
+  // #endif // ENABLE_GPS_PARSER_NMEA
     // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
 
@@ -135,6 +139,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+  #ifdef ENABLE_GPS_PARSER_NMEA
     JsonBuilderI->Level_Start("Location");
       JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
       JsonBuilderI->Add("latitude", gps_result_stored.latitude());
@@ -184,6 +189,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_method){
 
 
 
+  #endif// ENABLE_GPS_PARSER_NMEA
 
     /*
   
@@ -213,6 +219,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+  #ifdef ENABLE_GPS_PARSER_NMEA
   JBI->Level_Start("SequenceNumber");
     JBI->Add("GPSCount", 0);
     JBI->Add("RSSCount", 0);
@@ -294,6 +301,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
       JsonBuilderI->Add("time_err", gps_result_stored.time_err());
     JsonBuilderI->Level_End();
 
+  #endif // ENABLE_GPS_PARSER_NMEA
 
   return JsonBuilderI->End();
 

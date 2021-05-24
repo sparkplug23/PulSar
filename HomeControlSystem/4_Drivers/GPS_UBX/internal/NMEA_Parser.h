@@ -49,8 +49,8 @@ typedef PGM_P str_P;
 
 class NMEAGPS
 {
-    NMEAGPS & operator =( const NMEAGPS & );
-    NMEAGPS( const NMEAGPS & );
+    // NMEAGPS & operator =( const NMEAGPS & );
+    // NMEAGPS( const NMEAGPS & );
 
 public:
 
@@ -548,7 +548,7 @@ uint8_t parser_byte_in(uint8_t c)
       
     // Serial.print( F("handle: ") );
     if(_fixesAvailable){
-// Serial.printf( "_fixesAvailable: %d\n\r",_fixesAvailable );
+Serial.printf( "_fixesAvailable: %d\n\r",_fixesAvailable );
     }
     return _fixesAvailable; 
     

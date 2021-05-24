@@ -23,7 +23,7 @@
 
 
 // #include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
-// #include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
+#include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
 
 // #include "4_Drivers/GPS_UBX/internal/ublox/ubx_cfg.h"
 
@@ -136,7 +136,10 @@ class mGPS :
 
     uint32_t tSaved_SplashFix = millis();
 
-    NMEAGPS*  gps_parser = nullptr; // This parses the GPS characters
+    #ifdef ENABLE_GPS_PARSER_NMEA
+    // NMEAGPS*  gps_parser = nullptr; // This parses the GPS characters
+    #endif // ENABLE_GPS_PARSER_NMEA
+    ubloxGPS*  ugps_parser = nullptr; // This parses the GPS characters
 
     void init();
     void pre_init();
