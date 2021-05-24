@@ -490,6 +490,9 @@
   
   #define USE_MODULE_DRIVERS_GPS
   
+  #define NMEAGPS_DERIVED_TYPES
+#define gpsPort Serial2
+
   // #define USE_MODULE_DRIVERS_SERIAL_UART
   // #define USE_DEVFEATURE_GPS_POLLING_INPUT
   #define NMEAGPS_PARSE_SAVE_MILLIS

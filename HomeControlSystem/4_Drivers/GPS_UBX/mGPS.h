@@ -16,8 +16,39 @@
 #define gpsPort Serial2
 #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
-#include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
-#include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
+#include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
+#include "4_Drivers/GPS_UBX/internal/ublox/ubxGPS.h"
+
+
+
+
+// #include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
+// #include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
+
+// #include "4_Drivers/GPS_UBX/internal/ublox/ubx_cfg.h"
+
+// #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
+// #include "4_Drivers/GPS_UBX/internal/ublox/ubxGPS.h"
+
+//======================================================================
+//  Program: ublox.ino
+//
+//  Prerequisites:
+//     1) You have a ublox GPS device
+//     2) PUBX.ino works with your device
+//     3) You have installed the ubxGPS.* and ubxmsg.* files.
+//     4) At least one UBX message has been enabled in ubxGPS.h.
+//     5) Implicit Merging is disabled in NMEAGPS_cfg.h.
+//
+//  Description:  This program parses UBX binary protocal messages from
+//     ublox devices.  It shows how to acquire the information necessary
+//     to use the GPS Time-Of-Week in many UBX messages.  As an offset
+//     from midnight Sunday morning (GPS time), you also need the current 
+//     UTC time (this is *not* GPS time) and the current number of GPS 
+//     leap seconds.
+//
+//  Serial is for debug output to the Serial Monitor window.
+
 
 // #define SERIAL_PRINT_ARRAY(NAME,VALUE,LENGTH) \
 //           Serial.printf("\n\r%s=",NAME); \
@@ -35,6 +66,31 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR) "gpspacket_
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR)    "debug/parsing";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL_CTR)    "debug/all";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR)    "micro";
+
+
+
+// #ifndef NMEAGPS_DERIVED_TYPES
+//   #error You must "#define NMEAGPS_DERIVED_TYPES" in NMEAGPS_cfg.h!
+// #endif
+
+// #if !defined(UBLOX_PARSE_STATUS)  & !defined(UBLOX_PARSE_TIMEGPS) & \
+//     !defined(UBLOX_PARSE_TIMEUTC) & !defined(UBLOX_PARSE_POSLLH)  & \
+//     !defined(UBLOX_PARSE_DOP)     & !defined(UBLOX_PARSE_PVT)     & \
+//     !defined(UBLOX_PARSE_VELNED)  & !defined(UBLOX_PARSE_SVINFO)  & \
+//     !defined(UBLOX_PARSE_HNR_PVT)
+
+//   // #error No UBX binary messages enabled: no fix data available.
+
+// #endif
+
+// #ifndef NMEAGPS_RECOGNIZE_ALL
+//   //  Resetting the messages with ublox::configNMEA requires that
+//   //    all message types are recognized (i.e., the enum has all
+//   //    values).
+//   // #error You must "#define NMEAGPS_RECOGNIZE_ALL" in NMEAGPS_cfg.h!
+// #endif
+
+
 
 class mGPS :
   public mTaskerInterface

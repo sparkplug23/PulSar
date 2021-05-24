@@ -28,7 +28,7 @@ extern Print & operator <<( Print & outs, const int32_t v );
 extern Print & operator <<( Print & outs, const uint8_t v );
 extern Print & operator <<( Print & outs, const __FlashStringHelper *s );
 
-class gps_fix;
+class GPS_FIX;
 
 /**
  * Print valid fix data to the given stream with the format
@@ -37,14 +37,14 @@ class gps_fix;
  * The "header" above contains the actual compile-time configuration.
  * A comma-separated field will be empty if the data is NOT valid.
  * @param[in] outs output stream.
- * @param[in] fix gps_fix instance.
+ * @param[in] fix GPS_FIX instance.
  * @return iostream.
  */
-extern Print & operator <<( Print &outs, const gps_fix &fix );
+extern Print & operator <<( Print &outs, const GPS_FIX &fix );
 
 class NMEAGPS;
 
 extern void trace_header( Print & outs );
-extern void trace_all( Print & outs, const NMEAGPS &gps, const gps_fix &fix );
+extern void trace_all( Print & outs, const NMEAGPS &gps, const GPS_FIX &fix );
 
 #endif
