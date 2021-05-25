@@ -11,41 +11,6 @@
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
-uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
-
-  char buffer[30];
-  
-  JsonBuilderI->Start();  
-
-  #ifdef ENABLE_GPS_PARSER_NMEA
-    JsonBuilderI->Level_Start("Millis");
-      JsonBuilderI->Add("GGA",nmea_parser->active_millis.GGA);
-      JsonBuilderI->Add("GLL",nmea_parser->active_millis.GLL);
-      JsonBuilderI->Add("GSA",nmea_parser->active_millis.GSA);
-      JsonBuilderI->Add("GST",nmea_parser->active_millis.GST);
-      JsonBuilderI->Add("GSV",nmea_parser->active_millis.GSV);
-      JsonBuilderI->Add("RMC",nmea_parser->active_millis.RMC);
-      JsonBuilderI->Add("VTG",nmea_parser->active_millis.VTG);
-      JsonBuilderI->Add("ZDA",nmea_parser->active_millis.ZDA);
-    JsonBuilderI->Level_End();
-
-    JsonBuilderI->Level_Start("Millis2");
-      JsonBuilderI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
-      JsonBuilderI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
-      JsonBuilderI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
-      JsonBuilderI->Add("GST",millis()-nmea_parser->active_millis.GST);
-      JsonBuilderI->Add("GSV",millis()-nmea_parser->active_millis.GSV);
-      JsonBuilderI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
-      JsonBuilderI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
-      JsonBuilderI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
-    JsonBuilderI->Level_End();
-
-  #endif // ENABLE_GPS_PARSER_NMEA
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
-  return JsonBuilderI->End();
-
-}
-
 
 
 /**
@@ -289,6 +254,57 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
 
   #endif // ENABLE_GPS_PARSER_NMEA
 
+  return JsonBuilderI->End();
+
+}
+
+uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
+
+  char buffer[30];
+  
+  JsonBuilderI->Start();  
+
+  #ifdef ENABLE_GPS_PARSER_NMEA
+    JsonBuilderI->Level_Start("Millis");
+      JsonBuilderI->Add("GGA",nmea_parser->active_millis.GGA);
+      JsonBuilderI->Add("GLL",nmea_parser->active_millis.GLL);
+      JsonBuilderI->Add("GSA",nmea_parser->active_millis.GSA);
+      JsonBuilderI->Add("GST",nmea_parser->active_millis.GST);
+      JsonBuilderI->Add("GSV",nmea_parser->active_millis.GSV);
+      JsonBuilderI->Add("RMC",nmea_parser->active_millis.RMC);
+      JsonBuilderI->Add("VTG",nmea_parser->active_millis.VTG);
+      JsonBuilderI->Add("ZDA",nmea_parser->active_millis.ZDA);
+    JsonBuilderI->Level_End();
+
+    JsonBuilderI->Level_Start("Millis2");
+      JsonBuilderI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
+      JsonBuilderI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
+      JsonBuilderI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
+      JsonBuilderI->Add("GST",millis()-nmea_parser->active_millis.GST);
+      JsonBuilderI->Add("GSV",millis()-nmea_parser->active_millis.GSV);
+      JsonBuilderI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
+      JsonBuilderI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
+      JsonBuilderI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
+    JsonBuilderI->Level_End();
+
+  #endif // ENABLE_GPS_PARSER_NMEA
+
+
+    JsonBuilderI->Level_Start("UBX_Parsed_Millis");
+      JsonBuilderI->Add("status",millis()-gps.debug_millis_last_parsed.status);
+      JsonBuilderI->Add("posllh",millis()-gps.debug_millis_last_parsed.posllh);
+      JsonBuilderI->Add("pvt",millis()-gps.debug_millis_last_parsed.pvt);
+      JsonBuilderI->Add("dop",millis()-gps.debug_millis_last_parsed.dop);
+      JsonBuilderI->Add("velned",millis()-gps.debug_millis_last_parsed.velned);
+      JsonBuilderI->Add("timegps",mTime::MillisElapsed(gps.debug_millis_last_parsed.timegps));
+      JsonBuilderI->Add("timeutc",millis()-gps.debug_millis_last_parsed.timeutc);
+      JsonBuilderI->Add("svinfo",millis()-gps.debug_millis_last_parsed.svinfo);
+    JsonBuilderI->Level_End();
+
+
+
+
+    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();
 
 }

@@ -21,6 +21,10 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
   }else
   if(function == FUNC_INIT){
     Init();
+  }else
+  if(function == FUNC_UPTIME_10_SECONDS)
+  {
+    StartISR_RingBuffers(); 
   }
 
   // Only continue in to tasker if module was configured properly
@@ -141,6 +145,7 @@ void mSerialUART::Pre_Init_Pins()
     settings.uart0.baud = 115200;
     settings.uart0.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_TX_ID);
     settings.uart0.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL0_RING_BUFFER_RX_ID);
+    // init_UART1_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART0 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart0.gpio.tx, settings.uart0.gpio.rx);
   }else{
     settings.uart0.receive_interrupts_enable = false;
@@ -153,6 +158,7 @@ void mSerialUART::Pre_Init_Pins()
     settings.uart1.baud = HARDWARE_UART_1_BAUD_RATE_SPEED;
     settings.uart1.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID);
     settings.uart1.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID);
+    init_UART1_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART1 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart1.gpio.tx, settings.uart1.gpio.rx);
   }else{
     settings.uart1.receive_interrupts_enable = false;
@@ -165,6 +171,7 @@ void mSerialUART::Pre_Init_Pins()
     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
     settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
     settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
+    init_UART2_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
   }else{
     settings.uart2.receive_interrupts_enable = false;
@@ -177,11 +184,36 @@ void mSerialUART::Pre_Init_Pins()
 void mSerialUART::Init(void)
 {
 
+  // #ifdef ENABLE_HARDWARE_UART_1
+  // if(settings.uart1.receive_interrupts_enable)
+  // {
+  //   init_UART1_RingBuffer();
+  //   init_UART1_ISR();
+  // }
+  // #endif // ENABLE_HARDWARE_UART_1
+
+  // #ifdef ENABLE_HARDWARE_UART_2
+  // if(settings.uart2.receive_interrupts_enable)
+  // {
+  //   init_UART2_RingBuffer();
+  //   init_UART2_ISR();
+  // }
+  // #endif // ENABLE_HARDWARE_UART_2
+  
+}
+
+
+void mSerialUART::StartISR_RingBuffers()
+{
+
+  AddLog(LOG_LEVEL_TEST, PSTR("delayed start of uart interrupts for methods which need basic serial.read"));
+
   #ifdef ENABLE_HARDWARE_UART_1
   if(settings.uart1.receive_interrupts_enable)
   {
     init_UART1_RingBuffer();
     init_UART1_ISR();
+    settings.uart1.initialised = true;
   }
   #endif // ENABLE_HARDWARE_UART_1
 
@@ -190,9 +222,12 @@ void mSerialUART::Init(void)
   {
     init_UART2_RingBuffer();
     init_UART2_ISR();
+    settings.uart2.initialised = true;
   }
   #endif // ENABLE_HARDWARE_UART_2
-  
+
+
+
 }
 
 
@@ -218,15 +253,33 @@ uint16_t mSerialUART::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, 
   {
     default:
     case 0: 
-      handle_tmp = pCONT_uart->settings.uart0.ringbuffer_handle;
+      if(!settings.uart0.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart0.ringbuffer_handle;
     break;
-    case 1: 
-      handle_tmp = pCONT_uart->settings.uart1.ringbuffer_handle;
+    case 1:
+      if(!settings.uart1.initialised)
+      {
+        return 0;
+      } 
+      handle_tmp = settings.uart1.ringbuffer_handle;
     break;
     case 2: 
-      handle_tmp = pCONT_uart->settings.uart2.ringbuffer_handle;
+      if(!settings.uart2.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart2.ringbuffer_handle;
     break;
   }
+
+  //delayed start check
+  // if(handle_tmp == nullptr)
+  // {
+  //   return 0; // not ready to continue
+  // }
   
   // Receive an item from no-split ring buffer
   size_t item_size = 0;

@@ -142,14 +142,14 @@ public:
 *
 **/
 
-uint8_t parser_byte_in(uint8_t c)
-{
-  // Serial.print(c);
-  if (processing_style == PS_POLLING){
-    handle( c );
-  }
-  return _available();
-}
+    uint8_t parser_byte_in(uint8_t c)
+    {
+      // Serial.print(c);
+      if (processing_style == PS_POLLING){
+        handle( c );
+      }
+      return _available();
+    }
 
 
 
@@ -201,6 +201,14 @@ uint8_t parser_byte_in(uint8_t c)
     // @return DECODE_COMPLETED when a sentence has been completely received.
 
     NMEAGPS_VIRTUAL decode_t decode( char c );
+
+    #ifdef ENABLE_DEVFEATURE_DECODE_FUNCTION_AS_CALLBACK
+
+
+    #else
+
+
+    #endif
 
     //.......................................................................
     //  Current fix accessor.
@@ -548,7 +556,7 @@ uint8_t parser_byte_in(uint8_t c)
       
     // Serial.print( F("handle: ") );
     if(_fixesAvailable){
-Serial.printf( "_fixesAvailable: %d\n\r",_fixesAvailable );
+// Serial.printf( "_fixesAvailable: %d\n\r",_fixesAvailable );
     }
     return _fixesAvailable; 
     

@@ -86,6 +86,7 @@ class mSerialUART :
 
     void Pre_Init_Pins();
     void Init();
+void StartISR_RingBuffers();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
@@ -98,6 +99,7 @@ class mSerialUART :
      * */
     #define RINGBUFFER_HANDLE_1_LENGTH 100
     void  init_UART1_RingBuffer();
+    void  init_UART1_pins();
     void  init_UART1_ISR();
     // Receive buffer to collect incoming data
     uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
@@ -110,6 +112,7 @@ class mSerialUART :
      * */
     #define RINGBUFFER_HANDLE_2_LENGTH 1000
     void  init_UART2_RingBuffer();
+    void  init_UART2_pins();
     void  init_UART2_ISR();
     // Receive buffer to collect incoming data
     char rxbuf2[RINGBUFFER_HANDLE_2_LENGTH] = {0};

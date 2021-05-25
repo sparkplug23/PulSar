@@ -82,6 +82,17 @@ public:
     static const nmea_msg_t UBX_FIRST_MSG = (nmea_msg_t) UBX_MSG;
     static const nmea_msg_t UBX_LAST_MSG  = (nmea_msg_t) UBX_MSG;
 
+    struct DEBUG_MILLIS_LAST_PARSED{
+      uint32_t status = 0;
+      uint32_t posllh = 0;
+      uint32_t pvt = 0;
+      uint32_t dop = 0;
+      uint32_t velned = 0;
+      uint32_t timegps = 0;
+      uint32_t timeutc = 0;
+      uint32_t svinfo = 0;
+    }debug_millis_last_parsed;
+
 
     //................................................................
     // Process one character of ublox message.  The internal state 
@@ -230,7 +241,6 @@ protected:
     void wait_for_idle();
     bool wait_for_ack();
       //  NOTE: /run/ is called from these blocking functions 
-
 
     bool waiting() const
       {

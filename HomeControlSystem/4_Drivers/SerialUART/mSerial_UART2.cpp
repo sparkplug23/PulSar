@@ -9,7 +9,7 @@
 void mSerialUART::init_UART2_RingBuffer()
 {
 
-  settings.uart2.ringbuffer_handle = xRingbufferCreate(RINGBUFFER_HANDLE_2_LENGTH, RINGBUF_TYPE_BYTEBUF);
+  settings.uart2.ringbuffer_handle = xRingbufferCreate(settings.uart2.ring_buffer_size_rx, RINGBUF_TYPE_BYTEBUF);
   if (settings.uart2.ringbuffer_handle != NULL) {
     settings.uart2.initialised = true;
   }
@@ -23,15 +23,12 @@ void mSerialUART::init_UART2_RingBuffer()
 
 }
 
-/**
- * @brief init UART2 ISR routine
- * @note
- * @param void none
- * @return none
- */
-void mSerialUART::init_UART2_ISR(){
 
-  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART2_ISR Starting..."));
+/**
+ * split from other ISR init so pins can be configured without attaching the interrupt
+ * */
+void mSerialUART::init_UART2_pins()
+{
 
   /* Configure parameters of an UART driver, communication pins and install the driver */
   uart_config_t uart_config = {
@@ -45,6 +42,26 @@ void mSerialUART::init_UART2_ISR(){
   ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
   //Set UART gpio
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, settings.uart2.gpio.tx, settings.uart2.gpio.rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+}
+
+
+
+/**
+ * @brief init UART2 ISR routine
+ * @note
+ * @param void none
+ * @return none
+ */
+void mSerialUART::init_UART2_ISR(){
+
+  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART2_ISR Starting..."));
+
+  // If serial2 has already been activated by a library, disable it first so the new driver can attach
+  Serial2.end();
+  
+  init_UART2_pins(); //reassert new baud
+
   // Install UART driver, and get the queue.
   ESP_ERROR_CHECK(
     uart_driver_install(

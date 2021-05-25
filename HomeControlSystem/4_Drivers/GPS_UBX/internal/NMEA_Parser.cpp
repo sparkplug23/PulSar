@@ -187,7 +187,7 @@ void NMEAGPS::headerReceived()
 
 NMEAGPS::decode_t NMEAGPS::decode( char c )
 {
-  // Serial.println("decode");
+  // Serial.println("NMEAGPS::decode_t");
   #ifdef NMEAGPS_STATS
     statistics.chars++;
   #endif
@@ -296,6 +296,7 @@ NMEAGPS::decode_t NMEAGPS::handle( uint8_t c )
   decode_t res = decode( c );
 
   // AddLog(LOG_LEVEL_TEST, PSTR("handle = %c"), c);
+    // Serial.printf("NMEAGPS::handle\n\r");//; =%c\n\r",c);
 
   if (res == DECODE_COMPLETED) {
     // #ifdef DEBUG_NMEA_GPS

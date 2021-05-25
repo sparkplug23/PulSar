@@ -25,6 +25,80 @@
 // #include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
 #include "4_Drivers/GPS_UBX/internal/types/Streamers.h"
 
+#include "4_Drivers/GPS_UBX/mGPS_UBlox.h"
+
+// const unsigned char ubxRate10Hz[] PROGMEM =
+//   { 0x06,0x08,0x06,0x00,100,0x00,0x01,0x00,0x01,0x00 };
+
+
+//-------------------------------------------
+// U-blox NMEA text commands
+
+// const char disableRMC[] PROGMEM = "PUBX,40,RMC,0,0,0,0,0,0";
+// const char disableGLL[] PROGMEM = "PUBX,40,GLL,0,0,0,0,0,0";
+// const char disableGSV[] PROGMEM = "PUBX,40,GSV,0,0,0,0,0,0";
+// const char disableGSA[] PROGMEM = "PUBX,40,GSA,0,0,0,0,0,0";
+// const char disableGGA[] PROGMEM = "PUBX,40,GGA,0,0,0,0,0,0";
+// const char disableVTG[] PROGMEM = "PUBX,40,VTG,0,0,0,0,0,0";
+// const char disableZDA[] PROGMEM = "PUBX,40,ZDA,0,0,0,0,0,0";
+
+// const char enableRMC[] PROGMEM = "PUBX,40,RMC,0,1,0,0,0,0";
+// const char enableGLL[] PROGMEM = "PUBX,40,GLL,0,1,0,0,0,0";
+// const char enableGSV[] PROGMEM = "PUBX,40,GSV,0,1,0,0,0,0";
+// const char enableGSA[] PROGMEM = "PUBX,40,GSA,0,1,0,0,0,0";
+// const char enableGGA[] PROGMEM = "PUBX,40,GGA,0,1,0,0,0,0";
+// const char enableVTG[] PROGMEM = "PUBX,40,VTG,0,1,0,0,0,0";
+// const char enableZDA[] PROGMEM = "PUBX,40,ZDA,0,1,0,0,0,0";
+
+
+// $PUBX,41,portId,inProto,outProto,baudrate,autobauding*cs<CR><LF>
+// $PUBX,41,1,0007,0003,19200,0*25
+
+
+// const char baud9600  [] PROGMEM = "PUBX,41,1,3,3,9600,0";
+// const char baud38400 [] PROGMEM = "PUBX,41,1,3,3,38400,0";
+// const char baud57600 [] PROGMEM = "PUBX,41,1,3,3,57600,0";
+// const char baud115200[] PROGMEM = "PUBX,41,1,3,3,115200,0";
+const char baud921600[] PROGMEM = "PUBX,41,1,3,3,921600,0";
+
+
+//-------------------------------------------
+// U-blox UBX binary commands
+
+const unsigned char ubxRate1Hz[] PROGMEM = 
+  { 0x06,0x08,0x06,0x00,0xE8,0x03,0x01,0x00,0x01,0x00 };
+// const unsigned char ubxRate5Hz[] PROGMEM =
+//   { 0x06,0x08,0x06,0x00,200,0x00,0x01,0x00,0x01,0x00 };
+const unsigned char ubxRate10Hz[] PROGMEM =
+  { 0x06,0x08,0x06,0x00,100,0x00,0x01,0x00,0x01,0x00 };
+// const unsigned char ubxRate16Hz[] PROGMEM =
+//   { 0x06,0x08,0x06,0x00,50,0x00,0x01,0x00,0x01,0x00 };
+
+// // Disable specific NMEA sentences
+// const unsigned char ubxDisableGGA[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableGLL[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x01,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableGSA[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x02,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableGSV[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x03,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableRMC[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x04,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableVTG[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x05,0x00,0x00,0x00,0x00,0x00,0x01 };
+// const unsigned char ubxDisableZDA[] PROGMEM =
+//   { 0x06,0x01,0x08,0x00,0xF0,0x08,0x00,0x00,0x00,0x00,0x00,0x01 };
+
+// static const uint8_t ubxReset[] __PROGMEM =
+//   { ublox::UBX_CFG, ublox::UBX_CFG_RST,
+//     UBX_MSG_LEN(ublox::cfg_reset_t), 0,               // word length MSB is 0
+//     0,0,                                              // clear bbr section
+//     ublox::cfg_reset_t::CONTROLLED_SW_RESET_GPS_ONLY, // reset mode
+//     0x00                                              // reserved
+//   };
+
+
 // #include "4_Drivers/GPS_UBX/internal/ublox/ubx_cfg.h"
 
 // #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
@@ -90,10 +164,26 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR)    "micro";
 //   // #error You must "#define NMEAGPS_RECOGNIZE_ALL" in NMEAGPS_cfg.h!
 // #endif
 
+// // Need class that can force virtual method to the right parsing/decode method
+// class MyGPS : public ubloxGPS
+// {
+// public:
+
+//     MyGPS( Stream *device ) : ubloxGPS( device )
+//     {
+//       // state = GETTING_STATUS;
+//     }
+// };
+
+// // Construct the GPS object and hook it to the appropriate serial device
+// // static MyGPS gps( &gpsPort );
+
+
 
 
 class mGPS :
   public mTaskerInterface
+  // , ubloxGPS
 {
 
   private:
@@ -134,6 +224,10 @@ class mGPS :
       }
         state NEOGPS_BF(8);
 
+        
+// static
+//  MyGPS* gps2 = nullptr;//( &gpsPort );
+
     void get_status();
     void get_leap_seconds();
     void get_utc();
@@ -143,6 +237,7 @@ class mGPS :
     void disableUBX();
     void enableUBX();
 
+    void sendUBX( const unsigned char *progmemBytes, size_t len );
         
     /**
      * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
@@ -154,6 +249,15 @@ class mGPS :
     GPS_FIX   gps_result_stored;
 
     uint32_t tSaved_SplashFix = millis();
+
+//-----------------------------------------------------------------
+//  Derive a class to add the state machine for starting up:
+//    1) The status must change to something other than NONE.
+//    2) The GPS leap seconds must be received
+//    3) The UTC time must be received
+//    4) All configured messages are "requested"
+//         (i.e., "enabled" in the ublox device)
+//  Then, all configured messages are parsed and explicitly merged.
 
     // #ifdef ENABLE_GPS_PARSER_NMEA
     NMEAGPS*  nmea_parser = nullptr; // This parses the GPS characters

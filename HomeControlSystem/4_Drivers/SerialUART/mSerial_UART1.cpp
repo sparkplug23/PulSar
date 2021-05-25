@@ -7,7 +7,7 @@
 void mSerialUART::init_UART1_RingBuffer()
 {
 
-  settings.uart1.ringbuffer_handle = xRingbufferCreate(RINGBUFFER_HANDLE_1_LENGTH, RINGBUF_TYPE_BYTEBUF);
+  settings.uart1.ringbuffer_handle = xRingbufferCreate(settings.uart1.ring_buffer_size_rx, RINGBUF_TYPE_BYTEBUF);
   if (settings.uart1.ringbuffer_handle != NULL) {
     settings.uart1.initialised = true;
   }
@@ -21,15 +21,8 @@ void mSerialUART::init_UART1_RingBuffer()
 
 }
 
-/**
- * @brief init UART1 ISR routine
- * @note
- * @param void none
- * @return none
- */
-void mSerialUART::init_UART1_ISR(){
-
-  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART1_ISR Starting..."));
+void mSerialUART::init_UART1_pins()
+{
 
   /* Configure parameters of an UART driver, communication pins and install the driver */
   uart_config_t uart_config = {
@@ -43,6 +36,22 @@ void mSerialUART::init_UART1_ISR(){
   ESP_ERROR_CHECK(uart_param_config(UART_NUM_1, &uart_config));
   //Set UART gpio
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_1, settings.uart1.gpio.tx, settings.uart1.gpio.rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+}
+
+/**
+ * @brief init UART1 ISR routine
+ * @note
+ * @param void none
+ * @return none
+ */
+void mSerialUART::init_UART1_ISR(){
+
+  AddLog(LOG_LEVEL_DEBUG, PSTR("init_UART1_ISR Starting..."));
+
+  // If serial2 has already been activated by a library, disable it first so the new driver can attach
+  Serial1.end();  
+
   // Install UART driver, and get the queue.
   ESP_ERROR_CHECK(
     uart_driver_install(

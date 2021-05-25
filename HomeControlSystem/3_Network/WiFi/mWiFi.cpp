@@ -18,6 +18,10 @@ const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_F
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
 //   DEBUG_PRINT_FUNCTION_NAME_TEST;
+  #ifdef DISABLE_NETWORK
+    return 0;
+  #endif
+
 
       // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
 // Serial.println("wifi");

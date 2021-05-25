@@ -306,8 +306,10 @@ bool ubloxGPS::wait_for_ack()
   uint16_t removed_idle_time = 0;
 
   do {
+      // Serial.println( "wait_for_ack" );
     if (receiving()) {
       uint8_t rx_chars = m_device->available();
+      // Serial.println(rx_chars);
       wait_for_idle();
       sent = millis();
       
@@ -346,8 +348,8 @@ bool ubloxGPS::wait_for_ack()
     }
   } while ((idle_time < 300) && ((removed_idle_time+idle_time) < 1000));
 
-  //Serial.print( F("! -") );
-  //Serial.println( removed_idle_time );
+  Serial.print( F("! -") );
+  Serial.println( removed_idle_time );
 
   return false;
 
@@ -485,14 +487,30 @@ bool ubloxGPS::parseField( char c )
 //if (chrCount == 0) Serial << F(" NAV ") << (uint8_t) rx().msg_id;
 
       switch (rx().msg_id) {
-        case UBX_NAV_STATUS : return parseNavStatus ( chr );
-        case UBX_NAV_POSLLH : return parseNavPosLLH ( chr );
-        case UBX_NAV_PVT    : return parseNavPvt    ( chr );
-        case UBX_NAV_DOP    : return parseNavDOP    ( chr );
-        case UBX_NAV_VELNED : return parseNavVelNED ( chr );
-        case UBX_NAV_TIMEGPS: return parseNavTimeGPS( chr );
-        case UBX_NAV_TIMEUTC: return parseNavTimeUTC( chr );
-        case UBX_NAV_SVINFO : return parseNavSVInfo ( chr );
+        case UBX_NAV_STATUS : 
+          debug_millis_last_parsed.status = millis();
+          return parseNavStatus ( chr );
+        case UBX_NAV_POSLLH : 
+          debug_millis_last_parsed.posllh = millis();
+           return parseNavPosLLH ( chr );
+        case UBX_NAV_PVT    : 
+          debug_millis_last_parsed.pvt = millis();
+           return parseNavPvt    ( chr );
+        case UBX_NAV_DOP    : 
+          debug_millis_last_parsed.dop = millis();
+           return parseNavDOP    ( chr );
+        case UBX_NAV_VELNED : 
+          debug_millis_last_parsed.velned = millis();
+           return parseNavVelNED ( chr );
+        case UBX_NAV_TIMEGPS: 
+          debug_millis_last_parsed.timegps = millis();
+           return parseNavTimeGPS( chr );
+        case UBX_NAV_TIMEUTC: 
+          debug_millis_last_parsed.timeutc = millis();
+           return parseNavTimeUTC( chr );
+        case UBX_NAV_SVINFO : 
+          debug_millis_last_parsed.svinfo = millis();
+           return parseNavSVInfo ( chr );
         default             : break;
       }
       break;
@@ -934,6 +952,7 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
   bool ok = true;
 
 // Serial.printf("ubloxGPS::parseNavPosLLH=%d\n\r",chr);
+// Serial.printf("%d",chr);
 //if (chrCount == 0) trace << F( "velned ");
   #ifdef UBLOX_PARSE_POSLLH
     switch (chrCount) {
@@ -960,8 +979,10 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
             #endif
           }
           
-Serial.printf("ubloxGPS::parseNavPosLLH  case 4: =%d\n\r",m_fix.location._lon);
-
+//           if(chrCount==7)
+//           {
+// // Serial.printf("ubloxGPS::parseNavPosLLH  case 7: =%d\n\r",m_fix.location._lon);
+//           }
 
           break;
         case 8: case 9: case 10: case 11:
