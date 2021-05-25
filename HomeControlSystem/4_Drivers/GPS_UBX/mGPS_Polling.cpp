@@ -19,8 +19,8 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_Internal()
 
   uint32_t time = millis();
       
-  while (gps_parser->available( gpsPort )) {
-    gps_result_parsing = gps_parser->read();
+  while (nmea_parser->available( gpsPort )) {
+    gps_result_parsing = nmea_parser->read();
 
     if(gps_result_parsing.status > GPS_FIX::STATUS_NONE ){
 
@@ -60,10 +60,10 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_Bytes()
   while(Serial2.available())
   {
     // Read bytes in
-    gps_parser->parser_byte_in(Serial2.read());
+    nmea_parser->parser_byte_in(Serial2.read());
 
     // Check on fix status
-    gps_result_parsing = gps_parser->read();
+    gps_result_parsing = nmea_parser->read();
     if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
     {
       gps_fix_reading = true;
@@ -133,10 +133,10 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_BytesToBuffer()
     // Read bytes in
     for(int ii=0;ii<buflen;ii++)
     {
-      gps_parser->parser_byte_in(buffer[ii]);
+      nmea_parser->parser_byte_in(buffer[ii]);
 
       // Check on fix status
-      gps_result_parsing = gps_parser->read();
+      gps_result_parsing = nmea_parser->read();
       if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
       {
         gps_fix_reading = true;
@@ -207,10 +207,10 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_BytesFromBuffer()
     // Read bytes in
     for(int ii=0;ii<gps_receive_buffer.bufused;ii++)
     {
-      gps_parser->parser_byte_in(gps_receive_buffer.buffer[ii]);
+      nmea_parser->parser_byte_in(gps_receive_buffer.buffer[ii]);
 
       // Check on fix status
-      gps_result_parsing = gps_parser->read();
+      gps_result_parsing = nmea_parser->read();
       if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
       {
         gps_fix_reading = true;

@@ -130,6 +130,7 @@ namespace ublox {
     } __attribute__((packed));
 
     extern bool configNMEA( ubloxGPS &gps, NMEAGPS::nmea_msg_t msgType, uint8_t rate );
+    extern bool configNMEA( ubloxGPS* gps, NMEAGPS::nmea_msg_t msgType, uint8_t rate );
     
     // Reset command
     struct cfg_reset_t : msg_t {

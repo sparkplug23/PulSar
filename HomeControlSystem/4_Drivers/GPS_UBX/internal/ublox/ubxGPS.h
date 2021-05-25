@@ -50,9 +50,20 @@ class ubloxGPS : public UBLOXGPS_BASE
 {
     ubloxGPS & operator =( const ubloxGPS & );
     ubloxGPS( const ubloxGPS & );
-    ubloxGPS();
+    // ubloxGPS();
 
 public:
+
+    // ubloxGPS()
+    //   :
+    //     storage( (ublox::msg_t *) NULL ),
+    //     reply( (ublox::msg_t *) NULL ),
+    //     reply_expected( false ),
+    //     ack_expected( false )
+    //     // ,
+    //     // m_device( device )
+    //   {};
+      // {}; //new
 
     // Constructor needs to know the device to handle the UBX binary protocol
     ubloxGPS( Stream *device )

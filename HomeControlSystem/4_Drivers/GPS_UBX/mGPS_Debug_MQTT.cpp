@@ -2,12 +2,12 @@
 
 // Debug methods when designing, will not be included on logger
 
-// For now, lets use polling for gps_parser data until I get the rest working for it
+// For now, lets use polling for nmea_parser data until I get the rest working for it
 // I might want to move this into the "controller" method, or simply require it needs other drivers? cross-drivers, does this make sense??
-// Using that, a uart ISR can work to get the data, with maybe using the optional FreeRTOS method for triggering a parse event after message is complete? see how gps_parser lib works
+// Using that, a uart ISR can work to get the data, with maybe using the optional FreeRTOS method for triggering a parse event after message is complete? see how nmea_parser lib works
 
 
-// I will inject my gps_parser data in a formatted (searchable) way into the rss/sd card data stream, matlab later will find the nearest, the interopolate from either points beside it
+// I will inject my nmea_parser data in a formatted (searchable) way into the rss/sd card data stream, matlab later will find the nearest, the interopolate from either points beside it
 
 #ifdef USE_MODULE_DRIVERS_GPS
 
@@ -19,25 +19,25 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
 
   #ifdef ENABLE_GPS_PARSER_NMEA
     JsonBuilderI->Level_Start("Millis");
-      JsonBuilderI->Add("GGA",gps_parser->active_millis.GGA);
-      JsonBuilderI->Add("GLL",gps_parser->active_millis.GLL);
-      JsonBuilderI->Add("GSA",gps_parser->active_millis.GSA);
-      JsonBuilderI->Add("GST",gps_parser->active_millis.GST);
-      JsonBuilderI->Add("GSV",gps_parser->active_millis.GSV);
-      JsonBuilderI->Add("RMC",gps_parser->active_millis.RMC);
-      JsonBuilderI->Add("VTG",gps_parser->active_millis.VTG);
-      JsonBuilderI->Add("ZDA",gps_parser->active_millis.ZDA);
+      JsonBuilderI->Add("GGA",nmea_parser->active_millis.GGA);
+      JsonBuilderI->Add("GLL",nmea_parser->active_millis.GLL);
+      JsonBuilderI->Add("GSA",nmea_parser->active_millis.GSA);
+      JsonBuilderI->Add("GST",nmea_parser->active_millis.GST);
+      JsonBuilderI->Add("GSV",nmea_parser->active_millis.GSV);
+      JsonBuilderI->Add("RMC",nmea_parser->active_millis.RMC);
+      JsonBuilderI->Add("VTG",nmea_parser->active_millis.VTG);
+      JsonBuilderI->Add("ZDA",nmea_parser->active_millis.ZDA);
     JsonBuilderI->Level_End();
 
     JsonBuilderI->Level_Start("Millis2");
-      JsonBuilderI->Add("GGA",millis()-gps_parser->active_millis.GGA);
-      JsonBuilderI->Add("GLL",millis()-gps_parser->active_millis.GLL);
-      JsonBuilderI->Add("GSA",millis()-gps_parser->active_millis.GSA);
-      JsonBuilderI->Add("GST",millis()-gps_parser->active_millis.GST);
-      JsonBuilderI->Add("GSV",millis()-gps_parser->active_millis.GSV);
-      JsonBuilderI->Add("RMC",mTime::MillisElapsed(gps_parser->active_millis.RMC));
-      JsonBuilderI->Add("VTG",millis()-gps_parser->active_millis.VTG);
-      JsonBuilderI->Add("ZDA",millis()-gps_parser->active_millis.ZDA);
+      JsonBuilderI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
+      JsonBuilderI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
+      JsonBuilderI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
+      JsonBuilderI->Add("GST",millis()-nmea_parser->active_millis.GST);
+      JsonBuilderI->Add("GSV",millis()-nmea_parser->active_millis.GSV);
+      JsonBuilderI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
+      JsonBuilderI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
+      JsonBuilderI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
     JsonBuilderI->Level_End();
 
   #endif // ENABLE_GPS_PARSER_NMEA
@@ -67,62 +67,48 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
       JsonBuilderI->Add("longitude", gps_result_stored.longitude());
     JsonBuilderI->Level_End();
 
-    // JsonBuilderI->Level_Start("Altitude");
-    //   JsonBuilderI->Add("altitude_cm", gps_result_stored.altitude_cm()); 
-    //   JsonBuilderI->Add("altitude", gps_result_stored.altitude());
-    //   JsonBuilderI->Add("altitude_ft", gps_result_stored.altitude_ft());
-    // JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("Altitude");
+      JsonBuilderI->Add("altitude_cm", gps_result_stored.altitude_cm()); 
+      JsonBuilderI->Add("altitude", gps_result_stored.altitude());
+      JsonBuilderI->Add("altitude_ft", gps_result_stored.altitude_ft());
+    JsonBuilderI->Level_End();
 
 
-    // JsonBuilderI->Level_Start("Speed");
-    //   JsonBuilderI->Add("speed_mkn", gps_result_stored.speed_mkn()); 
-    //   JsonBuilderI->Add("speed", gps_result_stored.speed());
-    //   JsonBuilderI->Add("speed_kph", gps_result_stored.speed_kph());
-    //   JsonBuilderI->Add("speed_metersph", gps_result_stored.speed_metersph());
-    //   JsonBuilderI->Add("speed_mph", gps_result_stored.speed_mph());
-    // JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("Speed");
+      JsonBuilderI->Add("speed_mkn", gps_result_stored.speed_mkn()); 
+      JsonBuilderI->Add("speed", gps_result_stored.speed());
+      JsonBuilderI->Add("speed_kph", gps_result_stored.speed_kph());
+      JsonBuilderI->Add("speed_metersph", gps_result_stored.speed_metersph());
+      JsonBuilderI->Add("speed_mph", gps_result_stored.speed_mph());
+    JsonBuilderI->Level_End();
 
-    // JsonBuilderI->Level_Start("Heading");
-    //   JsonBuilderI->Add("heading_cd", gps_result_stored.heading_cd()); 
-    //   JsonBuilderI->Add("heading", gps_result_stored.heading());
-    // JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("Heading");
+      JsonBuilderI->Add("heading_cd", gps_result_stored.heading_cd()); 
+      JsonBuilderI->Add("heading", gps_result_stored.heading());
+    JsonBuilderI->Level_End();
 
-    // JsonBuilderI->Level_Start("geoidHt");
-    //   JsonBuilderI->Add("geoidHeight_cm", gps_result_stored.geoidHeight_cm()); 
-    //   JsonBuilderI->Add("geoidHeight", gps_result_stored.geoidHeight());
-    // JsonBuilderI->Level_End();
+    JsonBuilderI->Level_Start("geoidHt");
+      JsonBuilderI->Add("geoidHeight_cm", gps_result_stored.geoidHeight_cm()); 
+      JsonBuilderI->Add("geoidHeight", gps_result_stored.geoidHeight());
+    JsonBuilderI->Level_End();
 
-    // JsonBuilderI->Add("satellites", gps_result_stored.satellites); 
+    JsonBuilderI->Add("satellites", gps_result_stored.satellites); 
 
-    // JsonBuilderI->Level_Start("Dilution");
-    //   JsonBuilderI->Add("hdop", gps_result_stored.hdop); 
-    //   JsonBuilderI->Add("vdop", gps_result_stored.vdop);
-    //   JsonBuilderI->Add("pdop", gps_result_stored.pdop);
-    //   JsonBuilderI->Add("lat_err", gps_result_stored.lat_err());
-    //   JsonBuilderI->Add("lon_err", gps_result_stored.lon_err());
-    //   JsonBuilderI->Add("alt_err", gps_result_stored.alt_err());
-    //   JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
-    //   JsonBuilderI->Add("hdg_err", gps_result_stored.hdg_err());
-    //   JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
-    //   JsonBuilderI->Add("time_err", gps_result_stored.time_err());
-    // JsonBuilderI->Level_End();
-
-
-
-
-
-    /*
-  
-  #ifdef GPS_FIX_LOCATION_DMS
-    DMS_t latitudeDMS;
-    DMS_t longitudeDMS;
-  #endif
-
-*/
-
+    JsonBuilderI->Level_Start("Dilution");
+      JsonBuilderI->Add("hdop", gps_result_stored.hdop); 
+      JsonBuilderI->Add("vdop", gps_result_stored.vdop);
+      JsonBuilderI->Add("pdop", gps_result_stored.pdop);
+      JsonBuilderI->Add("lat_err", gps_result_stored.lat_err());
+      JsonBuilderI->Add("lon_err", gps_result_stored.lon_err());
+      JsonBuilderI->Add("alt_err", gps_result_stored.alt_err());
+      JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
+      JsonBuilderI->Add("hdg_err", gps_result_stored.hdg_err());
+      JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
+      JsonBuilderI->Add("time_err", gps_result_stored.time_err());
+    JsonBuilderI->Level_End();
 
   // #endif // ENABLE_GPS_PARSER_NMEA
-    // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+  
   return JsonBuilderI->End();
 
 }

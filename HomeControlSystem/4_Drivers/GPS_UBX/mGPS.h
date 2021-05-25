@@ -19,7 +19,7 @@
 #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
 #include "4_Drivers/GPS_UBX/internal/ublox/ubxGPS.h"
 
-
+#include "4_Drivers/GPS_UBX/internal/ublox/ubxmsg.h"
 
 
 // #include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
@@ -119,12 +119,31 @@ class mGPS :
     void EveryLoop_PollForGPSData(Stream& port);
     void EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
 
-    struct INTERNAL_BUFFER{
-      uint16_t buflen = 0;
-      uint16_t bufused = 0;
-      uint8_t* buffer = nullptr;
-    }gps_receive_buffer;
+    // struct INTERNAL_BUFFER{
+    //   uint16_t buflen = 0;
+    //   uint16_t bufused = 0;
+    //   uint8_t* buffer = nullptr;
+    // }gps_receive_buffer;
     
+    enum
+      {
+        GETTING_STATUS, 
+        GETTING_LEAP_SECONDS, 
+        GETTING_UTC, 
+        RUNNING
+      }
+        state NEOGPS_BF(8);
+
+    void get_status();
+    void get_leap_seconds();
+    void get_utc();
+    void send_UBX_enable_messages();
+    bool running();
+    void configNMEA( uint8_t rate );
+    void disableUBX();
+    void enableUBX();
+
+        
     /**
      * @note Holds a partial result during parsing, only to be merged with the stored fix is valid
      * */
@@ -136,10 +155,12 @@ class mGPS :
 
     uint32_t tSaved_SplashFix = millis();
 
-    #ifdef ENABLE_GPS_PARSER_NMEA
-    // NMEAGPS*  gps_parser = nullptr; // This parses the GPS characters
-    #endif // ENABLE_GPS_PARSER_NMEA
-    ubloxGPS*  ugps_parser = nullptr; // This parses the GPS characters
+    // #ifdef ENABLE_GPS_PARSER_NMEA
+    NMEAGPS*  nmea_parser = nullptr; // This parses the GPS characters
+    // #endif // ENABLE_GPS_PARSER_NMEA
+    #ifdef ENABLE_GPS_PARSER_UBX
+    ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
+    #endif
 
     void init();
     void pre_init();
@@ -147,7 +168,16 @@ class mGPS :
       uint8_t fEnableModule = false;
       uint8_t fShowManualSlider = false;
     }settings;
-    
+
+    struct RUNTIME_VARS{
+      /**
+       * 0 - not yet configured
+       * 1 - baud valid, data receiving
+       * 2 - registers set
+       * */
+      uint8_t ubx_config_status = 0;
+    }runtime;
+
     /**
      * @brief Updated with `gps_result_stored` to include the exact data I need
      * */

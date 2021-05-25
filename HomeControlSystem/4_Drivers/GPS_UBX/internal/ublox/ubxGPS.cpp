@@ -420,7 +420,9 @@ void ubloxGPS::write_P( const msg_t & msg )
 
 bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
-// trace << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
+  // Serial << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
+
+  Serial.println("ubloxGPS::send");
   bool ok = true;
 
   write( msg );
