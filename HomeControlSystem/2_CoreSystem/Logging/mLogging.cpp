@@ -129,10 +129,14 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
 
+  // DEBUG_LINE_HERE;
+
   va_list arg;
   va_start(arg, formatP);
   vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
   va_end(arg);
+
+  // DEBUG_LINE_HERE;
 
   //AddLogAddLog(loglevel);
 

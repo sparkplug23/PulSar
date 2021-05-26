@@ -55,10 +55,10 @@
 // $PUBX,41,1,0007,0003,19200,0*25
 
 
-// const char baud9600  [] PROGMEM = "PUBX,41,1,3,3,9600,0";
-// const char baud38400 [] PROGMEM = "PUBX,41,1,3,3,38400,0";
-// const char baud57600 [] PROGMEM = "PUBX,41,1,3,3,57600,0";
-// const char baud115200[] PROGMEM = "PUBX,41,1,3,3,115200,0";
+const char baud9600  [] PROGMEM = "PUBX,41,1,3,3,9600,0";
+const char baud38400 [] PROGMEM = "PUBX,41,1,3,3,38400,0";
+const char baud57600 [] PROGMEM = "PUBX,41,1,3,3,57600,0";
+const char baud115200[] PROGMEM = "PUBX,41,1,3,3,115200,0";
 const char baud921600[] PROGMEM = "PUBX,41,1,3,3,921600,0";
 
 

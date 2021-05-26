@@ -360,7 +360,7 @@ bool ubloxGPS::wait_for_ack()
 void ubloxGPS::write( const msg_t & msg )
 {
 
-Serial.println("ubloxGPS::write");
+Serial.print("ubloxGPS::write");
 
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
@@ -378,6 +378,9 @@ Serial.println("ubloxGPS::write");
   sent.msg_class = msg.msg_class;
   sent.msg_id    = msg.msg_id;
 // Serial << F("::write ") << msg.msg_class << F("/") << msg.msg_id << endl;
+
+Serial.println("\t written");
+
 }
 
 //---------------------------------------------------------
@@ -458,6 +461,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
     #endif
   }
 
+  Serial.printf("ubloxGPS::ok %d\n\r",ok);
   return ok;
 
 } // send

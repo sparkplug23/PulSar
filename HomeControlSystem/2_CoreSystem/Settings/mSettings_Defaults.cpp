@@ -6,10 +6,13 @@
 
 void mSettings::SettingsDefault(void)
 {
+
+  DEBUG_LINE_HERE;
   
   Settings.flag_system.stop_flash_rotate = true;
   stop_flash_rotate = true;
 
+  DEBUG_LINE_HERE;
   // Init new devicename buffer
   DeviceNameListI->Init(
     Settings.device_name_buffer.name_buffer,
@@ -19,12 +22,16 @@ void mSettings::SettingsDefault(void)
     DEVICENAMEBUFFER_NAME_INDEX_LENGTH
   );
 
+  DEBUG_LINE_HERE;
    //Serial.println("SettingsDefault");
   //  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+  DEBUG_LINE_HERE;
    SystemSettings_DefaultHeader();
+  DEBUG_LINE_HERE;
   //  Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
 
+  DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
     #endif // ENABLE_LOG_LEVEL_INFO
@@ -36,8 +43,10 @@ void mSettings::SettingsDefault(void)
     DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
     
+  DEBUG_LINE_HERE;
     pCONT_set->SettingsSave(2);
     
+  DEBUG_LINE_HERE;
     DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);

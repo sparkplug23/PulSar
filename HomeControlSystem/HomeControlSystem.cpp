@@ -44,6 +44,7 @@ void hw_wdt_enable(){
 void setup(void)
 { 
   // hw_wdt_disable();
+  hw_wdt_enable();
     
   #ifndef USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
   #ifdef ESP32
@@ -90,7 +91,15 @@ void setup(void)
   #endif
 
   // Load config from memory
+ // #ifndef DEBUG_NUM1
+
+  DEBUG_LINE_HERE;
+
   pCONT_set->SettingsDefault(); //preload minimal required
+  
+  // DEBUG_HOLD_POINT;
+
+ // #endif // DEBUG_NUM1
   #ifdef ENABLE_SETTINGS_STORAGE
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults

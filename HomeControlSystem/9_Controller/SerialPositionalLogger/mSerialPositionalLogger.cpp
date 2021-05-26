@@ -154,6 +154,7 @@ void mSerialPositionalLogger::EverySecond()
  * */
 void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 {
+  #ifdef USE_MODULE_DRIVERS_SDCARD
 
   // If desired card state has changed, then change the card mode needed
   
@@ -195,6 +196,8 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
     // AddLog(LOG_LEVEL_TEST, PSTR("sdcard_status.enable_logging=%d"), sdcard_status.enable_logging);
   // }
 
+  #endif // USE_MODULE_DRIVERS_SDCARD
+
 }
 
 
@@ -204,6 +207,7 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 void mSerialPositionalLogger::SubTask_Debug_BasicFileWriteTest()
 {
 
+  #ifdef USE_MODULE_DRIVERS_SDCARD
   // As a test, lets open, write/append and close sd card
   
 
@@ -228,6 +232,7 @@ void mSerialPositionalLogger::SubTask_Debug_BasicFileWriteTest()
   //close file
   file.close();
 
+  #endif// USE_MODULE_DRIVERS_SDCARD
 
 }
 

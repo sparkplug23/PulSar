@@ -16,19 +16,20 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
-    Pre_Init_Pins();
-  }else
-  if(function == FUNC_INIT){
-    Init();
-  }else
-  if(function == FUNC_UPTIME_10_SECONDS)
-  {
-    StartISR_RingBuffers(); 
+  switch(function){
+    case FUNC_PRE_INIT: 
+      Pre_Init_Pins(); 
+    break;
+    case FUNC_INIT: 
+      Init(); 
+    break;
+    case FUNC_UPTIME_30_SECONDS: 
+      StartISR_RingBuffers(); 
+    break;
   }
 
   // Only continue in to tasker if module was configured properly
-  //if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -158,7 +159,7 @@ void mSerialUART::Pre_Init_Pins()
     settings.uart1.baud = HARDWARE_UART_1_BAUD_RATE_SPEED;
     settings.uart1.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID);
     settings.uart1.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID);
-    init_UART1_pins();
+    // init_UART1_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART1 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart1.gpio.tx, settings.uart1.gpio.rx);
   }else{
     settings.uart1.receive_interrupts_enable = false;
@@ -171,7 +172,7 @@ void mSerialUART::Pre_Init_Pins()
     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
     settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
     settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
-    init_UART2_pins();
+    // init_UART2_pins();
     AddLog(LOG_LEVEL_INFO, PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
   }else{
     settings.uart2.receive_interrupts_enable = false;
@@ -214,6 +215,7 @@ void mSerialUART::StartISR_RingBuffers()
     init_UART1_RingBuffer();
     init_UART1_ISR();
     settings.uart1.initialised = true;
+    settings.fEnableModule = true;
   }
   #endif // ENABLE_HARDWARE_UART_1
 
@@ -223,6 +225,7 @@ void mSerialUART::StartISR_RingBuffers()
     init_UART2_RingBuffer();
     init_UART2_ISR();
     settings.uart2.initialised = true;
+    settings.fEnableModule = true;
   }
   #endif // ENABLE_HARDWARE_UART_2
 

@@ -40,24 +40,20 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
         // Turn off things that may be left on by a previous build
         disableUBX();
 
-        // Turn off things that may be left on by a previous build
-        // enableUBX();
+        // Turn on the exact UBX messages I need
         send_UBX_enable_messages();
+
+        // Change baud to higher rate
+        ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
+
+        delay(100);
+        gpsPort.flush();
+        // Change to high speed
+        gpsPort.updateBaudRate(921600); 
 
         // Increase send frequency to 10hz
         sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
         // sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
-
-        // Serial2.flush();
-
-        // // delay(1000);
-
-        // // // Change baud to 921600 HARDWARE_UART_2_BAUD_RATE_SPEED
-        // // //const char baud115200[] PROGMEM = "PUBX,41,1,3,3,115200,0";
-        // // changeBaud( baud921600, 921600UL );
-        // ubx_parser->send_P( &Serial2, (const __FlashStringHelper *) baud921600 );
-        // // Serial2.println(baud921600);
-        // gpsPort.begin(921600);
 
         runtime.ubx_config_status = 1; //success
 
@@ -74,6 +70,7 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
       #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
       #ifdef ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+      #ifdef USE_MODULE_DRIVERS_SERIAL_UART
 
       BufferWriterI->Clear();
       uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
@@ -107,6 +104,8 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 
       }
 
+
+      #endif//USE_MODULE_DRIVERS_SERIAL_UART
 
       // If ready, print only every second
       if(mTime::TimeReached(&tSaved_SplashFix, 1000))// || gps_fix_reading)
@@ -252,30 +251,119 @@ void mGPS::init(void)
    * */
 //   gpsPort.begin(9600);
 
+uint32_t start_millis = millis();
+
+AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
 
 
 // bool baud_found = false;
 // uint16_t baud_rate_responsed = 0;
 
-  uint32_t baud_rates[] = {9600, 921600};
+// gpsPort.end();
 
-  for(int i=0; i<ARRAY_SIZE(baud_rates); i++)
+//   uint32_t baud_rates[] = {9600, 921600};
+
+//   for(int i=0; i<ARRAY_SIZE(baud_rates); i++)
+//   {
+//     AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate baud_rates[i] %d"),baud_rates[i]);
+//     DEBUG_LINE_HERE;
+//     Serial.flush();
+//     DEBUG_LINE_HERE;
+//     delay(1000);
+//     DEBUG_LINE_HERE;
+
+//     switch(i)
+//     {
+//       default:
+//       case 0: gpsPort.begin(9600); break;
+//       case 1: gpsPort.begin(921600); break;
+//     }
+    
+//     DEBUG_LINE_HERE;
+//     ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
+//     DEBUG_LINE_HERE;
+//     gpsPort.flush();
+//     DEBUG_LINE_HERE;
+//     gpsPort.end();
+//     DEBUG_LINE_HERE;
+//     delay(100);
+//     DEBUG_LINE_HERE;
+//   }
+
+// Without interrupts, 912600 is too fast for polling during config. Force speed back to 9600 for config
+
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+  // Send command on 912600 to slower speed again for config
+  gpsPort.setDebugOutput(true);
+  gpsPort.begin(921600); 
+  // Wait for serial to start
+  while (!gpsPort){};
+  // Send command to lower baud to 9600
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+  gpsPort.flush();
+  // change to new slower baud for polling init phase
+  delay(100);
+  gpsPort.updateBaudRate(9600); 
+  // confirm its working on the lower baud, set a flag
+  if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
   {
-    gpsPort.begin(baud_rates[i]);
-    ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
-    gpsPort.flush();
-    delay(10);
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 921600 Working"));
   }
+#endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
 
-  gpsPort.begin(921600);
 
-  // Try setting a message and await response
-  if (!ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
-  {
-    DEBUG_PORT.println( F("GPS baud 921600 ERROR") );
-  }else{
-    DEBUG_PORT.println( F("GPS baud 921600 Working") );
-  }
+  //   Serial2.setDebugOutput(true);
+  //     gpsPort.begin(9600); 
+  // // Make sure if its on 9600 baud to switch to 921600
+
+  // uint32_t baud_rates[] = {9600, 921600};
+
+  // for(int i=0; i<ARRAY_SIZE(baud_rates); i++)
+  // {
+  //   AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate baud_rates[i] %d"),baud_rates[i]);
+  //   DEBUG_LINE_HERE;
+  //   // Serial.flush();
+  //   DEBUG_LINE_HERE;
+  //   // delay(1000);
+  //   // DEBUG_LINE_HERE;
+
+  //   // updateBaudRate
+
+  //   switch(i)
+  //   {
+  //     default:
+  //     case 0: 
+  //   DEBUG_LINE_HERE;
+  //     gpsPort.updateBaudRate(9600); 
+  //   DEBUG_LINE_HERE;
+  //     break;
+  //     case 1:
+  //   DEBUG_LINE_HERE; 
+  //   gpsPort.updateBaudRate(921600); 
+  //   DEBUG_LINE_HERE;
+  //   break;
+  //   }
+    
+  // //   DEBUG_LINE_HERE;
+  //   ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
+  // //   ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+  //   DEBUG_LINE_HERE;
+  //   gpsPort.flush();
+  //   DEBUG_LINE_HERE;
+  //   // gpsPort.end();
+  //   DEBUG_LINE_HERE;
+  //   delay(100);
+  //   DEBUG_LINE_HERE;
+  // }
+
+
+  // // // long baud = 115200;
+
+
+  // gpsPort.begin(921600);
+
+
+  AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
 
 }
 

@@ -73,7 +73,8 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
     switch_index = target_tasker ? target_tasker : i;
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%02d %s\t%S"), switch_index, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    // Serial.printf("switch_index=%d\n\r",switch_index);
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
@@ -112,11 +113,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     #endif
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, GetTaskName(function, buffer_taskname));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname));
     #endif
     #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       if(this_millis > 500){
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       }
     #endif
 
@@ -150,7 +151,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
         if(percent<boot_percentage){ Serial.print((char)219); }else{ DEBUG_PRINTF(" "); }
       }      
       #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,GetTaskName(function, buffer_taskname));
+      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,pCONT_set->GetTaskName(function, buffer_taskname));
       #else
       DEBUG_PRINTF("] %03d\n\r",boot_percentage);
       #endif // ENABLE_DEBUG_FUNCTION_NAMES

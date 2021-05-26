@@ -2125,6 +2125,7 @@ void NMEAGPS::send( Stream *device, const char *msg )
 
 void NMEAGPS::send_P( Stream *device, const __FlashStringHelper *msg )
 {
+  Serial.printf("send_P start %d\n\r", millis());
   if (msg) {
     const char *ptr = (const char *)msg;
           char  chr = pgm_read_byte(ptr++);
@@ -2146,6 +2147,8 @@ void NMEAGPS::send_P( Stream *device, const __FlashStringHelper *msg )
 
     if (!sent_trailer)
       send_trailer( device, crc );
+      
+  Serial.printf("send_P end %d\n\r", millis());
   }
 
 } // send_P

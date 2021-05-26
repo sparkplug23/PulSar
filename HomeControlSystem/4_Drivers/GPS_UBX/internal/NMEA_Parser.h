@@ -27,6 +27,7 @@
 typedef PGM_P str_P;
 #define __PROGMEM PROGMEM
 
+#include <Arduino.h>
 
 #include "GPSfix.h"
 #include "4_Drivers/GPS_UBX/internal/configs/NMEAGPS_cfg.h"

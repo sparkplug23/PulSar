@@ -1771,7 +1771,12 @@ void CommandSet_SystemRestartID(uint8_t value);
 #define WEB_LOG_SIZE 200       // Max number of characters in weblog
 #endif // WEB_LOG_SIZE
 #ifndef LOG_BUFFER_SIZE
+
+#ifdef ESP8266
 #define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
+#else //esp32
+#define LOG_BUFFER_SIZE 1000
+#endif
 #endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
