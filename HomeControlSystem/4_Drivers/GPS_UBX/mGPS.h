@@ -34,21 +34,21 @@
 //-------------------------------------------
 // U-blox NMEA text commands
 
-// const char disableRMC[] PROGMEM = "PUBX,40,RMC,0,0,0,0,0,0";
-// const char disableGLL[] PROGMEM = "PUBX,40,GLL,0,0,0,0,0,0";
-// const char disableGSV[] PROGMEM = "PUBX,40,GSV,0,0,0,0,0,0";
-// const char disableGSA[] PROGMEM = "PUBX,40,GSA,0,0,0,0,0,0";
-// const char disableGGA[] PROGMEM = "PUBX,40,GGA,0,0,0,0,0,0";
-// const char disableVTG[] PROGMEM = "PUBX,40,VTG,0,0,0,0,0,0";
-// const char disableZDA[] PROGMEM = "PUBX,40,ZDA,0,0,0,0,0,0";
+const char disableRMC[] PROGMEM = "PUBX,40,RMC,0,0,0,0,0,0";
+const char disableGLL[] PROGMEM = "PUBX,40,GLL,0,0,0,0,0,0";
+const char disableGSV[] PROGMEM = "PUBX,40,GSV,0,0,0,0,0,0";
+const char disableGSA[] PROGMEM = "PUBX,40,GSA,0,0,0,0,0,0";
+const char disableGGA[] PROGMEM = "PUBX,40,GGA,0,0,0,0,0,0";
+const char disableVTG[] PROGMEM = "PUBX,40,VTG,0,0,0,0,0,0";
+const char disableZDA[] PROGMEM = "PUBX,40,ZDA,0,0,0,0,0,0";
 
-// const char enableRMC[] PROGMEM = "PUBX,40,RMC,0,1,0,0,0,0";
-// const char enableGLL[] PROGMEM = "PUBX,40,GLL,0,1,0,0,0,0";
-// const char enableGSV[] PROGMEM = "PUBX,40,GSV,0,1,0,0,0,0";
-// const char enableGSA[] PROGMEM = "PUBX,40,GSA,0,1,0,0,0,0";
-// const char enableGGA[] PROGMEM = "PUBX,40,GGA,0,1,0,0,0,0";
-// const char enableVTG[] PROGMEM = "PUBX,40,VTG,0,1,0,0,0,0";
-// const char enableZDA[] PROGMEM = "PUBX,40,ZDA,0,1,0,0,0,0";
+const char enableRMC[] PROGMEM = "PUBX,40,RMC,0,1,0,0,0,0";
+const char enableGLL[] PROGMEM = "PUBX,40,GLL,0,1,0,0,0,0";
+const char enableGSV[] PROGMEM = "PUBX,40,GSV,0,1,0,0,0,0";
+const char enableGSA[] PROGMEM = "PUBX,40,GSA,0,1,0,0,0,0";
+const char enableGGA[] PROGMEM = "PUBX,40,GGA,0,1,0,0,0,0";
+const char enableVTG[] PROGMEM = "PUBX,40,VTG,0,1,0,0,0,0";
+const char enableZDA[] PROGMEM = "PUBX,40,ZDA,0,1,0,0,0,0";
 
 
 // $PUBX,41,portId,inProto,outProto,baudrate,autobauding*cs<CR><LF>
@@ -59,6 +59,7 @@ const char baud9600  [] PROGMEM = "PUBX,41,1,3,3,9600,0";
 const char baud38400 [] PROGMEM = "PUBX,41,1,3,3,38400,0";
 const char baud57600 [] PROGMEM = "PUBX,41,1,3,3,57600,0";
 const char baud115200[] PROGMEM = "PUBX,41,1,3,3,115200,0";
+const char baud230400[] PROGMEM = "PUBX,41,1,3,3,230400,0";
 const char baud921600[] PROGMEM = "PUBX,41,1,3,3,921600,0";
 
 
@@ -89,6 +90,23 @@ const unsigned char ubxRate10Hz[] PROGMEM =
 //   { 0x06,0x01,0x08,0x00,0xF0,0x05,0x00,0x00,0x00,0x00,0x00,0x01 };
 // const unsigned char ubxDisableZDA[] PROGMEM =
 //   { 0x06,0x01,0x08,0x00,0xF0,0x08,0x00,0x00,0x00,0x00,0x00,0x01 };
+
+// Disable specific NMEA sentences
+const unsigned char ubxDisableGGA[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x00,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableGLL[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x01,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableGSA[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x02,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableGSV[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x03,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableRMC[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x04,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableVTG[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x05,0x00,0x00,0x00,0x00,0x00,0x01 };
+const unsigned char ubxDisableZDA[] PROGMEM =
+  { 0x06,0x01,0x08,0x00,0xF0,0x08,0x00,0x00,0x00,0x00,0x00,0x01 };
+
 
 // static const uint8_t ubxReset[] __PROGMEM =
 //   { ublox::UBX_CFG, ublox::UBX_CFG_RST,
@@ -225,6 +243,14 @@ class mGPS :
         state NEOGPS_BF(8);
 
         
+const uint32_t COMMAND_DELAY = 250;
+
+void CommandSend_UBX_Disable_UBXMessages();//uint32_t baud);
+void CommandSend_UBX_Disable_NMEAMessages();//uint32_t baud);
+void CommandSend_NMEA_Disable_NMEAMessages();//uint32_t baud);
+void changeBaud( const char *textCommand, unsigned long baud );
+
+
 // static
 //  MyGPS* gps2 = nullptr;//( &gpsPort );
 

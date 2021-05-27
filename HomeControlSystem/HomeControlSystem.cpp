@@ -44,7 +44,7 @@ void hw_wdt_enable(){
 void setup(void)
 { 
   // hw_wdt_disable();
-  hw_wdt_enable();
+  //hw_wdt_enable();
     
   #ifndef USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
   #ifdef ESP32
@@ -54,6 +54,25 @@ void setup(void)
   #endif
 
   Serial.begin(115200);
+
+
+
+  
+// Serial2.begin(115200);
+// while(1)
+// {
+// Serial.println("115200 Working");
+// Serial2.println("115200 Working");
+// delay(1000);
+
+// }
+
+// Serial2.flush();
+
+// DEBUG_HOLD_POINT;
+
+
+
 
   #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);

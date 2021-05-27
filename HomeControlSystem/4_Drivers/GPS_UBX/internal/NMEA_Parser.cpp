@@ -2143,6 +2143,7 @@ void NMEAGPS::send_P( Stream *device, const __FlashStringHelper *msg )
       device->print( chr );
 
       chr = pgm_read_byte(ptr++);
+      Serial.print(".");
     }
 
     if (!sent_trailer)

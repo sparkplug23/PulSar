@@ -212,6 +212,7 @@ void mSerialUART::StartISR_RingBuffers()
   #ifdef ENABLE_HARDWARE_UART_1
   if(settings.uart1.receive_interrupts_enable)
   {
+    init_UART1_pins();
     init_UART1_RingBuffer();
     init_UART1_ISR();
     settings.uart1.initialised = true;
@@ -222,6 +223,7 @@ void mSerialUART::StartISR_RingBuffers()
   #ifdef ENABLE_HARDWARE_UART_2
   if(settings.uart2.receive_interrupts_enable)
   {
+    init_UART2_pins();
     init_UART2_RingBuffer();
     init_UART2_ISR();
     settings.uart2.initialised = true;
@@ -294,7 +296,7 @@ uint16_t mSerialUART::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, 
     // Read from buffer
     memcpy(buffer,item,item_size);
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("output_buf=%s"),buffer);
+    AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
 
     // if(flag_clear_buffer_after_read)
     // {

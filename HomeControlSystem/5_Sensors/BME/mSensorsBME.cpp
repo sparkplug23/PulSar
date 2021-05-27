@@ -96,8 +96,8 @@ void mSensorsBME::Pre_Init(){
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
     sensor[settings.fSensorCount].bme = new Adafruit_BME280();
-    if (sensor[settings.fSensorCount].bme->begin(pCONT_sup->wire)) {
-      // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
+    if (sensor[settings.fSensorCount].bme->begin(0x77, pCONT_sup->wire)) {
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
       settings.fSensorCount++;
     }else{
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
@@ -131,7 +131,7 @@ void mSensorsBME::EveryLoop(){
     if(mTime::TimeReachedNonReset(&sensor[sensor_id].tSavedMeasureClimate,settings.measure_rate_ms)){  
       // Retry init if failed
       if(!settings.fSensorCount){
-        init(); //search again
+        Init(); //search again
         sensor[sensor_id].tSavedMeasureClimate = millis()+(10000); //backoff period
       }else{
         SplitTask_ReadSensor(sensor_id,DONTREQUIRE_COMPLETE);

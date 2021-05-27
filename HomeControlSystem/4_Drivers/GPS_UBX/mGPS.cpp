@@ -31,33 +31,45 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP:{
 
     // #ifdef USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
-      if(runtime.ubx_config_status==0)
-      {
+//       if(runtime.ubx_config_status==0)
+//       {
 
-        // Turn off the preconfigured NMEA standard messages
-        configNMEA( 0 );
+// //         // Turn off the preconfigured NMEA standard messages
+// //         configNMEA( 0 );
 
-        // Turn off things that may be left on by a previous build
-        disableUBX();
+// //         // Turn off things that may be left on by a previous build
+// //         disableUBX();
 
-        // Turn on the exact UBX messages I need
-        send_UBX_enable_messages();
+// //         // Change baud to higher rate
+// //         ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
 
-        // Change baud to higher rate
-        ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
+// //         delay(1000);
+// // Serial2.println("921600 Working");
+// // Serial2.flush();
+// // Serial2.end();
+// // pinMode(17, OUTPUT);
+// // digitalWrite(17, HIGH);
+// // delay(1000);
 
-        delay(100);
-        gpsPort.flush();
-        // Change to high speed
-        gpsPort.updateBaudRate(921600); 
 
-        // Increase send frequency to 10hz
-        sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
-        // sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
+        
+// // Serial2.begin(115200);
 
-        runtime.ubx_config_status = 1; //success
+//         // Turn on the exact UBX messages I need
+//         // send_UBX_enable_messages();
 
-      }
+
+//         // gpsPort.flush();
+//         // // Change to high speed
+//         // gpsPort.updateBaudRate(115200); 
+
+//         // Increase send frequency to 10hz
+//         // sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
+//         sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
+
+//         runtime.ubx_config_status = 1; //success
+
+//       }
 
       // #endif
 
@@ -91,10 +103,10 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
         for(int ii=0;ii<bytes_in_line;ii++)
         {
           // nmea_parser->parser_byte_in(pbuffer[ii]);
-          gps.parser_byte_in(pbuffer[ii]);
+          ubx_parser->parser_byte_in(pbuffer[ii]);
 
           // Check on fix status
-          gps_result_parsing = gps.read();
+          gps_result_parsing = ubx_parser->read();
           if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
           {
             gps_fix_reading = true;
@@ -232,7 +244,7 @@ void mGPS::init(void)
   runtime.ubx_config_status = 0; 
 
   DEBUG_PORT.print( F("ublox binary protocol example started.\n") );
-  // DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';
+  // DEBUG_PORT << F("fix object size = ") << sizeof(ubx_parser->fix()) << '\n';
   // DEBUG_PORT << F("ubloxGPS object size = ") << sizeof(ubloxGPS) << '\n';
   // DEBUG_PORT << F("MyGPS object size = ") << sizeof(gps) << '\n';
   // DEBUG_PORT.println( F("Looking for GPS device on " GPS_PORT_NAME) );
@@ -292,7 +304,8 @@ AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
 
 // Without interrupts, 912600 is too fast for polling during config. Force speed back to 9600 for config
 
-#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW1
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 921600"));
   // Send command on 912600 to slower speed again for config
   gpsPort.setDebugOutput(true);
   gpsPort.begin(921600); 
@@ -303,15 +316,594 @@ AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
   gpsPort.flush();
   // change to new slower baud for polling init phase
   delay(100);
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 9600"));
   gpsPort.updateBaudRate(9600); 
   // confirm its working on the lower baud, set a flag
   if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
   {
-    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 921600 Working"));
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 Working"));
   }
 #endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
 
 
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW2
+
+DEBUG_LINE_HERE;
+
+
+
+Serial2.begin(921600);
+Serial2.println("921600 Working");
+Serial2.flush();
+Serial2.end();
+pinMode(17, OUTPUT);
+digitalWrite(17, HIGH);
+delay(1000);
+
+DEBUG_LINE_HERE;
+
+Serial2.begin(9600);
+Serial2.println("9600 Working");
+Serial2.flush();
+Serial2.end();
+pinMode(17, OUTPUT);
+digitalWrite(17, HIGH);
+delay(1000);
+
+DEBUG_LINE_HERE;
+
+delay(4000);
+
+
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 921600"));
+  // // Send command on 912600 to slower speed again for config
+  // // gpsPort.setDebugOutput(true);
+
+  
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 912600"));
+  // DEBUG_LINE_HERE;
+  // // Turn back to slow speed
+  // // gpsPort.updateBaudRate(921600); 
+  // // gpsPort.begin(921600); 
+  // // while (!gpsPort){};
+
+  // gpsPort.flush(); // wait for last transmitted data to be sent 
+  // gpsPort.begin(921600);
+  // while(gpsPort.available()){
+  //   DEBUG_LINE_HERE;
+  //   gpsPort.read(); 
+  // } 
+
+
+
+  // DEBUG_LINE_HERE;
+  // CommandSend_NMEA_Disable_NMEAMessages(921600);
+  // DEBUG_LINE_HERE;
+  // CommandSend_UBX_Disable_NMEAMessages(921600);
+  // DEBUG_LINE_HERE;
+  // CommandSend_UBX_Disable_UBXMessages(921600);
+  // DEBUG_LINE_HERE;
+  
+  // // // Wait for serial to start
+  // // while (!gpsPort){};
+  // // Send command to lower baud to 9600
+  // ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+  // // DEBUG_LINE_HERE;
+  // // gpsPort.flush();
+  // // gpsPort.end();
+
+  // // DEBUG_LINE_HERE;
+  // // delay(5000);
+  // // DEBUG_LINE_HERE;
+
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 9600"));
+  
+  // gpsPort.flush(); // wait for last transmitted data to be sent 
+  // gpsPort.begin(9600);
+  // while(gpsPort.available()) gpsPort.read(); 
+
+  // // Serial2.begin(921600); 
+
+
+
+  // // gpsPort.begin(9600); 
+  // // while (!gpsPort){};
+
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds"));
+  
+  // DEBUG_LINE_HERE;
+  // CommandSend_NMEA_Disable_NMEAMessages(9600);
+  // DEBUG_LINE_HERE;
+  // CommandSend_UBX_Disable_NMEAMessages(9600);
+  // DEBUG_LINE_HERE;
+  // CommandSend_UBX_Disable_UBXMessages(9600);
+
+  // gpsPort.flush();
+  // // gpsPort.end();
+
+
+
+  // // change to new slower baud for polling init phase
+  // // DEBUG_LINE_HERE;
+  // // delay(100);
+  // // AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 9600"));
+  // // DEBUG_LINE_HERE;
+  // // gpsPort.updateBaudRate(9600); 
+  // // confirm its working on the lower baud, set a flag
+  // DEBUG_LINE_HERE;
+  // if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+  // {
+  //   AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 Working"));
+  //   delay(2000);
+  // }else{
+  //   AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 NO RESPONSE"));
+  //   delay(2000);
+
+  // }
+  // DEBUG_LINE_HERE;
+#endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+
+
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW3
+
+// DEBUG_LINE_HERE;
+
+
+
+// DEBUG_LINE_HERE;
+
+// DEBUG_LINE_HERE;
+
+// delay(4000);
+
+
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 115200"));
+  // Send command on 912600 to slower speed again for config
+  // gpsPort.setDebugOutput(true);
+
+  
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 115200"));
+  DEBUG_LINE_HERE;
+  // Turn back to slow speed
+  // gpsPort.updateBaudRate(921600); 
+  // gpsPort.begin(921600); 
+  // while (!gpsPort){};
+
+  
+Serial2.begin(9600);
+delay(4000);
+// while(1)
+Serial2.println("115200 Working");
+Serial2.flush();
+
+DEBUG_HOLD_POINT;
+
+  DEBUG_LINE_HERE;
+  CommandSend_NMEA_Disable_NMEAMessages(115200);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_NMEAMessages(115200);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_UBXMessages(115200);
+  DEBUG_LINE_HERE;
+  
+  // // Wait for serial to start
+  // while (!gpsPort){};
+  // Send command to lower baud to 9600
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+  // DEBUG_LINE_HERE;
+  // gpsPort.flush();
+  // gpsPort.end();
+
+Serial2.end();
+pinMode(17, OUTPUT);
+digitalWrite(17, HIGH);
+delay(1000);
+  // DEBUG_LINE_HERE;
+  // delay(5000);
+  // DEBUG_LINE_HERE;
+
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 9600"));
+  
+
+  DEBUG_LINE_HERE;
+Serial2.begin(9600);
+  DEBUG_LINE_HERE;
+Serial2.println("9600 Working");
+  DEBUG_LINE_HERE;
+
+  // Serial2.begin(921600); 
+
+
+
+  // gpsPort.begin(9600); 
+  // while (!gpsPort){};
+
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds"));
+  
+  DEBUG_LINE_HERE;
+  CommandSend_NMEA_Disable_NMEAMessages(9600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_NMEAMessages(9600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_UBXMessages(9600);
+
+  gpsPort.flush();
+  // gpsPort.end();
+
+
+// Serial2.flush();
+// Serial2.end();
+// pinMode(17, OUTPUT);
+// digitalWrite(17, HIGH);
+// delay(1000);
+
+  // change to new slower baud for polling init phase
+  // DEBUG_LINE_HERE;
+  // delay(100);
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 9600"));
+  // DEBUG_LINE_HERE;
+  // gpsPort.updateBaudRate(9600); 
+  // confirm its working on the lower baud, set a flag
+  DEBUG_LINE_HERE;
+  if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+  {
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 Working"));
+    delay(2000);
+  }else{
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 NO RESPONSE"));
+    delay(2000);
+
+  }
+  // DEBUG_LINE_HERE;
+#endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+
+
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW4
+
+/**
+ * Test, try change 9 to 9600
+ * */
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing from 921600 to 9600"));
+
+
+// DEBUG_LINE_HERE;
+
+
+Serial2.begin(115200);
+Serial2.println("115200 Working");
+Serial2.flush();
+// Serial2.end();
+// pinMode(17, OUTPUT);
+// digitalWrite(17, HIGH);
+// delay(1000);
+
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+
+
+  DEBUG_HOLD_POINT;
+
+// DEBUG_LINE_HERE;
+
+// DEBUG_LINE_HERE;
+
+// delay(4000);
+
+
+  // Send command on 912600 to slower speed again for config
+  // gpsPort.setDebugOutput(true);
+
+  
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 912600"));
+  DEBUG_LINE_HERE;
+  // Turn back to slow speed
+  // gpsPort.updateBaudRate(921600); 
+  // gpsPort.begin(921600); 
+  // while (!gpsPort){};
+
+  
+
+
+  DEBUG_LINE_HERE;
+  CommandSend_NMEA_Disable_NMEAMessages(921600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_NMEAMessages(921600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_UBXMessages(921600);
+  DEBUG_LINE_HERE;
+  
+  // // Wait for serial to start
+  // while (!gpsPort){};
+  // Send command to lower baud to 9600
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+  // DEBUG_LINE_HERE;
+  // gpsPort.flush();
+  // gpsPort.end();
+
+  DEBUG_LINE_HERE;
+  delay(5000);
+  DEBUG_LINE_HERE;
+
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 9600"));
+  
+
+  DEBUG_LINE_HERE;
+Serial2.begin(9600);
+  DEBUG_LINE_HERE;
+Serial2.println("9600 Working");
+  DEBUG_LINE_HERE;
+Serial2.flush();
+Serial2.end();
+pinMode(17, OUTPUT);
+digitalWrite(17, HIGH);
+delay(1000);
+
+  // Serial2.begin(921600); 
+
+
+
+  // gpsPort.begin(9600); 
+  // while (!gpsPort){};
+
+  AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds"));
+  
+  DEBUG_LINE_HERE;
+  CommandSend_NMEA_Disable_NMEAMessages(9600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_NMEAMessages(9600);
+  DEBUG_LINE_HERE;
+  CommandSend_UBX_Disable_UBXMessages(9600);
+
+  gpsPort.flush();
+  // gpsPort.end();
+
+
+
+  // change to new slower baud for polling init phase
+  // DEBUG_LINE_HERE;
+  // delay(100);
+  // AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 9600"));
+  // DEBUG_LINE_HERE;
+  // gpsPort.updateBaudRate(9600); 
+  // confirm its working on the lower baud, set a flag
+  DEBUG_LINE_HERE;
+  if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+  {
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 Working"));
+    delay(2000);
+  }else{
+    AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 NO RESPONSE"));
+    delay(2000);
+
+  }
+  // DEBUG_LINE_HERE;
+#endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+
+
+#ifdef ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
+
+/**
+ * Change baud to slower by sending commands on all relevant frequencies
+ * */
+uint32_t baud_list[] = {9600, 115200};
+
+// pinMode(17, OUTPUT);
+
+for(int i=0;i<ARRAY_SIZE(baud_list);i++)
+{
+
+  AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d"), baud_list[i]);
+
+  Serial2.begin(baud_list[i]);
+  while(!Serial2);
+
+  // ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+  
+  Serial2.flush();
+  Serial2.end();
+  // digitalWrite(17, HIGH);
+
+}
+
+Serial2.begin(9600);
+while(!Serial2);
+
+/**
+ * Disable unwanted signals
+ * */
+CommandSend_UBX_Disable_NMEAMessages();
+DEBUG_LINE_HERE;
+CommandSend_UBX_Disable_UBXMessages();
+DEBUG_LINE_HERE;
+
+// configNMEA( 0 );
+// disableUBX();
+
+/**
+ * Renable what I want
+ * */
+enableUBX();
+
+/**
+ * Continue at desired speed
+ * */
+ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+Serial2.flush();
+Serial2.end();
+Serial2.begin(115200);
+while(!Serial2);
+
+/**
+ * Set the rate
+ * */
+sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
+// sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
+
+
+
+
+// // delay(1000);
+
+
+// DEBUG_HOLD_POINT;
+
+
+
+
+// // DEBUG_LINE_HERE;
+
+
+
+// // DEBUG_LINE_HERE;
+
+// // DEBUG_LINE_HERE;
+
+// // delay(4000);
+
+
+//   AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 115200"));
+//   // Send command on 912600 to slower speed again for config
+//   // gpsPort.setDebugOutput(true);
+
+  
+//   AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 115200"));
+//   DEBUG_LINE_HERE;
+//   // Turn back to slow speed
+//   // gpsPort.updateBaudRate(921600); 
+//   // gpsPort.begin(921600); 
+//   // while (!gpsPort){};
+
+  
+// Serial2.begin(9600);
+// // delay(4000);
+// // // while(1)
+// // Serial2.println("115200 Working");
+// // Serial2.flush();
+
+// // DEBUG_HOLD_POINT;
+
+//   DEBUG_LINE_HERE;
+//   CommandSend_NMEA_Disable_NMEAMessages(9600);
+//   // DEBUG_LINE_HERE;
+//   // CommandSend_UBX_Disable_NMEAMessages(9600);
+//   // DEBUG_LINE_HERE;
+//   // CommandSend_UBX_Disable_UBXMessages(9600);
+//   // DEBUG_LINE_HERE;
+  
+//   // // Wait for serial to start
+//   // while (!gpsPort){};
+//   // Send command to lower baud to 9600
+//   // ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+//   ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+//   // DEBUG_LINE_HERE;
+//   // gpsPort.flush();
+//   // gpsPort.end();
+
+// // Serial2.end();
+// // pinMode(17, OUTPUT);
+// // digitalWrite(17, HIGH);
+// // delay(1000);
+//   // DEBUG_LINE_HERE;
+//   // delay(5000);
+//   // DEBUG_LINE_HERE;
+
+//   AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds ======================= 9600"));
+  
+
+// //   DEBUG_LINE_HERE;
+// // Serial2.begin(9600);
+// //   DEBUG_LINE_HERE;
+// // Serial2.println("9600 Working");
+// //   DEBUG_LINE_HERE;
+
+// //   // Serial2.begin(921600); 
+
+
+
+// //   // gpsPort.begin(9600); 
+// //   // while (!gpsPort){};
+
+// //   AddLog(LOG_LEVEL_INFO, PSTR("GPS Disable all unwanted messages at all bauds"));
+  
+// //   DEBUG_LINE_HERE;
+// //   CommandSend_NMEA_Disable_NMEAMessages(9600);
+// //   DEBUG_LINE_HERE;
+// //   CommandSend_UBX_Disable_NMEAMessages(9600);
+// //   DEBUG_LINE_HERE;
+// //   CommandSend_UBX_Disable_UBXMessages(9600);
+
+// //   gpsPort.flush();
+// //   // gpsPort.end();
+
+
+// // Serial2.flush();
+// // Serial2.end();
+// // pinMode(17, OUTPUT);
+// // digitalWrite(17, HIGH);
+// // delay(1000);
+
+//   // change to new slower baud for polling init phase
+//   // DEBUG_LINE_HERE;
+//   // delay(100);
+//   // AddLog(LOG_LEVEL_INFO, PSTR("GPS baud changing to 9600"));
+//   // DEBUG_LINE_HERE;
+//   // gpsPort.updateBaudRate(9600); 
+//   // confirm its working on the lower baud, set a flag
+//   DEBUG_LINE_HERE;
+//   if(ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS ))
+//   {
+//     AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 Working"));
+//     delay(2000);
+//   }else{
+//     AddLog(LOG_LEVEL_INFO, PSTR("GPS baud 9600 NO RESPONSE"));
+//     delay(2000);
+
+//   }
+
+// 22:50:57  R -> UNKNOWN ???,  Size  33,  'UNKNOWN'
+// 22:50:57  R <- UBX MON,  Size   8,  'Monitor'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> NMEA PUBX40,  Size  29,  'Config Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> UBX CFG-MSG,  Size  16,  'Messages'
+// 22:50:57  R -> NMEA PUBX41,  Size  28,  'Config Ports'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> UBX CFG,  Size  11,  'Config'
+// 22:50:57  R -> NMEA PUBX41,  Size  28,  'Config Ports'
+
+
+
+  // DEBUG_LINE_HERE;
+#endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
+  // 
   //   Serial2.setDebugOutput(true);
   //     gpsPort.begin(9600); 
   // // Make sure if its on 9600 baud to switch to 921600
@@ -363,7 +955,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
   // gpsPort.begin(921600);
 
 
-  AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
+  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
 
 }
 
@@ -376,6 +968,114 @@ void mGPS::configNMEA( uint8_t rate )
 }
 
 
+void mGPS::changeBaud( const char *textCommand, unsigned long baud )
+{
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableRMC );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGLL );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGSV );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGSA );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGGA );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableVTG );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableZDA );
+  delay( 500 );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) textCommand );
+  gpsPort.flush();
+  gpsPort.end();
+
+  DEBUG_PORT.print( F("All sentences disabled for baud rate ") );
+  DEBUG_PORT.print( baud );
+  DEBUG_PORT.println( F(" change.  Enter '1' to reenable sentences.") );
+  delay( 500 );
+  gpsPort.begin( baud );
+
+} // changeBaud
+
+
+/**
+ * Send commands to disable NMEA sentences, via NMEA protocol, on request baud
+ * @param baud The rate to transmit the messages over
+ * */
+void mGPS::CommandSend_NMEA_Disable_NMEAMessages()//uint32_t baud)
+{  
+  DEBUG_LINE_HERE;
+  // gpsPort.updateBaudRate(baud);
+  DEBUG_LINE_HERE;
+  // Wait for serial to start
+  DEBUG_LINE_HERE;
+  // while (!gpsPort){};
+  // Send command to lower baud to 9600
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableRMC );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) enableGLL );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGSV );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGSA );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableGGA );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableVTG );
+  delay( COMMAND_DELAY );
+  ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) disableZDA );
+  gpsPort.flush();
+
+}
+
+
+/**
+ * Send commands to disable NMEA sentences, via NMEA protocol, on request baud
+ * @param baud The rate to transmit the messages over
+ * */
+void mGPS::CommandSend_UBX_Disable_NMEAMessages()//uint32_t baud)
+{  
+  
+  // gpsPort.updateBaudRate(baud);
+  // Wait for serial to start
+  // while (!gpsPort){};
+  // Send command to lower baud to 9600
+  sendUBX( ubxDisableGLL, sizeof(ubxDisableGLL) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableGSV, sizeof(ubxDisableGSV) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableGSA, sizeof(ubxDisableGSA) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableGGA, sizeof(ubxDisableGGA) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableVTG, sizeof(ubxDisableVTG) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableZDA, sizeof(ubxDisableZDA) );
+    delay( COMMAND_DELAY );
+  sendUBX( ubxDisableRMC, sizeof(ubxDisableRMC) );
+
+  // gpsPort.flush();
+
+}
+
+/**
+ * Send commands to disable NMEA sentences, via NMEA protocol, on request baud
+ * @param baud The rate to transmit the messages over
+ * */
+void mGPS::CommandSend_UBX_Disable_UBXMessages()//uint32_t baud)
+{  
+  
+  // gpsPort.updateBaudRate(baud);
+  // Wait for serial to start
+  // while (!gpsPort){};
+  // Send command to lower baud to 9600
+  ubx_parser->disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
+  ubx_parser->disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC );
+  ubx_parser->disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED );
+  ubx_parser->disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH );
+  ubx_parser->disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
+  // gpsPort.flush();
+
+}
 
 
 #endif

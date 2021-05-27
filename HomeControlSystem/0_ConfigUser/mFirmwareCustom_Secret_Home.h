@@ -80,7 +80,9 @@ Outside
   - CeilingLight
 **/
 // #define DEVICE_SIDEDOORLIGHT
-// #define DEVICE_GAZEBCON
+#define DEVICE_GAZEBCON //to become a sonoff 4ch (non pro)
+// Gazebo rgb as its own controllers
+// gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
 
 /**
 Garage
@@ -1817,38 +1819,43 @@ Bathroom
 
 
 #ifdef DEVICE_GAZEBCON
-  #define DEVICENAME_CTR          "gazebcon"
+  #define DEVICENAME_CTR          "gazebo_controller"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
 
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_BME
-  #define D_DEVICE_SENSOR_CLIMATE "Outside"
+  // In future, this device will become a sonoff 4ch pro, with no additional sensors to maintain solid performance
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define D_DEVICE_SENSOR_CLIMATE "Outside"
 
   #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_DRIVERS_RELAY
   
+  // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  
+  #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR "\","
+      // "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR "\","
+      // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR "\","
       "\"D5\":\"" D_GPIO_FUNCTION_REL1_INV_CTR "\","
       "\"D6\":\"" D_GPIO_FUNCTION_REL2_INV_CTR "\","
       "\"D7\":\"" D_GPIO_FUNCTION_REL3_INV_CTR "\","
-      "\"D0\":\"" D_GPIO_FUNCTION_REL4_INV_CTR "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+      "\"D0\":\"" D_GPIO_FUNCTION_REL4_INV_CTR "\""
+      // "\"D3\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+      // "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR "\"" // not used anymore
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "BigBulbs"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Lanterns"
-  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Water"
-  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "Relay4"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Red"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Yellow"
+  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Blue"
+  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "White"
 
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Gazebo"
 
@@ -1856,18 +1863,18 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-      "],"
+      // "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      //   "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      // "],"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "]"
+      // "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+      //   "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      // "]"
     "}"
   "}";
 

@@ -23,7 +23,7 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
 
     #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
+    AddLog(LOG_LEVEL_INFO, PSTR("MODULE_TEMPLATE Load"));// = \"%s\""), buffer);
     AddLog(LOG_LEVEL_DEBUG, PSTR("Load = \"%s\""), buffer);
     #endif // ENABLE_LOG_LEVEL_INFO
     #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES

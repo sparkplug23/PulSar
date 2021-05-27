@@ -117,7 +117,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 
 // Can only be used when hardware serial is enabled
-#if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
+// #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_HOLD_POINT   while(1) { \
                               SERIAL_DEBUG.printf("Debug Hold Point: ");\
                               SERIAL_DEBUG.print(__FILE__);\
@@ -125,9 +125,9 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                               SERIAL_DEBUG.flush(); \
                               delay(1000); \
                             }
-#else
-  #define DEBUG_HOLD_POINT   //nothing, no code
-#endif
+// #else
+//   #define DEBUG_HOLD_POINT   //nothing, no code
+// #endif
 
 
 
