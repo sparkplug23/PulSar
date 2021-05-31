@@ -80,7 +80,7 @@ Outside
   - CeilingLight
 **/
 // #define DEVICE_SIDEDOORLIGHT
-#define DEVICE_GAZEBCON //to become a sonoff 4ch (non pro)
+// #define DEVICE_GAZEBCON //to become a sonoff 4ch (non pro)
 // Gazebo rgb as its own controllers
 // gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
 

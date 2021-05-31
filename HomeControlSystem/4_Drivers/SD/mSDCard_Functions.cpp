@@ -103,6 +103,22 @@ void mSDCard::appendFile(fs::FS &fs, const char * path, const char * message){
     }
 }
 
+void mSDCard::appendFile_open_and_close(fs::FS &fs, const char * path, const char * message){
+    Serial.printf("Appending to file: %s\n", path);
+
+    File file = fs.open(path, FILE_APPEND);
+    if(!file){
+        Serial.println("Failed to open file for appending");
+        return;
+    }
+    if(file.print(message)){
+        Serial.println("Message appended");
+    } else {
+        Serial.println("Append failed");
+    }
+    file.close();
+}
+
 void mSDCard::write_append_array(fs::FS &fs, const char * path, uint8_t* buffer, uint16_t buflen)
 {
     // Serial.printf("Appending to file: %s\n", path);

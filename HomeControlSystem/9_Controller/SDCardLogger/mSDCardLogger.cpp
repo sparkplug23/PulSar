@@ -130,6 +130,13 @@ void mSDCardLogger::Init(void)
 void mSDCardLogger::EveryLoop()
 {
 
+      char timectr[30];
+      snprintf(timectr, sizeof(timectr), "%s\n", pCONT_time->RtcTime.hhmmss_ctr);
+
+      appendFile_open_and_close(SD, "/time_test.txt", timectr);
+
+      readFile(SD, "/time_test.txt");
+
 
 }
 

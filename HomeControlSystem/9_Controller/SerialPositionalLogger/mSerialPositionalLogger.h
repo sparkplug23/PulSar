@@ -8,6 +8,8 @@
 
 #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
 
+//https://i.stack.imgur.com/6pPh9.png
+
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR) "sdcard_superframe";
 
 class mSerialPositionalLogger :
@@ -40,11 +42,18 @@ class mSerialPositionalLogger :
     
     void EverySecond();
 
+    enum EM_LOGGING_STATE_IDS
+    {
+      EM_LOGGING_STATE_DISABLED_ID=0,
+      EM_LOGGING_STATE_ENABLED_ID,
+      EM_LOGGING_STATE_LENGTH
+    };
+
     struct SDCARD_DATA{
       bool isopened = false;
 
       // flag which if set, means the sdcard should be written to, if closed before, then start progress to open it
-      uint8_t enable_logging = 0;
+      uint8_t enable_logging = EM_LOGGING_STATE_DISABLED_ID;
 
 
     }sdcard_status;
@@ -57,6 +66,7 @@ class mSerialPositionalLogger :
     void SubTask_Debug_BasicFileWriteTest();
     
     void CommandSet_SDCard_OpenClose_Toggle();
+    void CommandSet_LoggingState(uint8_t state);
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

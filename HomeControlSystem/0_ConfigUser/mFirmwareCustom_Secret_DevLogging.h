@@ -34,6 +34,7 @@
 // #define DEVICE_SDCARD_TESTER
 // #define DEVICE_GPS_TO_SDCARD_TESTER
 // #define DEVICE_MEASUREMENT_SYSTEM_1
+#define DEVICE_OLED_WITH_SD_LIPO_TEST
 // #define DEVICE_SDCARD_LIPO_TESTER
 
 // #include "0_ConfigUser/mFirmwareCustom_Secret_Home.h"
@@ -680,6 +681,155 @@
 
 #endif // DEVICE_GPSPARSER_TESTER
 
+
+
+
+/**
+ * Description: Use of button, oled and sdcard together on LIPO_ESP32
+ * Button will toggle logging start/end (open/close), which will write the RTC time line by line. This will let me test sd opening and closing when expected
+ * */
+#ifdef DEVICE_OLED_WITH_SD_LIPO_TEST
+  #define DEVICENAME_CTR            "measurement_system_1_tester"
+  #define DEVICENAME_FRIENDLY_CTR   "MEASUREMENT_SYSTEM_1 Tester"
+
+  // General defines for debugging only, not for finished
+  // #define DISABLE_NETWORK
+
+  // General defines needed in release version
+  #define ESP32
+
+  // Section A: GPS
+  // #define USE_MODULE_DRIVERS_GPS
+  // #define ENABLE_GPS_PARSER_UBX
+  // #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW1
+  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW2
+  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW3
+  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW4
+  // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
+  // #define NMEAGPS_DERIVED_TYPES
+  // #define gpsPort Serial2
+  // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  // #define NMEAGPS_PARSE_SAVE_MILLIS
+
+  // Section UART
+  // #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_SERIAL_UART
+  // #define ENABLE_HARDWARE_UART_1
+  // #define ENABLE_HARDWARE_UART_2
+  // #define HARDWARE_UART_1_BAUD_RATE_SPEED  9600
+  // #define HARDWARE_UART_2_BAUD_RATE_SPEED  115200//921600
+
+  // Section B: SDCard driver
+  #define USE_MODULE_DRIVERS_SDCARD
+
+  // Seciton C: Logger controller
+  #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+  #define ENABLE_SDLOGGER_APPEND_TIME_TEST
+
+  // Section x: Button to toggle logging/sd state
+  #define USE_MODULE_CORE_RULES
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+
+  // Section x: OLED display 
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  // I may need to introduce a delayed start on this
+  
+  
+  // #define USE_MODULE_DRIVERS_SERIAL_UART
+  // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  
+
+  // #define ENABLE_BUG_TRACING
+  // #define DEBUG_NUM1
+
+  // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+
+
+
+  #define DEBUG_PIN1_GPIO     12
+  #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+  #define DEBUG_PIN2_GPIO     13
+  #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /**
+       * Debug pins
+       * */
+      "\"12\":\"" D_GPIO_FUNCTION_DEBUG_PIN1_CTR   "\","
+
+      /** 4P large JST - ADC
+       * Yellow     34(I), ADC2G, ADC1_CH6
+       * White      35(I), ADC5G, ADC1_CH7
+       * Red        32(I), ADC Record Trigger
+       * Black      GND
+       * */
+      "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_GENERIC_GPIO1_CTR   "\","
+
+      /** 5P small - UART2 RSS Stream
+       * Orange      17, UART2_TX
+       * Yellow      16, UART2_RX
+       * White       25, 
+       * Red         5V
+       * Black       GND
+       * */
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR  "\","
+
+      /** Built in - OLED
+       * 
+       * */
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
+      
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+#endif // DEVICE_GPSPARSER_TESTER
 
 
 /**

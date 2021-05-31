@@ -140,6 +140,9 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2);
 void deleteFile(fs::FS &fs, const char * path);
 void testFileIO(fs::FS &fs, const char * path);
 
+
+void appendFile_open_and_close(fs::FS &fs, const char * path, const char * message);
+
 void write_append_array(fs::FS &fs, const char * path, uint8_t* buffer, uint16_t buflen);
 
 

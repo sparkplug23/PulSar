@@ -7,6 +7,7 @@
 const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
 const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR = D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR;
 
+  SPIClass spiSD(HSPI);
 
 
 int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
@@ -68,7 +69,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     }
     break;
     case FUNC_EVERY_SECOND:  
-
+{
         // Open SD card, show directory
 
 //         if(close_decounter==0)
@@ -84,11 +85,22 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 // //   listDir(SD, "/", 0);
 //     readFile(SD, "/debugfile1.txt");
 
-
+  // listDir(SD, "/", 0);
 
       // SDCardSpeedDebug();
-
+}
     
+    break;
+    case FUNC_EVERY_FIVE_SECOND:
+
+
+      // char timectr[30];
+      // snprintf(timectr, sizeof(timectr), "%s\n", pCONT_time->RtcTime.hhmmss_ctr);
+
+      // appendFile_open_and_close(SD, "/time_test.txt", timectr);
+
+      // readFile(SD, "/time_test.txt");
+
     break;
 
     case FUNC_EVERY_MINUTE:
@@ -126,7 +138,30 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 
 void mSDCard::init(void)
 {
-  if(!SD.begin()){
+
+
+// SPIClass SDSPI(HSPI);
+
+// void setup(){
+//   SDSPI.begin(sck, miso, mosi, -1);
+//   SD.begin(ss, SDSPI);
+// }
+  Serial.print("Initializing SD card...");
+// Chip select for SD card
+#if defined(ESP32)
+#define SD_CS 15 // 5 **
+#elif defined (ARDUINO)
+#define SD_CS BUILTIN_SDCARD
+//#define SD_CS 15
+#endif
+  spiSD.begin(14, 12, 13, 15); //SCK,MISO,MOSI,SS //HSPI1
+// if (!SD.begin( SD_CS, spiSD ))
+// {
+// Serial.println("Card Mount Failed");
+// return;
+// }
+
+  if(!SD.begin( SD_CS,spiSD )){
       Serial.println("Card Mount Failed");
       delay(3000);
       return;

@@ -49,7 +49,8 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
      * TRIGGERS SECTION * 
     *******************/
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-      CommandSet_SDCard_OpenClose_Toggle();
+      // CommandSet_SDCard_OpenClose_Toggle();
+      CommandSet_LoggingState(2);
     break;
     /************
      * COMMANDS SECTION * 
@@ -181,6 +182,7 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
    * */
   // If more superframe data
 
+  #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
   if(sdcard_status.isopened)
   {
 
@@ -190,6 +192,27 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
     pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
   }
+  #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
+
+  #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
+  if(sdcard_status.isopened)
+  {
+
+    // char timectr[30];
+    // snprintf(timectr, sizeof(timectr), "%s\n", pCONT_time->RtcTime.hhmmss_ctr);
+
+    // appendFile_open_and_close(SD, "/time_test.txt", timectr);
+    // readFile(SD, "/time_test.txt");
+
+    ConstructJSON_SDCardSuperFrame();
+    AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+
+    pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+
+  }
+  #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+
+
 
   // if(sdcard_status.enable_logging)
   // {
@@ -259,6 +282,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
    * GPS data
    * 
    * */
+  #ifdef USE_MODULE_DRIVERS_GPS
   float latitude = pCONT_gps->gps_result_stored.latitudeL();
   uint32_t latitude_U32 = (uint32_t)latitude;
   uint8_t latitude_num_digits = mSupport::NumDigitsT(latitude_U32);
@@ -314,6 +338,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
     // pCONT_gps->gps_result_stored.valid.location?'V':'E' //this needs updating regardless or V/A in RMC, to include timeouts without new updates
   );
   pCONT_iDisp->LogBuffer_AddRow(line_ctr, 0);
+  #endif // USE_MODULE_DRIVERS_GPS
 
   //Test display messages
   //[1234567890123456]
@@ -372,15 +397,19 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     //     JBI->Add(i);
     // JBI->Array_End();
 
+    JBI->Add("Uptime", pCONT_time->RtcTime.hhmmss_ctr); //millis?
+
     JBI->Add("SF", "AABBCCDDEEFF");
 
     // GPS data
+    #ifdef USE_MODULE_DRIVERS_GPS
     JBI->Level_Start("GPS");
       JBI->Add("la", pCONT_gps->gps_result_stored.latitude()); 
       JBI->Add("lg", pCONT_gps->gps_result_stored.longitude()); 
       JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); 
       JBI->Add("sd", pCONT_gps->gps_result_stored.speed());
     JBI->Level_End();
+    #endif // USE_MODULE_DRIVERS_GPS
 
   return JsonBuilderI->End();
     
