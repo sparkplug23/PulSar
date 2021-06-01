@@ -231,7 +231,7 @@
 /**
  * 1) Serial0 is debugging, and will be disabled
  * 2) Serial1 is RSS samples in as superframes
- * 3) Serial2 is GPS input (9600)
+ * 3) Serial1 is GPS input (9600)
  * 4) GPSParser using my hardware, as fast as possible
  * 5) OLED screen to give sd card status
  * 6) SDCard records superframe+gpsfix
@@ -287,7 +287,7 @@
    * */
   // #define USE_MODULE_DRIVERS_SDCARD
   /**
-   *  - Putty Serial inputs into Serial2 buffer
+   *  - Putty Serial inputs into Serial1 buffer
    * */
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_SERIAL_UART
@@ -495,7 +495,7 @@
   #define DISABLE_NETWORK
   
   #define NMEAGPS_DERIVED_TYPES
-  #define gpsPort Serial2
+  #define gpsPort Serial1
 
   // #define USE_DEVFEATURE_GPS_POLLING_INPUT
   // #define NMEAGPS_PARSE_SAVE_MILLIS
@@ -692,33 +692,47 @@
   #define DEVICENAME_CTR            "measurement_system_1_tester"
   #define DEVICENAME_FRIENDLY_CTR   "MEASUREMENT_SYSTEM_1 Tester"
 
+  // Also defining so "HardwareSerial.cpp" will use these
+  #define RX1 18
+  #define TX1 19
+  #define RX2 16
+  #define TX2 17
+
   // General defines for debugging only, not for finished
-  // #define DISABLE_NETWORK
+  #define DISABLE_NETWORK
+
+  /** Next things to do
+   * Completely make it so it can compile without NTP, wifi, mqtt and telemetry
+   * Add that the GPS can be init after a period of time with no updates, ie connected after
+   * Add that a counter shows the last known time period of GPS signal, if none, alert me
+   * Order cheap caps, to attach the hardware to
+   * Use a GPIO to trigger interrupt, which will actually inform when to record adc readings.. these will be filtered into vector...
+   * I will need a GPIO_SuperFrame reset and GPIO_RSS_ADC measure to properly know when a packet is ready. The start of a new SF will trigger sending/saving latest completed SF frame, OR, every 1 second to keep the buffers clear
+   * */
 
   // General defines needed in release version
   #define ESP32
 
   // Section A: GPS
-  // #define USE_MODULE_DRIVERS_GPS
-  // #define ENABLE_GPS_PARSER_UBX
-  // #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
-  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW1
-  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW2
-  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW3
-  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW4
-  // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
-  // #define NMEAGPS_DERIVED_TYPES
-  // #define gpsPort Serial2
-  // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
-  // #define NMEAGPS_PARSE_SAVE_MILLIS
+  #define USE_MODULE_DRIVERS_GPS
+  #define ENABLE_GPS_PARSER_UBX
+  #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
+  #define NMEAGPS_DERIVED_TYPES
+  #define gpsPort Serial1
+  #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  #define NMEAGPS_PARSE_SAVE_MILLIS
 
   // Section UART
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_SERIAL_UART
-  // #define ENABLE_HARDWARE_UART_1
-  // #define ENABLE_HARDWARE_UART_2
-  // #define HARDWARE_UART_1_BAUD_RATE_SPEED  9600
-  // #define HARDWARE_UART_2_BAUD_RATE_SPEED  115200//921600
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SERIAL_UART
+  #define ENABLE_HARDWARE_UART_1
+  #define ENABLE_HARDWARE_UART_2
+  #define HARDWARE_UART_1_BAUD_RATE_SPEED  115200
+  #define HARDWARE_UART_2_BAUD_RATE_SPEED  115200
+
+  // Section RSS data
+  #define ENABLE_DEVFEATURE_DUMMY_RSS_DATA
 
   // Section B: SDCard driver
   #define USE_MODULE_DRIVERS_SDCARD
@@ -735,20 +749,6 @@
   // Section x: OLED display 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SSD1306
-  // I may need to introduce a delayed start on this
-  
-  
-  // #define USE_MODULE_DRIVERS_SERIAL_UART
-  // #define USE_DEVFEATURE_GPS_POLLING_INPUT
-
-  
-
-  // #define ENABLE_BUG_TRACING
-  // #define DEBUG_NUM1
-
-  // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
-
-
 
   #define DEBUG_PIN1_GPIO     12
   #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
@@ -855,7 +855,7 @@
   // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW4
   #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
   #define NMEAGPS_DERIVED_TYPES
-  #define gpsPort Serial2
+  #define gpsPort Serial1
   #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
   #define NMEAGPS_PARSE_SAVE_MILLIS
 
