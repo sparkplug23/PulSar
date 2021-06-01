@@ -42,23 +42,29 @@ class mSerialPositionalLogger :
     
     void EverySecond();
 
-    enum EM_LOGGING_STATE_IDS
-    {
-      EM_LOGGING_STATE_DISABLED_ID=0,
-      EM_LOGGING_STATE_ENABLED_ID,
-      EM_LOGGING_STATE_LENGTH
-    };
+    uint32_t sequence_test = 0;
 
+    uint32_t tSaved_MillisWrite = 0;
+    uint32_t tSaved_MillisWrite2 = 0;
+
+    
     struct SDCARD_DATA{
       bool isopened = false;
 
+      // enable_logging should be in logger class
+
+      // isopened_state
+      // isopened_state_
+
       // flag which if set, means the sdcard should be written to, if closed before, then start progress to open it
-      uint8_t enable_logging = EM_LOGGING_STATE_DISABLED_ID;
+      uint8_t enable = 0;
+      uint8_t enable_previous_state = 0;
 
 
-    }sdcard_status;
 
-    uint8_t enable_logging_previous_state = 0;
+    }logger_status;
+
+
     
     void SubTask_UpdateOLED();
     

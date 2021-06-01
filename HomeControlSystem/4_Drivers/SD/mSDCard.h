@@ -101,9 +101,40 @@ class mSDCard :
       }write_time;
     }debug;
 
-    #define WEB_HANDLE_SDCARD_SLIDER "fan_speed"
     
-// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
+    enum EM_LOGGING_STATE_IDS
+    {
+      EM_LOGGING_STATE_DISABLED_ID=0,
+      EM_LOGGING_STATE_ENABLED_ID,
+      EM_LOGGING_STATE_LENGTH
+    };
+
+    struct SDCARD_DATA{
+      bool isopened = false;
+      bool isopened_previous_state = false;
+
+      bool init_success_on_boot = false;
+      bool init_error_on_boot = false;
+
+      uint32_t bytes_written_to_file = 0;
+      // enable_logging should be in logger class
+
+      // isopened_state
+      // isopened_state_
+
+      // // flag which if set, means the sdcard should be written to, if closed before, then start progress to open it
+      // uint8_t enable_logging = EM_LOGGING_STATE_DISABLED_ID;
+      // uint8_t enable_logging_previous_state = EM_LOGGING_STATE_DISABLED_ID;
+
+
+    }sdcard_status;
+
+void CommandSet_SDCard_Appending_File_Method_State(uint8_t state);
+    
+void EveryLoop_Handle_Appending_File_Method();
+    
+
+
 void parse_JSONCommand(JsonParserObject obj);
 
 uint16_t test_val = 0;
@@ -173,6 +204,7 @@ struct WRITE{
 }writer_settings;
 int close_decounter = -1;
 void SubTask_Append_To_Open_File(char* buffer = nullptr, uint16_t buflen = 0);
+
 
 
 

@@ -124,7 +124,7 @@ void mSerialPositionalLogger::CommandSet_SDCard_OpenClose_Toggle()
 {//uint16_t time_secs, uint8_t relay_id){
 
 
-  sdcard_status.enable_logging ^= 1;
+  logger_status.enable ^= 1;
 
   // sdcard_status.isopened ^= 1;
   // sdcard_status.enable_logging ^= 1;
@@ -133,7 +133,7 @@ void mSerialPositionalLogger::CommandSet_SDCard_OpenClose_Toggle()
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("mSerialPositionalLogger CommandSet_SDCard_OpenClose_Toggle %d"),sdcard_status.isopened);
+  AddLog(LOG_LEVEL_TEST, PSTR("mSerialPositionalLogger CommandSet_SDCard_OpenClose_Toggle %d"),logger_status.isopened);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;
@@ -151,13 +151,13 @@ void mSerialPositionalLogger::CommandSet_LoggingState(uint8_t state)
 
   if(state == 2) //toggle
   {
-    sdcard_status.enable_logging ^= 1; 
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState state == 2, %d"),sdcard_status.enable_logging);
+    logger_status.enable ^= 1; 
+    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState state == 2, %d"),logger_status.enable);
 
   }else
   {
-    sdcard_status.enable_logging = state;
-    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),sdcard_status.enable_logging);
+    logger_status.enable = state;
+    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.enable_logging = state,  %d"),logger_status.enable);
 
   }
 
@@ -170,7 +170,7 @@ void mSerialPositionalLogger::CommandSet_LoggingState(uint8_t state)
   // // If closed, start logging and begin sdcard opening sequence
   // if(sdcard_status.isopened)
 
-  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState %d"),sdcard_status.enable_logging);
+  AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState %d"),logger_status.enable);
 
 
   // relay_status[relay_id].timer_decounter.seconds = time_secs;

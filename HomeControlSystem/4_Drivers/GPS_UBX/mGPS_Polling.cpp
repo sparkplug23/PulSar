@@ -57,10 +57,10 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_Bytes()
   bool bytes_waiting = false;
   bool gps_fix_reading = false;
 
-  while(Serial2.available())
+  while(Serial1.available())
   {
     // Read bytes in
-    nmea_parser->parser_byte_in(Serial2.read());
+    nmea_parser->parser_byte_in(Serial1.read());
 
     // Check on fix status
     gps_result_parsing = nmea_parser->read();
@@ -108,11 +108,11 @@ void mGPS::EveryLoop_InputMethod_PollingSerial_BytesToBuffer()
   char buffer[400] = {0};
   uint8_t buflen = 0;
 
-  while(Serial2.available())
+  while(Serial1.available())
   {
     if(buflen < 400)
     {
-      buffer[buflen++] = Serial2.read();
+      buffer[buflen++] = Serial1.read();
     }
     else
     {

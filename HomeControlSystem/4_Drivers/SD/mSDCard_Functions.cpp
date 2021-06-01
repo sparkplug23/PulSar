@@ -10,33 +10,35 @@
 void mSDCard::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
   Serial.printf("Listing directory: %s\n", dirname);
 
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println("Not a directory");
-        return;
-    }
+	File root = fs.open(dirname);
+	if(!root){
+		Serial.println("Failed to open directory");
+		return;
+	}
+	if(!root.isDirectory()){
+		Serial.println("Not a directory");
+		return;
+	}
 
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
-            }
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
-        }
-        file = root.openNextFile();
-    }
+	File file = root.openNextFile();
+	while(file){
+		if(file.isDirectory()){
+			Serial.print("  DIR : ");
+			Serial.println(file.name());
+			if(levels){
+				listDir(fs, file.name(), levels -1);
+			}
+		} else {
+			Serial.print("  FILE: ");
+			Serial.print(file.name());
+			Serial.print("  SIZE: ");
+			Serial.println(file.size());
+		}
+		file = root.openNextFile();
+	}
+
 }
+
 
 void mSDCard::createDir(fs::FS &fs, const char * path){
     Serial.printf("Creating Dir: %s\n", path);
@@ -148,15 +150,23 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
   {
     case FILE_STATUS_OPENING_ID:
 
-      sprintf(writer_settings.file_name, "/%s.txt", "TestWriter");
+// add option to use GPS time instead of NTP time, where it updates every second inside gps
+
+			sprintf(writer_settings.file_name, "/%s_%02d%02d%02d_%03d.txt", // Unique name each time it is opened
+				"APPEND", 
+				pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second, 
+				random(1,1000)
+			);
 
       stored_file = SD.open(writer_settings.file_name, FILE_APPEND);
       if(!stored_file){
-        AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" did not open"),writer_settings.file_name);
-      }
-      AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Opened!"),writer_settings.file_name);
+        AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "stored_file \"%s\" did not open"),writer_settings.file_name);
+      }else{
+	      AddLog(LOG_LEVEL_TEST, PSTR("stored_file \"%s\" Opened!"),writer_settings.file_name);
+      	writer_settings.status = FILE_STATUS_OPENED_ID;
+				sdcard_status.bytes_written_to_file = 0;
+			}
 
-      writer_settings.status = FILE_STATUS_OPENED_ID;
 
     // break;
     case FILE_STATUS_OPENED_ID:
@@ -165,6 +175,7 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
       {
         stored_file.write(buffer[i]);
       }
+			sdcard_status.bytes_written_to_file += buflen;
 
     break;
     case FILE_STATUS_CLOSING_ID:

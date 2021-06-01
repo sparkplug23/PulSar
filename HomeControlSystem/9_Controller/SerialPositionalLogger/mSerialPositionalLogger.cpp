@@ -50,7 +50,9 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
       // CommandSet_SDCard_OpenClose_Toggle();
-      CommandSet_LoggingState(2);
+      // CommandSet_LoggingState(2);
+      pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
+      sequence_test = 0;
     break;
     /************
      * COMMANDS SECTION * 
@@ -131,6 +133,10 @@ void mSerialPositionalLogger::Init(void)
 void mSerialPositionalLogger::EveryLoop()
 {
 
+  if(mTime::TimeReached(&tSaved_MillisWrite, 10))
+  {
+    SubTask_HandleSDCardLogging();
+  }
 
 }
 
@@ -141,7 +147,7 @@ void mSerialPositionalLogger::EverySecond()
 
   SubTask_UpdateOLED();
 
-  SubTask_HandleSDCardLogging();
+  // SubTask_HandleSDCardLogging();
 
   // SubTask_Debug_BasicFileWriteTest();
 
@@ -157,31 +163,6 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 {
   #ifdef USE_MODULE_DRIVERS_SDCARD
 
-  // If desired card state has changed, then change the card mode needed
-  
-  // Check if desired SD card status change and update saved variable
-  if(sdcard_status.enable_logging != enable_logging_previous_state)
-  {
-    AddLog(LOG_LEVEL_TEST, PSTR("sdcard_status.enable_logging CHANGED =%d"), sdcard_status.enable_logging);
-    enable_logging_previous_state = sdcard_status.enable_logging;
-    // If opened, close
-    if(sdcard_status.isopened)
-    {
-      pCONT_sdcard->writer_settings.status = mSDCard::FILE_STATUS_CLOSING_ID;
-      pCONT_sdcard->SubTask_Append_To_Open_File();
-    }
-    else
-    {
-      pCONT_sdcard->writer_settings.status = mSDCard::FILE_STATUS_OPENING_ID;
-      pCONT_sdcard->SubTask_Append_To_Open_File();
-    }
-  }
-
-  /**
-   * Write to card
-   * */
-  // If more superframe data
-
   #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
   if(sdcard_status.isopened)
   {
@@ -195,29 +176,20 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
   #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
 
   #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
-  if(sdcard_status.isopened)
+  if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
   {
 
-    // char timectr[30];
-    // snprintf(timectr, sizeof(timectr), "%s\n", pCONT_time->RtcTime.hhmmss_ctr);
-
-    // appendFile_open_and_close(SD, "/time_test.txt", timectr);
-    // readFile(SD, "/time_test.txt");
-
     ConstructJSON_SDCardSuperFrame();
-    AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+    
+    if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+    {
+      AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+    }
 
     pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
   }
   #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
-
-
-
-  // if(sdcard_status.enable_logging)
-  // {
-    // AddLog(LOG_LEVEL_TEST, PSTR("sdcard_status.enable_logging=%d"), sdcard_status.enable_logging);
-  // }
 
   #endif // USE_MODULE_DRIVERS_SDCARD
 
@@ -347,7 +319,14 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
   //[ ] //Also show lat/long so I know its working
   //[] packets received on serialRSS in thousands
 
-  snprintf(buffer, sizeof(buffer), "%s",sdcard_status.isopened?"Open":"CLOSED");
+
+
+
+  snprintf(buffer, sizeof(buffer), "%c%s%s",
+    pCONT_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
+    pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID ?"Open":"CLOSED",
+    &pCONT_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
+  );
   pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
 
   snprintf(buffer, sizeof(buffer), "%s %s","Op",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
@@ -392,14 +371,47 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     // RSS data from ringbuffer1, the arrival of X bytes into this buffer should trigger a write to the SD card.
     // This means, no exact SF is needed, but every RSS within it will have a gps position attached to it.
 
+    #ifdef ENABLE_DEVFEATURE_DUMMY_RSS_DATA
+    // JBI->Add("SF", "AABBCCDDEEFF");
+
+    char rss_single_frame[40];
+
+    // This will be pure UART_RSS Stream, triggered on GPIO pulse from pic32 interrupt
+    BufferWriterI->Append("\"SF\":[\"");
+    for(int i=0;i<10;i++)
+    {
+      
+      snprintf(rss_single_frame, sizeof(rss_single_frame), 
+        "%02d" // Frame
+        "%02d" // Tx
+        "%02d" // Rx
+        "%02d" // RSS_2400
+        "%02d" // RSS_5800
+        ,
+        i,
+        2,
+        3,
+        1000,
+        2000
+      );
+
+      BufferWriterI->Append(rss_single_frame);
+    }
+    BufferWriterI->Append("\"]");
+
+    #endif // ENABLE_DEVFEATURE_DUMMY_RSS_DATA
+
+
     // JBI->Array_Start("SF");
     //   for(int i=0; i<10; i++) //or byte packing? this would save 1 comma per sample, worth it!
     //     JBI->Add(i);
     // JBI->Array_End();
 
+    JBI->Add("SQ",sequence_test++);
+    JBI->Add("MS",millis());
+
     JBI->Add("Uptime", pCONT_time->RtcTime.hhmmss_ctr); //millis?
 
-    JBI->Add("SF", "AABBCCDDEEFF");
 
     // GPS data
     #ifdef USE_MODULE_DRIVERS_GPS

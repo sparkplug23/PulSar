@@ -44,16 +44,16 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
 // //         ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
 
 // //         delay(1000);
-// // Serial2.println("921600 Working");
-// // Serial2.flush();
-// // Serial2.end();
+// // Serial1.println("921600 Working");
+// // Serial1.flush();
+// // Serial1.end();
 // // pinMode(17, OUTPUT);
 // // digitalWrite(17, HIGH);
 // // delay(1000);
 
 
         
-// // Serial2.begin(115200);
+// // Serial1.begin(115200);
 
 //         // Turn on the exact UBX messages I need
 //         // send_UBX_enable_messages();
@@ -77,7 +77,7 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
         // EveryLoop_InputMethod_PollingSerial_Internal();
         // EveryLoop_InputMethod_PollingSerial_Bytes();
         // EveryLoop_InputMethod_PollingSerial_BytesToBuffer();
-        EveryLoop_PollForGPSData(Serial2);
+        EveryLoop_PollForGPSData(Serial1);
         EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
       #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
@@ -85,7 +85,7 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
       #ifdef USE_MODULE_DRIVERS_SERIAL_UART
 
       BufferWriterI->Clear();
-      uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(2, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+      uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
       // if(strlen(BufferWriterI->GetPtr())==0){
       //   // AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
       //   AddLog(LOG_LEVEL_TEST, PSTR("GPS >> [%d]"), bytes_in_line);
@@ -192,10 +192,10 @@ void mGPS::pre_init(){
   nmea_parser = new NMEAGPS(); 
   // #endif
   #ifdef ENABLE_GPS_PARSER_UBX
-  ubx_parser = new ubloxGPS(&Serial2); 
+  ubx_parser = new ubloxGPS(&Serial1); 
   #endif
 
-  // gps = new MyGPS(&Serial2);
+  // gps = new MyGPS(&Serial1);
 
 }
 
@@ -332,20 +332,20 @@ DEBUG_LINE_HERE;
 
 
 
-Serial2.begin(921600);
-Serial2.println("921600 Working");
-Serial2.flush();
-Serial2.end();
+Serial1.begin(921600);
+Serial1.println("921600 Working");
+Serial1.flush();
+Serial1.end();
 pinMode(17, OUTPUT);
 digitalWrite(17, HIGH);
 delay(1000);
 
 DEBUG_LINE_HERE;
 
-Serial2.begin(9600);
-Serial2.println("9600 Working");
-Serial2.flush();
-Serial2.end();
+Serial1.begin(9600);
+Serial1.println("9600 Working");
+Serial1.flush();
+Serial1.end();
 pinMode(17, OUTPUT);
 digitalWrite(17, HIGH);
 delay(1000);
@@ -402,7 +402,7 @@ delay(4000);
   // gpsPort.begin(9600);
   // while(gpsPort.available()) gpsPort.read(); 
 
-  // // Serial2.begin(921600); 
+  // // Serial1.begin(921600); 
 
 
 
@@ -470,11 +470,11 @@ delay(4000);
   // while (!gpsPort){};
 
   
-Serial2.begin(9600);
+Serial1.begin(9600);
 delay(4000);
 // while(1)
-Serial2.println("115200 Working");
-Serial2.flush();
+Serial1.println("115200 Working");
+Serial1.flush();
 
 DEBUG_HOLD_POINT;
 
@@ -494,7 +494,7 @@ DEBUG_HOLD_POINT;
   // gpsPort.flush();
   // gpsPort.end();
 
-Serial2.end();
+Serial1.end();
 pinMode(17, OUTPUT);
 digitalWrite(17, HIGH);
 delay(1000);
@@ -506,12 +506,12 @@ delay(1000);
   
 
   DEBUG_LINE_HERE;
-Serial2.begin(9600);
+Serial1.begin(9600);
   DEBUG_LINE_HERE;
-Serial2.println("9600 Working");
+Serial1.println("9600 Working");
   DEBUG_LINE_HERE;
 
-  // Serial2.begin(921600); 
+  // Serial1.begin(921600); 
 
 
 
@@ -531,8 +531,8 @@ Serial2.println("9600 Working");
   // gpsPort.end();
 
 
-// Serial2.flush();
-// Serial2.end();
+// Serial1.flush();
+// Serial1.end();
 // pinMode(17, OUTPUT);
 // digitalWrite(17, HIGH);
 // delay(1000);
@@ -569,10 +569,10 @@ Serial2.println("9600 Working");
 // DEBUG_LINE_HERE;
 
 
-Serial2.begin(115200);
-Serial2.println("115200 Working");
-Serial2.flush();
-// Serial2.end();
+Serial1.begin(115200);
+Serial1.println("115200 Working");
+Serial1.flush();
+// Serial1.end();
 // pinMode(17, OUTPUT);
 // digitalWrite(17, HIGH);
 // delay(1000);
@@ -627,17 +627,17 @@ Serial2.flush();
   
 
   DEBUG_LINE_HERE;
-Serial2.begin(9600);
+Serial1.begin(9600);
   DEBUG_LINE_HERE;
-Serial2.println("9600 Working");
+Serial1.println("9600 Working");
   DEBUG_LINE_HERE;
-Serial2.flush();
-Serial2.end();
+Serial1.flush();
+Serial1.end();
 pinMode(17, OUTPUT);
 digitalWrite(17, HIGH);
 delay(1000);
 
-  // Serial2.begin(921600); 
+  // Serial1.begin(921600); 
 
 
 
@@ -693,20 +693,20 @@ for(int i=0;i<ARRAY_SIZE(baud_list);i++)
 
   AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d"), baud_list[i]);
 
-  Serial2.begin(baud_list[i]);
-  while(!Serial2);
+  Serial1.begin(baud_list[i], 18, 19);
+  while(!Serial1);
 
   // ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
   ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
   
-  Serial2.flush();
-  Serial2.end();
+  Serial1.flush();
+  Serial1.end();
   // digitalWrite(17, HIGH);
 
 }
 
-Serial2.begin(9600);
-while(!Serial2);
+Serial1.begin(9600, 18, 19);
+while(!Serial1);
 
 /**
  * Disable unwanted signals
@@ -728,10 +728,10 @@ enableUBX();
  * Continue at desired speed
  * */
 ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
-Serial2.flush();
-Serial2.end();
-Serial2.begin(115200);
-while(!Serial2);
+Serial1.flush();
+Serial1.end();
+Serial1.begin(115200, 18, 19);
+while(!Serial1);
 
 /**
  * Set the rate
@@ -774,11 +774,11 @@ sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
 //   // while (!gpsPort){};
 
   
-// Serial2.begin(9600);
+// Serial1.begin(9600);
 // // delay(4000);
 // // // while(1)
-// // Serial2.println("115200 Working");
-// // Serial2.flush();
+// // Serial1.println("115200 Working");
+// // Serial1.flush();
 
 // // DEBUG_HOLD_POINT;
 
@@ -799,7 +799,7 @@ sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
 //   // gpsPort.flush();
 //   // gpsPort.end();
 
-// // Serial2.end();
+// // Serial1.end();
 // // pinMode(17, OUTPUT);
 // // digitalWrite(17, HIGH);
 // // delay(1000);
@@ -811,12 +811,12 @@ sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
   
 
 // //   DEBUG_LINE_HERE;
-// // Serial2.begin(9600);
+// // Serial1.begin(9600);
 // //   DEBUG_LINE_HERE;
-// // Serial2.println("9600 Working");
+// // Serial1.println("9600 Working");
 // //   DEBUG_LINE_HERE;
 
-// //   // Serial2.begin(921600); 
+// //   // Serial1.begin(921600); 
 
 
 
@@ -836,8 +836,8 @@ sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
 // //   // gpsPort.end();
 
 
-// // Serial2.flush();
-// // Serial2.end();
+// // Serial1.flush();
+// // Serial1.end();
 // // pinMode(17, OUTPUT);
 // // digitalWrite(17, HIGH);
 // // delay(1000);
@@ -904,7 +904,7 @@ sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
   // DEBUG_LINE_HERE;
 #endif // ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW
   // 
-  //   Serial2.setDebugOutput(true);
+  //   Serial1.setDebugOutput(true);
   //     gpsPort.begin(9600); 
   // // Make sure if its on 9600 baud to switch to 921600
 

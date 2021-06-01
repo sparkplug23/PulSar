@@ -31,6 +31,8 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP:{
 
+      EveryLoop_Handle_Appending_File_Method();
+
       // EveryLoop_RingBuffers_To_SDCard
 
         // if(debug.bytes_to_write == 0)
@@ -136,6 +138,46 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 } // END Tasker
 
 
+/**
+ * @brief - Function will handle if the file should be opened or closed
+ * 
+ * */
+void mSDCard::EveryLoop_Handle_Appending_File_Method()
+{
+
+  // Check if desired SD card status change and update saved variable
+  if(sdcard_status.isopened != sdcard_status.isopened_previous_state)
+  {
+
+    // If not init, retry init, but ignore press to start
+    if(sdcard_status.init_error_on_boot == true)
+    {
+      init();
+      // If still failed, then reject opening file
+      if(sdcard_status.init_error_on_boot == true)
+      {
+        return;
+      }
+    }
+
+    AddLog(LOG_LEVEL_TEST, PSTR("sdcard_status.isopened CHANGED =%d"), sdcard_status.isopened);
+    sdcard_status.isopened_previous_state = sdcard_status.isopened;
+    // If opened, close
+    if(sdcard_status.isopened)
+    {
+      writer_settings.status = mSDCard::FILE_STATUS_CLOSING_ID;
+      SubTask_Append_To_Open_File();
+    }
+    else
+    {
+      writer_settings.status = mSDCard::FILE_STATUS_OPENING_ID;
+      SubTask_Append_To_Open_File();
+    }
+  }
+
+}
+
+
 void mSDCard::init(void)
 {
 
@@ -162,14 +204,16 @@ void mSDCard::init(void)
 // }
 
   if(!SD.begin( SD_CS,spiSD )){
-      Serial.println("Card Mount Failed");
-      delay(3000);
-      return;
+    Serial.println("Card Mount Failed");
+    sdcard_status.init_error_on_boot = true;
+    delay(3000);
+    return;
   }
   uint8_t cardType = SD.cardType();
 
   if(cardType == CARD_NONE){
       Serial.println("No SD card attached");
+    sdcard_status.init_error_on_boot = true;
       return;
   }
 
@@ -201,6 +245,9 @@ void mSDCard::init(void)
   // testFileIO(SD, "/test.txt");
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+
+  // Success, no failure
+  sdcard_status.init_error_on_boot = false;
 
 }
 

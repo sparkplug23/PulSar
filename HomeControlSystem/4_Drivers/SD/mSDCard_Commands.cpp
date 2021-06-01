@@ -90,6 +90,37 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
 
 
 
+void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
+{
+
+  if(state == 2) //toggle
+  {
+    sdcard_status.isopened ^= 1; 
+    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.isopened == 2, %d"),sdcard_status.isopened);
+
+  }else
+  {
+    sdcard_status.isopened = state;
+    AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.isopened = state,  %d"),sdcard_status.isopened);
+
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** CommandSet_ReadFile *****************************************************************************************

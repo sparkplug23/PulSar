@@ -346,10 +346,11 @@ bool ubloxGPS::wait_for_ack()
       sent = ms;
       run();
     }
-  } while ((idle_time < 300) && ((removed_idle_time+idle_time) < 1000));
+  // } while ((idle_time < 300) && ((removed_idle_time+idle_time) < 1000));
+  } while ((idle_time < 100) && ((removed_idle_time+idle_time) < 200));
 
-  Serial.print( F("! -") );
-  Serial.println( removed_idle_time );
+  // Serial.print( F("! -") );
+  // Serial.println( removed_idle_time );
 
   return false;
 

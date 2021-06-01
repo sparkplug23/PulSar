@@ -13,7 +13,7 @@
 #define NMEAGPS_DERIVED_TYPES
 #define NMEAGPS_PARSE_PROPRIETARY
 #ifdef USE_DEVFEATURE_GPS_POLLING_INPUT
-#define gpsPort Serial2
+#define gpsPort Serial1
 #endif // USE_DEVFEATURE_GPS_POLLING_INPUT
 
 #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"

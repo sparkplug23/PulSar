@@ -97,7 +97,7 @@ void StartISR_RingBuffers();
      * UART1
      * 
      * */
-    #define RINGBUFFER_HANDLE_1_LENGTH 100
+    #define RINGBUFFER_HANDLE_1_LENGTH 1000
     void  init_UART1_RingBuffer();
     void  init_UART1_pins();
     void  init_UART1_ISR();

@@ -855,7 +855,7 @@ gpio_pad_select_gpio(BLINK_GPIO);
 // 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE
 // 	};
 
-//   Serial2.begin(115200);
+//   Serial1.begin(115200);
 
 
 
@@ -951,8 +951,8 @@ void init_UART1(){
 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE
 	};
 
-  // Serial2.begin(115200);
-  // Serial2.println("115200this");
+  // Serial1.begin(115200);
+  // Serial1.println("115200this");
 
   //PORT 0 for debug
   ESP_ERROR_CHECK(uart_param_config(UART_NUM_1, &uart_config));
@@ -1000,8 +1000,8 @@ void init_UART2(){
 		.flow_ctrl = UART_HW_FLOWCTRL_DISABLE
 	};
 
-  // Serial2.begin(115200);
-  // Serial2.println("115200this");
+  // Serial1.begin(115200);
+  // Serial1.println("115200this");
 
   //PORT 0 for debug
   ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));

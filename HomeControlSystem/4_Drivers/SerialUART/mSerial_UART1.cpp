@@ -52,6 +52,8 @@ void mSerialUART::init_UART1_ISR(){
   // If serial2 has already been activated by a library, disable it first so the new driver can attach
   Serial1.end();  
 
+  init_UART1_pins(); //reassert new baud
+
   // Install UART driver, and get the queue.
   ESP_ERROR_CHECK(
     uart_driver_install(
