@@ -34,7 +34,7 @@ class mUpdates :
     #endif
 
     void init(void);
-    void pre_init();
+    void Pre_Init();
 
     void parse_JSONCommand(JsonParserObject obj);
     

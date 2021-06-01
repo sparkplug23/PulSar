@@ -346,8 +346,8 @@ bool ubloxGPS::wait_for_ack()
       sent = ms;
       run();
     }
-  // } while ((idle_time < 300) && ((removed_idle_time+idle_time) < 1000));
-  } while ((idle_time < 100) && ((removed_idle_time+idle_time) < 200));
+  } while ((idle_time < 300) && ((removed_idle_time+idle_time) < 1000));
+  // } while ((idle_time < 100) && ((removed_idle_time+idle_time) < 200));
 
   // Serial.print( F("! -") );
   // Serial.println( removed_idle_time );
@@ -361,7 +361,7 @@ bool ubloxGPS::wait_for_ack()
 void ubloxGPS::write( const msg_t & msg )
 {
 
-Serial.print("ubloxGPS::write");
+// Serial.print("ubloxGPS::write");
 
   m_device->print( (char) SYNC_1 );
   m_device->print( (char) SYNC_2 );
@@ -380,7 +380,7 @@ Serial.print("ubloxGPS::write");
   sent.msg_id    = msg.msg_id;
 // Serial << F("::write ") << msg.msg_class << F("/") << msg.msg_id << endl;
 
-Serial.println("\t written");
+// Serial.println("\t written");
 
 }
 
@@ -428,7 +428,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 {
   // Serial << F("::send - ") << (uint8_t) msg.msg_class << F(" ") << (uint8_t) msg.msg_id << F(" ");
 
-  Serial.println("ubloxGPS::send");
+  // Serial.println("ubloxGPS::send");
   bool ok = true;
 
   write( msg );
@@ -462,7 +462,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
     #endif
   }
 
-  Serial.printf("ubloxGPS::ok %d\n\r",ok);
+  // Serial.printf("ubloxGPS::ok %d\n\r",ok);
   return ok;
 
 } // send
@@ -471,6 +471,7 @@ bool ubloxGPS::send( const msg_t & msg, msg_t *reply_msg )
 
 bool ubloxGPS::send_P( const msg_t & msg, msg_t *reply_msg )
 {
+  Serial.printf("Invalid command?\n\r");
     return false;
 
 } // send_P
@@ -984,10 +985,10 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
             #endif
           }
           
-//           if(chrCount==7)
-//           {
-// // Serial.printf("ubloxGPS::parseNavPosLLH  case 7: =%d\n\r",m_fix.location._lon);
-//           }
+          if(chrCount==7)
+          {
+Serial.printf("parseNavPosLLH  case 7: =%d\n\r",m_fix.location._lon);
+          }
 
           break;
         case 8: case 9: case 10: case 11:

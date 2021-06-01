@@ -34,7 +34,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function, JsonParserObject obj){ //Serial.pr
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      // pre_init();  
+      // Pre_Init();  
       break;
     case FUNC_INIT:
       init();

@@ -1031,7 +1031,7 @@ void mCameraOV2640::init(void)
 
 }
 
-void mCameraOV2640::pre_init(){
+void mCameraOV2640::Pre_Init(){
   
 // void WcInit(void) {
   // if (!pCONT_set->Settings.webcam_config.data) {
@@ -1045,7 +1045,7 @@ void mCameraOV2640::pre_init(){
   // }
 // }
 
-AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::pre_init"));
+AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::Pre_Init"));
 
 }
 
@@ -1858,7 +1858,7 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();

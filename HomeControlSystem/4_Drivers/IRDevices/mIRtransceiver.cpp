@@ -2,9 +2,9 @@
 
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
 
-void mIRtransceiver::pre_init(void){
+void mIRtransceiver::Pre_Init(void){
 
-  // AddLog(LOG_LEVEL_INFO,PSTR("pre_init pCONT_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_pins->GetPin(GPIO_IRSEND]);
+  // AddLog(LOG_LEVEL_INFO,PSTR("Pre_Init pCONT_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),pCONT_pins->GetPin(GPIO_IRSEND]);
 
   if (pCONT_pins->GetPin(GPIO_IRSEND_ID] < 99) {  // not set when 255
     pin = pCONT_pins->GetPin(GPIO_IRSEND_ID];
@@ -64,7 +64,7 @@ int8_t mIRtransceiver::Tasker(uint8_t func){
 
   switch(func){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       //init();

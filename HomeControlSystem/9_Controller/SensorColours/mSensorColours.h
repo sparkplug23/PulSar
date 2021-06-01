@@ -51,7 +51,7 @@ int8_t Tasker_Web(uint8_t function);
   uint8_t encoded_gradient_temp_array[200];
 
 void init();
-void pre_init();
+void Pre_Init();
 
 struct SETTINGS{
   uint8_t fEnableModule = false;

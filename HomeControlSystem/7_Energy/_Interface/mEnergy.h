@@ -43,7 +43,7 @@ class mEnergyInterface :
   public:
     mEnergyInterface(){};
     void Init(void);
-    void pre_init(void);
+    void Pre_Init(void);
     //#define D_MODULE_TOPIC_NAME "energy"
 
     static const char* PM_MODULE_ENERGY_INTERFACE_CTR;

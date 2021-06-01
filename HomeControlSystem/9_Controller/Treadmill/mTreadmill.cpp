@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_CONTROLLER_TREADMILL
 
 
-void mTreadmill::pre_init(){
+void mTreadmill::Pre_Init(){
   
   // #ifndef ENABLE_DEVFEATURE_FANTYPE_IFAN03
   // if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
@@ -25,7 +25,7 @@ int8_t mTreadmill::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     // init();

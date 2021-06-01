@@ -24,7 +24,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();  
+      Pre_Init();  
       break;
     case FUNC_INIT:
       init();
@@ -124,7 +124,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-void mAnimatorLight::pre_init(void){ 
+void mAnimatorLight::Pre_Init(void){ 
   
   // Allow runtime changes of animation size
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX; 

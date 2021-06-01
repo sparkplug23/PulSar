@@ -16,7 +16,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();
@@ -252,7 +252,7 @@ void mSDCard::init(void)
 }
 
 
-void mSDCard::pre_init(){
+void mSDCard::Pre_Init(){
 
 //change this into the fan module
 //   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255

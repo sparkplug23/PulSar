@@ -32,7 +32,7 @@ void mShellyDimmer::init(void)
 
 }
 
-void mShellyDimmer::pre_init(){
+void mShellyDimmer::Pre_Init(){
 
   if (
     pCONT_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0_ID) && 
@@ -80,7 +80,7 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();

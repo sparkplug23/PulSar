@@ -47,7 +47,7 @@ uint16_t test_val = 0;
 uint8_t dir = 0;
 
 void init();
-void pre_init();
+void Pre_Init();
 int8_t pin = -1;
 
 struct SETTINGS{

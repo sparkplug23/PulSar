@@ -17,7 +17,7 @@ class mLEDs {
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
     void init(void);
-    void pre_init(void);
+    void Pre_Init(void);
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;

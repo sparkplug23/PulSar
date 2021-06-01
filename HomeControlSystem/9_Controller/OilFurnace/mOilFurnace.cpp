@@ -290,7 +290,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    //pre_init();
+    //Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();

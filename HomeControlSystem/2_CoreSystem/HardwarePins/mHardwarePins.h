@@ -137,7 +137,7 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
     void TemplateJson();
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void pre_init(void);
+    void Pre_Init(void);
 
 
 

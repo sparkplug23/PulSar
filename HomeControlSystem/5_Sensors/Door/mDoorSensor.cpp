@@ -9,7 +9,7 @@ const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_
 
 
 
-void mDoorSensor::pre_init(void){
+void mDoorSensor::Pre_Init(void){
   
   settings.fEnableSensor = false;
 
@@ -55,7 +55,7 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj){
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();

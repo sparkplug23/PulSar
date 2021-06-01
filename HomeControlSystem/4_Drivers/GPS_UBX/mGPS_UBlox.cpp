@@ -90,6 +90,19 @@ void mGPS::enableUBX()
   ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
 }
 
+uint8_t mGPS::enableUBX_RequiredOnlyFor3DTracking()
+{
+  bool messages_confirmed_as_enabled_by_readback = false;
+  messages_confirmed_as_enabled_by_readback += ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
+  messages_confirmed_as_enabled_by_readback += ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC );
+  messages_confirmed_as_enabled_by_readback += ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED );
+  messages_confirmed_as_enabled_by_readback += ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH );
+  messages_confirmed_as_enabled_by_readback += ubx_parser->enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
+  return messages_confirmed_as_enabled_by_readback;
+}
+
+
+
 
 
 void mGPS::sendUBX( const unsigned char *progmemBytes, size_t len )

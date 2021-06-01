@@ -41,7 +41,7 @@ class mRelays :
     };
     #endif
     
-    void pre_init(void);
+    void Pre_Init(void);
 
 
     typedef union {

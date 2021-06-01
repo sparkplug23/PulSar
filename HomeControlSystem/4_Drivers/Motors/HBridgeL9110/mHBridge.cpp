@@ -2,7 +2,7 @@
 #include "mHBridge.h"
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
 
-void mHBridge::pre_init(void){
+void mHBridge::Pre_Init(void){
 
   init_success = true; 
 
@@ -73,7 +73,7 @@ int8_t mHBridge::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();

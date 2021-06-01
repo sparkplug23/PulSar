@@ -13,7 +13,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();
@@ -96,7 +96,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
-void mNextionPanel::pre_init(void){
+void mNextionPanel::Pre_Init(void){
  
   // if (mcl->mset->pin[GPIO_SR04_TRIG] < 99) {  // not set when 255
   //   pin_rx = mcl->mset->pin[GPIO_SR04_TRIG];
@@ -124,7 +124,7 @@ void mNextionPanel::pre_init(void){
     // swSer->begin(NEXTION_BAUD);
   // }
   
-  Serial.println("DONE::pre_init");
+  Serial.println("DONE::Pre_Init");
   Serial.flush();
 }
 

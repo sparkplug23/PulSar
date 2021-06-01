@@ -28,7 +28,7 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
-// void mHVAC::pre_init(void){
+// void mHVAC::Pre_Init(void){
 
 //   //init_success = true; // Begins true, anything bad sets to false
 

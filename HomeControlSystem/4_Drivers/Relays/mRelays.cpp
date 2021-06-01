@@ -33,7 +33,7 @@ Relay Name:    ontime, offtime, timeon, last controlled by//
 */
 
 
-void mRelays::pre_init(void){
+void mRelays::Pre_Init(void){
   
   settings.fEnableSensor = false;
    //LEDS
@@ -210,7 +210,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();

@@ -235,7 +235,7 @@ void mPWM::init(void)
 //   // }
 // }
 
-void mPWM::pre_init(){
+void mPWM::Pre_Init(){
 
 //change this into the fan module
   if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
@@ -259,7 +259,7 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();

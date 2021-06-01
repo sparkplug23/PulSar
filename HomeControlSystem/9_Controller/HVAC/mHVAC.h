@@ -265,7 +265,7 @@ class mHVAC :
     }zone[MAX_ZONES];
 
 
-    void pre_init(void);
+    void Pre_Init(void);
     void init(void);    
     
     struct SETTINGS{

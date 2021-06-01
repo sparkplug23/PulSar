@@ -43,8 +43,10 @@ void hw_wdt_enable(){
 #ifndef ENABLE_DEVFEATURE_BASIC_NEOPIXEL_TEST
 void setup(void)
 { 
+#ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
   // hw_wdt_disable();
-  //hw_wdt_enable();
+  hw_wdt_enable();
+  #endif
     
   #ifndef USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
   #ifdef ESP32

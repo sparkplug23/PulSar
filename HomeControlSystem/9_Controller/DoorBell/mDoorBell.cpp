@@ -7,7 +7,7 @@ const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_D
 const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR = D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR;
 
 
-void mDoorBell::pre_init(void){
+void mDoorBell::Pre_Init(void){
 
 
 //These should configure the relay and switch input indirectly, never used pinmode studd here
@@ -119,7 +119,7 @@ int8_t mDoorBell::Tasker(uint8_t function, JsonParserObject obj){
   
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();

@@ -23,8 +23,19 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT: 
       Init(); 
     break;
-    case FUNC_UPTIME_30_SECONDS: 
+    /**
+     * Special case, I want to loop and init this when another modules says
+     * */
+    case FUNC_LOOP:
+    
+     if(flag_init_buffers_and_start_isrs && !settings.fEnableModule)
+     {       
       StartISR_RingBuffers(); 
+     }
+
+    // case FUNC_UPTIME_10_SECONDS: 
+    // case FUNC_UPTIME_30_SECONDS: 
+    //   StartISR_RingBuffers(); 
     break;
   }
 
@@ -296,7 +307,7 @@ uint16_t mSerialUART::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, 
     // Read from buffer
     memcpy(buffer,item,item_size);
 
-    AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+    //AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
 
     // if(flag_clear_buffer_after_read)
     // {

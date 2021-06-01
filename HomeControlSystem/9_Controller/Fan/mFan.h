@@ -50,7 +50,7 @@ bool ifan_restart_flag = true;
 
 
 void init();
-void pre_init();
+void Pre_Init();
 
 int8_t pin = -1;
 

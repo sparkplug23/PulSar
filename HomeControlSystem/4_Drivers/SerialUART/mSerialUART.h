@@ -91,13 +91,15 @@ void StartISR_RingBuffers();
 
     // void IRAM_ATTR uart_intr_handle_u2(void *arg);
 
+    uint8_t flag_init_buffers_and_start_isrs = false;
+
     uint16_t GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint16_t buflen, char optional_read_until_char = 0, bool flag_clear_buffer_after_read = true);
 
     /***
      * UART1
      * 
      * */
-    #define RINGBUFFER_HANDLE_1_LENGTH 1000
+    #define RINGBUFFER_HANDLE_1_LENGTH 5000
     void  init_UART1_RingBuffer();
     void  init_UART1_pins();
     void  init_UART1_ISR();
@@ -105,12 +107,13 @@ void StartISR_RingBuffers();
     uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
     // Register to collect data length
     uint16_t urxlen1 = 0;
+//R288132N @ 1000
 
     /***
      * UART2
      * 
      * */
-    #define RINGBUFFER_HANDLE_2_LENGTH 1000
+    #define RINGBUFFER_HANDLE_2_LENGTH 5000
     void  init_UART2_RingBuffer();
     void  init_UART2_pins();
     void  init_UART2_ISR();

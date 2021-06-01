@@ -25,7 +25,7 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_EVERY_MINUTE:
       //ModuleSettings_ShowTemplateLog();
@@ -44,7 +44,7 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
 void mHardwarePins::parse_JSONCommand(JsonParserObject obj){}
 
 
-void mHardwarePins::pre_init(){
+void mHardwarePins::Pre_Init(){
 
   #ifdef DEBUG_PIN1_GPIO
     DEBUG_PIN1_INIT();
@@ -462,7 +462,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
     if(strcmp(c,buffer)==0)
     {
       pin = gpio_pin_by_index[i];
-      AddLog(LOG_LEVEL_INFO, PSTR("matched pin %d %d"),pin,i);
+      AddLog(LOG_LEVEL_DEBUG, PSTR("matched pin %d %d"),pin,i);
       break;
     }else{
 

@@ -29,7 +29,7 @@ class mIRtransceiver {//}: public IRsendRaw {
   public:
     mIRtransceiver(){};
     void init(void);
-    void pre_init(void);
+    void Pre_Init(void);
     
     int8_t pin = -1;
 

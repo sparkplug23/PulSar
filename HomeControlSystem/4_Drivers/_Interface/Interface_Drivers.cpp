@@ -25,7 +25,7 @@
 //  **********************************************************************************************************************************************************************************/
  
 
-// void mNextionPanel::pre_init(void){
+// void mNextionPanel::Pre_Init(void){
  
 //   // if (mcl->mset->pin[GPIO_SR04_TRIG] < 99) {  // not set when 255
 //   //   pin_rx = mcl->mset->pin[GPIO_SR04_TRIG];
@@ -105,7 +105,7 @@
 
 //   switch(task){
 //     case FUNC_PRE_INIT:
-//       pre_init();
+//       Pre_Init();
 //     break;
 //     case FUNC_INIT:
 //       init();

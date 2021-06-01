@@ -68,12 +68,12 @@ const char baud921600[] PROGMEM = "PUBX,41,1,3,3,921600,0";
 
 const unsigned char ubxRate1Hz[] PROGMEM = 
   { 0x06,0x08,0x06,0x00,0xE8,0x03,0x01,0x00,0x01,0x00 };
-// const unsigned char ubxRate5Hz[] PROGMEM =
-//   { 0x06,0x08,0x06,0x00,200,0x00,0x01,0x00,0x01,0x00 };
+const unsigned char ubxRate5Hz[] PROGMEM =
+  { 0x06,0x08,0x06,0x00,200,0x00,0x01,0x00,0x01,0x00 };
 const unsigned char ubxRate10Hz[] PROGMEM =
   { 0x06,0x08,0x06,0x00,100,0x00,0x01,0x00,0x01,0x00 };
-// const unsigned char ubxRate16Hz[] PROGMEM =
-//   { 0x06,0x08,0x06,0x00,50,0x00,0x01,0x00,0x01,0x00 };
+const unsigned char ubxRate16Hz[] PROGMEM =
+  { 0x06,0x08,0x06,0x00,50,0x00,0x01,0x00,0x01,0x00 };
 
 // // Disable specific NMEA sentences
 // const unsigned char ubxDisableGGA[] PROGMEM =
@@ -243,7 +243,7 @@ class mGPS :
         state NEOGPS_BF(8);
 
         
-const uint32_t COMMAND_DELAY = 250;
+const uint32_t COMMAND_DELAY = 500;
 
 void CommandSend_UBX_Disable_UBXMessages();//uint32_t baud);
 void CommandSend_UBX_Disable_NMEAMessages();//uint32_t baud);
@@ -262,6 +262,9 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void configNMEA( uint8_t rate );
     void disableUBX();
     void enableUBX();
+    uint8_t enableUBX_RequiredOnlyFor3DTracking();
+
+    void Init_UBX_Only_Requires_PowerCycle();
 
     void sendUBX( const unsigned char *progmemBytes, size_t len );
         
@@ -274,7 +277,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
      * */
     GPS_FIX   gps_result_stored;
 
-    uint32_t tSaved_SplashFix = millis();
+    // uint32_t tSaved_SplashFix = millis();
 
 //-----------------------------------------------------------------
 //  Derive a class to add the state machine for starting up:
@@ -292,12 +295,40 @@ void changeBaud( const char *textCommand, unsigned long baud );
     ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
     #endif
 
-    void init();
-    void pre_init();
+    enum GPS_INPUT_STREAM_METHOD_IDS{
+      GPS_INPUT_STREAM_METHOD_POLLING_ID,
+      GPS_INPUT_STREAM_METHOD_RINGBUFFERS_ID,
+      GPS_INPUT_STREAM_METHOD_LENGTH_ID
+    };
+    void ReadGPSStream();
+    void Splash_Latest_Fix(Stream* out);
+    void Handle_Connection_And_Configuration();
+
+    void Init_UBX_Only();
+    void Init_UBX_Only2();
+
+
+
+    void Init();
+    void Pre_Init();
     struct SETTINGS{
       uint8_t fEnableModule = false;
       uint8_t fShowManualSlider = false;
+      uint8_t read_gps_method = GPS_INPUT_STREAM_METHOD_RINGBUFFERS_ID; 
     }settings;
+
+    struct CONNECTION_STATUS{
+      /**
+       * @note Any activity at the expected baud rate
+       * */
+      uint32_t last_message_received_time = 0;
+      /**
+       * @note Parsed and valid messages on the expected baud, valid fix not required
+       * */
+      uint32_t last_valid_message_received_time = 0;
+
+
+    }connection_status;
 
     struct RUNTIME_VARS{
       /**
@@ -306,6 +337,8 @@ void changeBaud( const char *textCommand, unsigned long baud );
        * 2 - registers set
        * */
       uint8_t ubx_config_status = 0;
+
+      uint8_t ubx_messages_confirmed_enabled = 0;
     }runtime;
 
     /**

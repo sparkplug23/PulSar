@@ -34,7 +34,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj){
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();
@@ -129,7 +129,7 @@ void mHVAC::Every_Second()
 
 
 
-void mHVAC::pre_init(void){
+void mHVAC::Pre_Init(void){
 
   settings.active_zones = 4;
 

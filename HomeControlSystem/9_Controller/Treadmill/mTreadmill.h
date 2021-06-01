@@ -42,7 +42,7 @@ void EverySecond();
     void parse_JSONCommand(void);
 
 void init();
-void pre_init();
+void Pre_Init();
 
 int8_t pin = -1;
 

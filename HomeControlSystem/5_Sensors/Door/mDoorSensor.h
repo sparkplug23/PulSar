@@ -22,7 +22,7 @@ class mDoorSensor :
 	  mDoorSensor(){};
 
     void init(void);
-    void pre_init(void);
+    void Pre_Init(void);
     
     static const char* PM_MODULE_SENSORS_DOOR_CTR;
     static const char* PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR;

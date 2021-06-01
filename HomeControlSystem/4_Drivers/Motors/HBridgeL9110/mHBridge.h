@@ -51,7 +51,7 @@ class mHBridge{
 //B-1A,B-1B
 
 
-    void pre_init(void);
+    void Pre_Init(void);
     int8_t pin_A_IA = -1;
     int8_t pin_A_IB = -1;
     int8_t pin_B_IA = -1;

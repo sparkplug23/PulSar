@@ -111,7 +111,7 @@ class mShellyDimmer :
 
 
     void init();
-    void pre_init();
+    void Pre_Init();
     int8_t pin = -1;
     struct SETTINGS{
       uint8_t fEnableModule = false;

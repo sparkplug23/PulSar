@@ -103,7 +103,7 @@ enum drivers_type_t{
 //     //#define D_MODULE_TOPIC_NAME "nextion"
 //   public:
 //     mNextionPanel();
-//     void pre_init();
+//     void Pre_Init();
 
 //   //#define USE_NEXTION_SOFTWARE_SERIAL
 

@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_DRIVERS_LEDS
 
 
-void mLEDs::pre_init(void){
+void mLEDs::Pre_Init(void){
   
   settings.fEnableSensor = false;
    //LEDS
@@ -48,7 +48,7 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
-      pre_init();
+      Pre_Init();
     break;
     case FUNC_INIT:
       init();
@@ -440,7 +440,7 @@ void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // }
 
 
-// void mLEDs::pre_init(){
+// void mLEDs::Pre_Init(){
   
 //   if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
 //     pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
@@ -456,7 +456,7 @@ void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //  * INIT SECTION * 
 //   // *******************/
 //   // if(function == FUNC_PRE_INIT){
-//   //   pre_init();
+//   //   Pre_Init();
 //   // }else
 //   // if(function == FUNC_INIT){
 //   //   init();

@@ -37,10 +37,10 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_method){
     JBI->Level_Start("UART2");
       JBI->Add("receive_interrupts_enable", settings.uart2.receive_interrupts_enable);
       
-      JBI->Array_Start("Buffer1");
-        for(int i=0;i<100;i++)
-          JBI->Add(rxbuf2[i]);
-      JBI->Array_End();
+      // JBI->Array_Start("Buffer1");
+      //   for(int i=0;i<100;i++)
+      //     JBI->Add(rxbuf2[i]);
+      // JBI->Array_End();
       
 
     JBI->Level_End();

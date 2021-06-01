@@ -19,7 +19,7 @@ class mDoorBell :
 {
   public:
 	  mDoorBell(){};  
-    void pre_init(void);
+    void Pre_Init(void);
 
     uint8_t BellSwitch_OnOff();
     const char* BellSwitch_OnOff_Ctr();

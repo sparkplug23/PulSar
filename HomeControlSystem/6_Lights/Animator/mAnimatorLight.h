@@ -160,7 +160,7 @@ class mAnimatorLight :
   private:
   public:
     mAnimatorLight(){};
-    void pre_init(void);
+    void Pre_Init(void);
     void init(void);
     
     #ifdef USE_DEBUG_CLASS_SIZE

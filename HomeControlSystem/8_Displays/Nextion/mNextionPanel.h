@@ -68,7 +68,7 @@ class mNextionPanel :
 {
   public:
     mNextionPanel(){};
-    void pre_init();
+    void Pre_Init();
     
     
     static const char* PM_MODULE_DISPLAYS_NEXTION_CTR;

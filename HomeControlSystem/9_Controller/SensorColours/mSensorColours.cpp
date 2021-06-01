@@ -22,7 +22,7 @@ void mSensorColours::init(void)
 }
 
 
-void mSensorColours::pre_init(){
+void mSensorColours::Pre_Init(){
   
   // if(pCONT_pins->PinUsed(GPIO_FAN_PWM1_ID)) {  // not set when 255
   //   pin = pCONT_pins->GetPin(GPIO_FAN_PWM1_ID);
@@ -38,7 +38,7 @@ int8_t mSensorColours::Tasker(uint8_t function, JsonParserObject obj){
    * INIT SECTION * 
   *******************/
   if(function == FUNC_PRE_INIT){
-    pre_init();
+    Pre_Init();
   }else
   if(function == FUNC_INIT){
     init();
