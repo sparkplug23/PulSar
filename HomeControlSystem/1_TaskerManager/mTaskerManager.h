@@ -321,6 +321,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
     EM_MODULE_SENSORS_REMOTE_DEVICE_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+    EM_MODULE_SENSORS_ADC_INTERNAL_ID,
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -360,6 +363,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
+    EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
   EM_MODULE_LENGTH_ID
 };
@@ -592,6 +598,10 @@ enum MODULE_IDS{
   #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
   #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+  #include "5_Sensors/ADCInternal/mADCInternal.h"
+  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+#endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -645,6 +655,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
   #include "9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
   #define pCONT_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_USERMOD_01
+  #include "9_Controller/UserMod_01/mUserMod_01.h"
+  #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
 #endif
 
 #include  "1_TaskerManager/mTaskerInterface.h"

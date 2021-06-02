@@ -53,14 +53,17 @@ class mUserMod_01 :
       uint16_t adc_value = 0;
       uint16_t adc_dir = 0;
       uint32_t tSaved_AdcRampTick = 0;
+      uint32_t tSaved_MeasureTest = 0;
       uint16_t frames_in_super_frame;
       uint8_t tx_num = 0;
+      uint32_t sequencenum = 0;
 
 
 
     }pic32;
 
 
+    char buffer[1000] = {0};
 
     uint8_t set_fan_speed = 0;//0,1,2,3
     uint16_t set_USERMOD_01 = 0;//0,1,2,3

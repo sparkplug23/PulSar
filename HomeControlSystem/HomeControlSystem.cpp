@@ -55,10 +55,9 @@ void setup(void)
   #endif
   #endif
 
+  #ifndef DISABLE_SERIAL0_CORE
   Serial.begin(115200);
-
-
-
+  #endif
   
 // Serial2.begin(115200);
 // while(1)
@@ -183,6 +182,7 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
   #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_
+  // pinMode(21, OUTPUT);
 
 }
 
@@ -223,6 +223,7 @@ void loop(void)
   pCONT_sup->activity.loop_counter++;
   pCONT_sup->loop_start_millis = millis();
   WDT_RESET();
+  
 
   LoopTasker();
     

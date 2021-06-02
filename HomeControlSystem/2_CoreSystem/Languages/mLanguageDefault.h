@@ -214,6 +214,11 @@
   #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR              "mMoistureSensor"
   #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_FRIENDLY_CTR              "moisture"
 //#endif
+
+#define D_MODULE_SENSORS_ADC_INTERNAL_CTR "adc_internal"
+#define D_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR "adc_internal"
+
+
 //#ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #define D_MODULE_SENSORS_PULSECOUNTER_CTR              "mPulseCounter"
   #define D_MODULE_SENSORS_PULSECOUNTER_FRIENDLY_CTR              "pulsecounter"
@@ -276,6 +281,10 @@
 
 #define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR "serial_positional_logger"
 #define D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR "serial_positional_logger"
+
+#define D_MODULE_CONTROLLER_USERMOD_01_CTR "usermod_01"
+#define D_MODULE_CONTROLLER_USERMOD_01_FRIENDLY_CTR  "usermod_01"
+
 
 
 

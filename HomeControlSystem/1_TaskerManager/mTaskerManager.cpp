@@ -340,6 +340,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
     pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID] = new mRemoteDevice();
   #endif
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+    pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID] = new mADCInternal();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
@@ -379,6 +382,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID] = new mSerialPositionalLogger();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
+    pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();
   #endif
 
 };
