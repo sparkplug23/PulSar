@@ -103,7 +103,7 @@ void mSerialUART::init_UART1_ISR(){
  **/
 void IRAM_ATTR UART1_ISR_Static(void *arg)
 { 
-  DEBUG_PIN1_SET(LOW);
+ // DEBUG_PIN1_SET(LOW);
   
   uint16_t rx_fifo_len, status;
   uint16_t i = 0;
@@ -143,7 +143,7 @@ void IRAM_ATTR UART1_ISR_Static(void *arg)
   gpio_set_level(BLINK_GPIO, !gpio_get_level(BLINK_GPIO));
   #endif
 
-  DEBUG_PIN1_SET(HIGH);
+ // DEBUG_PIN1_SET(HIGH);
 }
 
 

@@ -84,7 +84,10 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
   //   // CommandSet_ReadFile(jtok.getStr());
 
   // }
+  
+  #ifdef USE_MODULE_NETWORK_MQTT
   MQTTHandler_Set_fSendNow();
+  #endif// USE_MODULE_NETWORK_MQTT
 
 }
 

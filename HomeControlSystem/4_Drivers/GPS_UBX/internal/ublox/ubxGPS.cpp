@@ -985,10 +985,10 @@ bool ubloxGPS::parseNavPosLLH( uint8_t chr )
             #endif
           }
           
-          if(chrCount==7)
-          {
-Serial.printf("parseNavPosLLH  case 7: =%d\n\r",m_fix.location._lon);
-          }
+//           if(chrCount==7)
+//           {
+// Serial.printf("parseNavPosLLH  case 7: =%d\n\r",m_fix.location._lon);
+//           }
 
           break;
         case 8: case 9: case 10: case 11:

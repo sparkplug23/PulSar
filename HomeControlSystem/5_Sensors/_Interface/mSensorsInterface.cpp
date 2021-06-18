@@ -155,7 +155,9 @@ void mSensorsInterface::EveryLoop()
 void mSensorsInterface::CommandEvent_Motion(uint8_t event_type)
 {
 
+  #ifdef USE_MODULE_NETWORK_MQTT
   mqtthandler_motion_event_ifchanged.flags.SendNow = true;
+  #endif // USE_MODULE_NETWORK_MQTT
 
 }
 
@@ -388,17 +390,8 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-  // uint8_t list_ids[] = {
-  //   MQTT_HANDLER_SETTINGS_ID, 
-  //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-  //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  // };
+  #ifdef USE_MODULE_NETWORK_MQTT
   
-  // struct handler<mSensorsInterface>* list_ptr[] = {
-  //   &mSensorsInterface::mqtthandler_settings_teleperiod,
-  //   &mSensorsInterface::mqtthandler_sensor_ifchanged,
-  //   &mSensorsInterface::mqtthandler_sensor_teleperiod
-  // };
 
 void mSensorsInterface::MQTTHandler_Init(){
 
@@ -492,5 +485,6 @@ void mSensorsInterface::MQTTHandler_Sender(uint8_t id)
   }
 }
 
+  #endif // USE_MODULE_NETWORK_MQTT
 
 #endif

@@ -95,6 +95,10 @@ class mPalette
     void init_ColourPalettes_Holloween_OP();
     void init_ColourPalettes_Holloween_OGP();
     void init_ColourPalettes_Hot_Neon_Pink_With_Navy();
+    void init_ColourPalettes_Flower_SweetPeas_01();
+    void init_ColourPalettes_Flower_SweetPeas_02();
+    void init_ColourPalettes_Pink_Purple_01();
+    void init_ColourPalettes_MicroLEDS_Pastel_01();
     void init_ColourPalettes_Single_Fire_01();
     void init_ColourPalettes_Shelf_Hearts();
     void init_ColourPalettes_Gradient_01();
@@ -278,6 +282,14 @@ class mPalette
     PALETTELIST_STATIC_CUSTOM_USER_01_ID,
     PALETTELIST_STATIC_SINGLE_FIRE_01_ID,
 
+    /**
+     * Patterns for Gazebo
+     * */
+    PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID,
+    PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID,
+    PALETTELIST_STATIC_PINK_PURPLE_01_ID,
+    PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID,
+
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
   };
@@ -353,6 +365,10 @@ class mPalette
       PALETTE holloween_ogp;
       PALETTE hot_pink_neon_with_navy;
       PALETTE single_fire_01;
+      PALETTE flower_sweetpeas_01;
+      PALETTE flower_sweetpeas_02;
+      PALETTE pink_purple_01;
+      PALETTE microleds_pastel_01;
       PALETTE winter;
       PALETTE autumn;
       PALETTE autumn_red;

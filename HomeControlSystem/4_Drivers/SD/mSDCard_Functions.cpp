@@ -146,6 +146,8 @@ void mSDCard::write_append_array(fs::FS &fs, const char * path, uint8_t* buffer,
 
 void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 {
+   // DEBUG_PIN1_SET(0);
+
   switch(writer_settings.status)
   {
     case FILE_STATUS_OPENING_ID:
@@ -175,7 +177,7 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
       {
         stored_file.write(buffer[i]);
       }
-			sdcard_status.bytes_written_to_file += buflen;
+	    sdcard_status.bytes_written_to_file += buflen;
 
     break;
     case FILE_STATUS_CLOSING_ID:
@@ -194,8 +196,29 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
     //close file
   }
 
+  //  DEBUG_PIN1_SET(1);
 
 }
+
+/***
+ * New ringbuffer for stream out to sdcard, every 10ms if there is new sdcard data to write, it will be taken from ringbuffer
+ * 
+ * */
+void mSDCard::Stream_AddToBuffer(char* buffer, uint16_t buflen)
+{
+
+
+
+
+
+
+}
+
+
+
+
+
+
 
 void mSDCard::renameFile(fs::FS &fs, const char * path1, const char * path2){
     Serial.printf("Renaming file %s to %s\n", path1, path2);

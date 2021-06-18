@@ -117,8 +117,10 @@
  *  MQTT
 \*********************************************************************************************/
 
-#define USE_MODULE_NETWORK_MQTT
-#define USE_MQTT
+// #ifndef DISABLE_NETWORK
+// #define USE_MODULE_NETWORK_MQTT
+// #define USE_MQTT
+// #endif // DISABLE_NETWORK
 
 #define MQTT_HOST                     "192.168.1.65"    // [MqttHost] Defined as either "X.X.X.X" for IP, or "NAME" for MDNS. 
 #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING

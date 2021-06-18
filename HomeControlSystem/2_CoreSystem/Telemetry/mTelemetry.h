@@ -149,8 +149,9 @@ class mTelemetry :
 
     // uint32_t loop_delay_temp = 100;
 
-// #ifdef USE_MODULE_NETWORK_MQTT
 
+  #ifdef USE_MODULE_NETWORK_MQTT
+  
     //use new syntax
     enum STATUS_SYSTEM_IDS{
       MQTT_HANDLER_SYSTEM_ALL_ID = 0,
@@ -210,7 +211,7 @@ class mTelemetry :
     #endif
   };
 
-// #endif // USE_MODULE_NETWORK_MQTT
+#endif // USE_MODULE_NETWORK_MQTT
 
 };
 

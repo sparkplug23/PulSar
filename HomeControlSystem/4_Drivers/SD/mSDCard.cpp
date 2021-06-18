@@ -2,6 +2,13 @@
 
 //  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
 
+
+
+/***
+ * Introduce a ringbuffer for sdcard writter, hence as long as the sdcard is open, anything written to buffer will be flushed to sdcard
+ * */
+
+
 #ifdef USE_MODULE_DRIVERS_SDCARD
 
 const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
@@ -29,85 +36,27 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:{
-
-      EveryLoop_Handle_Appending_File_Method();
-
-      // EveryLoop_RingBuffers_To_SDCard
-
-        // if(debug.bytes_to_write == 0)
-        // {
-        //     debug.test_mode = STANDBY_ID; //stop trying
-        // }else
-        // if(debug.test_mode == WRITE_BYTES_ID)
-        // {
-        //     //Open card
-        //     debug.write_time.opened.push_back(millis());
-        //     char filename[50] = {0};
-        //     uint8_t textmessage[50] = {0};
-        //     sprintf(filename, "/debugfile%d.txt",1);// millis());
-
-        //     // For loop write
-        //     uint8_t j = 0;
-        //     for(int i=0;i<debug.bytes_to_write;i++)
-        //     {
-        //         // sprintf(textmessage, "%d", j);
-        //         textmessage[j] = i;
-        //         if(j++>9){ j = 0; }
-        //         // appendFile(SD, filename, textmessage);
-        //         write_append_array(SD, filename, textmessage, 10);
-
-        //     }
-
-        //     // close card
-        //     debug.write_time.closed.push_back(millis());
-
-
-        //     debug.test_mode = STANDBY_ID;
-
-
-        // }
+    case FUNC_LOOP:
+    {
 
     }
     break;
+    case FUNC_EVERY_50_MSECOND:
+
+      EveryLoop_Handle_Appending_File_Method();
+
+      /**
+       * check if ringbuffer stream has data, if so, write to sdcard (Assuming its open)
+       * */
+      #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+        Handle_Write_Ringbuffer_Stream_To_SDCard();
+      #endif // ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+          
+    break;
     case FUNC_EVERY_SECOND:  
-{
-        // Open SD card, show directory
+    {
 
-//         if(close_decounter==0)
-//         {
-//     writer_settings.status = FILE_STATUS_CLOSE_ID;
-//     SubTask_Append_To_Open_File();
-
-//         }else{
-//           close_decounter--;
-//         }
-
-
-// //   listDir(SD, "/", 0);
-//     readFile(SD, "/debugfile1.txt");
-
-  // listDir(SD, "/", 0);
-
-      // SDCardSpeedDebug();
-}
-    
-    break;
-    case FUNC_EVERY_FIVE_SECOND:
-
-
-      // char timectr[30];
-      // snprintf(timectr, sizeof(timectr), "%s\n", pCONT_time->RtcTime.hhmmss_ctr);
-
-      // appendFile_open_and_close(SD, "/time_test.txt", timectr);
-
-      // readFile(SD, "/time_test.txt");
-
-    break;
-
-    case FUNC_EVERY_MINUTE:
-
-
+    } 
     break;
     /************
      * COMMANDS SECTION * 
@@ -209,27 +158,27 @@ void mSDCard::init(void)
     delay(3000);
     return;
   }
-  uint8_t cardType = SD.cardType();
 
+  uint8_t cardType = SD.cardType();
   if(cardType == CARD_NONE){
       Serial.println("No SD card attached");
-    sdcard_status.init_error_on_boot = true;
+      sdcard_status.init_error_on_boot = true;
       return;
   }
 
-  Serial.print("SD Card Type: ");
-  if(cardType == CARD_MMC){
-      Serial.println("MMC");
-  } else if(cardType == CARD_SD){
-      Serial.println("SDSC");
-  } else if(cardType == CARD_SDHC){
-      Serial.println("SDHC");
-  } else {
-      Serial.println("UNKNOWN");
-  }
+  // Serial.print("SD Card Type: ");
+  // if(cardType == CARD_MMC){
+  //     Serial.println("MMC");
+  // } else if(cardType == CARD_SD){
+  //     Serial.println("SDSC");
+  // } else if(cardType == CARD_SDHC){
+  //     Serial.println("SDHC");
+  // } else {
+  //     Serial.println("UNKNOWN");
+  // }
 
-  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
+  // uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+  // Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
   listDir(SD, "/", 0);
   // createDir(SD, "/mydir");
@@ -243,8 +192,8 @@ void mSDCard::init(void)
   // renameFile(SD, "/hello.txt", "/foo.txt");
   // readFile(SD, "/foo.txt");
   // testFileIO(SD, "/test.txt");
-  Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+  // Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+  // Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 
   // Success, no failure
   sdcard_status.init_error_on_boot = false;
@@ -261,9 +210,113 @@ void mSDCard::Pre_Init(){
 //     settings.fEnableModule = true;
 //   }
 
+    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
 //chip select pin needs setting
+init_SDCard_StreamOut_RingBuffer();
+    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
 }
+
+    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
+void mSDCard::init_SDCard_StreamOut_RingBuffer()
+{
+
+  stream.ringbuffer_handle = xRingbufferCreate(stream.ring_buffer_size_rx, RINGBUF_TYPE_BYTEBUF);
+  if (stream.ringbuffer_handle != NULL) {
+    stream.initialised = true;
+  }
+
+  char data_ctr[] = "\0";
+  UBaseType_t res =  xRingbufferSend(stream.ringbuffer_handle, data_ctr, strlen(data_ctr), pdMS_TO_TICKS(100));
+  if (res != pdTRUE) {
+    AddLog(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
+    stream.initialised = false; //disable if false
+  }
+
+}
+
+
+void mSDCard::Handle_Write_Ringbuffer_Stream_To_SDCard()
+{
+
+   #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+  if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+  {
+
+    uint16_t maximum_bytes_to_write_in_one_chunk = 2048; // 2kB per write
+    uint16_t byte_read_limit = maximum_bytes_to_write_in_one_chunk > BufferWriterI->GetBufferSize() ? BufferWriterI->GetBufferSize() : maximum_bytes_to_write_in_one_chunk;
+
+    // BufferWriterI->Clear();
+    uint16_t bytes_read = GetRingBufferDataAndClear(0, stream_out_buffer, byte_read_limit, '\n', false);
+    // if(strlen(BufferWriterI->GetPtr())==0){
+    //   AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
+    // }
+
+    //if any data found
+    if(bytes_read)
+    {  
+      // char* pbuffer = BufferWriterI->GetPtr();
+      // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),bytes_to_read, pbuffer);
+      pCONT_sdcard->SubTask_Append_To_Open_File(stream_out_buffer, bytes_read);      
+    }
+
+
+  }
+  #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+
+
+}
+
+/**
+ * Universal to all UARTs, get RingBuffer
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * @return item_size number of bytes read from buffer
+ * */
+uint16_t mSDCard::GetRingBufferDataAndClear(uint8_t stream_num, char* buffer, uint16_t buflen, char optional_read_until_char, bool flag_clear_buffer_after_read)
+{
+
+  // Receive an item from no-split ring buffer
+  size_t item_size = 0;
+  // Wait at most 1ms to read from buffer, read a maximum number of bytes
+  char*  item = (char *)xRingbufferReceiveUpTo(stream.ringbuffer_handle, &item_size, pdMS_TO_TICKS(100), buflen);
+
+  //Check received item
+  if (item != NULL) 
+  {
+    // Read from buffer
+    memcpy(buffer,item,item_size);
+    //Return Item
+    vRingbufferReturnItem(stream.ringbuffer_handle, (void *)item); // Free memory
+  // }
+  } 
+
+  return item_size;
+
+}
+
+
+uint16_t mSDCard::AppendRingBuffer(char* buffer, uint16_t buflen)
+{
+  
+  UBaseType_t res =  xRingbufferSend(stream.ringbuffer_handle, buffer, buflen, pdMS_TO_TICKS(1000));
+  if (res != pdTRUE) {
+      printf("Failed to send item\n");
+  }
+  
+  stream.flag_data_waiting = true; // easier than checking for bytes each time
+
+  return res;
+
+}
+
+
+
+
+    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
+
+
 
 
 uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_method)
@@ -321,6 +374,7 @@ uint8_t mSDCard::ConstructJSON_Debug_WriteTimes(uint8_t json_method)
 }
 
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mSDCard::MQTTHandler_Init(){
 
   struct handler<mSDCard>* mqtthandler_ptr;
@@ -387,6 +441,7 @@ void mSDCard::MQTTHandler_Sender(uint8_t id){
 }
 
 
+  #endif// USE_MODULE_NETWORK_MQTT
 
 
 #endif

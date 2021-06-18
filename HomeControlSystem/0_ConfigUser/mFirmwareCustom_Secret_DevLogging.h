@@ -34,9 +34,10 @@
 // #define DEVICE_SDCARD_TESTER
 // #define DEVICE_GPS_TO_SDCARD_TESTER
 // #define DEVICE_MEASUREMENT_SYSTEM_1
-#define DEVICE_OLED_WITH_SD_LIPO_TEST
+// #define DEVICE_OLED_WITH_SD_LIPO_TEST//this
 // #define DEVICE_PIC32_RSS_STREAM_OUTPUT_TEST
 // #define DEVICE_SDCARD_LIPO_TESTER
+#define DEVICE_GPS_SDCARD_LOGGER_WITH_OLED_TEST
 
 // #include "0_ConfigUser/mFirmwareCustom_Secret_Home.h"
 
@@ -717,46 +718,52 @@
   #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
 
   // // Section A: GPS
-  // #define USE_MODULE_DRIVERS_GPS
-  // #define ENABLE_GPS_PARSER_NMEA
-  // #define ENABLE_GPS_PARSER_UBX
-  // #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
-  // // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
-  // #define NMEAGPS_DERIVED_TYPES
-  // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
-  // #define NMEAGPS_PARSE_SAVE_MILLIS
-  // #define gpsPort Serial1
-  // #define D_GPS_BAUD_RATE_FAST 921600//230400//115200
-  // #define D_GPS_BAUD_RATE_DEFAULT 9600
+  #define USE_MODULE_DRIVERS_GPS
+  #define ENABLE_GPS_PARSER_NMEA
+  #define ENABLE_GPS_PARSER_UBX
+  #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
+  #define NMEAGPS_DERIVED_TYPES
+  #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  #define NMEAGPS_PARSE_SAVE_MILLIS
+  #define gpsPort Serial1
+  #define D_GPS_BAUD_RATE_FAST 921600//230400//115200
+  #define D_GPS_BAUD_RATE_DEFAULT 9600
 
   // // Section UART
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_SERIAL_UART
-  // #define ENABLE_HARDWARE_UART_1
-  // #define ENABLE_HARDWARE_UART_2
-  // #define HARDWARE_UART_1_BAUD_RATE_SPEED  D_GPS_BAUD_RATE_FAST
-  // #define HARDWARE_UART_2_BAUD_RATE_SPEED  115200
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SERIAL_UART
+  #define ENABLE_HARDWARE_UART_1
+  #define ENABLE_HARDWARE_UART_2
+  #define HARDWARE_UART_1_BAUD_RATE_SPEED  D_GPS_BAUD_RATE_FAST
+  #define HARDWARE_UART_2_BAUD_RATE_SPEED  2048000
 
   // // Section RSS data
   // #define ENABLE_DEVFEATURE_DUMMY_RSS_DATA
 
   // // Section B: SDCard driver
-  // #define USE_MODULE_DRIVERS_SDCARD
+  #define USE_MODULE_DRIVERS_SDCARD
 
-  // // Seciton C: Logger controller
-  // #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
-  // #define ENABLE_SDLOGGER_APPEND_TIME_TEST
+  // Seciton C: Logger controller
+  #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+  #define ENABLE_SDLOGGER_APPEND_TIME_TEST
 
   // // Section x: Button to toggle logging/sd state
   // #define USE_MODULE_CORE_RULES
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_BUTTONS
   #define USE_MODULE_SENSORS_ADC_INTERNAL
+  #define ENABLE_SMOOTHING_ON_ADC_READING
+  #define ADC_CAPTURE_EXTERNAL_PIN 32
+  #define ADC_CAPTURE_INPUT0_PIN 34
+  #define ADC_CAPTURE_INPUT1_PIN 35
 
   // // Section x: OLED display 
-  // #define USE_MODULE_DISPLAYS_INTERFACE
-  // #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SSD1306
 
+
+  // debug
   #define DEBUG_PIN1_GPIO     12
   #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
   #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
@@ -776,7 +783,22 @@
       /**
        * Debug pins
        * */
-      "\"12\":\"" D_GPIO_FUNCTION_DEBUG_PIN1_CTR   "\","
+
+// Change this to be a 6pin between pic32 and esp32
+/**
+ * Shared power for stable IO
+ * 3v3
+ * ground
+ * 
+ * adc2
+ * adc5
+ * esp32 adc trigger
+ * esp32 json completed
+ * 
+ * serial?
+ * 
+ * 
+ * */
 
       /** 4P large JST - ADC
        * Yellow     34(I), ADC2G, ADC1_CH6
@@ -786,7 +808,8 @@
        * */
       "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_GENERIC_GPIO1_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_GENERIC_GPIO1_CTR   "\","
 
       /** 5P small - UART2 RSS Stream
        * Orange      17, UART2_TX
@@ -837,6 +860,190 @@
   "}";
 
 #endif // DEVICE_GPSPARSER_TESTER
+
+
+/**
+ * Description: Use of button, oled and sdcard together on LIPO_ESP32
+ * Button will toggle logging start/end (open/close), which will write the RTC time line by line. This will let me test sd opening and closing when expected
+ * Test version before adding pic32 stream of data (although will use same format)
+ * Aim: To log GPS data at 10hz, to sd card, and have me drive around and get that 3d fix saved and into matlab then google earth
+ * 
+ * GPS @ 912800 baud recorded to local fix
+ * - each new fix, triggers a "save" flag
+ * OLED screen will show bytes written every second
+ * No networking
+ * 
+ * 
+ * */
+#ifdef DEVICE_GPS_SDCARD_LOGGER_WITH_OLED_TEST
+  #define DEVICENAME_CTR            "system_1_tester"
+  #define DEVICENAME_FRIENDLY_CTR   "SYSTEM_1 Tester"
+
+  // Also defining so "HardwareSerial.cpp" will use these
+  #define RX1 18
+  #define TX1 19
+  #define RX2 16
+  #define TX2 17
+
+  // General defines for debugging only, not for finished
+  #define DISABLE_NETWORK
+  #define DISABLE_SLEEP
+
+  /** Next things to do
+   * Completely make it so it can compile without NTP, wifi, mqtt and telemetry
+   * Add that the GPS can be init after a period of time with no updates, ie connected after
+   * Add that a counter shows the last known time period of GPS signal, if none, alert me
+   * Order cheap caps, to attach the hardware to
+   * Use a GPIO to trigger interrupt, which will actually inform when to record adc readings.. these will be filtered into vector...
+   * I will need a GPIO_SuperFrame reset and GPIO_RSS_ADC measure to properly know when a packet is ready. The start of a new SF will trigger sending/saving latest completed SF frame, OR, every 1 second to keep the buffers clear
+   * */
+
+  // General defines needed in release version
+  #define ESP32
+  #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+
+  // // Section A: GPS
+  #define USE_MODULE_DRIVERS_GPS
+  #define ENABLE_GPS_PARSER_NMEA
+  #define ENABLE_GPS_PARSER_UBX
+  #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  // #define ENABLE_GPS_DEVICE_CONFIG_SPEED_SLOW5
+  #define NMEAGPS_DERIVED_TYPES
+  #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  #define NMEAGPS_PARSE_SAVE_MILLIS
+  #define gpsPort Serial1
+  #define D_GPS_BAUD_RATE_FAST    921600//230400//115200
+  #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+  // // Section UART
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SERIAL_UART
+  #define ENABLE_HARDWARE_UART_1
+  #define ENABLE_HARDWARE_UART_2
+  #define HARDWARE_UART_1_BAUD_RATE_SPEED  D_GPS_BAUD_RATE_FAST
+  #define HARDWARE_UART_2_BAUD_RATE_SPEED  2048000
+
+  // // Section RSS data
+  // #define ENABLE_DEVFEATURE_DUMMY_RSS_DATA
+
+  // // Section B: SDCard driver
+  #define USE_MODULE_DRIVERS_SDCARD
+  #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+
+  // Seciton C: Logger controller
+  #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
+  // #define ENABLE_SDLOGGER_APPEND_TIME_TEST
+  #define ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+
+  // // Section x: Button to toggle logging/sd state
+  #define USE_MODULE_CORE_RULES
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  // Next phase, will include saving adc values
+  // #define USE_MODULE_SENSORS_ADC_INTERNAL
+  // #define ENABLE_SMOOTHING_ON_ADC_READING
+  // #define ADC_CAPTURE_EXTERNAL_PIN 32
+  // #define ADC_CAPTURE_INPUT0_PIN 34
+  // #define ADC_CAPTURE_INPUT1_PIN 35
+
+  // Section x: OLED display 
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /**
+       * Debug pins
+       * */
+
+      /** 4P large JST - ADC
+       * Yellow     34(I), ADC2G, ADC1_CH6
+       * White      35(I), ADC5G, ADC1_CH7
+       * Red        32(I), ADC Record Trigger
+       * Black      GND
+       * */
+      "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_GENERIC_GPIO1_CTR   "\","
+
+      /** 5P small - UART2 RSS Stream
+       * Orange      17, UART2_TX
+       * Yellow      16, UART2_RX
+       * White       25, 
+       * Red         5V
+       * Black       GND
+       * */
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR  "\","
+
+      /** Built in - OLED
+       * 
+       * */
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
+      
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+
+  // debug
+  #define DEBUG_PIN1_GPIO     26
+  #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+  #define DEBUG_PIN2_GPIO     27
+  #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+
+  #define DEBUG_PIN3_GPIO     21
+  #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+
+  #define DEBUG_PIN4_GPIO     22
+  #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+
+#endif // DEVICE_GPSPARSER_TESTER
+
 
 
 /**

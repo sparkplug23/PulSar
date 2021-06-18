@@ -145,6 +145,15 @@ class mTime :
     void parse_JSONCommand(JsonParserObject obj);
 
 
+    void  SetUTCTime(
+          uint16_t year,
+          uint8_t month,
+          uint8_t day,
+          uint8_t hour,
+          uint8_t minute,
+          uint8_t second
+        );
+
     uint32_t uptime_seconds_nonreset = 0; //test new uptime with comparison of breaktime
     uint32_t boottime_epoch;
 

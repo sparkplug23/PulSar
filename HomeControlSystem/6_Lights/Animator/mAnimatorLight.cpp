@@ -2718,9 +2718,14 @@ uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level){
 
   uint8_t numpixels = pCONT_iLight->settings.light_size_count<100?pCONT_iLight->settings.light_size_count:100;
   RgbTypeColor c;
+
+  char buffer[100];
   
   JsonBuilderI->Start();  
     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
+    JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH_ID);
+    JBI->Add("ColourPaletteID", pCONT_iLight->animation.palette.id );
+    JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(pCONT_iLight->animation.palette.id, buffer, sizeof(buffer)));
     JsonBuilderI->Array_Start("rgb");
     for(int i=0;i<numpixels;i++){
       RgbTypeColor c = GetPixelColor(i);

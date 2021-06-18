@@ -29,7 +29,16 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP:
       Handle_Connection_And_Configuration();
-      ReadGPSStream();
+
+
+/**
+ * @10hz, I only need to check buffer every 100ms for new full data, this will allow the other 100ms to be used
+ * */
+      if(mTime::TimeReached(&tSaved_parse_gps, 100))
+      {
+        ReadGPSStream();
+      }
+    
     break;
     case FUNC_EVERY_SECOND:
       Splash_Latest_Fix(&Serial);
@@ -60,14 +69,6 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     #endif //USE_MODULE_NETWORK_MQTT
   }
   
-  /************
-   * WEBPAGE SECTION * 
-  *******************/
-  
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-
 } // END Tasker
 
 
@@ -103,11 +104,10 @@ void mGPS::ReadGPSStream()
       #ifdef ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
       #ifdef USE_MODULE_DRIVERS_SERIAL_UART
 
-      BufferWriterI->Clear();
-      char* pbuffer = BufferWriterI->GetPtr();
+      // BufferWriterI->Clear();
       uint16_t bytes_to_read = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
       // if(strlen(BufferWriterI->GetPtr())==0){
-      //   // AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 2, bytes_in_line, BufferWriterI->GetPtr());
+      //   AddLog(LOG_LEVEL_TEST, PSTR("GPS UART%d >> [%d] \"%s\""), 1, bytes_to_read, BufferWriterI->GetPtr());
       // }
 
       bool gps_fix_reading = false;
@@ -115,7 +115,8 @@ void mGPS::ReadGPSStream()
       //if any data found
       if(bytes_to_read)
       {  
-        AddLog(LOG_LEVEL_TEST, PSTR("GPS >> [%d]"), bytes_to_read);
+        char* pbuffer = BufferWriterI->GetPtr();
+        //AddLog(LOG_LEVEL_TEST, PSTR("GPS >> [%d]"), bytes_to_read);
         // AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d|%d]=\"%s\""),gps_receive_buffer.bufused, gps_receive_buffer.buflen, gps_receive_buffer.buffer);
         // Read bytes in
         for(int ii=0;ii<bytes_to_read;ii++)
@@ -133,6 +134,26 @@ void mGPS::ReadGPSStream()
           }
             gps_result_stored |= gps_result_parsing; // Save reading
           // Serial.printf("status=%d\n\r",gps_result_parsing.status);
+
+          
+            //if first fix with valud time, use this to update internal time
+            if((gps_latest.fix_used_to_update_internal_rtc == false)&&(gps_result_stored.dateTime.is_valid()))
+            {
+              gps_latest.fix_used_to_update_internal_rtc = true;
+              // Later, do this as a rule event              
+              pCONT_time->SetUTCTime(
+                gps_result_stored.dateTime.year,
+                gps_result_stored.dateTime.month,
+                gps_result_stored.dateTime.day,
+                gps_result_stored.dateTime.hours,
+                gps_result_stored.dateTime.minutes,
+                gps_result_stored.dateTime.seconds
+              );
+            }
+
+
+
+
         }
 
       }

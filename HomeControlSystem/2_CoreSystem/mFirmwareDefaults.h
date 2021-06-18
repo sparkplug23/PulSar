@@ -29,6 +29,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 #include "2_CoreSystem/mBaseConfig.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 
 /*********************************************************************************************\
  * Default global defines
@@ -47,8 +48,10 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_TIME
 // #define USE_MODULE_CORE_RULES
 
+#ifndef DISABLE_NETWORK
 #define USE_MODULE_NETWORK_WIFI
 #define USE_MODULE_NETWORK_MQTT
+#endif // DISABLE_NETWORK
 
 
 #ifndef USE_MODULE_NETWORK_WIFI

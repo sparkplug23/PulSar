@@ -364,6 +364,8 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Required(uint8_t json_method){
 
 ////////////////////// START OF MQTT /////////////////////////
 
+#ifdef USE_MODULE_NETWORK_MQTT
+
 void mGPS::MQTTHandler_Init(){
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
@@ -461,6 +463,7 @@ void mGPS::MQTTHandler_Sender(uint8_t id)
   }
 }
 
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 

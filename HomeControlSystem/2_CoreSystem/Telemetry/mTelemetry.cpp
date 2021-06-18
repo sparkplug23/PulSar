@@ -108,7 +108,7 @@ void mTelemetry::WebPage_Root_AddHandlers(){
 
 
 
-// #ifdef USE_MODULE_NETWORK_MQTT
+#ifdef USE_MODULE_NETWORK_MQTT
 
 
 
@@ -332,7 +332,7 @@ void mTelemetry::MQTTHandler_Sender(uint8_t id)
   }
 }
 
-// #endif // USE_MODULE_NETWORK_MQTT
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 

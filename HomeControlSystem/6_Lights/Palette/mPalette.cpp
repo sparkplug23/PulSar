@@ -68,6 +68,10 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Holloween_OGP();
   init_ColourPalettes_Hot_Neon_Pink_With_Navy();
   init_ColourPalettes_Single_Fire_01();
+  init_ColourPalettes_Flower_SweetPeas_01();
+  init_ColourPalettes_Flower_SweetPeas_02();
+  init_ColourPalettes_Pink_Purple_01();
+  init_ColourPalettes_MicroLEDS_Pastel_01();
   init_ColourPalettes_Shelf_Hearts();
   init_ColourPalettes_Pastel();
   init_ColourPalettes_Gradient_01();
@@ -148,6 +152,43 @@ void mPalette::init_ColourPalettes_Single_Fire_01(){
   palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP_IDS);
   palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP_IDS;
   palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_SINGLE_FIRE_01_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+
+void mPalette::init_ColourPalettes_Flower_SweetPeas_01(){
+  palettelist.ptr     = &palettelist.flower_sweetpeas_01;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_FLOWER_SWEATPEAS_01_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+void mPalette::init_ColourPalettes_Flower_SweetPeas_02(){
+  palettelist.ptr     = &palettelist.flower_sweetpeas_02;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_FLOWER_SWEATPEAS_02_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+void mPalette::init_ColourPalettes_Pink_Purple_01(){
+  palettelist.ptr     = &palettelist.pink_purple_01;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_PINK_PURPLE_01_ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_PINK_PURPLE_01_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+void mPalette::init_ColourPalettes_MicroLEDS_Pastel_01(){
+  palettelist.ptr     = &palettelist.microleds_pastel_01;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_MICROLEDS_PASTEL_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_MICROLEDS_PASTEL_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_MICROLEDS_PASTEL_01_NAME_CTR;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
 }
 
@@ -747,6 +788,10 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_HOLLOWEEN_OGP_ID:   return &palettelist.holloween_ogp;
     case PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY_ID:    return &palettelist.hot_pink_neon_with_navy;
     case PALETTELIST_STATIC_SINGLE_FIRE_01_ID:    return &palettelist.single_fire_01;
+    case PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID:    return &palettelist.flower_sweetpeas_01;
+    case PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID:    return &palettelist.flower_sweetpeas_02;
+    case PALETTELIST_STATIC_PINK_PURPLE_01_ID:    return &palettelist.pink_purple_01;
+    case PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID:    return &palettelist.microleds_pastel_01;
     case PALETTELIST_STATIC_RAINBOW_ID:         return &palettelist.rainbow;
     case PALETTELIST_STATIC_RAINBOW_INVERTED_ID:return &palettelist.rainbow_inverted;
     case PALETTELIST_STATIC_PASTEL_ID:          return &palettelist.pastel;

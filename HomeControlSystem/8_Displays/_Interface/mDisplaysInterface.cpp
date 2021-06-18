@@ -451,6 +451,8 @@ uint8_t mDisplaysInterface::ConstructJSON_Sensor(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
+  #ifdef USE_MODULE_NETWORK_MQTT
+  
 void mDisplaysInterface::MQTTHandler_Init(){
 
   struct handler<mDisplaysInterface>* mqtthandler_ptr;
@@ -513,5 +515,6 @@ void mDisplaysInterface::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 }
 
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

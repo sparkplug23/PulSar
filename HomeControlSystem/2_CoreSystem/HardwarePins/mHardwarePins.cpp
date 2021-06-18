@@ -52,7 +52,12 @@ void mHardwarePins::Pre_Init(){
   #ifdef DEBUG_PIN2_GPIO
     DEBUG_PIN2_INIT();
   #endif
-
+  #ifdef DEBUG_PIN3_GPIO
+    DEBUG_PIN3_INIT();
+  #endif
+  #ifdef DEBUG_PIN4_GPIO
+    DEBUG_PIN4_INIT();
+  #endif
 
 }
 
@@ -1636,6 +1641,9 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #ifdef ESP32
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH6_CTR)==0){  return GPIO_ADC1_CH6_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH7_CTR)==0){  return GPIO_ADC1_CH7_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR)==0){  return GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID; }
+
+  
 
   // Webcam
   else if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_DATA1_CTR)==0){  return GPIO_WEBCAM_DATA1_ID; }

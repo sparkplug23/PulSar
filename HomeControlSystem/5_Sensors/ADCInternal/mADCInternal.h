@@ -116,18 +116,26 @@ class mADCInternal :
     ADC_CHANNEL_GROUP_UNSET_ID
   }adc_channel_group;
 
+  typedef enum
+  {
+    ADC_MODE_DISABLED_ID=0,
+    ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID,
+    ADC_MODE_LENGTH_ID,
+  }adc_mode;
+
 
     uint32_t tSaved_adctest = 0;
 
     #define ADC_CHANNELS_MAX 2
     struct ADC_CONFIG{
-      uint8_t pin = 0;
-      uint8_t channel_id = ADC_CHANNEL_0;
+      uint8_t input_pin = 0;
+      adc_channel_t channel_id = ADC_CHANNEL_0;
       adc_channel_group channel_group =  ADC_CHANNEL_GROUP_UNSET_ID;    
       adc_atten_t attentuation_db_level = ADC_ATTEN_DB_11;
       adc_bits_width_t adc_width_bit = ADC_WIDTH_BIT_12;
+      adc_mode mode = ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID;
 
-      bool flag_external_interrupt_triggered_reading = false;
+      // bool flag_external_interrupt_triggered_reading = false;
 
 
       //measure_rate
@@ -139,13 +147,32 @@ class mADCInternal :
     }adc_config[ADC_CHANNELS_MAX];
 
 
-    // struct INTERRUPT_EXTERNAL_ADC_TRIGGER{
-    //   uint8_t flag_pin_active = false;
+    struct INTERRUPT_EXTERNAL_ADC_TRIGGER{
+      uint8_t flag_pin_active = false;
+      uint8_t trigger_pin = 12;
+      bool flag_enabled = false;
 
-    // }interrupt_external;
+    }external_interrupt;
+
+    // Going to be the size of the superframe, ie 50 samples * channels (4) [3 active + guard] = 200
+    #define STORED_VALUE_ADC_MAX 250
+    struct READINGS{
+      uint16_t adc_level = 0;
+      uint8_t adcSampleCount_ = 10;
+      // uint16_t max_channel_readings = 100;
+      uint16_t samples_between_resets = 0;
+      struct STORED_VALUES{
+        uint16_t index = 0;
+        // std::vector<uint16_t> 
+        // static size for stability of stack
+        uint16_t adc[STORED_VALUE_ADC_MAX] = {0};
+      }stored_values;
+    }readings[2];
+
+    std::vector<int> samples;
 
 
-
+void Update_Channel1_ADC_Readings();
     
     void AddToHardwareMessage();
 
@@ -162,26 +189,26 @@ class mADCInternal :
     #define MAX_SENSORS 1
     void EveryLoop();
 
-    void WebAppend_Root_Status_Table_Draw();
-    void WebAppend_Root_Status_Table_Data();
-    struct SENSORDATA{
-      float temperature;
-      float humidity;
-      float pressure;
-      float altitude;
-      uint8_t isvalid=false;
-      uint8_t ischanged=false;
-      uint8_t ischanged_over_threshold=false;
-      uint32_t ischangedtLast = millis();
-      float heatIndex;
-      float dewPoint;
-      float cr;
-      uint32_t tSavedMeasureClimate;
-      uint8_t fWithinLimit;
-      unsigned long tWithinLimit;
-      uint8_t sReadSensor;
-      // Adafruit_ADC_INTERNAL280* ADC_INTERNAL = NULL;
-    }sensor[MAX_SENSORS];
+    // void WebAppend_Root_Status_Table_Draw();
+    // void WebAppend_Root_Status_Table_Data();
+    // struct SENSORDATA{
+    //   float temperature;
+    //   float humidity;
+    //   float pressure;
+    //   float altitude;
+    //   uint8_t isvalid=false;
+    //   uint8_t ischanged=false;
+    //   uint8_t ischanged_over_threshold=false;
+    //   uint32_t ischangedtLast = millis();
+    //   float heatIndex;
+    //   float dewPoint;
+    //   float cr;
+    //   uint32_t tSavedMeasureClimate;
+    //   uint8_t fWithinLimit;
+    //   unsigned long tWithinLimit;
+    //   uint8_t sReadSensor;
+    //   // Adafruit_ADC_INTERNAL280* ADC_INTERNAL = NULL;
+    // }sensor[MAX_SENSORS];
 
     
     uint8_t GetSensorCount(void) override
@@ -192,12 +219,13 @@ class mADCInternal :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-      if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-      value->data.push_back(sensor[index].temperature);
-      value->data.push_back(sensor[index].humidity);
-      value->sensor_id = index;
+      // if(index > MAX_SENSORS-1) {
+        value->type.push_back(0); return ;//}
+      // value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      // value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+      // value->data.push_back(sensor[index].temperature);
+      // value->data.push_back(sensor[index].humidity);
+      // value->sensor_id = index;
     };
 
 

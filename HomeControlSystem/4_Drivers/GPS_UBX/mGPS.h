@@ -307,6 +307,8 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void Init_UBX_Only();
     void Init_UBX_Only2();
 
+    uint32_t tSaved_parse_gps = 0;
+
 
 
     void Init();
@@ -356,6 +358,11 @@ void changeBaud( const char *textCommand, unsigned long baud );
 
       uint32_t milliseconds_of_day =  MILLISECONDS_IN_DAY;
 
+      uint8_t fix_status = 0;
+      uint8_t fix_status_last = 0;
+
+      uint8_t fix_used_to_update_internal_rtc = false;
+
 
 
 
@@ -389,7 +396,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
     uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_method = 0);
     uint8_t ConstructJSON_GPSPacket_All(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
+  #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
@@ -420,6 +427,8 @@ void changeBaud( const char *textCommand, unsigned long baud );
       &mqtthandler_gpspacket_micro,
       &mqtthandler_gpspacket_debug
     };
+    
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

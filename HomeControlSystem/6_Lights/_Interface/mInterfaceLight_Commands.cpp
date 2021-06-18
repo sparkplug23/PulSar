@@ -1248,6 +1248,9 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
   #endif
   
+//temp feedback
+pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette.id);
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));

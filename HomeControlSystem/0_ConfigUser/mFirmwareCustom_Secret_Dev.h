@@ -61,6 +61,7 @@
 // #define DEVICE_RGBMICRO2 //              
 // #define DEVICE_RGBMICRO4 //
 // #define DEVICE_RGBESP32_1_TESTER
+// #define DEVICE_RGBGAZEBO_ROOF
 
 /**
  *  CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- 
@@ -1542,6 +1543,118 @@
     // command to set the max and min of those
     // disable by defaultThanks
   "}";
+
+#endif
+
+#ifdef DEVICE_RGBGAZEBO_ROOF
+  #define DEVICENAME_CTR          "rgbgazeboroof"
+  #define DEVICENAME_FRIENDLY_CTR "rgbgazeboroof"
+
+  #define FORCE_TEMPLATE_LOADING
+  //#define SETTINGS_HOLDER 21
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
+  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
+  // #define USE_MODULE_DRIVERS_LEDS
+  // #define DISABLE_WEBSERVER 
+
+  #define ESP32
+
+  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
+  
+  // #define DISABLE_NETWORK
+
+  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
+  // #define ENABLE_DEVFEATURE_FLICKER_TESTING2
+  
+//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
+  
+//   #define USE_MODULE_SENSORS_SWITCHES
+//   #define USE_MODULE_SENSORS_ANALOG
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  
+  // #define STRIP_SIZE_MAX 50//100//256
+  // // #define STRIP_REPEAT_OUTPUT_MAX 256
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   #ifdef STRIP_SIZE_MAX
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   #else
+  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
+  //   #endif //STRIP_SIZE_MAX
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     // "\"" D_JSON_TIME_MS "\":300,"
+  //     // "\"" D_JSON_RATE_MS "\":100,"
+  //     "\"" D_JSON_TIME_MS "\":4000,"
+  //     "\"" D_JSON_RATE_MS "\":1000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
+  //     // "\"" D_JSON_FUNCTION "\":"  "1"
+  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+  //   "},"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+  //   // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  //   // "\"Brightness\":1"
+
+    
+
+  //   // command to enable random brightness from palette on generation
+  //   // command to set the max and min of those
+  //   // disable by defaultThanks
+  // "}";
+
+
+  #define STRIP_SIZE_MAX 450
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":5000,"
+      "\"" D_JSON_RATE_MS "\":10000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+    "},"
+    "\"" D_JSON_COLOUR_PALETTE "\":66,"
+    "\"" D_JSON_BRIGHTNESS_RGB_255 "\":255"
+  "}";
+
 
 #endif
 

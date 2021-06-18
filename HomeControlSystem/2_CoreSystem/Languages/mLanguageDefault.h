@@ -1080,6 +1080,7 @@
 #define D_GPIO_FUNCTION_ADC1_CH5_CTR "ADC_CH5"
 #define D_GPIO_FUNCTION_ADC1_CH6_CTR "ADC_CH6"
 #define D_GPIO_FUNCTION_ADC1_CH7_CTR "ADC_CH7"
+#define D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR "ADC1_Ext_Int"
 
 
 // Special generic pins that can be used as special functions eg logger or debuggers

@@ -11,6 +11,20 @@
 #include <string.h>
 #include <strings.h>
 
+
+#include "freertos/ringbuf.h"
+// static char tx_item[] = "test_item";
+#include <stdio.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "driver/uart.h"
+#include "esp_log.h"
+#include "driver/gpio.h"
+#include "sdkconfig.h"
+#include "esp_intr_alloc.h"
+
 /*** Working
  * SD Card using SPI on ESP32
  * 
@@ -132,8 +146,30 @@ class mSDCard :
 void CommandSet_SDCard_Appending_File_Method_State(uint8_t state);
     
 void EveryLoop_Handle_Appending_File_Method();
-    
+    void Handle_Write_Ringbuffer_Stream_To_SDCard();
 
+
+    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
+
+    #define RINGBUFFER_HANDLE_2_LENGTH 5000
+
+    struct STREAM_RINGBUFFER
+    {
+      bool initialised = false;
+      bool flag_data_waiting = false;
+      RingbufHandle_t ringbuffer_handle;
+      QueueHandle_t event_queue_handle;
+      int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+      int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+
+    }stream;
+
+uint16_t GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint16_t buflen, char optional_read_until_char, bool flag_clear_buffer_after_read);
+void Stream_AddToBuffer(char* buffer, uint16_t buflen);
+void init_SDCard_StreamOut_RingBuffer();
+uint16_t AppendRingBuffer(char* buffer, uint16_t buflen);
+
+    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
 void parse_JSONCommand(JsonParserObject obj);
 
@@ -207,6 +243,10 @@ void SubTask_Append_To_Open_File(char* buffer = nullptr, uint16_t buflen = 0);
 
 
 
+char stream_out_buffer[2048];
+
+
+
 
 
 
@@ -229,7 +269,7 @@ void WebAppend_Root_Status_Table();
     uint8_t ConstructJSON_Debug_WriteTimes(uint8_t json_method = 0);
 
   
-  //#ifdef USE_CORE_MQTT 
+  #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
@@ -248,6 +288,7 @@ void WebAppend_Root_Status_Table();
       &mqtthandler_file_writer,
       &mqtthandler_debug_write_times
     };
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

@@ -107,37 +107,38 @@ void mUserMod_01::EveryLoop_EmulatePic32Measurement()
 
   // digitalWrite(21, !digitalRead(21));
 
-  if(mTime::TimeReached(&pic32.tSaved_AdcRampTick, 500))
+  if(mTime::TimeReached(&pic32.tSaved_AdcRampTick, 100))
   {
 
     digitalWrite(4, LOW); //start adc slot
 
     // Ramp up
-    switch(pic32.adc_dir)
-    {
-      case 1: // accending
+    // switch(pic32.adc_dir)
+    // {
+    //   case 1: // accending
             
-        if(pic32.adc_value < pic32.adc_high)
-        {
-          pic32.adc_value++;
-        }
-        else{
-          pic32.adc_dir = 0; // decending
-        }
+    //     if(pic32.adc_value < pic32.adc_high)
+    //     {
+    //       pic32.adc_value+=100;
+    //     }
+    //     else{
+    //       pic32.adc_dir = 0; // decending
+    //     }
 
-      break;
-      case 0: // decending
+    //   break;
+    //   case 0: // decending
             
-        if(pic32.adc_value > pic32.adc_low)
-        {
-          pic32.adc_value--;
-        }
-        else{
-          pic32.adc_dir = 1; // accending
-        }
+    //     if(pic32.adc_value > pic32.adc_low)
+    //     {
+    //       pic32.adc_value-=100;
+    //     }
+    //     else{
+    //       pic32.adc_dir = 1; // accending
+    //     }
 
-      break;
-    }
+    //   break;
+    // }
+    pic32.adc_value = 1234;
 
     // Write analog out
     analogWrite(22, pic32.adc_value);

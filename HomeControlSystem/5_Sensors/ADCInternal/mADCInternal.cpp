@@ -47,6 +47,80 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP: 
       EveryLoop();
     break;   
+    case FUNC_EVERY_FIVE_SECOND:
+
+     // DEBUG_PIN1_SET(LOW);
+     // os_delay_us(1000);
+    //  DEBUG_PIN1_SET(HIGH);
+
+
+    break;
+    case FUNC_EVERY_SECOND:
+
+    {
+
+    // readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
+    // ets_delay_us(1);
+    // readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
+
+
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
+
+
+    // adc1_config_width(ADC_WIDTH_BIT_12);
+    // adc1_config_channel_atten(ADC1_CHANNEL_4,ADC_ATTEN_DB_0);
+    // int val = adc1_get_raw(ADC1_CHANNEL_4);
+    // printf("4val%d\n", val );
+
+
+    // adc1_config_width(ADC_WIDTH_BIT_12);
+    // adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
+    // val = adc1_get_raw(ADC1_CHANNEL_7);
+    // printf("7val%d\n", val );
+
+
+    // adc1_config_width(ADC_WIDTH_BIT_12);
+    // adc1_config_channel_atten(ADC1_CHANNEL_6,ADC_ATTEN_DB_0);
+    // val = adc1_get_raw(ADC1_CHANNEL_6);
+    // printf("6val%d\n", val );
+
+    // adc1_config_width(ADC_WIDTH_BIT_12);
+    // adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_1,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_2,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_3,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_4,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_5,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_6,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
+
+    AddLog(LOG_LEVEL_TEST, PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
+      adc1_get_raw(ADC1_CHANNEL_0),
+      adc1_get_raw(ADC1_CHANNEL_1),
+      adc1_get_raw(ADC1_CHANNEL_2),
+      adc1_get_raw(ADC1_CHANNEL_3),
+      adc1_get_raw(ADC1_CHANNEL_4),
+      adc1_get_raw(ADC1_CHANNEL_5),
+      adc1_get_raw(ADC1_CHANNEL_6),
+      adc1_get_raw(ADC1_CHANNEL_7)
+    );
+
+
+      int read_raw;
+      adc2_config_channel_atten( ADC2_CHANNEL_6, ADC_ATTEN_0db );
+
+      esp_err_t r = adc2_get_raw( ADC2_CHANNEL_6, ADC_WIDTH_12Bit, &read_raw);
+      if ( r == ESP_OK ) {
+          printf("%d\n", read_raw );
+      } else if ( r == ESP_ERR_TIMEOUT ) {
+          printf("ADC2 used by Wi-Fi.\n");
+      }
+
+
+    }
+
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -82,28 +156,41 @@ void mADCInternal::Pre_Init(){
 
   if(pCONT_pins->PinUsed(GPIO_ADC1_CH6_ID))
   {
-    adc_config[settings.fSensorCount].pin = pCONT_pins->GetPin(GPIO_ADC1_CH6_ID);
+    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH6_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_6;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
     adc_config[settings.fSensorCount].adc_width_bit = ADC_WIDTH_BIT_12;
+    adc_config[settings.fSensorCount].mode = ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID;
+    pinMode(adc_config[settings.fSensorCount].input_pin, INPUT);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "adc_config[%d].input_pin=%d"),settings.fSensorCount,adc_config[settings.fSensorCount].input_pin);
     settings.fSensorCount++;
   }
 
   if(pCONT_pins->PinUsed(GPIO_ADC1_CH7_ID))
   {
-    adc_config[settings.fSensorCount].pin = pCONT_pins->GetPin(GPIO_ADC1_CH7_ID);
+    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH7_ID);
     adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
     adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_7;
     adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
     adc_config[settings.fSensorCount].adc_width_bit = ADC_WIDTH_BIT_12;
+    adc_config[settings.fSensorCount].mode = ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID;
+    pinMode(adc_config[settings.fSensorCount].input_pin, INPUT);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "adc_config[%d].input_pin=%d"),settings.fSensorCount,adc_config[settings.fSensorCount].input_pin);
     settings.fSensorCount++;
   }
+
+  // Special pin set here
+  if(pCONT_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
+  {
+    external_interrupt.trigger_pin = pCONT_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
+    external_interrupt.flag_enabled = true;
+  }
   
-  if(settings.fSensorCount){
+  // if(settings.fSensorCount){
     settings.fEnableSensor = true;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "ADC_INTERNAL Sensor Enabled"));
-  }
+  // }
 
 }
 
@@ -114,112 +201,116 @@ void mADCInternal::Pre_Init(){
        a flag that is inside the class
 *************************************************************************************
 *************************************************************************************/
-void IRAM_ATTR ISR_External_Pin_ADC_Config0_Trigger()
+void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 {
-  pCONT_adc_internal->adc_config[0].flag_external_interrupt_triggered_reading = true;
+  pCONT_adc_internal->external_interrupt.flag_pin_active = true;
+  // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
 }
 
-void IRAM_ATTR ISR_External_Pin_ADC_Config1_Trigger()
-{
-  pCONT_adc_internal->adc_config[0].flag_external_interrupt_triggered_reading = true;
-}
+// void IRAM_ATTR ISR_External_Pin_ADC_Config1_Trigger()
+// {
+//   pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
+// }
 
 
 
 
 void mADCInternal::Init(void){
 
-// pinMode(12, INPUT);
+  if(external_interrupt.flag_enabled)
+  {
+    pinMode(external_interrupt.trigger_pin, INPUT_PULLUP);
+    attachInterrupt(external_interrupt.trigger_pin, ISR_External_Pin_ADC_Config_All_Trigger, FALLING);
+  }
 
-      // Start the button monitoring passing in the helper function.  You COULD make this a lambda here, BUT I found that the lambda not being "IRAM" would periodically crash the device.
-    // buttonExternal.
-    Start(ISR_External_Pin_ADC_Config0_Trigger);
+  // Configure all channel atten and width
+  for(int i=0; i<settings.fSensorCount; i++)
+  {
+    switch(adc_config[i].input_pin)
+    {
+      case 32:
+        adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
+      break;
+      case 34:
+        adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
+      break;
+      case 35:
+        adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
+        adc1_config_width(ADC_WIDTH_BIT_12);
+        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
+      break;
+    }
+
+  }
 
 
+  // adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
+  // adc1_config_width(ADC_WIDTH_BIT_12);
 
-  // for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){    
-  //   sensor[sensor_id].tSavedMeasureClimate = millis();
-  //   sensor[sensor_id].sReadSensor = SPLIT_TASK_SEC1_ID;    
-  // }
+  // adc2_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
+  // adc2_config_width(ADC_WIDTH_BIT_12);
 
-  adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_11db );
-  adc1_config_width(ADC_WIDTH_12Bit);
+  // adc1_config_width(ADC_WIDTH_BIT_12);
+  //   adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_0);
+  //   int val = adc1_get_raw(ADC1_CHANNEL_0);
 
-  adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_11db );
-  adc1_config_width(ADC_WIDTH_12Bit);
-
-  settings.measure_rate_ms = 1000;
-
-  attachInterrupt(
-    22, 
-    ISR_TriggerGPIO_ADC_Record,
-    FALLING
-  );
-
+  Serial2.begin(1536000);
   
 }
-
-void mADCInternal::Start(void (*ISR_callback)(void)) {
-    pinMode(this->interruptPin, INPUT_PULLUP);
-    attachInterrupt(this->interruptPin, ISR_callback, FALLING);
-}
-
-
-
-static void IRAM_ATTR ISR_TriggerGPIO_ADC_Record()
-{
-  // button1.numberKeyPresses += 1;
-  // button1.pressed = true;
-}
-
-
-// Optional, add that another GPIO is interrupt on low to trigger ADC capture
-
 
 void mADCInternal::EveryLoop(){
     
-
-  if(mTime::TimeReached(&tSaved_adctest, 1000))
+  if(external_interrupt.flag_pin_active)
   {
-
-      Serial.print(adc1_get_raw(ADC1_CHANNEL_7));
-      Serial.print("===========");
-
-  std::vector<int> samples;
-  uint8_t channel_ = ADC1_CHANNEL_7;
-  float lastReading_ = 0;
-  uint8_t adcSampleCount_ = 10;
-
-    // collect samples from ADC
-    while(samples.size() < adcSampleCount_)
-    {
-      samples.push_back(adc1_get_raw(ADC1_CHANNEL_7));
-      ets_delay_us(1);
-    }
-    // average the collected samples
-    lastReading_ = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
-
-    Serial.println(lastReading_);
-
-  }
-
-
-  if(adc_config[0].flag_external_interrupt_triggered_reading)
-  {
-    adc_config[0].flag_external_interrupt_triggered_reading = false;
-    Serial.println("adc_config[0].flag_external_interrupt_triggered_reading");
-  }
-  
-  if(adc_config[1].flag_external_interrupt_triggered_reading)
-  {
-    adc_config[1].flag_external_interrupt_triggered_reading = false;
-    Serial.println("adc_config[1].flag_external_interrupt_triggered_reading");
-  }
-  
+    external_interrupt.flag_pin_active = false;
+    // Serial.println("external_interrupt.flag_pin_active");
+    Update_Channel1_ADC_Readings();
+    // AddLog(LOG_LEVEL_TEST, PSTR("adc_levels = \t%d\t%d"), readings[0].adc_level, readings[1].adc_level);
+  }  
 
 }
 
 
+void mADCInternal::Update_Channel1_ADC_Readings()
+{
+
+  #ifdef ENABLE_SMOOTHING_ON_ADC_READING
+  for(int i = 0;i<settings.fSensorCount; i++)
+  {
+    samples.clear();
+
+    // collect samples from ADC
+    while(samples.size() < readings[i].adcSampleCount_){
+      samples.push_back(adc1_get_raw((adc1_channel_t)adc_config[i].channel_id));
+      ets_delay_us(1);
+    }
+    // average the collected samples
+    readings[i].adc_level = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
+    // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
+
+    readings[i].samples_between_resets++;
+
+    // Add nice function that adds reading into memory
+    if(readings[i].stored_values.index < STORED_VALUE_ADC_MAX){
+      readings[i].stored_values.adc[readings[i].stored_values.index++] = readings[i].adc_level;
+    }else{
+      // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
+      // readings[i].stored_values.index = 0;
+    }
+
+  }
+  #else
+    readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
+    ets_delay_us(1);
+    readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
+    AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
+  #endif
+
+}
 
 
 uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_method){
@@ -236,30 +327,76 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
 
   char buffer[50];
 
-  // for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
-  //   if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-  //     JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_ADC_INTERNAL_ID,sensor_id,buffer,sizeof(buffer)));   
-  //       JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
-  //       JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
-  //       JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
-  //       JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-  //       JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
-  //         JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-  //         JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-  //       JsonBuilderI->Level_End();  
-  //     JsonBuilderI->Level_End();
-  //   }
+  
+    // adc1_config_width(ADC_WIDTH_BIT_12);
+    // adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_1,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_2,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_3,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_4,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_5,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_6,ADC_ATTEN_DB_0);
+    // adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("adc = [%d,%d,%d,%d,%d,%d,%d,%d]"),
+    //   adc1_get_raw(ADC1_CHANNEL_0),
+    //   adc1_get_raw(ADC1_CHANNEL_1),
+    //   adc1_get_raw(ADC1_CHANNEL_2),
+    //   adc1_get_raw(ADC1_CHANNEL_3),
+    //   adc1_get_raw(ADC1_CHANNEL_4),
+    //   adc1_get_raw(ADC1_CHANNEL_5),
+    //   adc1_get_raw(ADC1_CHANNEL_6),
+    //   adc1_get_raw(ADC1_CHANNEL_7)
+    // );
+
+    // Update_Channel1_ADC_Readings();
+    
+  JBI->Array_Start("chADC1");
+  for(int i=0;i<2;i++){
+    JBI->Add(readings[i].adc_level);
+  }
+  JBI->Array_End();
+
+  // JBI->Array_Start("ADC1");
+  // for(int i=0;i<8;i++){
+  //   JBI->Add(adc1_get_raw((adc1_channel_t)i));
   // }
+  // JBI->Array_End();
+
+  JBI->Array_Start("stored_values.index");
+  for(int i=0;i<2;i++){
+    JBI->Add(readings[0].stored_values.index);
+  }
+  JBI->Array_End();
+  JBI->Array_Start("samples_between_resets");
+  for(int i=0;i<2;i++){
+    JBI->Add(readings[i].samples_between_resets);
+  }
+  JBI->Array_End();
+
+  uint16_t send_size = 0;
+  send_size = 10; //STORED_VALUE_ADC_MAX
+
+  JBI->Array_Start("adc0");
+  for(int i=0;i<send_size;i++){
+    JBI->Add(readings[0].stored_values.adc[i]);
+  }
+  JBI->Array_End();
+  JBI->Array_Start("adc1");
+  for(int i=0;i<send_size;i++){
+    JBI->Add(readings[1].stored_values.adc[i]);
+  }
+  JBI->Array_End();
+
+
+  
+
+
   
   return JsonBuilderI->End();
 
 }
 
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
@@ -298,8 +435,6 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mADCInternal::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
-
-
 
 /**
  * @brief Set flag for all mqtthandlers to send

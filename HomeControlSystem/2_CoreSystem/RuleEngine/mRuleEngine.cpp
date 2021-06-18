@@ -312,6 +312,7 @@ uint8_t mRuleEngine::ConstructJSON_Sensor(uint8_t json_level){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mRuleEngine::MQTTHandler_Init(){
 
   struct handler<mRuleEngine>* mqtthandler_ptr;
@@ -395,5 +396,6 @@ void mRuleEngine::MQTTHandler_Sender(uint8_t id){
 
 }
 
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif // USE_MODULE_CORE_RULES

@@ -131,8 +131,7 @@ bool IsButtonActive(uint8_t id);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
-
+  #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
@@ -150,8 +149,7 @@ bool IsButtonActive(uint8_t id);
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
     };
-
-  //#endif
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 };

@@ -48,6 +48,11 @@ class mSerialPositionalLogger :
     uint32_t tSaved_MillisWrite2 = 0;
 
     
+    std::vector<uint16_t> readings_rss2;
+    std::vector<uint16_t> readings;
+
+
+    
     struct SDCARD_DATA{
       bool isopened = false;
 

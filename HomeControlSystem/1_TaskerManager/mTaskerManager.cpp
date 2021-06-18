@@ -68,6 +68,10 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     break;
   } //END switch
 
+  for(int i=0;i<1;i++){
+    DEBUG_PIN3_SET(0); //green
+    DEBUG_PIN3_SET(1);
+  }
 
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
@@ -92,7 +96,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //   }
       break;
       default:
+    DEBUG_PIN2_SET(0); //blue
         pModule[switch_index]->Tasker(function, obj);
+    DEBUG_PIN2_SET(1);
       break;
     }
 
@@ -167,6 +173,10 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
+  for(int i=0;i<2;i++){
+    DEBUG_PIN1_SET(0); //pur
+    DEBUG_PIN1_SET(1);
+  }
   return result;
 
 }

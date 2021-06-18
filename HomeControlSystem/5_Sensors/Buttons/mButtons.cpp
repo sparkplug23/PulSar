@@ -258,8 +258,12 @@ void mButtons::ButtonHandler(void)
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
           AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
           //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
-            mqtthandler_sensor_ifchanged.flags.SendNow = true;
-            // Type method
+            
+  #ifdef USE_MODULE_NETWORK_MQTT
+  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  #endif // USE_MODULE_NETWORK_MQTT     
+  
+       // Type method
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
             // tsaved_button_debounce = millis() + KEY_CHECK_TIME; // Push next read into future // move time forward by 1 second
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
@@ -432,6 +436,7 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mButtons::MQTTHandler_Init(){
 
   struct handler<mButtons>* mqtthandler_ptr;
@@ -496,5 +501,6 @@ void mButtons::MQTTHandler_Sender(uint8_t id){
   }
 
 }
+  #endif// USE_MODULE_NETWORK_MQTT
 
 #endif

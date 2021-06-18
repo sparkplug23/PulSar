@@ -253,6 +253,7 @@ bool loaded_default_for_moduled = false;
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
 
 
+  #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_fSendNow();
     void MQTTHandler_Set_TelePeriod();
@@ -275,6 +276,7 @@ bool loaded_default_for_moduled = false;
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_teleperiod
     };
+  #endif //  USE_MODULE_NETWORK_MQTT
 
 };
 

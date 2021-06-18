@@ -23,7 +23,8 @@
 const char* mOLED_SSD1306::PM_MODULE_DISPLAYS_OLED_SSD1306_CTR = D_MODULE_DISPLAYS_OLED_SSD1306_CTR;
 const char* mOLED_SSD1306::PM_MODULE_DISPLAYS_OLED_SSD1306_FRIENDLY_CTR = D_MODULE_DISPLAYS_OLED_SSD1306_FRIENDLY_CTR;
 
-int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
+{
   
   int8_t function_result = 0;
 
@@ -43,7 +44,7 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-  if (!pCONT_iDisp->renderer){ return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
+  if(!pCONT_iDisp->renderer) { return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
 
   switch(function){
     /************
@@ -289,6 +290,7 @@ uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mOLED_SSD1306::MQTTHandler_Init(){
 
   struct handler<mOLED_SSD1306>* mqtthandler_ptr;
@@ -328,5 +330,7 @@ void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   );
 
 }
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

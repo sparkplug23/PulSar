@@ -91,6 +91,23 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
       if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
 
+      
+      #ifndef DISABLE_SERIAL0_CORE
+
+        // SetUTCTime(
+        //   2021,
+        //   6,
+        //   17,
+        //   15,
+        //   16,
+        //   17);
+
+        char buffer[40];
+        AddLog(LOG_LEVEL_TEST, PSTR("utc_time=%s"), pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+
+      // Serial.println(GetUptime());
+      #endif
+
     }break;
     case FUNC_EVERY_MIDNIGHT:
     
@@ -114,6 +131,59 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
 
 }//end
 
+/**
+ * Function that allows setting the utc_time (and all other parts neccasry for setting internal time)
+ * This is to allow ntp or gps time to be used as time setting
+ * @param year absolute (not relative to 1970) ie "2021"
+ * */
+void mTime::SetUTCTime(
+          uint16_t year,
+          uint8_t month,
+          uint8_t day,
+          uint8_t hour,
+          uint8_t minute,
+          uint8_t second
+)
+{
+
+  datetime tm;
+  tm.year = year-1970;
+  tm.month = month;
+  tm.Mday = day;
+  tm.hour = hour;
+  tm.minute = minute;
+  tm.second = second;
+
+  Rtc.utc_time = MakeTime(tm);
+
+}
+
+
+
+
+// void UBXHandleTIME()
+// {
+//   DEBUG_SENSOR_LOG(PSTR("UBX: UTC-Time: %u-%u-%u %u:%u:%u"), UBX.Message.navTime.year, UBX.Message.navTime.month ,UBX.Message.navTime.day,UBX.Message.navTime.hour,UBX.Message.navTime.min,UBX.Message.navTime.sec);
+//   if (UBX.Message.navTime.valid.UTC == 1) {
+//     UBX.state.timeOffset =  millis(); // iTOW%1000 should be 0 here, when NTP-server is enabled and in "pure mode"
+//     DEBUG_SENSOR_LOG(PSTR("UBX: UTC-Time is valid"));
+//     if (Rtc.user_time_entry == false || UBX.mode.forceUTCupdate || UBX.mode.runningNTP) {
+//       TIME_T gpsTime;
+//       gpsTime.year = UBX.Message.navTime.year - 1970;
+//       gpsTime.month = UBX.Message.navTime.month;
+//       gpsTime.day_of_month = UBX.Message.navTime.day;
+//       gpsTime.hour = UBX.Message.navTime.hour;
+//       gpsTime.minute = UBX.Message.navTime.min;
+//       gpsTime.second = UBX.Message.navTime.sec;
+//       UBX.rec_buffer.values.time = MakeTime(gpsTime);
+//       if (UBX.mode.forceUTCupdate || Rtc.user_time_entry == false){
+//         AddLog(LOG_LEVEL_INFO, PSTR("UBX: UTC-Time is valid, set system time"));
+//         Rtc.utc_time = UBX.rec_buffer.values.time;
+//       }
+//       Rtc.user_time_entry = true;
+//     }
+//   }
+// }
 
 void mTime::parse_JSONCommand(JsonParserObject obj){}
 
@@ -1563,7 +1633,7 @@ uint32_t mTime::MakeTime(datetime_t &tm)
       seconds += SECS_PER_DAY * kDaysInMonth[i-1];  // monthDay array starts from 0
     }
   }
-  seconds+= (tm.Wday - 1) * SECS_PER_DAY;
+  seconds+= (tm.Mday - 1) * SECS_PER_DAY;
   seconds+= tm.hour * SECS_PER_HOUR;
   seconds+= tm.minute * SECS_PER_MIN;
   seconds+= tm.second;

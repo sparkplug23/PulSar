@@ -33,25 +33,14 @@ int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
     break;  
     case FUNC_EVERY_SECOND: 
       EverySecond();
-    break;  
-    //Rule based on button toggle for sd open and close 
-    //have buitin led on when sd card has shown write activity in last 100ms
-    /************
-     * RULES SECTION * 
-    *******************/
-    #ifdef USE_MODULE_CORE_RULES
-    // case FUNC_EVENT_BUTTON_PRESSED:
-    //   RulesEvent_Button_Pressed();
-    // break;
-    #endif// USE_MODULE_CORE_RULES
-
+    break;
     /************
      * TRIGGERS SECTION * 
     *******************/
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-      // CommandSet_SDCard_OpenClose_Toggle();
-      // CommandSet_LoggingState(2);
+      #ifdef USE_MODULE_DRIVERS_SDCARD
       pCONT_sdcard->CommandSet_SDCard_Appending_File_Method_State(2);
+      #endif
       sequence_test = 0;
     break;
     /************
@@ -132,11 +121,15 @@ void mSerialPositionalLogger::Init(void)
 
 void mSerialPositionalLogger::EveryLoop()
 {
+    // DEBUG_PIN3_SET(0);
 
   if(mTime::TimeReached(&tSaved_MillisWrite, 10))
   {
+    //DEBUG_PIN2_SET(0);
     SubTask_HandleSDCardLogging();
+    //DEBUG_PIN2_SET(1);
   }
+    // DEBUG_PIN3_SET(1);/
 
 }
 
@@ -151,6 +144,13 @@ void mSerialPositionalLogger::EverySecond()
 
   // SubTask_Debug_BasicFileWriteTest();
 
+
+// ConstructJSON_SDCardSuperFrame();
+//   AddLog(LOG_LEVEL_TEST, PSTR("SuperFrame=\"%s\""), JBI->GetBufferPtr());
+
+
+  
+
 }
 
 
@@ -158,6 +158,7 @@ void mSerialPositionalLogger::EverySecond()
 /**
  * @brief Test1: Button will open the file, then each time it is called, append the current RTC time.
  * Button will then close the file again. 
+ * This method will try writting it directly, but future method may need a ringbuffer just for the sdcard stream... "BufferSDCARDStream-> print to it"
  * */
 void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 {
@@ -181,12 +182,37 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 
     ConstructJSON_SDCardSuperFrame();
     
-    if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
-    {
-      AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
-    }
+    // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+    // {
+    //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+    // }
 
     pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+
+  }
+  #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+
+
+  #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+  if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+  {
+
+    ConstructJSON_SDCardSuperFrame();
+    
+    // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+    // {
+    //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+    // }
+
+    // pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+    /**
+     * Append to sdcard stream
+     * */
+    pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+    
+
+
+
 
   }
   #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
@@ -319,15 +345,16 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
   //[ ] //Also show lat/long so I know its working
   //[] packets received on serialRSS in thousands
 
+// DEBUG_PIN2_TOGGLE();
 
-
-
+  #ifdef USE_MODULE_DRIVERS_SDCARD
   snprintf(buffer, sizeof(buffer), "%c%s%s",
     pCONT_sdcard->sdcard_status.init_error_on_boot ? 'E' : 'f',
     pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID ?"Open":"CLOSED",
     &pCONT_sdcard->writer_settings.file_name[8] //skipping "APPEND_" to get just time
   );
   pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
+  #endif //USE_MODULE_DRIVERS_SDCARD
 
   snprintf(buffer, sizeof(buffer), "%s %s","Op",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
@@ -368,60 +395,80 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
 
   JsonBuilderI->Start();
     
-    // RSS data from ringbuffer1, the arrival of X bytes into this buffer should trigger a write to the SD card.
-    // This means, no exact SF is needed, but every RSS within it will have a gps position attached to it.
+    JBI->Add("SN", sequence_test++);
 
-    #ifdef ENABLE_DEVFEATURE_DUMMY_RSS_DATA
-    // JBI->Add("SF", "AABBCCDDEEFF");
-
-    char rss_single_frame[40];
-
-    // This will be pure UART_RSS Stream, triggered on GPIO pulse from pic32 interrupt
-    BufferWriterI->Append("\"SF\":[\"");
-    for(int i=0;i<10;i++)
-    {
-      
-      snprintf(rss_single_frame, sizeof(rss_single_frame), 
-        "%02d" // Frame
-        "%02d" // Tx
-        "%02d" // Rx
-        "%02d" // RSS_2400
-        "%02d" // RSS_5800
-        ,
-        i,
-        2,
-        3,
-        1000,
-        2000
-      );
-
-      BufferWriterI->Append(rss_single_frame);
-    }
-    BufferWriterI->Append("\"]");
-
-    #endif // ENABLE_DEVFEATURE_DUMMY_RSS_DATA
-
-
-    // JBI->Array_Start("SF");
-    //   for(int i=0; i<10; i++) //or byte packing? this would save 1 comma per sample, worth it!
-    //     JBI->Add(i);
-    // JBI->Array_End();
-
-    JBI->Add("SQ",sequence_test++);
+    // Debug data only
     JBI->Add("MS",millis());
-
-    JBI->Add("Uptime", pCONT_time->RtcTime.hhmmss_ctr); //millis?
+    //JBI->Add("Uptime", pCONT_time->RtcTime.hhmmss_ctr); //millis?
 
 
     // GPS data
     #ifdef USE_MODULE_DRIVERS_GPS
-    JBI->Level_Start("GPS");
-      JBI->Add("la", pCONT_gps->gps_result_stored.latitude()); 
-      JBI->Add("lg", pCONT_gps->gps_result_stored.longitude()); 
-      JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); 
+    JBI->Level_Start("gp");
+      // JBI->Add("la", pCONT_gps->gps_result_stored.latitude()); 
+      // JBI->Add("lg", pCONT_gps->gps_result_stored.longitude()); 
+
+      //altitudem, msl approx 27
+
+      JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
+      JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
+      JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
       JBI->Add("sd", pCONT_gps->gps_result_stored.speed());
     JBI->Level_End();
     #endif // USE_MODULE_DRIVERS_GPS
+
+
+    /**
+     * add esp32 rss data
+     * */ 
+    JBI->Array_Start("e2");
+    for(int i=0;i<40;i++)
+    {
+      JBI->Add(i);
+    }
+    JBI->Array_End();
+
+    JBI->Array_Start("e5");
+    for(int i=0;i<40;i++)
+    {
+      JBI->Add(i);
+    }
+    JBI->Array_End();
+
+
+
+
+    // RSS data from ringbuffer1, the arrival of X bytes into this buffer should trigger a write to the SD card.
+    // This means, no exact SF is needed, but every RSS within it will have a gps position attached to it.
+
+    //#ifdef ENABLE_DEVFEATURE_DUMMY_RSS_DATA
+
+    // This will be pure UART_RSS Stream, triggered on GPIO pulse from pic32 interrupt
+    BufferWriterI->Append(",\"SF\":\"");
+    for(int i=0;i<163;i++)
+    {
+      
+      // sprintf(rss_single_frame, sizeof(rss_ingle_frame), 
+      //   "%02d" // Frames
+      //   "%02d" // Tx
+      //   "%02d" // Rx
+      //   "%02d" // RSS_2400
+      //   "%02d" // RSS_5800
+      //   ,
+      //   i,
+      //   2,
+      //   3,
+      //   1000,
+      //   2000
+      // );
+
+      BufferWriterI->Append_P(PSTR("%c"), (i%10)+48);
+    }
+    BufferWriterI->Append("\"");
+
+    //#endif // ENABLE_DEVFEATURE_DUMMY_RSS_DATA
+
+
 
   return JsonBuilderI->End();
     
@@ -435,6 +482,7 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
+  #ifdef USE_MODULE_NETWORK_MQTT
 void mSerialPositionalLogger::MQTTHandler_Init(){
 
   struct handler<mSerialPositionalLogger>* mqtthandler_ptr;
@@ -512,6 +560,7 @@ void mSerialPositionalLogger::MQTTHandler_Sender(uint8_t id)
   }
 }
 
+  #endif // USE_MODULE_NETWORK_MQTT
 
 
 ////////////////////// END OF MQTT /////////////////////////
