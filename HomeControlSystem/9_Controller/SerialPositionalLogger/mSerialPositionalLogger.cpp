@@ -6,6 +6,35 @@ const char* mSerialPositionalLogger::PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGG
 const char* mSerialPositionalLogger::PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR = D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR;
 
 
+  #ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
+/************************************************************************************
+******** External Pin Interrupt Triggers For ADC ************************************
+ @note Helper functions, that need to be static. The singlton class instance allows setting
+       a flag that is inside the class
+*************************************************************************************
+*************************************************************************************/
+void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
+{
+  pCONT_serial_pos_log->sync_frame_data.flag_pin_active = true;
+  // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
+  if(digitalRead(SYNC_FRAME_ISR_PIN)==LOW)
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_started = true;
+  }
+  else
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_ended = true;
+  }
+}
+
+
+#endif // ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
+
+
+
+
+
+
 int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
@@ -84,6 +113,29 @@ void mSerialPositionalLogger::Pre_Init(void)
     settings.fEnableSensor = true;
   // }
 
+
+
+/**
+ * Pin "sync_frame_status" on falling edge signifies the start of a new frame being sent, while, rising edge is the completion of the data.
+ * Rising edge should occur approx 2.5ms after falling, and will set a flag to begin formation of sync_frame sample data to be sent to SDCARD stream
+ * The amount of data to be read from RSS_STREAM will be known as it ends with two 0xFF 0xFF EOF bytes.
+ * */
+  #ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
+
+  //  if(external_interrupt.flag_enabled)
+  // {
+    
+    sync_frame_data.trigger_pin = SYNC_FRAME_ISR_PIN;
+
+    pinMode(sync_frame_data.trigger_pin, INPUT_PULLUP);
+    attachInterrupt(sync_frame_data.trigger_pin, ISR_External_Pin_Sync_Frame_Status_Event_Trigger, CHANGE);
+  // }
+
+
+
+
+  #endif
+
 }
 
 
@@ -123,6 +175,7 @@ void mSerialPositionalLogger::EveryLoop()
 {
     // DEBUG_PIN3_SET(0);
 
+  #ifdef ENABLE_GPS_10MS_LOG_TEST1
   if(mTime::TimeReached(&tSaved_MillisWrite, 10))
   {
     //DEBUG_PIN2_SET(0);
@@ -130,8 +183,110 @@ void mSerialPositionalLogger::EveryLoop()
     //DEBUG_PIN2_SET(1);
   }
     // DEBUG_PIN3_SET(1);/
+  #endif // ENABLE_GPS_10MS_LOG_TEST1
+
+  Handle_Primary_Service_RSS_Stream_To_Create_SDCard_Stream();
+
 
 }
+
+
+void mSerialPositionalLogger::Handle_Primary_Service_RSS_Stream_To_Create_SDCard_Stream()
+{
+
+  if(pCONT_serial_pos_log->sync_frame_data.flag_started)
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_started = false;
+    // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_started"));
+  }
+  
+  if(pCONT_serial_pos_log->sync_frame_data.flag_ended)
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_ended = false;
+    // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_ended"));
+    SubTask_Generate_SyncFrame_To_SDCard_Stream();
+  }
+
+}
+
+void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
+{
+    // #ifdef ENABLE_DEVFEATURE_SPLASH_RINGBUFFER_TO_DEBUG_SERIAL
+    // // for(
+    //   int i=2;
+    // //   i<3;i++)
+    // // {
+    //   BufferWriterI->Clear();
+    //   uint16_t bytes_in_line = pCONT_uart->GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+    //   if(bytes_in_line){
+    //     AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d]"), i, bytes_in_line);
+    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //   }
+    // // }
+    // #endif
+
+    /**
+     * Warning: Assume flags and this next part of code happen fast enough (approx. 7.5ms or less) so no special char is needed, what is in the buffer should be the entire pic32_syncframe
+     * */
+    Construct_SuperFrame_Data_From_RingBuffer();
+
+
+    // memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
+    // uint16_t maximum_sync_frame_length = 300;
+    // sync_frame_data.buffer_bytes_read = pCONT_uart->GetRingBufferDataAndClear(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
+    //   if(sync_frame_data.buffer_bytes_read){
+    //   //  AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
+    //     // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
+    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //   }
+
+    /**
+     * Get data that is superframe, and save as its own small buffer read from RSS ring, instead of global buffer
+     * */
+
+
+    ConstructJSON_SDCardSuperFrame();
+
+    /**
+     * Append to sdcard stream
+     * */
+    #ifdef USE_MODULE_DRIVERS_SDCARD
+    pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+
+    #else
+      AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
+    #endif //USE_MODULE_DRIVERS_SDCARD
+
+
+}
+
+
+
+/**
+ * Check ringbuffer for max size needed to get a superframe, then check for the index where the 0xFF 0xFF end-of-frame exists
+ * Read it again, giving only this amount of data, return that space to the ringbuffer
+ * */
+void mSerialPositionalLogger::Construct_SuperFrame_Data_From_RingBuffer()
+{
+
+  memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
+  uint16_t maximum_sync_frame_length = 300;
+  sync_frame_data.buffer_bytes_read = pCONT_uart->GetSingleItemFromNoSplitRingBuffer(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
+
+  
+  if(sync_frame_data.buffer_bytes_read){
+  //  AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
+    // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
+    // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+  }
+
+
+
+
+}
+
+
+
 
 //Use gps time to set rtc time?
 
@@ -397,6 +552,15 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     
     JBI->Add("SN", sequence_test++);
 
+    /**
+     * on first sequence number, send additional useful info
+     * */
+    if(sequence_test == 0)
+    {
+      JBI->Add("NodeNumber", 1);
+      JBI->Add("MAC", 1); //as this gives unique to hardware value
+    }
+
     // Debug data only
     JBI->Add("MS",millis());
     //JBI->Add("Uptime", pCONT_time->RtcTime.hhmmss_ctr); //millis?
@@ -435,6 +599,13 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     }
     JBI->Array_End();
 
+    
+    BufferWriterI->Append(",\"SF\":[");
+    for(int i=0;i<sync_frame_data.buffer_bytes_read;i++)
+    {
+      BufferWriterI->Append_P(PSTR("%d%s"), sync_frame_data.buffer[i], i<sync_frame_data.buffer_bytes_read-1? ",": ""); 
+    }
+    BufferWriterI->Append("]");
 
 
 
@@ -444,27 +615,27 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     //#ifdef ENABLE_DEVFEATURE_DUMMY_RSS_DATA
 
     // This will be pure UART_RSS Stream, triggered on GPIO pulse from pic32 interrupt
-    BufferWriterI->Append(",\"SF\":\"");
-    for(int i=0;i<163;i++)
-    {
+    // BufferWriterI->Append(",\"SF\":\"");
+    // for(int i=0;i<163;i++)
+    // {
       
-      // sprintf(rss_single_frame, sizeof(rss_ingle_frame), 
-      //   "%02d" // Frames
-      //   "%02d" // Tx
-      //   "%02d" // Rx
-      //   "%02d" // RSS_2400
-      //   "%02d" // RSS_5800
-      //   ,
-      //   i,
-      //   2,
-      //   3,
-      //   1000,
-      //   2000
-      // );
+    //   // sprintf(rss_single_frame, sizeof(rss_ingle_frame), 
+    //   //   "%02d" // Frames
+    //   //   "%02d" // Tx
+    //   //   "%02d" // Rx
+    //   //   "%02d" // RSS_2400
+    //   //   "%02d" // RSS_5800
+    //   //   ,
+    //   //   i,
+    //   //   2,
+    //   //   3,
+    //   //   1000,
+    //   //   2000
+    //   // );
 
-      BufferWriterI->Append_P(PSTR("%c"), (i%10)+48);
-    }
-    BufferWriterI->Append("\"");
+    //   BufferWriterI->Append_P(PSTR("%c"), (i%10)+48);
+    // }
+    // BufferWriterI->Append("\"");
 
     //#endif // ENABLE_DEVFEATURE_DUMMY_RSS_DATA
 
