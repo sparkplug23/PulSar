@@ -243,8 +243,8 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 
 }
 
-template<typename T>
-void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, T arr_len)
+template<typename T, typename U>
+void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
   T ch;
   #ifndef DISABLE_SERIAL_LOGGING

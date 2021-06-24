@@ -27,6 +27,11 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
      * Special case, I want to loop and init this when another modules says
      * */
     case FUNC_LOOP:
+
+      #ifndef USE_MODULE_DRIVERS_GPS
+        // Finsihed with manual control, start ISRs
+        pCONT_uart->flag_init_buffers_and_start_isrs = true;
+      #endif
     
      if(flag_init_buffers_and_start_isrs && !settings.fEnableModule)
      {       
@@ -55,16 +60,19 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
       // }
 
 
-    #ifdef ENABLE_DEVFEATURE_SPLASH_RINGBUFFER_TO_DEBUG_SERIAL
-    for(int i=2;i<3;i++)
-    {
-      BufferWriterI->Clear();
-      uint16_t bytes_in_line = GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
-      if(strlen(BufferWriterI->GetPtr())){
-        AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
-      }
-    }
-    #endif
+    // #ifdef ENABLE_DEVFEATURE_SPLASH_RINGBUFFER_TO_DEBUG_SERIAL
+    // // for(
+    //   int i=2;
+    // //   i<3;i++)
+    // // {
+    //   BufferWriterI->Clear();
+    //   uint16_t bytes_in_line = GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+    //   if(bytes_in_line){
+    //     AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d]"), i, bytes_in_line);
+    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    //   }
+    // // }
+    // #endif
 
       // char buffer2[500] = {0};
       // uint16_t bytes_in_line2 = GetRingBufferDataAndClear(2, buffer2, sizeof(buffer2), '\n', false);
@@ -75,6 +83,23 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
    }
    break;
    case FUNC_EVERY_SECOND:{
+
+
+// // for(
+//       int i=2;
+//     //   i<3;i++)
+//     // {
+//       BufferWriterI->Clear();
+//       uint16_t bytes_in_line = GetRingBufferDataAndClear(i, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
+//       if(bytes_in_line){//strlen(BufferWriterI->GetPtr())){
+//         AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+//       }else{
+//         AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> EMPTY"));//, i, bytes_in_line, BufferWriterI->GetPtr());
+
+//       }
+//     // }
+//     // #endif
+
 
     // AddLog(LOG_LEVEL_TEST, PSTR("[%d] \"%s\""),pCONT_uart->urxlen2,(char*)pCONT_uart->rxbuf2);
 
@@ -102,6 +127,11 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
       //   //Failed to receive item
       //   Serial.printf("Failed to receive item\n");
       // }
+
+      #ifdef ENABLE_DEVFEATURE_DEBUG_PRINT_UART1_INPUT_STREAM_FROM_RINGBUFFER
+
+
+      #endif // ENABLE_DEVFEATURE_DEBUG_PRINT_UART1_INPUT_STREAM_FROM_RINGBUFFER
 
 
     }
@@ -301,6 +331,196 @@ uint16_t mSerialUART::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, 
   size_t item_size = 0;
   // Wait at most 1ms to read from buffer, read a maximum number of bytes
   char*  item = (char *)xRingbufferReceiveUpTo(handle_tmp, &item_size, pdMS_TO_TICKS(100), buflen);
+
+  //Check received item
+  if (item != NULL) {
+    // Read from buffer
+    memcpy(buffer,item,item_size);
+
+    //AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+
+    // if(flag_clear_buffer_after_read)
+    // {
+      //Return Item
+      vRingbufferReturnItem(handle_tmp, (void *)item); // Free memory
+    // }
+  } 
+
+  return item_size;
+
+}
+
+/**
+ * Universal to all UARTs, get RingBuffer
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * @return item_size number of bytes read from buffer
+ * */
+uint16_t mSerialUART::GetRingBufferDataAndClearUntilSpecialDelimeter(uint8_t uart_num, char* buffer, uint16_t buflen)
+{
+
+  RingbufHandle_t handle_tmp;
+  switch(uart_num)
+  {
+    default:
+    case 0: 
+      if(!settings.uart0.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart0.ringbuffer_handle;
+    break;
+    case 1:
+      if(!settings.uart1.initialised)
+      {
+        return 0;
+      } 
+      handle_tmp = settings.uart1.ringbuffer_handle;
+    break;
+    case 2: 
+      if(!settings.uart2.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart2.ringbuffer_handle;
+    break;
+  }
+
+//   //delayed start check
+//   // if(handle_tmp == nullptr)
+//   // {
+//   //   return 0; // not ready to continue
+//   // }
+//   uint16_t index_of_end_of_frame = 0;
+//   bool flag_found_eof = false;
+
+//   /**
+//    * First read, with amount greater than expected until next frame 0xFF 0xFF
+//    * */
+//   // Receive an item from no-split ring buffer
+//   size_t item1_size = 0;
+//   // Wait at most 1ms to read from buffer, read a maximum number of bytes
+//   char*  item1 = (char *)xRingbufferReceiveUpTo(handle_tmp, &item1_size, pdMS_TO_TICKS(100), buflen);
+
+
+
+//   /**
+//    * Read, then test this memory for the special char, and record the index (ie max length I need to read on next receiveupto)
+//    * */
+//   //Check received item
+//   if (item1 != NULL) {
+//     // Read from buffer
+//     memcpy(buffer,item1,item1_size);
+
+
+//   for(int i=0;i<item1_size;i++)
+//   {
+//     Serial.print(buffer[i]);
+//     Serial.print('-');
+//   }
+//     Serial.println();
+//     Serial.println();
+
+
+//     for(int i=0;i<item1_size;i++)
+//     {
+//       //first byte
+//       if(buffer[i] = 0xFF)
+//       {
+//         if(buffer[i+1] = 0xFF)
+//         {
+//           index_of_end_of_frame = i+1;
+//           break;
+//         }
+//       }
+//     }
+//   }
+
+//   /**
+//    *  Read again, but only until the EOF ends
+//    * */
+//   if(flag_found_eof)
+//   {
+//     buflen = index_of_end_of_frame;
+//   }
+
+// */
+
+  
+  // Receive an item from no-split ring buffer
+  size_t item_size = 0;
+  // Wait at most 1ms to read from buffer, read a maximum number of bytes
+  char*  item = (char *)xRingbufferReceiveUpTo(handle_tmp, &item_size, pdMS_TO_TICKS(100), buflen);
+
+  //Check received item
+  if (item != NULL) {
+    // Read from buffer
+    memcpy(buffer,item,item_size);
+
+    AddLog(LOG_LEVEL_TEST, PSTR("xRingbufferReceiveUpTo=\"%s\""),buffer);
+
+    // if(flag_clear_buffer_after_read)
+    // {
+      //Return Item
+      vRingbufferReturnItem(handle_tmp, (void *)item); // Free memory
+    // }
+  } 
+
+  return item_size;
+
+}
+
+
+
+/**
+ * Universal to all UARTs, get RingBuffer
+ * Returns: Bytes read from buffer and thus freed
+ * Arg:     Buffer to write into and its size, or simply, how much to read at a time
+ * Possible change: Read until length, or stop on a special character (with possible relative index also ie "a,5x" detect comma, plus 2)
+ * @return item_size number of bytes read from buffer
+ * */
+uint16_t mSerialUART::GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buffer, uint16_t buflen)
+{
+
+  RingbufHandle_t handle_tmp;
+  switch(uart_num)
+  {
+    default:
+    case 0: 
+      if(!settings.uart0.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart0.ringbuffer_handle;
+    break;
+    case 1:
+      if(!settings.uart1.initialised)
+      {
+        return 0;
+      } 
+      handle_tmp = settings.uart1.ringbuffer_handle;
+    break;
+    case 2: 
+      if(!settings.uart2.initialised)
+      {
+        return 0;
+      }
+      handle_tmp = settings.uart2.ringbuffer_handle;
+    break;
+  }
+
+  //delayed start check
+  // if(handle_tmp == nullptr)
+  // {
+  //   return 0; // not ready to continue
+  // }
+  
+  // Receive an item from no-split ring buffer
+  size_t item_size = 0;
+  // Wait at most 1ms to read from buffer, read a maximum number of bytes
+  // char*  item = (char *)xRingbufferReceiveUpTo(handle_tmp, &item_size, pdMS_TO_TICKS(100), buflen);
+  char *item = (char *)xRingbufferReceive(handle_tmp, &item_size, pdMS_TO_TICKS(1000));
 
   //Check received item
   if (item != NULL) {

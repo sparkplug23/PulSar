@@ -8,6 +8,8 @@
 
 #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
 
+#include "5_Sensors/ADCInternal/mADCInternal.h"
+
 //https://i.stack.imgur.com/6pPh9.png
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR) "sdcard_superframe";
@@ -69,6 +71,28 @@ class mSerialPositionalLogger :
 
     }logger_status;
 
+    #define RSS_RINGBUFFER_NUMBER_INDEX 2
+    #define SYNC_FRAME_DATA_BUFFER_LENGTH 5000
+    struct SYNC_FRAME_DATA
+    {
+      uint8_t trigger_pin = 0;
+      bool flag_pin_active = false;
+
+      /**
+       * ACTIVE_LOW
+       * Low = started
+       * High = ended
+       * */
+      bool flag_started = false;
+      bool flag_ended = false;
+      char buffer[SYNC_FRAME_DATA_BUFFER_LENGTH];
+      uint16_t buflen = 0;
+      uint16_t buffer_bytes_read = 0;
+    }sync_frame_data;
+
+    void Handle_Primary_Service_RSS_Stream_To_Create_SDCard_Stream();
+    void SubTask_Generate_SyncFrame_To_SDCard_Stream();
+    void Construct_SuperFrame_Data_From_RingBuffer();
 
     
     void SubTask_UpdateOLED();

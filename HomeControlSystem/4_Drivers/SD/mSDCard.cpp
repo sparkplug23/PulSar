@@ -137,7 +137,7 @@ void mSDCard::init(void)
 //   SDSPI.begin(sck, miso, mosi, -1);
 //   SD.begin(ss, SDSPI);
 // }
-  Serial.print("Initializing SD card...");
+  Serial.println("Initializing SD card...");
 // Chip select for SD card
 #if defined(ESP32)
 #define SD_CS 15 // 5 **
@@ -155,7 +155,7 @@ void mSDCard::init(void)
   if(!SD.begin( SD_CS,spiSD )){
     Serial.println("Card Mount Failed");
     sdcard_status.init_error_on_boot = true;
-    delay(3000);
+    // delay(3000);
     return;
   }
 
@@ -166,19 +166,19 @@ void mSDCard::init(void)
       return;
   }
 
-  // Serial.print("SD Card Type: ");
-  // if(cardType == CARD_MMC){
-  //     Serial.println("MMC");
-  // } else if(cardType == CARD_SD){
-  //     Serial.println("SDSC");
-  // } else if(cardType == CARD_SDHC){
-  //     Serial.println("SDHC");
-  // } else {
-  //     Serial.println("UNKNOWN");
-  // }
+  Serial.print("SD Card Type: ");
+  if(cardType == CARD_MMC){
+      Serial.println("MMC");
+  } else if(cardType == CARD_SD){
+      Serial.println("SDSC");
+  } else if(cardType == CARD_SDHC){
+      Serial.println("SDHC");
+  } else {
+      Serial.println("UNKNOWN");
+  }
 
-  // uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  // Serial.printf("SD Card Size: %lluMB\n", cardSize);
+  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+  Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
   listDir(SD, "/", 0);
   // createDir(SD, "/mydir");
@@ -192,8 +192,8 @@ void mSDCard::init(void)
   // renameFile(SD, "/hello.txt", "/foo.txt");
   // readFile(SD, "/foo.txt");
   // testFileIO(SD, "/test.txt");
-  // Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  // Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+  Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+  Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 
   // Success, no failure
   sdcard_status.init_error_on_boot = false;

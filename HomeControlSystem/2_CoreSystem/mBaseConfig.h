@@ -23,6 +23,7 @@
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 
 /*********************************************************************************************\
  * This file is one of two user configurable files
@@ -52,6 +53,9 @@
 #endif
 
 #define SERIALD Serial //serial debug
+#ifndef SERIAL_DEBUG_BAUD_DEFAULT
+#define SERIAL_DEBUG_BAUD_DEFAULT 115200
+#endif // SERIAL_DEBUG_BAUD_DEFAULT
 
 /*********************************************************************************************\
  * CAUTION! Only select from values defined in the comments next to (right hand side) the parameter. 

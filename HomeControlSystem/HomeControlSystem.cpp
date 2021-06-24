@@ -1,3 +1,176 @@
+#include "arduino.h"
+
+#include <driver/adc.h>
+
+#include "soc/rtc_wdt.h"
+
+//   #define DEBUG_PIN1_GPIO     23
+//   #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+//   #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+//   #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+// const byte interruptPin = 25;
+// volatile int interruptCounter = 0;
+// // volatile double interruptExecuteTime = 0;
+// static int taskCore0 = 0;
+// static int taskCore1 = 1;
+// int numberOfInterrupts = 0;
+// uint16_t adc6 = 0;
+// uint16_t adc7 = 0;
+
+// #include <soc/sens_reg.h>
+// #include <soc/sens_struct.h>
+
+//  int IRAM_ATTR local_adc1_read(int channel) {
+//     uint16_t adc_value;
+//     SENS.sar_meas_start1.sar1_en_pad = (1 << channel); // only one channel is selected
+//     while (SENS.sar_slave_addr1.meas_status != 0);
+//     SENS.sar_meas_start1.meas1_start_sar = 0;
+//     SENS.sar_meas_start1.meas1_start_sar = 1;
+//     while (SENS.sar_meas_start1.meas1_done_sar == 0);
+//     adc_value = SENS.sar_meas_start1.meas1_data_sar;
+//     return adc_value;
+// }
+
+//   uint16_t adc_value;
+
+// portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+// RTC_DATA_ATTR uint16_t adcValue;
+// uint16_t _adcValue;
+// uint16_t adcValue1;
+
+// void IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
+//     SENS.sar_read_ctrl.sar1_dig_force = 0; // switch SARADC into RTC channel 
+//     SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PU; // adc_power_on
+//     // RTCIO.hall_sens.xpd_hall = false; //disable other peripherals
+//     SENS.sar_meas_wait2.force_xpd_amp = SENS_FORCE_XPD_AMP_PD; // channel is set in the convert function
+    
+// 	// disable FSM, it's only used by the LNA.
+//     SENS.sar_meas_ctrl.amp_rst_fb_fsm = 0; 
+//     SENS.sar_meas_ctrl.amp_short_ref_fsm = 0;
+//     SENS.sar_meas_ctrl.amp_short_ref_gnd_fsm = 0;
+//     SENS.sar_meas_wait1.sar_amp_wait1 = 1;
+//     SENS.sar_meas_wait1.sar_amp_wait2 = 1;
+//     SENS.sar_meas_wait2.sar_amp_wait3 = 1; 
+
+//     //set controller
+//     SENS.sar_read_ctrl.sar1_dig_force = false;      //RTC controller controls the ADC, not digital controller
+//     SENS.sar_meas_start1.meas1_start_force = true;  //RTC controller controls the ADC,not ulp coprocessor
+//     SENS.sar_meas_start1.sar1_en_pad_force = true;  //RTC controller controls the data port, not ulp coprocessor
+//     SENS.sar_touch_ctrl1.xpd_hall_force = true;     // RTC controller controls the hall sensor power,not ulp coprocessor
+//     SENS.sar_touch_ctrl1.hall_phase_force = true;   // RTC controller controls the hall sensor phase,not ulp coprocessor
+    
+//     //start conversion
+//     SENS.sar_meas_start1.sar1_en_pad = (1 << channel); //only one channel is selected.
+//     while (SENS.sar_slave_addr1.meas_status != 0);
+//     SENS.sar_meas_start1.meas1_start_sar = 0;
+//     SENS.sar_meas_start1.meas1_start_sar = 1;
+//     while (SENS.sar_meas_start1.meas1_done_sar == 0);
+//     _adcValue = SENS.sar_meas_start1.meas1_data_sar; // set adc value!
+
+//     SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PD; // adc power off
+// }
+
+
+// void core1Task(){// void * pvParameters ){
+//       Serial.print("An interrupt has occurred. Total: ");
+//       Serial.print(numberOfInterrupts);
+//       // Serial.print(" at :");
+//       // Serial.print(interruptExecuteTime);
+//       Serial.print(" on Core :");
+//       Serial.println(_adcValue);
+//       // Serial.println(xPortGetCoreID());
+// }
+
+
+// void IRAM_ATTR handleInterrupt(){//void * pvParameters) {
+//   portENTER_CRITICAL_ISR(&mux);
+//   // Serial.print(" on Core :");
+//   DEBUG_PIN1_SET(0);
+//   /**
+//    * adc1_ch6
+//    * */
+//   adc1_get_raw_ram(ADC1_CHANNEL_6);
+//   adcValue1 = _adcValue;
+
+//   DEBUG_PIN1_SET(1);
+//   // interruptExecuteTime = millis(); // this is the important part for me
+//   interruptCounter++;
+//   portEXIT_CRITICAL_ISR(&mux);
+// }
+
+ 
+// void main_task(void *pvParameter)
+// {
+  
+// rtc_wdt_protect_off();
+// rtc_wdt_disable();
+
+//   pinMode(interruptPin, INPUT_PULLUP);
+//   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, FALLING);
+  
+//         adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
+//         adc1_config_width(ADC_WIDTH_BIT_12);
+//         adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
+//         adc1_config_width(ADC_WIDTH_BIT_12);
+
+//   while(1) {
+//     // printf( "Task1 %d\n\r", interruptCounter ); //CONFIG_HELLO_MESSAGE );
+//     core1Task();
+
+//     vTaskDelay(1000 / portTICK_RATE_MS);
+//   }
+
+// }
+
+
+// void setup() {
+ 
+//   Serial.begin(115200);
+//   Serial.println("Monitoring interrupts: ");
+// DEBUG_PIN1_INIT();
+
+
+// analogSetClockDiv(1);
+
+
+//     xTaskCreatePinnedToCore(&main_task, "main_task", 2048, NULL, 1, NULL, 1);
+  
+// //  xTaskCreatePinnedToCore(
+// //                  handleInterrupt,   /* Function to implement the task */
+// //                  "handleinterrupt", /* Name of the task */
+// //                  10000,      /* Stack size in words */
+// //                  NULL,       /* Task input parameter */
+// //                  0,          /* Priority of the task */
+// //                  NULL,       /* Task handle. */
+// //                  taskCore0);  /* Core where the task should run */
+// //  xTaskCreatePinnedToCore(
+// //                  core1Task,   /* Function to implement the task */
+// //                  "core1Task", /* Name of the task */
+// //                  10000,      /* Stack size in words */
+// //                  NULL,       /* Task input parameter */
+// //                  0,          /* Priority of the task */
+// //                  NULL,       /* Task handle. */
+// //                  taskCore1);  /* Core where the task should run */
+// }
+ 
+ 
+// void loop() {
+ 
+//   if(interruptCounter>0){ // greater than 0 means there was a interrupt fired
+//        portENTER_CRITICAL(&mux);
+//       interruptCounter--; // decrease to reset the value
+//       portEXIT_CRITICAL(&mux);
+//       numberOfInterrupts++; // count the numbers of interrupts fired at this moment
+// }
+//   if (numberOfInterrupts >= 25){
+//     numberOfInterrupts = 0;
+//     esp_restart(); // restart example by cleaning all data and resetting MCU
+//   }
+// }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
    Copyright (c) 2020, my_name_here
    All rights reserved.
@@ -56,7 +229,7 @@ void setup(void)
   #endif
 
   #ifndef DISABLE_SERIAL0_CORE
-  Serial.begin(115200);
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
   #endif
   
 // Serial2.begin(115200);

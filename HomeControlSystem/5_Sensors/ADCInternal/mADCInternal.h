@@ -16,6 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+//https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/gpio.html
+
 #ifndef mADCInternal_H
 #define mADCInternal_H
 
@@ -33,6 +35,23 @@
 // C:\Users\Michael Doone\.platformio\packages\framework-arduinoespressif32\tools\sdk\include\driver\driver
 #include <vector>
 
+
+/**
+ * As a one off, making this global, as I need it to have fast timings inside the ISR
+ * ISR measurement system recording into small buffers
+ * adc will continue to write into buffer, but will not reset it, this is handled in another module (ie seriallogger)
+ * Using an index_buffer, and active_buffer_to_write_to_index, this will be written into until full, then stops
+ * */
+// extern struct ISR_DUAL_CAPTURE isr_capture;
+
+
+
+
+
+
+
+
+
     static void IRAM_ATTR ISR_TriggerGPIO_ADC_Record();
 
 class mADCInternal :
@@ -48,6 +67,21 @@ class mADCInternal :
 
     uint8_t interruptPin = 12;
 
+
+struct ISR_DUAL_CAPTURE{
+  struct ADC_PIN1{
+    uint16_t buffer_ch6[40];
+    uint16_t buffer_ch7[40];
+  }adc_readings[2]; //single struct, 2 buffers
+  
+  /**
+   * One buffer will be filled, while the other is read from 
+   * In seriallogger, this needs to happen because the previous recorded syncframe on the pic32 is transmitted during the next syncframe interval
+   * */
+  uint8_t within_buffer_iter_counter = 0;
+  uint8_t active_buffer_to_write_to_index = 0;
+
+}isr_capture;
   
 
 
@@ -147,6 +181,8 @@ class mADCInternal :
     }adc_config[ADC_CHANNELS_MAX];
 
 
+    bool flag_adc_capture_interrupt = false;
+
     struct INTERRUPT_EXTERNAL_ADC_TRIGGER{
       uint8_t flag_pin_active = false;
       uint8_t trigger_pin = 12;
@@ -170,6 +206,9 @@ class mADCInternal :
     }readings[2];
 
     std::vector<int> samples;
+
+
+
 
 
 void Update_Channel1_ADC_Readings();

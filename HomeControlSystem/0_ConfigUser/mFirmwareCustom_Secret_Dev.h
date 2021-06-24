@@ -1629,7 +1629,7 @@
   // "}";
 
 
-  #define STRIP_SIZE_MAX 450
+  #define STRIP_SIZE_MAX 100
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1642,10 +1642,10 @@
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":5000,"
-      "\"" D_JSON_RATE_MS "\":10000,"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":2000,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 

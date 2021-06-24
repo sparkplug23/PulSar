@@ -6,7 +6,17 @@ const char* mSerialPositionalLogger::PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGG
 const char* mSerialPositionalLogger::PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR = D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_FRIENDLY_CTR;
 
 
-  #ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
+/****
+ *  interrupt pins
+ * 
+ *  pin1 = adc record
+ *  pin1 = sync frame over (ie update internal values, begin forming json, switch adc active vectors)
+ * 
+ * */
+
+
+
+#ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
 /************************************************************************************
 ******** External Pin Interrupt Triggers For ADC ************************************
  @note Helper functions, that need to be static. The singlton class instance allows setting
@@ -17,19 +27,27 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 {
   pCONT_serial_pos_log->sync_frame_data.flag_pin_active = true;
   // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
-  if(digitalRead(SYNC_FRAME_ISR_PIN)==LOW)
+  if(digitalRead(GPIO_SYNC_FRAME_ISR_PIN)==LOW)
   {
     pCONT_serial_pos_log->sync_frame_data.flag_started = true;
+
+  /**
+   * toggle to the other buffer to be writting into, the read will check which is not active
+   * */
+    pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index = 0;//^= 1; // Reset ADC syncframe index
+  /**
+   * Use new buffer set here, to reset its counter
+   * The other buffer not being written into, the counter values here wont be reset until the next ISR, allowing it to be checked for length of data on previous frame
+   * */
+    pCONT_adc_internal->isr_capture.within_buffer_iter_counter = 0;
+
   }
   else
   {
     pCONT_serial_pos_log->sync_frame_data.flag_ended = true;
   }
 }
-
-
 #endif // ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
-
 
 
 
@@ -125,7 +143,7 @@ void mSerialPositionalLogger::Pre_Init(void)
   //  if(external_interrupt.flag_enabled)
   // {
     
-    sync_frame_data.trigger_pin = SYNC_FRAME_ISR_PIN;
+    sync_frame_data.trigger_pin = GPIO_SYNC_FRAME_ISR_PIN;
 
     pinMode(sync_frame_data.trigger_pin, INPUT_PULLUP);
     attachInterrupt(sync_frame_data.trigger_pin, ISR_External_Pin_Sync_Frame_Status_Event_Trigger, CHANGE);
@@ -135,6 +153,7 @@ void mSerialPositionalLogger::Pre_Init(void)
 
 
   #endif
+
 
 }
 
@@ -198,6 +217,40 @@ void mSerialPositionalLogger::Handle_Primary_Service_RSS_Stream_To_Create_SDCard
   {
     pCONT_serial_pos_log->sync_frame_data.flag_started = false;
     // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_started"));
+
+
+
+
+
+
+
+
+uint8_t read_index = 0;//!pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index; // invert
+
+Serial.println();
+Serial.println();
+Serial.println();
+
+Serial.println(pCONT_adc_internal->isr_capture.within_buffer_iter_counter);
+for(int i=0;i<40;i++)
+{
+Serial.print(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch6[i]);
+Serial.print('-');
+}
+Serial.println();
+
+Serial.println(pCONT_adc_internal->isr_capture.within_buffer_iter_counter);
+for(int i=0;i<40;i++)
+{
+Serial.print(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch7[i]);
+Serial.print('-');
+}
+Serial.println();
+
+
+
+
+
   }
   
   if(pCONT_serial_pos_log->sync_frame_data.flag_ended)
@@ -254,7 +307,7 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
     #else
-      AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
+     // AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream UART%d >> [%d] \"%s\""), 2, BufferWriterI->GetLength(), BufferWriterI->GetPtr());
     #endif //USE_MODULE_DRIVERS_SDCARD
 
 
@@ -269,6 +322,8 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
 void mSerialPositionalLogger::Construct_SuperFrame_Data_From_RingBuffer()
 {
 
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+
   memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
   uint16_t maximum_sync_frame_length = 300;
   sync_frame_data.buffer_bytes_read = pCONT_uart->GetSingleItemFromNoSplitRingBuffer(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
@@ -279,6 +334,8 @@ void mSerialPositionalLogger::Construct_SuperFrame_Data_From_RingBuffer()
     // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
   }
+
+  #endif // USE_MODULE_DRIVERS_SERIAL_UART
 
 
 

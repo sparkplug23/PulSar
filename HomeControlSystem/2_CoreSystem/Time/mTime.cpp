@@ -102,8 +102,8 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         //   16,
         //   17);
 
-        char buffer[40];
-        AddLog(LOG_LEVEL_TEST, PSTR("utc_time=%s"), pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+        // char buffer[40];
+        // AddLog(LOG_LEVEL_TEST, PSTR("utc_time=%s"), pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
 
       // Serial.println(GetUptime());
       #endif
