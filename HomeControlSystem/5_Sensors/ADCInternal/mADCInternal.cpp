@@ -54,7 +54,7 @@ RTC_DATA_ATTR uint16_t adcValue;
 uint16_t _adcValue;
 // uint16_t adcValue1;
 
-void IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
+uint16_t IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
     SENS.sar_read_ctrl.sar1_dig_force = 0; // switch SARADC into RTC channel 
     SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PU; // adc_power_on
     // RTCIO.hall_sens.xpd_hall = false; //disable other peripherals
@@ -84,6 +84,8 @@ void IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
     _adcValue = SENS.sar_meas_start1.meas1_data_sar; // set adc value!
 
     SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PD; // adc power off
+
+    return _adcValue;
 }
 
 
@@ -98,7 +100,7 @@ void IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
 *************************************************************************************/
 void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 {
-  DEBUG_PIN4_SET(LOW);
+  DEBUG_ADC_ISR_EVENT_SET(LOW);
   pCONT_adc_internal->external_interrupt.flag_pin_active = true;
 
   /**
@@ -106,48 +108,14 @@ void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
    * */
   mADCInternal::ISR_DUAL_CAPTURE* adc_p = &pCONT_adc_internal->isr_capture;
 
-  // ML2740 pin 34
   if(adc_p->within_buffer_iter_counter < 40)
   {
-    DEBUG_PIN2_SET(0);
-    adc1_get_raw_ram(ADC1_CHANNEL_6);
-    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch6[adc_p->within_buffer_iter_counter] = _adcValue;
-    // ets_delay_us(1);
-    
-    DEBUG_PIN2_SET(1);
-    DEBUG_PIN3_SET(0);
-    adc1_get_raw_ram(ADC1_CHANNEL_7);
-    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch7[adc_p->within_buffer_iter_counter] = _adcValue;
-    
-    DEBUG_PIN3_SET(1);
-    
+    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch6[adc_p->within_buffer_iter_counter] = adc1_get_raw_ram(ADC1_CHANNEL_6);
+    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch7[adc_p->within_buffer_iter_counter] = adc1_get_raw_ram(ADC1_CHANNEL_7);
     adc_p->within_buffer_iter_counter++;
   }
 
-//   // for(int i = 0;i<5; i++)
-//   // {
-//   //   pCONT_adc_internal->samples.clear();
-//   //   // collect samples from ADC
-//   //   while(pCONT_adc_internal->samples.size() < readings[i].adcSampleCount_){
-//   //     pCONT_adc_internal->samples.push_back(adc1_get_raw((adc1_channel_t)adc_config[i].channel_id));
-//   //     ets_delay_us(1); // too long!?
-//   //   }
-//   //   // average the collected samples
-//   //   readings[i].adc_level = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
-//   //   // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
-
-//   //   readings[i].samples_between_resets++;
-
-//   //   // Add nice function that adds reading into memory
-//   //   if(readings[i].stored_values.index < STORED_VALUE_ADC_MAX){
-//   //     readings[i].stored_values.adc[readings[i].stored_values.index++] = readings[i].adc_level;
-//   //   }else{
-//   //     // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
-//   //     // readings[i].stored_values.index = 0;
-//   //   }
-//   // }
-
-  DEBUG_PIN4_SET(HIGH);
+  DEBUG_ADC_ISR_EVENT_SET(HIGH);
 }
 
 #endif // ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER

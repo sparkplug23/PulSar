@@ -39,6 +39,8 @@ class mSerialPositionalLogger :
       uint8_t fEnableSensor = false;
     }settings;
 
+    uint32_t rxon_counter = 0;
+
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
     
@@ -75,7 +77,7 @@ class mSerialPositionalLogger :
     #define SYNC_FRAME_DATA_BUFFER_LENGTH 5000
     struct SYNC_FRAME_DATA
     {
-      uint8_t trigger_pin = 0;
+      // uint8_t trigger_pin = 0;
       bool flag_pin_active = false;
 
       /**

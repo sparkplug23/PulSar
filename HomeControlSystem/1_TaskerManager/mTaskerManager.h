@@ -324,6 +324,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
     EM_MODULE_SENSORS_ADC_INTERNAL_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+    EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID,
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -602,6 +605,11 @@ enum MODULE_IDS{
   #include "5_Sensors/ADCInternal/mADCInternal.h"
   #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+  #include "5_Sensors/I2S_Sampler_ADC/mADC_I2S_Sampler.h"
+  #define pCONT_adc_internal       static_cast<mADC_I2S_Sampler*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID])
+  // pCONT_adc_i2s                           static_cast<mADC_I2S_Sampler*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID])
+#endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -738,9 +746,6 @@ class mTaskerManager{
 
     uint8_t switch_index = 0;
     
-    // JsonParserObject obj = 0;
-    // JsonParser* parser = nullptr;//(parsing_buffer);
-      
     int16_t GetModuleIDbyFriendlyName(const char* c);
 
 };

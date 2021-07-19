@@ -9,6 +9,10 @@
  * This can also include lights or displays as notification/information systems. 
  * Although all sensors/drivers are accesible through default builds, this allows users to config and add their own controllers.
  * Ideally, when possible, templates can be used to replicate the custom firmware options performed here.
+ * 
+ * Ideas:
+ * Create two basic LCD numbers, one for outside and one for bedroom temperature
+ * Create world map (like I said to jess) that lights to show where the sun is, and day/night land-mass light up with cities being bright spots.
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER

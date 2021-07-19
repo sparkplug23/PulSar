@@ -154,8 +154,9 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 
 // add option to use GPS time instead of NTP time, where it updates every second inside gps
 
-			sprintf(writer_settings.file_name, "/%s_%02d%02d%02d_%03d.txt", // Unique name each time it is opened
+			sprintf(writer_settings.file_name, "/%s_%s_%02d%02d%02d_%03d.txt", // Unique name each time it is opened
 				"APPEND", 
+				DEVICENAME_FOR_SDCARD_FRIENDLY_CTR, 
 				pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second, 
 				random(1,1000)
 			);

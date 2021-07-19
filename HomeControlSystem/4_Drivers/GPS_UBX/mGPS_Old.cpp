@@ -635,3 +635,110 @@
 
 
 //   // gpsPort.begin(921600);
+
+
+
+// /**
+//  * @brief Configure messages
+//  * */
+// void mGPS::Init_UBX_Only()
+// {
+
+// //   runtime.ubx_config_status = 0; 
+
+// //   // Check pins for serial have been defined before proceeeding
+// //   if(!(pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL1_RING_BUFFER_RX_ID))) {
+// //     AddLog(LOG_LEVEL_ERROR, PSTR("No gpsPort (Serial1) pins have been set"));
+// //     return;
+// //   }
+
+// //   uint32_t start_millis = millis();
+// //   AddLog(LOG_LEVEL_TEST, PSTR("GPS: Setting baud rate started"));
+
+// //   /**
+// //    * Step 1: Ensure baud is set the default for configuration
+// //    * */
+// //   uint32_t baud_list[] = {D_GPS_BAUD_RATE_DEFAULT, D_GPS_BAUD_RATE_FAST, 921600};
+
+// //   for(int i=0;i<ARRAY_SIZE(baud_list);i++)
+// //   {
+// //     // Begin connection
+// //     //unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms
+// //     AddLog(LOG_LEVEL_TEST, PSTR("Baud Test %d on TX%d, RX%d"), baud_list[i], pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID));
+// //     gpsPort.begin(baud_list[i], SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //     // while(!gpsPort);
+// //     // Send default baud command
+// //     switch(D_GPS_BAUD_RATE_DEFAULT)
+// //     {
+// //       default:
+// //       case 9600:
+// //         ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+// //       break;
+// //       case 115200:
+// //         ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+// //       break;
+// //       case 921600:
+// //         ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud921600 );
+// //       break;
+// //     }
+// //     // Complete transmission
+// //     gpsPort.flush();
+// //     gpsPort.end();
+// //     pinMode(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), OUTPUT); digitalWrite(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID), HIGH);
+// //     pinMode(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), OUTPUT); digitalWrite(pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), HIGH);
+// //     // Allow time for the GPS to switch baud speeds
+// //     // delay(500);
+// //   }
+
+// //   // Begin at default speed to start configuring messages
+// //   gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //   // while(!gpsPort);
+
+// //   /**
+// //    * Disable unwanted signals
+// //    * */
+// //   CommandSend_UBX_Disable_NMEAMessages();
+// //   DEBUG_LINE_HERE;
+// //   CommandSend_UBX_Disable_UBXMessages();
+// //   DEBUG_LINE_HERE;
+
+// //   // configNMEA( 0 );
+// //   // disableUBX();
+
+// // // B5 62 06 00 01 00 01 08 22
+
+// //   /**
+// //    * Renable what I want
+// //    * */
+// //   // enableUBX();
+// //   runtime.ubx_messages_confirmed_enabled = enableUBX_RequiredOnlyFor3DTracking();
+// //   AddLog(LOG_LEVEL_TEST, PSTR("runtime.ubx_messages_confirmed_enabled = %d"),runtime.ubx_messages_confirmed_enabled);
+
+// //   /**
+// //    * Change baud rate to desired
+// //    * */
+// //   switch(D_GPS_BAUD_RATE_FAST)
+// //   {
+// //     default:
+// //     case 9600:
+// //       ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud9600 );
+// //     break;
+// //     case 115200:
+// //       ubx_parser->send_P( &gpsPort, (const __FlashStringHelper *) baud115200 );
+// //     break;
+// //   }
+// //   gpsPort.flush();
+// //   gpsPort.end();
+// //   gpsPort.begin(D_GPS_BAUD_RATE_FAST, SERIAL_8N1, pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID));
+// //   // while(!gpsPort);
+
+// //   /**
+// //    * Set the rate
+// //    * */
+// //   // sendUBX( ubxRate1Hz, sizeof(ubxRate1Hz) );
+// //   sendUBX( ubxRate5Hz, sizeof(ubxRate5Hz) );
+// //   // sendUBX( ubxRate10Hz, sizeof(ubxRate10Hz) );
+ 
+// //   AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "GPS: Setting baud rate finsihed, %d ms"), millis()-start_millis);
+
+// }

@@ -1,9 +1,5 @@
 #include "mSDCard.h"
 
-//  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
-
-
-
 /***
  * Introduce a ringbuffer for sdcard writter, hence as long as the sdcard is open, anything written to buffer will be flushed to sdcard
  * */
@@ -14,8 +10,7 @@
 const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
 const char* mSDCard::PM_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR = D_MODULE_DRIVERS_SDCARD_FRIENDLY_CTR;
 
-  SPIClass spiSD(HSPI);
-
+SPIClass spiSD(HSPI);
 
 int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -30,7 +25,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   // Only continue in to tasker if module was configured properly
-  //if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -55,6 +50,12 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:  
     {
+
+      // If not init, retry init, but ignore press to start
+      if(sdcard_status.init_error_on_boot == true)
+      {
+        init();
+      }
 
     } 
     break;
@@ -130,94 +131,91 @@ void mSDCard::EveryLoop_Handle_Appending_File_Method()
 void mSDCard::init(void)
 {
 
-
-// SPIClass SDSPI(HSPI);
-
-// void setup(){
-//   SDSPI.begin(sck, miso, mosi, -1);
-//   SD.begin(ss, SDSPI);
-// }
   Serial.println("Initializing SD card...");
-// Chip select for SD card
-#if defined(ESP32)
-#define SD_CS 15 // 5 **
-#elif defined (ARDUINO)
-#define SD_CS BUILTIN_SDCARD
-//#define SD_CS 15
-#endif
-  spiSD.begin(14, 12, 13, 15); //SCK,MISO,MOSI,SS //HSPI1
-// if (!SD.begin( SD_CS, spiSD ))
-// {
-// Serial.println("Card Mount Failed");
-// return;
-// }
 
-  if(!SD.begin( SD_CS,spiSD )){
+  int8_t chip_select = -1;
+  int8_t clock = -1;
+  int8_t mosi = -1;
+  int8_t miso = -1;
+
+  chip_select = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO_ID);
+  clock = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK_ID);
+  mosi = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI_ID);
+  miso = pCONT_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO_ID);
+  
+  uint8_t sd_hardware_type = 0;
+
+  if((chip_select>=0)&&(clock>=0)&&(mosi>=0)&&(miso>=0))
+  {
+    sd_hardware_type = 1;
+  }
+
+  /**
+   * init VSPI
+   * */
+  if(sd_hardware_type == 1)
+  {
+    AddLog(LOG_LEVEL_INFO, PSTR("(clock, miso, mosi, chip_select)=(%d,%d,%d,%d)"), clock, miso, mosi, chip_select);
+    spiSD.begin(clock, miso, mosi, chip_select); //SCK,MISO,MOSI,SS //HSPI1
+  }else{
+    return;
+  }
+
+  if(!SD.begin(chip_select, spiSD )){
     Serial.println("Card Mount Failed");
     sdcard_status.init_error_on_boot = true;
     // delay(3000);
     return;
   }
 
+
   uint8_t cardType = SD.cardType();
-  if(cardType == CARD_NONE){
-      Serial.println("No SD card attached");
-      sdcard_status.init_error_on_boot = true;
-      return;
-  }
 
   Serial.print("SD Card Type: ");
-  if(cardType == CARD_MMC){
+  switch(cardType)
+  {
+    default:
+    case CARD_NONE: 
+      Serial.println("No SD card attached");
+      sdcard_status.init_error_on_boot = true;
+      return;      
+    break;
+    case CARD_MMC:
       Serial.println("MMC");
-  } else if(cardType == CARD_SD){
+    break;
+    case CARD_SD:
       Serial.println("SDSC");
-  } else if(cardType == CARD_SDHC){
+    break;
+    case CARD_SDHC:
       Serial.println("SDHC");
-  } else {
-      Serial.println("UNKNOWN");
+    break;
   }
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
   listDir(SD, "/", 0);
-  // createDir(SD, "/mydir");
-  // listDir(SD, "/", 0);
-  // removeDir(SD, "/mydir");
-  // listDir(SD, "/", 2);
-  // writeFile(SD, "/hello.txt", "Hello ");
-  // appendFile(SD, "/hello.txt", "World!\n");
-  // readFile(SD, "/hello.txt");
-  // deleteFile(SD, "/foo.txt");
-  // renameFile(SD, "/hello.txt", "/foo.txt");
-  // readFile(SD, "/foo.txt");
-  // testFileIO(SD, "/test.txt");
-  Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+
+  Serial.printf("SD Card Size: %lluMB\n\r", cardSize);
+  Serial.printf("Total space: %lluMB\n\r", SD.totalBytes() / (1024 * 1024));
+  Serial.printf("Used space: %lluMB\n\r", SD.usedBytes() / (1024 * 1024));
 
   // Success, no failure
   sdcard_status.init_error_on_boot = false;
+  settings.fEnableModule = true;
 
 }
 
 
 void mSDCard::Pre_Init(){
 
-//change this into the fan module
-//   if(pCONT_pins->PinUsed(GPIO_FAN_SDCARD1_ID)) {  // not set when 255
-//     pin = pCONT_pins->GetPin(GPIO_FAN_SDCARD1_ID);
-//     pinMode(pin, OUTPUT);
-//     settings.fEnableModule = true;
-//   }
-
-    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
-//chip select pin needs setting
-init_SDCard_StreamOut_RingBuffer();
-    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
+  #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
+    //chip select pin needs setting
+    init_SDCard_StreamOut_RingBuffer();
+  #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
 }
 
-    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
+#ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
 void mSDCard::init_SDCard_StreamOut_RingBuffer()
 {
 
@@ -311,12 +309,7 @@ uint16_t mSDCard::AppendRingBuffer(char* buffer, uint16_t buflen)
 
 }
 
-
-
-
-    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
-
-
+#endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
 
 uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_method)

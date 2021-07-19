@@ -357,6 +357,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
     pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID] = new mADCInternal();
   #endif
+  #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+    pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID] = new mADC_I2S_Sampler();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
