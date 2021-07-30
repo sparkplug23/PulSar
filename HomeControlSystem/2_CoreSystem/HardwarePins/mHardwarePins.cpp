@@ -467,7 +467,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
     if(strcmp(c,buffer)==0)
     {
       pin = gpio_pin_by_index[i];
-      AddLog(LOG_LEVEL_DEBUG, PSTR("matched pin %d %d"),pin,i);
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("matched pin %d %d"),pin,i);
       break;
     }else{
 
@@ -489,7 +489,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   // }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR("GetRealPinNumberFromName = %d"), pin);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP32
 
@@ -623,7 +623,7 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
   // {
     if(internal_pin_index != 1)
 {
-    AddLog(LOG_LEVEL_ERROR, PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
   
   
   // // Check if valid gpio

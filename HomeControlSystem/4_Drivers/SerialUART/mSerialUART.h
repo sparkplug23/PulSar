@@ -10,9 +10,9 @@
 #define ENABLE_UART2_ISR_BUFFERS
 
 
-#define ENABLE_HARDWARE_UART_0
-#define ENABLE_HARDWARE_UART_1
-#define ENABLE_HARDWARE_UART_2
+// #define ENABLE_HARDWARE_UART_0
+// #define ENABLE_HARDWARE_UART_1
+// #define ENABLE_HARDWARE_UART_2
 
 #include <string.h>
 #include <strings.h>
@@ -122,11 +122,14 @@ class mSerialUART :
 //   RINGBUFFER_TYPE_SPLIT_BUFFER_ID
 // }ringbuffer_t;
 
+
+int sendData(const char* logName, const char* data);
+
     /***
      * UART2
      * 
      * */
-    #define RINGBUFFER_HANDLE_2_LENGTH 15000
+    #define RINGBUFFER_HANDLE_2_LENGTH 5000//15000
     void  init_UART2_RingBuffer();
     void  init_UART2_pins();
     void  init_UART2_ISR();
@@ -144,8 +147,8 @@ class mSerialUART :
       RingbufHandle_t ringbuffer_handle;
       ringbuf_type_t ringbuffer_format_type = RINGBUF_TYPE_BYTEBUF;
       QueueHandle_t event_queue_handle;
-      int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
-      int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+      int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH);// * 2); //1024*2
+      int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH);// * 2); //1024*2
       int event_queue_size = 10;
       struct GPIO{
         int8_t tx = UART_PIN_NO_CHANGE;
@@ -175,7 +178,7 @@ class mSerialUART :
     /**
      * lazy for now, hard coded 0xFF 0xFF
      * */
-    uint16_t GetRingBufferDataAndClearUntilSpecialDelimeter(uint8_t uart_num, char* buffer, uint16_t buflen);
+    // uint16_t GetRingBufferDataAndClearUntilSpecialDelimeter(uint8_t uart_num, char* buffer, uint16_t buflen);
     uint16_t GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buffer, uint16_t buflen);
 
 

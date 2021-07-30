@@ -41,31 +41,35 @@ const char* mSerialPositionalLogger::PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGG
 
 void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 {
-  // pCONT_serial_pos_log->sync_frame_data.flag_pin_active = true;
-  // // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
-  // if(digitalRead(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM)==LOW)
-  // {
-  //   pCONT_serial_pos_log->sync_frame_data.flag_started = true;
+  pCONT_serial_pos_log->sync_frame_data.flag_pin_active = true;
+  // pCONT_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
+  
+  gpio_num_t pin = (gpio_num_t)(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM & 0x1F);
+  int state = state = (GPIO_REG_READ(GPIO_IN_REG)  >> pin) & 1U;
 
-  //   //Serial2.printf("ISR_External_Pin_Sync_Frame_Status_Event_Trigger");
+  if(state==LOW)
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_started = true;
+
+    //Serial2.printf("ISR_External_Pin_Sync_Frame_Status_Event_Trigger");
       
-  //   #ifdef ENABLE_ESP32_ADC_SAMPLING
-  //   /**
-  //    * toggle to the other buffer to be writting into, the read will check which is not active
-  //    * */
-  //   pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index ^= 1; // Reset ADC syncframe index
-  //   /**
-  //    * Use new buffer set here, to reset its counter
-  //    * The other buffer not being written into, the counter values here wont be reset until the next ISR, allowing it to be checked for length of data on previous frame
-  //    * */
-  //     pCONT_adc_internal->isr_capture.within_buffer_iter_counter = 0;
-  //   #endif // ENABLE_ESP32_ADC_SAMPLING
+    #ifdef ENABLE_ESP32_ADC_SAMPLING
+    /**
+     * toggle to the other buffer to be writting into, the read will check which is not active
+     * */
+    pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index ^= 1; // Reset ADC syncframe index
+    /**
+     * Use new buffer set here, to reset its counter
+     * The other buffer not being written into, the counter values here wont be reset until the next ISR, allowing it to be checked for length of data on previous frame
+     * */
+      pCONT_adc_internal->isr_capture.within_buffer_iter_counter = 0;
+    #endif // ENABLE_ESP32_ADC_SAMPLING
 
-  // }
-  // else
-  // {
-  //   pCONT_serial_pos_log->sync_frame_data.flag_ended = true;
-  // }
+  }
+  else
+  {
+    pCONT_serial_pos_log->sync_frame_data.flag_ended = true;
+  }
 }
 #endif // ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
 
@@ -280,15 +284,15 @@ void mSerialPositionalLogger::EveryLoop()
 {
     // DEBUG_PIN3_SET(0);
 
-    if(
-    pCONT_serial_pos_log->sync_frame_data.flag_started)
-    {
+//     if(
+//     pCONT_serial_pos_log->sync_frame_data.flag_started)
+//     {
     
-    pCONT_serial_pos_log->sync_frame_data.flag_started = false;
+//     pCONT_serial_pos_log->sync_frame_data.flag_started = false;
 
-    Serial.println("ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger");
+//     Serial.println("ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger");
     
-}
+// }
     // = true;
 
     //Serial.println("ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger");
@@ -398,20 +402,19 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     Construct_SuperFrame_Data_From_RingBuffer();
 
 
-    // memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
-    // uint16_t maximum_sync_frame_length = 300;
-    // sync_frame_data.buffer_bytes_read = pCONT_uart->GetRingBufferDataAndClear(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
-    //   if(sync_frame_data.buffer_bytes_read){
-    //   //  AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
-    //     // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
-    //     // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
-    //   }
+    memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
+    uint16_t maximum_sync_frame_length = 300;
+    sync_frame_data.buffer_bytes_read = pCONT_uart->GetRingBufferDataAndClear(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
+
+    // if(sync_frame_data.buffer_bytes_read){
+    //   AddLog(LOG_LEVEL_TEST, PSTR("SDCardStream bytes_read >> [%d]"), sync_frame_data.buffer_bytes_read);
+    //   // AddLog_Array_P(LOG_LEVEL_INFO, PSTR("sync_frame_data.buffer"), sync_frame_data.buffer, sync_frame_data.buffer_bytes_read);
+    //   // AddLog(LOG_LEVEL_TEST, PSTR("UART%d >> [%d] \"%s\""), i, bytes_in_line, BufferWriterI->GetPtr());
+    // }
 
     /**
      * Get data that is superframe, and save as its own small buffer read from RSS ring, instead of global buffer
      * */
-
-
     ConstructJSON_SDCardSuperFrame();
 
     /**
@@ -503,33 +506,33 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
 {
   #ifdef USE_MODULE_DRIVERS_SDCARD
 
-  #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
-  if(sdcard_status.isopened)
-  {
+  // #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
+  // if(sdcard_status.isopened)
+  // {
 
-    ConstructJSON_SDCardSuperFrame();
-    AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+  //   ConstructJSON_SDCardSuperFrame();
+  //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
 
-    pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+  //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
-  }
-  #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
+  // }
+  // #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
 
-  #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
-  if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
-  {
+  // #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
+  // if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+  // {
 
-    ConstructJSON_SDCardSuperFrame();
+  //   ConstructJSON_SDCardSuperFrame();
     
-    // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
-    // {
-    //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
-    // }
+  //   // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+  //   // {
+  //   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+  //   // }
 
-    pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+  //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
-  }
-  #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+  // }
+  // #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
 
 
   #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
@@ -549,10 +552,6 @@ void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
      * */
     pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
     
-
-
-
-
   }
   #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
 
@@ -654,7 +653,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
   //if valid, then simply show valid, if not, show satellites
   if(pCONT_gps->gps_result_stored.valid.location)
   {
-    snprintf(quality, sizeof(quality), "%s", "Val");  
+    snprintf(quality, sizeof(quality), "%s", "Va");  
   }else{
     // if(pCONT_gps->gps_result_stored.satellites<10)
     // {
@@ -667,10 +666,11 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
 //https://cdn-shop.adafruit.com/datasheets/PMTK_A08.pdf
 
 
-  snprintf(line_ctr, sizeof(line_ctr), "%03d %03d %s",
+  snprintf(line_ctr, sizeof(line_ctr), "%03d %03d %s%s",
     latitude_three_largest_chars, 
     longitude_three_largest_chars,
-    quality
+    quality,
+    pCONT_gps->flag_incoming_data_at_correct_runtime_baud?"T":"F"
     // pCONT_gps->gps_result_stored.satellites,
     // pCONT_gps->gps_result_stored.valid.location?'V':'E' //this needs updating regardless or V/A in RMC, to include timeouts without new updates
   );
@@ -696,6 +696,7 @@ void mSerialPositionalLogger::SubTask_UpdateOLED()
   #endif //USE_MODULE_DRIVERS_SDCARD
 
   
+  #ifdef USE_MODULE_DRIVERS_SDCARD
 uint32_t bytes_written = pCONT_sdcard->sdcard_status.bytes_written_to_file;
 char unit_type = 'B';
 
@@ -707,6 +708,7 @@ if(bytes_written>50000)
 
   snprintf(buffer, sizeof(buffer), "%d %c",bytes_written,unit_type);
   pCONT_iDisp->LogBuffer_AddRow(buffer,2);
+  #endif // USE_MODULE_DRIVERS_SDCARD
 
   snprintf(buffer, sizeof(buffer), "%s %s","Op",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
@@ -816,104 +818,15 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     /**
      * Test, add only first sample from each esp32_adc item
      * */
+    #ifdef USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
     JBI->Level_Start("EA");
       pCONT_adc_internal->Append_JSONPart_ESP32ADCReadings();
     JBI->Level_End();
+    #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
 
 
   return JsonBuilderI->End();
     
 }
-
-
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-void mSerialPositionalLogger::MQTTHandler_Init(){
-
-  struct handler<mSerialPositionalLogger>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sdcard_superframe;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame;
-  
-} //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSerialPositionalLogger::MQTTHandler_Set_fSendNow()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSerialPositionalLogger::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSerialPositionalLogger::MQTTHandler_Sender(uint8_t id)
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID, handle, id);
-  }
-}
-
-  #endif // USE_MODULE_NETWORK_MQTT
-
-
-////////////////////// END OF MQTT /////////////////////////
 
 #endif

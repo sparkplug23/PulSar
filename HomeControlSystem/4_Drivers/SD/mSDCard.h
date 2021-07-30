@@ -171,6 +171,11 @@ uint16_t AppendRingBuffer(char* buffer, uint16_t buflen);
 
     #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
+    
+#ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+void init_SDCARD_is_Serial_Debug_Only();
+#endif
+
 void parse_JSONCommand(JsonParserObject obj);
 
 uint16_t test_val = 0;

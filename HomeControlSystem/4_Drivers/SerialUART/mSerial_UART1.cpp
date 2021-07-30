@@ -12,12 +12,21 @@ void mSerialUART::init_UART1_RingBuffer()
     settings.uart1.initialised = true;
   }
 
+  
+
   char data_ctr[] = "UART1 RingBuf Init\0";
   UBaseType_t res =  xRingbufferSend(settings.uart1.ringbuffer_handle, data_ctr, strlen(data_ctr), pdMS_TO_TICKS(100));
   if (res != pdTRUE) {
     AddLog(LOG_LEVEL_ERROR, PSTR("%s FAILED"),data_ctr);
     settings.uart1.initialised = false; //disable if false
+  }else{
+
+    AddLog(LOG_LEVEL_ERROR, PSTR("%s SUCCESS"),data_ctr);
+
+
   }
+// assert(settings.uart1.ringbuffer_handle != NULL);
+  
 
 }
 
@@ -70,7 +79,7 @@ void mSerialUART::init_UART1_ISR(){
 	ESP_ERROR_CHECK(
     uart_isr_free(UART_NUM_1)       // Free UART interrupt handler registered by uart_isr_register. Must be called on the same core as uart_isr_register was called.
   ); 
-  
+
   uart_isr_register(            // UART ISR handler will be attached to the same CPU core that this function is running on.
     UART_NUM_1,                 // UART_NUM_0, UART_NUM_1 or UART_NUM
     UART1_ISR_Static, // Interrupt handler function.
@@ -78,7 +87,7 @@ void mSerialUART::init_UART1_ISR(){
     ESP_INTR_FLAG_IRAM,         // Flags used to allocate the interrupt. One or multiple (ORred) ESP_INTR_FLAG_* values. See esp_intr_alloc.h for more info. 
     uart1_handle_console        // Pointer to return handle. If non-NULL, a handle for the interrupt will be returned here.
   );
-  
+
   AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK "init_UART1_ISR Started %d buffer size"),settings.uart1.ring_buffer_size_rx);
 
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
@@ -88,6 +97,7 @@ void mSerialUART::init_UART1_ISR(){
   #endif
 // esp_log_level_set("*", ESP_LOG_VERBOSE);
 // esp_log_level_set(TAG, ESP_LOG_INFO);
+
 
 // std::cout << "x" << std::flush;
   

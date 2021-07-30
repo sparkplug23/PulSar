@@ -40,7 +40,10 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     
     break;
     case FUNC_EVERY_SECOND:
+
+      #ifndef DISABLE_SERIAL_LOGGING
       Splash_Latest_Fix(&Serial);
+      #endif
     break;
     /************
      * COMMANDS SECTION * 
@@ -128,6 +131,7 @@ void mGPS::ReadGPSStream()
           if(gps_result_parsing.status > GPS_FIX::STATUS_NONE)
           {
             gps_fix_reading = true;
+            flag_incoming_data_at_correct_runtime_baud = true;
             // gps_result_stored |= gps_result_parsing; // Save reading
             // Serial.printf("=============================================%d\n\r",gps_result_parsing.status);
           }

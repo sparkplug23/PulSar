@@ -601,7 +601,7 @@ void setup(void)
 
 void LoopTasker()
 {
-
+  
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif  // USE_ARDUINO_OTA

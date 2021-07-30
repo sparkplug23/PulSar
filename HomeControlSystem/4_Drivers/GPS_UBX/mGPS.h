@@ -242,6 +242,9 @@ class mGPS :
       }
         state NEOGPS_BF(8);
 
+
+        uint8_t flag_incoming_data_at_correct_runtime_baud = false;
+
         
 const uint32_t COMMAND_DELAY = 500;
 

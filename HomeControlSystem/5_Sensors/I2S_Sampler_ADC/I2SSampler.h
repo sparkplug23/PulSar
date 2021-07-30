@@ -1,6 +1,9 @@
 #ifndef __sampler_base_h__
 #define __sampler_base_h__
 
+
+#ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+
 #include <Arduino.h>
 #include "driver/i2s.h"
 #include "freertos/ringbuf.h"
@@ -62,6 +65,7 @@ public:
 
 #endif
 
+#endif // USE_MODULE_SENSORS_ADC_I2S_INTERNAL
 
 // gpio_num_t pin = (gpio_num_t)(your_pin_number_0to31 & 0x1F);
 // int state=0;

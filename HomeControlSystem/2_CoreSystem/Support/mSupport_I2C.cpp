@@ -269,7 +269,7 @@ bool mSupport::I2cSetDevice(uint32_t addr)
     AddLog(LOG_LEVEL_DEBUG, PSTR("I2cSetDevice already active"));
     return false;       // If already active report as not present;
   }
-AddLog(LOG_LEVEL_DEBUG, PSTR("I2cSetDevice beginning"));
+AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("I2cSetDevice beginning"));
   wire->beginTransmission((uint8_t)addr);
   return (0 == wire->endTransmission());
 }

@@ -8,7 +8,7 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03(){
 
     AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Sonoff_iFan03"));
 
-    mRuleEngine::EVENT_PART* p_event = nullptr;
+    mEvent::EVENT_PART* p_event = nullptr;
 
     if(pCONT_rules->rules_active_index>2){ return; } //block new rules
 
@@ -47,7 +47,7 @@ void mRuleEngine::DefaultRule_Shelly_Dimmer2(){
 
     AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_Dimmer2"));
 
-    mRuleEngine::EVENT_PART* p_event = nullptr;
+    mEvent::EVENT_PART* p_event = nullptr;
 
     if(pCONT_rules->rules_active_index>2){ return; } //block new rules
 
@@ -141,7 +141,7 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
 
     AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_2p5"));
 
-    mRuleEngine::EVENT_PART* p_event = nullptr;
+    mEvent::EVENT_PART* p_event = nullptr;
 
     if(pCONT_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
 

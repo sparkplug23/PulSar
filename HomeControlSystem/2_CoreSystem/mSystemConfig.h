@@ -16,9 +16,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0
-#define FIRMWARE_VERSION_MINOR    92
-#define FIRMWARE_VERSION_CORE     84
-#define FIRMWARE_VERSION_MODULE   94
+#define FIRMWARE_VERSION_MINOR    93
+#define FIRMWARE_VERSION_CORE     85
+#define FIRMWARE_VERSION_MODULE   95
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           11//                (random(1,1000))
@@ -56,7 +56,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #endif
 
-// Enable special debugs that trigger only regions
+// Enable special d ebugs that trigger only regions
 // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
 
@@ -100,7 +100,6 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // #ifdef ENABLE_ADVANCED_DEBUGGING
 //   #define DEBUG_FOR_FAULT
 // #endif
-
 
 //--------------------------------[Defines needed here]-------------------------------------
 

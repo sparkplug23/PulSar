@@ -1,7 +1,11 @@
+
+#include "ADCSampler.h"
+
+#ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+
 #include <Arduino.h>
 #include "driver/i2s.h"
 #include "driver/adc.h"
-#include "ADCSampler.h"
 
 ADCSampler::ADCSampler(adc_unit_t adcUnit, adc1_channel_t adcChannel)
 {
@@ -17,3 +21,4 @@ void ADCSampler::configureI2S()
     i2s_adc_enable(getI2SPort());
 }
 
+#endif // USE_MODULE_SENSORS_ADC_I2S_INTERNAL

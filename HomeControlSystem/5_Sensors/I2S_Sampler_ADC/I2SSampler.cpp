@@ -1,6 +1,9 @@
 
-#include <Arduino.h>
 #include "I2SSampler.h"
+
+#ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+
+#include <Arduino.h>
 #include "driver/i2s.h"
 
 #define DMA_BYTE_SIZE 1000
@@ -106,3 +109,5 @@ void I2SSampler::SwapReaderWritersRingbuffers()
 //   std::swap(ringbuffer_handle_writer_ptr, ringbuffer_handle_reader_ptr);
   active_ringbuffer_writting_index ^= 1;
 }
+
+#endif // USE_MODULE_SENSORS_ADC_I2S_INTERNAL

@@ -3,6 +3,8 @@
 
 #include "I2SSampler.h"
 
+#ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+
 class ADCSampler : public I2SSampler
 {
 private:
@@ -16,5 +18,7 @@ public:
     ADCSampler(adc_unit_t adc_unit, adc1_channel_t adc_channel);
     
 };
+
+#endif // USE_MODULE_SENSORS_ADC_I2S_INTERNAL
 
 #endif

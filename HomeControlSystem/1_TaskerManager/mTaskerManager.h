@@ -30,9 +30,12 @@
 #ifdef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/mUserConfig_Secret.h"
+
+#include "2_CoreSystem/Events/mEvents.h"
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"

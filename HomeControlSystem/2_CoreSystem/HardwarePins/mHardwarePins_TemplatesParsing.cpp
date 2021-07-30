@@ -92,10 +92,10 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
       const char* key = jtok.getStr();
       
       real_pin = GetRealPinNumberFromName(key);
-      AddLog(LOG_LEVEL_INFO, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
-      AddLog(LOG_LEVEL_INFO, PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
       
       if(index_pin>=0){
       
@@ -292,14 +292,14 @@ void mHardwarePins::GpioInit(void)
     if(!ValidUserGPIOFunction(pCONT_set->Settings.module_pins.io,i)){
       pCONT_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     #endif // ENABLE_LOG_LEVEL_INFO
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
       #endif // ENABLE_LOG_LEVEL_INFO
     }
 
@@ -310,7 +310,7 @@ void mHardwarePins::GpioInit(void)
       if(pCONT_set->my_module.io[i] > GPIO_NONE_ID){
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
+      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
         pCONT_set->my_module.io[i],
         def_gp.io[i],
         i,
@@ -329,7 +329,7 @@ void mHardwarePins::GpioInit(void)
   }
   pCONT_set->my_module_flag = ModuleFlag();
 
-  AddLog_Array(LOG_LEVEL_DEBUG, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
+  AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
   /**
    *  Take module io and configure pins
@@ -365,7 +365,7 @@ void mHardwarePins::GpioInit(void)
   //   // SetPinFunction(gpio_pin_number, pin_function);  
   // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
-    AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
 
   //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
   //   // if(mgpio){

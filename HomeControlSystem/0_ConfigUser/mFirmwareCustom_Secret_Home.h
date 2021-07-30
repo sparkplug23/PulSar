@@ -83,6 +83,7 @@ Outside
 // #define DEVICE_GAZEBCON //to become a sonoff 4ch (non pro)
 // Gazebo rgb as its own controllers
 // gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
+// #define DEVICE_GAZEBO_SENSOR
 
 /**
 Garage
@@ -1879,6 +1880,67 @@ Bathroom
   "}";
 
 #endif
+
+
+#ifdef DEVICE_GAZEBO_SENSOR
+  #define DEVICENAME_CTR          "gazebosensor"
+  #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DHT
+  #define USE_MODULE_SENSORS_MOTION
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"D1\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18B20
+      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D5\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      #endif
+      "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
+      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" "Outside" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" "Outside" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" "Outside" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" "Cold Water Tank" "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 /**************************************************************************************************************************************************

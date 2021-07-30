@@ -9,6 +9,8 @@
 
 #ifdef USE_MODULE_CORE_RULES
 
+//, public mEvent
+
 #include <stdint.h>
 #include "3_Network/MQTT/mMQTT.h"
 #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
@@ -16,6 +18,7 @@
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mRuleEngine :
+  // public mTaskerInterface, public mEvent // WORKS
   public mTaskerInterface
 {
     
@@ -133,42 +136,49 @@ bool loaded_default_for_moduled = false;
 // const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
 
     
-
-    struct EVENT_PART{
-      /**
-       * Buttons, Relays
-       * */
-      uint16_t module_id;
-      /**
-       * InputChange, Timer
-       */
-      uint16_t function_id;
-      /**
-       * ?? or buffer[0]
-       * */
-      uint8_t device_id;
-      /**
-       * Values
-       * */
-      struct VALUES{
-        uint8_t encoding = 0;
-        uint8_t data[5];
-        uint8_t length = 0;
-      }value;
-      /**
-       * jsoncommands stored in a dlist
-       * */
-      int8_t json_commands_dlist_id = -1;
-    };
+    // /***
+    //  * 
+    //  * Future change:
+    //  * Events should become their own class, to hold things that happen.
+    //  * Rules can then only be turned on when needed in the primary loop, equally, I should add a check to only go through rules if any are active with a flag
+    //  * 
+    //  * 
+    //  * */
+    // struct EVENT_PART{
+    //   /**
+    //    * Buttons, Relays
+    //    * */
+    //   uint16_t module_id;
+    //   /**
+    //    * InputChange, Timer
+    //    */
+    //   uint16_t function_id;
+    //   /**
+    //    * ?? or buffer[0]
+    //    * */
+    //   uint8_t device_id;
+    //   /**
+    //    * Values
+    //    * */
+    //   struct VALUES{
+    //     uint8_t encoding = 0;
+    //     uint8_t data[5];
+    //     uint8_t length = 0;
+    //   }value;
+    //   /**
+    //    * jsoncommands stored in a dlist
+    //    * */
+    //   int8_t json_commands_dlist_id = -1;
+    // };
 
     struct RULES{
       bool enabled = false;
-      EVENT_PART trigger;
-      EVENT_PART command; //introduce multiple commands? Create a vector of rules?
+      mEvent::EVENT_PART trigger;
+      mEvent::EVENT_PART command; //introduce multiple commands? Create a vector of rules?
     }rules[D_MAX_RULES];
 
     // This will need to become an array or queue, that way consecutive rules can trigger at the same time
-    EVENT_PART event_triggered;
+    mEvent::EVENT_PART event_triggered;
 
 
     uint8_t rules_active_index = 0;
@@ -179,19 +189,19 @@ bool loaded_default_for_moduled = false;
     // void Reset(){
     //   Reset(&EventTriggered);
     // }
-    void Reset(EVENT_PART* e){
+    void Reset(mEvent::EVENT_PART* e){
       e->module_id = 0;
       e->function_id = 0;
       // e->index = 0;
       // e->state = 0;
     };
-    void Add_All(EVENT_PART* e, uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
+    void Add_All(mEvent::EVENT_PART* e, uint16_t _module_id=0, uint8_t _index=0, uint8_t _state=0){
       e->module_id = _module_id;
       // e->function_id = _function_id;
       // e->index = _index;
       // e->state = _state;
     };
-    void Encoding(EVENT_PART* e, uint8_t encoding){
+    void Encoding(mEvent::EVENT_PART* e, uint8_t encoding){
       e->value.encoding = encoding;
     };
 
@@ -243,7 +253,7 @@ bool loaded_default_for_moduled = false;
     #endif // USE_MODULE_TEMPLATE_SHELLY_2P5
 
     
-    void parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event);
+    void parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event);
 
     
     void Tasker_Rules_Interface(uint16_t function);

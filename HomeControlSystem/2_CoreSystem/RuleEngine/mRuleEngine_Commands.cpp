@@ -3,7 +3,7 @@
 
 #ifdef USE_MODULE_CORE_RULES
 
-void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mRuleEngine::EVENT_PART* event){
+void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event){
 
   AddLog(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
 
@@ -185,7 +185,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj){
       
       AddLog(LOG_LEVEL_INFO, PSTR("MATCHED Rule%d"),rule_index);
 
-      mRuleEngine::EVENT_PART* p_event = nullptr;
+      mEvent::EVENT_PART* p_event = nullptr;
 
       jobj = obj[rule_name].getObject()["Trigger"];
       if(!jobj.isNull()){
