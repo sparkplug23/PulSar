@@ -163,6 +163,8 @@ void IRAM_ATTR ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger
 int8_t mSerialPositionalLogger::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
+
+  DEBUG_PIN1_TOGGLE();
   
   switch(function){
     /************
@@ -267,15 +269,14 @@ void mSerialPositionalLogger::Init(void)
 
   WiFi.mode(WIFI_OFF);
   btStop();
-
   
-    /**
-     * Only on debug lipo-esp32, for simplifying the data to pc process
-     * */
-    #if defined(USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT) && !defined(USE_MODULE_DRIVERS_SERIAL_UART)
-      // Configure here for debugging only
-      Serial2.begin(2048000);
-    #endif
+  /**
+   * Only on debug lipo-esp32, for simplifying the data to pc process
+   * */
+  #if defined(USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT) && !defined(USE_MODULE_DRIVERS_SERIAL_UART)
+    // Configure here for debugging only
+    Serial2.begin(2048000);
+  #endif
 
 }
 
@@ -335,40 +336,6 @@ void mSerialPositionalLogger::Handle_Primary_Service_RSS_Stream_To_Create_SDCard
   {
     pCONT_serial_pos_log->sync_frame_data.flag_started = false;
     // AddLog(LOG_LEVEL_INFO, PSTR("sync_frame_data.flag_started"));
-
-
-
-
-
-
-
-
-// uint8_t read_index = 0;//!pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index; // invert
-
-// Serial.println();
-// Serial.println();
-// Serial.println();
-
-// Serial.println(pCONT_adc_internal->isr_capture.within_buffer_iter_counter);
-// for(int i=0;i<40;i++)
-// {
-// Serial.print(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch6[i]);
-// Serial.print('-');
-// }
-// Serial.println();
-
-// Serial.println(pCONT_adc_internal->isr_capture.within_buffer_iter_counter);
-// for(int i=0;i<40;i++)
-// {
-// Serial.print(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch7[i]);
-// Serial.print('-');
-// }
-// Serial.println();
-
-
-
-
-
   }
   
   if(pCONT_serial_pos_log->sync_frame_data.flag_ended)
@@ -401,7 +368,6 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
      * */
     Construct_SuperFrame_Data_From_RingBuffer();
 
-
     memset(sync_frame_data.buffer, 0, sizeof(sync_frame_data.buffer));
     uint16_t maximum_sync_frame_length = 300;
     sync_frame_data.buffer_bytes_read = pCONT_uart->GetRingBufferDataAndClear(RSS_RINGBUFFER_NUMBER_INDEX, sync_frame_data.buffer, maximum_sync_frame_length);
@@ -429,14 +395,13 @@ void mSerialPositionalLogger::SubTask_Generate_SyncFrame_To_SDCard_Stream()
     /**
      * Only on debug lipo-esp32, for simplifying the data to pc process
      * */
-    #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+    #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
       char* buff_ptr = BufferWriterI->GetPtr();
-      for(int i=0;i<BufferWriterI->GetLength();i++)
-      {
-        Serial2.print(buff_ptr[i]);
+      for(int i=0;i<BufferWriterI->GetLength();i++){
+        Serial.print(buff_ptr[i]);
       }
       // For pretty output
-      Serial2.println();
+      Serial.println();
     #endif
 
 
@@ -497,103 +462,103 @@ void mSerialPositionalLogger::EverySecond()
 
 
 
-/**
- * @brief Test1: Button will open the file, then each time it is called, append the current RTC time.
- * Button will then close the file again. 
- * This method will try writting it directly, but future method may need a ringbuffer just for the sdcard stream... "BufferSDCARDStream-> print to it"
- * */
-void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
-{
-  #ifdef USE_MODULE_DRIVERS_SDCARD
+// /**
+//  * @brief Test1: Button will open the file, then each time it is called, append the current RTC time.
+//  * Button will then close the file again. 
+//  * This method will try writting it directly, but future method may need a ringbuffer just for the sdcard stream... "BufferSDCARDStream-> print to it"
+//  * */
+// void mSerialPositionalLogger::SubTask_HandleSDCardLogging()
+// {
+//   #ifdef USE_MODULE_DRIVERS_SDCARD
 
-  // #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
-  // if(sdcard_status.isopened)
-  // {
+//   // #ifdef ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
+//   // if(sdcard_status.isopened)
+//   // {
 
-  //   ConstructJSON_SDCardSuperFrame();
-  //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+//   //   ConstructJSON_SDCardSuperFrame();
+//   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
 
-  //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+//   //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
-  // }
-  // #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
+//   // }
+//   // #endif // ENABLE_SDLOGGER_APPEND_JSON_SUPERFRAME
 
-  // #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
-  // if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
-  // {
+//   // #ifdef ENABLE_SDLOGGER_APPEND_TIME_TEST
+//   // if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+//   // {
 
-  //   ConstructJSON_SDCardSuperFrame();
+//   //   ConstructJSON_SDCardSuperFrame();
     
-  //   // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
-  //   // {
-  //   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
-  //   // }
+//   //   // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+//   //   // {
+//   //   //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+//   //   // }
 
-  //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+//   //   pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
 
-  // }
-  // #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+//   // }
+//   // #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
 
 
-  #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
-  if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
-  {
+//   #ifdef ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+//   if(pCONT_sdcard->writer_settings.status == pCONT_sdcard->FILE_STATUS_OPENED_ID)
+//   {
 
-    ConstructJSON_SDCardSuperFrame();
+//     ConstructJSON_SDCardSuperFrame();
     
-    // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
-    // {
-    //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
-    // }
+//     // if(mTime::TimeReached(&tSaved_MillisWrite2, 1000))
+//     // {
+//     //   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe[%d]=\"%s\""), pCONT_sdcard->sdcard_status.bytes_written_to_file, BufferWriterI->GetPtr());
+//     // }
 
-    // pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
-    /**
-     * Append to sdcard stream
-     * */
-    pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+//     // pCONT_sdcard->SubTask_Append_To_Open_File(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
+//     /**
+//      * Append to sdcard stream
+//      * */
+//     pCONT_sdcard->AppendRingBuffer(BufferWriterI->GetPtr(), BufferWriterI->GetLength());
     
-  }
-  #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
+//   }
+//   #endif // ENABLE_SDLOGGER_APPEND_TIME_TEST
 
-  #endif // USE_MODULE_DRIVERS_SDCARD
+//   #endif // USE_MODULE_DRIVERS_SDCARD
 
-}
+// }
 
 
-/**
- * @brief basic test, that fully opens, appends and closed the file automatically on call
- * */
-void mSerialPositionalLogger::SubTask_Debug_BasicFileWriteTest()
-{
+// /**
+//  * @brief basic test, that fully opens, appends and closed the file automatically on call
+//  * */
+// void mSerialPositionalLogger::SubTask_Debug_BasicFileWriteTest()
+// {
 
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-  // As a test, lets open, write/append and close sd card
+//   #ifdef USE_MODULE_DRIVERS_SDCARD
+//   // As a test, lets open, write/append and close sd card
   
 
-  // Open file
-  sprintf(pCONT_sdcard->writer_settings.file_name, "/%s%d.txt", "SDCardTest",1);
-  File file = SD.open(pCONT_sdcard->writer_settings.file_name, FILE_APPEND);
-  if(!file){
-    AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" did not open"),pCONT_sdcard->writer_settings.file_name);
-  }
-  AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" Opened!"),pCONT_sdcard->writer_settings.file_name);
+//   // Open file
+//   sprintf(pCONT_sdcard->writer_settings.file_name, "/%s%d.txt", "SDCardTest",1);
+//   File file = SD.open(pCONT_sdcard->writer_settings.file_name, FILE_APPEND);
+//   if(!file){
+//     AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" did not open"),pCONT_sdcard->writer_settings.file_name);
+//   }
+//   AddLog(LOG_LEVEL_TEST, PSTR("file \"%s\" Opened!"),pCONT_sdcard->writer_settings.file_name);
 
-  ConstructJSON_SDCardSuperFrame();
-  AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
-  // write all bytes
-  char* buffer_to_write = BufferWriterI->GetPtr();
-  for(int i=0; i<strlen(BufferWriterI->GetPtr()); i++)
-  {
-    file.print(buffer_to_write[i]);
-  }
-  file.print('\n');
+//   ConstructJSON_SDCardSuperFrame();
+//   AddLog(LOG_LEVEL_TEST, PSTR("sdcardframe=\"%s\""), BufferWriterI->GetPtr());
+//   // write all bytes
+//   char* buffer_to_write = BufferWriterI->GetPtr();
+//   for(int i=0; i<strlen(BufferWriterI->GetPtr()); i++)
+//   {
+//     file.print(buffer_to_write[i]);
+//   }
+//   file.print('\n');
 
-  //close file
-  file.close();
+//   //close file
+//   file.close();
 
-  #endif// USE_MODULE_DRIVERS_SDCARD
+//   #endif// USE_MODULE_DRIVERS_SDCARD
 
-}
+// }
 
 /**
  * @brief Show logger status on OLED
@@ -710,7 +675,7 @@ if(bytes_written>50000)
   pCONT_iDisp->LogBuffer_AddRow(buffer,2);
   #endif // USE_MODULE_DRIVERS_SDCARD
 
-  snprintf(buffer, sizeof(buffer), "%s %s","Op",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
+  snprintf(buffer, sizeof(buffer), "T:%s",pCONT_time->RtcTime.hhmmss_ctr);//pCONT_time->GEt DT_UTC;
   pCONT_iDisp->LogBuffer_AddRow(buffer, 3);
   #endif // USE_MODULE_DISPLAYS_OLED_SSD1306
 
@@ -749,80 +714,85 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
 
   JsonBuilderI->Start();
     
-    /**
-     * on first sequence number, send additional useful info
-     * */
-    if(sequence_test == 0)
-    {
-      JBI->Add("DeviceName", DEVICENAME_FRIENDLY_CTR);
-    }
+  /**
+   * on first sequence number, send additional useful info
+   * */
+  if(sequence_test == 0)
+  {
+    JBI->Add("DeviceName", DEVICENAME_FRIENDLY_CTR);
+  }
 
-    JBI->Add("SN", sequence_test++);
+  JBI->Add("N", sequence_test++);
 
-    // // Debug data only
-    // JBI->Add("MS",millis());
+  uint32_t elapsed_millis_from_last_construct = millis() - tSaved_Constructed_Json_SDCardSuperFrame_ms;
+  tSaved_Constructed_Json_SDCardSuperFrame_ms = millis();
 
-    // // GPS data
-    // #ifdef USE_MODULE_DRIVERS_GPS
-    // JBI->Level_Start("gp");
-    //   JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
-    //   JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
-    //   JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
-    //   JBI->Add("sd", pCONT_gps->gps_result_stored.speed());
-    //   JBI->Add("hd", pCONT_gps->gps_result_stored.heading_cd());
-    //   JBI->Add("gh", pCONT_gps->gps_result_stored.geoidHeight_cm()); // Height of the geoid above the WGS84 ellipsoid
-    //   JBI->Add("s",  pCONT_gps->gps_result_stored.satellites);
+  // Debug data only
+  JBI->Add("M",millis());
+  JBI->Add("D",elapsed_millis_from_last_construct);
 
-    //   uint32_t timeofday_seconds = 
-    //     (pCONT_gps->gps_result_stored.dateTime.hours*3600) +
-    //     (pCONT_gps->gps_result_stored.dateTime.minutes*60) +
-    //     (pCONT_gps->gps_result_stored.dateTime.seconds*1000);
+  // GPS data
+  #ifdef USE_MODULE_DRIVERS_GPS
+  JBI->Level_Start("G");
+    JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
+    JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
+    JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
+    JBI->Add("sd", pCONT_gps->gps_result_stored.speed());
+    JBI->Add("hd", pCONT_gps->gps_result_stored.heading_cd());
+    JBI->Add("gh", pCONT_gps->gps_result_stored.geoidHeight_cm()); // Height of the geoid above the WGS84 ellipsoid
+    JBI->Add("s",  pCONT_gps->gps_result_stored.satellites);
 
-    //   uint32_t tod_millis = 
-    //     (timeofday_seconds*1000) + 
-    //     pCONT_gps->gps_result_stored.dateTime_ms();
+    uint32_t timeofday_seconds = 
+      (pCONT_gps->gps_result_stored.dateTime.hours*3600) +
+      (pCONT_gps->gps_result_stored.dateTime.minutes*60) +
+      (pCONT_gps->gps_result_stored.dateTime.seconds*1000);
 
-    //   JBI->Add("tms",  tod_millis);
-    // JBI->Level_End();
-    // #endif // USE_MODULE_DRIVERS_GPS
+    uint32_t tod_millis = 
+      (timeofday_seconds*1000) + 
+      pCONT_gps->gps_result_stored.dateTime_ms();
+
+    JBI->Add("tms",  tod_millis);
+    JBI->Add_FV("t",  "%02d:%02d:%02d-%03d", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
+  JBI->Level_End();
+  #endif // USE_MODULE_DRIVERS_GPS
 
 
-    // /**
-    //  * add esp32 rss data
-    //  * */ 
-    // #ifdef ENABLE_ESP32_ADC_SAMPLING
-    // uint8_t read_index = pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index?0:1;
-    // JBI->Array_Start("e2");
-    // for(int i=0;i<40;i++)
-    // {
-    //   JBI->Add(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch6[i]);
-    // }
-    // JBI->Array_End();
+  // /**
+  //  * add esp32 rss data
+  //  * */ 
+  // #ifdef ENABLE_ESP32_ADC_SAMPLING
+  // uint8_t read_index = pCONT_adc_internal->isr_capture.active_buffer_to_write_to_index?0:1;
+  // JBI->Array_Start("e2");
+  // for(int i=0;i<40;i++)
+  // {
+  //   JBI->Add(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch6[i]);
+  // }
+  // JBI->Array_End();
 
-    // JBI->Array_Start("e5");
-    // for(int i=0;i<40;i++)
-    // {
-    //   JBI->Add(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch7[i]);
-    // }
-    // JBI->Array_End();
-    // #endif // ENABLE_ESP32_ADC_SAMPLING
+  // JBI->Array_Start("e5");
+  // for(int i=0;i<40;i++)
+  // {
+  //   JBI->Add(pCONT_adc_internal->isr_capture.adc_readings[read_index].buffer_ch7[i]);
+  // }
+  // JBI->Array_End();
+  // #endif // ENABLE_ESP32_ADC_SAMPLING
 
-    
-    // BufferWriterI->Append(",\"SF\":[");
-    // for(int i=0;i<sync_frame_data.buffer_bytes_read;i++)
-    // {
-    //   BufferWriterI->Append_P(PSTR("%d%s"), sync_frame_data.buffer[i], i<sync_frame_data.buffer_bytes_read-1? ",": ""); 
-    // }
-    // BufferWriterI->Append("]");
+  
+  BufferWriterI->Append(",\"SF\":[");
+  for(int i=0;i<sync_frame_data.buffer_bytes_read;i++)
+  {
+    BufferWriterI->Append_P(PSTR("%d%s"), sync_frame_data.buffer[i], i<sync_frame_data.buffer_bytes_read-1? ",": ""); 
+  }
+  BufferWriterI->Append("]");
 
-    /**
-     * Test, add only first sample from each esp32_adc item
-     * */
-    #ifdef USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
-    JBI->Level_Start("EA");
-      pCONT_adc_internal->Append_JSONPart_ESP32ADCReadings();
-    JBI->Level_End();
-    #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
+  /**
+   * Test, add only first sample from each esp32_adc item
+   * */
+  #ifdef USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
+  JBI->Level_Start("EA");
+    pCONT_adc_internal->Append_JSONPart_ESP32ADCReadings();
+  JBI->Level_End();
+  #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
 
 
   return JsonBuilderI->End();

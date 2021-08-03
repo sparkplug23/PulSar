@@ -172,7 +172,7 @@ uint16_t AppendRingBuffer(char* buffer, uint16_t buflen);
     #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
 
     
-#ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+#ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
 void init_SDCARD_is_Serial_Debug_Only();
 #endif
 

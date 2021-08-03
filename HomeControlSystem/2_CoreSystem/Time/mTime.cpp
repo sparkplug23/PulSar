@@ -56,7 +56,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:{
       
       #ifndef DISABLE_SERIAL0_CORE
-      Serial.println(GetUptime());
+      //Serial.println(GetUptime());
       #endif
       
       #ifndef DISABLE_NETWORK

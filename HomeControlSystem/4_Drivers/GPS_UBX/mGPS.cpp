@@ -10,7 +10,6 @@ const char* mGPS::PM_MODULE_DRIVERS_GPS_CTR = D_MODULE_DRIVERS_GPS_CTR;
 const char* mGPS::PM_MODULE_DRIVERS_GPS_FRIENDLY_CTR = D_MODULE_DRIVERS_GPS_FRIENDLY_CTR;
 
 int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
-
   /************
    * INIT SECTION * 
   *******************/
@@ -28,10 +27,11 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
-      Handle_Connection_And_Configuration();
+     // Handle_Connection_And_Configuration();
 
       /**
        * @10hz, I only need to check buffer every 100ms for new full data, this will allow the other 100ms to be used
+       * Doing every 7 ms should mean each time spend here will be shorter parsing
        * */
       if(mTime::TimeReached(&tSaved_parse_gps, 100))
       {
@@ -106,6 +106,9 @@ void mGPS::ReadGPSStream()
       #ifdef ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
       #ifdef USE_MODULE_DRIVERS_SERIAL_UART
 
+      // uint16_t bytes_to_read_for_faster_parsing = 100;
+
+
       // BufferWriterI->Clear();
       uint16_t bytes_to_read = pCONT_uart->GetRingBufferDataAndClear(1, BufferWriterI->GetPtr(), BufferWriterI->GetBufferSize(), '\n', false);
       // if(strlen(BufferWriterI->GetPtr())==0){
@@ -114,6 +117,7 @@ void mGPS::ReadGPSStream()
 
       bool gps_fix_reading = false;
 
+      // Serial.printf("bytes = %d\n\r", bytes_to_read);
       //if any data found
       if(bytes_to_read)
       {  

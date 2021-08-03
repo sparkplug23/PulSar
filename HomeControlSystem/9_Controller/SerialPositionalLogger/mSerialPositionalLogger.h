@@ -92,6 +92,8 @@ class mSerialPositionalLogger :
       uint16_t buffer_bytes_read = 0;
     }sync_frame_data;
 
+    uint32_t tSaved_Constructed_Json_SDCardSuperFrame_ms = 0;
+
     void Handle_Primary_Service_RSS_Stream_To_Create_SDCard_Stream();
     void SubTask_Generate_SyncFrame_To_SDCard_Stream();
     void Construct_SuperFrame_Data_From_RingBuffer();

@@ -36,7 +36,7 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
 
     break;
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
+      AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
 
     break;
     /************

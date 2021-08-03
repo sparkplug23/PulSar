@@ -22,11 +22,18 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
   }else
   if(function == FUNC_INIT){
     
-    // #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+    // #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
     //   init_SDCARD_is_Serial_Debug_Only();
     // #else
       init();
     // #endif
+  }
+  else
+  if(function == FUNC_EVERY_SECOND){
+    if(sdcard_status.init_error_on_boot)
+    {
+      init();
+    }
   }
 
   // Only continue in to tasker if module was configured properly
@@ -210,7 +217,7 @@ void mSDCard::init(void)
 
 }
 
-#ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+#ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
 void mSDCard::init_SDCARD_is_Serial_Debug_Only()
 {
 
@@ -219,7 +226,7 @@ void mSDCard::init_SDCARD_is_Serial_Debug_Only()
   settings.fEnableModule = true;
 
 }
-#endif  //   USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_UART_ESP32_OUTPUT
+#endif  //   USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
 
 
 void mSDCard::Pre_Init(){
@@ -270,7 +277,7 @@ void mSDCard::Handle_Write_Ringbuffer_Stream_To_SDCard()
     if(bytes_read)
     {  
       // char* pbuffer = BufferWriterI->GetPtr();
-      AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),bytes_read, stream_out_buffer);
+      //AddLog(LOG_LEVEL_TEST, PSTR("buffer[%d]=\"%s\""),bytes_read, stream_out_buffer);
       pCONT_sdcard->SubTask_Append_To_Open_File(stream_out_buffer, bytes_read);      
     }
 
