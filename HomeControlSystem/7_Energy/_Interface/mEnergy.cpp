@@ -1,3 +1,4 @@
+
 #include "mEnergy.h"
 
 #ifdef USE_MODULE_ENERGY_INTERFACE

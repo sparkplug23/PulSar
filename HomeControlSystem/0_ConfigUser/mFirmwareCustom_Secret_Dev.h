@@ -38,12 +38,14 @@
 // #define DEVICE_RGBDISPLAY_GARAGE   
 // #define DEVICE_RGBSTRING_LIGHTS1
 // #define DEVICE_RGBSTRING_LIGHTS2 //heart
+// #define DEVICE_RGBSTRING_GARDEN_TREE_1
 // #define DEVICE_BEDROOMBLINDS     
 // #define DEVICE_DESKFAN
 // #define DEVICE_DESKPANEL
 // #define DEVICE_HVAC_BEDROOM
 // #define DEVICE_BEDROOM_PZEM_TESTER
 // #define DEVICE_RGBDELL
+// #define DEVICE_RGBBEDROOM_H801_2
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -117,7 +119,7 @@
 **/
 // #define DEVICE_TESTBED_SHELLY1_01
 // #define DEVICE_TESTBED_SHELLY2_DIMMER
-// #define DEVICE_TESTBED_SHELLY2P5_01
+#define DEVICE_TESTBED_SHELLY2P5_01
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
 
@@ -607,6 +609,58 @@
 #endif
 
 
+
+
+#ifdef DEVICE_RGBSTRING_GARDEN_TREE_1
+  #define DEVICENAME_CTR            "rgbstring_garden_tree1"
+  #define DEVICENAME_FRIENDLY_CTR   "Garden Tree Lights 1"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":9000,"
+      "\"" D_JSON_RATE_MS "\":30000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+    "},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
+    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
+  "}";
+
+#endif
 
 
 #ifdef DEVICE_TESTER_RGBW
@@ -2534,6 +2588,54 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 #endif
 
 
+#ifdef DEVICE_RGBBEDROOM_H801_2
+  #define DEVICENAME_CTR          "rgbbedroom_h801_2"
+  #define DEVICENAME_FRIENDLY_CTR "H801 rgbbedroom_h801_2"
+  
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1   
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+  
+  #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+    "},"
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME "\":1,"
+      "\"" D_JSON_RATE "\":5,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  "}";
+    
+#endif
+
+
 
 #ifdef DEVICE_RGBBEDLIGHT_TEST // for PWM dev
   #define DEVICENAME_CTR          "rgbbedlight_test"
@@ -3936,17 +4038,17 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   320,0,32,0,224,193,0,0,640,192,608,225,3456,4736
   */
   //],"FLAG":0,"BASE":18}
-  #define USE_MODULE_SENSORS_PRESENCE
+  // #define USE_MODULE_SENSORS_PRESENCE   // to be added
 
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_ADE7953
+  // #define USE_MODULE_ENERGY_INTERFACE
+  // #define USE_MODULE_ENERGY_ADE7953
 
   #define FORCE_TEMPLATE_LOADING
   // #define SETTINGS_HOLDER 2
   
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
-  // #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_MOTION   //phasing out??
 
   #define USE_MODULE_CORE_RULES
 
@@ -3954,42 +4056,13 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define MAX_RELAYS 2
   #define USE_MODULE_DRIVERS_INTERFACE
 
-  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
-  
-
-  // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT
+  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON  
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"" D_JSON_GPIOC "\":{"
-    //   #ifdef USE_MODULE_SENSORS_SWITCHES
-    //   "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-    //   "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-    //   #endif
-    //   #ifdef USE_MODULE_SENSORS_MOTION
-    //   "\"13\":\"" D_GPIO_FUNCTION_PIR_1_NP_CTR  "\","
-    //   "\"5\":\""  D_GPIO_FUNCTION_PIR_2_NP_CTR  "\","
-    //   #endif
-    //   #ifdef USE_MODULE_DRIVERS_RELAY
-    //   "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-    //   "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-    //   #endif 
-    //   #ifdef USE_MODULE_SENSORS_BUTTONS
-    //   "\"2\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-    //   #endif 
-    //   #ifdef USE_MODULE_ENERGY_ADE7953 // I2C address 0x38
-    //   "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR  "\","
-    //   "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
-    //   "\"16\":\"" D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
-    //   #endif 
-    //   #ifdef USE_MODULE_SENSORS_ANALOG_TEMPERATURE
-    //   "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_TEMPERATURE_CTR  "\","
-    //   #endif 
-    //   "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-    // "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\""
   "}";
 
@@ -3998,22 +4071,83 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Motion0"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Motion1"
   
+  
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
+    //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
-      "]"
+      "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D15:45:00\",\"OffTime\":\"00D00:00:00\"},"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"},"
     "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
   "}";
+
+
+  #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Motion\","
+        "\"Function\":\"MotionStarted\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":1,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Motion\","
+        "\"Function\":\"MotionStarted\","
+        "\"DeviceName\":1,"
+        "\"State\":1"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":1,"
+        "\"State\":1,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "}"
+  "}";
+
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+  //       "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+  //     "],"
+  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+  //       "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+  //     "]"
+  //   "},"
+  //   "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D15:45:00\",\"OffTime\":\"00D00:00:00\"},"
+  //   "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
+  // "}";
 
   // #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
   // DEFINE_PGM_CTR(RULES_TEMPLATE)

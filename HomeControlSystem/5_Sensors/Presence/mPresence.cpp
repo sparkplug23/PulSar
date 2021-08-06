@@ -44,7 +44,7 @@ int8_t mPresence::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVENT_MOTION_ENDED_ID:
       // CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
 
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
 
     break; 
     /************

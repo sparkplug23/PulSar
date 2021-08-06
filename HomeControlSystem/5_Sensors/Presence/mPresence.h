@@ -34,6 +34,8 @@ class mPresence :
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
+
+    void parse_JSONCommand(JsonParserObject obj);
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);

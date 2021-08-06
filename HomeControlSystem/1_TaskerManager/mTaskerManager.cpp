@@ -87,11 +87,11 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     uint32_t start_millis = millis();
     #endif
 
-DEBUG_PIN2_SET(0);
+// DEBUG_PIN2_SET(0);
 
-if(i==0){
-  DEBUG_PIN3_SET(1);
-}
+// if(i==0){
+//   DEBUG_PIN3_SET(1);
+// }
     switch(function){
       // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
       case FUNC_JSON_COMMAND_ID: 
@@ -109,7 +109,7 @@ if(i==0){
       break;
     }
 
-DEBUG_PIN2_SET(1);
+// DEBUG_PIN2_SET(1);
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis
@@ -151,7 +151,7 @@ DEBUG_PIN2_SET(1);
     }
   
   } //end for
-  DEBUG_PIN3_SET(0);
+  // DEBUG_PIN3_SET(0);
 
   DEBUG_LINE;
   if(!pCONT_set->flag_boot_complete){
