@@ -30,6 +30,7 @@
 #ifdef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
 #endif // D_USER_MICHAEL
 

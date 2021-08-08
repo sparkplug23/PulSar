@@ -1211,6 +1211,7 @@
 #define D_LOG_ASYNC "ASC: "
 #define D_LOG_TEST "TST: "
 #define D_LOG_SDCARD "SDC: "
+#define D_LOG_SWITCHES "SWH: "
 
 
 //SDM220
