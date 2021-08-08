@@ -1,14 +1,10 @@
 
 #include "mSwitches.h"
 
-#include "2_CoreSystem/mBaseConfig.h"
-
 #ifdef USE_MODULE_SENSORS_SWITCHES
-
 
 const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
 const char* mSwitches::PM_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR = D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR;
-
 
 int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -20,10 +16,7 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
       SwitchLoop();
     break;
     case FUNC_EVERY_SECOND:
-
-    // pinMode(13,INPUT);
-    // pinMode(5,INPUT);
-    
+   
         // Serial.printf("PinUsed[29]\t\tpin=%d\n\r",pCONT_pins->GetPin(29));
         // Serial.printf("PinUsed[30]\t\tpin=%d\n\r",pCONT_pins->GetPin(30));
         // Serial.printf("PinUsed[291]\t\tpin=%d\n\r",pCONT_pins->PinUsed(GPIO_SWT1_NP_ID));
@@ -40,9 +33,6 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
       // switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
       // switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
     break;
-    // case FUNC_JSON_COMMAND: 
-    
-    // break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -233,19 +223,16 @@ void mSwitches::SwitchHandler(uint8_t mode)
 {
   if (pCONT_time->uptime.seconds_nonreset < 4) { return; }  
 
-  uint8_t button = SWITCH_NOT_PRESSED_ID;
+  uint8_t state = SWITCH_NOT_PRESSED_ID;
   uint8_t switchflag;
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.switch_debounce;
+  uint8_t active_state = LOW;
 
   for (uint8_t i = 0; i < MAX_SWITCHES; i++) {
     if (
-      //      pCONT_pins->PinUsed(GPIO_SWT1_ID,i)
-      (switches[i].pin != -1) 
-      
-       || (mode)) {
-
-// Serial.printf("switches[%d].pin=%d \t %d\n\r",i,switches[i].pin,digitalRead(switches[i].pin));
-
+      (switches[i].pin != -1) // pCONT_pins->PinUsed(GPIO_SWT1_ID,i)
+      || (mode)
+    ){
 
       if (switches[i].holdwallswitch) {
         switches[i].holdwallswitch--;
@@ -254,7 +241,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
         }
       }
 
-      button = switches[i].switch_virtual;
+      state = switches[i].switch_virtual;
 
       // enum SwitchModeOptions {TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE, MAX_SWITCH_OPTION};
 
@@ -269,49 +256,58 @@ void mSwitches::SwitchHandler(uint8_t mode)
       // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
       // state 16 = POWER_SHOW_STATE = Show power state
 
-      if (button != switches[i].lastwallswitch) {
+      if (state != switches[i].lastwallswitch) 
+      {
         switches[i].ischanged = true;
-        AddLog(LOG_LEVEL_TEST,PSTR("button%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),button,i,switches[i].lastwallswitch);
+
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
+                              i, 
+                              state,
+                              state==active_state?"ACTIVE":"Not Active"
+        );
+      
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
+        
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
         case TOGGLE:
-          switchflag = POWER_TOGGLE;                // Toggle
+          switchflag = POWER_TOGGLE;    // Toggle
           break;
         case FOLLOW:
-          switchflag = button &1;        // Follow wall switch state
+          switchflag = state &1;        // Follow wall switch state
           break;
         case FOLLOW_INV:
-          switchflag = ~button &1;       // Follow inverted wall switch state
+          switchflag = ~state &1;       // Follow inverted wall switch state
           break;
         case PUSHBUTTON:
-          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
+          if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTON_INV:
-          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with releasing pushbutton from Gnd
           }
           break;
         case PUSHBUTTON_TOGGLE:
-          if (button != switches[i].lastwallswitch) {
+          if (state != switches[i].lastwallswitch) {
             switchflag = 2;              // Toggle with any pushbutton change
           }
           break;
         case PUSHBUTTONHOLD:
-          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
+          if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
         case PUSHBUTTONHOLD_INV:
-          if ((SWITCH_NOT_PRESSED_ID == button) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
+          if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
-          if ((SWITCH_PRESSED_ID == button) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
+          if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
@@ -329,12 +325,11 @@ void mSwitches::SwitchHandler(uint8_t mode)
           #endif // USE_MODULE_CORE_RULES
         }
 
-        switches[i].lastwallswitch = button;
-        switches[i].state = button;
+        switches[i].lastwallswitch = state;
+        switches[i].state = state;
 
       }
     }else{
-      
         switches[i].ischanged = false;
     }
   }
@@ -343,53 +338,12 @@ void mSwitches::SwitchHandler(uint8_t mode)
 void mSwitches::SwitchLoop(void)
 {
   if (settings.switches_found) {
-    if(mTime::TimeReached(&switch_debounce, SWITCH_DEBOUNCE_TIME)){//pCONT_set->Settings.switch_debounce)){
+    if(mTime::TimeReached(&switch_debounce, pCONT_set->Settings.switch_debounce)){
       SwitchHandler(0);
     }
   }
 }
 
-
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mSwitches::WebAppend_Root_Draw_Table(){
-
-  const char kTitle_TableTitles_Root[] = 
-    "Switch 0" "|" 
-    "Switch 1" "|" 
-    "Switch 2" "|" 
-    "Switch 3" "|" 
-    "Switch 4" "|" 
-    "Switch 5" "|" 
-    "Switch 6" "|" 
-    "Switch 7" "|" 
-    "Switch 8" "|" ;
-
- pCONT_web->WebAppend_Root_Draw_Table_dList(settings.switches_found,"switch_table", kTitle_TableTitles_Root); //add flag (or another function) that draws names with numbers after it
-
-}
-
-//append to internal buffer if any root messages table
-void mSwitches::WebAppend_Root_Status_Table(){
-
-  char buffer[50];
-  
-  JsonBuilderI->Array_Start("switch_table");// Class name
-  for(int row=0;row<settings.switches_found;row++){
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
-      if(IsSwitchActive(row)){
-        JsonBuilderI->Add("fc","#00ff00");
-      }else{
-        JsonBuilderI->Add("fc","#ff0000");
-      }
-    
-    JsonBuilderI->Level_End();
-  }
-  JsonBuilderI->Array_End();
-  
-}
-    #endif// USE_MODULE_NETWORK_WEBSERVER
 
 
 bool mSwitches::IsSwitchActive(uint8_t id){
@@ -401,9 +355,9 @@ bool mSwitches::IsSwitchActive(uint8_t id){
 }
 
 
-// /********************************************************************************************/
+/********************************************************************************************/
 
-void mSwitches::SwitchPullupFlag(uint16 switch_bit)
+void mSwitches::SwitchPullupFlag(uint16_t switch_bit)
 {
   bitSet(switch_no_pullup, switch_bit);
 }
@@ -435,14 +389,12 @@ uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
 
-    JsonBuilderI->Add("pin0", switches[0].pin);
-    JsonBuilderI->Add("pin1", switches[1].pin);
-    JsonBuilderI->Add("pin2", switches[2].pin);
-    JsonBuilderI->Add("read0", digitalRead(switches[0].pin));
-    JsonBuilderI->Add("read1", digitalRead(switches[1].pin));
-    JsonBuilderI->Add("read2", digitalRead(switches[2].pin));
-
-
+    // JsonBuilderI->Add("pin0", switches[0].pin);
+    // JsonBuilderI->Add("pin1", switches[1].pin);
+    // JsonBuilderI->Add("pin2", switches[2].pin);
+    // JsonBuilderI->Add("read0", digitalRead(switches[0].pin));
+    // JsonBuilderI->Add("read1", digitalRead(switches[1].pin));
+    // JsonBuilderI->Add("read2", digitalRead(switches[2].pin));
     
   return JsonBuilderI->End();
 
@@ -450,9 +402,9 @@ uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
 
-  JsonBuilderI->Start();
-
   char buffer[50]; 
+
+  JsonBuilderI->Start();
 
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
     if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
@@ -477,89 +429,5 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
 
 }
 
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
-
-void mSwitches::MQTTHandler_Init(){
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-void mSwitches::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSwitches::MQTTHandler_Set_TelePeriod(){
-
-  // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSwitches::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSwitches>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_SWITCHES_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
-}
-
-
-////////////////////// END OF MQTT /////////////////////////
 
 #endif
