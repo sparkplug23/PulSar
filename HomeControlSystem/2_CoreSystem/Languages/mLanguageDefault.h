@@ -209,6 +209,12 @@
 //#ifdef USE_MODULE_SENSORS_MOTION
   #define D_MODULE_SENSORS_MOTION_CTR              "mMotionSensor"
   #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR              "motion"
+
+  #define D_MODULE_SENSORS_PRESENCE_CTR "Presence"
+  #define D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "presence"
+
+
+
 //#endif
 //#ifdef USE_MODULE_SENSORS_MOISTURE
   #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR              "mMoistureSensor"
@@ -412,6 +418,8 @@
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
 #define D_FUNC_EVENT_MOTION_STARTED_CTR "MotionStarted"
+#define D_FUNC_EVENT_PRESENCE_STARTED_CTR "PresenceStarted"
+#define D_FUNC_EVENT_PRESENCE_ENDED_CTR "PresenceEnded"
 #define   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "StateChanged"
 #define   D_FUNC_EVENT_SET_POWER_CTR   "SetPower"
 #define   D_FUNC_EVENT_SET_SPEED_CTR   "SetSpeed"
@@ -1164,6 +1172,7 @@
  * */
 #define D_LOG_APPLICATION "APP: "  // Application
 #define D_LOG_BRIDGE "BRG: "       // Bridge
+#define D_LOG_BUTTONS "BTN: "
 #define D_LOG_CONFIG "CFG: "       // Settings
 #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
 #define D_LOG_COMMAND "CMD: "      // Command
@@ -1212,7 +1221,7 @@
 #define D_LOG_TEST "TST: "
 #define D_LOG_SDCARD "SDC: "
 #define D_LOG_SWITCHES "SWH: "
-
+#define D_LOG_RULES "RUL: "
 
 //SDM220
 #define D_PHASE_ANGLE     "Phase Angle"

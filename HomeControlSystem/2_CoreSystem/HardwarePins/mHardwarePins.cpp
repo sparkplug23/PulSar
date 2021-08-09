@@ -659,7 +659,7 @@ void mHardwarePins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t sta
 
   uint8_t real_pin = Pin(gpio_pin, index);
 
-    AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite %d %d %d %d"),gpio_pin,index, state &1,real_pin);
+    AddLog(LOG_LEVEL_TEST, PSTR("DigitalWrite gpio_pin=%d, real_pin=%d, index=%d, state=%d"),gpio_pin,real_pin, index, state &1);
   // if (PinUsed(gpio_pin, index)) {
     digitalWrite(real_pin, state &1);
   // }

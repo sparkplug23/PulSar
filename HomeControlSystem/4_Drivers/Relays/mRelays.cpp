@@ -2,20 +2,9 @@
 
 #ifdef USE_MODULE_DRIVERS_RELAY
 
-/**
- * 
- * 
- * */
-
-
-
-
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR = D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
 
-
-
-//minimal
 /*
 1) MQTT control, including minutes on
 2) Report relay status correctly
@@ -189,9 +178,9 @@ void mRelays::init(void){
 
   #ifdef ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
   settings.flags.enabled_relays_allowed_time_window_checks = true;
-  relay_status[0].enabled_ranges[0].enabled = true;
-  relay_status[0].enabled_ranges[0].ontime = {8, 14, 25, 0}; //8 meaning all days   3pm to 8am
-  relay_status[0].enabled_ranges[0].offtime = {8, 7, 0, 0}; //8 meaning all days
+  // relay_status[0].enabled_ranges[0].enabled = true;
+  // relay_status[0].enabled_ranges[0].ontime = {8, 14, 25, 0}; //8 meaning all days   3pm to 8am
+  // relay_status[0].enabled_ranges[0].offtime = {8, 7, 0, 0}; //8 meaning all days
   #else
   settings.flags.enabled_relays_allowed_time_window_checks = false;
   #endif // ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
@@ -322,7 +311,9 @@ void mRelays::RulesEvent_Set_Power(){
   uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
 
 
-  pCONT_mry->ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
+  ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
+  
+  // MQTTHandler_Set_fSendNow();
 
 }
 #endif // USE_MODULE_CORE_RULES
@@ -363,6 +354,9 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
       #endif
+
+      mqtthandler_sensor_ifchanged.flags.SendNow = true;
+
     }else{
       //assumed off ie == 0
     }
@@ -661,14 +655,13 @@ DEBUG_LINE;
 // #endif // #ifdef USE_NETWORK_MDNS
     // #endif
 
-
-uint16_t gpio_pin = 0;
+    uint16_t gpio_pin = 0;
 
     for (uint32_t i = 0; i < pCONT_set->devices_present; i++) {
       power_t state = rpower &1;
       if (i < MAX_RELAYS) {
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
 
+//        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_RELAYS "i=%d,state=%d"),i,state);
 
         //tmp fix
         if(bitRead(rel_inverted, i))
@@ -782,17 +775,16 @@ void mRelays::SetPowerOnState(void)
 }
 
 
-
-// void mRelays::ExecuteCommandPowerZeroIndex(uint32_t device, uint32_t state, uint32_t source){
-//   AddLog(LOG_LEVEL_WARN, PSTR("Temporary fix ExecuteCommandPowerZeroIndex"));
-//   ExecuteCommandPower(device+1, state, source);
-// }
-
 void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t source)
 {
 
-//device++; // I am using 0 index, tasmota used 1
-// AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_RELAYS "ExecuteCommandPower forcing \"device++\" index shift"));
+/**
+ * Adding locking time based method in here, so if set, relays will only turn on during set windows. 
+ * Note: Allow the off command without time limits
+ * */
+
+
+
 
 // device  = Relay number 1 and up
 // state 0 = POWER_OFF = Relay Off
@@ -805,7 +797,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 // state 10 = POWER_TOGGLE_NO_STATE = Toggle relay and no publishPowerState
 // state 16 = POWER_SHOW_STATE = Show power state
 
-  pCONT_sup->ShowSource(source);
+  // pCONT_sup->ShowSource(source);
 
 // #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 //   if (IsModuleIfan()) {
@@ -817,7 +809,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 //   }
 // #endif  // USE_MODULE_CONTROLLER_SONOFF_IFAN
 
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteCommandPower(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
+  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_RELAYS "ExecuteComPow(device%d,state%d,source%d)=devices_present%d"),device,state,source,pCONT_set->devices_present);
 
   bool publish_power = true;
   if ((state >= POWER_OFF_NO_STATE) && (state <= POWER_TOGGLE_NO_STATE)) {
@@ -840,7 +832,8 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
   // Indexing is now from 0!!
   power_t mask = 1 << device;        // Device to control
-  if (state <= POWER_TOGGLE) {
+  if (state <= POWER_TOGGLE)
+  {
     // if ((blink_mask & mask)) {
     //   blink_mask &= (POWER_MASK ^ mask);  // Clear device mask
     //   MqttPublishPowerBlinkState(device);
@@ -908,6 +901,10 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     mqtthandler_sensor_teleperiod.flags.SendNow = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
   }
+
+//AddLog(LOG_LEVEL_TEST, PSTR("mqtthandler_sensor_teleperiod.flags.SendNow=%d"),mqtthandler_sensor_teleperiod.flags.SendNow);
+
+
 }
 
 
@@ -998,11 +995,18 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level){
 
             JsonBuilderI->Array_Start("ontime");
               JsonBuilderI->Add(mTime::ConvertShortTime_HHMMSS(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
-
-
-
-
             JsonBuilderI->Array_End();
+            JsonBuilderI->Array_Start("offtime");
+              JsonBuilderI->Add(mTime::ConvertShortTime_HHMMSS(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
+            JsonBuilderI->Array_End();
+
+
+            JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+
+            //  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
+    
+
+
 
 
           JsonBuilderI->Level_End();
@@ -1071,7 +1075,7 @@ void mRelays::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = true;
   mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
+  mqtthandler_ptr->tRateSecs = 1;//SEC_IN_HOUR; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
@@ -1099,6 +1103,8 @@ void mRelays::MQTTHandler_Set_TelePeriod()
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   }
 }
 

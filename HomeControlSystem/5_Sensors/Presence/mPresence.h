@@ -8,6 +8,14 @@
 
 #ifdef USE_MODULE_SENSORS_PRESENCE
 
+#include "2_CoreSystem/Time/mTime.h"
+
+#include "5_Sensors/_Interface/mSensorsInterface.h"
+
+#include "1_TaskerManager/mTaskerManager.h"
+
+#include "1_TaskerManager/mTaskerInterface.h"
+
 class mPresence :
   public mTaskerInterface
 {
@@ -29,14 +37,21 @@ class mPresence :
     #endif
 
     struct SETTINGS{
+      uint8_t sensors_active = 0;
       uint8_t fEnableSensor = false;
+      // uint8_t motion_trigger_type = MOTION_TRIGGER_TYPE_REPORT_ONLY_ID;
     }settings;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
+    
+    void RulesEvent_Presence_Change();
 
     void parse_JSONCommand(JsonParserObject obj);
     
+    #define MAXIMUM_SENSORS 3
+    event_motion_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
+
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
 

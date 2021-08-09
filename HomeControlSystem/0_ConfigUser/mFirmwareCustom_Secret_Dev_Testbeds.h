@@ -48,38 +48,24 @@
   #define DEVICENAME_CTR          "testbed_shelly25_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly 2.5 #01"
 
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
-
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Test"
-
-  // #define ENABLE_DEVFEATURE_RULES_MQTT_FASTER_SECS
-
-  // #define ENABLE_DEVFEATURE_OTA_FALLBACK_ON_BOOT_LOOPING
   /*
     Method should only activate if boot loop happens 10 times
     Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
     Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
   */
+  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  //{"NAME":"Shelly 2.5","GPIO":[
-    
-  /*
-  320,0,32,0,224,193,0,0,640,192,608,225,3456,4736
-  */
-  //],"FLAG":0,"BASE":18}
-  // #define USE_MODULE_SENSORS_PRESENCE   // to be added
+  #define ENABLE_DEVFEATURE_RELAY_ENABLE_SCHEDULE_CHECKS
+  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON  
 
   // #define USE_MODULE_ENERGY_INTERFACE
   // #define USE_MODULE_ENERGY_ADE7953
-
-  #define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 2
-  
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
- // #define USE_MODULE_SENSORS_MOTION   //phasing out??
+  #define USE_MODULE_SENSORS_PRESENCE
+
+  #define USE_MODULE_NETWORKS_MQTT
 
   #define USE_MODULE_CORE_RULES
 
@@ -87,7 +73,7 @@
   #define MAX_RELAYS 2
   #define USE_MODULE_DRIVERS_INTERFACE
 
-  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON  
+  // #define ENABLE_DEVFEATURE_OTA_FALLBACK_ON_BOOT_LOOPING
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -100,8 +86,7 @@
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Power0"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Power1"
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Motion0"
-  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Motion1"
-  
+  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Motion1"  
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -119,10 +104,14 @@
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D13:00:00\",\"OffTime\":\"00D14:00:00\"},"
+    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D20:01:00\",\"OffTime\":\"00D06:00:00\"}"
   "}";
 
 
@@ -151,13 +140,28 @@
         "\"Module\":\"Switches\","
         "\"Function\":\"StateChanged\","
         "\"DeviceName\":1,"
-        "\"State\":1"
+        "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
         "\"Function\":\"SetPower\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+      "}"
+    "},"
+    // Button0 Single Press = Relay0 Power On for 10 seconds tester
+    "\"Rule2\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":2" // 
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
     "}"
   "}";
@@ -190,179 +194,89 @@
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    // 
+    // Switch0 HIGH = Relay0 Power ON for Timed seconds
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Motion\","
-        "\"Function\":\"MotionStarted\","
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
         "\"DeviceName\":0,"
-        "\"State\":2"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":0,"
-        "\"State\":1,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-      "}"
-    "},"
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"Motion\","
-        "\"Function\":\"MotionStarted\","
-        "\"DeviceName\":1,"
         "\"State\":1"
       "},"
       "\"Command\":{"
         "\"Module\":\"Relays\","
         "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "},"
+    // Switch1 HIGH = Relay1 Power ON for Timed seconds
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"StateChanged\","
         "\"DeviceName\":1,"
-        "\"State\":1,"
+        "\"State\":1"      // 2 meaning either low or high, 1 would be high only
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":1,"
+        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
         "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "},"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule2\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "},"
+    // Switch1 HIGH = Motion1 Event Started, ie report as motion with motion name
+    "\"Rule3\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":1,"
+        "\"State\":1" // 
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started        
+        // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
+      "}"
+    "},"
+    // Button0 Single Press = Relay0 Power On for 10 seconds tester
+    "\"Rule4\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
+        "\"Function\":\"StateChanged\","
+        "\"DeviceName\":0,"
+        "\"State\":2" // 
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
     "}"
   "}";
   #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
 
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"" D_JSON_DEVICENAME "\":{"
-  //     "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-  //       "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-  //       "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-  //     "],"
-  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-  //       "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
-  //     "]"
-  //   "},"
-  //   "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D15:45:00\",\"OffTime\":\"00D00:00:00\"},"
-  //   "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
-  // "}";
-
-  // #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
-  // DEFINE_PGM_CTR(RULES_TEMPLATE)
-  // "{"
-  //   "\"Rule0\":{"
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Switches\","
-  //       "\"Function\":\"StateChanged\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":2"
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":2"
-  //     "}"
-  //   "},"
-  //   "\"Rule1\":{"
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Switches\","
-  //       "\"Function\":\"StateChanged\","
-  //       "\"DeviceName\":1,"
-  //       "\"State\":2"
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":2"
-  //     "}"
-  //   "}"
-  // "}";
-
-//   // #define ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
-//   #define LOG_BUFFER_SIZE  1000
-
-//   #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
-//   DEFINE_PGM_CTR(RULES_TEMPLATE)
-//   "{"
-//     "\"Rule0\":{" //switch example
-//       "\"Trigger\":{"
-//       //module_id
-//         "\"Module\":\"Motion\","    //sensor
-//         //?
-//         "\"Function\":\"MotionStarted\"," //eg. InputChange (TemperatureThreshold)
-//         //[1]
-//         "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-//         //[0]
-//         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-//       "},"
-//       "\"Command\":{"
-//         "\"Module\":\"Relays\","
-//         // set power?
-//         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-//         //1
-//         "\"DeviceName\":0," //number, name, or all
-//         //2
-//         "\"State\":1,"//setpower
-//         // Append other "normal" commands here? this would need storing
-//         // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-//         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-
-//         //relay:timeon needs a way to specify which device
-        
-//         // {"PowerName":0,"PowerState":1,"Relay":{"TimeOn":5}}
-
-
-//         //relay 
-//       "}"
-//     "},"
-//     "\"Rule1\":{" //switch example
-//       "\"Trigger\":{"
-//       //module_id
-//         "\"Module\":\"Motion\","    //sensor
-//         //?
-//         "\"Function\":\"MotionStarted\"," //eg. InputChange (TemperatureThreshold)
-//         //[1]
-//         "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-//         //[0]
-//         "\"State\":1" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-//       "},"
-//       "\"Command\":{"
-//         "\"Module\":\"Relays\","
-//         // set power?
-//         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-//         //1
-//         "\"DeviceName\":1," //number, name, or all
-//         //2
-//         "\"State\":1,"//setpower
-//         // Append other "normal" commands here? this would need storing
-//         // "\"JsonCommands\":\"{\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-        
-//         // "\"JsonCommands\":\"{\\\"PowerName\\\":5,\\\"Relay\\\":{\\\"TimeOn\\\":12}}\""
-//         // "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchenlight5/set/relay\\\",\\\"Payload\\\":\\\"{\\\\\"PowerName\\\\\":0,\\\\\"PowerState\\\\\":2}\\\"}}\""
-//         // "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchenlight5/set/relay\\\",\\\"Payload\\\":\\\"hello\\\"}\""
-//         "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchenlight4/set/relays\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2,~TimeOn~:10}\\\"}}\""
- 
-// //  {"MQTTSend":
-// //   {
-// //     "Topic":"kitchenlight5/set/relay",
-// //     "Payload":
-// //       "{"PowerName":0,"PowerState":2}"
-// //   }
-// // }
-
-
-
-
-//         // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
-//         //relay 
-//       "}"
-//     "}"
-    
-
-//   "}";
-
-
-
-
-#endif
+#endif // DEVICE_NAME
 
 
 

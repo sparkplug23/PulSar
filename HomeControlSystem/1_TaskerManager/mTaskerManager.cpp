@@ -6,13 +6,18 @@ mTaskerManager* mTaskerManager::instance = nullptr;
  * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
  If !0, a specific tasker will be called and this function will exit after completion
  * */
+
+// Add later what the source is, with none passed, then assume its generic
+// USe SRC when rule are called etc
+
+
 int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
 
   int8_t result = 0;
 
   if(target_tasker){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -57,7 +62,14 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
 
       for(uint8_t i=0;i<GetClassCount();i++)
       { 
-        pModule[i]->Tasker(function, obj);
+        switch_index = target_tasker ? target_tasker : i;
+        pModule[switch_index]->Tasker(function, obj);
+        if(target_tasker) { 
+
+           AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+  
+          
+          break; }
       }
       return 0;
       // else{

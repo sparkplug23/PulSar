@@ -109,8 +109,8 @@ uint32_t tsaved_button_debounce;
 
 uint16_t dual_button_code = 0;              // Sonoff dual received code
 
-void ButtonPullupFlag(uint8_t button_bit);
-void ButtonInvertFlag(uint8_t button_bit);
+void SetPullupFlag(uint8_t button_bit);
+void SetInvertFlag(uint8_t button_bit);
 void Pre_Init(void);
 uint8_t ButtonSerial(uint8_t serial_in_byte);
 void ButtonHandler(void);

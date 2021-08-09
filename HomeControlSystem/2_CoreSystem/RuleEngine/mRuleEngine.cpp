@@ -124,48 +124,75 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     // Check this rule must act of the function
     if(rules[rule_index].trigger.function_id == function_input){
 
-      AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface rule%d"),rule_index);
+      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED function_input[%d] to rule[%d]"),function_input,rule_index);
 
       rules_active_index = rule_index;
 
       // Also check switch_index against rule index
-      if(rules[rule_index].trigger.device_id == event_triggered.device_id){
-        AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Event.index rule%d"),event_triggered.device_id);
-        AddLog(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
+      if(rules[rule_index].trigger.device_id == event_triggered.device_id)
+      {
+
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
+
+        // char message[50];
+        // memset(message,0,sizeof(message));
+        // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
+        // pCONT_mqtt->ppublish("status/debug/rules",message,false); //reconnect message
+
+        /**
+         * Check if module_id has matched rule
+         * */
+        if(rules[rule_index].trigger.module_id == event_triggered.module_id)
+        {
         
-      // char message[50];
-      // memset(message,0,sizeof(message));
-      // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
-      // pCONT_mqtt->ppublish("status/debug/rules",message,false); //reconnect message
+          AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] to rule[%d]"),rules[rule_index].trigger.module_id,rule_index);
+         
+          AddLog(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
+          AddLog(LOG_LEVEL_TEST, PSTR("Trying to target module %d \"%s\""),rules[rule_index].command.module_id, pCONT->GetModuleFriendlyName(rules[rule_index].command.module_id));
+        
 
-        pCONT->Tasker_Interface(
-          rules[rule_index].command.function_id, // function the previous trigger is linked to
-          rules[rule_index].command.module_id, //target module
-          true  // runnig a rule, so don't call this loop back into this function
-        );
+          // Populate any jsoncommands to be executed, this takes precident over "State" controls
+          if(rules[rule_index].command.json_commands_dlist_id>=0)
+          {
 
-        AddLog(LOG_LEVEL_TEST, PSTR("Tasker_Interface(%d,%d,%d)"),
-          rules[rule_index].command.function_id, // function the previous trigger is linked to
-          rules[rule_index].command.module_id, //target module
-          true  // runnig a rule, so don't call this loop back into this function
-          );
+            D_DATA_BUFFER_CLEAR();
+            pCONT_sup->GetTextIndexed(
+              data_buffer.payload.ctr, 
+              sizeof(data_buffer.payload.ctr), 
+              pCONT_rules->rules[rule_index].command.json_commands_dlist_id, 
+              pCONT_rules->jsonbuffer.data
+            ); 
+            data_buffer.payload.len += strlen(data_buffer.payload.ctr);
 
-        // Populate any jsoncommands to be executed
-        if(rules[rule_index].command.json_commands_dlist_id>=0){
+            AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
 
-          D_DATA_BUFFER_CLEAR();
-          pCONT_sup->GetTextIndexed(
-            data_buffer.payload.ctr, 
-            sizeof(data_buffer.payload.ctr), 
-            pCONT_rules->rules[rule_index].command.json_commands_dlist_id, 
-            pCONT_rules->jsonbuffer.data
-          ); 
-          data_buffer.payload.len += strlen(data_buffer.payload.ctr);
+            pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+          }
+          else // Execute normal state/value method if no jsoncommand was used
+          {
+            
+            pCONT->Tasker_Interface(
+              rules[rule_index].command.function_id, // function the previous trigger is linked to
+              rules[rule_index].command.module_id, //target module
+              true  // runnig a rule, so don't call this loop back into this function
+            );
 
-          AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
 
-          pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-        }
+            AddLog(LOG_LEVEL_TEST, PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+              rules[rule_index].command.function_id, // function the previous trigger is linked to
+              rules[rule_index].command.module_id, //target module
+              true  // runnig a rule, so don't call this loop back into this function
+            );
+
+          }
+
+        } // trigger.module_id
+
+      }
+      else
+      {
+
+        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES ".............NOMATCH trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
 
       }
 
@@ -214,7 +241,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
 
     char name[10]={0};
 
-    for(uint8_t id=0;id<2;id++){
+    for(uint8_t id=0;id<MAX_RULE_VARS;id++){
 
         sprintf(name, "Rule%d", id);
 
@@ -385,6 +412,8 @@ void mRuleEngine::MQTTHandler_Set_TelePeriod()
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   }
 }
 

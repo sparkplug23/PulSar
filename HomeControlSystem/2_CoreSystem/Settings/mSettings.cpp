@@ -154,7 +154,7 @@ void mSettings::Function_Template_Load(){
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
+//IF TASKER RESULT WAS TRUE, THEN SUCCESS
   boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE
 
@@ -169,6 +169,9 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
   if(strcasecmp_P(c,PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return FUNC_EVENT_INPUT_STATE_CHANGED_ID; }
 
   if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
+
+  if(strcasecmp_P(c,PM_FUNC_EVENT_PRESENCE_STARTED_CTR)==0){ return FUNC_EVENT_PRESENCE_STARTED_ID; }
+  if(strcasecmp_P(c,PM_FUNC_EVENT_PRESENCE_ENDED_CTR)==0){ return FUNC_EVENT_PRESENCE_ENDED_ID; }
 
 
   if(strcasecmp_P(c,PM_FUNC_EVENT_SET_POWER_CTR)==0){ return FUNC_EVENT_SET_POWER_ID; }

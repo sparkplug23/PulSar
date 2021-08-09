@@ -139,6 +139,11 @@ const char* mMotionSensor::PIR_Detected_Ctr(uint8_t sensor_id, char* buffer, uin
 }
 
 
+
+/**
+ * 
+ * This needs assorbed into presence
+ * */
 void mMotionSensor::EveryLoop(){
 
   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++)

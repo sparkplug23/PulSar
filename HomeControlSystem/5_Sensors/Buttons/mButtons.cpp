@@ -32,8 +32,6 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:
 
     // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::Tasker %d"),digitalRead(22));
-
-
     break;
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
      // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
@@ -74,16 +72,14 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
 
 }
 
+/********************************************************************************************/
 
-
-// /********************************************************************************************/
-
-void mButtons::ButtonPullupFlag(uint8_t button_bit)
+void mButtons::SetPullupFlag(uint8_t button_bit)
 {
   bitSet(key_no_pullup, button_bit);
 }
 
-void mButtons::ButtonInvertFlag(uint8_t button_bit)
+void mButtons::SetInvertFlag(uint8_t button_bit)
 {
   bitSet(key_inverted, button_bit);
 }
@@ -103,24 +99,19 @@ void mButtons::Pre_Init(void)
 
   // Check for special gpio types, store their settings as bitmaps then shift gpio as normal types.
 
-
-  
-      // else if ((mpin >= AGPIO(GPIO_KEY1_NP)) && (mpin < (AGPIO(GPIO_KEY1_NP) + MAX_KEYS))) {
-      //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_NP));      //  0 .. 3
-      //   mpin -= (AGPIO(GPIO_KEY1_NP) - AGPIO(GPIO_KEY1));
-      // }
-      // else if ((mpin >= AGPIO(GPIO_KEY1_INV)) && (mpin < (AGPIO(GPIO_KEY1_INV) + MAX_KEYS))) {
-      //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV));     //  0 .. 3
-      //   mpin -= (AGPIO(GPIO_KEY1_INV) - AGPIO(GPIO_KEY1));
-      // }
-      // else if ((mpin >= AGPIO(GPIO_KEY1_INV_NP)) && (mpin < (AGPIO(GPIO_KEY1_INV_NP) + MAX_KEYS))) {
-      //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
-      //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
-      //   mpin -= (AGPIO(GPIO_KEY1_INV_NP) - AGPIO(GPIO_KEY1));
-      // }
-
-
-
+  // else if ((mpin >= AGPIO(GPIO_KEY1_NP)) && (mpin < (AGPIO(GPIO_KEY1_NP) + MAX_KEYS))) {
+  //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_NP));      //  0 .. 3
+  //   mpin -= (AGPIO(GPIO_KEY1_NP) - AGPIO(GPIO_KEY1));
+  // }
+  // else if ((mpin >= AGPIO(GPIO_KEY1_INV)) && (mpin < (AGPIO(GPIO_KEY1_INV) + MAX_KEYS))) {
+  //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV));     //  0 .. 3
+  //   mpin -= (AGPIO(GPIO_KEY1_INV) - AGPIO(GPIO_KEY1));
+  // }
+  // else if ((mpin >= AGPIO(GPIO_KEY1_INV_NP)) && (mpin < (AGPIO(GPIO_KEY1_INV_NP) + MAX_KEYS))) {
+  //   ButtonPullupFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
+  //   ButtonInvertFlag(mpin - AGPIO(GPIO_KEY1_INV_NP));  //  0 .. 3
+  //   mpin -= (AGPIO(GPIO_KEY1_INV_NP) - AGPIO(GPIO_KEY1));
+  // }
 
   // Lets check each type on their own, normal, inverted etc
   for(uint8_t sensor_index=0; sensor_index<MAX_KEYS; sensor_index++)
@@ -137,7 +128,7 @@ void mButtons::Pre_Init(void)
     {
       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_INV_ID, sensor_index);
       pinMode(buttons[settings.buttons_found].pin, INPUT_PULLUP);
-      ButtonInvertFlag(sensor_index); 
+      SetInvertFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = LOW; 
       buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);  
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
@@ -146,7 +137,7 @@ void mButtons::Pre_Init(void)
     {
       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_NP_ID, sensor_index);
       pinMode(buttons[settings.buttons_found].pin, INPUT);
-      ButtonPullupFlag(sensor_index); 
+      SetPullupFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = HIGH; 
       buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);  
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
@@ -155,8 +146,8 @@ void mButtons::Pre_Init(void)
     {
       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_INV_NP_ID, sensor_index);
       pinMode(buttons[settings.buttons_found].pin, INPUT);
-      ButtonPullupFlag(sensor_index); 
-      ButtonInvertFlag(sensor_index); 
+      SetPullupFlag(sensor_index); 
+      SetInvertFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = LOW; 
       buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);          
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
@@ -182,28 +173,27 @@ void mButtons::Pre_Init(void)
 
 }
 
+// uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
+// {
+//   if (dual_hex_code) {
+//     dual_hex_code--;
+//     if (dual_hex_code) {
+//       dual_button_code = (dual_button_code << 8) | serial_in_byte;
+//       serial_in_byte = 0;
+//     } else {
+//       if (serial_in_byte != 0xA1) {
+//         dual_button_code = 0;                // 0xA1 - End of Sonoff dual button code
+//       }
+//     }
+//   }
+//   if (0xA0 == serial_in_byte) {              // 0xA0 - Start of Sonoff dual button code
+//     serial_in_byte = 0;
+//     dual_button_code = 0;
+//     dual_hex_code = 3;
+//   }
 
-uint8_t mButtons::ButtonSerial(uint8_t serial_in_byte)
-{
-  if (dual_hex_code) {
-    dual_hex_code--;
-    if (dual_hex_code) {
-      dual_button_code = (dual_button_code << 8) | serial_in_byte;
-      serial_in_byte = 0;
-    } else {
-      if (serial_in_byte != 0xA1) {
-        dual_button_code = 0;                // 0xA1 - End of Sonoff dual button code
-      }
-    }
-  }
-  if (0xA0 == serial_in_byte) {              // 0xA0 - Start of Sonoff dual button code
-    serial_in_byte = 0;
-    dual_button_code = 0;
-    dual_hex_code = 3;
-  }
-
-  return serial_in_byte;
-}
+//   return serial_in_byte;
+// }
 
 /*********************************************************************************************\
  * Button handler with single press only or multi-press and hold on all buttons
@@ -217,7 +207,7 @@ void mButtons::ButtonHandler(void)
     return; 
   } 
 
-  uint8_t button = BUTTON_NOT_PRESSED_ID;
+  uint8_t state = BUTTON_NOT_PRESSED_ID;
   uint8_t button_present = 0;
   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;            // Extent hold time factor in case of iminnent Reset command
   uint16_t loops_per_second = 1000 / pCONT_set->Settings.button_debounce;
@@ -229,39 +219,46 @@ void mButtons::ButtonHandler(void)
 
  for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
    
-    button = BUTTON_NOT_PRESSED_ID;
+    state = BUTTON_NOT_PRESSED_ID;
     button_present = 0;
 
     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, button_index)) {
       button_present = 1;
-      button = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,button_index)) != bitRead(key_inverted, button_index));
+      state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,button_index)) != bitRead(key_inverted, button_index));
     }else
     if (pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, button_index)) {
       button_present = 1;
-      button = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
+      state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
     }
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("button=%d"),button);
+    // AddLog(LOG_LEVEL_TEST, PSTR("state=%d"),state);
 
     if (button_present) {
 
-      buttons[button_index].isactive = button;
+      buttons[button_index].isactive = state;
       
       // if (pCONT->Tasker_Interface(FUNC_BUTTON_PRESSED)) {
-      //   // Serviced internally    //causes button not to work right now, tasker is returning true always
+      //   // Serviced internally    //causes state not to work right now, tasker is returning true always
       // }
       // else 
-      {
+      // {
 
       // new PRESS, was not previously pressed
-      if ((BUTTON_PRESSED_ID == button) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton)) {
+      if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton)) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
-          //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
+        
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
+        //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
             
-  #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  #endif // USE_MODULE_NETWORK_MQTT     
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), 
+                              button_index, 
+                              state,
+                              state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active"
+        );
+      
+        #ifdef USE_MODULE_NETWORK_MQTT
+        mqtthandler_sensor_ifchanged.flags.SendNow = true;
+        #endif // USE_MODULE_NETWORK_MQTT     
   
        // Type method
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
@@ -269,10 +266,10 @@ void mButtons::ButtonHandler(void)
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
 
 
-            #ifdef USE_MODULE_CORE_RULES
-            pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,button);
-            pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
-            #endif // USE_MODULE_CORE_RULES
+        #ifdef USE_MODULE_CORE_RULES
+        pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,state);
+        #endif
+        pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
 
           //}
         // } else {
@@ -284,7 +281,7 @@ void mButtons::ButtonHandler(void)
       }
 
 //held buttons
-      if (BUTTON_NOT_PRESSED_ID == button) {
+      if (BUTTON_NOT_PRESSED_ID == state) {
         buttons[button_index].holdbutton = 0;
       } else {
         buttons[button_index].holdbutton++;
@@ -351,10 +348,10 @@ void mButtons::ButtonHandler(void)
         }
       }
       #endif // ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-      }//if serviced, single button, 4chan
+      // }//if serviced, single button, 4chan
     } // if (button_present)
     
-    buttons[button_index].lastbutton = button;
+    buttons[button_index].lastbutton = state;
   }
 }
 
@@ -426,81 +423,5 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
   return JsonBuilderI->End();
 
 }
-
-
-
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-void mButtons::MQTTHandler_Init(){
-
-  struct handler<mButtons>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mButtons::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mButtons::MQTTHandler_Set_fSendNow()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mButtons::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  }
-}
-
-void mButtons::MQTTHandler_Sender(uint8_t id){
-    
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BUTTONS_ID, handle, id);
-  }
-
-}
-  #endif// USE_MODULE_NETWORK_MQTT
 
 #endif

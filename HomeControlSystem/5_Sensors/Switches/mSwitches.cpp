@@ -317,12 +317,12 @@ void mSwitches::SwitchHandler(uint8_t mode)
         mqtthandler_sensor_ifchanged.flags.SendNow = true;
         mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-        if (switchflag < 3) {
-          //update the event
+        if (switchflag < 3) 
+        {
           #ifdef USE_MODULE_CORE_RULES
-          pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID,i,switchflag);
+            pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, switchflag);
+          #endif
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
-          #endif // USE_MODULE_CORE_RULES
         }
 
         switches[i].lastwallswitch = state;
@@ -357,22 +357,22 @@ bool mSwitches::IsSwitchActive(uint8_t id){
 
 /********************************************************************************************/
 
-void mSwitches::SwitchPullupFlag(uint16_t switch_bit)
+void mSwitches::SetPullupFlag(uint16_t switch_bit)
 {
   bitSet(switch_no_pullup, switch_bit);
 }
 
-uint8_t mSwitches::SwitchLastState(uint8_t index)
+uint8_t mSwitches::GetLastState(uint8_t index)
 {
   return switches[index].lastwallswitch;
 }
 
-void mSwitches::SwitchSetVirtual(uint8_t index, uint8_t state)
+void mSwitches::SetVirtual(uint8_t index, uint8_t state)
 {
   switches[index].switch_virtual = state;
 }
 
-uint8_t mSwitches::SwitchGetVirtual(uint8_t index)
+uint8_t mSwitches::GetVirtual(uint8_t index)
 {
   return switches[index].switch_virtual;
 }

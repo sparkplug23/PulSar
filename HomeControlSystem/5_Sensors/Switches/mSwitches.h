@@ -103,10 +103,10 @@ class mSwitches :
     uint32_t switch_debounce = 0;          // Switch debounce timer
     uint16_t switch_no_pullup = 0;              // Switch pull-up bitmask flags
     
-    void SwitchPullupFlag(uint16_t switch_bit);
-    uint8_t SwitchLastState(uint8_t index);
-    void SwitchSetVirtual(uint8_t index, uint8_t state);
-    uint8_t SwitchGetVirtual(uint8_t index);
+    void SetPullupFlag(uint16_t switch_bit);
+    uint8_t GetLastState(uint8_t index);
+    void SetVirtual(uint8_t index, uint8_t state);
+    uint8_t GetVirtual(uint8_t index);
 
 
     void SwitchHandler(uint8_t mode);
@@ -131,14 +131,7 @@ class mSwitches :
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-
-    uint8_t list_ids[3] = {
-      MQTT_HANDLER_SETTINGS_ID, 
-      MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-      MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-    };
-    
-    struct handler<mSwitches>* list_ptr[3] = {
+    struct handler<mSwitches>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod

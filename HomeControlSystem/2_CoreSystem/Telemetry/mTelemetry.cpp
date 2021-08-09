@@ -319,6 +319,8 @@ void mTelemetry::MQTTHandler_Set_TelePeriod()
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   }
 }
 
@@ -337,10 +339,12 @@ void mTelemetry::MQTTHandler_Sender(uint8_t id)
 
 
 void mTelemetry::Init(){
-    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
+  
+  #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
   memset(&hardwarestatus,0,sizeof(hardwarestatus));
   hardwarestatus.len += 0;//sprintf(hardwarestatus.ctr,"Restarted");
-    #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
+  #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
+
 }
 
 
@@ -533,6 +537,19 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
     //   JsonBuilderI->Add(PM_JSON_UPSECONDS,      pCONT_mqtt->pubsub->stats.connection_uptime);
     //   JsonBuilderI->Add(PM_JSON_BROKERHOSTNAME, pCONT_set->Settings.mqtt.hostname_ctr);
     // JsonBuilderI->Level_End();
+
+    JsonBuilderI->Add("sensors_ifchanged_secs", pCONT_set->Settings.sensors.ifchanged_secs);
+    JsonBuilderI->Add("sensors_teleperiod_secs", pCONT_set->Settings.sensors.teleperiod_secs);
+    
+//make mqtt commands to allow me to tweak and debug 
+  //  = 10;
+  // Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
+  // Settings.sensors.teleperiod_secs = 120;
+  // Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
+  // Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
+  // Settings.sensors.configperiod_secs = SEC_IN_HOUR;
+
+
     JsonBuilderI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
   return JsonBuilderI->End();
 

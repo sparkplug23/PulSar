@@ -586,6 +586,8 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
+  // Init the refresh periods for mqtt
+  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif

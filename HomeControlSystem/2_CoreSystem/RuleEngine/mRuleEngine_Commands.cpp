@@ -179,7 +179,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj){
 
   uint8_t rule_index = 0;
   char rule_name[10] = {0};
-  for(int rule_index=0;rule_index<2;rule_index++){
+  for(int rule_index=0;rule_index<MAX_RULE_VARS;rule_index++){
     sprintf(rule_name, "Rule%d", rule_index);
     if(jtok = obj[rule_name]){
       
