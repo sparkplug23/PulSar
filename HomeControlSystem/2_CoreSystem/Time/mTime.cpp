@@ -102,8 +102,10 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         //   16,
         //   17);
 
-        // char buffer[40];
-        // AddLog(LOG_LEVEL_TEST, PSTR("utc_time=%s"), pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+//         char buffer[40];
+//         AddLog(LOG_LEVEL_TEST, PSTR("DT_LOCAL=%s"), pCONT_time->GetDateAndTimeCtr(DT_LOCAL, buffer, sizeof(buffer)));
+//   AddLog(LOG_LEVEL_TEST, PSTR("DT_LOCAL=%s"), pCONT_time->GetDateAndTimeCtr(DT_LOCAL, buffer, sizeof(buffer)));
+// AddLog(LOG_LEVEL_TEST, PSTR("DT_TIMEZONE=%s IsDst=%d"), pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)), IsDst());
 
       // Serial.println(GetUptime());
       #endif
@@ -216,6 +218,19 @@ void mTime::init(void){
   kDaysInMonth[9] = 31;
   kDaysInMonth[10] = 30;
   kDaysInMonth[11] = 31;
+
+  // kDaysInMonth[0] = 1;
+  // kDaysInMonth[1] = 2;
+  // kDaysInMonth[2] = 3;
+  // kDaysInMonth[3] = 4;
+  // kDaysInMonth[4] = 5;
+  // kDaysInMonth[5] = 6;
+  // kDaysInMonth[6] = 7;
+  // kDaysInMonth[7] = 8;
+  // kDaysInMonth[8] = 9;
+  // kDaysInMonth[9] = 10;
+  // kDaysInMonth[10] = 11;
+  // kDaysInMonth[11] = 12;
 
   // memcpy(kMonthNamesEnglish,"JanFebMarAprMayJunJulAugSepOctNovDec",sizeof("JanFebMarAprMayJunJulAugSepOctNovDec")-1);// = ;
 
@@ -1131,6 +1146,14 @@ const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
   snprintf_P(buffer, buflen, PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
     tmpTime.year +1970, tmpTime.month, tmpTime.Mday, tmpTime.hour, tmpTime.minute, tmpTime.second);
 
+  // if(tmpTime.Mday>30)
+  // {
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("GetDT=%d %s"),time, buffer);
+  // AddLog(LOG_LEVEL_TEST, PSTR("...........................tmpTime.Mday=%d"),tmpTime.Mday);
+
+  // }
+
   return buffer;  // 2017-03-07T11:08:02
 }
 
@@ -1191,9 +1214,9 @@ const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
 
 bool  mTime::IsDst(void) //is daylight savings time
 {
-  // if (Rtc.time_timezone == Settings.toffset[1]) {
-  //   return true;
-  // }
+  if (Rtc.time_timezone == pCONT_set->Settings.toffset[1]) {
+    return true;
+  }
   return false;
 }
 
@@ -1404,18 +1427,18 @@ char* mTime::GetDateAndTimeCtr(uint8_t time_type, char* buffer, uint8_t buflen)
     case DT_STD:
       time = Rtc.standard_time;
       break;
-//     case DT_RESTART:
-//       if (Rtc.restart_time == 0) {
-//         return "";
-//       }
-//       time = Rtc.restart_time;
-//       break;
-//     case DT_ENERGY:
-//       time = Settings.energy_kWhtotal_time;
-//       break;
-//     case DT_BOOTCOUNT:
-//       time = Settings.bootcount_reset_time;
-//       break;
+    case DT_RESTART:
+      // if (Rtc.restart_time == 0) {
+      //   return "";
+      // }
+      time = Rtc.restart_time;
+      break;
+    // case DT_ENERGY:
+    //   time = Settings.energy_kWhtotal_time;
+    //   break;
+    // case DT_BOOTCOUNT:
+    //   time = pCONT_set->Settings.bootcount_reset_time;
+    //   break;
 
   }
 
@@ -1428,9 +1451,9 @@ char* mTime::GetDateAndTimeCtr(uint8_t time_type, char* buffer, uint8_t buflen)
 //     time_type = DT_LOCAL;
 //   }
 
-//   if (Settings.flag3.time_append_timezone && (DT_LOCAL == time_type)) {  // SetOption52 - Append timezone to JSON time
-//     dt += GetTimeZone();    // 2017-03-07T11:08:02-07:00
-//   }
+  // if (Settings.flag3.time_append_timezone && (DT_LOCAL == time_type)) {  // SetOption52 - Append timezone to JSON time
+  //   dt += GetTimeZone();    // 2017-03-07T11:08:02-07:00
+  // }
   return buffer;  // 2017-03-07T11:08:02-07:00
 }
 
@@ -1606,6 +1629,7 @@ void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
   // strlcpy(tm.name_of_month, kMonthNames + (month *3), 4);
   tm.month = month + 1;      // jan is month 1
   tm.Wday = time + 1;         // day of month
+  tm.Mday = time + 1;         // day of month
   tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
 }
 
@@ -1711,27 +1735,38 @@ void mTime::RtcSecond(void)
     int16_t timezone_minutes = pCONT_set->Settings.timezone_minutes;
     if (pCONT_set->Settings.timezone < 0) { timezone_minutes *= -1; }
     Rtc.time_timezone = (pCONT_set->Settings.timezone * SECS_PER_HOUR) + (timezone_minutes * SECS_PER_MIN);
-      // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.timezone=%d"),pCONT_set->Settings.timezone);
-    if (99 == pCONT_set->Settings.timezone) {
+    // AddLog(LOG_LEVEL_TEST,PSTR(DEBUG_INSERT_PAGE_BREAK "pCONT_set->Settings.timezone=%d"),pCONT_set->Settings.timezone);
+    
+    if (99 == pCONT_set->Settings.timezone)
+    { // 99, means unset, so try work it out then set it
       int32_t dstoffset = pCONT_set->Settings.toffset[1] * SECS_PER_MIN;
       int32_t stdoffset = pCONT_set->Settings.toffset[0] * SECS_PER_MIN;
-      if (pCONT_set->Settings.tflag[1].hemis) {
+      
+      // AddLog(LOG_LEVEL_TEST,PSTR("Daylight Saving Time dstoffset=%d"),dstoffset);
+      // AddLog(LOG_LEVEL_TEST,PSTR("Standard Time stdoffset=%d"),stdoffset);
+
+      if (pCONT_set->Settings.tflag[1].hemis) 
+      {
         // Southern hemisphere
-        if ((Rtc.utc_time >= (Rtc.standard_time - dstoffset)) && (Rtc.utc_time < (Rtc.daylight_saving_time - stdoffset))) {
+        if ((Rtc.utc_time >= (Rtc.standard_time - dstoffset)) && (Rtc.utc_time < (Rtc.daylight_saving_time - stdoffset))) 
+        {
           Rtc.time_timezone = stdoffset;  // Standard Time
         } else {
           Rtc.time_timezone = dstoffset;  // Daylight Saving Time
         }
       } else {
         // Northern hemisphere
-        if ((Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && (Rtc.utc_time < (Rtc.standard_time - dstoffset))) {
+        if ((Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && (Rtc.utc_time < (Rtc.standard_time - dstoffset)))
+        {
           Rtc.time_timezone = dstoffset;  // Daylight Saving Time
         } else {
           Rtc.time_timezone = stdoffset;  // Standard Time
         }
       }
     }
-      // AddLog(LOG_LEVEL_TEST,PSTR("Rtc.time_timezone=%d"),Rtc.time_timezone);
+    
+    // AddLog(LOG_LEVEL_TEST,PSTR("Rtc.time_timezone=%d"),Rtc.time_timezone);
+
     Rtc.local_time += Rtc.time_timezone;
     Rtc.time_timezone /= 60;
     // if (!pCONT_set->Settings.energy_kWhtotal_time) {
