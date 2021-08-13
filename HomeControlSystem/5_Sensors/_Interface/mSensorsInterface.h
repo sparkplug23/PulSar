@@ -14,8 +14,6 @@ typedef struct event_motion_s{
   uint8_t  ischanged = false;
   uint32_t tDetectTime;
   uint32_t tEndedTime;
-  // uint32_t detected_shorttime = 0;
-  // time_short_t detected_time;
   uint32_t detected_time;
 }event_motion_t;
 

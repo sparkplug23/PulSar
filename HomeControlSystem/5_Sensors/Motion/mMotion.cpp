@@ -1,15 +1,15 @@
-#include "mPresence.h" 
+#include "mMotion.h" 
 
 /***
  * New joint motion triggered class, all future motion events will also trigger a response from this class (no rules required)
  * */
 
-#ifdef USE_MODULE_SENSORS_PRESENCE 
+#ifdef USE_MODULE_SENSORS_MOTION 
 
-const char* mPresence::PM_MODULE_SENSORS_PRESENCE_CTR = D_MODULE_SENSORS_PRESENCE_CTR;
-const char* mPresence::PM_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR = D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR;
+const char* mMotion::PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_MOTION_CTR;
+const char* mMotion::PM_MODULE_SENSORS_MOTION_FRIENDLY_CTR = D_MODULE_SENSORS_MOTION_FRIENDLY_CTR;
 
-int8_t mPresence::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
@@ -79,13 +79,13 @@ int8_t mPresence::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mPresence::Pre_Init(void)
+void mMotion::Pre_Init(void)
 {
 
 }
 
 
-void mPresence::Init(void)
+void mMotion::Init(void)
 {
   settings.fEnableSensor = true;
 
@@ -94,7 +94,7 @@ void mPresence::Init(void)
 }
 
 
-void mPresence::EveryLoop()
+void mMotion::EveryLoop()
 {
 
 }
@@ -110,7 +110,7 @@ void mPresence::EveryLoop()
  * @param DeviceName gives the index to the stored location index from sensor list
  * @param State gives the ON/Started (1) or OFF/Ended (0)
  * */
-void mPresence::RulesEvent_Presence_Change(){
+void mMotion::RulesEvent_Presence_Change(){
 
 
   // for(
@@ -131,6 +131,7 @@ void mPresence::RulesEvent_Presence_Change(){
         #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
         #endif
+        AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].detected_time=%d"),pir_detect[sensor_id].detected_time);
         
         // #ifdef USE_MODULE_CORE_RULES
         // pCONT_rules->New_Event(EM_MODULE_SENSORS_MOTION_ID, sensor_id);
@@ -161,7 +162,7 @@ void mPresence::RulesEvent_Presence_Change(){
 
 
 
-uint8_t mPresence::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mMotion::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -170,7 +171,7 @@ uint8_t mPresence::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mPresence::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
 
   char buffer[80];
 
@@ -188,8 +189,8 @@ uint8_t mPresence::ConstructJSON_Sensor(uint8_t json_method){
       pir_detect[sensor_id].ischanged = false;
       
       //Phase out
-      JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_PRESENCE_ID, sensor_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
   //     JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
@@ -209,85 +210,5 @@ uint8_t mPresence::ConstructJSON_Sensor(uint8_t json_method){
 }
 
 
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-void mPresence::MQTTHandler_Init(){
-
-  struct handler<mPresence>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mPresence::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = false;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mPresence::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = false;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mPresence::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-void mPresence::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mPresence::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mPresence::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mPresence>* list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_PRESENCE_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
-
-}
-
-////////////////////// END OF MQTT /////////////////////////
 
 #endif

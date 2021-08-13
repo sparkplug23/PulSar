@@ -33,7 +33,7 @@
 // #define DEVICE_RGBBEDROOMFLOOR
 // #define DEVICE_RGBCLOCK_01
 // #define DEVICE_RGBCLOCK_02 
-// #define DEVICE_RGBFIREPLACE_TESTER  
+// #define DEVICE_RGBFIREPLACE_TESTER 
 // #define DEVICE_RGBDESK        
 // #define DEVICE_RGBDISPLAY_GARAGE   
 // #define DEVICE_RGBSTRING_LIGHTS1
@@ -72,7 +72,6 @@
 /**
  *  CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- CONTROLLERS   -- 
 **/
-// #define DEVICE_SHELLY1_TESTER
 //#define DEVICE_KITCHENPANEL
 //#define DEVICE_BLACKDOORBELL
 // #define DEVICE_CAM_TESTER
@@ -1389,73 +1388,10 @@
 #endif
 
 
-#ifdef DEVICE_RGBNOTIFICATION_01
-  #define DEVICENAME_CTR          "rgbnotification_01"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Notification 01"  
-  
-  #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  #define USE_MODULE_DRIVERS_LEDS
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  #define STRIP_NOTIFICATION_SIZE 12
-
-  #define DISABLE_WEBSERVER
-  
-  //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define STRIP_SIZE_MAX 12
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  "}";
-
-#endif
-
-
-
+/**
+ * Using a RGB matrix, display a simple moving fire pattern
+ * Aim is to get stability of esp32 animations 
+ * */
 #ifdef DEVICE_RGBFIREPLACE_TESTER
   #define DEVICENAME_CTR          "rgbfireplace_tester"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
@@ -1473,7 +1409,8 @@
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
   #define DISABLE_WEBSERVER 
-  #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK
+  // #define USE_MODULE_NETWORK_MQTT
 
   #define ENABLE_DEVFEATURE_DEBUG_GET_PIXEL_ZERO
   #define ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
@@ -1481,7 +1418,7 @@
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
   // #define ENABLE_DEVFEATURE_BASIC_NEOPIXEL_TEST
 
-  //   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
+  // #define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1494,7 +1431,7 @@
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 48//100//256
+  #define STRIP_SIZE_MAX 300//256//100//256
   // #define STRIP_REPEAT_OUTPUT_MAX 256
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1503,8 +1440,10 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":2000,"
-      "\"" D_JSON_RATE_MS "\":5000,"
+      // "\"" D_JSON_TIME_MS "\":2000,"
+      // "\"" D_JSON_RATE_MS "\":5000,"
+      "\"" D_JSON_TIME_MS "\":20,"
+      "\"" D_JSON_RATE_MS "\":50,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
@@ -1515,7 +1454,7 @@
     "},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
     // "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":20"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":1"
   "}";
 
 // "{HardwareType":"WS28XX","Transition":{"TimeMs":400,"RateMs":100,"PixelUpdatePerc":10,"Order":"Random"},"AnimationMode":"Effects","Effects":{"Function":"FirePlace01"},"ColourPalette":"Single Fire 01","BrightnessRGB":5}
@@ -3390,118 +3329,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 
 
-#ifdef DEVICE_SIDEDOORLIGHT_TEST
-  #define DEVICENAME_CTR          "sidedoorlight_test"
-  #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Test"
-
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 3
-
-  //#define DISABLE_WEBSERVER
-   
-  #define USE_MODULE_SENSORS_MOTION
-
-  #define ENABLE_DEVFEATURE_BLOCK_RESTART
-  #define ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
-  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
-  
-  #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //disable until I rewrite for the sidelight
-
-  #define USE_MODULE_DRIVERS_RELAY
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      #endif 
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\"," //d2 normally
-      #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
-  #define MAX_RELAYS 1
-  
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
-
-
-
-
-#ifdef DEVICE_SHELLY1_TESTER
-  #define DEVICENAME_CTR          "shelly1_tester"
-  #define DEVICENAME_FRIENDLY_CTR "Shelly1 Tester"
-
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-   
-  #define USE_MODULE_SENSORS_MOTION
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle"
-
-  #define 
-  
-  // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //disable until I rewrite for the sidelight
-
-  #define USE_MODULE_DRIVERS_RELAY
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "\","
-      #endif 
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
-  #define MAX_RELAYS 1
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
-
 
 
 #ifdef DEVICE_NODEMCU_TESTER
@@ -3966,55 +3793,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 **/
 
 
-#ifdef DEVICE_TESTBED_SHELLY1_01
-  #define DEVICENAME_CTR          "testbed_shelly1_01"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly1 #01"
-
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-   
-  #define USE_MODULE_SENSORS_MOTION
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Test"
-
-  // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //disable until I rewrite for the sidelight
-
-  #define USE_MODULE_DRIVERS_RELAY
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D1\":\"" D_GPIO_FUNCTION_PIR_1_NP_INV_CTR     "\","
-      #endif 
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Power"
-  #define MAX_RELAYS 1
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
 
 // #ifdef DEVICE_TESTBED_SHELLY2P5_01
 //   #define DEVICENAME_CTR          "testbed_shelly25_01"
@@ -4038,7 +3816,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 //   320,0,32,0,224,193,0,0,640,192,608,225,3456,4736
 //   */
 //   //],"FLAG":0,"BASE":18}
-//   // #define USE_MODULE_SENSORS_PRESENCE   // to be added
+//   // #define USE_MODULE_SENSORS_MOTION   // to be added
 
 //   // #define USE_MODULE_ENERGY_INTERFACE
 //   // #define USE_MODULE_ENERGY_ADE7953
@@ -4056,7 +3834,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 //   #define MAX_RELAYS 2
 //   #define USE_MODULE_DRIVERS_INTERFACE
 
-//   // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON  
+//   // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS  
     
 //   #define USE_MODULE_TEMPLATE
 //   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

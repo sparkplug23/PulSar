@@ -313,9 +313,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
     EM_MODULE_SENSORS_PULSECOUNTER_ID,
   #endif
-  #ifdef USE_MODULE_SENSORS_PRESENCE
-    EM_MODULE_SENSORS_PRESENCE_ID,
-  #endif
   #ifdef USE_MODULE_SENSORS_BH1750
     EM_MODULE_SENSORS_BH1750_ID,
   #endif
@@ -578,7 +575,7 @@ enum MODULE_IDS{
   #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOTION
-  #include "5_Sensors/Motion/mMotionSensor.h"
+  #include "5_Sensors/Motion/mMotion.h"
   #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
@@ -588,10 +585,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_PRESENCE
-  #include "5_Sensors/Presence/mPresence.h"
-  #define pCONT_presence                          static_cast<mPresence*>(pCONT->pModule[EM_MODULE_SENSORS_PRESENCE_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750
   #include "5_Sensors/BH1750Light/mBH1750.h"

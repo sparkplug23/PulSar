@@ -774,6 +774,10 @@ void mEnergyInterface::EnergyEverySecond(void)
   //   }
   // }
   
+  /**
+   * Tmp fix
+   * */
+  #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   for (uint32_t phase = 0; phase < Energy.phase_count; phase++) {
         // Move into energy module
         pCONT_iEnergy->Energy.voltage[phase]       = pCONT_pzem->data_modbus[phase].voltage;   
@@ -784,6 +788,7 @@ void mEnergyInterface::EnergyEverySecond(void)
         pCONT_iEnergy->Energy.energy2[phase]       = pCONT_pzem->data_modbus[phase].energy;  
 
   }
+  #endif
   
   // Invalid data reset
   uint32_t data_valid = Energy.phase_count;
@@ -1522,7 +1527,8 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
     // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
     
     JBI->Level_Start("Address");
-    for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
+    // for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
+    for(int ii=0;ii<address.size();ii++)
     {
       JBI->Array_Start_P(PSTR("device%d"), ii);
         // for(int i=0;i<4;i++)
@@ -1653,148 +1659,6 @@ leave energy in its own module, not telemetry here
 #endif  // USE_ENERGY_MARGIN_DETECTION
 
 */
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
-
-void mEnergyInterface::MQTTHandler_Init(){
-
-    struct handler<mEnergyInterface>* mqtthandler_ptr;
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
-  
-  mqtthandler_ptr = &mqtthandler_energystats_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_EnergyStats;
-  
-  mqtthandler_ptr = &mqtthandler_energystats_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_EnergyStats;
-
-  mqtthandler_ptr = &mqtthandler_thresholdlimits_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_ThresholdLimits;
-
-  mqtthandler_ptr = &mqtthandler_thresholdlimits_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_ThresholdLimits;
-
-} //end "MQTTHandler_Init"
-
-
-void mEnergyInterface::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-  mqtthandler_energystats_ifchanged.flags.SendNow = true;
-  mqtthandler_energystats_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mEnergyInterface::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_energystats_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-
-void mEnergyInterface::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-    // ,
-    // MQTT_HANDLER_MODULE_ENERGYSTATS_IFCHANGED_ID,
-    // MQTT_HANDLER_MODULE_ENERGYSTATS_TELEPERIOD_ID
-    // ,
-    // MQTT_HANDLER_MODULE_THRESHOLDLIMITS_IFCHANGED_ID,
-    // MQTT_HANDLER_MODULE_THRESHOLDLIMITS_TELEPERIOD_ID
-  };
-  
-  struct handler<mEnergyInterface>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-    // ,
-    // &mqtthandler_energystats_ifchanged,  
-    // &mqtthandler_energystats_teleperiod
-    // ,  
-    // &mqtthandler_thresholdlimits_ifchanged,  
-    // &mqtthandler_thresholdlimits_teleperiod  
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_INTERFACE_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
-    mqtt_handler_id
-  );
-
-}
-
-
-////////////////////// END OF MQTT /////////////////////////
-
 
 
 

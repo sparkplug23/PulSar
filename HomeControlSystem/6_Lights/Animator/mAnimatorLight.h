@@ -1316,6 +1316,36 @@ void SetPixelColor_All(RgbcctColor colour);
       struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
     #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
+
+    
+  // Could this be put into a function? to allow me to set things to all in this, or by ID
+  struct handler<mAnimatorLight>* mqtthandler_list[
+    5
+
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+      +1
+    #endif
+
+    ] = {
+    &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
+    &mqtthandler_state_teleperiod,
+    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+      &mqtthandler_notifications_teleperiod,
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      &mqtthandler_flasher_teleperiod, 
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+      &mqtthandler_mixer_teleperiod,
+    #endif
+    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      &mqtthandler_manual_setpixel,
+    #endif
+    &mqtthandler_settings_teleperiod
+  };
+
+
+
   #endif
   
   /*******NOTIFICATIONS*********************************************************************************************/

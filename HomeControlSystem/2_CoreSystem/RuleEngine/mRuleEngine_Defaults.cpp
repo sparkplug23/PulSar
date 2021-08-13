@@ -181,22 +181,22 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     p_event->value.data[p_event->value.length++] = 2;  // Toggle
     pCONT_rules->rules_active_index++;
 
-    // Trigger2
-    pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true; 
-    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
-    p_event->module_id = EM_MODULE_SENSORS_BUTTONS_ID;
-    p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
-    p_event->device_id = 1; 
-    p_event->value.length = 0;
-    p_event->value.data[p_event->value.length++] = 1;  // Pressed 
-    // Command2
-    p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
-    p_event->module_id = EM_MODULE_DRIVERS_RELAY_ID;
-    p_event->function_id = FUNC_EVENT_SET_POWER_ID;
-    p_event->device_id = 1;
-    p_event->value.length = 0;
-    p_event->value.data[p_event->value.length++] = 2;  // Toggle
-    pCONT_rules->rules_active_index++;
+    // // Trigger2
+    // pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true; 
+    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
+    // p_event->module_id = EM_MODULE_SENSORS_BUTTONS_ID;
+    // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    // p_event->device_id = 1; 
+    // p_event->value.length = 0;
+    // p_event->value.data[p_event->value.length++] = 1;  // Pressed 
+    // // Command2
+    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
+    // p_event->module_id = EM_MODULE_DRIVERS_RELAY_ID;
+    // p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    // p_event->device_id = 1;
+    // p_event->value.length = 0;
+    // p_event->value.data[p_event->value.length++] = 2;  // Toggle
+    // pCONT_rules->rules_active_index++;
 
     settings.loaded_default_for_moduled = true;
 

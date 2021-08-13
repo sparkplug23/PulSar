@@ -556,7 +556,8 @@ uint32_t mTime::GetTimeShortNowU32(){
 
 }
 
-const char* mTime::ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen){
+const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen)
+{
   
   snprintf_P(buffer, buflen, 
               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
@@ -565,16 +566,45 @@ const char* mTime::ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uin
   return buffer;
 }
 
-const char* mTime::ConvertShortTime_HHMMSS(uint32_t* _time, char* buffer, uint8_t buflen){
+/**
+ * @brief 
+ * */
+const char* mTime::ConvertU32TimetoCtr(uint32_t* _time, char* buffer, uint8_t buflen)
+{
+  // typedef struct time_short{
+  //   uint8_t Wday; // week day [0-7]
+  //   uint8_t hour;   // [0-23]
+  //   uint8_t minute; // [0-59]
+  //   uint8_t second; // [0-59]
+  // }time_short_t;
 
-  time_short_t* time = reinterpret_cast<time_short_t*>(_time);
+  uint32_t time = *_time;
+  uint8_t Wday   = (uint8_t)((time & 0xFF000000) >> 24);
+  uint8_t hour   = (uint8_t)((time & 0x00FF0000) >> 16);
+  uint8_t minute = (uint8_t)((time & 0x0000FF00) >>  8);
+  uint8_t second = (uint8_t)((time & 0x000000FF)      );
+
+  // time_short_t* time = reinterpret_cast<time_short_t*>(_time);
+  // uint8_t Wday = _time
   
   snprintf_P(buffer, buflen, 
               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
-              time->hour, time->minute, time->second
+              hour, minute, second
   );
   return buffer;
 }
+
+// const char* mTime::ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen)
+// {
+
+//   // time_short_t* time = reinterpret_cast<time_short_t*>(_time);
+  
+//   snprintf_P(buffer, buflen, 
+//               PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"),
+//               time->hour, time->minute, time->second
+//   );
+//   return buffer;
+// }
 
 
 time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
@@ -734,8 +764,12 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
   uint32_t start_sod = (start->hour*SEC2HOUR)+(start->minute*SEC2MIN)+(start->second);
   uint32_t end_sod =   (end->hour*SEC2HOUR)+(end->minute*SEC2MIN)+(end->second);
 
-  int32_t time_until_start = RtcTime.Dseconds-start_sod; 
-  int32_t time_until_end = end_sod-RtcTime.Dseconds;
+  uint32_t time_of_day_secs_now = RtcTime.Dseconds;
+  int32_t time_until_start = time_of_day_secs_now-start_sod; 
+  int32_t time_until_end = end_sod-time_of_day_secs_now;
+
+  bool flag_24hrs_added = false;
+  bool flag_within_time_window = false;
 
   //if times are equal, return early as false
   if(start_sod == end_sod) return false;
@@ -743,22 +777,38 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
   //need to add check if start>end, then add 24 hours
   if(end_sod < start_sod){
     end_sod += SECS_PER_DAY;
+    time_of_day_secs_now += SECS_PER_DAY; // Also need the time_now needs moved forward into next bracket
+    flag_24hrs_added = true;
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
   }
 
+  if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
+    flag_within_time_window = true;
+  }else{
+    flag_within_time_window = false;
+  }
+
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
-    start->hour,start->minute,start->second,time_until_start,
-    RtcTime.Dseconds,
-    time_until_end,end->hour,end->minute,end->second
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
+  //   start->hour,start->minute,start->second,time_until_start,
+  //   RtcTime.Dseconds,
+  //   time_until_end,end->hour,end->minute,end->second
+  // );
+  
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME 
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d %d)"
+    "\n\r\t%02d:%02d:%02d (%d seconds)"
+    "\n\r\t%02d:%02d:%02d (%d seconds : diff %d) %s %s"),   
+    start->hour,start->minute,start->second, start_sod, time_until_start,
+    RtcTime.hour,RtcTime.minute,RtcTime.second, RtcTime.Dseconds, time_of_day_secs_now,
+    end->hour,end->minute,end->second, end_sod, time_until_end,
+    flag_24hrs_added?"+24hrs added":"",
+    flag_within_time_window?"WITHIN":"OUTSIDE"
   );
   #endif// ENABLE_LOG_LEVEL_INFO
-  
-  if((start_sod < RtcTime.Dseconds)&&(RtcTime.Dseconds < end_sod)){ //now>start AND now<END
-    return 1;
-  }
-  return 0;
 
+  return flag_within_time_window;
+  
 }
 
 

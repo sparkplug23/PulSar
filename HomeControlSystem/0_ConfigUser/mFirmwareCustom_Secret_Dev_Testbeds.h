@@ -17,9 +17,9 @@
 /**
  *  TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- 
 **/
-// #define DEVICE_TESTBED_SHELLY1_01
+#define DEVICE_TESTBED_SHELLY1_01
+// #define DEVICE_TESTBED_SHELLY2P5_01
 // #define DEVICE_TESTBED_SHELLY2_DIMMER
-#define DEVICE_TESTBED_SHELLY2P5_01
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
 
@@ -32,7 +32,7 @@
 /**
  * Device Type: Shelly 2.5
  * Modules:   
- *  - 2 Mains Relays
+ *  - 2 Mains " D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "
  *  - 2 Mains Inputs
  *  - Energy monitoring (Voltage, Current and power)
  *  - Reset button on PCB
@@ -56,22 +56,23 @@
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  #define ENABLE_DEVFEATURE_RELAY_ENABLE_SCHEDULE_CHECKS
-  // #define ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON  
+  #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
-  // #define USE_MODULE_ENERGY_INTERFACE
-  // #define USE_MODULE_ENERGY_ADE7953
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_ADE7953
+
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
-  #define USE_MODULE_SENSORS_PRESENCE
+  #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_NETWORKS_MQTT
 
   #define USE_MODULE_CORE_RULES
 
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   #define MAX_RELAYS 2
-  #define USE_MODULE_DRIVERS_INTERFACE
 
   // #define ENABLE_DEVFEATURE_OTA_FALLBACK_ON_BOOT_LOOPING
     
@@ -105,13 +106,13 @@
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D13:00:00\",\"OffTime\":\"00D14:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D20:01:00\",\"OffTime\":\"00D06:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"},"
+    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D20:01:00\",\"OffTime\":\"00D05:00:00\"}"
   "}";
 
 
@@ -122,14 +123,14 @@
     // Switch0 Toggle = Relay0 Power Toggle
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"StateChanged\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -137,14 +138,14 @@
     // Switch1 Toggle = Relay1 Power Toggle
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"StateChanged\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
       "}"
@@ -153,12 +154,12 @@
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"StateChanged\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -197,32 +198,28 @@
     // Switch0 HIGH = Relay0 Power ON for Timed seconds
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"StateChanged\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
-        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
     "},"
     // Switch1 HIGH = Relay1 Power ON for Timed seconds
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"StateChanged\","
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":1,"
-        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+        // Module and Function omitted, as not needed, for this example
         "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
     "},"
@@ -230,12 +227,12 @@
     "\"Rule2\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"StateChanged\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
@@ -245,30 +242,26 @@
     "\"Rule3\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"StateChanged\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started        
-        // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
+        "\"State\":1" // Started
       "}"
     "},"
     // Button0 Single Press = Relay0 Power On for 10 seconds tester
     "\"Rule4\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"StateChanged\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":2" // 
+        "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
       "}"
     "}"
@@ -277,6 +270,168 @@
 
 
 #endif // DEVICE_NAME
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Device Type: Shelly 1
+ * Modules:   
+ *  - 2 Mains " D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "
+ *  - 2 Mains Inputs
+ *  - Energy monitoring (Voltage, Current and power)
+ *  - Reset button on PCB
+ *  - LED
+ * Notes: Requires neutral
+ * 
+ * Default configuration
+ * Mode A (Inputs are switches eg basic wall switch)
+ * Mode B (Inputs are motion events eg security light)
+ * 
+ * */
+#ifdef DEVICE_TESTBED_SHELLY1_01
+  #define DEVICENAME_CTR          "testbed_shelly1_01"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly1 Tester"
+
+  #define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+   
+  /*
+    Method should only activate if boot loop happens 10 times
+    Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
+    Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
+  */
+  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+
+  #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+
+  #define USE_MODULE_NETWORKS_MQTT
+
+  #define USE_MODULE_CORE_RULES
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  
+  #define USE_MODULE_DRIVERS_RELAY
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\""
+  "}";
+    
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Middle" 
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "]"    
+    "},"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"}"
+  "}";
+
+
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 Toggle = Relay0 Power Toggle
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+      "}"
+    "}"
+  "}";
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+
+  /**
+   * Motion needs to change, to instead be a rule. ie.
+   * 
+   * Switch, button, distance etc changes will trigger a rule which fires the presence detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+   * One rule will be required for direction, ie motion started (button low) and motion over (button high)
+  
+   * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
+   * Example
+   * Rule0
+   * - Switch 0 = Low, Motion0 started
+   * Rule1
+   * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
+   * Rule2
+   * - Switch 1 = Low, Motion1 started
+   * Rule3
+   * - Switch 1 = low, Relay1 on for X minutes
+   * */
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Relay0 Power ON for Timed seconds
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "},"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+
+
+
+
+#endif
+
+
 
 
 

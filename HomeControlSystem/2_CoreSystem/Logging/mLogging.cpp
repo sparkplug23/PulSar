@@ -185,7 +185,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         pCONT_set->log_data
       );
     #else
-      SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel),  pCONT_set->log_data);
+      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
     #endif
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // Only flush if we all doing all for debugging

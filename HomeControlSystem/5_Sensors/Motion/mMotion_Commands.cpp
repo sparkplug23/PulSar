@@ -1,14 +1,14 @@
 
-#include "mPresence.h" 
+#include "mMotion.h" 
 
 /***
  * New joint motion triggered class, all future motion events will also trigger a response from this class (no rules required)
  * */
 
-#ifdef USE_MODULE_SENSORS_PRESENCE 
+#ifdef USE_MODULE_SENSORS_MOTION 
 
 
-void mPresence::parse_JSONCommand(JsonParserObject obj){
+void mMotion::parse_JSONCommand(JsonParserObject obj){
 
 //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
 //   JsonParserToken jtok = 0; 

@@ -188,23 +188,30 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
     return;
   }
 
-  #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_SCHEDULE_CHECKS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"),
-    settings.flags.enabled_relays_allowed_time_window_checks);
-    
-    
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
-    
-  // Add checks to see if relay is restricted from controls (locked by time)
-  // flag to enable these checks
+  #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
-  if(settings.flags.enabled_relays_allowed_time_window_checks){
+    // AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "settings.flags.enabled_relays_allowed_time_window_checks=%d"), settings.flags.enabled_relays_allowed_time_window_checks);
+    // AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
     
-    if(!IsRelayTimeWindowAllowed(num)){
-        state = 0; // forcing off34
-    //   return;
+    /**
+     * @note Only block relay from turning on, as off period may occur outside window
+     * */
+    if(state==1)
+    {
+      if(settings.flags.enabled_relays_allowed_time_window_checks && pCONT_time->RtcTime.valid)
+      {  
+        if(!IsRelayTimeWindowAllowed(num))
+        {
+          state = 0; // forcing off
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is locked: Outside enabled time window"), num);
+          //   return;
+        }
+        else
+        {
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_RELAYS "Relay %d is permitted: Inside enabled time window"), num);
+        }
+      }
     }
-  }
   #endif // ENABLE_DEVFEATURE_RELAY_DISABLING_SCHEDULE_CHECKS
 
   if(CommandGet_Relay_Power(num)==state){

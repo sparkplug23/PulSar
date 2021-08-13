@@ -53,7 +53,7 @@
 // #define DEVICE_DOORBELLWALLCHIME                 
 // #define DEVICE_OILTANK               
 // #define DEVICE_OILFURNACE
-//#define DEVICE_GAZEBCON
+//#define DEVICE_GAZEBO_CONTROLLER
 // #define DEVICE_HEATING
 //#define DEVICE_KITCHENPANEL
 // #define DEVICE_LANDINGPANEL

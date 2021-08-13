@@ -160,8 +160,13 @@ class mTime :
     
     uint32_t GetTimeOfDay_Seconds(void);
     static const char* ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds, char* buffer, uint8_t buflen);
-    static const char* ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen);
-    static const char* ConvertShortTime_HHMMSS(uint32_t* _time, char* buffer, uint8_t buflen);
+    // static const char* ConvertShortTime_HHMMSS(time_short_t* time, char* buffer, uint8_t buflen);
+    
+    static const char* ConvertShortTimetoCtr(time_short_t* time, char* buffer, uint8_t buflen);
+
+    static const char* ConvertU32TimetoCtr(uint32_t* _time, char* buffer, uint8_t buflen);
+
+    // static const char* ConvertShortTime_HHMMSS(uint32_t* _time, char* buffer, uint8_t buflen);
     static time_short_t Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr);
     
     // Used to keep the last midnight time, this stops multiple midnight runs at the same midnight
@@ -378,7 +383,6 @@ struct RTC {
       uint8_t count=0;
     }rebootinfo;
 
-    uint8_t fTimeValid = false;
 
     datetime_t uptime;
 

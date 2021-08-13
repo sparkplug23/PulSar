@@ -353,16 +353,13 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_SENSORS_DOOR_ID] = new mDoorSensor();
   #endif
   #ifdef USE_MODULE_SENSORS_MOTION
-    pModule[EM_MODULE_SENSORS_MOTION_ID] = new mMotionSensor();
+    pModule[EM_MODULE_SENSORS_MOTION_ID] = new mMotion();
   #endif
   #ifdef USE_MODULE_SENSORS_MOISTURE
     pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID] = new X();
   #endif
   #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
     pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID] = new X();
-  #endif
-  #ifdef USE_MODULE_SENSORS_PRESENCE
-    pModule[EM_MODULE_SENSORS_PRESENCE_ID] = new mPresence();
   #endif
   #ifdef USE_MODULE_SENSORS_BH1750
     pModule[EM_MODULE_SENSORS_BH1750_ID] = new mBH1750();

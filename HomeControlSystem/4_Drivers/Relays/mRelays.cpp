@@ -176,14 +176,14 @@ void mRelays::init(void){
     relay_status[relay_id].timer_decounter.active = false;
   }
 
-  #ifdef ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+  #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
   settings.flags.enabled_relays_allowed_time_window_checks = true;
   // relay_status[0].enabled_ranges[0].enabled = true;
   // relay_status[0].enabled_ranges[0].ontime = {8, 14, 25, 0}; //8 meaning all days   3pm to 8am
   // relay_status[0].enabled_ranges[0].offtime = {8, 7, 0, 0}; //8 meaning all days
   #else
   settings.flags.enabled_relays_allowed_time_window_checks = false;
-  #endif // ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+  #endif // ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
 
 //{"PowerName":0,"Relay":{"TimeOn":5},"EnabledTime":{"Enabled":1,"OnTime":"01D12:34:56","OffTime":"12D34:56:78"}}
@@ -284,7 +284,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
 
 void mRelays::SubTask_Every_Minute(){
 
-  #ifdef ENABLE_DEVFEATURE_RELAY_TIME_SCHEDULED_DEFAULT_ON
+  #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
     // Check if time is outside limits and set flag
 
 
@@ -965,6 +965,10 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
             t = relay_status[device_id].enabled_ranges[ii].offtime;
             snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
             JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
+
+            // Add if relay is within window etc here
+            JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+
           JsonBuilderI->Level_End();
         }
         JsonBuilderI->Level_End();
@@ -994,10 +998,10 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level){
           JsonBuilderI->Level_Start("enabled_ranges");
 
             JsonBuilderI->Array_Start("ontime");
-              JsonBuilderI->Add(mTime::ConvertShortTime_HHMMSS(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
+              JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
             JsonBuilderI->Array_End();
             JsonBuilderI->Array_Start("offtime");
-              JsonBuilderI->Add(mTime::ConvertShortTime_HHMMSS(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
+              JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
             JsonBuilderI->Array_End();
 
 

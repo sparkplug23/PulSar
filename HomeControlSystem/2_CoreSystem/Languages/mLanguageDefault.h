@@ -129,7 +129,7 @@
 // Energy (Range 130-139
 //#ifdef USE_MODULE_ENERGY_INTERFACE
   #define D_MODULE_ENERGY_INTERFACE_CTR              "mEnergyInterface"
-  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "energy"
+  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "energy_interface"
 
   #define D_MODULE_ENERGY_ADE7953_CTR              "ADE7953"
   #define D_MODULE_ENERGY_ADE7953_FRIENDLY_CTR     "ade7953"
@@ -210,8 +210,8 @@
   #define D_MODULE_SENSORS_MOTION_CTR              "mMotionSensor"
   #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR              "motion"
 
-  #define D_MODULE_SENSORS_PRESENCE_CTR "Presence"
-  #define D_MODULE_SENSORS_PRESENCE_FRIENDLY_CTR "presence"
+  // #define D_MODULE_SENSORS_MOTION_CTR "Presence"
+  // #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "presence"
 
 
 

@@ -236,6 +236,9 @@ const char* state_ctr(void);
 
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
 
+    /**
+     * Phase out
+     * */
     template<typename T>
     void MQTTHandler_Command_Array_Group(
       T& class_ptr, uint8_t class_id,
@@ -252,6 +255,22 @@ const char* state_ctr(void);
       }
 
     }
+
+    /**
+     * Special MQTT functions that manupulate the generic mqtthandler_list from any class
+     * handler<mAnimatorLight> *mAnimatorLight::mqtthandler_list[5]
+     * Future idea:
+     * Issue: Unknown how to also send length or array, so for(auto&) type loops probably wont work
+     * */
+    // template<typename T>
+    // void MQTTHandler_Flags_SendNow(handler<T>* mqtthandler_list_ptr)
+    // {     
+    //   for(auto& handle:mqtthandler_list_ptr){
+    //     handle->flags.SendNow = true;
+    //   }
+    // }
+
+
 
 
 // Choose auto x when you want to work with copies.
