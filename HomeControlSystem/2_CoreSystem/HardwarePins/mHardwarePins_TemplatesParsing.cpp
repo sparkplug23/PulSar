@@ -527,7 +527,8 @@ void mHardwarePins::GpioInit(void)
     pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
   } // i2c_enabled
 #endif  // USE_I2C
-// #endif // ESP8266
+
+
 
 
 

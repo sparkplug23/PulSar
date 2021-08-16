@@ -34,7 +34,7 @@ void mUltraSonicSensor::Init(void){
 
   object_detected_static.tSavedCheck = millis();
 
-  sprintf(presence_detect.detected_rtc_ctr,"--:--:--\0");
+  sprintf(motion_detect.detected_rtc_ctr,"--:--:--\0");
           
 }
 
@@ -272,16 +272,16 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
 
 }
 
-void mUltraSonicSensor::AddPresenceEventStatusSum(uint8_t status){
-  presence_event_status_sum.arr[presence_event_status_sum.idx++] = status;
-  if(presence_event_status_sum.idx > PRESENCE_EVENT_STATUS_SUM_MAX){presence_event_status_sum.idx=0;}
+void mUltraSonicSensor::AddMOTIONEventStatusSum(uint8_t status){
+  motion_event_status_sum.arr[motion_event_status_sum.idx++] = status;
+  if(motion_event_status_sum.idx > MOTION_EVENT_STATUS_SUM_MAX){motion_event_status_sum.idx=0;}
 }
-uint8_t mUltraSonicSensor::GetPresenceEventStatusSum(){
+uint8_t mUltraSonicSensor::GetMOTIONEventStatusSum(){
   uint8_t sum = 0;
-  for(uint8_t ii=0;ii<PRESENCE_EVENT_STATUS_SUM_MAX;ii++){
-    sum += presence_event_status_sum.arr[ii]; 
+  for(uint8_t ii=0;ii<MOTION_EVENT_STATUS_SUM_MAX;ii++){
+    sum += motion_event_status_sum.arr[ii]; 
   }
-  if((sum == PRESENCE_EVENT_STATUS_SUM_MAX) || (sum == 0)){
+  if((sum == MOTION_EVENT_STATUS_SUM_MAX) || (sum == 0)){
     return 1; // return true if all are the same ie all events are the same
   }
   return 0;
@@ -485,7 +485,7 @@ void mUltraSonicSensor::SubTask_UltraSonicAverage(){
 
 void mUltraSonicSensor::MQQTSendObjectDetected(void){
 
-  if(presence_detect.ischanged){ presence_detect.ischanged=false;
+  if(motion_detect.ischanged){ motion_detect.ischanged=false;
 
     D_DATA_BUFFER_CLEAR();
 
@@ -496,10 +496,10 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
       JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->End();
 
-    if(presence_detect.isactive){
-      pCONT_mqtt->ppublish("status/presence/detected",JsonBuilderI->GetBufferPtr(),false);
+    if(motion_detect.isactive){
+      pCONT_mqtt->ppublish("status/motion/detected",JsonBuilderI->GetBufferPtr(),false);
     }else{
-      pCONT_mqtt->ppublish("status/presence/over",JsonBuilderI->GetBufferPtr(),false);
+      pCONT_mqtt->ppublish("status/motion/over",JsonBuilderI->GetBufferPtr(),false);
     }
 
   }
@@ -610,7 +610,7 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
           dtostrf(GetDistanceCMReading()/100,3,2,float_ctr);
           JsonBuilderI->Add_FV("ih",PSTR("\"%s m\""),float_ctr);
         break;
-        case 1: JsonBuilderI->Add_P("ih",presence_detect.detected_rtc_ctr); break;
+        case 1: JsonBuilderI->Add_P("ih",motion_detect.detected_rtc_ctr); break;
       }  
     JsonBuilderI->Level_End();
   }
@@ -635,48 +635,48 @@ void mUltraSonicSensor::SubTask_DetectMotion(){
       if(distancecm<250){
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"within");
         object_detected_static.ispresent = true;
-        AddPresenceEventStatusSum(true);
+        AddMOTIONEventStatusSum(true);
       }else{
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "object_detected_static \"%s\""),"outside");
         object_detected_static.ispresent = false;
-        AddPresenceEventStatusSum(false);
+        AddMOTIONEventStatusSum(false);
       }
 
-      // if(!GetPresenceEventStatusSum()){ // If consecutive events are the same, then return true
+      // if(!GetMOTIONEventStatusSum()){ // If consecutive events are the same, then return true
       //   return;
       // }
       
-      if(presence_detect.state!=object_detected_static.ispresent){
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF presence_detect"));
+      if(motion_detect.state!=object_detected_static.ispresent){
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "IF motion_detect"));
 
-        pCONT_mqtt->ppublish("status/presence/event",object_detected_static.ispresent?"Present":"Not Present",false);
+        pCONT_mqtt->ppublish("status/motion/event",object_detected_static.ispresent?"Present":"Not Present",false);
         
         
-        presence_detect.state = object_detected_static.ispresent;
-        presence_detect.tDetectTime = millis();
+        motion_detect.state = object_detected_static.ispresent;
+        motion_detect.tDetectTime = millis();
 
         mqtthandler_sensor_ifchanged.flags.SendNow = true;
         
-        if(presence_detect.state){ 
-          presence_detect.isactive = true;
-          // presence_detect.wasactive = false; //toggle as "previous state"
-          memcpy(presence_detect.detected_rtc_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr));
+        if(motion_detect.state){ 
+          motion_detect.isactive = true;
+          // motion_detect.wasactive = false; //toggle as "previous state"
+          memcpy(motion_detect.detected_rtc_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr));
         }else{
-          presence_detect.isactive = false;
-          // presence_detect.wasactive = true; //toggle as "previous state"
+          motion_detect.isactive = false;
+          // motion_detect.wasactive = true; //toggle as "previous state"
         }
 
         // If this and previous state where the same
-        // if(presence_detect.wasactive ++ presence_detect.wasactive){
+        // if(motion_detect.wasactive ++ motion_detect.wasactive){
 
         // }
 
 
 
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "presence_detect"));
-        presence_detect.ischanged = true;
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIR "motion_detect"));
+        motion_detect.ischanged = true;
       }else{
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "ELSE presence_detect"));
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_PIR "ELSE motion_detect"));
 
       }
 

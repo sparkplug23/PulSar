@@ -588,7 +588,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750
   #include "5_Sensors/BH1750Light/mBH1750.h"
-  #define pCONT_presence                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
+  #define pCONT_motion                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_SR04
   #include "5_Sensors/SR04/mSR04.h"

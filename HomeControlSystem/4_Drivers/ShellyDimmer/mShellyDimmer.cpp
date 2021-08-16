@@ -131,7 +131,6 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Set_fSendNow();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-
   }
   
   /************
@@ -197,85 +196,6 @@ uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_method){
 }
 
 
-////////////////////// START OF MQTT /////////////////////////
-
-void mShellyDimmer::MQTTHandler_Init(){
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Settings;
-
-  
-  mqtthandler_ptr = &mqtthandler_state_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_State;
-
-//   mqtthandler_ptr = &mqtthandler_sensdebug_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Debug;
-
-} //end "MQTTHandler_Init"
-
-
-void mShellyDimmer::MQTTHandler_Set_fSendNow(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  // mqtthandler_animation_teleperiod.flags.SendNow = true;
-  // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
-//   mqtthandler_scene_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mShellyDimmer::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mShellyDimmer::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t mqtthandler_list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID
-    //, MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
-  };
-  
-  struct handler<mShellyDimmer>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings_teleperiod
-    //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, 
-    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-    mqtt_handler_id
-  );
-
-}
-
-
 /*********************************************************************************************\
  * Internal Functions
 \*********************************************************************************************/
@@ -299,10 +219,10 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
     while(abs(millis()-snd_time)<SHD_ACK_TIMEOUT)
     // while (TimePassedSince(snd_time) < SHD_ACK_TIMEOUT)
     {
-        if (SerialInput())
-            return true;
+      if (SerialInput())
+          return true;
 
-        delay(1);
+      delay(1);
     }
 
     // timeout
@@ -770,97 +690,6 @@ int mShellyDimmer::check_byte()
 }
 
 
-bool mShellyDimmer::SetChannels(void)
-{
-#ifdef SHELLY_DIMMER_DEBUG
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "SetChannels:"));
-    AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t *)XdrvMailbox.data, XdrvMailbox.data_len);
-#endif  // SHELLY_DIMMER_DEBUG
-
-    // uint16_t brightness = ((uint32_t *)XdrvMailbox.data)[0];
-    // // Use dimmer_hw_min and dimmer_hw_max to constrain our values if the light should be on
-    // if (brightness > 0)
-    //     brightness = changeUIntScale(brightness, 0, 255, Settings.dimmer_hw_min * 10, Settings.dimmer_hw_max * 10);
-    // req_brightness = brightness;
-
-    // ShdDebugState();
-
-    return SyncState();
-}
-
-bool mShellyDimmer::SetPower(void)
-{
-  #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
-  #endif  // SHELLY_DIMMER_DEBUG
-
-  req_on = 1;//(bool)XdrvMailbox.index;
-  return SyncState();
-}
-
-
-
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
-
-#ifdef SHELLY_CMDS
-
-const char kShdCommands[] PROGMEM = D_PRFX_SHD "|"  // Prefix
-  D_CMND_LEADINGEDGE "|"  D_CMND_WARMUPBRIGHTNESS "|" D_CMND_WARMUPTIME;
-
-void (* const ShdCommand[])(void) PROGMEM = {
-  &CmndShdLeadingEdge, &CmndShdWarmupBrightness, &CmndShdWarmupTime };
-
-void CmndShdLeadingEdge(void)
-{
-    if (XdrvMailbox.payload == 0 || XdrvMailbox.payload == 1)
-    {
-        leading_edge = 2 - XdrvMailbox.payload;
-        Settings.shd_leading_edge = XdrvMailbox.payload;
-#ifdef SHELLY_DIMMER_DEBUG
-        if (leading_edge == 1)
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to trailing edge"));
-        else
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to leading edge"));
-#endif  // SHELLY_DIMMER_DEBUG
-        ShdSendSettings();
-    }
-    ShdSaveSettings();
-    ResponseCmndNumber(Settings.shd_leading_edge);
-}
-
-void CmndShdWarmupBrightness(void)
-{
-    if ((10 <= XdrvMailbox.payload) && (XdrvMailbox.payload <= 100))
-    {
-        warmup_brightness = XdrvMailbox.payload * 10;
-        Settings.shd_warmup_brightness = XdrvMailbox.payload;
-#ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup brightness to %d%%"), XdrvMailbox.payload);
-#endif  // SHELLY_DIMMER_DEBUG
-        ShdSendSettings();
-    }
-    ShdSaveSettings();
-    ResponseCmndNumber(Settings.shd_warmup_brightness);
-}
-
-void CmndShdWarmupTime(void)
-{
-    if ((20 <= XdrvMailbox.payload) && (XdrvMailbox.payload <= 200))
-    {
-        warmup_time = XdrvMailbox.payload;
-        Settings.shd_warmup_time = XdrvMailbox.payload;
-#ifdef SHELLY_DIMMER_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set warmup time to %dms"), XdrvMailbox.payload);
-#endif  // SHELLY_DIMMER_DEBUG
-        ShdSendSettings();
-    }
-    ShdSaveSettings();
-    ResponseCmndNumber(Settings.shd_warmup_time);
-}
-
-#endif // SHELLY_CMDS
 
 /*********************************************************************************************\
  * SHD firmware update Functions

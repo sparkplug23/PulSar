@@ -223,7 +223,7 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 `Door` | Open/Closed
 `Moisture` | Moisture
 `Motion` | Motion <BR> PIR <BR> Doppler
-`Presence` | Occupancy
+`MOTION` | Occupancy
 `PulseCounter` | Counter^
 `RemoteSensor` | Any
 `Rotaty` | Rotational Counter?
@@ -250,7 +250,7 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 `Door` (Open/Closed)
 `Moisture` (Moisture)
 `Motion` (Motion, PIR, Doppler)
-`Presence` (Occupancy)
+`MOTION` (Occupancy)
 `PulseCounter` (Counter^)
 `RemoteSensor` (Any)
 `Rotaty` (Rotational Counter?)

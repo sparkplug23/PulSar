@@ -142,7 +142,7 @@
 
 // /**
 //  * 
-//  * This needs assorbed into presence
+//  * This needs assorbed into motion
 //  * */
 // void mMotionSensor::EveryLoop(){
 

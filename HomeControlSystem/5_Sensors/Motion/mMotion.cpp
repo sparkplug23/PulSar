@@ -52,9 +52,9 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_PRESENCE_STARTED_ID:
-    case FUNC_EVENT_PRESENCE_ENDED_ID:
-      RulesEvent_Presence_Change();
+    case FUNC_EVENT_MOTION_STARTED_ID:
+    case FUNC_EVENT_MOTION_ENDED_ID:
+      RulesEvent_Motion_Change();
     break;
     #endif// USE_MODULE_CORE_RULES
     /************
@@ -102,18 +102,23 @@ void mMotion::EveryLoop()
 
 
 /**
- * @brief Presence Events, will replace all motion type events.
- * The motion (PIR), ultrasonic change to trigger presence, will be controlled via the rule engine
- * Thus, any state change (or later mqtt topic input or url etc) can be treated internally as a presence change, no longer a pin state
+ * @brief MOTION Events, will replace all motion type events.
+ * The motion (PIR), ultrasonic change to trigger motion, will be controlled via the rule engine
+ * Thus, any state change (or later mqtt topic input or url etc) can be treated internally as a motion change, no longer a pin state
  * 
  * @note Information about trigger, will be contained within the stored event
  * @param DeviceName gives the index to the stored location index from sensor list
  * @param State gives the ON/Started (1) or OFF/Ended (0)
  * */
-void mMotion::RulesEvent_Presence_Change(){
+void mMotion::RulesEvent_Motion_Change(){
 
 
   // for(
+/**
+ * Rhis "rules" should be changed, unless rules are to be on all the time
+ * */
+
+
     uint8_t sensor_id = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
     // sensor_id<settings.sensors_active;sensor_id++)
   // {
@@ -156,7 +161,7 @@ void mMotion::RulesEvent_Presence_Change(){
   //   }
   // }
 
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "Presence Event"));
+  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
 
 }
 

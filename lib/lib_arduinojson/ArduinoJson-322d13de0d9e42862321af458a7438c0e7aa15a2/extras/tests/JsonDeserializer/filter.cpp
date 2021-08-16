@@ -321,7 +321,7 @@ TEST_CASE("Filtering") {
       0
     },
     {
-      // detect incomplete string in presence of escaped quotes
+      // detect incomplete string in motion of escaped quotes
       "'A\\'BC",
       "false",
       10,
@@ -330,7 +330,7 @@ TEST_CASE("Filtering") {
       0
     },
     {
-      // detect incomplete string in presence of escaped quotes
+      // detect incomplete string in motion of escaped quotes
       "\"A\\\"BC",
       "false",
       10,

@@ -108,6 +108,11 @@ void WebAppend_Root_Status_Table_Data();
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+
+    
+  struct handler<mDoorSensor>* mqtthandler_list[3] = {
+    &mqtthandler_settings_teleperiod, &mqtthandler_sensor_ifchanged, &mqtthandler_sensor_teleperiod
+  };
     
   //#endif
 

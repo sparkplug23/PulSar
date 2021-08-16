@@ -148,6 +148,8 @@ void mBH1750::Init(void)
     if (pCONT_sup->I2cActive(Bh1750.addresses[i])) { continue; }
 
     Bh1750_sensors[Bh1750.count].address = Bh1750.addresses[i];
+    // AddLog(LOG_LEVEL_INFO, PSTR("Bh1750.count=%d"),Bh1750.count);
+
     if (Bh1750SetMTreg(Bh1750.count)) {
       pCONT_sup->I2cSetActiveFound(Bh1750_sensors[Bh1750.count].address, Bh1750.types);
       Bh1750.count++;
@@ -179,14 +181,24 @@ bool mBH1750::Bh1750SetResolution(uint32_t sensor_index) {
 }
 
 bool mBH1750::Bh1750SetMTreg(uint32_t sensor_index) {
+  // DEBUG_LINE_HERE;
   pCONT_sup->wire->beginTransmission(Bh1750_sensors[sensor_index].address);
+  // DEBUG_LINE_HERE;
   uint8_t data = BH1750_MEASUREMENT_TIME_HIGH | ((Bh1750_sensors[sensor_index].mtreg >> 5) & 0x07);
+  // DEBUG_LINE_HERE;
+  // delay(5000);
+  // DEBUG_LINE_HERE;
   pCONT_sup->wire->write(data);
-  if (pCONT_sup->wire->endTransmission()) { return false; }
+  // DEBUG_LINE_HERE;
+  if (pCONT_sup->wire->endTransmission()) { 
+  // DEBUG_LINE_HERE;
+  return false; }
+  // DEBUG_LINE_HERE;
   pCONT_sup->wire->beginTransmission(Bh1750_sensors[sensor_index].address);
   data = BH1750_MEASUREMENT_TIME_LOW | (Bh1750_sensors[sensor_index].mtreg & 0x1F);
   pCONT_sup->wire->write(data);
   if (pCONT_sup->wire->endTransmission()) { return false; }
+  // DEBUG_LINE_HERE;
   return Bh1750SetResolution(sensor_index);
 }
 

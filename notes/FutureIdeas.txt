@@ -393,3 +393,9 @@ For now, its so unlikely someone would be switching between both hardware its no
 
 #Idea 119
     All sensors (most) should include optional flag to enable smoothing, where previous valid sample(s) is used to get a smoothing window
+
+#Idea 120
+  /**
+   * Allow using notifications with pixel groupings, ie applying pixel notificaiton across entire strip or section with pixel_index ranges
+   * 
+   * */

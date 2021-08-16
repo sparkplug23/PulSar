@@ -157,7 +157,7 @@ OneWire::OneWire(uint8_t pin)
 // the bus to come high, if it doesn't then it is broken or shorted
 // and we return a 0;
 //
-// Returns 1 if a device asserted a presence pulse, 0 otherwise.
+// Returns 1 if a device asserted a motion pulse, 0 otherwise.
 //
 uint8_t OneWire::reset(void)
 {

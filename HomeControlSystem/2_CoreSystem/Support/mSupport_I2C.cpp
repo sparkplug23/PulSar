@@ -277,12 +277,12 @@ AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("I2cSetDevice beginning"));
 bool mSupport::I2cEnabled(uint32_t i2c_index)
 {
 
-// Serial.println("I2cEnabled"); Serial.flush();
+Serial.println("I2cEnabled"); Serial.flush();
 // delay(3000);
-// bool val = 
+bool val = (pCONT_set->i2c_enabled && bitRead(pCONT_set->Settings.i2c_drivers[i2c_index / 32], i2c_index % 32));
 
-  return 
-  (pCONT_set->i2c_enabled && bitRead(pCONT_set->Settings.i2c_drivers[i2c_index / 32], i2c_index % 32));
+Serial.println(val); Serial.flush();
+  return val;
 
 // Serial.println("val"); Serial.flush();
 // Serial.println(val); Serial.flush();

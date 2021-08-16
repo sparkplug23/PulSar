@@ -47,7 +47,7 @@ class mMotion :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
     
-    void RulesEvent_Presence_Change();
+    void RulesEvent_Motion_Change();
 
     void parse_JSONCommand(JsonParserObject obj);
     

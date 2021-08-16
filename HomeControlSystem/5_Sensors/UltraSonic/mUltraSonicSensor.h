@@ -90,28 +90,28 @@ class mUltraSonicSensor :
      * Uses an array (wrapping) to store the the state of the sensor distance where 
      * true is within threshold and false is not.
      * */
-    void AddPresenceEventStatusSum(uint8_t status);
+    void AddMOTIONEventStatusSum(uint8_t status);
     /**
      * Returns sum of the array.
      * */
-    uint8_t GetPresenceEventStatusSum();
+    uint8_t GetMOTIONEventStatusSum();
     /**
      * Variables relating to event status
      * */
-    #define PRESENCE_EVENT_STATUS_SUM_MAX 3
-    struct PRESENCE_EVENT_STATUS_SUM{
-      uint8_t arr[PRESENCE_EVENT_STATUS_SUM_MAX];
+    #define MOTION_EVENT_STATUS_SUM_MAX 3
+    struct MOTION_EVENT_STATUS_SUM{
+      uint8_t arr[MOTION_EVENT_STATUS_SUM_MAX];
       uint8_t idx = 0;
-    }presence_event_status_sum;
+    }motion_event_status_sum;
 
-    struct PRESENCE_DETECT{
+    struct MOTION_DETECT{
       uint8_t isactive = false;
       uint8_t wasactive = false; // previous state
       uint8_t state = false;
       uint8_t ischanged = false;
       uint32_t tDetectTime;
       char detected_rtc_ctr[10];
-    }presence_detect;
+    }motion_detect;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Init(void);

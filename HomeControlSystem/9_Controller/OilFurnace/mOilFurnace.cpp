@@ -657,7 +657,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
 //       }break;
 //       // case 1:{        
 //       //   char table_row[25]; memset(table_row,0,sizeof(table_row));       
-//       //   sprintf(table_row,"%s",presence_detect.detected_rtc_ctr);
+//       //   sprintf(table_row,"%s",motion_detect.detected_rtc_ctr);
 //       //   JsonObject element_obj = classname_obj.createNestedObject();
 //       //     element_obj["id"] = row;
 //       //     element_obj["ih"] = table_row;

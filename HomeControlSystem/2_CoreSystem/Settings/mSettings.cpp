@@ -170,8 +170,8 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
 
   if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
 
-  if(strcasecmp_P(c,PM_FUNC_EVENT_PRESENCE_STARTED_CTR)==0){ return FUNC_EVENT_PRESENCE_STARTED_ID; }
-  if(strcasecmp_P(c,PM_FUNC_EVENT_PRESENCE_ENDED_CTR)==0){ return FUNC_EVENT_PRESENCE_ENDED_ID; }
+  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_STARTED_CTR)==0){ return FUNC_EVENT_MOTION_STARTED_ID; }
+  if(strcasecmp_P(c,PM_FUNC_EVENT_MOTION_ENDED_CTR)==0){ return FUNC_EVENT_MOTION_ENDED_ID; }
 
 
   if(strcasecmp_P(c,PM_FUNC_EVENT_SET_POWER_CTR)==0){ return FUNC_EVENT_SET_POWER_ID; }

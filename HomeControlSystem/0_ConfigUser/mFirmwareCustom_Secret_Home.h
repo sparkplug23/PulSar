@@ -12,6 +12,7 @@
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
 #define FORCE_TEMPLATE_LOADING
+#define USE_MODULE_CORE_RULES
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -81,10 +82,9 @@ Outside
   - CeilingLight
 **/
 // #define DEVICE_SIDEDOORLIGHT
-// #define DEVICE_GAZEBO_CONTROLLER //to become a sonoff 4ch (non pro)
-// Gazebo rgb as its own controllers
-// gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
+// #define DEVICE_GAZEBO_CONTROLLER
 // #define DEVICE_GAZEBO_SENSOR
+#define DEVICE_H801_RGBGAZEBO
 
 /**
 Garage
@@ -350,7 +350,7 @@ Bathroom
     Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
   */
   #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_ADE7953
@@ -936,10 +936,10 @@ Bathroom
 
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
-
-   #define DISABLE_WEBSERVER //memory to low for OTA
      
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_DOOR
 
@@ -954,7 +954,7 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR    "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_PIR_1_INV_CTR)
+      DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_SWT1_INV_CTR)
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
       DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
@@ -973,7 +973,8 @@ Bathroom
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "_1" "\""
       "],"
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "\""
@@ -983,6 +984,45 @@ Bathroom
       "]"
     "}"
   "}";
+
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "},"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
+
+
 #endif
 
 
@@ -1836,7 +1876,7 @@ Bathroom
     Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
   */
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
   #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
@@ -1908,7 +1948,7 @@ Bathroom
   /**
    * Motion needs to change, to instead be a rule. ie.
    * 
-   * Switch, button, distance etc changes will trigger a rule which fires the presence detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
    * One rule will be required for direction, ie motion started (button low) and motion over (button high)
   
    * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
@@ -1922,7 +1962,7 @@ Bathroom
    * Rule3
    * - Switch 1 = low, Relay1 on for X minutes
    * */
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
@@ -1951,13 +1991,13 @@ Bathroom
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
       "}"
     "}"
   "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
 
 
@@ -1977,6 +2017,7 @@ Bathroom
   #define DEVICENAME_CTR          "gazebo_controller"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
 
+  //to become a sonoff 4ch (non pro)
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   #define MAX_RELAYS 4
@@ -2018,18 +2059,16 @@ Bathroom
 #endif
 
 
+// gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
 #ifdef DEVICE_GAZEBO_SENSOR
   #define DEVICENAME_CTR          "gazebosensor"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
-
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18B20
-  // #define USE_MODULE_SENSORS_DHT
+  #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BH1750
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2037,21 +2076,13 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"D1\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_BME
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18B20
-      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D5\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\""
       #endif
-      "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
-      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2063,21 +2094,76 @@ Bathroom
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" "Outside" "\""
       "],"
-      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" "Outside" "\""
-      "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" "Outside" "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" "Cold Water Tank" "\""
+        "\"" "Gazebo" "\""
       "]"
+    "}"
+  "}";
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
     "}"
   "}";
 
 #endif
 
 
+
+#ifdef DEVICE_H801_RGBGAZEBO
+  #define DEVICENAME_CTR          "h801_rgbgazebo"
+  #define DEVICENAME_FRIENDLY_CTR "H801 RGB Gazebo RGBCCT Strip"
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_PWM
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+  
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":1,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":0,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":8},"//\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -2364,7 +2450,7 @@ Bathroom
     Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
   */
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
   #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
@@ -2481,7 +2567,7 @@ Bathroom
   /**
    * Motion needs to change, to instead be a rule. ie.
    * 
-   * Switch, button, distance etc changes will trigger a rule which fires the presence detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
    * One rule will be required for direction, ie motion started (button low) and motion over (button high)
    * 
    * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
@@ -2501,7 +2587,7 @@ Bathroom
    * - Switch 1 = low, Relay1 on for X minutes
    * 
    * */
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
@@ -2547,7 +2633,7 @@ Bathroom
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
       "}"
@@ -2562,7 +2648,7 @@ Bathroom
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_PRESENCE_STARTED_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started        
         // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
@@ -2584,7 +2670,7 @@ Bathroom
       "}"
     "}"
   "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_PRESENCE_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
 
 #endif // DEVICE_NAME
@@ -2887,14 +2973,16 @@ Bathroom
    * Door Lock        D7
    * BH1 Light        D1/D2
    */
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_DOOR
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2907,7 +2995,7 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
       "\"D5\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
@@ -2919,6 +3007,11 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
+  /**
+   * Allow using notifications with pixel groupings, ie applying pixel notificaiton across entire strip or section with pixel_index ranges
+   * 
+   * */
+
 
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2930,7 +3023,6 @@ Bathroom
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
@@ -2948,7 +3040,8 @@ Bathroom
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" "bedroom" "\""
+        "\"" "bedroom" "\","
+        "\"" "bedroomdoor" "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" "Bedroom" "\""
@@ -2959,53 +3052,72 @@ Bathroom
       "]"
     "}"
   "}";
+
+
+/**
+ * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+ * 
+ * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "},"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
+
 #endif
 
 
 #ifdef DEVICE_RGBNOTIFICATION_01
   #define DEVICENAME_CTR          "rgbnotification_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
-
-  /**
-   * BME              D1/D2
-   * PIR Motion       D6
-   * Door Position    D5
-   * Door Lock        D7
-   * BH1 Light        D1/D2
-   */
-  #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define USE_MODULE_SENSORS_DOOR
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"    
-      // #ifdef USE_MODULE_SENSORS_BME
-      // "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      // "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      // #endif
-      // #ifdef USE_MODULE_SENSORS_MOTION
-      // "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      // #endif
-      // #ifdef USE_MODULE_SENSORS_DOOR
-      // "\"D5\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
-      // "\"D7\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
-      // #endif
+    "\"" D_JSON_GPIOC "\":{"
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
 
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -3016,16 +3128,15 @@ Bathroom
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grbw\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":1" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
     "\"TimeMs\":500,"
     "\"ColourPalette\":43," //c12    43 is the colours for this christmas
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":0"
   "}";
   #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
   #define STRIP_SIZE_MAX                      50   
@@ -3046,45 +3157,6 @@ Bathroom
       "]"
     "}"
   "}";
-
-
-  
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_GPIOC "\":{"
-  //     "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-  //   "},"
-  // "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  // "}";
-
-  // #define STRIP_SIZE_MAX 12
-
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   #ifdef STRIP_SIZE_MAX
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   #else
-  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
-  //   #endif //STRIP_SIZE_MAX
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME_MS "\":10000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-  //   "},"
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-  //   "},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  // "}";
 
 #endif
 
@@ -3236,7 +3308,9 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-//esp32 now
+/**
+ * To be esp32 poe later
+ * */
 #ifdef DEVICE_LANDINGPANEL
   #define DEVICENAME_CTR            "landingpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Landing Panel ESP8266"
@@ -3252,8 +3326,11 @@ Bathroom
   #define DISABLE_WEBSERVER
 
   #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_MOTION
+
+  #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3266,36 +3343,14 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_GPIOC "\":{"      
-  //     #ifdef USE_MODULE_SENSORS_BME
-  //     "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-  //     "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-  //     #endif
-  //     #ifdef USE_MODULE_SENSORS_MOTION
-  //     "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
-  //     #endif
-  //     "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-  //     "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-  //     // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-  //     "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-  //   "},"
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  // "}";
-
-
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -3317,7 +3372,7 @@ Bathroom
     "\"" D_JSON_SAT "\":100,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":1"
   "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
@@ -3336,6 +3391,47 @@ Bathroom
       "]"
     "}"
   "}";
+    
+  /**
+   * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+   * 
+   * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
+
+
 
 #endif
 

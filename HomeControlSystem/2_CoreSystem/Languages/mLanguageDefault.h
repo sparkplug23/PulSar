@@ -210,8 +210,8 @@
   #define D_MODULE_SENSORS_MOTION_CTR              "mMotionSensor"
   #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR              "motion"
 
-  // #define D_MODULE_SENSORS_MOTION_CTR "Presence"
-  // #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "presence"
+  // #define D_MODULE_SENSORS_MOTION_CTR "MOTION"
+  // #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"
 
 
 
@@ -417,9 +417,10 @@
 #define D_FUNC_WEB_SYSTEM_INFO_CTR                          "WEB_SYSTEM_INFO"
 #define D_FUNC_DEBUG_CONFIGURE_CTR                          "DEBUG_CONFIGURE"
 
+
 #define D_FUNC_EVENT_MOTION_STARTED_CTR "MotionStarted"
-#define D_FUNC_EVENT_PRESENCE_STARTED_CTR "PresenceStarted"
-#define D_FUNC_EVENT_PRESENCE_ENDED_CTR "PresenceEnded"
+#define D_FUNC_EVENT_MOTION_ENDED_CTR "MotionEnded"
+
 #define   D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "StateChanged"
 #define   D_FUNC_EVENT_SET_POWER_CTR   "SetPower"
 #define   D_FUNC_EVENT_SET_SPEED_CTR   "SetSpeed"
@@ -896,6 +897,8 @@
 #define D_GPIO_FUNCTION_RGB_CLOCK_CTR     "WS281x Clock"
 #define D_GPIO_FUNCTION_SWT1_CTR     "SWT1"
 #define D_GPIO_FUNCTION_SWT2_CTR     "SWT2"
+#define D_GPIO_FUNCTION_SWT1_INV_CTR     "SWT1 Inv"
+#define D_GPIO_FUNCTION_SWT2_INV_CTR     "SWT2 Inv"
 #define D_GPIO_FUNCTION_SWT1_NP_CTR     "SWT1_NP"
 #define D_GPIO_FUNCTION_SWT2_NP_CTR     "SWT2_NP"
 #define D_GPIO_FUNCTION_REL1_CTR          "Relay 1"

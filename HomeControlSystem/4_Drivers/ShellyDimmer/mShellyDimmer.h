@@ -177,12 +177,10 @@ class mShellyDimmer :
     bool ModuleSelected(void) ;
     bool SetChannels();
 
-
     int8_t Tasker_Web(uint8_t function);
 
-
     int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(void);
+    void parse_JSONCommand(JsonParserObject obj);
 
     uint8_t ConstructJSON_Scene(uint8_t json_method);
     uint8_t ConstructJSON_State(uint8_t json_method);
@@ -201,13 +199,16 @@ class mShellyDimmer :
     void MQTTHandler_Set_TelePeriod();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mShellyDimmer>* mqtthandler_ptr;
     struct handler<mShellyDimmer>  mqtthandler_settings_teleperiod;
     struct handler<mShellyDimmer>  mqtthandler_state_ifchanged;
     struct handler<mShellyDimmer>  mqtthandler_state_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
+    struct handler<mShellyDimmer>* mqtthandler_list[2] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_state_teleperiod
+    };
 
 };
 

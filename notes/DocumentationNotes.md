@@ -52,7 +52,7 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 `Door` | Open/Closed
 `Moisture` | Moisture
 `Motion` | Motion <BR> PIR <BR> Doppler
-`Presence` | Occupancy
+`MOTION` | Occupancy
 `PulseCounter` | Counter^
 `RemoteSensor` | Any
 `Rotaty` | Rotational Counter?
@@ -79,7 +79,7 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 `Door` (Open/Closed)
 `Moisture` (Moisture)
 `Motion` (Motion, PIR, Doppler)
-`Presence` (Occupancy)
+`MOTION` (Occupancy)
 `PulseCounter` (Counter^)
 `RemoteSensor` (Any)
 `Rotaty` (Rotational Counter?)
@@ -96,3 +96,20 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 ## Displays
 
 ## Controller
+
+
+## RJ45 Wiring
+
+# Method A (inc 5v)
+
+o/w = 3v3
+w/0 gnd
+
+g/w = gpio1 (i2c)
+w/g = gpio2 (i2c)
+
+bl/w = gpio3 (serial?)
+w/bl = gpio4
+
+br/w = optional 5v
+w/br = gpio5
