@@ -588,8 +588,7 @@ class mInterfaceLight :
       uint32_t animation_changed_millis = 0;
     }runtime;
 
-
-void LightCalcPWMRange();
+    void LightCalcPWMRange();
 
     /**************
      * CHANGE_POWER - TURN_ON - fade ON, returns to previous lighting array.  TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
@@ -637,7 +636,7 @@ void LightCalcPWMRange();
     void CommandSet_PixelHardwareTypeID(uint8_t value);
     void CommandSet_LightPowerState(uint8_t value);
 
-void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
+    void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     // Global and shared with activergb
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);
@@ -648,6 +647,8 @@ void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
     bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
     void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+    
+    void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
 
     void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
     void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
@@ -752,9 +753,9 @@ void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
 
 
-void SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index = 0, bool flag_replicate_for_total_pixel_length = false);
-RgbcctColor GetPixelColourHardwareInterface(uint16_t index = 0);
-void ShowInterface();
+    void SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index = 0, bool flag_replicate_for_total_pixel_length = false);
+    RgbcctColor GetPixelColourHardwareInterface(uint16_t index = 0);
+    void ShowInterface();
 
 
     /******************************************************************************************************************************
@@ -862,6 +863,8 @@ void ShowInterface();
 
     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
+void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
+
     bool Pre_Init(void);
 
     float    HueN2F(uint16_t hue);
@@ -957,6 +960,19 @@ void ShowInterface();
     void setBriCT_Global(uint8_t bri_ct) {
       _briCT_Global = bri_ct;
     }
+
+
+    
+    uint16_t get_CTRangeMin(void)
+    {
+      return _ct_min_range;
+    }
+    uint16_t get_CTRangeMax(void)
+    {
+      return _ct_max_range;
+    }
+
+
 
 private:
 

@@ -530,7 +530,7 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
     // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
     // char buffer[100];
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
-    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
+    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
     //#endif
 // #ifdef DEVICE_RGBFIREPLACE_TESTER
 //     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
@@ -591,6 +591,12 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
        break;
        case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
          SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+       break;
+       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
+         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+       break;
+       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
+         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
        break;
        case EFFECTS_FUNCTION_FIREPLACE_01_ID:
          SubTask_Flasher_Animate_Function_FirePlace_01();

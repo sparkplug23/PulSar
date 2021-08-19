@@ -120,12 +120,37 @@ void mMotion::RulesEvent_Motion_Change(){
 
 
     uint8_t sensor_id = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+
+    /**
+     * If command state is follow (now value 2), then use trigger.data[0] as destination.data[0]
+     * */
+    uint8_t trigger_state = pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[0];
+    uint8_t command_state_in = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+    uint8_t newevent_command_state_in = pCONT_rules->event_triggered.value.data[0];
+    uint8_t command_state_out = 0;
+    if(command_state_in==2) /* follow */
+    {
+      command_state_out = newevent_command_state_in; // command will follow trigger state
+    }else{
+      command_state_out = command_state_in;
+    }
+
+
+
     // sensor_id<settings.sensors_active;sensor_id++)
   // {
 
   //   if(PIR_Detected(sensor_id)!=pir_detect[sensor_id].state)
   //   {
-      pir_detect[sensor_id].state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];//PIR_Detected(sensor_id);
+
+// 1 ie HIGH will ALWAYS mean active, the inversion should be handled on the trigger/switch side
+
+      pir_detect[sensor_id].state = command_state_out;//pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];//PIR_Detected(sensor_id);
+      
+      
+      AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d %d %d %d %d"),
+      pir_detect[sensor_id].state, trigger_state, command_state_in, command_state_out, newevent_command_state_in);
+
 
       if(pir_detect[sensor_id].state)
       {
@@ -161,7 +186,7 @@ void mMotion::RulesEvent_Motion_Change(){
   //   }
   // }
 
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
+  // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
 
 }
 

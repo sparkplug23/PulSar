@@ -232,6 +232,10 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_UPDATES
   pModule[EM_MODULE_CORE_UPDATES_ID] = new mUpdates();
   #endif
+  // Subsystems
+  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
+  #endif
   // Network
   #ifdef USE_MODULE_NETWORK_WIFI
   pModule[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();

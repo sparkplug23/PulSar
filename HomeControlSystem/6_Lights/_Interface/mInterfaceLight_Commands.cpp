@@ -963,6 +963,27 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
+/**
+ * direct percentage version
+ * */
+void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage) {
+
+  CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(percentage, 0,100, _ct_min_range,_ct_max_range));
+
+  // rgbcct_controller.setCCT(ct);
+  // animation.flags.fForceUpdate = true;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
+  // #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+/**
+ * "InternalSet" ie direct control, does not have Addlog feedback like commandset
+ * */
+void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
+  rgbcct_controller.setCCT(ct);
+  animation.flags.fForceUpdate = true;
+}
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************

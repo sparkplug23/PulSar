@@ -1,4 +1,5 @@
 #include "mRadiatorFan.h"
+
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
 
 const char* mRadiatorFan::PM_MODULE_CONTROLLER_RADIATORFAN_CTR = D_MODULE_CONTROLLER_RADIATORFAN_CTR;
@@ -61,7 +62,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function, JsonParserObject obj){ //Serial.pr
   #ifdef USE_MODULE_SENSORS_DS18B20
     if(abs(millis()-tCheckForMaxTemp)>=60000*10){tCheckForMaxTemp=millis();
 
-     pCONT_mry->CommandSet_Relay_Power(RAD_FAN_RELAY_ON);
+     pCONT_mry->CommandSet_Relay_Power(RAD_FAN_RELAY_OFF);
 
       // int tempsensorid;
       // if((tempsensorid=pCONT_msdb18->getIDbyName("inside"))>=0){

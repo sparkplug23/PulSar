@@ -103,6 +103,20 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
         }
     }
 
+
+    
+    if(jtok = obj["Display"].getObject()["Println"]){
+        // JsonParserArray array = jtok;
+        // for(auto val : array) {
+        //     // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+        //     nextionSendCmd(val.getStr());
+        // }
+        Serial2.println(jtok.getStr());
+    }
+
+
+
+
     
 //     if(jtok = obj["commands3"]){
 //         //temp fix

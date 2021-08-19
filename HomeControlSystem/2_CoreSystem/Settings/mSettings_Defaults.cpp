@@ -364,9 +364,9 @@ void mSettings::SystemSettings_DefaultBody_Sensors(){
   #ifdef USE_MODULE_SENSORS_SWITCHES
     for (uint8_t i = 0; i < MAX_SWITCHES; i++) { Settings.switchmode[i] = SWITCH_MODE; }
   #endif
-  Settings.sensors.altitude = 0; 
-  Settings.sensors.latitude = (int)((double)LATITUDE * 1000000);
-  Settings.sensors.longitude = (int)((double)LONGITUDE * 1000000);
+  Settings.sensors.altitude = ALTITUDE_ABOVE_SEALEVEL; 
+  Settings.sensors.latitude = LATITUDE;//(int)((double)LATITUDE * 1000000);
+  Settings.sensors.longitude = LONGITUDE;//(int)((double)LONGITUDE * 1000000);
 
   Settings.sensors.flags.decimal_precision = 3;
 

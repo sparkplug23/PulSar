@@ -234,9 +234,11 @@ void mSwitches::SwitchHandler(uint8_t mode)
       || (mode)
     ){
 
-      if (switches[i].holdwallswitch) {
+      if (switches[i].holdwallswitch) 
+      {
         switches[i].holdwallswitch--;
-        if (0 == switches[i].holdwallswitch) {
+        if (0 == switches[i].holdwallswitch) 
+        {
          // SendKey(1, i +1, 3);           // Execute command via MQTT
         }
       }
@@ -320,7 +322,11 @@ void mSwitches::SwitchHandler(uint8_t mode)
         if (switchflag < 3) 
         {
           #ifdef USE_MODULE_CORE_RULES
-            pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, switchflag);
+            // Active high means start of motion always, so check for inversion
+            uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
+            
+            // AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
+            pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, new_state);
           #endif
           pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
         }

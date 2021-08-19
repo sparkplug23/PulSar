@@ -26,6 +26,11 @@
  * Generic hardware eg nodemcu
  * */
 // #define DEVICE_TESTBED_MOTION
+// #define DEVICE_TESTBED_RGBCLOCK
+
+
+// #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
+
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
@@ -526,6 +531,7 @@
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_DOOR
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_BH1750
 
@@ -542,8 +548,12 @@
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\","
+      // "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DOOR
+      "\"D5\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
@@ -560,6 +570,10 @@
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" "bedroomDOOR" "\","
+        "\"" "bedroomlock" "\""
       "]"
     "}"
   "}";
@@ -570,7 +584,7 @@
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    // PIR detected
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -582,27 +596,212 @@
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"State\":2" // Started
       "}"
-    "},"
+    "}," // DOOR opened
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
+        "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"State\":2" // Started
       "}"
     "}"
   "}";
 
 #endif
 
+
+
+
+
+
+
+
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+#ifdef DEVICE_TESTBED_RGBCLOCK
+  #define DEVICENAME_CTR          "testbed_rgbclock"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Clock 02"
+
+  // TEST DEVICE, NOT WORKING
+ 
+  #define FORCE_TEMPLATE_LOADING
+  // #define SETTINGS_HOLDER 1
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  //#define USE_TASK_RGBLIGHTING_NOTIFICATIONS  // BREAKS
+  #define USE_SK6812_METHOD_DEFAULT
+
+  #define ENABLE_DEVFEATURE_RGB_CLOCK
+
+  // #define ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
+  // // #define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  // // #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
+
+  // // #define ENABLE_BUG_TRACING
+  // // #define DEBUG_PRINT_FUNCTION_NAME
+  // //  #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // //#define ENABLE_LOG_FILTERING_TEST_ONLY
+  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  // // #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
+  // #define DISABLE_WEBSERVER 
+  
+  // #define ENABLE_PIXEL_FUNCTION_MIXER
+  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+  #define STRIP_SIZE_MAX 93// 750   *15 //changing gazebo to be 12v
+
+  // #define DISABLE_NETWORK
+  // // #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
+
+  // #define DISABLE_SLEEP
+    
+  #define DISABLE_WEBSERVER
+
+  // #define USE_MODULE_SENSORS_BME
+  
+  // #define USE_MODULE_SENSORS_MOTION
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)   
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grbw\","
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":0,"
+      "\"" D_JSON_RATE_MS "\":5000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":29"
+    "},"
+    // "\"CCT_Temp\": 152,"
+    // "\"Hue\":25,"
+    // "\"Sat\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":34,"
+    "\"BrightnessCCT\":0,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":5"
+
+  "}";
+
+
+#endif
+
+
+
+
+#ifdef DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
+  #define DEVICENAME_SOCKET_NUMBER_CTR 14
+  #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  
+  /**
+   * Disable serial logging
+   * Use RX pin, gpio 1, as switch input
+   * */
+  #define DISABLE_SERIAL_LOGGING
+  
+  #define DISABLE_WEBSERVER
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"3\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Builtin Button as toggle
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "}"
+  "}";
+
+#endif
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

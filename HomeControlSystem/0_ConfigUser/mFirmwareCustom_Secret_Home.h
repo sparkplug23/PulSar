@@ -84,7 +84,7 @@ Outside
 // #define DEVICE_SIDEDOORLIGHT
 // #define DEVICE_GAZEBO_CONTROLLER
 // #define DEVICE_GAZEBO_SENSOR
-#define DEVICE_H801_RGBGAZEBO
+// #define DEVICE_H801_RGBGAZEBO
 
 /**
 Garage
@@ -227,6 +227,7 @@ Bathroom
   "}";
 
 #endif
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -974,7 +975,7 @@ Bathroom
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "_1" "\""
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Door" "\""
       "],"
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_DOOROPEN_FRIENDLY_NAME_LONG "\""
@@ -1001,7 +1002,7 @@ Bathroom
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"State\":2" // Started
       "}"
     "},"
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
@@ -1016,7 +1017,7 @@ Bathroom
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"State\":2" // Started
       "}"
     "}"
   "}";
@@ -1335,19 +1336,19 @@ Bathroom
   #define DEVICENAME_CTR          "radiatorfan"
   #define DEVICENAME_FRIENDLY_CTR "Radiator Fan"
   
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
-   
-  #define USE_MODULE_SENSORS_MOTION
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Hallway"
-
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_DS18B20
   #define USE_MODULE_SENSORS_DHT
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
 
   #define USE_MODULE_CONTROLLER_RADIATORFAN
 
-  #define USE_MODULE_DRIVERS_RELAY
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Hallway"
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1399,7 +1400,7 @@ Bathroom
       "\"D6\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
       #endif 
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
@@ -1442,6 +1443,27 @@ Bathroom
       "]"  
     "}"
   "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
 
 #endif
 
@@ -2128,6 +2150,12 @@ Bathroom
   #define DEVICENAME_CTR          "h801_rgbgazebo"
   #define DEVICENAME_FRIENDLY_CTR "H801 RGB Gazebo RGBCCT Strip"
 
+  /**
+   * 24W/meter
+   * Approx 5.5m used, 24*5.5 = 132W so 132/12 = 11Amps at 12V
+   * 20A 12V should be enough
+   * */
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -2150,11 +2178,7 @@ Bathroom
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
     "\"" D_JSON_STRIP_SIZE       "\":1,"
-    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":0,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
@@ -3081,7 +3105,7 @@ Bathroom
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
+        "\"DeviceName\":1,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"

@@ -48,7 +48,7 @@ class mRadiatorFan :
     };
     #endif
     
-void SubTasker_MQTTSender();
+    void SubTasker_MQTTSender();
 
     enum FAN_MODE{MANUAL=1,AUTO_TEMP,AUTO_REMOTE};
     uint8_t fan_mode = AUTO_TEMP;
@@ -58,7 +58,7 @@ void SubTasker_MQTTSender();
 
     void ConstructJSON_FanStatus();
     void MQQTSendFanStatus();
-    void parse_JSONCommand();
+    void parse_JSONCommand(JsonParserObject obj);
 
     // void AddToJsonObject_AddHardware(JsonObject root);
     void Append_Hardware_Status_Message();

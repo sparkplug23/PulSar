@@ -184,6 +184,10 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_UPDATES
     EM_MODULE_CORE_UPDATES_ID,
   #endif 
+  // Additional Internal Subsytems
+  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+    EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
+  #endif 
   // Network
   #ifdef USE_MODULE_NETWORK_WIFI
     EM_MODULE_NETWORK_WIFI_ID,
@@ -406,6 +410,12 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CORE_UPDATES
   #include "2_CoreSystem/Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
+#endif
+
+// Subsystems (x-x)
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #include "2b_SubSystem/SolarLunar/mSolarLunar.h"
+  #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
 #endif
 
 

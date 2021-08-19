@@ -1124,9 +1124,12 @@ struct SensorSettings{
   uint8_t       teleperiod_json_level;
   uint8_t       ifchanged_json_level;
   uint8_t       teleperiod_retain_flag;
-  int16_t       altitude;                  
-  int           latitude;                  
-  int           longitude;               
+  /**
+   * Stored as ints for data savings, flat change to int
+   * */
+  int16_t       altitude;            
+  float           latitude;      //54.5 shall be 54500000
+  float           longitude;               
   SysBitfield_Sensors flags;
 };
 

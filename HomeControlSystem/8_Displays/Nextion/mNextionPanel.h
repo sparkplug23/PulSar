@@ -27,7 +27,7 @@
 #define USE_HARDWARE_SERIAL_TEMP
 
 
-#define NEXTION_BAUD 38400
+#define NEXTION_BAUD 115200//38400
 
 
 #include "2_CoreSystem/Time/mTime.h"

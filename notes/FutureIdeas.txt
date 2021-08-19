@@ -399,3 +399,12 @@ For now, its so unlikely someone would be switching between both hardware its no
    * Allow using notifications with pixel groupings, ie applying pixel notificaiton across entire strip or section with pixel_index ranges
    * 
    * */
+
+
+#Idea 121
+    Create a way to make animations linked by when they should change
+    eg. Solar ezimuth. 
+
+    Using a single palette of rgbcct, I can create the colour steps I want.. but how to know when to step through them aka ranges
+    Stepping through may still be the best way, then the animation itself will just have a defined range where each change happens!
+    This will be solar03 test 

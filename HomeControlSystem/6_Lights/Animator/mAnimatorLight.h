@@ -384,7 +384,15 @@ class mAnimatorLight :
     void Ambilight_InputStream();
     void init_Ambilight();
     #define AMBILIGHT_SCREENS_CONNECTED 1
+
+    /**
+     * 
+     * Long term, multiple screens will be used as their own subclass, containing all the info about that screen instead of struct arrays
+     * */
     enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
+
+
+
     struct AMBILIGHT_SCREEN_SETTINGS{
       uint8_t ambilight_mode=AMBILIGHT_SIDES_ID;
       uint32_t tSavedUpdate = millis();
@@ -393,7 +401,7 @@ class mAnimatorLight :
 
       struct SCREENS{
         struct EDGE{
-          HsbColor colour;
+          RgbwColor colour;
           int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
           uint8_t size = 5;
         };
@@ -480,6 +488,10 @@ class mAnimatorLight :
     //far left = east from position, and far right = wast from position using sunset position
     EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
     EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
+    // New with solarlunar
+    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID,
+    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID,
+    
     // palette to step through, which gives single colour sun
     EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
     //enabled CCT by azimuth 
@@ -763,6 +775,14 @@ void AnimUpdateMemberFunction_Pulse_Random_On_Fade_Off(const AnimationParam& par
 void SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
   void AnimUpdateMemberFunction_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back(const AnimationParam& param);
 
+void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01(const AnimationParam& param);
+   
+  
+void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02(const AnimationParam& param);
+   
+  
 
 
   void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();

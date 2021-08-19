@@ -5,6 +5,8 @@
 
 #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
+
+
 /*******************************************************************************************************************
 ********************************************************************************************************************
 ************ START OF AMBILIGHT DEFINITIONS ********************************************************************************************
@@ -24,9 +26,27 @@ void mAnimatorLight::init_Ambilight(){
   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-  
   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+
+
+
+  #ifdef   USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX
+  
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbwColor(255,175,0,100);//HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbwColor(150,0,0,0);//HsbColor(pCONT_iLight->HueN2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 44; // 2 extra pixels on centre inlay
+  ambilightsettings.screens[SCREEN_CENTRE].left.size = 23;
+  ambilightsettings.screens[SCREEN_CENTRE].right.size = 23;
+  ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 0;
+  ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage = 0;
+
+
+  #endif // USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX
+  
 
 }
 
@@ -66,10 +86,15 @@ void mAnimatorLight::SubTask_Ambilight_Main(){
 } // END function
 
 
+
+
 void mAnimatorLight::Ambilight_Sides(){
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::Ambilight_Sides()"));
   #endif
+
+
+  #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_RIGHT
 
   float progress;
   HsbColor colour_tmp;
@@ -107,6 +132,127 @@ void mAnimatorLight::Ambilight_Sides(){
                                        progress);
     animation_colours[right_start+right].DesiredColour = colour_tmp;
   }
+
+  #endif
+
+  
+  #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
+
+
+  switch(1)
+  {
+    case 0: // method 4 different sides
+    { 
+
+      float progress;
+      HsbColor colour_tmp;
+
+      uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
+      uint8_t bottom_start = 0;
+      for(int bottom=0;bottom<bottom_size;bottom++){
+        animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
+      }
+
+      uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
+      uint8_t right_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
+      for(int right=0;right<right_size;right++){
+        //if(ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage>=0){ //if set
+          // progress = (float)(right)/(float)(right_size);
+          // colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+          //                                    RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+          //                                    progress);
+        //}
+        // animation_colours[right_start+right].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].right.colour;
+        animation_colours[right_start+right].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].right.colour;
+      }
+
+      uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
+      uint8_t top_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size+ambilightsettings.screens[SCREEN_CENTRE].right.size;
+      for(int top=0;top<top_size;top++){
+        animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
+      }
+
+      uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
+      uint8_t left_start = top_start + top_size;
+      for(int left=0;left<left_size;left++){
+        // progress = (float)(left)/(float)(left_size);
+        // colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+        //                                    RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+        //                                    progress);
+        // animation_colours[left_start+left].DesiredColour = colour_tmp;
+        animation_colours[left_start+left].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].left.colour;;
+      }
+
+      // animation_colours[0].DesiredColour = RgbColor(255,0,0);
+      // animation_colours[43].DesiredColour = RgbColor(255,0,0);
+
+      // animation_colours[44].DesiredColour = RgbColor(0,255,0);
+      // animation_colours[66].DesiredColour = RgbColor(0,255,0);
+
+      // animation_colours[67].DesiredColour = RgbColor(0,0,255);
+      // animation_colours[108].DesiredColour = RgbColor(0,0,255);
+
+      // animation_colours[109].DesiredColour = RgbwColor(0,0,0,255);
+      // animation_colours[130].DesiredColour = RgbwColor(0,0,0,255);
+      
+      // animation_colours[131].DesiredColour = RgbwColor(255,0,0,255);
+      // animation_colours[132].DesiredColour = RgbwColor(0,255,0,255);
+      // animation_colours[133].DesiredColour = RgbwColor(0,0,255,255);
+      // animation_colours[131].DesiredColour = RgbwColor(255,0,255,255);
+      
+      }
+      break;
+      case 1: //blend top and bottom colour only, sides are linear
+      {
+
+
+      float progress;
+      HsbColor colour_tmp;
+
+      uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
+      uint8_t bottom_start = 0;
+      for(int bottom=0;bottom<bottom_size;bottom++){
+        animation_colours[bottom_start+bottom].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].bottom.colour;
+      }
+
+      uint8_t right_size = ambilightsettings.screens[SCREEN_CENTRE].right.size;
+      uint8_t right_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
+      for(int right=0;right<right_size;right++){
+        if(ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage>=0){ //if set
+          progress = (float)(right)/(float)(right_size);
+          colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+                                             RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+                                             progress);
+        }
+        animation_colours[right_start+right].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].right.colour;
+        // animation_colours[right_start+right].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].right.colour;
+      }
+
+      uint8_t top_size = ambilightsettings.screens[SCREEN_CENTRE].top.size;
+      uint8_t top_start = ambilightsettings.screens[SCREEN_CENTRE].bottom.size+ambilightsettings.screens[SCREEN_CENTRE].right.size;
+      for(int top=0;top<top_size;top++){
+        animation_colours[top_start+top].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].top.colour;
+      }
+
+      uint8_t left_size = ambilightsettings.screens[SCREEN_CENTRE].left.size;
+      uint8_t left_start = top_start + top_size;
+      for(int left=0;left<left_size;left++){
+        progress = (float)(left)/(float)(left_size);
+        colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+                                           RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+                                           progress);
+        animation_colours[left_start+left].DesiredColour = colour_tmp;
+        // animation_colours[left_start+left].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].left.colour;;
+      }
+
+
+      }
+      break;
+  }//end switch
+
+  #endif
+
+
 
 }
 

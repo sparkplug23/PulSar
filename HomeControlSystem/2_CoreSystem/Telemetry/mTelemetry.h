@@ -107,6 +107,7 @@ class mTelemetry :
     uint8_t ConstructJSON_Debug_Template(uint8_t json_level);
     uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_level);
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
+    uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_level);
     #endif
 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
@@ -172,6 +173,7 @@ class mTelemetry :
         MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
         MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
         MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
+        MQTT_HANDLER_SYSTEM_DEBUG_SYSTEM_SAVED_SETTINGS_ID,
       #endif
       MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
     };
@@ -198,9 +200,15 @@ class mTelemetry :
       handler<mTelemetry> mqtthandler_debug_template;
       handler<mTelemetry> mqtthandler_debug_moduleinterface;
       handler<mTelemetry> mqtthandler_debug_minimal;
+      handler<mTelemetry> mqtthandler_debug_system_saved_settings;
     #endif
     
-  struct handler<mTelemetry>* mqtthandler_list[15] = {
+  struct handler<mTelemetry>* mqtthandler_list[
+    11  
+    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+    +5
+    #endif
+    ] = {
     &mqtthandler_health, &mqtthandler_settings,
     &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
     &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
@@ -208,6 +216,8 @@ class mTelemetry :
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
       &mqtthandler_debug_pins, &mqtthandler_debug_template,
       &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
+      , 
+      &mqtthandler_debug_system_saved_settings
     #endif
   };
 

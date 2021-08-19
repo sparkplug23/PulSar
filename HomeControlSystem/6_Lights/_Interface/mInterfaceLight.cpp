@@ -577,7 +577,7 @@ void mInterfaceLight::EveryLoop(){
       #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT // Basic colours around boxed objects
       case ANIMATION_MODE_AMBILIGHT_ID:
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_AMBILIGHT_ID"));
-        pCONT_ladd->SubTask_Ambilight_Main();
+        pCONT_lAni->SubTask_Ambilight_Main();
         // light_power_state = true;
       break;
       #endif
@@ -642,6 +642,8 @@ void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
   colour->WC = mapvalue(colour->WC, 0, 255, 0, rgbcct_controller.getBrightnessCCT255());
 
 }
+
+
 
 float mInterfaceLight::HueN2F(uint16_t hue){
   return hue/360.0f;

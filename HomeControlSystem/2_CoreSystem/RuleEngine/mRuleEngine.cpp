@@ -170,6 +170,14 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           }
           else // Execute normal state/value method if no jsoncommand was used
           {
+
+            /**
+             * If destination.state is "2", then "NewEvent" needs to be inverted from trigger
+             * */
+            // if(rules[rule_index].command.value.data[0]==2)
+            // {
+
+            // }
             
             pCONT->Tasker_Interface(
               rules[rule_index].command.function_id, // function the previous trigger is linked to

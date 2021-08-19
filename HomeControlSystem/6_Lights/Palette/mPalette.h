@@ -290,6 +290,11 @@ class mPalette
     PALETTELIST_STATIC_PINK_PURPLE_01_ID,
     PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID,
 
+    /**
+     * Create a few palettes that are updated/calculated using sun/azimuth
+     * eg: 1) ambilight colours that are calculated to show sun brightness up top
+     * */
+
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
   };

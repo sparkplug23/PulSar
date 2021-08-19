@@ -39,7 +39,10 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
           }
         }
         
-      EverySecond_SendScreenInfo();
+      // EverySecond_SendScreenInfo();
+
+// Serial2.println("TEST");
+
     break;
     case FUNC_EVERY_MINUTE:
       // EverySecond_SendScreenInfo();
