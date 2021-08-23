@@ -22,6 +22,8 @@
 #include <ESPAsyncWebServer.h>
 #endif
 
+#include "math.h"
+#include "fastmath.h"
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
@@ -491,6 +493,10 @@ class mAnimatorLight :
     // New with solarlunar
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID,
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID,
+    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID, // Using stored rgbcct palette
+    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID, // Using stored rgbcct palette
+    
+    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID, // CCT only, mapped directly, no palette
     
     // palette to step through, which gives single colour sun
     EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
@@ -781,6 +787,15 @@ void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_0
   
 void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
 void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02(const AnimationParam& param);
+void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03(const AnimationParam& param);
+void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04(const AnimationParam& param);
+void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05(const AnimationParam& param);
+
+
+void AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param);
    
   
 

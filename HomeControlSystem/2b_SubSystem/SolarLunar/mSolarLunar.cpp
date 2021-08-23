@@ -100,8 +100,21 @@ void mSolarLunar::Update_Solar_Tracking_Data()
 	float lat = pCONT_set->Settings.sensors.latitude;
 	float lon = pCONT_set->Settings.sensors.longitude;
 
-	// SolarAzEl(time(NULL), lat, lon, 0, &solar_position.azimuth, &solar_position.elevation);
-	SolarAzEl(pCONT_time->Rtc.utc_time, lat, lon, 0, &solar_position.azimuth, &solar_position.elevation);
+	double elevation_tmp = 0;
+
+	SolarAzEl(pCONT_time->Rtc.utc_time, lat, lon, 0, &solar_position.azimuth, &elevation_tmp);
+
+	/**
+	 * Get direction of change ie sunrise or sunset
+	 * */
+	if(elevation_tmp > solar_position.elevation)
+	{
+		solar_position.direction.is_ascending = true;
+	}else{
+		solar_position.direction.is_ascending = false;
+	}
+	solar_position.elevation = elevation_tmp;
+
 
 	solar_position.isvalid = true;
 	solar_position.tUpdated_millis = millis();
@@ -267,7 +280,9 @@ void mSolarLunar::parse_JSONCommand(JsonParserObject obj)
    * As order of importance, others that rely on previous commands must come after
    * */
   if(jtok = obj["SolarElevation"]){
-    solar_position_testing.elevation = (double)jtok.getInt();
+    solar_position_testing.elevation = (double)jtok.getFloat();
+
+	Serial.printf("solar_position_testing.elevation=%f\n\r",solar_position_testing.elevation);
 
 	// AddLog(LOG_LEVEL_INFO, PSTR("SolarElevation=%d %d"),(int)solar_position_testing.elevation,jtok.getInt() );
 	// delay(3000);

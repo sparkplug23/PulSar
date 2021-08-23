@@ -34,6 +34,12 @@ struct RgbColor;
 struct RgbwColor;
 struct HslColor;
 struct HsbColor;
+/**
+ * 
+ * Important note!
+ * warm white is always byte 4, not 5, that is cold white
+ * 
+ * */
 
 #define ENABLE_DEVFEATURE_RGBCCT_MANIPULATION
 // ------------------------------------------------------------------------
@@ -80,8 +86,8 @@ struct RgbcctColor
         R(color.R),
         G(color.G),
         B(color.B),
-        WC(color.W),    //to be renamed W1/W2, since it could be warm white or cold white
-        WW(color.W)
+        WW(color.W),    //to be renamed W1/W2, since it could be warm white or cold white
+        WC(color.W)
         // R(0),G(0),B(0),WC(0)    
     {
     };

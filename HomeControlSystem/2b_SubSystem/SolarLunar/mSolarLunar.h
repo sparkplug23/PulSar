@@ -63,6 +63,9 @@ public:
     {
       double azimuth = 0;
       double elevation = 0;
+      struct DIRECTION_OF_CHANGE{
+        uint8_t is_ascending = true;
+      }direction;
       uint32_t tUpdated_millis = 0;
       bool isvalid = false;
     }solar_position;

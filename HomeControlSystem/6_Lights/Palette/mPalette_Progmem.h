@@ -58,22 +58,26 @@
     #define D_RGB255_GREEN_FADED3    0, 80, 0,
     #define D_RGB255_GREEN_PASTEL    25, 112, 25,
     #define D_RGB255_GREEN_PASTEL_FADED    15, 90, 15,
-    #define D_RGB255_PURPLE_RED      255, 16, 44,
-    #define D_RGB255_PURPLE_BLUE     120, 16, 144,
-    #define D_RGB255_PINK_WARM       255, 26, 64,
-    #define D_RGB255_PINK_HOT        255, 16, 44,
-    #define D_RGB255_PINK_HOT2       255, 0, 72,
-    #define D_RGB255_PINK            255, 0, 200,
+
+    #define D_RGB255_CYAN            0, 255, 255,
+    #define D_RGB255_CYAN_FADED2      0, 100, 100,
+    #define D_RGB255_CYAN_FADED3      0, 60, 60,
+    #define D_RGB255_CYAN_FADED4      0, 30, 30,
 
 
     #define D_RGB255_BLUE            0, 0, 255,
     #define D_RGB255_BLUE_FADED      0, 0, 200,
     #define D_RGB255_BLUE_FADED2     0, 0, 150,
     #define D_RGB255_BLUE_FADED3     0, 0, 100,
-    #define D_RGB255_CYAN            0, 255, 255,
-    #define D_RGB255_CYAN_FADED2      0, 100, 100,
-    #define D_RGB255_CYAN_FADED3      0, 60, 60,
-    #define D_RGB255_CYAN_FADED4      0, 30, 30,
+
+
+    #define D_RGB255_PURPLE_BLUE     120, 16, 144,
+    #define D_RGB255_PURPLE_RED      255, 16, 44,
+    #define D_RGB255_PINK_WARM       255, 26, 64,
+    #define D_RGB255_PINK_HOT        255, 16, 44,
+    #define D_RGB255_PINK_HOT2       255, 0, 72,
+    #define D_RGB255_PINK            255, 0, 200,
+
     #define D_RGB255_BLACK      0, 0, 0,
 
     #define D_RGB255_WHITE          255, 255, 255,
@@ -1571,6 +1575,130 @@ DEF_PGM_UINT8(PM_PALETTE_SINGLE_HOT_PINK_NEON_WITH_NAVY_COLOUR_MAP_IDS)
   25, 116, 209  //est. Bright Navy Blue RGB: (25, 116, 209)   
 };
 
+
+
+
+
+/**
+ * The indexes are packed with the elevation in degrees that equate to the colour
+ * 
+ * 1) Full colour, cyan in daylight
+ * 2) only colours of red/orange during sunset
+ * 3) CCT only, full brightness
+ * */
+#ifndef D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__NAME_CTR
+#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__NAME_CTR   "Solid RGBCCT Sun Elevation 01"
+#endif
+//MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+DEF_PGM_CTR  (PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__NAME_CTR)
+        D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__NAME_CTR;
+DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__COLOUR_MAP_IDS)
+{ // R,G,B,WW,CW
+//Index values are stored relative to -90, so -90 to 180 is 0 to 180
+
+  // Night time          ww, cw
+  90 -90, 0, 0, 1,        0, 0, // Peak dusk
+  90 -45, 0, 0, 1,        0, 0,
+  90 -15, 0, 0, 30,       0, 0,
+  90 -10, 0, 0, 100,      0, 0,
+  90 -5, 0, 0, 20,       20, 0,
+  90 -2, 0, 0, 15,      10, 0,
+  90 -1, 50, 10, 10,     5, 0,
+  90 +0, 255, 3, 0,       2, 0,  // Transition
+  90 +1, D_RGB255_ORANGE_DEEP       1, 20,
+  90 +2, D_RGB255_YELLOW_WARM     0, 100,
+  90 +5, 8, 10, 0,    0, 150,
+  90 +10, 0, 20, 0,  0, 200,
+  90 +15, 0, 30, 0,  0, 255,
+  90 +45, 200, 40, 0,   0, 255,
+  90 +90, 255, 50, 0,   0, 255  // Noon
+
+  // 90 -7, 0, 1,  0, 0, 0, // Peak dusk
+  // 90 -6, 1, 1, 0, 0, 0,
+  // 90 -5, 2, 1, 0, 0, 0,
+  // 90 -4, 3, 1, 0, 0, 0,
+  // 90 -3, 4, 1, 0, 0, 0,
+  // 90 -2, 5, 1, 0, 0, 0,
+  // 90 -1, 5, 1, 0, 0, 0,
+  // 90 +0, 6, 0, 1, 0, 0,  // Transition
+  // 90 +1, 7, 0, 1, 0, 0,
+  // 90 +2, 7, 0, 1, 0, 0,
+  // 90 +3, 8, 0, 1, 0, 0,
+  // 90 +4, 9, 0, 1, 0, 0,
+  // 90 +5, 10, 0, 1, 0, 0,
+  // 90+ 6, 11, 0, 1, 0, 0,
+  // 90 +7, 12, 0, 1, 0, 0  // Noon
+
+
+
+  // 90 -90, D_RGB255_RED 0,0,//7, 0, // Peak dusk
+  // 90 -45, D_RGB255_ORANGE_LIGHT 0,0,//6, 0,
+  // 90 -15, D_RGB255_ORANGE_DEEP 0,0,//5, 0,
+  // 90 -10, D_RGB255_YELLOW_WARM 0,0,//4, 0,
+  // 90 -5, D_RGB255_GREEN 0,0,//3, 0,
+  // 90 -2, D_RGB255_CYAN 0,0,//2, 0,
+  // 90 -1, D_RGB255_BLUE 0,0,//1, 0,
+  // 90 +0, D_RGB255_RED 0,0,//0, 0,  // Transition
+  // 90 +1, D_RGB255_PURPLE_BLUE 0,0,//0, 1,
+  // 90 +2, D_RGB255_PINK_HOT 0,0,//0, 2,
+  // 90 +5, D_RGB255_RED 0,0,//0, 3,
+  // 90 +10, D_RGB255_ORANGE_LIGHT 0,0,//0, 4,
+  // 90 +15, D_RGB255_YELLOW_WARM 0,0,//0, 5,
+  // 90+ 45, D_RGB255_GREEN 0,0,//0, 6,
+  // 90 +90, D_RGB255_CYAN 0,0,//0, 7  // Noon
+
+  /**
+   * Sun effect modes
+   * 1) full colour, with cyan at midday
+   * 1b) colour sunset transition, day white in day time, warm white at night... but yellow to red during sunset
+   * 2) CCT only, aligned with sun directly, day to warm white but full brightness
+   * 
+   * CCT only should be another animation mode, direct mapping of cct_temp
+   * 
+   * 
+   * */
+
+};
+
+
+
+
+
+/**
+ * The indexes are packed with the elevation in degrees that equate to the colour
+ * 
+ * 1) Full colour, cyan in daylight
+ * 2) only colours of red/orange during sunset
+ * 3) CCT only, full brightness
+ * */
+#ifndef D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR
+#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR   "Solid RGBCCT Sun Elevation 02" // CCT ONLY
+#endif
+//MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+DEF_PGM_CTR  (PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR)
+        D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR;
+DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__COLOUR_MAP_IDS)
+{ // R,G,B,WW,CW
+  //Index values are stored relative to -90, so -90 to 180 is 0 to 180
+
+  // Night time          ww, cw
+  90 -90, 0, 0, 0,        255, 0, // Peak dusk
+  90 -45, 0, 0, 1,        0, 0,
+  90 -15, 0, 0, 30,       0, 0,
+  90 -10, 0, 0, 100,      0, 0,
+  90 -5, 0, 0, 20,       20, 0,
+  90 -2, 0, 0, 15,      10, 0,
+  90 -1, 50, 10, 10,     5, 0,
+  90 +0, 255, 3, 0,       2, 0,  // Transition
+  90 +1, D_RGB255_ORANGE_DEEP       1, 20,
+  90 +2, D_RGB255_YELLOW_WARM     0, 100,
+  90 +5, 8, 10, 0,    0, 150,
+  90 +10, 0, 20, 0,  0, 200,
+  90 +15, 0, 30, 0,  0, 255,
+  90 +45, 200, 40, 0,   0, 255,
+  90 +90, 255, 50, 0,   0, 255  // Noon
+  
+};
 
 
 

@@ -136,7 +136,12 @@ class mPalette
     void init_ColourPalettes_Gradient_SunLevel_Group01_05();
     void init_ColourPalettes_Gradient_SunLevel_Group01_06();
     void init_ColourPalettes_Gradient_SunLevel_Group01_07();
-    
+    /**
+     * Specialised palettes
+     * */
+    void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_01();
+    void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02();
+      
 
     enum SHELFFLIES_HEART_INDEX{ //right to left
       SHELFFLIES_HEART_INDEX1=1,
@@ -295,6 +300,13 @@ class mPalette
      * eg: 1) ambilight colours that are calculated to show sun brightness up top
      * */
 
+
+    /**
+     * Specialised palettes
+     * */
+    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID,
+    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02_ID,
+
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
   };
@@ -400,6 +412,8 @@ class mPalette
       PALETTE gradient_sunlevel_group01_05;
       PALETTE gradient_sunlevel_group01_06;
       PALETTE gradient_sunlevel_group01_07;
+      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
+      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
       // Christmas static patterns
       PALETTE christmas_01;
       PALETTE christmas_02;
