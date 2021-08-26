@@ -115,6 +115,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR) "notifications";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_EFFECTS_CTR)       "flasher";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)         "mixer";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR) "setpixel_manually";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)         "debug/animation_details";
 
 
     
@@ -151,10 +152,21 @@ DEFINE_PGM_CTR(PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)                      D_
 DEFINE_PGM_CTR(PM_EFFECTS_REGION_ANIMATE_NAME_CTR)                            D_EFFECTS_REGION_ANIMATE_NAME_CTR;
 
 
+
+
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR;
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR;
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR;
+
+
+
+
 #include <functional>
 // #define ANIM_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
 // #define ANIM_CALLBACK_SIGNATURE std::function<void(const AnimationParam& param)> callback
 #define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
+// #define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
+#define ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE std::function<void()> anim_progress_mqtt_function_callback
 
 class mAnimatorLight :
   public mTaskerInterface
@@ -171,8 +183,6 @@ class mAnimatorLight :
     };
     #endif
 
-
-    
     // Put settings at top of class from now on, use it for common settings
     struct SETTINGS{
       struct FLAGS{
@@ -403,7 +413,7 @@ class mAnimatorLight :
 
       struct SCREENS{
         struct EDGE{
-          RgbwColor colour;
+          RgbcctColor colour;
           int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
           uint8_t size = 5;
         };
@@ -491,13 +501,34 @@ class mAnimatorLight :
     EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
     EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
     // New with solarlunar
+
+    /**
+     * Development methods
+     * */
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID,
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID,
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID, // Using stored rgbcct palette
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID, // Using stored rgbcct palette
-    
     EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID, // CCT only, mapped directly, no palette
-    
+
+    /**
+     * Functional methods of sunrise
+     * EFFECTS_FUNCTION_SUNPOSITIONS_<SOLIDCOLOUR/2D_ARRAY>
+     * */
+    /**
+     * Eleveation controls that use rgbcct palette (that has elevation in its index byte) to display solid colour only
+     * */
+    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID,
+    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID,
+
+    //create a palette to leave on ALL the time, ie deep red at night instead of blue... testing for the clocks later I guess
+
+    /**
+     * Elevation controls the CCT channels only
+     **/
+    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID,
+
+
     // palette to step through, which gives single colour sun
     EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
     //enabled CCT by azimuth 
@@ -795,14 +826,29 @@ void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Ele
 void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05(const AnimationParam& param);
 
 
+/**
+ * inline animation header includes
+ * */
+#include "6_Lights/Animator/EffectsHACS/Effect_Sunlights/Animator.h"
+
+void SubTask_Flasher_Animate_Function_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01();
+void         AnimUpdateMemberFunction_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01(const AnimationParam& param);
+
+
 void AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param);
    
   
+void SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
 
 
-  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
-  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
-  void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
+
+
+void SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+
+
+void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
+void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
+void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
 
 
 #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
@@ -1310,6 +1356,14 @@ void SetPixelColor_All(RgbcctColor colour);
     uint8_t ConstructJSON_State(uint8_t json_level = 0);
     uint8_t ConstructJSON_Flasher(uint8_t json_level = 0);
     uint8_t ConstructJSON_Mixer(uint8_t json_level = 0);
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+    uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0);
+    
+    ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
+    mAnimatorLight& setFunction_Debug_Animation_Progress_Callback(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);
+
+    
+    #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
@@ -1319,6 +1373,7 @@ void SetPixelColor_All(RgbcctColor colour);
     struct handler<mAnimatorLight>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
+  
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;
 
@@ -1335,6 +1390,9 @@ void SetPixelColor_All(RgbcctColor colour);
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
         MQTT_HANDLER_MODULE_MANUAL_SETPIXEL_TELEPERIOD_ID,
       #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+        MQTT_HANDLER_MODULE_DEBUG_ANIMATION_PROGRESS_TELEPERIOD_ID,
+      #endif
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
@@ -1350,17 +1408,20 @@ void SetPixelColor_All(RgbcctColor colour);
     #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
     #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
+    #endif
 
     
   // Could this be put into a function? to allow me to set things to all in this, or by ID
   struct handler<mAnimatorLight>* mqtthandler_list[
     5
-
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
       +1
     #endif
-
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      +1
+    #endif
     ] = {
     &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
     &mqtthandler_state_teleperiod,
@@ -1375,6 +1436,9 @@ void SetPixelColor_All(RgbcctColor colour);
     #endif
     #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       &mqtthandler_manual_setpixel,
+    #endif
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      &mqtthandler_debug_animations_progress,
     #endif
     &mqtthandler_settings_teleperiod
   };

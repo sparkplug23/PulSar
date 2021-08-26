@@ -408,3 +408,12 @@ For now, its so unlikely someone would be switching between both hardware its no
     Using a single palette of rgbcct, I can create the colour steps I want.. but how to know when to step through them aka ranges
     Stepping through may still be the best way, then the animation itself will just have a defined range where each change happens!
     This will be solar03 test 
+
+#Idea 122
+    Allow multiple animations to work at the same time, ie colour pattern and brightness pattern
+    Create brightness animations that run alongside
+
+        - brightness manual
+        - brightness by sun elevation
+        - brightness by time of day
+        

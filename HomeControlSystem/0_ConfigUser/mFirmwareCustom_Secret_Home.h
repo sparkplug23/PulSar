@@ -160,7 +160,7 @@ Bathroom
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_BEDROOMBLINDS
-// #define DEVICE_RGBNOTIFICATION_01
+#define DEVICE_RGBNOTIFICATION_01
 
 
 /**************************************************************************************************************************************************
@@ -812,20 +812,15 @@ Bathroom
   #define DEVICENAME_CTR          "rgbfridge"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fridge H801"
 
-  
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
   #define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
-
-  #define DISABLE_WEBSERVER
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
   
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR 
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -846,11 +841,12 @@ Bathroom
     "\"" D_JSON_STRIP_SIZE       "\":1,"
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid RGBCCT Sun Elevation 04: Kitchen Pink, CW, WW\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":8},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Sun Elevation RGBCCT Solid Palette 01\"},"
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
 
@@ -3131,6 +3127,8 @@ Bathroom
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
+  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -3346,6 +3344,8 @@ Bathroom
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define STRIP_SIZE_MAX 36
+
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   
   #define DISABLE_WEBSERVER
 
@@ -3367,8 +3367,8 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
       #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"

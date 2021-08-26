@@ -76,6 +76,7 @@
     #define D_RGB255_PINK_WARM       255, 26, 64,
     #define D_RGB255_PINK_HOT        255, 16, 44,
     #define D_RGB255_PINK_HOT2       255, 0, 72,
+    #define D_RGB255_PINK_HOT3       255, 0, 43, // Hsb(350,100,100)
     #define D_RGB255_PINK            255, 0, 200,
 
     #define D_RGB255_BLACK      0, 0, 0,
@@ -1671,8 +1672,16 @@ DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__COLOUR_MA
  * 2) only colours of red/orange during sunset
  * 3) CCT only, full brightness
  * */
+
+
+/**
+ * RGBCCT
+ * Day:     Cyan
+ * Sunset:  yellow, orange, red
+ * Night:   dark blue (level 1)
+ * */
 #ifndef D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR
-#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR   "Solid RGBCCT Sun Elevation 02" // CCT ONLY
+#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR   "Solid RGBCCT Sun Elevation 02: Dark Blue" // CCT ONLY
 #endif
 //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
 DEF_PGM_CTR  (PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__NAME_CTR)
@@ -1699,6 +1708,155 @@ DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__COLOUR_MA
   90 +90, 255, 50, 0,   0, 255  // Noon
   
 };
+
+/**
+ * RGBCCT
+ * Day:     Cyan
+ * Sunset:  yellow, orange, red
+ * Night:   deep red (level 1)
+ * */
+#ifndef D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__NAME_CTR
+#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__NAME_CTR   "Solid RGBCCT Sun Elevation 03: Dark Red" // CCT ONLY
+#endif
+//MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+DEF_PGM_CTR  (PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__NAME_CTR)
+        D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__NAME_CTR;
+DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__COLOUR_MAP_IDS)
+{ // R,G,B,WW,CW
+  //Index values are stored relative to -90, so -90 to 180 is 0 to 180
+
+  // Night time          ww, cw
+  90 -90, 1, 0, 0,        0, 0, // Peak dusk
+  90 -45, 1, 0, 0,        0, 0,
+  90 -15, 1, 0, 0,       0, 0,
+  90 -10, 1, 0, 0,      0, 0,
+  90 -5, 2, 0, 0,       20, 0,
+  90 -2, 3, 0, 0,      10, 0,
+  90 -1, 100, 0, 0,     5, 0,
+  90 +0, 255, 3, 0,       2, 0,  // Transition
+  90 +1, D_RGB255_ORANGE_DEEP       1, 20,
+  90 +2, D_RGB255_YELLOW_WARM     0, 100,
+  90 +5, 8, 10, 0,    0, 150,
+  90 +10, 0, 20, 0,  0, 200,
+  90 +15, 0, 30, 0,  0, 255,
+  90 +45, 200, 40, 0,   0, 255,
+  90 +90, 255, 50, 0,   0, 255  // Noon
+  
+};
+
+
+/**
+ * RGBCCT: Kitchen light tester
+ * Day:     Pink
+ * Sunset:  Pink and white (pale pink)
+ * Night:   Warm white
+ * */
+#ifndef D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__NAME_CTR
+#define D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__NAME_CTR   "Solid RGBCCT Sun Elevation 04: Kitchen Pink, CW, WW" // CCT ONLY
+#endif
+//MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+DEF_PGM_CTR  (PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__NAME_CTR)
+        D_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__NAME_CTR;
+DEF_PGM_UINT8(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__COLOUR_MAP_IDS)
+{ // R,G,B,WW,CW
+  //Index values are stored relative to -90, so -90 to 180 is 0 to 180
+
+  // Night time          ww, cw
+  90 -90, 0, 0, 0,      255, 0, // Peak dusk
+  90 -45, 0, 0, 0,      255, 0,
+  90 -15, 0, 0, 0,      255, 0,
+  90 -10, 0, 0, 0,      255, 150,
+  90 -5,  0, 0, 0,      100, 255,
+  90 -2,  0, 0, 0,      20,  200,
+  90 -1, 100, 0, 25,     0,  150,
+  90 +0, 150, 0, 50,     0,  50,  // Transition
+  90 +1, 200, 0, 100,     0, 20,
+  90 +2,  D_RGB255_PINK_HOT3   0, 10,
+  90 +5,  D_RGB255_PINK_HOT3   0, 0,
+  90 +10, D_RGB255_PINK_HOT3   0, 0,
+  90 +15, D_RGB255_PINK_HOT3   0, 0,
+  90 +45, D_RGB255_PINK_HOT3   0, 0,
+  90 +90, D_RGB255_PINK_HOT3   0, 0  // Noon
+  
+};
+
+
+// Figure out how to roll this into its own 
+/**
+ * RGBCCT Pairs
+ * Day:     Cyan
+ * Sunset:  yellow, orange, red
+ * Night:   deep red (level 1)
+ * */
+#ifndef D_PALETTE__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__NAME_CTR
+#define D_PALETTE__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__NAME_CTR   "Solid RGBCCT Sun Elevation 01 Dual Colours: Dark Red" // CCT ONLY
+#endif
+//MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+DEF_PGM_CTR  (PM_PALETTE__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__NAME_CTR)
+        D_PALETTE__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__NAME_CTR;
+DEF_PGM_UINT8(PM_SOLID__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__COLOUR_MAP_IDS)
+{ // R,G,B,WW,CW
+  // Index values are stored relative to -90, so -90 to 180 is 0 to 180
+  // Indexes must be replicated to give pairs (maybe 3 and 4 in groups later?)
+
+  // Night time          ww, cw
+  90 -90, 1, 0, 0,        0, 0, // Peak dusk
+  90 -90, 1, 0, 0,        0, 0, // Peak dusk
+  90 -45, 1, 0, 0,        0, 0,
+  90 -45, 1, 0, 0,        0, 0,
+  90 -15, 1, 0, 0,       0, 0,
+  90 -15, 1, 0, 0,       0, 0,
+  90 -10, 1, 0, 0,      0, 0,
+  90 -10, 1, 0, 0,      0, 0,
+  90 -5, 2, 0, 0,       20, 0,
+  90 -5, 2, 0, 0,       20, 0,
+  90 -2, 3, 0, 0,      10, 0,
+  90 -2, 3, 0, 0,      10, 0,
+  90 -1, 100, 0, 0,     5, 0,
+  90 -1, 100, 0, 0,     5, 0,
+  90 +0, 255, 3, 0,       2, 0,  // Transition
+  90 +0, 255, 3, 0,       2, 0,  // Transition
+  90 +1, D_RGB255_ORANGE_DEEP       1, 20,
+  90 +1, D_RGB255_ORANGE_DEEP       1, 20,
+  90 +2, D_RGB255_YELLOW_WARM     0, 100,
+  90 +2, D_RGB255_YELLOW_WARM     0, 100,
+  90 +5, 8, 10, 0,    0, 150,
+  90 +5, 8, 10, 0,    0, 150,
+  90 +10, 0, 20, 0,  0, 200,
+  90 +10, 0, 20, 0,  0, 200,
+  90 +15, 0, 30, 0,  0, 255,
+  90 +15, 0, 30, 0,  0, 255,
+  90 +45, 200, 40, 0,   0, 255,
+  90 +45, 200, 40, 0,   0, 255,
+  90 +90, 255, 50, 0,   0, 255,  // Noon
+  90 +90, 255, 50, 0,   0, 255  // Noon
+  
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

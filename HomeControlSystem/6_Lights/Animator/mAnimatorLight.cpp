@@ -11,6 +11,18 @@ const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LI
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
+// using namespace std;  
+// int addF(int x , int y)  
+// {  
+//     return x+y;  
+// }  
+
+// void addF2(void)  
+// {  
+//     return;  
+// }  
+
+
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){ 
 
   int8_t function_result = 0;
@@ -54,6 +66,29 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){
       //EverySecond();
       //Settings_Default();
       // pCONT_iLight->ShowInterface();
+
+      // setFunction_Debug_Animation_Progress_Callback()
+
+      this->setFunction_Debug_Animation_Progress_Callback(
+        [this](void){
+          this->ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+        }
+      );
+
+      mqtthandler_debug_animations_progress.flags.SendNow = true;
+
+
+//  int (*funcptr)(int,int);  // Declaration of function pointer
+//       // void (*funcptr)(void);
+//       funcptr = addF;
+//       int sum=funcptr(7,10);  
+
+//  void (*funcptr2)(void);  // Declaration of function pointer
+//       // void (*funcptr)(void);
+//       funcptr2 = addF2;
+//       funcptr2;  
+//       // std::cout << "Sum=" <<sum<< std::endl;  
+
 
       // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
       //   char result[100];
@@ -607,6 +642,15 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
        case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
          SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
        break;
+       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
+         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+       break;
+       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
+         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+       break;
+       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
+         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+       break;
        case EFFECTS_FUNCTION_FIREPLACE_01_ID:
          SubTask_Flasher_Animate_Function_FirePlace_01();
        break;
@@ -852,6 +896,36 @@ uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
 
 #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
 
+
+#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level){
+
+  char buffer[100];
+
+
+    // JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
+    // JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
+    // JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
+
+DEBUG_LINE_HERE;
+    if(anim_progress_mqtt_function_callback)
+    {
+      JsonBuilderI->Start();
+DEBUG_LINE_HERE;
+      anim_progress_mqtt_function_callback();
+DEBUG_LINE_HERE;
+
+      // (this.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level);
+
+      return JsonBuilderI->End();
+    }
+
+
+  return 0; // None to send
+}
+
+#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
 
@@ -1954,11 +2028,14 @@ void mAnimatorLight::StartAnimation_AsAnimUpdateMemberFunction(){
 
 
 mAnimatorLight& mAnimatorLight::setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE) {
-    this->anim_function_callback = anim_function_callback;
-    return *this;
+  this->anim_function_callback = anim_function_callback;
+  return *this;
 }
 
-
+mAnimatorLight& mAnimatorLight::setFunction_Debug_Animation_Progress_Callback(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE) {
+  this->anim_progress_mqtt_function_callback = anim_progress_mqtt_function_callback;
+  return *this;
+}
 
 
 bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){

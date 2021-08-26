@@ -72,6 +72,8 @@ public:
 
     solar_position_t solar_position_testing;
 
+    float elevation_adjusted_for_debugging = 0;
+
 
   // ~mSolarLunar();
 

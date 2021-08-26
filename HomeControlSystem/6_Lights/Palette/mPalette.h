@@ -141,6 +141,10 @@ class mPalette
      * */
     void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_01();
     void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02();
+    void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03();
+    void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04();
+    void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01();
+
       
 
     enum SHELFFLIES_HEART_INDEX{ //right to left
@@ -302,10 +306,16 @@ class mPalette
 
 
     /**
-     * Specialised palettes
+     * Specialised palettes: Solid single colour
      * */
     PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID,
     PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02_ID,
+    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03_ID,
+    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04_ID,
+    /**
+     * Rgbcct colour pairs: For ambilight top/bottom arrangement
+     * */
+    PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID,
 
     // Count of total handlers and starting point for other modules
     PALETTELIST_STATIC_LENGTH_ID 
@@ -414,6 +424,9 @@ class mPalette
       PALETTE gradient_sunlevel_group01_07;
       PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
       PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
+      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;
+      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
+      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
       // Christmas static patterns
       PALETTE christmas_01;
       PALETTE christmas_02;

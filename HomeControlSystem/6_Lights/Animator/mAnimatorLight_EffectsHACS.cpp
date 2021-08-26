@@ -171,6 +171,25 @@ void mAnimatorLight::AnimUpdateMemberFunction_BlendStartingToDesiredColour(const
     // SetPixelColor(0, RgbColor(0,random(0,255),0));
 }
 
+void mAnimatorLight::ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01()
+{   
+// Serial.println("AnimUpdateMemberFunction_BlendStartingToDesiredColour");
+  // for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+  //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+  //       animation_colours[pixel].StartingColor,
+  //       animation_colours[pixel].DesiredColour,
+  //       param.progress);    
+  //   SetPixelColor(pixel, updatedColor);
+  // } // END for
+
+  DEBUG_LINE_HERE;
+
+  JBI->Add("test","debug");
+
+    // SetPixelColor(0, RgbColor(0,random(0,255),0));
+}
+
+
 
 /**************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************
@@ -3193,6 +3212,15 @@ struct EFFECT_CONFIG {
 
 } effect_config;
 
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
+
 
   // star* stars = reinterpret_cast<star*>(pCONT_iLight->effects_data_buffer);
   EFFECT_CONFIG* effect_config2 = reinterpret_cast<EFFECT_CONFIG*>(pCONT_iLight->effects_data_buffer);
@@ -3218,7 +3246,7 @@ struct EFFECT_CONFIG {
    * Amount of blue when sun is down
    * */
 
-  if(pCONT_solar->solar_position.elevation)
+  if(sun_elevation)
   {
     /**
      * Max daily elevation will need to be known later
@@ -3238,21 +3266,21 @@ struct EFFECT_CONFIG {
  * colour channels
  * */
 
-  if((pCONT_solar->solar_position.elevation>-50)&&(pCONT_solar->solar_position.elevation<10))
+  if((sun_elevation>-50)&&(sun_elevation<10))
   {
     // HsbColor hsb = HsbColor(RgbColor(0));
-    // hsb.H = map(pCONT_solar->solar_position.elevation,-50,10,255,0)
+    // hsb.H = map(sun_elevation,-50,10,255,0)
 
-    uint8_t blue =  map(pCONT_solar->solar_position.elevation,-50,10,255,0);
+    uint8_t blue =  map(sun_elevation,-50,10,255,0);
 
     pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
 
-    // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)pCONT_solar->solar_position.elevation, elev_perc, cct_val);
+    // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
 
 
 
-    uint8_t brightness_255 = map(pCONT_solar->solar_position.elevation,-50,10,255,0);
+    uint8_t brightness_255 = map(sun_elevation,-50,10,255,0);
 
     pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
 
@@ -3261,19 +3289,19 @@ struct EFFECT_CONFIG {
 /**
  * WHITE CHANNEL
  * */
-  if((pCONT_solar->solar_position.elevation>-10)&&(pCONT_solar->solar_position.elevation<25))
+  if((sun_elevation>-10)&&(sun_elevation<25))
   {
 
 
     // Convert elevation into percentage
-    uint8_t elev_perc = map(pCONT_solar->solar_position.elevation,-10,25,0,100);
+    uint8_t elev_perc = map(sun_elevation,-10,25,0,100);
     // Convert percentage into cct
     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
     // Set the colour temp
     pCONT_iLight->rgbcct_controller.setCCT(cct_val);
 
 
-    uint8_t brightness_255 = map(pCONT_solar->solar_position.elevation,-10,25,0,255);
+    uint8_t brightness_255 = map(sun_elevation,-10,25,0,255);
 
     pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
 
@@ -3554,38 +3582,14 @@ pCONT_iLight->animation.palette.id = 10;
     // }break;
     // case EFFECTS_REGION_ANIMATE_ID: //shift along
       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-      this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01(param); });
+      this->setAnimFunctionCallback([this](const AnimationParam& param){ 
+        this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
       
   //     flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
   //     break;
   // }
 
 }
-
-void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01(const AnimationParam& param)
-{   
-  // Need to make rgbcct pixels possible in the future, with dynamic animation_state
-
-  //  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-  //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-  //       animation_colours[pixel].StartingColor,
-  //       animation_colours[pixel].DesiredColour,
-  //       param.progress);    
-  //   SetPixelColor(pixel, updatedColor);
-  // } // END for
-
-  
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
-    SetPixelColor(ii,output_colour);
-  }
-
-}
-
 
 
 
@@ -3619,8 +3623,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
   /**
    * Solar data to use, defined here for testing or simulations
    * */
-  double sun_elevation = pCONT_solar->solar_position.elevation;
-  // double sun_elevation = pCONT_solar->solar_position_testing.elevation;
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
   
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "sun_elevation=%d"), (int)sun_elevation);
 
@@ -3909,38 +3919,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
     // }break;
     // case EFFECTS_REGION_ANIMATE_ID: //shift along
       AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-      this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02(param); });
+      this->setAnimFunctionCallback([this](const AnimationParam& param){ 
+        this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
       
   //     flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
   //     break;
   // }
 
 }
-
-void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02(const AnimationParam& param)
-{   
-  // Need to make rgbcct pixels possible in the future, with dynamic animation_state
-
-  //  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-  //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-  //       animation_colours[pixel].StartingColor,
-  //       animation_colours[pixel].DesiredColour,
-  //       param.progress);    
-  //   SetPixelColor(pixel, updatedColor);
-  // } // END for
-
-  
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
-    SetPixelColor(ii,output_colour);
-  }
-
-}
-
 
 
 
@@ -3978,8 +3964,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
   /**
    * Solar data to use, defined here for testing or simulations
    * */
-  // double sun_elevation = pCONT_solar->solar_position.elevation;
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
   float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
 
   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
@@ -4354,7 +4346,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
 //     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct[%d]=\t%d\t%d\t%d,%d,%d,%d,%d"),desired_index,indexing,adjusted_index,c.R,c.G,c.B,c.WW,c.WC);
 //   }
 
-  delay(100);
+  // delay(100);
 
   
   pCONT_iLight->animation.flags.fForceUpdate = true;
@@ -4374,22 +4366,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
   animation_colours_rgbcct.StartingColor = GetPixelColor();
   
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-  this->setAnimFunctionCallback([this](const AnimationParam& param){ this->AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03(param); });
+  this->setAnimFunctionCallback([this](const AnimationParam& param){ 
+    this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
    
-}
-
-void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03(const AnimationParam& param)
-{   
-
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
-    SetPixelColor(ii,output_colour);
-  }
-
 }
 
 
@@ -4423,8 +4402,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
   /**
    * Solar data to use, defined here for testing or simulations
    * */
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
   float sun_elevation = (float)pCONT_solar->solar_position.elevation;
-  // float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #endif
+#endif
   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
   // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
 
@@ -4598,23 +4583,10 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
 
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
   this->setAnimFunctionCallback([this](const AnimationParam& param){
-      this->AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04(param); });
+      this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
    
 }
 
-void mAnimatorLight::AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04(const AnimationParam& param)
-{   
-
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
-    SetPixelColor(ii,output_colour);
-  }
-
-}
 
 
 
@@ -4639,8 +4611,15 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
   // Set up colours
   // Brightness is generated internally, and rgbcct solid palettes are output values
 
-  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
 
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
   if(sun_elevation < -20)
   {
     pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMax());      
@@ -4701,11 +4680,303 @@ void mAnimatorLight::AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(c
 
 
 
+/**************************************************************************************************************************************************************
+ * @brief  Solid_Colour_Based_On_Sun_Elevation_02
+ * @note   From -10 to noon, CCT will range from yellow to daywhite
+ * @note   From -5 to dusk, blue will go from 0 to max_brightness 
+ * 
+ * @note   Gloabl brightness will be manual, or controlled indirectly eg via mqtt
+ * 
+ * @note   Using RgbcctColour palette that is designed for each point in elevation
+ * *************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01()
+{
+ 
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
+
+  // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+
+  // Set palette pointer
+  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+  // Brightness is generated internally, and rgbcct solid palettes are output values
+  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
+
+  /**
+   * Solar data to use, defined here for testing or simulations
+   * */
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
+  bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;
+  // Serial.printf("\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
+
+  // delay(1000);
+
+  /**
+   * Sun elevation indexing is stored in palettes index location.
+   * The current sun elevation shall be searched against for nearest match, then depending on accesending or decending sun the nearest match and nearest next match will be linearblended as current show colour
+   * */
+
+  /**
+   * Get total pixels in palette
+   * */
+  mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(pCONT_iLight->animation.palette.id);
+  uint8_t pixels_max = mPaletteI->GetPixelsInMap(palette_p);
+  // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
+
+  // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
+  uint8_t zero_crossing_index = 0;
+
+  struct INDEXES_MATCHES{
+    uint8_t previous = 0; //ie colour moving away from
+    uint8_t next = 0; //colour moving towards
+  }index;
+
+  /**
+   * Steps to finding index
+   * 1) Find the zero-crossing index from the palette (ie the colour where its index is 0)
+   * 2) Decide if elevation is pos or neg, begin searching that part of the array
+   * 3) Find index of closest in array
+   * 4) Next and previous index will depend on direction of sun, and will be equal to current index if error is exactly 0
+   * */
+
+  /**
+   * Step X: Find zero crossing point
+   * Step X: Find all differences
+   * */
+  int16_t indexing = 0;  
+  uint8_t lower_boundary_index = 13;
+  float lower_boundary_value = 45;
+  uint8_t upper_boundary_index = 14;  
+  float upper_boundary_value = 90;
+  float sun_positions_from_palette_index[pixels_max];  
+  uint8_t searching_matched_index = 0;
+
+  /**
+   * Ascending method for finding right region between points
+   * Check all, but once sun_elev is greater, then thats the current region
+   * */
+  for(int i=0;i<pixels_max;i++)
+  {
+    mPaletteI->GetColourFromPalette(palette_p, i, &indexing);
+    sun_positions_from_palette_index[i] = indexing - 90;
+    // Serial.printf("sun_pos=[%02d]=\t%f\n\r", i, sun_positions_from_palette_index[i]);
+  }
+
+
+  for(int i=0;i<pixels_max;i++)
+  {
+    // Serial.printf("sun=%f > index[%d]=%f\n\r", sun_elevation, i, sun_positions_from_palette_index[i]);
+    if(sun_elevation >= sun_positions_from_palette_index[i])
+    {
+      
+      // searching_matched_index = i;
+      // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
+      //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
+      // );
+      //Serial.printf("Still less\n\r");
+
+    }else{
+      
+      searching_matched_index = i-1;
+      // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
+      //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
+      // );
+      // Serial.printf("searching_matched_index = %d\n\r", searching_matched_index);
+      break;
+
+    }
+
+    // Directly, manually, check the last memory space
+
+    if(sun_elevation == sun_positions_from_palette_index[pixels_max-1])
+    {
+      searching_matched_index = i-1;
+      // Serial.printf("sun=%f > index[%d]=%f   MATCH=%d\n\r", 
+      //   sun_elevation, i, sun_positions_from_palette_index[i], searching_matched_index
+      // );
+      break;
+
+    }
+
+
+
+
+  }
+
+  lower_boundary_index = searching_matched_index;
+  upper_boundary_index = searching_matched_index+1;
+
+  /**
+   * Check ranges are valid, if not, reset to 0 and 1
+   * */
+  if(lower_boundary_index>=pixels_max)
+  {
+    lower_boundary_index = 0;
+    Serial.printf("lower_boundary_index>=pixels_max\n\r");
+  }
+  if(upper_boundary_index>=pixels_max)
+  {
+    upper_boundary_index = pixels_max;
+    Serial.printf("upper_boundary_index>=pixels_max\n\r");
+  }
+
+  lower_boundary_value = sun_positions_from_palette_index[lower_boundary_index];
+  upper_boundary_value = sun_positions_from_palette_index[upper_boundary_index];
+
+
+  float numer = sun_elevation        - lower_boundary_value;
+  float denum = upper_boundary_value - lower_boundary_value;
+  float progress_between_colours = numer/denum;
+
+  Serial.printf("\n\r\n\r\n\rsun_elevation\t => %f\n\r", sun_elevation);
+  Serial.printf("lower_boundary_value[%02d]=%f\n\r", lower_boundary_index, lower_boundary_value);
+  Serial.printf("upper_boundary_value[%02d]=%f\n\r", upper_boundary_index, upper_boundary_value);
+  Serial.printf("numer=\t%f\n\r",numer);
+  Serial.printf("denum=\t%f\n\r",denum);
+  Serial.printf("progress_between_colours=\t%f\n\r",progress_between_colours);
+
+  /**
+   * Showing the colours
+   * 1) previous
+   * 2) next
+   * 3) linearblend of the exact new colour
+   * */
+
+  RgbcctColor c_lower = mPaletteI->GetColourFromPalette(palette_p, lower_boundary_index);
+  RgbcctColor c_upper = mPaletteI->GetColourFromPalette(palette_p, upper_boundary_index);
+
+  // Serial.printf("progress_between_colours\t %f(%d)/%f(%d) => %f\n\r", 
+  //   lower_boundary_value, lower_boundary_index, 
+  //   upper_boundary_value, upper_boundary_index, progress_between_colours);
+
+  RgbcctColor c_blended = RgbcctColor::LinearBlend(c_lower, c_upper, progress_between_colours);
+
+  RgbcctColor c = c_lower; 
+  // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_p\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+  c = c_blended; 
+  // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_b\t%d,%d,%d,%d,%d (progress %d"),c.R,c.G,c.B,c.WW,c.WC, (int)(progress_between_colours*100));
+  c = c_upper; 
+  // AddLog(LOG_LEVEL_INFO, PSTR("rgbcct_n\t%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WW,c.WC);
+
+  /**
+   * Load new colour into animation
+   * */
+
+  pCONT_iLight->animation.flags.fForceUpdate = true;
+
+  animation_colours_rgbcct.DesiredColour  = c_blended;
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
+  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+  { // If not already applied, do it using global values
+    animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
+      animation_colours_rgbcct.DesiredColour, 
+      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
+      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+    );
+  }
+
+  animation_colours_rgbcct.StartingColor = GetPixelColor();
+
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+  this->setAnimFunctionCallback([this](const AnimationParam& param){
+      this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
+   
+}
 
 
 
 
 
+
+
+
+/**************************************************************************************************************************************************************
+ * @brief  Solid_Colour_Based_On_Sun_Elevation_05
+ * 
+ * CCT_Mapped, day white to warm white around +-20, then >20 is max cct
+ * 
+ * *************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01()
+{
+ 
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05"));
+
+  pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+
+  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+  // Set up colours
+  // Brightness is generated internally, and rgbcct solid palettes are output values
+
+float sun_elevation = 0;
+#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  #else
+  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  #endif
+#endif
+
+  if(sun_elevation < -20)
+  {
+    pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMax());      
+  }else
+  if(sun_elevation > 20)
+  {
+    pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMin());      
+  }else{
+    // Convert elevation into percentage
+    uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
+    // Convert percentage into cct
+    uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMax(),pCONT_iLight->get_CTRangeMin());
+ 
+    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
+    // Set the colour temp
+    pCONT_iLight->rgbcct_controller.setCCT(cct_val);    
+  }
+
+  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
+  animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+  pCONT_iLight->animation.flags.fForceUpdate = true;
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
+  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+  { // If not already applied, do it using global values
+    animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
+      animation_colours_rgbcct.DesiredColour, 
+      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
+      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+    );
+  }
+
+  animation_colours_rgbcct.StartingColor = GetPixelColor();
+
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+  this->setAnimFunctionCallback([this](const AnimationParam& param){
+      this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
+   
+}
+
+
+
+
+
+
+
+
+
+// void SubTask_Flasher_Animate_Function_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01();
+// void         AnimUpdateMemberFunction_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01(const AnimationParam& param);
 
 
 

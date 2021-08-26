@@ -111,6 +111,9 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Gradient_SunLevel_Group01_07();
   init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_01();
   init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02();
+  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03();
+  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04();
+  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01();
 
   // DEBUG_LINE_HERE;
 }
@@ -641,6 +644,37 @@ void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID;
 }
 
+void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03(){
+  palettelist.ptr     = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;  
+  palettelist.ptr->id =     PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID;
+}
+
+void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04(){
+  palettelist.ptr     = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;  
+  palettelist.ptr->id =     PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_SOLID__RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID;
+}
+
+
+void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01(){
+  palettelist.ptr     = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;  
+  palettelist.ptr->id =     PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_SOLID__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_SOLID__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID;
+}
+
 
 
 
@@ -857,6 +891,9 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID:     return &palettelist.gradient_sunlevel_group01_07;
     case PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
     case PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02_ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
+    case PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03_ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;
+    case PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04_ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
+    case PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
     case PALETTELIST_STATIC_CUSTOM_USER_01_ID: return &palettelist.custom_user_01;
   }
 

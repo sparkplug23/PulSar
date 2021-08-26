@@ -113,7 +113,7 @@ void mSolarLunar::Update_Solar_Tracking_Data()
 	}else{
 		solar_position.direction.is_ascending = false;
 	}
-	solar_position.elevation = elevation_tmp;
+	solar_position.elevation = elevation_tmp+elevation_adjusted_for_debugging;
 
 
 	solar_position.isvalid = true;
@@ -287,6 +287,18 @@ void mSolarLunar::parse_JSONCommand(JsonParserObject obj)
 	// AddLog(LOG_LEVEL_INFO, PSTR("SolarElevation=%d %d"),(int)solar_position_testing.elevation,jtok.getInt() );
 	// delay(3000);
   }
+
+  if(jtok = obj["SolarElevationAdjusted"]){
+    elevation_adjusted_for_debugging = (double)jtok.getFloat();
+
+	Serial.printf("elevation_adjusted_for_debugging=%f\n\r",elevation_adjusted_for_debugging);
+
+	// AddLog(LOG_LEVEL_INFO, PSTR("SolarElevation=%d %d"),(int)solar_position_testing.elevation,jtok.getInt() );
+	// delay(3000);
+  }
+
+
+  
   
 
 }
@@ -300,6 +312,7 @@ uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_level){
 		JBI->Add("Az",(float)solar_position.azimuth);
 		JBI->Add("El",(float)solar_position.elevation);
 		JBI->Add("age",millis()-solar_position.tUpdated_millis);
+		JBI->Add("elevation_adjusted_for_debugging", elevation_adjusted_for_debugging);
 	}
 
   return JsonBuilderI->End();

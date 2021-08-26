@@ -330,10 +330,7 @@ const char* state_ctr(void);
         handler_ptr->flags.SendNow = false;
         handler_ptr->tSavedLastSent = millis();    
 
-        
-
-  // Serial.printf("mqtthandler_sensor_ifchanged=%d\n\r",mqtthandler_list_ptr[1]->tRateSecs);
-        
+        // Serial.printf("mqtthandler_sensor_ifchanged=%d\n\r",mqtthandler_list_ptr[1]->tRateSecs);
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);
@@ -355,74 +352,6 @@ const char* state_ctr(void);
       }
 
     };
-
-
-    // // Functions to call the ConstructJson held within telemetry for the system.
-    // uint8_t ConstructJSON_Health(uint8_t json_level);
-    // uint8_t ConstructJSON_Settings(uint8_t json_level);
-    // uint8_t ConstructJSON_Firmware(uint8_t json_level);
-    // uint8_t ConstructJSON_Log(uint8_t json_level);
-    // uint8_t ConstructJSON_Memory(uint8_t json_level);
-    // uint8_t ConstructJSON_Network(uint8_t json_level);
-    // uint8_t ConstructJSON_Time(uint8_t json_level);
-    // uint8_t ConstructJSON_Reboot(uint8_t json_level);
-    // uint8_t ConstructJSON_Reboot_Event(uint8_t json_level);
-    // uint8_t ConstructJSON_MQTT(uint8_t json_level);
-    // uint8_t ConstructJSON_Devices(uint8_t json_level);
-    // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    //   uint8_t ConstructJSON_Debug_Pins(uint8_t json_level);
-    //   uint8_t ConstructJSON_Debug_Template(uint8_t json_level);
-    //   uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_level);
-    //   uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
-    // #endif
-
-    // //use new syntax
-    // enum STATUS_SYSTEM_IDS{
-    //   MQTT_HANDLER_SYSTEM_ALL_ID = 0,
-    //   MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
-    //   MQTT_HANDLER_SYSTEM_SETTINGS_ID,
-    //   MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
-    //   MQTT_HANDLER_SYSTEM_LOG_ID,
-    //   MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
-    //   MQTT_HANDLER_SYSTEM_MEMORY_ID,
-    //   MQTT_HANDLER_SYSTEM_NETWORK_ID,
-    //   MQTT_HANDLER_SYSTEM_MQTT_ID,
-    //   MQTT_HANDLER_SYSTEM_TIME_ID,
-    //   MQTT_HANDLER_SYSTEM_DEVICES_ID,
-    //   MQTT_HANDLER_SYSTEM_REBOOT_ID,
-    //   MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
-    //   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    //     MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
-    //     MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
-    //     MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
-    //     MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
-    //   #endif
-    //   MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
-    // };
-
-    // void MQTTHandler_Init();
-    // void MQTTHandler_Set_fSendNow();
-    // void MQQTHandler_System_Sender(uint8_t 
-    //status_id = 
-    //MQTT_HANDLER_SYSTEM_ALL_ID);
-
-    // handler<mMQTT> mqtthandler_health;
-    // handler<mMQTT> mqtthandler_settings;
-    // handler<mMQTT> mqtthandler_log;
-    // handler<mMQTT> mqtthandler_firmware;
-    // handler<mMQTT> mqtthandler_memory;
-    // handler<mMQTT> mqtthandler_network;
-    // handler<mMQTT> mqtthandler_mqtt;
-    // handler<mMQTT> mqtthandler_time;
-    // handler<mMQTT> mqtthandler_devices;
-    // handler<mMQTT> mqtthandler_reboot;
-    // handler<mMQTT> mqtthandler_reboot_event;
-    // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    //   handler<mMQTT> mqtthandler_debug_pins;
-    //   handler<mMQTT> mqtthandler_debug_template;
-    //   handler<mMQTT> mqtthandler_debug_moduleinterface;
-    //   handler<mMQTT> mqtthandler_debug_minimal;
-    // #endif
 
 };
 #endif
