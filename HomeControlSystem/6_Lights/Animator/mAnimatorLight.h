@@ -829,7 +829,8 @@ void AnimUpdateMemberFunction_SunPositions_Solid_Colour_Based_On_Sun_Elevation_0
 /**
  * inline animation header includes
  * */
-#include "6_Lights/Animator/EffectsHACS/Effect_Sunlights/Animator.h"
+#include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01/Animator.h"
+#include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_Controlled_CCT_Temperature_01/Animator.h"
 
 void SubTask_Flasher_Animate_Function_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01();
 void         AnimUpdateMemberFunction_SunPositions_Dual_Colour_Based_On_Sun_Elevation_Ambilight_01(const AnimationParam& param);
@@ -843,7 +844,6 @@ void SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette
 
 
 
-void SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
 
 
 void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
