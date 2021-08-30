@@ -23,6 +23,24 @@
 // NMEA is the primary parser, gpsfix holds the saved data
 
 
+/**
+ * Move all "internal" ubx into its own library??
+ * 
+ * 
+ * 
+#include "1_TaskerManager/mTaskerManager.h"
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
+
+ * */
+
+// #include "1_TaskerManager/mTaskerManager.h"
+
+// #ifdef USE_MODULE_DRIVERS_GPS
+
+
 #define PGM_P const char *
 typedef PGM_P str_P;
 #define __PROGMEM PROGMEM
@@ -1049,3 +1067,5 @@ public:
 
 
 // **/
+
+// #endif 

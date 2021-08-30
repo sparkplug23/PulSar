@@ -16,36 +16,6 @@
 #ifndef LEDPIN
 #define LEDPIN 3  //strip pin. Any for ESP32, gpio2 or 3 is recommended for ESP8266 (gpio2/3 are labeled D4/RX on NodeMCU and Wemos)
 #endif
-//#define USE_APA102  // Uncomment for using APA102 LEDs.
-//#define USE_WS2801  // Uncomment for using WS2801 LEDs (make sure you have NeoPixelBus v2.5.6 or newer)
-//#define USE_LPD8806 // Uncomment for using LPD8806
-//#define USE_TM1814  // Uncomment for using TM1814 LEDs (make sure you have NeoPixelBus v2.5.7 or newer)
-//#define USE_P9813   // Uncomment for using P9813 LEDs (make sure you have NeoPixelBus v2.5.8 or newer)
-//#define WLED_USE_ANALOG_LEDS //Uncomment for using "dumb" PWM controlled LEDs (see pins below, default R: gpio5, G: 12, B: 15, W: 13)
-//#define WLED_USE_H801 //H801 controller. Please uncomment #define WLED_USE_ANALOG_LEDS as well
-//#define WLED_USE_5CH_LEDS  //5 Channel H801 for cold and warm white
-//#define WLED_USE_BWLT11
-//#define WLED_USE_SHOJO_PCB
-
-// #ifndef BTNPIN
-// #define BTNPIN  0  //button pin. Needs to have pullup (gpio0 recommended)
-// #endif
-
-// #ifndef IR_PIN
-// #define IR_PIN  4  //infrared pin (-1 to disable)  MagicHome: 4, H801 Wifi: 0
-// #endif
-
-// #ifndef RLYPIN
-// #define RLYPIN 12  //pin for relay, will be set HIGH if LEDs are on (-1 to disable). Also usable for standby leds, triggers,...
-// #endif
-
-// #ifndef AUXPIN
-// #define AUXPIN -1  //debug auxiliary output pin (-1 to disable)
-// #endif
-
-// #ifndef RLYMDE
-// #define RLYMDE  1  //mode for relay, 0: LOW if LEDs are on 1: HIGH if LEDs are on
-// #endif
 
 //END CONFIGURATION
 
@@ -55,49 +25,6 @@
  #if BTNPIN == CLKPIN || BTNPIN == DATAPIN
   #undef BTNPIN   // Deactivate button pin if it conflicts with one of the APA102 pins.
  #endif
-#endif
-
-#ifdef WLED_USE_ANALOG_LEDS
-  //PWM pins - PINs 15,13,12,14 (W2 = 04)are used with H801 Wifi LED Controller
-  #ifdef WLED_USE_H801
-    #define RPIN 15   //R pin for analog LED strip   
-    #define GPIN 13   //G pin for analog LED strip
-    #define BPIN 12   //B pin for analog LED strip
-    #define WPIN 14   //W pin for analog LED strip 
-    #define W2PIN 04  //W2 pin for analog LED strip
-    #undef BTNPIN
-    #undef IR_PIN
-    #define IR_PIN  0 //infrared pin (-1 to disable)  MagicHome: 4, H801 Wifi: 0
-  #elif defined(WLED_USE_BWLT11)
-  //PWM pins - to use with BW-LT11
-    #define RPIN 12  //R pin for analog LED strip
-    #define GPIN 4   //G pin for analog LED strip
-    #define BPIN 14  //B pin for analog LED strip
-    #define WPIN 5   //W pin for analog LED strip
-  #elif defined(WLED_USE_SHOJO_PCB)
-  //PWM pins - to use with Shojo PCB (https://www.bastelbunker.de/esp-rgbww-wifi-led-controller-vbs-edition/)
-    #define RPIN 14  //R pin for analog LED strip
-    #define GPIN 4   //G pin for analog LED strip
-    #define BPIN 5   //B pin for analog LED strip
-    #define WPIN 15  //W pin for analog LED strip
-    #define W2PIN 12 //W2 pin for analog LED strip
-  #elif defined(WLED_USE_PLJAKOBS_PCB)
-  // PWM pins - to use with esp_rgbww_controller from patrickjahns/pljakobs (https://github.com/pljakobs/esp_rgbww_controller)
-    #define RPIN 12  //R pin for analog LED strip
-    #define GPIN 13  //G pin for analog LED strip
-    #define BPIN 14  //B pin for analog LED strip
-    #define WPIN 4   //W pin for analog LED strip
-    #define W2PIN 5  //W2 pin for analog LED strip
-    #undef IR_PIN
-  #else
-  //PWM pins - PINs 5,12,13,15 are used with Magic Home LED Controller
-    #define RPIN 5   //R pin for analog LED strip
-    #define GPIN 12  //G pin for analog LED strip
-    #define BPIN 15  //B pin for analog LED strip
-    #define WPIN 13  //W pin for analog LED strip
-  #endif
-  #undef RLYPIN
-  #define RLYPIN -1 //disable as pin 12 is used by analog LEDs
 #endif
 
 //automatically uses the right driver method for each platform
@@ -137,27 +64,8 @@
  #endif
 #endif
 
-
-//you can now change the color order in the web settings
-#ifdef USE_APA102
- #define PIXELFEATURE3 DotStarBgrFeature
- #define PIXELFEATURE4 DotStarLbgrFeature
-#elif defined(USE_LPD8806)
- #define PIXELFEATURE3 Lpd8806GrbFeature 
-#elif defined(USE_WS2801)
- #define PIXELFEATURE3 NeoRbgFeature
- #define PIXELFEATURE4 NeoRbgFeature
-#elif defined(USE_TM1814)
-  #define PIXELFEATURE3 NeoWrgbTm1814Feature
-  #define PIXELFEATURE4 NeoWrgbTm1814Feature
-#elif defined(USE_P9813)
- #define PIXELFEATURE3 P9813BgrFeature 
- #define PIXELFEATURE4 NeoGrbwFeature   
-#else
- #define PIXELFEATURE3 NeoGrbFeature
- #define PIXELFEATURE4 NeoGrbwFeature
-#endif
-
+#define PIXELFEATURE3 NeoGrbFeature
+#define PIXELFEATURE4 NeoGrbwFeature
 
 #include <NeoPixelBrightnessBus.h>
 
@@ -174,10 +82,10 @@ class NeoPixelWrapper
 public:
   NeoPixelWrapper() :
     // initialize each member to null
-#ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+    #ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
     _pGrb(NULL),
     _pGrbw(NULL),
-#endif// ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+    #endif// ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
     _type(NeoPixelType_None)
   {
 
@@ -193,7 +101,7 @@ public:
     cleanup();
     _type = type;
 
-#ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+    #ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
     switch (_type)
     {
       case NeoPixelType_Grb:
@@ -214,73 +122,9 @@ public:
         _pGrbw->Begin();
       break;
     }
-#endif// ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+    #endif// ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
 
-    #ifdef WLED_USE_ANALOG_LEDS 
-      #ifdef ARDUINO_ARCH_ESP32
-        ledcSetup(0, 5000, 8);
-        ledcAttachPin(RPIN, 0);
-        ledcSetup(1, 5000, 8);
-        ledcAttachPin(GPIN, 1);
-        ledcSetup(2, 5000, 8);        
-        ledcAttachPin(BPIN, 2);
-        if(_type == NeoPixelType_Grbw) 
-        {
-          ledcSetup(3, 5000, 8);        
-          ledcAttachPin(WPIN, 3);
-          #ifdef WLED_USE_5CH_LEDS
-            ledcSetup(4, 5000, 8);        
-            ledcAttachPin(W2PIN, 4);
-          #endif
-        }
-      #else  // ESP8266
-        //init PWM pins
-        pinMode(RPIN, OUTPUT);
-        pinMode(GPIN, OUTPUT);
-        pinMode(BPIN, OUTPUT); 
-        if(_type == NeoPixelType_Grbw) 
-        {
-          pinMode(WPIN, OUTPUT); 
-          #ifdef WLED_USE_5CH_LEDS
-            pinMode(W2PIN, OUTPUT);
-          #endif
-        }
-        analogWriteRange(255);  //same range as one RGB channel
-        analogWriteFreq(880);   //PWM frequency proven as good for LEDs
-      #endif 
-    #endif
   }
-
-#ifdef WLED_USE_ANALOG_LEDS      
-    void SetRgbwPwm(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t w2=0)
-    {
-      #ifdef ARDUINO_ARCH_ESP32
-        ledcWrite(0, r);
-        ledcWrite(1, g);
-        ledcWrite(2, b);
-        switch (_type) {
-          case NeoPixelType_Grb:                                                  break;
-          #ifdef WLED_USE_5CH_LEDS
-            case NeoPixelType_Grbw: ledcWrite(3, w); ledcWrite(4, w2);            break;
-          #else
-            case NeoPixelType_Grbw: ledcWrite(3, w);                              break;
-          #endif
-        }        
-      #else   // ESP8266
-        analogWrite(RPIN, r);
-        analogWrite(GPIN, g);
-        analogWrite(BPIN, b);
-        switch (_type) {
-          case NeoPixelType_Grb:                                                  break;
-          #ifdef WLED_USE_5CH_LEDS
-            case NeoPixelType_Grbw: analogWrite(WPIN, w); analogWrite(W2PIN, w2); break;
-          #else
-            case NeoPixelType_Grbw: analogWrite(WPIN, w);                         break;
-          #endif
-        }
-      #endif 
-    }
-#endif
 
   void Show()
   {
@@ -347,8 +191,8 @@ public:
       case NeoPixelType_Grbw: return _pGrbw->Pixels(); break;
     }
     return 0;
-    
 #endif // ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+
   }
 
 
@@ -358,8 +202,7 @@ private:
 #ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
   // have a member for every possible type
   NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>*  _pGrb;
-  NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>* _pGrbw;
-  
+  NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>* _pGrbw;  
 #endif // ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
 
   void cleanup()
@@ -368,9 +211,9 @@ private:
       
 #ifndef ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
       case NeoPixelType_Grb:  delete _pGrb ; _pGrb  = NULL; break;
-      case NeoPixelType_Grbw: delete _pGrbw; _pGrbw = NULL; break;
-      
+      case NeoPixelType_Grbw: delete _pGrbw; _pGrbw = NULL; break;      
 #endif // ENABLE_DEVFEATURE_PHASEOUT_NEO_WRAPPER
+
     }
   }
 };

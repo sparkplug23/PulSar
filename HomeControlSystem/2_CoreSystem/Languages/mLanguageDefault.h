@@ -157,6 +157,11 @@
 #define D_MODULE_LIGHTS_WLED_EFFECTS_FRIENDLY_CTR "wled_effects"
 #define D_MODULE_LIGHTS_WLED_EFFECTS_CTR "wled_effects"
 
+#define D_MODULE_LIGHTS_WLED_FRIENDLY_CTR "wled_effects"
+#define D_MODULE_LIGHTS_WLED_CTR "wled_effects"
+
+
+
 
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
   #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "light"

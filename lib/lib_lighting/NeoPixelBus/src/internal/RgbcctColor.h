@@ -49,6 +49,8 @@ struct HsbColor;
 // ------------------------------------------------------------------------
 struct RgbcctColor
 {
+    typedef NeoRgbcctCurrentSettings SettingsObject;
+
     // ------------------------------------------------------------------------
     // Construct a RgbcctColor using R, G, B, W values (0-255)
     // ------------------------------------------------------------------------

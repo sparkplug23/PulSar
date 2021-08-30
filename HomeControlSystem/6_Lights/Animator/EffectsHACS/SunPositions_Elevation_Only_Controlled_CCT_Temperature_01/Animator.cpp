@@ -1,6 +1,9 @@
 #include "../../mAnimatorLight.h"
 
 
+#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+
+
 /**************************************************************************************************************************************************************
  * @brief  Solid_Colour_Based_On_Sun_Elevation_05
  * 
@@ -65,9 +68,10 @@ float sun_elevation = 0;
 
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
   this->setAnimFunctionCallback([this](const AnimationParam& param){
-      this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
+      this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
    
 }
 
 
 
+#endif

@@ -13,7 +13,7 @@ void mAnimatorLight::SubTask_Manual_SetPixel(){
   //  pCONT_iLight->animation.transition.rate_ms = 1000;
   //  pCONT_iLight->animation.transition.time_ms.val = 0;
 
-  // SubTask_Flasher_Animate_Function_Slow_Glow();
+  // SubTask_Flasher_Animate_Function__Slow_Glow();
 
   // //run function once
 

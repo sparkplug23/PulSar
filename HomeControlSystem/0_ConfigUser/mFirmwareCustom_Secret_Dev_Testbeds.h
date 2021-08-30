@@ -27,6 +27,7 @@
  * */
 // #define DEVICE_TESTBED_MOTION
 // #define DEVICE_TESTBED_RGBCLOCK
+#define DEVICE_RGBSTRING_ANIMATOR_01
 
 
 // #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
@@ -802,6 +803,83 @@
   "}";
 
 #endif
+
+
+#ifdef DEVICE_RGBSTRING_ANIMATOR_01
+  #define DEVICENAME_CTR          "testbed_string_animator_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  // HACS
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // WLED
+  #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
+
+  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  
+  #define ENABLE_BOOT_OVERRIDE_INIT
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+ #define STRIP_SIZE_MAX 50
+ #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
+    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      // "\"Function\":\"FirePlace01\"" //slow glow
+      "\"Function\":\"Static Glow\"" //slow glow
+    "},"
+    // "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
+    // "\"TimeMs\":500,"
+    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":5000,"
+      "\"" D_JSON_RATE_MS "\":5001,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"ColourPalette\":\"Christmas Pifco MiniBells\"," //c12    43 is the colours for this christmas
+    // "\"ColourPalette\":\"Single Fire 01\"," //c12    43 is the colours for this christmas
+    // "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
+    "\"BrightnessRGB\":100"
+  "}";
+  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
+  #define STRIP_SIZE_MAX                      50   
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" "bedroom" "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

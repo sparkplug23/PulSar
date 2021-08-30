@@ -593,6 +593,10 @@ void setup(void)
   #endif
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
+  // For debugging, allow method to override init/loaded values
+  #ifdef ENABLE_BOOT_OVERRIDE_INIT
+  pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
+  #endif
   // Used to show progress of boot in logs
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 

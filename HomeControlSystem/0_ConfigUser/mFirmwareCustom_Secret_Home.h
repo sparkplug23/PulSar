@@ -160,7 +160,7 @@ Bathroom
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_BEDROOMBLINDS
-#define DEVICE_RGBNOTIFICATION_01
+// #define DEVICE_RGBNOTIFICATION_01
 
 
 /**************************************************************************************************************************************************
@@ -1200,8 +1200,10 @@ Bathroom
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BME
 
+  #define USE_MODULE_CORE_RULES
 
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "DriveFront"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "LivingRoom"
@@ -1231,8 +1233,8 @@ Bathroom
       "\"D3\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_2_INV_CTR     "\"" //END
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1248,6 +1250,10 @@ Bathroom
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         // "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\","
@@ -1256,25 +1262,62 @@ Bathroom
     "}"
   "}";
 
+  /**
+   * Add new function, if we try to access sensor name and none exists, then return the classname + number (which will be reading its internal sensor count)
+   */
+
+  
+  /**
+   * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+   * 
+   * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
+
 #endif
 
 #ifdef DEVICE_RGBFIREPLACE
   #define DEVICENAME_CTR          "rgbfireplace"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
 
-  #define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-
-  #define ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
+  #define ENABLE_PIXEL_FUNCTION_EFFECTS
   
-//   #define USE_MODULE_SENSORS_ANALOG
-// Use light sensor to tweak brightness?
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1285,10 +1328,8 @@ Bathroom
     "},"
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
   
   #define STRIP_SIZE_MAX 300//256 + ~50
-  // #define STRIP_REPEAT_OUTPUT_MAX 256
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1300,7 +1341,7 @@ Bathroom
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":400,"
+      "\"" D_JSON_TIME_MS "\":30,"
       "\"" D_JSON_RATE_MS "\":100,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
@@ -1309,6 +1350,7 @@ Bathroom
     "\"" D_JSON_EFFECTS "\":{" 
       "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
     "},"
+    "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
     "\"ColourPalette\":\"Single Fire 01\","
     "\"BrightnessRGB\":100"
   "}";
@@ -3129,6 +3171,9 @@ Bathroom
 
   #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
+  #define ENABLE_BOOT_OVERRIDE_INIT
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -3141,6 +3186,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
+ #define STRIP_SIZE_MAX 12
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -3153,14 +3199,14 @@ Bathroom
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grbw\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
+      "\"Function\":\"Slow Glow\"" //slow glow
     "},"
     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
     "\"TimeMs\":500,"
     "\"ColourPalette\":43," //c12    43 is the colours for this christmas
     "\"BrightnessRGB\":0"
   "}";
-  #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
+  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
   #define STRIP_SIZE_MAX                      50   
 
   #define USE_FUNCTION_TEMPLATE

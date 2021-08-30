@@ -326,7 +326,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_LIGHTS_PWM_ID] = new mPWMLight();
   #endif
   #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-    pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new X();
+    pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new mWLEDEffects();
   #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE

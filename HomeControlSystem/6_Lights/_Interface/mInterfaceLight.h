@@ -441,10 +441,13 @@ class mInterfaceLight :
 
         uint16_t Limit_Upper_Brightness_With_BrightnessRGB : 1;
 
-        uint8_t use_gamma_for_brightness : 1;
+        uint16_t use_gamma_for_brightness : 1;
+
+        uint16_t animator_first_run : 1;
+
 
         // Reserved
-        uint16_t reserved : 4;
+        uint16_t reserved : 3;
       };
     } ANIMATION_FLAGS;
 
@@ -506,6 +509,7 @@ class mInterfaceLight :
       uint8_t options; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
       uint8_t grouping;
       uint8_t spacing;
+      uint8_t debug_mqtt_response_available = 0;
       void setOption(uint8_t n, bool val)
       {
         if (val) {
@@ -558,6 +562,9 @@ class mInterfaceLight :
 
     bool flag_test= false;
     uint16_t    pwm_test = 0;
+
+
+    uint8_t debug_mqtt_response_available_but_not_yet_set = false;
 
     // segment _segments[MAX_NUM_SEGMENTS];
     //  = { // SRAM footprint: 24 bytes per element

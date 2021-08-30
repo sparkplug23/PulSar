@@ -1,3 +1,4 @@
+
 #include "mInterfaceLight.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
@@ -1269,8 +1270,10 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
   #endif
   
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 //temp feedback
 pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
+#endif // USE_MODULE_LIGHTS_ANIMATOR
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette.id);

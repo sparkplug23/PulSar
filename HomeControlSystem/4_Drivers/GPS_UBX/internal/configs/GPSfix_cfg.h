@@ -1,6 +1,11 @@
 #ifndef GPS_FIX_CFG
 #define GPS_FIX_CFG
 
+// #include "1_TaskerManager/mTaskerManager.h"
+
+// #ifdef USE_MODULE_DRIVERS_GPS
+
+
 //  Copyright (C) 2014-2017, SlashDevin
 //
 //  This file is part of NeoGPS
@@ -54,3 +59,5 @@
 #define GPS_FIX_GEOID_HEIGHT
 
 #endif
+
+// #endif

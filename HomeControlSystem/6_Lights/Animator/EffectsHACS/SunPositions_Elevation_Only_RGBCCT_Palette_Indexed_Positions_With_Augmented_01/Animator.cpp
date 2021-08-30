@@ -1,4 +1,10 @@
+
 #include "../../mAnimatorLight.h"
+
+
+#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+
+
 
 /**************************************************************************************************************************************************************
  * @brief  Solid_Colour_Based_On_Sun_Elevation_02
@@ -14,8 +20,30 @@
 
 void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01()
 {
- 
-  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
+
+   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
+
+   /**
+    * Setting that an mqtt debug exists
+    * */
+   pCONT_iLight->animation.debug_mqtt_response_available = 1;
+
+  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  if(pCONT_iLight->animation.debug_mqtt_response_available && pCONT_iLight->animation.flags.animator_first_run)
+  {
+    this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
+      [this](void){
+        this->ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+      }
+    );
+  //   AddLog(LOG_LEVEL_INFO, PSTR("ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01 FIRST RUN"));
+  //   delay(5000);
+  // }else{
+  //   AddLog(LOG_LEVEL_INFO, PSTR("NOT SETTING"));
+
+  }
+  #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  // delay(5000);
 
   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
@@ -219,10 +247,31 @@ float sun_elevation = 0;
 
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
   this->setAnimFunctionCallback([this](const AnimationParam& param){
-      this->AnimUpdateMemberFunction_Generic_RGBCCT_Single_Colour_All(param); });
+      this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
+
+  pCONT_iLight->animation.flags.animator_first_run = false; // process completed, so lets not redo things above
    
 }
 
 
 
+void mAnimatorLight::ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01()
+{   
+// Serial.println("AnimationProcess_Generic_AnimationColour_LinearBlend");
+  // for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+  //   RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+  //       animation_colours[pixel].StartingColor,
+  //       animation_colours[pixel].DesiredColour,
+  //       param.progress);    
+  //   SetPixelColor(pixel, updatedColor);
+  // } // END for
 
+  // DEBUG_LINE_HERE;
+
+  JBI->Add("test2","debug2");
+
+    // SetPixelColor(0, RgbColor(0,random(0,255),0));
+}
+
+
+#endif

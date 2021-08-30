@@ -23,6 +23,11 @@ enum XsnsFunctions {
   
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
 
+  /**
+   * Flags that are used in debugging, that will override any stored or default init states. This will be optionally called at the end of setup.
+   * */
+  FUNC_OVERRIDE_BOOT_INIT,
+
   // This will run AFTER json templates
   FUNC_POST_INIT,    // similar to FUNC_CONFIGURE_MODULES_FOR_DEVICE, will run immediately after init
 

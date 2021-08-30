@@ -60,3 +60,22 @@ public:
     uint16_t BlueTenthMilliAmpere;  // in 1/10th ma
     uint16_t WhiteCurrent; // in 1/10th ma
 };
+
+class NeoRgbcctCurrentSettings
+{
+public:
+    NeoRgbcctCurrentSettings(uint16_t red, uint16_t green, uint16_t blue, uint16_t warm_white, uint16_t cold_white) :
+        RedTenthMilliAmpere(red),
+        GreenTenthMilliAmpere(green),
+        BlueTenthMilliAmpere(blue),
+        WarmWhiteCurrent(warm_white),
+        ColdWhiteCurrent(cold_white)
+    {
+    }
+
+    uint16_t RedTenthMilliAmpere;   // in 1/10th ma
+    uint16_t GreenTenthMilliAmpere; // in 1/10th ma
+    uint16_t BlueTenthMilliAmpere;  // in 1/10th ma
+    uint16_t WarmWhiteCurrent; // in 1/10th ma
+    uint16_t ColdWhiteCurrent; // in 1/10th ma
+};

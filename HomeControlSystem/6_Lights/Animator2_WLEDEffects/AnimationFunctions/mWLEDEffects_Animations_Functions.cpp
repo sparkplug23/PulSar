@@ -1,4 +1,4 @@
-#include "mWLEDEffects.h"
+#include "../mWLEDEffects.h"
 
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS 
 

@@ -1,0 +1,3 @@
+#pragma once
+
+  void SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();

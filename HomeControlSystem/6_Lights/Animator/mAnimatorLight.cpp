@@ -2,156 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
-const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************TASKER**************************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-// using namespace std;  
-// int addF(int x , int y)  
-// {  
-//     return x+y;  
-// }  
-
-// void addF2(void)  
-// {  
-//     return;  
-// }  
-
-
-int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj){ 
-
-  int8_t function_result = 0;
-
-  #ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
-  Tasker_Override_Forcing_Variables_Testing();
-  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
-
-  /************
-   * INIT SECTION * 
-  *******************/
-  switch(function){
-    case FUNC_PRE_INIT:
-      Pre_Init();  
-      break;
-    case FUNC_INIT:
-      init();
-      break;
-  }
-  
-  if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
-  
-  switch(function){
-    /************
-     * SETTINGS SECTION * 
-    *******************/
-    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-      // Settings_Load();
-    break;
-    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-      Settings_Save();
-    break;
-    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-      Settings_Default();
-    break;
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_EVERY_SECOND:{
-      //EverySecond();
-      //Settings_Default();
-      // pCONT_iLight->ShowInterface();
-
-      // setFunction_Debug_Animation_Progress_Callback()
-
-      this->setFunction_Debug_Animation_Progress_Callback(
-        [this](void){
-          this->ConstructJSONBody_Animation_Progress__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-        }
-      );
-
-      mqtthandler_debug_animations_progress.flags.SendNow = true;
-
-
-//  int (*funcptr)(int,int);  // Declaration of function pointer
-//       // void (*funcptr)(void);
-//       funcptr = addF;
-//       int sum=funcptr(7,10);  
-
-//  void (*funcptr2)(void);  // Declaration of function pointer
-//       // void (*funcptr)(void);
-//       funcptr2 = addF2;
-//       funcptr2;  
-//       // std::cout << "Sum=" <<sum<< std::endl;  
-
-
-      // #ifdef USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
-      //   char result[100];
-      //   pCONT_sup->GetTextIndexed_P(result, sizeof(result), mixer.running_id, PM_OUTSIDE_TREE_MIXER_DESCRIPTION);  // should this be _P?
-      //   AddLog(LOG_LEVEL_INFO, PSTR("Mixer routine \"%s\""), result);          
-      // #endif // USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
-
-      #ifdef ENABLE_DEVFEATURE_DEBUG_GET_PIXEL_ZERO
-      RgbTypeColor col = stripbus->GetPixelColor(0);
-
-        AddLog(LOG_LEVEL_TEST, PSTR("getpixel[0] = %d,%d,%d"),col.R,col.G,col.B);
-
-
-      #endif
-
-    }break;
-    case FUNC_EVERY_MINUTE:
-
-      // pCONT_iLight->animation.flags.use_gamma_for_brightness ^= 1;
-
-    break;
-    case FUNC_LOOP: 
-      EveryLoop();
-    break;    
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
-    // Other stuff
-    case FUNC_STATUS_MESSAGE_APPEND:
-      Append_Hardware_Status_Message();
-    break;
-  }// switch(command)
-
-  /************
-   * WEBPAGE SECTION * 
-  *******************/  
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-
-} // END FUNCTION
-
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -218,10 +68,10 @@ pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
   flashersettings.brightness_max = 255;
   flashersettings.brightness_min = 0;
 
-#ifdef ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
-  pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true; // FIX
-  pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = true;
-#endif // ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
+// #ifdef ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET // move to proper command options
+//   // pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true; // FIX
+//   pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = true;
+// #endif // ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
 
 
   pixel_group.flags.fEnabled = false;
@@ -514,6 +364,71 @@ void mAnimatorLight::init_flasher_settings(){
 
 
 
+// simple blend function
+void mAnimatorLight::BlendAnimUpdate(const AnimationParam& param)
+{    
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);
+    SetPixelColor(pixel, updatedColor);
+  } // END for
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void mAnimatorLight::AnimationProcess_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param)
+{   
+
+  RgbcctColor output_colour = RgbcctColor::LinearBlend(
+    animation_colours_rgbcct.StartingColor,
+    animation_colours_rgbcct.DesiredColour,
+    param.progress);
+
+  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
+    SetPixelColor(ii,output_colour);
+  }
+
+}
+
+
+void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend(const AnimationParam& param)
+{    
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++)
+  {
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);    
+    SetPixelColor(pixel, updatedColor);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void mAnimatorLight::SubTask_Flasher_Main(){
@@ -546,162 +461,129 @@ void mAnimatorLight::SubTask_Flasher_Animate(){
   SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
 
 
-  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms))||(pCONT_iLight->animation.flags.fForceUpdate)){
-
-    // #ifdef ENABLE_DEVFEATURE_FLICKERING_TEST2
-    // if(pCONT_iLight->animator_controller->IsAnimating()){
-    //   AddLog(LOG_LEVEL_TEST, PSTR("Blocking new animation"));
-    //   return;
-    // }else{
-      // flashersettings.tSaved.Update = millis();
-    // }
-    // #endif // ENABLE_DEVFEATURE_FLICKERING_TEST2
+  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms))||(pCONT_iLight->animation.flags.fForceUpdate))
+  {
 
     if(pCONT_iLight->animation.flags.fForceUpdate){ pCONT_iLight->animation.flags.fForceUpdate=false;
       flashersettings.tSaved.Update = millis();
     }
-
 
     // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
     // char buffer[100];
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
     //#endif
-// #ifdef DEVICE_RGBFIREPLACE_TESTER
-//     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// #endif
+    // #ifdef DEVICE_RGBFIREPLACE_TESTER
+    //     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+    // #endif
 
     switch(flashersettings.function){
       default:
-      case EFFECTS_FUNCTION_SLOW_GLOW_ID:
-        SubTask_Flasher_Animate_Function_Slow_Glow();
+      case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
+        SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour();
       break;
-       case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
-         SubTask_Flasher_Animate_Function_SOLID_COLOUR();
-       break;
-       case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
-         SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-       break;
-       case EFFECTS_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID:
-         SubTask_Flasher_Animate_Function_Slow_Glow_Partial_Palette_Step_Through();
-       break;
-       case EFFECTS_FUNCTION_SEQUENTIAL_ID:
-         SubTask_Flasher_Animate_Function_Sequential();
-       break;
-       case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
-         SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-       break;
-       case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
-         SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-       break;
-       case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
-         SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-       break;
-       case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
-         SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-       break;
-       case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
-         SubTask_Flasher_Animate_Function_Fade_Gradient();
-       break;
-       case EFFECTS_FUNCTION_TESTER_ID:
-         SubTask_Flasher_Animate_Function_Tester();
-       break; 
-       case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
-         SubTask_Flasher_Animate_Function_Pulse_Random_On();
-       break;
-       case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
-         SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-       break;
-       case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
-         SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-       break;
-       case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-         SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-       break;
-       case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-         SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_ALARM_01:
-         SubTask_Flasher_Animate_Function_SunPositions_Gradient_Alarm_01();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-         SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-       break;
-       case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
-         SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-       break;
-       case EFFECTS_FUNCTION_FIREPLACE_01_ID:
-         SubTask_Flasher_Animate_Function_FirePlace_01();
-       break;
-       #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+      case EFFECTS_FUNCTION_SLOW_GLOW_ID:
+        SubTask_Flasher_Animate_Function__Slow_Glow();
+      break;
+      case EFFECTS_FUNCTION_STATIC_GLOW_ID:
+        SubTask_Flasher_Animate_Function__Static_Glow();
+      break;
+      case EFFECTS_FUNCTION_SEQUENTIAL_ID:
+        SubTask_Flasher_Animate_Function__Sequential();
+      break;
+      case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:
+        SubTask_Flasher_Animate_Function__Palette_Step_Through_Palette();
+      break;
+      //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+      //  break;
+      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
+      //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+      //  break;
+      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
+      //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+      //  break;
+      //  case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+      //  break;
+      //  case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+      //  break;
+      //  case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
+      //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+      //  break;
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+      //  break;
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+      //  break;
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+      //  break;
+      //  case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+      //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+      //  break;
+      //  case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+      //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01:
+      //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+      //  break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
+        SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+      break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+      //  break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
+        SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+      break;
+      case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:
+        SubTask_Flasher_Animate_Function_FirePlace_1D_01();
+      break;
+      #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
       case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID:
         SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
       break;
-      case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID:
-        SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
-      break;
-      case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
-        SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-      break;
-      #endif // ENABLE_DEVFEATURE_RGB_CLOCK
-
-
-  //     case EFFECTS_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID:
-    //     SubTask_Flasher_Animate_Function_Slow_Glow_Showing_Multiples_Of_Colours();
+      // case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID:
+      //   SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
       // break;
-
-//new pastel random ie change pixel colour 90-100% saturation with slow blend time and randomly
-       //case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
-         //SubTask_Flasher_Animate_Function_Fade_Gradient();
-       //break;
-
-      // New animation
-      // slowly random change between palette paired colours, ie red, green, blue, pink in pallette, first red/green, then blue/pink, or with flag, only skip one colour for each pair, red/green, green/blue, blue/pink etc
-
-
-//pulse will use the "multiplier" number, and every X will turn on, moving by a few each time, fading off after instant on 
-// instant on or pulsing on? 
-// maybe I need to make "transition waveforms", square (instant), sine wave, pulsing, saw tooth (rising edge, falling edge)
-
-     
-
-      //https://photos.google.com/search/green%20light/photo/AF1QipONCC4dPcCk3AUmff17venI28Jih0iAsLwwX-Po
-      //gradient light
-
-      //apply saturation rotation or "wipe"
-
+      // case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
+      //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+      // break;
+      #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+       case EFFECTS_FUNCTION_TESTER_ID:
+         SubTask_Flasher_Animate_Function_Tester();
+       break; 
     } //end SWITCH
 
-    // // Configure animator to show output
-    // StartAnimationAsBlendFromStartingColorToDesiredColor();
+    // Configure animator to show output
     StartAnimation_AsAnimUpdateMemberFunction();
 
   }//end if update reached
 
+   pCONT_iLight->animation.flags.animator_first_run = false;
+
 } //end flasher_animate
-
-
 
 
 /**
@@ -761,7 +643,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change
 //  * Changes pixels randomly to new colour, with slow blending
 //  * Requires new colour calculation each call
 //  */
-// void mAnimatorLight::SubTask_Flasher_Animate_Function_Slow_Glow(){
+// void mAnimatorLight::SubTask_Flasher_Animate_Function__Slow_Glow(){
 //   // So colour region does not need to change each loop to prevent colour crushing
 //   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
 //   UpdateDesiredColourFromPaletteSelected();
@@ -899,30 +781,17 @@ uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
-uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
+{
 
-  char buffer[100];
-
-
-    // JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
-    // JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-    // JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
-
-DEBUG_LINE_HERE;
-    if(anim_progress_mqtt_function_callback)
-    {
-      JsonBuilderI->Start();
-DEBUG_LINE_HERE;
-      anim_progress_mqtt_function_callback();
-DEBUG_LINE_HERE;
-
-      // (this.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level);
-
-      return JsonBuilderI->End();
-    }
-
-
+  if(anim_progress_mqtt_function_callback)
+  {
+    JsonBuilderI->Start();
+    anim_progress_mqtt_function_callback(); // Call the function
+    return JsonBuilderI->End();
+  }
   return 0; // None to send
+
 }
 
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -2016,7 +1885,7 @@ void mAnimatorLight::StartAnimation_AsAnimUpdateMemberFunction(){
   #else
     pCONT_iLight->animator_controller->StartAnimation(0, 900, 
       [this](const AnimationParam& param){
-        this->AnimUpdateMemberFunction_Tester(param);
+        this->AnimationProcess_Tester(param);
       }
     );
 
@@ -2032,10 +1901,12 @@ mAnimatorLight& mAnimatorLight::setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE)
   return *this;
 }
 
-mAnimatorLight& mAnimatorLight::setFunction_Debug_Animation_Progress_Callback(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE) {
+#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE) {
   this->anim_progress_mqtt_function_callback = anim_progress_mqtt_function_callback;
   return *this;
 }
+#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
 bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
@@ -2615,7 +2486,7 @@ uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level){
 
   Tasker_Override_Forcing_Variables_Testing();
   // pCONT_iLight->_briRGB = 255;
-  // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_PARTIAL_PALETTE_STEP_THROUGH_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
+  // flashersettings.function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
   // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_EFFECTS_ID;
   // pCONT_iLight->animation.transition.rate_ms = 400; // not sure if this will work? I probably have to force a check somewhere
   // pCONT_iLight->animation.transition.time_ms.val = 2;

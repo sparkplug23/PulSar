@@ -414,7 +414,7 @@ enum MODULE_IDS{
 
 // Subsystems (x-x)
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  #include "2b_SubSystem/SolarLunar/mSolarLunar.h"
+  #include "2b_InternalSystems/SolarLunar/mSolarLunar.h"
   #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
 #endif
 
@@ -543,7 +543,7 @@ enum MODULE_IDS{
   #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pModule[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
-  #include "6_Lights/WLEDEffects/mWLEDEffects.h"
+  #include "6_Lights/Animator2_WLEDEffects/mWLEDEffects.h"
   #define pCONT_lwled                           static_cast<mWLEDEffects*>(pCONT->pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID])
 #endif
 

@@ -118,7 +118,7 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-#include "2b_SubSystem/SolarLunar/mSolarLunar.h"
+#include "2b_InternalSystems/SolarLunar/mSolarLunar.h"
 
 class mTime :
   public mTaskerInterface
