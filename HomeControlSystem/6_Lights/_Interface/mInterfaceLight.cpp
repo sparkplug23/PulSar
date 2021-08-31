@@ -568,6 +568,13 @@ void mInterfaceLight::EveryLoop(){
         // light_power_state = true;
       break;
       #endif
+      #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+      case ANIMATION_MODE_WLED_ID:
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_8EFFECTS_ID"));
+        pCONT_lAni->SubTask_WLED_Animation();
+        // light_power_state = true;
+      break;
+      #endif // ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID:
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_NOTIFICATIONS_IDu"));

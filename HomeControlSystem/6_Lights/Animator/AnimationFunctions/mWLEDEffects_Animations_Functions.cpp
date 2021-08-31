@@ -1,4 +1,8 @@
-#include "../mWLEDEffects.h"
+// #include "../mWLEDEffects.h"
+
+#include "6_Lights/Animator/mWLEDEffects.h"
+// #include "6_Lights/Animator/mAnimatorLight.h"
+
 
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS 
 

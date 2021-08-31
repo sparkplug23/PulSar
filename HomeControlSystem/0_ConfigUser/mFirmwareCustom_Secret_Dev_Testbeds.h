@@ -812,10 +812,12 @@
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   // HACS
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
   // WLED
   #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+  #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
   #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -860,7 +862,7 @@
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"ColourPalette\":\"Christmas Pifco MiniBells\"," //c12    43 is the colours for this christmas
+    "\"ColourPalette\":\"Christmas 06\"," //c12    43 is the colours for this christmas
     // "\"ColourPalette\":\"Single Fire 01\"," //c12    43 is the colours for this christmas
     // "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
     "\"BrightnessRGB\":100"

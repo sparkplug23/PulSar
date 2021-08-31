@@ -5,6 +5,394 @@
 
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
 
+#include "6_Lights/Animator/mWLEDEffects_progmem_defines.h"
+
+
+
+#define FASTLED_INTERNAL //remove annoying pragma messages
+// #include "FastLED_Modified/FastLED.h"
+#include "6_Lights/Animator/FastLED_Modified/FastLED.h"
+
+//Notifier callMode 
+#define NOTIFIER_CALL_MODE_INIT           0    //no updates on init, can be used to disable updates
+#define NOTIFIER_CALL_MODE_DIRECT_CHANGE  1
+#define NOTIFIER_CALL_MODE_BUTTON         2
+#define NOTIFIER_CALL_MODE_NOTIFICATION   3
+#define NOTIFIER_CALL_MODE_NIGHTLIGHT     4
+#define NOTIFIER_CALL_MODE_NO_NOTIFY      5
+#define NOTIFIER_CALL_MODE_FX_CHANGED     6    //no longer used
+#define NOTIFIER_CALL_MODE_HUE            7
+#define NOTIFIER_CALL_MODE_PRESET_CYCLE   8
+#define NOTIFIER_CALL_MODE_BLYNK          9
+#define NOTIFIER_CALL_MODE_ALEXA         10
+
+//RGB to RGBW conversion mode
+#define RGBW_MODE_MANUAL_ONLY     0            //No automatic white channel calculation. Manual white channel slider
+#define RGBW_MODE_AUTO_BRIGHTER   1            //New algorithm. Adds as much white as the darkest RGBW channel
+#define RGBW_MODE_AUTO_ACCURATE   2            //New algorithm. Adds as much white as the darkest RGBW channel and subtracts this amount from each RGB channel
+#define RGBW_MODE_DUAL            3            //Manual slider + auto calculation. Automatically calculates only if manual slider is set to off (0)  
+#define RGBW_MODE_LEGACY          4            //Old floating algorithm. Too slow for realtime and palette support
+
+
+//E1.31 DMX modes
+#define DMX_MODE_DISABLED         0            //not used
+#define DMX_MODE_SINGLE_RGB       1            //all LEDs same RGB color (3 channels)
+#define DMX_MODE_SINGLE_DRGB      2            //all LEDs same RGB color and master dimmer (4 channels)
+#define DMX_MODE_EFFECT           3            //trigger standalone effects of WLED (11 channels)
+#define DMX_MODE_MULTIPLE_RGB     4            //every LED is addressed with its own RGB (ledCount * 3 channels)
+#define DMX_MODE_MULTIPLE_DRGB    5            //every LED is addressed with its own RGB and share a master dimmer (ledCount * 3 + 1 channels)
+
+//Light capability byte (unused)
+#define TYPE_NONE                 0            //light is not configured
+#define TYPE_RESERVED             1            //unused. Might indicate a "virtual" light
+#define TYPE_WS2812_RGB           2
+#define TYPE_SK6812_RGBW          3
+#define TYPE_WS2812_WWA           4            //amber + warm + cold white
+#define TYPE_WS2801               5
+#define TYPE_ANALOG_1CH           6            //single channel PWM. Uses value of brightest RGBW channel
+#define TYPE_ANALOG_2CH           7            //analog WW + CW
+#define TYPE_ANALOG_3CH           8            //analog RGB
+#define TYPE_ANALOG_4CH           9            //analog RGBW
+#define TYPE_ANALOG_5CH          10            //analog RGB + WW + CW
+#define TYPE_APA102              11
+#define TYPE_LPD8806             12
+
+//Segment option byte bits
+#define SEG_OPTION_SELECTED       0
+#define SEG_OPTION_REVERSED       1
+#define SEG_OPTION_ON             2
+#define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME or needs getPixelColor
+#define SEG_OPTION_TRANSITIONAL   7
+
+// GLOBAL VARIABLES
+// both declared and defined in header (solution from http://www.keil.com/support/docs/1868.htm)
+//
+//e.g. byte test = 2 becomes WLED_GLOBAL byte test _INIT(2);
+//     int arr[]{0,1,2} becomes WLED_GLOBAL int arr[] _INIT_N(({0,1,2}));
+
+#ifndef WLED_DEFINE_GLOBAL_VARS
+# define WLED_GLOBAL extern
+# define _INIT(x)
+# define _INIT_N(x)
+#else
+# define WLED_GLOBAL
+# define _INIT(x) = x
+//needed to ignore commas in array definitions
+#define UNPACK( ... ) __VA_ARGS__
+# define _INIT_N(x) UNPACK x
+#endif
+
+//Segment option byte bits
+#define SEG_OPTION_SELECTED       0
+#define SEG_OPTION_REVERSED       1
+#define SEG_OPTION_ON             2
+#define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME or needs getPixelColor
+#define SEG_OPTION_TRANSITIONAL   7
+
+//RGB to RGBW conversion mode
+#define RGBW_MODE_MANUAL_ONLY     0            //No automatic white channel calculation. Manual white channel slider
+#define RGBW_MODE_AUTO_BRIGHTER   1            //New algorithm. Adds as much white as the darkest RGBW channel
+#define RGBW_MODE_AUTO_ACCURATE   2            //New algorithm. Adds as much white as the darkest RGBW channel and subtracts this amount from each RGB channel
+#define RGBW_MODE_DUAL            3            //Manual slider + auto calculation. Automatically calculates only if manual slider is set to off (0)  
+#define RGBW_MODE_LEGACY          4            //Old floating algorithm. Too slow for realtime and palette support
+
+#define ENABLE_ADVANCED_EFFECTS // ability to disable most for testing
+
+#define IBN 5100
+#define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
+
+// #include "NpbWrapper.h"
+// #include "6_Lights/Animator/NpbWrapper.h"
+
+
+// //PIN CONFIGURATION
+// #ifndef LEDPIN
+// #define LEDPIN 3  //strip pin. Any for ESP32, gpio2 or 3 is recommended for ESP8266 (gpio2/3 are labeled D4/RX on NodeMCU and Wemos)
+// #endif
+// #define PIXELMETHOD NeoEsp8266Dma800KbpsMethod
+// #define PIXELFEATURE3 NeoGrbFeature
+
+// #include <NeoPixelBrightnessBus.h>
+
+// enum NeoPixelType
+// {
+//   NeoPixelType_None = 0,
+//   NeoPixelType_Grb  = 1,
+//   NeoPixelType_Grbw = 2,
+//   NeoPixelType_End  = 3
+// };
+
+// class NeoPixelWrapper
+// {
+// public:
+//   NeoPixelWrapper() :
+//     _pGrb(NULL)
+//   {
+
+//   }
+
+//   ~NeoPixelWrapper()
+//   {
+//     cleanup();
+//   }
+
+//   void Begin(NeoPixelType type, uint16_t countPixels)
+//   {
+//     cleanup();
+    
+//     // _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, LEDPIN);
+//     // _pGrb->Begin();
+
+//   }
+
+//   void Show()
+//   {
+//     // pCONT_lAni->stripbus->Show();
+//     // _pGrb->Show();
+//     // pCONT_lAni;
+//     pCONT_mqtt->EveryLoop();
+//   }
+
+//   void SetPixelColor(uint16_t indexPixel, RgbwColor color)
+//   {
+//     _pGrb->SetPixelColor(indexPixel, RgbColor(color.R,color.G,color.B));
+//   }
+
+//   void SetBrightness(byte b)
+//   {
+//     _pGrb->SetBrightness(b);
+//   }
+
+//   // NOTE:  Due to feature differences, some support RGBW but the method name
+//   // here needs to be unique, thus GetPixeColorRgbw
+//   RgbwColor GetPixelColorRgbw(uint16_t indexPixel) const
+//   {
+//     return _pGrb->GetPixelColor(indexPixel);
+//   }
+
+//   uint8_t* GetPixels(void)
+//   {
+//     return _pGrb->Pixels();  
+//   }
+
+
+// private:
+
+//   NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>*  _pGrb;
+
+//   void cleanup()
+//   {
+//     delete _pGrb ; 
+//     _pGrb  = NULL; 
+//   }
+
+// };
+
+#define DEFAULT_BRIGHTNESS (uint8_t)127
+#define DEFAULT_MODE       (uint8_t)0
+#define DEFAULT_SPEED      (uint8_t)128
+#define DEFAULT_COLOR      (uint32_t)0xFFAA00
+
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+/* Not used in all effects yet */
+#define WLED_FPS         42
+#define FRAMETIME        (1000/WLED_FPS)
+
+/* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
+  insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
+#define MAX_NUM_SEGMENTS 1//10
+
+/* How much data bytes all segments combined may allocate */
+#ifdef ESP8266
+#define MAX_SEGMENT_DATA 2048
+#else
+#define MAX_SEGMENT_DATA 8192
+#endif
+
+#define LED_SKIP_AMOUNT  1
+#define MIN_SHOW_DELAY  15
+
+
+
+
+#define NUM_COLORS       3 /* number of colors per segment */
+// #define _segments[_segment_index]          _segments[_segment_index]
+// #define SEGCOLOR(x)      SEGCOLOR()
+// #define SEGENV           _segment_runtimes[_segment_index]
+#define SEGCOLOR(x)      gamma32(_segments[_segment_index].colors[x])
+#define SEGLEN           _virtualSegmentLength
+// #define SEGACT           _segments[_segment_index].stop
+#define SPEED_FORMULA_L  5 + (50*(255 - _segments[_segment_index].speed))/_virtualSegmentLength
+#define RESET_RUNTIME    memset(_segment_runtimes, 0, sizeof(_segment_runtimes))
+
+// some common colors
+#define RED        (uint32_t)0xFF0000
+#define GREEN      (uint32_t)0x00FF00
+#define BLUE       (uint32_t)0x0000FF
+#define WHITE      (uint32_t)0xFFFFFF
+#define BLACK      (uint32_t)0x000000
+#define YELLOW     (uint32_t)0xFFFF00
+#define CYAN       (uint32_t)0x00FFFF
+#define MAGENTA    (uint32_t)0xFF00FF
+#define PURPLE     (uint32_t)0x400080
+#define ORANGE     (uint32_t)0xFF3000
+#define PINK       (uint32_t)0xFF1493
+#define ULTRAWHITE (uint32_t)0xFFFFFFFF
+
+// options
+// bit    7: segment is in transition mode
+// bits 4-6: TBD
+// bit    3: mirror effect within segment
+// bit    2: segment is on
+// bit    1: reverse segment
+// bit    0: segment is selected
+#define NO_OPTIONS   (uint8_t)0x00
+#define TRANSITIONAL (uint8_t)0x80
+#define MIRROR       (uint8_t)0x08
+#define SEGMENT_ON   (uint8_t)0x04
+#define REVERSE      (uint8_t)0x02
+#define SELECTED     (uint8_t)0x01
+#define IS_TRANSITIONAL ((_segments[_segment_index].options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((_segments[_segment_index].options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((_segments[_segment_index].options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((_segments[_segment_index].options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((_segments[_segment_index].options & SELECTED    ) == SELECTED    )
+
+
+enum FX_MODES{
+  // Static
+  FX_MODE_STATIC=0,
+  FX_MODE_STATIC_PATTERN,
+  FX_MODE_TRI_STATIC_PATTERN,
+  FX_MODE_SPOTS,
+  FX_MODE_PERCENT,
+  // One colour changes
+  FX_MODE_RANDOM_COLOR,
+  // Wipe/Sweep/Runners 
+  FX_MODE_COLOR_WIPE, 
+  FX_MODE_COLOR_WIPE_RANDOM,
+  FX_MODE_COLOR_SWEEP,
+  FX_MODE_COLOR_SWEEP_RANDOM,
+  FX_MODE_TRICOLOR_WIPE,
+  FX_MODE_ANDROID,
+  FX_MODE_RUNNING_RED_BLUE,
+  FX_MODE_RUNNING_COLOR,
+  FX_MODE_RUNNING_RANDOM,
+  FX_MODE_GRADIENT,
+  FX_MODE_LOADING,
+  FX_MODE_POLICE,
+  FX_MODE_POLICE_ALL,
+  FX_MODE_TWO_DOTS,
+  FX_MODE_TWO_AREAS,
+  FX_MODE_MULTI_COMET,
+  FX_MODE_OSCILLATE,
+  FX_MODE_BPM,
+  FX_MODE_JUGGLE,
+  FX_MODE_PALETTE,
+  FX_MODE_COLORWAVES,
+  FX_MODE_LAKE,
+  FX_MODE_GLITTER,
+  FX_MODE_METEOR,
+  FX_MODE_METEOR_SMOOTH,
+  FX_MODE_PRIDE_2015,
+  FX_MODE_RIPPLE_RAINBOW,
+  FX_MODE_PACIFICA,
+  FX_MODE_SUNRISE,
+  FX_MODE_SINEWAVE,
+  FX_MODE_FLOW,
+  FX_MODE_PHASEDNOISE,
+  FX_MODE_PHASED,
+  FX_MODE_RUNNING_LIGHTS,
+  FX_MODE_RAINBOW_CYCLE,
+  FX_MODE_MERRY_CHRISTMAS,
+  FX_MODE_HALLOWEEN,
+  // Chase
+  FX_MODE_CHASE_COLOR,
+  FX_MODE_CHASE_RANDOM,
+  FX_MODE_CHASE_RAINBOW, 
+  FX_MODE_CHASE_FLASH,
+  FX_MODE_CHASE_FLASH_RANDOM, 
+  FX_MODE_CHASE_RAINBOW_WHITE,
+  FX_MODE_THEATER_CHASE,
+  FX_MODE_THEATER_CHASE_RAINBOW,
+  FX_MODE_TRICOLOR_CHASE,
+  FX_MODE_RANDOM_CHASE,
+  FX_MODE_CIRCUS_COMBUSTUS,
+  // Breathe/Fade/Pulse
+  FX_MODE_BREATH,
+  FX_MODE_FADE,
+  FX_MODE_TRICOLOR_FADE,
+  FX_MODE_SPOTS_FADE,
+  // Fireworks
+  FX_MODE_FIREWORKS,
+  FX_MODE_STARBURST,
+  FX_MODE_EXPLODING_FIREWORKS,
+  FX_MODE_RAIN,
+  // Sparkle/Twinkle
+  FX_MODE_SOLID_GLITTER,
+  FX_MODE_POPCORN,
+  FX_MODE_PLASMA,
+  FX_MODE_FIRE_FLICKER,
+  FX_MODE_SPARKLE,
+  FX_MODE_FLASH_SPARKLE,
+  FX_MODE_HYPER_SPARKLE,
+  FX_MODE_TWINKLE,
+  FX_MODE_COLORTWINKLE,
+  FX_MODE_TWINKLEFOX,
+  FX_MODE_TWINKLECAT,
+  FX_MODE_TWINKLEUP,
+  FX_MODE_DYNAMIC,
+  FX_MODE_SAW,
+  FX_MODE_DISSOLVE,
+  FX_MODE_DISSOLVE_RANDOM,
+  FX_MODE_COLORFUL,
+  FX_MODE_TRAFFIC_LIGHT,
+  FX_MODE_CANDLE,
+  FX_MODE_CANDLE_MULTI,
+  FX_MODE_HALLOWEEN_EYES,
+  #ifdef ENABLE_ADVANCED_EFFECTS  
+  // Blink/Strobe
+  FX_MODE_BLINK,
+  FX_MODE_BLINK_RAINBOW,
+  FX_MODE_STROBE,
+  FX_MODE_MULTI_STROBE,
+  FX_MODE_STROBE_RAINBOW, 
+  FX_MODE_RAINBOW,
+  FX_MODE_LIGHTNING,     
+  FX_MODE_FIRE_2012,
+  FX_MODE_RAILWAY,
+  FX_MODE_HEARTBEAT, 
+  // Noise
+  FX_MODE_FILLNOISE8,
+  FX_MODE_NOISE16_1,
+  FX_MODE_NOISE16_2,
+  FX_MODE_NOISE16_3,
+  FX_MODE_NOISE16_4,
+  FX_MODE_NOISEPAL,
+  // Scan
+  FX_MODE_SCAN,
+  FX_MODE_DUAL_SCAN,
+  FX_MODE_LARSON_SCANNER,
+  FX_MODE_DUAL_LARSON_SCANNER,
+  FX_MODE_ICU,
+  FX_MODE_RIPPLE,
+  FX_MODE_COMET,
+  FX_MODE_CHUNCHUN,
+  FX_MODE_BOUNCINGBALLS,
+  FX_MODE_SINELON,
+  FX_MODE_SINELON_DUAL,
+  FX_MODE_SINELON_RAINBOW,
+  FX_MODE_DRIP,      
+  #endif // ENABLE_ADVANCED_EFFECTS   
+  // Length of Effects
+  MODE_COUNT,
+};
+
+
 class WS2812FX 
 {
   typedef uint16_t (WS2812FX::*mode_ptr)(void);
@@ -229,7 +617,7 @@ class WS2812FX
       ablMilliampsMax = 850;
       currentMilliamps = 0;
       timebase = 0;
-      bus = new NeoPixelWrapper();
+      // bus = new NeoPixelWrapper();
       resetSegments();     
     };
 
@@ -419,7 +807,7 @@ class WS2812FX
       mode_chunchun(void);
 
   private:
-    NeoPixelWrapper *bus;
+    // NeoPixelWrapper *bus;
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);

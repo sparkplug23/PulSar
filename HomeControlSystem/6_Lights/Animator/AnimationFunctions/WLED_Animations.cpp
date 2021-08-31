@@ -1,4 +1,6 @@
-#include "../mWLEDEffects.h"
+// #include "../mWLEDEffects.h"
+
+#include "6_Lights/Animator/mWLEDEffects.h"
 
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS 
 
@@ -19,7 +21,9 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
     _lengthRaw += LED_SKIP_AMOUNT;
   }
 
-  bus->Begin((NeoPixelType)ty, _lengthRaw);
+  // bus->Begin((NeoPixelType)ty, _lengthRaw);
+  
+  // pCONT_lAni->stripbus->Begin(ty, _lengthRaw);
   
   _segments[0].start = 0;
   _segments[0].stop = _length;
@@ -28,14 +32,21 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 }
 
 void WS2812FX::service() {
+  
+DEBUG_LINE_HERE;
   uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
   now = nowUp + timebase;
-  if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
+  if (nowUp - _lastShow < MIN_SHOW_DELAY) {
+    
+DEBUG_LINE_HERE;
+return;
+  }
   bool doShow = false;
 
+DEBUG_LINE_HERE;
   for(uint8_t i=0; i < MAX_NUM_SEGMENTS; i++)
   {
-  //Serial.printf("WS2812FX::service() %d\n\r",i); Serial.flush();
+  Serial.printf("WS2812FX::service() %d\n\r",i); Serial.flush();
     _segment_index = i;
     if (_segments[_segment_index].isActive())
     {
@@ -44,19 +55,27 @@ void WS2812FX::service() {
         if (_segments[_segment_index].grouping == 0) _segments[_segment_index].grouping = 1; //sanity check
         _virtualSegmentLength = _segments[_segment_index].virtualLength();
         doShow = true;
+DEBUG_LINE_HERE;
         handle_palette();
+DEBUG_LINE_HERE;
         uint16_t delay = (this->*_mode[_segments[_segment_index].mode])();
+DEBUG_LINE_HERE;
         _segment_runtimes[_segment_index].next_time = nowUp + delay;
         if (_segments[_segment_index].mode != FX_MODE_HALLOWEEN_EYES) _segment_runtimes[_segment_index].call++;
       }
     }
   }
   _virtualSegmentLength = 0;
+DEBUG_LINE_HERE;
   if(doShow) {
+DEBUG_LINE_HERE;
     yield();
+DEBUG_LINE_HERE;
     show();
+DEBUG_LINE_HERE;
   }
   _triggered = false;
+DEBUG_LINE_HERE;
 }
 
 
@@ -330,9 +349,16 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
       if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
       #endif
       if (indexSetRev >= _segments[_segment_index].start && indexSetRev < _segments[_segment_index].stop) {
-        bus->SetPixelColor(indexSet + skip, col);
+        // bus->SetPixelColor(indexSet + skip, col);
+        // pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, col);
+        pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, RgbColor(col));
         if (IS_MIRROR)  //set the corresponding mirrored pixel
-          bus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, col);
+        {
+          // bus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, col);
+
+          pCONT_lAni->stripbus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, RgbColor(col));
+
+        }
       }
     }
   } else { //live data, etc.
@@ -340,11 +366,13 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
     #ifdef WLED_CUSTOM_LED_MAPPING
     if (i < customMappingSize) i = customMappingTable[i];
     #endif
-    bus->SetPixelColor(i + skip, col);
+    // pCONT_lAni->stripbus->SetPixelColor(i + skip, col);
+    pCONT_lAni->stripbus->SetPixelColor(i + skip, RgbColor(col));
   }
   if (skip && i == 0) {
     for (uint16_t j = 0; j < skip; j++) {
-      bus->SetPixelColor(j, RgbwColor(0, 0, 0, 0));
+      // pCONT_lAni->stripbus->SetPixelColor(j, RgbwColor(0, 0, 0, 0));
+      pCONT_lAni->stripbus->SetPixelColor(j, RgbColor(0, 0, 0));
     }
   }
 }
@@ -366,7 +394,7 @@ void WS2812FX::show(void) {
     // Serial.printf("show1\n\r");
   // if (_callback) _callback();
   
-//    Serial.printf("show2\n\r");
+  //  Serial.printf("show2\n\r");
   
   //power limit calculation
   //each LED can draw up 195075 "power units" (approx. 53mA)
@@ -380,66 +408,89 @@ void WS2812FX::show(void) {
     actualMilliampsPerLed = 12; // from testing an actual strip
   }
 
-  if (ablMilliampsMax > 149 && actualMilliampsPerLed > 0) //0 mA per LED and too low numbers turn off calculation
-  {
-    uint32_t puPerMilliamp = 195075 / actualMilliampsPerLed;
-    uint32_t powerBudget = (ablMilliampsMax - MA_FOR_ESP) * puPerMilliamp; //100mA for ESP power
-    if (powerBudget > puPerMilliamp * _length) //each LED uses about 1mA in standby, exclude that from power budget
-    {
-      powerBudget -= puPerMilliamp * _length;
-    } else
-    {
-      powerBudget = 0;
-    }
-
-    uint32_t powerSum = 0;
-
-    for (uint16_t i = 0; i < _length; i++) //sum up the usage of each LED
-    {
-      RgbwColor c = bus->GetPixelColorRgbw(i);
-
-      if(useWackyWS2815PowerModel)
-      {
-        // ignore white component on WS2815 power calculation
-        powerSum += (MAX(MAX(c.R,c.G),c.B)) * 3;
-      }
-      else 
-      {
-        powerSum += (c.R + c.G + c.B + c.W);
-      }
-    }
-
-
-    if (_useRgbw) //RGBW led total output with white LEDs enabled is still 50mA, so each channel uses less
-    {
-      powerSum *= 3;
-      powerSum = powerSum >> 2; //same as /= 4
-    }
-
-    uint32_t powerSum0 = powerSum;
-    powerSum *= _brightness;
-    
-    if (powerSum > powerBudget) //scale brightness down to stay in current limit
-    {
-      float scale = (float)powerBudget / (float)powerSum;
-      uint16_t scaleI = scale * 255;
-      uint8_t scaleB = (scaleI > 255) ? 255 : scaleI;
-      uint8_t newBri = scale8(_brightness, scaleB);
-      bus->SetBrightness(newBri);
-      currentMilliamps = (powerSum0 * newBri) / puPerMilliamp;
-    } else
-    {
-      currentMilliamps = powerSum / puPerMilliamp;
-      bus->SetBrightness(_brightness);
-    }
-    currentMilliamps += MA_FOR_ESP; //add power of ESP back to estimate
-    currentMilliamps += _length; //add standby power back to estimate
-  } else {
-    currentMilliamps = 0;
-    bus->SetBrightness(_brightness);
-  }
   
-  bus->Show();
+/**
+ * adjust to limit brightness by power rating
+ * */
+
+
+// DEBUG_LINE_HERE;
+//   if (ablMilliampsMax > 149 && actualMilliampsPerLed > 0) //0 mA per LED and too low numbers turn off calculation
+//   {
+//     uint32_t puPerMilliamp = 195075 / actualMilliampsPerLed;
+//     uint32_t powerBudget = (ablMilliampsMax - MA_FOR_ESP) * puPerMilliamp; //100mA for ESP power
+//     if (powerBudget > puPerMilliamp * _length) //each LED uses about 1mA in standby, exclude that from power budget
+//     {
+//       powerBudget -= puPerMilliamp * _length;
+//     } else
+//     {
+//       powerBudget = 0;
+//     }
+
+//     uint32_t powerSum = 0;
+
+//     for (uint16_t i = 0; i < _length; i++) //sum up the usage of each LED
+//     {
+//       // RgbwColor c = pCONT_lAni->stripbus->GetPixelColorRgbw(i);
+//       // RgbwColor c = pCONT_lAni->stripbus->GetPixelColor(i);
+//       RgbwColor c = pCONT_lAni->GetPixelColor(i);
+
+//       if(useWackyWS2815PowerModel)
+//       {
+//         // ignore white component on WS2815 power calculation
+//         powerSum += (MAX(MAX(c.R,c.G),c.B)) * 3;
+//       }
+//       else 
+//       {
+//         powerSum += (c.R + c.G + c.B + c.W);
+//       }
+//     }
+
+
+//     if (_useRgbw) //RGBW led total output with white LEDs enabled is still 50mA, so each channel uses less
+//     {
+//       powerSum *= 3;
+//       powerSum = powerSum >> 2; //same as /= 4
+//     }
+
+// DEBUG_LINE_HERE;
+//     uint32_t powerSum0 = powerSum;
+//     powerSum *= _brightness;
+    
+// //     if (powerSum > powerBudget) //scale brightness down to stay in current limit
+// //     {
+// // DEBUG_LINE_HERE;
+// //       float scale = (float)powerBudget / (float)powerSum;
+// //       uint16_t scaleI = scale * 255;
+// //       uint8_t scaleB = (scaleI > 255) ? 255 : scaleI;
+// //       uint8_t newBri = scale8(_brightness, scaleB);
+
+// //       // pCONT_lAni->stripbus->
+
+// //       // pCONT_lAni->stripbus->SetBrightness(newBri);
+// //       currentMilliamps = (powerSum0 * newBri) / puPerMilliamp;
+// // DEBUG_LINE_HERE;
+// //     } else
+// //     {
+// DEBUG_LINE_HERE;
+//       currentMilliamps = powerSum / puPerMilliamp;
+//       // pCONT_lAni->stripbus->SetBrightness(_brightness);
+
+// // Set/Convert brightness here to new method
+
+
+// DEBUG_LINE_HERE;
+//     // }
+//     currentMilliamps += MA_FOR_ESP; //add power of ESP back to estimate
+//     currentMilliamps += _length; //add standby power back to estimate
+//   } else {
+//     currentMilliamps = 0;
+// DEBUG_LINE_HERE;
+//     // pCONT_lAni->stripbus->SetBrightness(_brightness);
+// DEBUG_LINE_HERE;
+//   }
+  
+  pCONT_lAni->stripbus->Show();
   _lastShow = millis();
 }
 
@@ -526,7 +577,9 @@ uint32_t WS2812FX::getPixelColor(uint16_t i)
   
   if (i >= _lengthRaw) return 0;
   
-  RgbwColor col = bus->GetPixelColorRgbw(i);
+  // RgbwColor col = bus->GetPixelColorRgbw(i);
+  
+  RgbwColor col = pCONT_lAni->stripbus->GetPixelColor(i);
   switch (colorOrder)
   {
     //                    W               G              R               B

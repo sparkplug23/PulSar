@@ -382,6 +382,56 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   //   }
   // }
 
+  
+  byte effectCurrent=0,effectSpeed = 0,effectIntensity=0,effectPalette=0;
+
+  if(jtok = obj["Effects"].getObject()["Current"]){ // default to secs
+    effectCurrent = jtok.getInt();
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  if(jtok = obj["Effects"].getObject()["Speed"]){ // default to secs
+    effectSpeed = jtok.getInt();
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  if(jtok = obj["Effects"].getObject()["Intensity"]){ // default to secs
+    effectIntensity = jtok.getInt();
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  if(jtok = obj["Effects"].getObject()["Palette"]){ // default to secs
+    effectPalette = jtok.getInt();
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+    mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
+  }
+
+
+  if(jtok = obj["Effects"].getObject()["Mode"]){ // default to secs
+    CommandSet_EffectsModeID(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), animation.transition.time_ms.val);  
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+  if(jtok = obj["Effects"].getObject()["Select"]){ // default to secs
+    // effectPalette = jtok.getInt();
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+    flags_hac_wled_animator_switch = jtok.getInt();
+
+    Serial.printf("flags_hac_wled_animator_switch=%d\n\r", flags_hac_wled_animator_switch);
+    
+  }
+
+
   //pCONT_iLight->animation.flags.fForceUpdate = true;
   
   if(data_buffer.isserviced){ //update string, move to shared place
@@ -399,6 +449,18 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   // t_mqtthandler_status_animation.flags.SendNow = true; 
 
 }
+
+
+
+void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
+{
+  char buffer[50];
+  mEffects->setMode(segment, mode);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+} 
+
 
 
 #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
