@@ -1,8 +1,5 @@
-// #include "../mWLEDEffects.h"
 
-#include "6_Lights/Animator/mWLEDEffects.h"
-// #include "6_Lights/Animator/mAnimatorLight.h"
-
+#include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS 
 

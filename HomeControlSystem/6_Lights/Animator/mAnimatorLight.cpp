@@ -2900,11 +2900,11 @@ void mAnimatorLight::Init_WLED(void)
 void mAnimatorLight::SubTask_WLED_Animation()
 {
   
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
   handleTransitions();
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
   mEffects->service();
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
 }
 

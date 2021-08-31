@@ -34,10 +34,10 @@
 
 // #include "6_Lights/mAnimatorLight_WLED_Shared_Index.h"
 
-// // #include "AnimationFunctions/WLED_Animations.h"
-// #include "6_Lights/Animator/AnimationFunctions/WLED_Animations.h"
+// // #include "EffectsWLED/Animations.h"
+// #include "6_Lights/Animator/EffectsWLED/Animations.h"
 
-#include "6_Lights/Animator/AnimationFunctions/WLED_Animations.h"
+#include "6_Lights/Animator/EffectsWLED/Animations.h"
 
 // #define FASTLED_INTERNAL //remove annoying pragma messages
 // #include "../Animator2_WLEDEffects/FastLED_Modified/FastLED.h"
@@ -186,7 +186,7 @@ DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR;
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR;
 
-// #include "6_Lights/Animator2_WLEDEffects/AnimationFunctions/WLED_Animations.h"
+// #include "6_Lights/Animator2_WLEDEffects/EffectsWLED/Animations.h"
 
 
 #include <functional>
