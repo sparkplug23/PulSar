@@ -6,7 +6,7 @@
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands %d"),obj.isNull());
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   // Turn off this, might cause double commands (ie double toggles)
@@ -1418,7 +1418,11 @@ const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, 
       case ANIMATION_MODE_NOTIFICATIONS_ID: memcpy_P(buffer, PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR,sizeof(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)); break;
     #endif
     case ANIMATION_MODE_EFFECTS_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_EFFECTS_NAME_CTR, sizeof(PM_ANIMATION_MODE_EFFECTS_NAME_CTR)); break;
-    // case ANIMATION_MODE_SCENE_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_SCENE_NAME_CTR , sizeof(PM_ANIMATION_MODE_SCENE_NAME_CTR)); break;
+    
+    
+  #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+    case ANIMATION_MODE_WLED_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_WLED_NAME_CTR, sizeof(PM_ANIMATION_MODE_WLED_NAME_CTR)); break;
+    #endif
     
     #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
     case ANIMATION_MODE_MANUAL_SETPIXEL_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR , sizeof(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR)); break;
@@ -1439,6 +1443,9 @@ int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
   #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
   if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_EFFECTS_ID; }
+  #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+  if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
+  #endif
   return -1;
 }
 
