@@ -1164,7 +1164,7 @@ uint16_t WS2812FX::mode_exploding_fireworks(void)
         if (sparks[i].pos > 0 && sparks[i].pos < SEGLEN) {
           uint16_t prog = sparks[i].col;
           uint32_t spColor = (_segments[_segment_index].palette) ? color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
-          CRGB c = CRGB::Black; //HeatColor(sparks[i].col);
+          CRGB c = HTMLColorCode::Black; //HeatColor(sparks[i].col);
           if (prog > 300) { //fade from white to spark color
             c = col_to_crgb(color_blend(spColor, WHITE, (prog - 300)*5));
           } else if (prog > 45) { //fade from spark color to black
@@ -2756,7 +2756,7 @@ CRGB WS2812FX::twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
       }
     }
   } else {
-    c = CRGB::Black;
+    c = HTMLColorCode::Black;
   }
   return c;
 }

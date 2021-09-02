@@ -22,8 +22,6 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
   // bus->Begin((NeoPixelType)ty, _lengthRaw);
   
-  // pCONT_lAni->stripbus->Begin(ty, _lengthRaw);
-  
   _segments[0].start = 0;
   _segments[0].stop = _length;
 
@@ -32,16 +30,12 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
 void WS2812FX::service() {
   
-
   uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
   now = nowUp + timebase;
   if (nowUp - _lastShow < MIN_SHOW_DELAY) {
-    
-    return;
-  
+    return;  
   }
   bool doShow = false;
-
 
   for(uint8_t i=0; i < MAX_NUM_SEGMENTS; i++)
   {
@@ -49,29 +43,46 @@ void WS2812FX::service() {
     _segment_index = i;
     if (_segments[_segment_index].isActive())
     {
-      if(nowUp > _segment_runtimes[_segment_index].next_time || _triggered || (doShow && _segments[_segment_index].mode == 0)) //last is temporary
+      if(
+        (nowUp > _segment_runtimes[_segment_index].next_time) || 
+        _triggered || 
+        (doShow && _segments[_segment_index].mode == 0)
+      ) //last is temporary
       {
         if (_segments[_segment_index].grouping == 0) _segments[_segment_index].grouping = 1; //sanity check
+
         _virtualSegmentLength = _segments[_segment_index].virtualLength();
         doShow = true;
 
+        /**
+         * Generate new colours
+         * */
         handle_palette();
 
+        /**
+         * Animation call (using ptr), then return delay time until next call
+         * */
         uint16_t delay = (this->*_mode[_segments[_segment_index].mode])();
 
         _segment_runtimes[_segment_index].next_time = nowUp + delay;
-        if (_segments[_segment_index].mode != FX_MODE_HALLOWEEN_EYES) _segment_runtimes[_segment_index].call++;
+
+        /**
+         * 
+         * */
+        if (_segments[_segment_index].mode != FX_MODE_HALLOWEEN_EYES)
+        {
+          _segment_runtimes[_segment_index].call++; // Used as progress counter for animations eg rainbow across all hues
+        }
+
+
       }
     }
   }
   _virtualSegmentLength = 0;
 
   if(doShow) {
-
     yield();
-
     show();
-
   }
   _triggered = false;
 
@@ -85,7 +96,7 @@ void WS2812FX::blur(uint8_t blur_amount)
 {
   uint8_t keep = 255 - blur_amount;
   uint8_t seep = blur_amount >> 1;
-  CRGB carryover = CRGB::Black;
+  CRGB carryover = HTMLColorCode::Black;
   for(uint16_t i = 0; i < _virtualSegmentLength; i++)
   {
     CRGB cur = col_to_crgb(getPixelColor(i));

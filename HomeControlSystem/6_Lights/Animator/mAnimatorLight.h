@@ -1664,7 +1664,7 @@ RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colo
  
 
     void CommandSet_EffectsModeID(uint8_t mode, uint8_t segment = 0);
-    int8_t GetEffectsModeIDbyName(const char* c);
+    // int8_t GetEffectsModeIDbyName(const char* c);
     const char* GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen);
 
 

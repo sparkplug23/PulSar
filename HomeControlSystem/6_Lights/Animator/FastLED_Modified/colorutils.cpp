@@ -384,7 +384,7 @@ void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount)
 {
     uint8_t keep = 255 - blur_amount;
     uint8_t seep = blur_amount >> 1;
-    CRGB carryover = CRGB::Black;
+    CRGB carryover = HTMLColorCode::Black;
     for( uint16_t i = 0; i < numLeds; i++) {
         CRGB cur = leds[i];
         CRGB part = cur;
@@ -419,7 +419,7 @@ void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
     uint8_t keep = 255 - blur_amount;
     uint8_t seep = blur_amount >> 1;
     for( uint8_t col = 0; col < width; col++) {
-        CRGB carryover = CRGB::Black;
+        CRGB carryover = HTMLColorCode::Black;
         for( uint8_t i = 0; i < height; i++) {
             CRGB cur = leds[XY(col,i)];
             CRGB part = cur;

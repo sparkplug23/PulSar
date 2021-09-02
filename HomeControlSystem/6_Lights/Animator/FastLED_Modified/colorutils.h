@@ -7,6 +7,7 @@
 #include "FastLED.h"
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
+#include "6_Lights/Palette/mPalette_Progmem.h"
 
 FASTLED_NAMESPACE_BEGIN
 ///@defgroup Colorutils Color utility functions

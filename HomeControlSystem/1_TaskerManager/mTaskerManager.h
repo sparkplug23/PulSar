@@ -372,6 +372,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
+    EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -667,6 +670,11 @@ enum MODULE_IDS{
   #include "9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
   #define pCONT_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
+  #include "9_Controller/GPS_SD_Logger/mGPS_SD_Logger.h"
+  #define pCONT_gps_sd_log                  static_cast<mGPS_SD_Logger*>(pCONT->pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID])
+  #define pCONT_serial_pos_log  pCONT_gps_sd_log
+#endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
@@ -677,6 +685,10 @@ enum MODULE_IDS{
 class mTaskerManager{
 
   friend class mTaskerInterface;
+
+  public:
+  
+    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
   private:
     /* Prevent others from being created */
@@ -695,7 +707,7 @@ class mTaskerManager{
       return instance;
     };
 
-    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
+    // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
 
 

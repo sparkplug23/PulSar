@@ -31,6 +31,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
 
 /*********************************************************************************************\
  * Default global defines

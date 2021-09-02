@@ -10,6 +10,13 @@
 #define FASTLED_INTERNAL //remove annoying pragma messages
 #include "6_Lights/Animator/FastLED_Modified/FastLED.h"
 
+/**
+ * Steps required for better WLED integration
+ * 1) Reduce and potentially remove all FastLED code, absorb into mine
+ * 2) Figure out of segments via complex arrays or simple pointers is easier, if so, possibly make WLEDv2 use them
+ * 3) Figure out a way to possibly change WLED animations to use built in animator (ie the calling of blend function to replace wled_fx) 
+ * */
+
 //Notifier callMode 
 #define NOTIFIER_CALL_MODE_INIT           0    //no updates on init, can be used to disable updates
 #define NOTIFIER_CALL_MODE_DIRECT_CHANGE  1
@@ -514,7 +521,7 @@ class WS2812FX
       #endif // ENABLE_ADVANCED_EFFECTS
       
       _brightness = DEFAULT_BRIGHTNESS;
-      currentPalette = CRGBPalette16(CRGB::Black);
+      currentPalette = CRGBPalette16(HTMLColorCode::Black);
       targetPalette = CloudColors_p;
       ablMilliampsMax = 850;
       currentMilliamps = 0;

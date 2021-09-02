@@ -420,6 +420,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID] = new mSerialPositionalLogger();
   #endif
+  #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
+    pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID] = new mGPS_SD_Logger();
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();
   #endif

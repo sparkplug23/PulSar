@@ -2727,6 +2727,43 @@ void mAnimatorLight::DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 float mAnimatorLight::minf2(float v, float w)
 {
   if (w > v) return v;
@@ -2768,25 +2805,21 @@ void mAnimatorLight::colorFromDecOrHexString(byte* rgb, char* in)
   rgb[2] =  c        & 0xFF;
 }
 
-
-
-
-
 /*
  * Color conversion methods
  */
 void mAnimatorLight::colorFromUint32(uint32_t in, bool secondary)
 {
   if (secondary) {
-    pCONT_lAni->colSec[3] = in >> 24 & 0xFF;
-    pCONT_lAni->colSec[0] = in >> 16 & 0xFF;
-    pCONT_lAni->colSec[1] = in >> 8  & 0xFF;
-    pCONT_lAni->colSec[2] = in       & 0xFF;
+    colSec[3] = in >> 24 & 0xFF;
+    colSec[0] = in >> 16 & 0xFF;
+    colSec[1] = in >> 8  & 0xFF;
+    colSec[2] = in       & 0xFF;
   } else {
-    pCONT_lAni->col[3] = in >> 24 & 0xFF;
-    pCONT_lAni->col[0] = in >> 16 & 0xFF;
-    pCONT_lAni->col[1] = in >> 8  & 0xFF;
-    pCONT_lAni->col[2] = in       & 0xFF;
+    col[3] = in >> 24 & 0xFF;
+    col[0] = in >> 16 & 0xFF;
+    col[1] = in >> 8  & 0xFF;
+    col[2] = in       & 0xFF;
   }
 }
 
@@ -2794,23 +2827,23 @@ void mAnimatorLight::colorFromUint32(uint32_t in, bool secondary)
 void mAnimatorLight::colorFromUint24(uint32_t in, bool secondary)
 {
   if (secondary) {
-    pCONT_lAni->colSec[0] = in >> 16 & 0xFF;
-    pCONT_lAni->colSec[1] = in >> 8  & 0xFF;
-    pCONT_lAni->colSec[2] = in       & 0xFF;
+    colSec[0] = in >> 16 & 0xFF;
+    colSec[1] = in >> 8  & 0xFF;
+    colSec[2] = in       & 0xFF;
   } else {
-    pCONT_lAni->col[0] = in >> 16 & 0xFF;
-    pCONT_lAni->col[1] = in >> 8  & 0xFF;
-    pCONT_lAni->col[2] = in       & 0xFF;
+    col[0] = in >> 16 & 0xFF;
+    col[1] = in >> 8  & 0xFF;
+    col[2] = in       & 0xFF;
   }
 }
 
 //relatively change white brightness, minumum A=5
 void mAnimatorLight::relativeChangeWhite(int8_t amount, byte lowerBoundary)
 {
-  int16_t new_val = (int16_t) pCONT_lAni->col[3] + amount;
+  int16_t new_val = (int16_t) col[3] + amount;
   if (new_val > 0xFF) new_val = 0xFF;
   else if (new_val < lowerBoundary) new_val = lowerBoundary;
-  pCONT_lAni->col[3] = new_val;
+  col[3] = new_val;
 }
 
 void mAnimatorLight::colorHStoRGB(uint16_t hue, byte sat, byte* rgb) //hue, sat to rgb
@@ -2830,7 +2863,7 @@ void mAnimatorLight::colorHStoRGB(uint16_t hue, byte sat, byte* rgb) //hue, sat 
     case 4: rgb[0]=t,rgb[1]=p,rgb[2]=255;break;
     case 5: rgb[0]=255,rgb[1]=p,rgb[2]=q;
   }
-  if (pCONT_lAni->useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY) pCONT_lAni->colorRGBtoRGBW(pCONT_lAni->col);
+  if (useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY) colorRGBtoRGBW(col);
 }
 
 void mAnimatorLight::colorCTtoRGB(uint16_t mired, byte* rgb) //white spectrum to rgb
@@ -2853,7 +2886,7 @@ void mAnimatorLight::colorCTtoRGB(uint16_t mired, byte* rgb) //white spectrum to
   } else {
     rgb[0]=237;rgb[1]=255;rgb[2]=239;//150
   }
-  if (pCONT_lAni->useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY) pCONT_lAni->colorRGBtoRGBW(pCONT_lAni->col);
+  if (useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY) colorRGBtoRGBW(col);
 }
 
 
@@ -2862,7 +2895,7 @@ void mAnimatorLight::Init_WLED(void)
 
   pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE); // NeoPixel animation management object
 
-  pCONT_lAni->ledCount = 50;
+  ledCount = 50;
 
   mEffects = new WS2812FX();
 
@@ -2874,16 +2907,12 @@ void mAnimatorLight::Init_WLED(void)
   int heapPreAlloc = ESP.getFreeHeap();
   DEBUG_PRINT("heap ");
   DEBUG_PRINTLN(ESP.getFreeHeap());
-  // registerUsermods();
 
-  mEffects->init(0, pCONT_lAni->ledCount, 0);
+  mEffects->init(0, ledCount, 0);
   mEffects->setBrightness(0);
 
   DEBUG_PRINT("LEDs inited. heap usage ~");
   DEBUG_PRINTLN(heapPreAlloc - ESP.getFreeHeap());
-
-  // Initialize NeoPixel Strip and button
-  // mEffects->setShowCallback(handleOverlayDraw);
 
   colorUpdated(NOTIFIER_CALL_MODE_INIT);
   
@@ -2892,19 +2921,14 @@ void mAnimatorLight::Init_WLED(void)
   //mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
   mEffects->setEffectConfig(FX_MODE_FADE, 100, 100, 11);
 
-  delay(4000);
-
 }
 
 
 void mAnimatorLight::SubTask_WLED_Animation()
 {
   
-// DEBUG_LINE_HERE;
   handleTransitions();
-// DEBUG_LINE_HERE;
   mEffects->service();
-// DEBUG_LINE_HERE;
 
 }
 
@@ -2921,33 +2945,33 @@ void mAnimatorLight::resetTimebase()
 
 void mAnimatorLight::toggleOnOff()
 {
-  if (pCONT_lAni->bri == 0)
+  if (bri == 0)
   {
-    pCONT_lAni->bri = pCONT_lAni->briLast;
+    bri = briLast;
   } else
   {
-    pCONT_lAni->briLast = pCONT_lAni->bri;
-    pCONT_lAni->bri = 0;
+    briLast = bri;
+    bri = 0;
   }
 }
 
 
 void mAnimatorLight::setAllLeds()
 {
-  if (!pCONT_lAni->realtimeMode || !pCONT_lAni->arlsForceMaxBri)
+  if (!realtimeMode || !arlsForceMaxBri)
   {
-    double d = pCONT_lAni->briT*pCONT_lAni->briMultiplier;
+    double d = briT*briMultiplier;
     int val = d/100;
     if (val > 255) val = 255;
     mEffects->setBrightness(val);
   }
-  if (pCONT_lAni->useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY)
+  if (useRGBW && mEffects->rgbwMode == RGBW_MODE_LEGACY)
   {
-    pCONT_lAni->colorRGBtoRGBW(pCONT_lAni->colT);
-    pCONT_lAni->colorRGBtoRGBW(pCONT_lAni->colSecT);
+    colorRGBtoRGBW(colT);
+    colorRGBtoRGBW(colSecT);
   }
-  mEffects->setColor(0, pCONT_lAni->colT[0], pCONT_lAni->colT[1], pCONT_lAni->colT[2], pCONT_lAni->colT[3]);
-  mEffects->setColor(1, pCONT_lAni->colSecT[0], pCONT_lAni->colSecT[1], pCONT_lAni->colSecT[2], pCONT_lAni->colSecT[3]);
+  mEffects->setColor(0, colT[0], colT[1], colT[2], colT[3]);
+  mEffects->setColor(1, colSecT[0], colSecT[1], colSecT[2], colSecT[3]);
 }
 
 
@@ -2961,24 +2985,24 @@ void mAnimatorLight::setValuesFromMainSeg()
   WS2812FX::Segment& seg = mEffects->getSegment(mEffects->getMainSegmentId());
   colorFromUint32(seg.colors[0]);
   colorFromUint32(seg.colors[1], true);
-  pCONT_lAni->effectCurrent = seg.mode;
-  pCONT_lAni->effectSpeed = seg.speed;
-  pCONT_lAni->effectIntensity = seg.intensity;
-  pCONT_lAni->effectPalette = seg.palette;
+  effectCurrent = seg.mode;
+  effectSpeed = seg.speed;
+  effectIntensity = seg.intensity;
+  effectPalette = seg.palette;
 }
 
 void mAnimatorLight::setLedsStandard(bool justColors)
 {
   for (byte i=0; i<4; i++)
   {
-    pCONT_lAni->colOld[i] = pCONT_lAni->col[i];
-    pCONT_lAni->colT[i] = pCONT_lAni->col[i];
-    pCONT_lAni->colSecOld[i] = pCONT_lAni->colSec[i];
-    pCONT_lAni->colSecT[i] = pCONT_lAni->colSec[i];
+    colOld[i] = col[i];
+    colT[i] = col[i];
+    colSecOld[i] = colSec[i];
+    colSecT[i] = colSec[i];
   }
   if (justColors) return;
-  pCONT_lAni->briOld = pCONT_lAni->bri;
-  pCONT_lAni->briT = pCONT_lAni->bri;
+  briOld = bri;
+  briT = bri;
   setAllLeds();
 }
 
@@ -2987,10 +3011,10 @@ bool mAnimatorLight::colorChanged()
 {
   for (byte i=0; i<4; i++)
   {
-    if (pCONT_lAni->col[i] != pCONT_lAni->colIT[i]) return true;
-    if (pCONT_lAni->colSec[i] != pCONT_lAni->colSecIT[i]) return true;
+    if (col[i] != colIT[i]) return true;
+    if (colSec[i] != colSecIT[i]) return true;
   }
-  if (pCONT_lAni->bri != pCONT_lAni->briIT) return true;
+  if (bri != briIT) return true;
   return false;
 }
 
@@ -3003,16 +3027,16 @@ void mAnimatorLight::colorUpdated(int callMode)
       callMode != NOTIFIER_CALL_MODE_DIRECT_CHANGE && 
       callMode != NOTIFIER_CALL_MODE_NO_NOTIFY) mEffects->applyToAllSelected = true; //if not from JSON api, which directly sets segments
   
-  bool fxChanged = mEffects->setEffectConfig(pCONT_lAni->effectCurrent, pCONT_lAni->effectSpeed, pCONT_lAni->effectIntensity, pCONT_lAni->effectPalette);
+  bool fxChanged = mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
   bool colChanged = colorChanged();
 
  // Serial.println("HERE");
 
   if (fxChanged || colChanged)
   {
-    if (pCONT_lAni->realtimeTimeout == UINT32_MAX) pCONT_lAni->realtimeTimeout = 0;
-    if (pCONT_lAni->isPreset) {pCONT_lAni->isPreset = false;}
-        else {pCONT_lAni->currentPreset = -1;}
+    if (realtimeTimeout == UINT32_MAX) realtimeTimeout = 0;
+    if (isPreset) {isPreset = false;}
+        else {currentPreset = -1;}
         
     //notify(callMode);
     
@@ -3038,45 +3062,45 @@ void mAnimatorLight::colorUpdated(int callMode)
   // }
   for (byte i=0; i<4; i++)
   {
-    pCONT_lAni->colIT[i] = pCONT_lAni->col[i];
-    pCONT_lAni->colSecIT[i] = pCONT_lAni->colSec[i];
+    colIT[i] = col[i];
+    colSecIT[i] = colSec[i];
   }
-  if (pCONT_lAni->briT == 0)
+  if (briT == 0)
   {
     setLedsStandard(true);                                            //do not color transition if starting from off
     if (callMode != NOTIFIER_CALL_MODE_NOTIFICATION) resetTimebase(); //effect start from beginning
   }
 
-  pCONT_lAni->briIT = pCONT_lAni->bri;
-  if (pCONT_lAni->bri > 0) pCONT_lAni->briLast = pCONT_lAni->bri;
+  briIT = bri;
+  if (bri > 0) briLast = bri;
 
   //deactivate nightlight if target brightness is reached
   // if (bri == nightlightTargetBri && callMode != NOTIFIER_CALL_MODE_NO_NOTIFY) nightlightActive = false;
   
-  if (pCONT_lAni->fadeTransition)
+  if (fadeTransition)
   {
     //set correct delay if not using notification delay
-    if (callMode != NOTIFIER_CALL_MODE_NOTIFICATION && !pCONT_lAni->jsonTransitionOnce) pCONT_lAni->transitionDelayTemp = pCONT_lAni->transitionDelay;
-    pCONT_lAni->jsonTransitionOnce = false;
-    if (pCONT_lAni->transitionDelayTemp == 0) {setLedsStandard(); mEffects->trigger(); return;}
+    if (callMode != NOTIFIER_CALL_MODE_NOTIFICATION && !jsonTransitionOnce) transitionDelayTemp = transitionDelay;
+    jsonTransitionOnce = false;
+    if (transitionDelayTemp == 0) {setLedsStandard(); mEffects->trigger(); return;}
     
-    if (pCONT_lAni->transitionActive)
+    if (transitionActive)
     {
       for (byte i=0; i<4; i++)
       {
-        pCONT_lAni->colOld[i] = pCONT_lAni->colT[i];
-        pCONT_lAni->colSecOld[i] = pCONT_lAni->colSecT[i];
+        colOld[i] = colT[i];
+        colSecOld[i] = colSecT[i];
       }
-      pCONT_lAni->briOld = pCONT_lAni->briT;
-      pCONT_lAni->tperLast = 0;
+      briOld = briT;
+      tperLast = 0;
     }
     mEffects->setTransitionMode(true);
-    pCONT_lAni->transitionActive = true;
-    pCONT_lAni->transitionStartTime = millis();
+    transitionActive = true;
+    transitionStartTime = millis();
   } else
   {
     setLedsStandard();
-    mEffects->trigger();
+    mEffects->trigger();  //run now
   }
 }
 
@@ -3085,25 +3109,25 @@ void mAnimatorLight::colorUpdated(int callMode)
 void mAnimatorLight::handleTransitions()
 {
   
-  if (pCONT_lAni->transitionActive && pCONT_lAni->transitionDelayTemp > 0)
+  if (transitionActive && transitionDelayTemp > 0)
   {
-    float tper = (millis() - pCONT_lAni->transitionStartTime)/(float)pCONT_lAni->transitionDelayTemp;
+    float tper = (millis() - transitionStartTime)/(float)transitionDelayTemp;
     if (tper >= 1.0)
     {
       mEffects->setTransitionMode(false);
-      pCONT_lAni->transitionActive = false;
-      pCONT_lAni->tperLast = 0;
+      transitionActive = false;
+      tperLast = 0;
       setLedsStandard();
       return;
     }
-    if (tper - pCONT_lAni->tperLast < 0.004) return;
-    pCONT_lAni->tperLast = tper;
+    if (tper - tperLast < 0.004) return;
+    tperLast = tper;
     for (byte i=0; i<4; i++)
     {
-      pCONT_lAni->colT[i] = pCONT_lAni->colOld[i]+((pCONT_lAni->col[i] - pCONT_lAni->colOld[i])*tper);
-      pCONT_lAni->colSecT[i] = pCONT_lAni->colSecOld[i]+((pCONT_lAni->colSec[i] - pCONT_lAni->colSecOld[i])*tper);
+      colT[i] = colOld[i]+((col[i] - colOld[i])*tper);
+      colSecT[i] = colSecOld[i]+((colSec[i] - colSecOld[i])*tper);
     }
-    pCONT_lAni->briT    = pCONT_lAni->briOld   +((pCONT_lAni->bri    - pCONT_lAni->briOld   )*tper);
+    briT    = briOld   +((bri    - briOld   )*tper);
     
     setAllLeds();
   }
@@ -3128,16 +3152,8 @@ const uint16_t customMappingSize = sizeof(customMappingTable)/sizeof(uint16_t); 
 #endif
 
 
-
-
-// Temporary method that tracks indexing, to be replaced with single dlist later
-int8_t mAnimatorLight::GetEffectsModeIDbyName(const char* c){
-  if(c=='\0') return -1;
-  if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE; }
-  return -1;
-}
-const char* mAnimatorLight::GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen){
+const char* mAnimatorLight::GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen)
+{
   pCONT_sup->GetTextIndexed_P(buffer, buflen, id, PM_FX_MODES_NAMES_CTR);
   return buffer;
 }

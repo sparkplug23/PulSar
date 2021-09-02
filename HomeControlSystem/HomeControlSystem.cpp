@@ -601,7 +601,12 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
   #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_
-  // pinMode(21, OUTPUT);
+  // pinMode(21, OUTPUT);++
+
+  #ifndef USE_MODULE_NETWORK_WIFI
+  WiFi.mode(WIFI_OFF);
+  btStop();
+  #endif // USE_MODULE_NETWORK_WIFI
 
 }
 

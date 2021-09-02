@@ -60,7 +60,7 @@ void JsonBuilder::Start()
 {
   // PRINT_FLUSHED("JsonBuilder::Start()");
   if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) {  
-    PRINT_FLUSHED("JsonBuilder::return()");
+    //PRINT_FLUSHED("JsonBuilder::return()");
     return;
   }  
   // PRINT_FLUSHED("memset::start()");
