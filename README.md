@@ -2,13 +2,13 @@
 
 Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity, is intended to allow easy integration of additional sensors or drivers as the project expands. 
 
-*The release of this project into the public domain is to allow easy sharing with early adopters, who are helping me to test and debug this project for future release for anyone to use.*
+*The current release of this project into the public domain is to allow easy sharing with early adopters, who are helping to test and debug this project for future public release.*
 
-Note: The documentation on this code is sparse, as there are still sweeping changes being made to the firmware. I will strive to credit all libraries used and to those I owe my inspiration from, and eventually write a detailed documentation on how to install, use and maintain this project.
+Note: The documentation on this project is sparse, as there are still significant changes being made to the firmware. I will strive to credit all libraries used and to those I owe my inspiration from, and eventually write a detailed documentation on how to install, use and maintain this project.
 
 ## Credits
 
-This project started as a bespoke controller for home heating, and slowly grew with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped jump start the projects scope, and in the near term will probably include many simularities with Tasmota, but over time I aim to diverge this project into its own identity as I have time to develop it further. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Furthermore, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
+This project started as a bespoke controller for home heating, and slowly expanded with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped jump start the projects scope, and in the near term will probably include many simularities with Tasmota, but over time I aim to diverge this project into its own identity as I have time to develop it further. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Furthermore, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
 
 ### Libraries Used (included in project)
 Libraries used with Aurora are:
