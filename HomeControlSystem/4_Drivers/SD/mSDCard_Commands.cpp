@@ -101,6 +101,23 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
     sdcard_status.isopened ^= 1; 
     AddLog(LOG_LEVEL_TEST, PSTR("CommandSet_LoggingState sdcard_status.isopened == 2, %d"),sdcard_status.isopened);
 
+    /**
+     * temp fix, when opening, try set the internal time from gps time once
+     * */
+    if(sdcard_status.isopened)
+    {
+      pCONT_time->SetUTCTime(
+                    pCONT_gps->gps_result_stored.dateTime.year,
+                    pCONT_gps->gps_result_stored.dateTime.month,
+                    pCONT_gps->gps_result_stored.dateTime.day,
+                    pCONT_gps->gps_result_stored.dateTime.hours,
+                    pCONT_gps->gps_result_stored.dateTime.minutes,
+                    pCONT_gps->gps_result_stored.dateTime.seconds
+                  );
+
+    }
+
+
   }else
   {
     sdcard_status.isopened = state;
