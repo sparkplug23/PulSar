@@ -745,14 +745,25 @@ uint8_t mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame(uint8_t json_met
     uint32_t timeofday_seconds = 
       (pCONT_gps->gps_result_stored.dateTime.hours*3600) +
       (pCONT_gps->gps_result_stored.dateTime.minutes*60) +
-      (pCONT_gps->gps_result_stored.dateTime.seconds*1000);
+      (pCONT_gps->gps_result_stored.dateTime.seconds);
 
     uint32_t tod_millis = 
       (timeofday_seconds*1000) + 
       pCONT_gps->gps_result_stored.dateTime_ms();
 
     JBI->Add("tms",  tod_millis);
-    JBI->Add_FV("t",  "%02d:%02d:%02d-%03d", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
+
+    JBI->Level_Start("Gt");
+      JBI->Add("h", pCONT_gps->gps_result_stored.dateTime.hours);
+      JBI->Add("m", pCONT_gps->gps_result_stored.dateTime.minutes);
+      JBI->Add("s", pCONT_gps->gps_result_stored.dateTime.seconds);
+      JBI->Add("i", pCONT_gps->gps_result_stored.dateTime_ms());
+    JBI->Level_End();
+
+
+
+
+    // JBI->Add_FV("t",  "%02d:%02d:%02d-%03d", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
   JBI->Level_End();
   #endif // USE_MODULE_DRIVERS_GPS
 
