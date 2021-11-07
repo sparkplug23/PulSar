@@ -182,7 +182,7 @@ class mUltraSonicSensor :
           uint16_t measure_rate_ms = 10000;
           uint16_t blocking_time_ms = 5000;
           uint16_t duration_limit_max = 50000;
-          uint16_t duration_limit_min = 30000;
+          uint16_t duration_limit_min = 100;
         }settings;
     }ultrasonic;
 

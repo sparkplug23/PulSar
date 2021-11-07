@@ -1,6 +1,6 @@
 #include "../../mAnimatorLight.h"
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
@@ -13,6 +13,8 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester(){
   for(uint16_t index=0; index<test_strip_size; index++ ){
     animation_colours[index].DesiredColour = RgbColor(0);
   }
+
+uint8_t counter_test= 0;// tmp fix, function needs changing, prevously in header
 
   // set one pixel on
   animation_colours[counter_test].DesiredColour = RgbColor(0,0,255);

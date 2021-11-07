@@ -94,6 +94,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     // Serial.printf("switch_index=%d\n\r",switch_index);
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
+    #endif
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();
@@ -380,6 +383,15 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
     pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID] = new mADC_I2S_Sampler();
   #endif
+  #ifdef USE_MODULE_SENSORS_LSM303D
+    pModule[EM_MODULE_SENSORS_LSM303D_ID] = new mSensorsLSM303D();
+  #endif
+  #ifdef USE_MODULE_SENSORS_L3G
+    pModule[EM_MODULE_SENSORS_L3G_ID] = new mSensorsL3G();
+  #endif
+  #ifdef USE_MODULE_SENSORS_MPU9250
+    pModule[EM_MODULE_SENSORS_MPU9250_ID] = new mSensorsMPU9250();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
@@ -422,6 +434,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
     pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID] = new mGPS_SD_Logger();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+    pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID] = new mSDLoggerIMURadiationPattern();
   #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();

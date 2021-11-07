@@ -649,7 +649,7 @@ const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses
 
 #ifdef ESP8266
 // Version 5.2 allow for more flash space
-const uint8_t CFG_ROTATES = 8;          // Number of flash sectors used (handles uploads)
+const uint8_t CFG_ROTATES = 1;//8;          // Number of flash sectors used (handles uploads)
 
 uint32_t settings_location = SETTINGS_LOCATION;
 // uint32_t settings_crc = 0;
@@ -1221,6 +1221,9 @@ struct AnimationSettings{
   uint16_t animation_transition_time_ms; //TBD save as seconds
   uint32_t animation_transition_rate_ms; //TBD save as seconds
   uint8_t transition_pixels_to_update_as_number;
+
+  uint8_t xmas_controller_params[10];
+
 };
 
 
@@ -1254,7 +1257,7 @@ struct Template_Config{
 
 struct SystemName{ 
   char          friendly[33]; // Used in titles, set by templates "FriendlyName"
-  char          device[30];   // USed as mqtt topic by default, set by templates "Name"
+  char          device[50];   // USed as mqtt topic by default, set by templates "Name"
 };
 
 struct SettingsMQTT{
@@ -1326,14 +1329,18 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
 #endif // esp32
 
 
+// struct SYSCFG_HEADER
+
+
+
 struct SYSCFG {
   // Header (partial loading during boot)
-  uint16_t      cfg_holder;                // 000 v6 header
-  uint16_t      cfg_size;                  // 002
-  unsigned long save_flag;                 // 004
-  unsigned long version;                   // 008
-  uint16_t      bootcount;                 // 00C
-  uint16_t      cfg_crc;                   // 00E
+  uint16_t      cfg_holder = 0;                // 000 v6 header
+  uint16_t      cfg_size = 0;                  // 002
+  unsigned long save_flag = 0;                 // 004
+  unsigned long version = 0;                   // 008
+  uint16_t      bootcount = 1234;                 // 00C
+  uint16_t      cfg_crc = 0;                   // 00E
   // Body
   // System/Core
   uint16_t      bootcount_errors_only;     // E01
@@ -1488,6 +1495,12 @@ struct SYSCFG {
   uint32_t      cfg_crc32;                 // FFC
 } Settings;
 
+
+void TestSettingsLoad();
+
+void TestSettings_ShowLocal_Header();
+
+void SettingsMerge(SYSCFG* saved, SYSCFG* new_settings);
 
 
 
@@ -1658,6 +1671,8 @@ uint8_t latching_relay_pulse = 0;           // Latching relay pulse timer
 uint8_t backlog_index = 0;                  // Command backlog index
 uint8_t backlog_pointer = 0;                // Command backlog pointer
 uint8_t blinkspeed = 1;                     // LED blink rate
+
+uint8_t settings_save_decounter_seconds_delayed_save = 0;
 
 
 // These are used only at runtime, and not saved eg TasmotaGlobals

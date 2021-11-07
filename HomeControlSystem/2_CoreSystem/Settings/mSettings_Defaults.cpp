@@ -7,12 +7,12 @@
 void mSettings::SettingsDefault(void)
 {
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   
   Settings.flag_system.stop_flash_rotate = true;
   stop_flash_rotate = true;
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   // Init new devicename buffer
   DeviceNameListI->Init(
     Settings.device_name_buffer.name_buffer,
@@ -22,32 +22,37 @@ void mSettings::SettingsDefault(void)
     DEVICENAMEBUFFER_NAME_INDEX_LENGTH
   );
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
    //Serial.println("SettingsDefault");
-  //  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
-  DEBUG_LINE_HERE;
+   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+  // DEBUG_LINE_HERE;
    SystemSettings_DefaultHeader();
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   //  Serial.println(DEBUG_INSERT_PAGE_BREAK "SystemSettings_DefaultBody");
    SystemSettings_DefaultBody();
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
     #endif // ENABLE_LOG_LEVEL_INFO
-    pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
-    boot_status.module_template_used = true;
+
+    // pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
+    // boot_status.module_template_used = true;
+    // AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(D_LOG_MEMORY D_LOAD " DISABLED Loading any progmem templates"));
+
+
+
     DEBUG_LINE;
     // Clear module defaults
     pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
     DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
     
-  DEBUG_LINE_HERE;
-    pCONT_set->SettingsSave(2);
+  // DEBUG_LINE_HERE;
+  //   pCONT_set->SettingsSave(2);
     
-  DEBUG_LINE_HERE;
-    DEBUG_LINE;
+  // DEBUG_LINE_HERE;
+  //   DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
     #endif// ENABLE_LOG_LEVEL_INFO
@@ -64,6 +69,8 @@ void mSettings::SystemSettings_DefaultHeader(void)
   Settings.save_flag = 0;
   Settings.version = PROJECT_VERSION;
   Settings.bootcount = 0;
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Resetting \t\t\tSettings.bootcount"));
+  // delay(5000);
   Settings.cfg_crc = 0;
 }
 
@@ -206,7 +213,7 @@ void mSettings::SystemSettings_DefaultBody_MQTT(){
 void mSettings::SystemSettings_DefaultBody_TelePeriods(){
 
 //make mqtt commands to allow me to tweak and debug 
-  Settings.sensors.ifchanged_secs = 10;
+  Settings.sensors.ifchanged_secs = SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS;
   Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
   Settings.sensors.teleperiod_secs = 120;
   Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default

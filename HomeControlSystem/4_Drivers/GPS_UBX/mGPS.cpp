@@ -42,7 +42,7 @@ int8_t mGPS::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:
 
       #ifndef DISABLE_SERIAL_LOGGING
-      Splash_Latest_Fix(&Serial);
+      // Splash_Latest_Fix(&Serial);
       #endif
     break;
     /************
@@ -141,6 +141,45 @@ void mGPS::ReadGPSStream()
           }
             gps_result_stored |= gps_result_parsing; // Save reading
           // Serial.printf("status=%d\n\r",gps_result_parsing.status);
+
+          /**
+           * Manually update ISR Safe values into struct for sd output
+           * */
+          my_gps_vals.lat = gps_result_stored.latitudeL();
+          my_gps_vals.lon = gps_result_stored.longitudeL();
+          my_gps_vals.alt = gps_result_stored.altitude_cm();
+          my_gps_vals.speed = (uint16_t)gps_result_stored.speed()*100; //float to int
+          my_gps_vals.heading_cd = gps_result_stored.heading_cd();
+          my_gps_vals.geoidHeight_cm = gps_result_stored.geoidHeight_cm();
+          my_gps_vals.hours = gps_result_stored.dateTime.hours+1; //add daylight savings
+          my_gps_vals.minutes = gps_result_stored.dateTime.minutes;
+          my_gps_vals.seconds = gps_result_stored.dateTime.seconds;
+          my_gps_vals.dateTime_ms = gps_result_stored.dateTime_ms();
+
+
+          pCONT_uart->special_json_part_of_gps_buflen = sprintf( pCONT_uart->special_json_part_of_gps_buffer,
+            "B]],\"G\":[%d,%d,%d,%d,%d,%d,%d,%d]}@", 
+            my_gps_vals.lat,
+            my_gps_vals.lon,
+            my_gps_vals.alt,
+            my_gps_vals.speed,
+            my_gps_vals.hours,
+            my_gps_vals.minutes,
+            my_gps_vals.seconds,
+            my_gps_vals.dateTime_ms/100
+          );
+
+
+//       if(sequence_test_global == 0){
+//         JBI->Add("DeviceName", DEVICENAME_FRIENDLY_CTR);
+//       }
+//       JBI->Add("N", sequence_test_global++);
+          
+    // char special_json_part_of_gps_buffer[300];
+    // uint16_t special_json_part_of_gps_buflen = 0;
+
+
+
 
           
             //if first fix with valud time, use this to update internal time

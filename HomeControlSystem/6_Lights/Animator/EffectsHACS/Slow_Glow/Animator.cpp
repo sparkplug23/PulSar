@@ -1,7 +1,10 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+// IMPORTANT: STORAGE of animation_colours may only be needed for certain animation types (ie this one) and otherwise can be produced on each loop like WLED
+// in that case, I can reduce hardcoded ram usage (or make it dynamic) for only when needed. Otherwise retrieve from animator output
 
 
 // /**************************************************************************************************************************************************************

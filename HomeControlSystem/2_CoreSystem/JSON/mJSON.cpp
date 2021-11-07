@@ -38,6 +38,9 @@ JsonBuilder* JsonBuilder::GetInstance(){
 char* JsonBuilder::GetBufferPtr(){
   return writer.buffer;
 }
+char* JsonBuilder::GetPtr(){ // To make it the same as BufferWriter
+  return writer.buffer;
+}
 uint16_t JsonBuilder::GetLength(){
   return *writer.length;
 }
@@ -65,6 +68,24 @@ void JsonBuilder::Start()
   }  
   // PRINT_FLUSHED("memset::start()");
   memset(writer.buffer,0,writer.buffer_size);
+  // PRINT_FLUSHED("memset::end()");
+  // Serial.println(writer.buffer_size);
+  // Serial.println(DATA_BUFFER_PAYLOAD_MAX_LENGTH); Serial.flush();
+  *writer.length = 0;
+  *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s","{");
+  // PRINT_FLUSHED("JsonBuilder::Start::end()");
+}
+
+// for speed
+void JsonBuilder::Start_NoMemClear()
+{
+  // PRINT_FLUSHED("JsonBuilder::Start()");
+  if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)) {  
+    //PRINT_FLUSHED("JsonBuilder::return()");
+    return;
+  }  
+  // PRINT_FLUSHED("memset::start()");
+  // memset(writer.buffer,0,writer.buffer_size);
   // PRINT_FLUSHED("memset::end()");
   // Serial.println(writer.buffer_size);
   // Serial.println(DATA_BUFFER_PAYLOAD_MAX_LENGTH); Serial.flush();

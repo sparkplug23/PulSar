@@ -1,7 +1,7 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random(){

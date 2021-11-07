@@ -486,6 +486,7 @@ void setup(void)
 // DEBUG_HOLD_POINT;
 
 
+  // delay(10000);
 
 
   #ifdef USE_SERIAL_ALTERNATE_TX
@@ -526,44 +527,71 @@ void setup(void)
   // Load config from memory
  // #ifndef DEBUG_NUM1
 
-  DEBUG_LINE_HERE;
+  //DEBUG_LINE_HERE;
 
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before"));
+  // pCONT_set->TestSettingsLoad();
+  // pCONT_set->TestSettings_ShowLocal_Header();
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before1"));
+  // delay(1000);
+
+  AddLog(LOG_LEVEL_INFO, PSTR("Loading minimal defaults"));
   pCONT_set->SettingsDefault(); //preload minimal required
+
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after"));
+  // pCONT_set->TestSettingsLoad();
+  // pCONT_set->TestSettings_ShowLocal_Header();
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after1"));
+  // delay(1000);
   
-  // DEBUG_HOLD_POINT;
 
  // #endif // DEBUG_NUM1
-  #ifdef ENABLE_SETTINGS_STORAGE
+  // #ifdef ENABLE_SETTINGS_STORAGE
+  AddLog(LOG_LEVEL_INFO, PSTR("Loading settings from saved memory"));
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
-  #endif
+  // #endif
+
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before4"));
+  // pCONT_set->TestSettingsLoad();
+  // pCONT_set->TestSettings_ShowLocal_Header();
+  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after4"));
+
+  // Test save and read back
+  // pCONT_set->Settings.bootcount = 13;
+  // pCONT_set->SettingsSave(1);
+
+  // pCONT_set->TestSettingsLoad();
+
+  // DEBUG_HOLD_POINT;
+  // delay(10000);
 
   // if (1 == RtcReboot.fast_reboot_count) {      // Allow setting override only when all is well
   //   UpdateQuickPowerCycle(true);
   // }
-
    
   pCONT->Tasker_Interface(FUNC_POINTER_INIT); // confirgure any memory address needed as part of module init or templates
   
-  #ifdef FORCE_TEMPLATE_LOADING
+  // #ifdef FORCE_TEMPLATE_LOADING
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
   #endif
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // loading module, only interface modules will have these
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
   // load
-  // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
-  #endif
+  // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
+  // #else
+  // #warning "FORCE_TEMPLATE_LOADING is disabled, trying to use settings may result in improper loaded values"
+  // #endif
   
   // Set boot method
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
-  pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
+  pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
   
-
   // Init the GPIOs
   pCONT_pins->GpioInit();
   // Start pins in modules
@@ -575,13 +603,15 @@ void setup(void)
   // Run system functions 
   pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_INIT);
   // Preload any templates defined in mFirmwareCustom.h
-  // pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD); // Note both below may need checks to ignore if this occured
   // Load the minimal default settings in modules (hard coded) before loading any stored user values
   pCONT->Tasker_Interface(FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES); // load the minimal
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
-  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD);//load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
+  /**
+   * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
+   * */
+  pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);//load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_AFTER_INIT)
   // Configure sensor/drivers to values desired for modules
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
@@ -605,7 +635,9 @@ void setup(void)
 
   #ifndef USE_MODULE_NETWORK_WIFI
   WiFi.mode(WIFI_OFF);
+  #ifdef ESP32
   btStop();
+  #endif // esp32
   #endif // USE_MODULE_NETWORK_WIFI
 
 }
@@ -648,6 +680,8 @@ void loop(void)
   pCONT_sup->loop_start_millis = millis();
   WDT_RESET();
   
+
+        // AddLog(LOG_LEVEL_INFO, PSTR("loop"));
 
   LoopTasker();
     

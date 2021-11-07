@@ -1,6 +1,11 @@
 #ifndef MFIRMWARECUSTOM_SECRET_HOME_H
 #define MFIRMWARECUSTOM_SECRET_HOME_H
 
+/**
+ * TODO: Make a binder with all wiring diagrams and ideas as I move forward with designs
+ * 
+ * */
+
 // #ifdef USER_MICHAEL
 
 /*********************************************************************************************\
@@ -11,7 +16,7 @@
 // #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
-#define FORCE_TEMPLATE_LOADING
+//#define FORCE_TEMPLATE_LOADING
 #define USE_MODULE_CORE_RULES
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -174,7 +179,7 @@ Bathroom
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
@@ -246,7 +251,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight1"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 1 [Main Kitchen]"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
   #define USE_MODULE_SENSORS_SWITCHES
@@ -341,7 +346,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight2"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
   
-  // #define FORCE_TEMPLATE_LOADING
+  // //#define FORCE_TEMPLATE_LOADING
   // #define USE_MODULE_SENSORS_SWITCHES
   // #define USE_MODULE_CORE_RULES
   
@@ -511,7 +516,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight3"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 VirtualSwt"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_SWITCHES
@@ -580,7 +585,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight4"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Cupboard Lights"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_SENSORS_BUTTONS
@@ -663,10 +668,10 @@ Bathroom
   #define DEVICENAME_CTR          "rgbcrystal3"
   #define DEVICENAME_FRIENDLY_CTR "Glass Box Lights"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 11
    
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define DISABLE_WEBSERVER
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -718,7 +723,7 @@ Bathroom
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
@@ -764,7 +769,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
      
   #define USE_MODULE_SENSORS_MOTION
@@ -812,7 +817,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbfridge"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fridge H801"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -863,7 +868,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbutility"
   #define DEVICENAME_FRIENDLY_CTR "RGB Utility H801"
 
-  // #define FORCE_TEMPLATE_LOADING
+  // //#define FORCE_TEMPLATE_LOADING
   // //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
   
   // #define USE_SERIAL_ALTERNATE_TX
@@ -875,7 +880,7 @@ Bathroom
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
@@ -931,7 +936,7 @@ Bathroom
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
      
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1027,10 +1032,10 @@ Bathroom
   #define DEVICENAME_CTR            "rgbcrystal1"
   #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 11
    
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define DISABLE_WEBSERVER
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1090,7 +1095,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
   #define ESP32
     
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1191,11 +1196,34 @@ Bathroom
 /**
  * Testing without ultrasonics until I get stable inside/outside PIR working
  * */
+
+/**
+ * Via Connector: Ethernet 1
+ * w/o    
+ * o/w
+ * w/g
+ * bl/w
+ * w/bl
+ * g/w
+ * w/br  Gnd for Camera
+ * br/w  9v  for Camera
+ * 
+ * 
+ * Direct: connection to GPIO (ie future prototype boards)
+ * 
+ * 
+ * Future RJ11, 6 or 4 pin varient of telephone connector for simplier connections
+ * eg power,gnd, serial rx, tx (nextion)
+ * eg power, G, I2C, I2C
+ * eg power, G, Lux I2C needs 2, Motion
+ * 
+ * 
+ * */
 #ifdef DEVICE_LIVINGROOMSENSOR
   #define DEVICENAME_CTR          "livingroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Living Room Sensor"
     
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1213,7 +1241,7 @@ Bathroom
 
   // #define USE_MODULE_SENSORS_ANALOG
 
-  // #define USE_MODULE_SENSORS_ULTRASONICS
+  #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   
   #define D_DEVICE_SENSOR_CLIMATE "LivingRoom"
@@ -1231,6 +1259,8 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_ULTRASONICS
       "\"D8\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\"," //d0 to d3
       "\"D3\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\"," //d0 to d3
+      // "\"D8\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\","
@@ -1316,7 +1346,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1509,7 +1539,7 @@ Bathroom
   #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   // #define ENABLE_BUG_TRACING
@@ -1543,13 +1573,33 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
+      // // "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      // "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      // "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      // // "\"SD2\":\"" D_GPIO_FUNCTION_REL3_CTR      "\"," //GPIO10 INSTEAD OF
+      // "\"D7\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D4\":\"" D_GPIO_FUNCTION_REL3_CTR      "\"" //GPIO10 INSTEAD OF
+      // // "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+
+      /**
+       * putting WB relay into US pin, leaving US pin disconnected for now, probably until esp32 is used
+       * step1: Get furnace nodemcu working again, so I can check when its running
+       * step1b: create heating light for dads room, so he knows its running okay and heat (a few leds is enough) -- flashing = on, colour of tank middle only
+       * step2: get esp32 working with db18
+       * step3: move heating into esp32, with or without db sensors in the short term, simple relays only (backup system will be used for temps)
+       * */
       // "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\"," //upstairs to D6, unreliable
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"D5\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      
+      "\"SD3\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+
+      "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\"," //GPIO10 INSTEAD OF
       "\"D7\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D4\":\"" D_GPIO_FUNCTION_REL3_CTR      "\"" //GPIO10 INSTEAD OF
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1665,10 +1715,25 @@ Bathroom
 
 
 #ifdef DEVICE_HEATING_ESP32
+
+/**
+ * 1)
+ * Transition hardware, will use esp32_A for control of relays 
+ * Nodemcu will continue to measure db18 sensors
+ * 
+ * 2) Esp32_b will be introduced, to measure just the downstairs db sensors. At this point
+ * there will be 3 active esp's (1 esp8266 and 2 esp32)
+ * 
+ * 3) Adding the new downstairs sensors, into the primary esp32 heating
+ * 
+ * 4) Adding all sensors into primary esp32
+ * 
+ * */
+
   #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   // #define ENABLE_BUG_TRACING
@@ -1681,17 +1746,24 @@ Bathroom
   #define DISABLE_WEBSERVER
   #define ESP32
 
-  // #define USE_MODULE_CONTROLLER_HVAC
+  #define USE_MODULE_CONTROLLER_HVAC
+
+  //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on))
   
-  #define USE_MODULE_SENSORS_INTERFACE  
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_DS18B20
   
-  #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 7
+  #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8
   // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
+
+  #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_INV_CTR
+  #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1699,18 +1771,38 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+
+      "\"25\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
+      "\"26\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
+      "\"27\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      "\"14\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
+
+      // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
+
+      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
+
+      /**
+       * Upstairs
+       * */
+      "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
+
+
+      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
+      // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
+
       // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
       // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
       // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+
+/**
+ * 
+ * LDRs onto input only 30 gpios
+ * */
+
+
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1825,7 +1917,7 @@ Bathroom
   #define DEVICENAME_CTR          "doorbellwallchime"
   #define DEVICENAME_FRIENDLY_CTR "Doorbell Wall Chime"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
@@ -1927,7 +2019,7 @@ Bathroom
   #define DEVICENAME_CTR          "sidedoorlight"
   #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Light"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
    
   /*
@@ -1979,7 +2071,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D18:00:00\",\"OffTime\":\"00D07:00:00\"}"
   "}";
 
 
@@ -2238,18 +2330,15 @@ Bathroom
   #define DEVICENAME_CTR          "oiltank"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
 
-  #define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
   #define USE_MODULE_CONTROLLER_OILFURNACE
     
-  #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18B20
   
   #define USE_MODULE_SENSORS_ULTRASONICS
-  #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
 
-  #define ENABLE_DEVFEATURE_DELAYED_RESTART_WITHOTA_FOR_DEBUGGING
+  // #define ENABLE_DEVFEATURE_DELAYED_RESTART_WITHOTA_FOR_DEBUGGING
   // #define ENABLE_DEVFEATURE_OTAFALLBACK_WITH_FASTBOOT_DETECTED //to be done long term
 
   #define USE_MODULE_TEMPLATE
@@ -2271,7 +2360,6 @@ Bathroom
   #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
   #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
-  // #define D_DEVICE_FURNACE_ACTIVE_FRIENDLY_NAME_LONG "Furnace Power"
   
   #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
 
@@ -2283,9 +2371,6 @@ Bathroom
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_BUTTON_1_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -2313,14 +2398,15 @@ Bathroom
    * motion sensor
    */
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
-  #define USE_MODULE_SENSORS_ANALOG
+  #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_ANALOG
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_DS18B20
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BME //works
+  // #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2389,7 +2475,7 @@ Bathroom
   #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
   
-//   #define FORCE_TEMPLATE_LOADING
+//   //#define FORCE_TEMPLATE_LOADING
 //   #define SETTINGS_HOLDER 1
 
 //   // Core
@@ -2569,8 +2655,8 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D19:01:00\",\"OffTime\":\"00D05:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D19:00:00\",\"OffTime\":\"00D07:00:00\"},"
+    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D19:00:00\",\"OffTime\":\"00D07:00:00\"}"
   "}";
 
 
@@ -2741,7 +2827,7 @@ Bathroom
 #ifdef DEVICE_TREADMILL
   #define DEVICENAME_CTR          "treadmill"
   #define DEVICENAME_FRIENDLY_CTR "Camera OV2640 Tester"
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   
   #define USE_MODULE_ENERGY_INA219
   #define USE_MODULE_CONTROLLER_TREADMILL
@@ -2789,7 +2875,7 @@ Bathroom
   #define DEVICENAME_CTR          "shellydimmer_spareroom"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
   
   #define USE_MODULE_SENSORS_SWITCHES
@@ -2921,7 +3007,7 @@ Bathroom
   #define DEVICENAME_CTR          "masterbedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Master Bedroom Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
      
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -2991,7 +3077,7 @@ Bathroom
   #define DEVICENAME_CTR          "floorfan2"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 2"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_CORE_RULES
@@ -3025,7 +3111,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   /**
@@ -3044,7 +3130,42 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
+
+  // // New segments for joining everything together
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  // // HACS
+  // // WLED
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
+  /**
+   * The types of WLED includes, exclusive
+   * */
+  // WLED ran as its own "mode", but entirely using the WLED method as original merged into project. This is temp solution.
+  //#define USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+  // WLED built as new method into my code, which will eventually become the merged WLED/HACS solution (ie not its own mode, but simply "effects")
+  //#define USE_DEVFEATURE_WLED_METHOD_NEW_SEGMENTS_EFFECT_THAT_MERGES_HACS_AND_WLED_AS_EFFECT
+  
+
+
+  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
+
+
+
+  // #define ENABLE_DEVFEATURE_MUSIC_ANIMATION_OPTIONS // ie esp32 speaker with timed animations for xmas 2022
+
+
+
+
+  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  
+  // #define ENABLE_BOOT_OVERRIDE_INIT
+
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3234,7 +3355,7 @@ Bathroom
   #define DEVICENAME_CTR          "airpurifier"
   #define DEVICENAME_FRIENDLY_CTR "Air Purifier 1"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_CORE_RULES
@@ -3260,7 +3381,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroom_ceilingfan"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Ceiling Fan"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_CORE_RULES
@@ -3286,7 +3407,7 @@ Bathroom
   #define DEVICENAME_CTR          "floorfan1"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 1"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_CORE_RULES
@@ -3313,7 +3434,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomblinds"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Blinds"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
   // #define ENABLE_BUG_TRACING
@@ -3551,7 +3672,7 @@ Bathroom
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLFY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
       // #ifdef USE_MODULE_SENSORS_BME
       // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
@@ -3694,7 +3815,7 @@ Bathroom
   #define DEVICENAME_CTR          "immersionsensor"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -3819,7 +3940,7 @@ Bathroom
   #define DEVICENAME_CTR          "atticsensor"
   #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
   // #define USE_MODULE_SENSORS_BME

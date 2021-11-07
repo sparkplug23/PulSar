@@ -31,12 +31,14 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::Tasker %d"),digitalRead(22));
-    break;
-    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-     // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
+// pinMode(16, INPUT_PULLDOWN_16);
+//     AddLog(LOG_LEVEL_TEST, PSTR("mButtons::Tasker %d"),digitalRead(16));
 
     break;
+    // case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+    //  // AddLog(LOG_LEVEL_TEST, PSTR("mButtons::FUNC_EVENT_INPUT_STATE_CHANGED_ID"));
+
+    // break;
     /************
      * MQTT SECTION * 
     *******************/
@@ -89,6 +91,20 @@ bool mButtons::ModuleEnabled()
   return settings.buttons_found;
 }
 
+/**
+ * Esp8266 and esp32 will have different pull resistors
+ * */
+uint8_t mButtons::GetHardwareSpecificPullMethod(uint8_t real_pin)
+{
+
+  #ifdef ESP8266
+  return (real_pin == 16) ? INPUT_PULLDOWN_16 : INPUT_PULLUP;
+  #else //esp32
+  return INPUT_PULLUP;
+  #endif
+
+}
+
 void mButtons::Pre_Init(void)
 {
   
@@ -119,18 +135,33 @@ void mButtons::Pre_Init(void)
     if(pCONT_pins->PinUsed(GPIO_KEY1_ID, sensor_index))
     {
       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_ID, sensor_index);
-      pinMode(buttons[settings.buttons_found].pin, INPUT_PULLUP);
-      buttons[settings.buttons_found].active_state_value = HIGH; 
-      buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin); 
+
+      // THIS (buttons[settings.buttons_found].pin == 16) ? INPUT_PULLDOWN_16 : INPUT_PULLUP needs moved into a function, since it differs by esp8266 and esp32?
+      pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)); // Note: GPIO16/D0 inversion is pulldown, not up
+      buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;  //if pulls up normally, then grounded is on ie low
+      
+      
+      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // so its not "not pressed" on first call
+      // BUTTON_NOT_PRESSED_ID;
+      
+      // (digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
+      
+      
+      //  state = (digitalRead(buttons[settings.buttons_found].pin) != 
+      //  bitRead(key_inverted, button_index));
+    
+        // (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,sensor_index)) != bitRead(key_inverted, sensor_index));
+      
+      
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, sensor_index))
     {
       buttons[settings.buttons_found].pin = pCONT_pins->GetPin(GPIO_KEY1_INV_ID, sensor_index);
-      pinMode(buttons[settings.buttons_found].pin, INPUT_PULLUP);
+      pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin));
       SetInvertFlag(sensor_index); 
-      buttons[settings.buttons_found].active_state_value = LOW; 
-      buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);  
+      buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;
+      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_KEY1_NP_ID, sensor_index))
@@ -139,7 +170,7 @@ void mButtons::Pre_Init(void)
       pinMode(buttons[settings.buttons_found].pin, INPUT);
       SetPullupFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = HIGH; 
-      buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);  
+      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;  
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_KEY1_INV_NP_ID, sensor_index))
@@ -149,7 +180,7 @@ void mButtons::Pre_Init(void)
       SetPullupFlag(sensor_index); 
       SetInvertFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = LOW; 
-      buttons[settings.buttons_found].lastbutton = digitalRead(buttons[settings.buttons_found].pin);          
+      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;          
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }
   }
@@ -207,6 +238,10 @@ void mButtons::ButtonHandler(void)
     return; 
   } 
 
+  /**
+   * state is pressed or not, it is ntnot the logical level
+   * so inversion matters
+   * */
   uint8_t state = BUTTON_NOT_PRESSED_ID;
   uint8_t button_present = 0;
   uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;            // Extent hold time factor in case of iminnent Reset command
@@ -216,6 +251,9 @@ void mButtons::ButtonHandler(void)
  uint8_t maxdev = (pCONT_set->devices_present > MAX_KEYS) ? MAX_KEYS : pCONT_set->devices_present;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("maxdev=%d"),maxdev);
+
+//delay(1000);
+
 
  for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
    
@@ -231,7 +269,17 @@ void mButtons::ButtonHandler(void)
       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
     }
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("state=%d"),state);
+    // AddLog(LOG_LEVEL_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].lastbutton_active_state);
+
+          // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
+          // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
+          // // button_index,
+          
+          // state,
+          // buttons[button_index].lastbutton_active_state
+          
+          // );
+
 
     if (button_present) {
 
@@ -244,10 +292,20 @@ void mButtons::ButtonHandler(void)
       // {
 
       // new PRESS, was not previously pressed
-      if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton)) {
+      if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton_active_state)) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
         
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
+          // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
+          // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
+          // // button_index,
+          
+          // state,
+          // buttons[button_index].lastbutton_active_state
+          
+          // );
+
+
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_IMMEDIATE), button_index);
         //if (!SendKey(0, button_index, POWER_TOGGLE)) {  // Execute Toggle command via MQTT if ButtonTopic is set
             
         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), 
@@ -255,6 +313,8 @@ void mButtons::ButtonHandler(void)
                               state,
                               state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active"
         );
+
+        // delay(1000);
       
         #ifdef USE_MODULE_NETWORK_MQTT
         mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -351,7 +411,7 @@ void mButtons::ButtonHandler(void)
       // }//if serviced, single button, 4chan
     } // if (button_present)
     
-    buttons[button_index].lastbutton = state;
+    buttons[button_index].lastbutton_active_state = state;
   }
 }
 

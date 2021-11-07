@@ -159,12 +159,9 @@ void mAnimatorLight::init_mixer_defaults(){
   // Pushing default states for all flags
   for(uint8_t id=0; id<EFFECTS_FUNCTION_MIXER_MAX; id++){
 
-
-
     mixer.group[id].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false;
     mixer.group[id].brightness_higher_255 = 255*0.9;  
     mixer.group[id].brightness_lower_255  = 255*0.2;
-
 
   }
 
@@ -200,6 +197,7 @@ void mAnimatorLight::init_mixer_defaults(){
   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
+  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].starttime = {8, 1, 2, 3};
 
   // Group 1 "Random, slow, few"
   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flags.enable_force_preset_brightness_scaler = true;
@@ -359,7 +357,7 @@ void mAnimatorLight::init_mixer_defaults(){
   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = false;
   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
+  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;//EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 // Step thorugh
@@ -439,47 +437,41 @@ void mAnimatorLight::init_mixer_defaults(){
   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 
-// Animation idea #1
-// mostly dark colours, with pulsing some brighter for a "shimmer" look
+  // Animation idea #1
+  // mostly dark colours, with pulsing some brighter for a "shimmer" look
 
-// Animation idea #2
-// mostly dark colours, with pulsing some brighter for a "shimmer" look
-
-
-
-
-
-
+  // Animation idea #2
+  // mostly dark colours, with pulsing some brighter for a "shimmer" look
 
   mixer.enabled_mixer_count = EFFECTS_FUNCTION_MIXER_LENGTH_ID-1;//flasher_id;
   AddLog(LOG_LEVEL_INFO, PSTR("enabled_mixer_count=%d"),mixer.enabled_mixer_count);
-
 
 }
 
 
 
-void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
+void mAnimatorLight::SubTask_Flasher_Animate_Mixer()
+{
 
   uint8_t flag_reset = false;
 
   // Run every second
-  if(mTime::TimeReachedNonReset(&mixer.tSavedTrigger,1000)||pCONT_set->fSystemRestarted){
+  if(mTime::TimeReachedNonReset(&mixer.tSavedTrigger,1000)||pCONT_set->fSystemRestarted)
+  {
 
-    if(mixer.group[mixer.running_id].time_on_secs_decounter == 0){ 
+    if(mixer.group[mixer.running_id].time_on_secs_decounter == 0)
+    {
       
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter =%d END %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter,sizeof(mixer));
 
       uint8_t new_group_found = false;
       mqtthandler_mixer_teleperiod.flags.SendNow = true;
       
-      if(mixer.running_id++>=EFFECTS_FUNCTION_MIXER_LENGTH_ID){ // greater or "EQUAL", needed as its moving index before using it again
+      if(mixer.running_id++>=EFFECTS_FUNCTION_MIXER_LENGTH_ID)
+      { // greater or "EQUAL", needed as its moving index before using it again
         
-           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "mixer was %d|%d, reseting %d"),mixer.running_id,mixer.enabled_mixer_count,EFFECTS_FUNCTION_MIXER_01_ID);
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "mixer was %d|%d, reseting %d"),mixer.running_id,mixer.enabled_mixer_count,EFFECTS_FUNCTION_MIXER_01_ID);
 
-        
-        
-        
         mixer.running_id = EFFECTS_FUNCTION_MIXER_01_ID;
       }
   
@@ -490,28 +482,28 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
 // CheckBetween_Day_DateTimesShort(start,end, bit_val)
 
 
-      // if(!pCONT_time->CheckBetween_Day_DateTimesShort(&mixer.group[mixer.running_id].starttime,
-      //                                              &mixer.group[mixer.running_id].endtime)){
-      //   //add here to pass if the running_id is restricted
-      //   if(mixer.group[mixer.running_id].enable_skip_restricted_by_time){ //if true, skip
-      //     do{ //skip until we reach an acceptable mixer      
-      //       mixer.running_id++;     
-      //       if(mixer.running_id>+EFFECTS_FUNCTION_MIXER_LENGTH_ID){
-      //         mixer.running_id = EFFECTS_FUNCTION_MIXER_1_ID;
-      //       }
-      //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode = WHILE LO OP MULTIPLE");
-      //     }while(mixer.group[mixer.running_id].enable_skip_restricted_by_time);
-      //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode");
-      //     //mixer.times.skip_restricted_by_time_isactive = true;
-      //   }else{
-      //     //mixer.times.skip_restricted_by_time_isactive = false;
-      //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"NOT Skipping restricted mode");
-      //   }
-      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"OUTSIDE restricted CheckBetween_Day_DateTimes");
-      // }else{
-      //   //mixer.mode.times.skip_restricted_by_time_isactive = false;
-      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"INSIDE restricted CheckBetween_Day_DateTimes");
-      // }
+      if(!pCONT_time->CheckBetween_Day_DateTimesShort(&mixer.group[mixer.running_id].starttime,
+                                                   &mixer.group[mixer.running_id].endtime)){
+        //add here to pass if the running_id is restricted
+        if(mixer.group[mixer.running_id].enable_skip_restricted_by_time){ //if true, skip
+          do{ //skip until we reach an acceptable mixer      
+            mixer.running_id++;     
+            if(mixer.running_id>+EFFECTS_FUNCTION_MIXER_LENGTH_ID){
+              mixer.running_id = EFFECTS_FUNCTION_MIXER_01_ID;
+            }
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode = WHILE LO OP MULTIPLE");
+          }while(mixer.group[mixer.running_id].enable_skip_restricted_by_time);
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"Skipping restricted mode");
+          //mixer.times.skip_restricted_by_time_isactive = true;
+        }else{
+          //mixer.times.skip_restricted_by_time_isactive = false;
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"NOT Skipping restricted mode");
+        }
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"OUTSIDE restricted CheckBetween_Day_DateTimes");
+      }else{
+        //mixer.mode.times.skip_restricted_by_time_isactive = false;
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "\"%s\""),"INSIDE restricted CheckBetween_Day_DateTimes");
+      }
 
 
       // Progress to next active mode IF ACTIVE
@@ -584,7 +576,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
       // mixer.running_id++;
       // wrap around
 
-    }else{ 
+    }
+    else
+    { 
       mixer.group[mixer.running_id].time_on_secs_decounter--; //if on
       mixer.tSavedTrigger = millis(); //reset if this was reached
       //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "Time until MillisReached = %d"),mixer.tSavedMillisToChangeAt-millis());
@@ -601,7 +595,8 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer(){
 } // SubTask_Flasher_Animate
 
 
-void mAnimatorLight::LoadMixerGroupByID(uint8_t id){
+void mAnimatorLight::LoadMixerGroupByID(uint8_t id)
+{
 
   // // Only runs if new state was found
   // flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID; // refresh by calling init colour generator
@@ -679,7 +674,8 @@ void mAnimatorLight::LoadMixerGroupByID(uint8_t id){
 
 // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
 
-uint8_t mAnimatorLight::ConstructJSON_Mixer(uint8_t json_level){
+uint8_t mAnimatorLight::ConstructJSON_Mixer(uint8_t json_level)
+{
 
   JsonBuilderI->Start();
 

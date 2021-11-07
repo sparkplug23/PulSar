@@ -32,6 +32,7 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
       // settings.switches_found,
       // switch_virtual[0],switch_virtual[1],switch_virtual[2],switch_virtual[3],
       // switch_virtual[4],switch_virtual[5],switch_virtual[6],switch_virtual[7]);
+      
     break;
     /************
      * MQTT SECTION * 

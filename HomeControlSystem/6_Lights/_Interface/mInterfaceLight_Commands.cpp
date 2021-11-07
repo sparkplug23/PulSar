@@ -376,8 +376,11 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
     animation_override.time_ms = 100;
   }
 
+#ifdef USE_MODULE_NETWORK_MQTT
   mqtthandler_debug_teleperiod.flags.SendNow = true;
   mqtthandler_scene_teleperiod.flags.SendNow = true;
+  
+#endif //ifdef USE_MODULE_NETWORK_MQTT
   animation.flags.fForceUpdate = true;
 
 }
@@ -430,9 +433,9 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
     
   if(!c){ return; }
   if(strlen(c)<=5){
-    AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
   }else{
-    AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
+    AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
     return;
   }
 
@@ -465,7 +468,7 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
 
   }
 
-  AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
     order->r,
     order->g,
     order->b,
@@ -1200,6 +1203,10 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   animation.transition.pixels_to_update_as_number = value;
   // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
 
+  // Tmp fix until I merge them
+  pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+  // SetLEDOutAmountByPercentage(animation.transition.pixels_to_update_as_number)
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
   #endif
@@ -1228,6 +1235,23 @@ uint16_t mInterfaceLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percen
 uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
   return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
 }
+
+/**
+ * Duplicate parameter, needs merging with above in long term if it is really the same
+ * */
+uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
+
+  strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+
+// AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
+
+  return strip_size_requiring_update; // also return the count
+
+}
+
+
+
+
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1272,7 +1296,9 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 //temp feedback
+#ifdef USE_MODULE_NETWORK_MQTT
 pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
+#endif // USE_MODULE_NETWORK_MQTT
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS

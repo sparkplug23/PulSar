@@ -561,7 +561,7 @@ void mWiFi::WifiSetState(uint8_t state)
   
   if(state == 0){
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"WifiSetState",state);
+    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s=%d"),"WifiSetState",state);
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -584,6 +584,7 @@ void mWiFi::WifiSetState(uint8_t state)
     pCONT_set->global_state.network_down = 0;
   }
 
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState end");
   
 }
 
@@ -645,7 +646,7 @@ void mWiFi::WifiCheckIp(void)
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
+  //AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "mWiFi::WifiCheckIp"));
 
     #endif// ENABLE_LOG_LEVEL_INFO
   // return;
@@ -692,7 +693,7 @@ void mWiFi::WifiCheckIp(void)
   } else { //not connected
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("%s" " NOT connected"),__FUNCTION__);//WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
+   // AddLog(LOG_LEVEL_INFO, PSTR("%s" " NOT connected"),__FUNCTION__);//WiFi.status() %s, IP \"%s\" %s"),GetWiFiStatusCtr(),WiFi.localIP().toString().c_str(),WiFi.localIP().toString()=="(IP unset)"?"matched":"nomatch");
     #endif// ENABLE_LOG_LEVEL_INFO
 
     WifiSetState(0);
@@ -838,13 +839,17 @@ void mWiFi::WifiCheckIp(void)
     } else {
       
     #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
+      //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "wifi_retry=FALSE"));
     #endif// ENABLE_LOG_LEVEL_INFO
       WifiConfig(wifi_config_tool);
       connection.counter = 1;
       connection.retry = connection.retry_init;
     }
   }
+
+  //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),"WifiSetState checkip END");
+
+
 }
 
 
@@ -997,7 +1002,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
           } else {
             
-        DEBUG_PRINTF( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
+        // Serial.println( " ELSE if ((WL_CONNECTED == WiFi.status())\n\r");
             WifiSetState(0);
             Mdns.begun = 0;
           }
@@ -1031,6 +1036,8 @@ void mWiFi::WifiConnect(void)
   
   // if (!Settings.flag4.network_wifi) { return; } //probably for when ethernet is used instead
 
+
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
   WifiSetState(0);
   // WifiSetOutputPower(); //new
   WiFi.persistent(false);     // Solve possible wifi init errors

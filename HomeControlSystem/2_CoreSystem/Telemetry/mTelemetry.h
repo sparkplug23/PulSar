@@ -215,8 +215,7 @@ class mTelemetry :
     &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
       &mqtthandler_debug_pins, &mqtthandler_debug_template,
-      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal
-      , 
+      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal, 
       &mqtthandler_debug_system_saved_settings
     #endif
   };

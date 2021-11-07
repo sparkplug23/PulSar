@@ -31,10 +31,10 @@ void mAnimatorLight::init_Ambilight(){
 
 
 
-  #ifdef   USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX
+  #ifdef   DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   
-  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbwColor(255,175,0,100);//HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbwColor(150,0,0,0);//HsbColor(pCONT_iLight->HueN2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(pCONT_iLight->HueN2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
   ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
@@ -45,7 +45,26 @@ void mAnimatorLight::init_Ambilight(){
   ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage = 0;
 
 
-  #endif // USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX
+  #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
+
+  #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+  ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
+  ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
+  ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
+  ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
+
+  ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+  ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+
+
+
+
+  #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
   
 
 }
@@ -97,7 +116,7 @@ void mAnimatorLight::Ambilight_Sides(){
   #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_RIGHT
 
   float progress;
-  HsbColor colour_tmp;
+  RgbcctColor colour_tmp;
 
   uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
   uint8_t bottom_start = 0;
@@ -110,8 +129,8 @@ void mAnimatorLight::Ambilight_Sides(){
   for(int left=0;left<left_size;left++){
     //if(ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage>=0){ //if set
       progress = (float)(left)/(float)(left_size);
-      colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-                                         RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+      colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+                                         RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
                                          progress);
     //}
     animation_colours[left_start+left].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].left.colour;
@@ -127,11 +146,26 @@ void mAnimatorLight::Ambilight_Sides(){
   uint8_t right_start = 85;
   for(int right=0;right<right_size;right++){
     progress = (float)(right)/(float)(right_size);
-    colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-                                       RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+    colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+                                       RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
                                        progress);
     animation_colours[right_start+right].DesiredColour = colour_tmp;
   }
+
+  
+     // #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
+      for(int i=0;i<STRIP_SIZE_MAX;i++)
+      {
+        // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+          // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+
+animation_colours[i].DesiredColour = ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+
+        // }
+      }
+ //     #endif
+
+
 
   #endif
 
@@ -139,13 +173,13 @@ void mAnimatorLight::Ambilight_Sides(){
   #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
 
 
-  switch(1)
+  switch(1//)
   {
     case 0: // method 4 different sides
     { 
 
       float progress;
-      HsbColor colour_tmp;
+      RgbcctColor colour_tmp;
 
       uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
       uint8_t bottom_start = 0;
@@ -207,7 +241,7 @@ void mAnimatorLight::Ambilight_Sides(){
 
 
       float progress;
-      HsbColor colour_tmp;
+      RgbcctColor colour_tmp;
 
       uint8_t bottom_size = ambilightsettings.screens[SCREEN_CENTRE].bottom.size;
       uint8_t bottom_start = 0;
@@ -220,8 +254,8 @@ void mAnimatorLight::Ambilight_Sides(){
       for(int right=0;right<right_size;right++){
         if(ambilightsettings.screens[SCREEN_CENTRE].right.blend_between_sides_gradient_percentage>=0){ //if set
           progress = (float)(right)/(float)(right_size);
-          colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
-                                             RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+          colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+                                             RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
                                              progress);
         }
         animation_colours[right_start+right].DesiredColour = colour_tmp;//ambilightsettings.screens[SCREEN_CENTRE].right.colour;
@@ -238,13 +272,24 @@ void mAnimatorLight::Ambilight_Sides(){
       uint8_t left_start = top_start + top_size;
       for(int left=0;left<left_size;left++){
         progress = (float)(left)/(float)(left_size);
-        colour_tmp = RgbColor::LinearBlend(RgbColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
-                                           RgbColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
+        colour_tmp = RgbcctColor::LinearBlend(RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].top.colour),
+                                           RgbcctColor(ambilightsettings.screens[SCREEN_CENTRE].bottom.colour),
                                            progress);
         animation_colours[left_start+left].DesiredColour = colour_tmp;
         // animation_colours[left_start+left].DesiredColour = ambilightsettings.screens[SCREEN_CENTRE].left.colour;;
       }
 
+      #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
+      for(int i=0;i<STRIP_SIZE_MAX;i++)
+      {
+        // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+          // animation_colours[i].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global());
+
+animation_colours[i].DesiredColour = ApplyBrightnesstoRgbcctColour(animation_colours[i].DesiredColour, pCONT_iLight->getBriRGB_Global(), pCONT_iLight->getBriCCT_Global());
+
+        // }
+      }
+      #endif
 
       }
       break;

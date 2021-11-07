@@ -25,6 +25,10 @@
 #include "sdkconfig.h"
 #include "esp_intr_alloc.h"
 
+
+extern uint8_t extern_flag_sdcard_writer_status;
+
+
 /*** Working
  * SD Card using SPI on ESP32
  * 
@@ -65,6 +69,10 @@
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
+
+
+// extern File stored_file;
+
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR) "file_writer";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR) "debug/writetimes";
@@ -143,15 +151,15 @@ class mSDCard :
 
     }sdcard_status;
 
-void CommandSet_SDCard_Appending_File_Method_State(uint8_t state);
-    
-void EveryLoop_Handle_Appending_File_Method();
+    void CommandSet_SDCard_Appending_File_Method_State(uint8_t state);
+        
+    void EveryLoop_Handle_Appending_File_Method();
     void Handle_Write_Ringbuffer_Stream_To_SDCard();
 
 
-    #ifdef USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #ifdef USE_SDCARD_RINGBUFFER_STREAM_OUT
 
-    #define RINGBUFFER_HANDLE_2_LENGTH 5000
+    #define RINGBUFFER_HANDLE_SDCARD_WRITER_LENGTH 100000 //huge
 
     struct STREAM_RINGBUFFER
     {
@@ -159,17 +167,17 @@ void EveryLoop_Handle_Appending_File_Method();
       bool flag_data_waiting = false;
       RingbufHandle_t ringbuffer_handle;
       QueueHandle_t event_queue_handle;
-      int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
-      int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+      // int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
+      // int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH * 2); //1024*2
 
     }stream;
 
-uint16_t GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint16_t buflen, char optional_read_until_char, bool flag_clear_buffer_after_read);
-void Stream_AddToBuffer(char* buffer, uint16_t buflen);
-void init_SDCard_StreamOut_RingBuffer();
-uint16_t AppendRingBuffer(char* buffer, uint16_t buflen);
+    uint16_t GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint16_t buflen, char optional_read_until_char, bool flag_clear_buffer_after_read);
+    void Stream_AddToBuffer(char* buffer, uint16_t buflen);
+    void init_SDCard_StreamOut_RingBuffer();
+    uint16_t AppendRingBuffer(char* buffer, uint16_t buflen);
 
-    #endif // USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #endif // USE_SDCARD_RINGBUFFER_STREAM_OUT
 
     
 #ifdef USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT

@@ -359,20 +359,21 @@ public:
 
     // Initialize all flags to false
     void init()
-      {
-        uint8_t *all = (uint8_t *) this;
-        for (uint8_t i=0; i<sizeof(*this); i++)
-          *all++ = 0;
-      }
+    {
+      uint8_t *all = (uint8_t *) this;
+      for (uint8_t i=0; i<sizeof(*this); i++)
+        *all++ = 0;
+    }
 
     // Merge these valid flags with another set of valid flags
     void operator |=( const valid_t & r )
-      {
-        uint8_t *all = (uint8_t *) this;
-        const uint8_t *r_all = (const uint8_t *) &r;
-        for (uint8_t i=0; i<sizeof(*this); i++)
-          *all++ |= *r_all++;
-      }
+    {
+      uint8_t *all = (uint8_t *) this;
+      const uint8_t *r_all = (const uint8_t *) &r;
+      for (uint8_t i=0; i<sizeof(*this); i++)
+        *all++ |= *r_all++;
+    }
+    
   } NEOGPS_PACKED
       valid;        // This is the name of the collection of valid flags
 

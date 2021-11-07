@@ -94,6 +94,11 @@ struct RgbColor : RgbColorBase
     RgbColor(const RgbcctColor& color);
 
     // ------------------------------------------------------------------------
+    // Construct a RgbColor using RgbcctColor
+    // ------------------------------------------------------------------------
+    // RgbColor(const uint32_t color32bit_WRGB);
+
+    // ------------------------------------------------------------------------
     // Construct a RgbColor that will have its values set in latter operations
     // CAUTION:  The R,G,B members are not initialized and may not be consistent
     // ------------------------------------------------------------------------

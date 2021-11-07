@@ -305,18 +305,19 @@ void WS2812FX::setPixelColor(uint16_t n, uint32_t c) {
 void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
 {
   //auto calculate white channel value if enabled
-  if (_useRgbw) {
-    if (rgbwMode == RGBW_MODE_AUTO_BRIGHTER || (w == 0 && (rgbwMode == RGBW_MODE_DUAL || rgbwMode == RGBW_MODE_LEGACY)))
-    {
-      //white value is set to lowest RGB channel
-      //thank you to @Def3nder!
-      w = r < g ? (r < b ? r : b) : (g < b ? g : b);
-    } else if (rgbwMode == RGBW_MODE_AUTO_ACCURATE && w == 0)
-    {
-      w = r < g ? (r < b ? r : b) : (g < b ? g : b);
-      r -= w; g -= w; b -= w;
-    }
-  }
+  // if (_useRgbw) {
+  //   if (rgbwMode == RGBW_MODE_AUTO_BRIGHTER || (w == 0 && (rgbwMode == RGBW_MODE_DUAL || rgbwMode == RGBW_MODE_LEGACY)))
+  //   {
+  //     //white value is set to lowest RGB channel
+  //     //thank you to @Def3nder!
+  //     w = r < g ? (r < b ? r : b) : (g < b ? g : b);
+  //   } else 
+  //   if (rgbwMode == RGBW_MODE_AUTO_ACCURATE && w == 0)
+  //   {
+  //     w = r < g ? (r < b ? r : b) : (g < b ? g : b);
+  //     r -= w; g -= w; b -= w;
+  //   }
+  // }
   
   //reorder channels to selected order
   RgbwColor col;
@@ -332,63 +333,63 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
   // }
   col.G = g; col.R = r; col.B = b;
 
-
   col.W = w;
   
-  uint16_t skip = _skipFirstMode ? LED_SKIP_AMOUNT : 0;
-  if (_virtualSegmentLength) {//from segment
+  uint16_t skip = 0;//_skipFirstMode ? LED_SKIP_AMOUNT : 0;
+  // if (_virtualSegmentLength) {//from segment
 
-    //color_blend(getpixel, col, _segments[_segment_index].opacity); (pseudocode for future blending of segments)
-    if (IS_SEGMENT_ON)
-    {
-      if (_segments[_segment_index].opacity < 255) {  
-        col.R = scale8(col.R, _segments[_segment_index].opacity);
-        col.G = scale8(col.G, _segments[_segment_index].opacity);
-        col.B = scale8(col.B, _segments[_segment_index].opacity);
-        col.W = scale8(col.W, _segments[_segment_index].opacity);
-      }
-    } else {
-      col = BLACK;
-    }
+  //   //color_blend(getpixel, col, _segments[_segment_index].opacity); (pseudocode for future blending of segments)
+  //   if (IS_SEGMENT_ON)
+  //   {
+  //     if (_segments[_segment_index].opacity < 255) {  
+  //       col.R = scale8(col.R, _segments[_segment_index].opacity);
+  //       col.G = scale8(col.G, _segments[_segment_index].opacity);
+  //       col.B = scale8(col.B, _segments[_segment_index].opacity);
+  //       col.W = scale8(col.W, _segments[_segment_index].opacity);
+  //     }
+  //   } else {
+  //     col = BLACK;
+  //   }
 
-    /* Set all the pixels in the group, ensuring _skipFirstMode is honored */
-    bool reversed = reverseMode ^ IS_REVERSE;
-    uint16_t realIndex = realPixelIndex(i);
+  //   /* Set all the pixels in the group, ensuring _skipFirstMode is honored */
+  //   bool reversed = reverseMode ^ IS_REVERSE;
+  //   uint16_t realIndex = realPixelIndex(i);
 
-    for (uint16_t j = 0; j < _segments[_segment_index].grouping; j++) {
-      int16_t indexSet = realIndex + (reversed ? -j : j);
-      int16_t indexSetRev = indexSet;
-      if (reverseMode) indexSetRev = _length - 1 - indexSet;
-      #ifdef WLED_CUSTOM_LED_MAPPING
-      if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
-      #endif
-      if (indexSetRev >= _segments[_segment_index].start && indexSetRev < _segments[_segment_index].stop) {
-        // bus->SetPixelColor(indexSet + skip, col);
-        // pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, col);
-        pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, RgbColor(col));
-        if (IS_MIRROR)  //set the corresponding mirrored pixel
-        {
-          // bus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, col);
+  //   for (uint16_t j = 0; j < _segments[_segment_index].grouping; j++) {
+  //     int16_t indexSet = realIndex + (reversed ? -j : j);
+  //     int16_t indexSetRev = indexSet;
+  //     if (reverseMode) indexSetRev = _length - 1 - indexSet;
+  //     #ifdef WLED_CUSTOM_LED_MAPPING
+  //     if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
+  //     #endif
+  //     if (indexSetRev >= _segments[_segment_index].start && indexSetRev < _segments[_segment_index].stop) {
+  //       // bus->SetPixelColor(indexSet + skip, col);
+  //       // pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, col);
+  //       pCONT_lAni->stripbus->SetPixelColor(indexSet + skip, RgbColor(col));
+  //       if (IS_MIRROR)  //set the corresponding mirrored pixel
+  //       {
+  //         // bus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, col);
 
-          pCONT_lAni->stripbus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, RgbColor(col));
+  //         pCONT_lAni->stripbus->SetPixelColor(_segments[_segment_index].stop - (indexSet + skip) + _segments[_segment_index].start - 1, RgbColor(col));
 
-        }
-      }
-    }
-  } else { //live data, etc.
-    if (reverseMode) i = _length - 1 - i;
-    #ifdef WLED_CUSTOM_LED_MAPPING
-    if (i < customMappingSize) i = customMappingTable[i];
-    #endif
+  //       }
+  //     }
+  //   }
+  // } else { //live data, etc.
+  //   if (reverseMode) i = _length - 1 - i;
+  //   #ifdef WLED_CUSTOM_LED_MAPPING
+  //   if (i < customMappingSize) i = customMappingTable[i];
+  //   #endif
     // pCONT_lAni->stripbus->SetPixelColor(i + skip, col);
-    pCONT_lAni->stripbus->SetPixelColor(i + skip, RgbColor(col));
-  }
-  if (skip && i == 0) {
-    for (uint16_t j = 0; j < skip; j++) {
-      // pCONT_lAni->stripbus->SetPixelColor(j, RgbwColor(0, 0, 0, 0));
-      pCONT_lAni->stripbus->SetPixelColor(j, RgbColor(0, 0, 0));
-    }
-  }
+    // pCONT_lAni->stripbus->SetPixelColor(i + skip, RgbColor(col));
+    pCONT_lAni->stripbus->SetPixelColor(i, RgbColor(col));
+  // }
+  // if (skip && i == 0) {
+  //   for (uint16_t j = 0; j < skip; j++) {
+  //     // pCONT_lAni->stripbus->SetPixelColor(j, RgbwColor(0, 0, 0, 0));
+  //     pCONT_lAni->stripbus->SetPixelColor(j, RgbColor(0, 0, 0));
+  //   }
+  // }
 }
 
 
@@ -400,12 +401,13 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
 //I am NOT to be held liable for burned down garages!
 
 //fine tune power estimation constants for your setup                  
-#define MA_FOR_ESP        100 //how much mA does the ESP use (Wemos D1 about 80mA, ESP32 about 120mA)
-                              //you can set it to 0 if the ESP is powered by USB and the LEDs by external
+// #define MA_FOR_ESP        100 //how much mA does the ESP use (Wemos D1 about 80mA, ESP32 about 120mA)
+//                               //you can set it to 0 if the ESP is powered by USB and the LEDs by external
 
-void WS2812FX::show(void) {
+void WS2812FX::show(void)
+{
   
-    // Serial.printf("show1\n\r");
+  // Serial.printf("show1\n\r");
   // if (_callback) _callback();
   
   //  Serial.printf("show2\n\r");

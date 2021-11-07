@@ -2,6 +2,345 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
+const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
+
+
+// #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+
+int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
+{
+
+  #ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
+  Tasker_Override_Forcing_Variables_Testing();
+  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
+
+  /************
+   * INIT SECTION * 
+  *******************/
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();  
+      break;
+    case FUNC_INIT:
+    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+      init();
+    #endif
+
+#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+      Init_WLED();
+#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+
+      break;
+    case FUNC_OVERRIDE_BOOT_INIT:
+
+    // stripbus->NeoRgbCurrentSettings(1,2,3);
+
+      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      mqtthandler_debug_animations_progress.tRateSecs = 1;
+      #endif
+
+    break;
+  }
+  
+  if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
+  
+  switch(function){
+    /************
+     * SETTINGS SECTION * 
+    *******************/
+    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+
+    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+      Settings_Load();
+    break;
+    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+      Settings_Save();
+    break;
+    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
+    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+      Settings_Default();
+    break;
+    #endif// ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+
+    // Tmp fix for xmas
+    #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+    
+// #ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+    case FUNC_ON_BOOT_COMPLETE:
+      // Physical_UserInput_Init();
+      // Physical_UserInput_Load();
+      
+
+
+    break;
+    // #endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+    #endif //  USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_EVERY_SECOND:{
+      
+    // Tmp fix for xmas
+    #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+    
+#ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+    // case FUNC_EVERY_SECOND:
+    Physical_UserInput_Save();
+    Physical_UserInput_Load();
+    // break;
+    
+#endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+
+
+    #endif //  USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+
+
+      //EverySecond();
+
+//       const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
+// uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
+
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+char buffer[50];
+      AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
+        pCONT_lAni->GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
+      );
+      #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+    }break;
+    case FUNC_LOOP: 
+      // EveryLoop();
+
+#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+        SubTask_WLED_Animation_PhaseOut();
+#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+      // if(flags_hac_wled_animator_switch)
+      // {
+
+      // #if defined(USE_MODULE_LIGHTS_ANIMATOR) && !defined(USE_MODULE_LIGHTS_WLED_EFFECTS)
+    
+    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+      EveryLoop(); // hacs only
+       // AddLog(LOG_LEVEL_INFO, PSTR("EveryLoop"));
+        #endif
+    //   #else
+//       }else{
+
+// DEBUG_LINE_HERE;
+
+//     //   if(pCONT_lAni->flashersettings.function<EFFECTS_FUNCTION_LENGTH_ID)
+//     //   {
+//     //     EveryLoop(); // HACS
+//     //     // AddLog(LOG_LEVEL_INFO, PSTR("RUNNING = HACS %d"), pCONT_lAni->flashersettings.function);
+//     //     // delay(500);
+//     //   }
+//     //   else 
+//     //   if(
+//     //     (pCONT_lAni->flashersettings.function>=EFFECTS_MODE_STATIC) &&
+//     //     (pCONT_lAni->flashersettings.function<EFFECTS_MODE_COUNT)
+//     //   ){
+
+//     //     //shift function wled indexing from 0
+//     //     uint8_t wled_function_mode_index = EFFECTS_MODE_STATIC - pCONT_lAni->flashersettings.function;
+
+//     //     AddLog(LOG_LEVEL_INFO, PSTR("RUNNING = WLED %d -> %d"),pCONT_lAni->flashersettings.function,wled_function_mode_index);
+//     //     pCONT_lwled->mEffects->setMode(0, wled_function_mode_index);
+        
+// #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+//         SubTask_WLED_Animation_PhaseOut();
+// #endif// USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+//     //     AddLog(LOG_LEVEL_INFO, PSTR("OVER = WLED %d -> %d"),pCONT_lAni->flashersettings.function,wled_function_mode_index);
+//         AddLog(LOG_LEVEL_INFO, PSTR("SubTask_WLED_Animation_PhaseOut"));
+
+//     //   }
+//      }
+    // #endif
+
+
+
+    break;    
+
+    
+    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+
+    case FUNC_EVERY_FIVE_SECOND:
+// #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+//       pCONT_set->SettingsSave(2);
+//       #endif // #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+    break;
+
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * TRIGGERS SECTION * 
+    *******************/
+    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+      #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+      CommandSet_Physical_UserInput_Buttons();
+      #endif
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
+    // Other stuff
+    case FUNC_STATUS_MESSAGE_APPEND:
+      Append_Hardware_Status_Message();
+    break;
+
+
+    #endif // #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+  }// switch(command)
+
+  /************
+   * WEBPAGE SECTION * 
+  *******************/  
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  return Tasker_Web(function);
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+
+} // END FUNCTION
+
+
+// #else
+
+
+// // #endif
+
+// int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
+// {
+
+//   /************
+//    * INIT SECTION * 
+//   *******************/
+//   if(function == FUNC_INIT){
+//     init(); //ilight needs parts I think
+    
+//     #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+//       Init_WLED(); //new init of animator will override that set by hacs on that pin
+//     #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+  
+//   }
+
+//   switch(function){
+//     /************
+//      * SETTINGS SECTION * 
+//     *******************/
+//     case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+//       // Settings_Load();
+//     break;
+//     case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+//       // Settings_Save();
+//     break;
+//     case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
+//     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+//       // Settings_Default();  //only 1 animator can be attached to a pin, so WLED effects will need shifted to my animator
+//     break;
+//     /************
+//      * PERIODIC SECTION * 
+//     *******************/
+//     case FUNC_LOOP:
+//       // if(flags_hac_wled_animator_switch){
+//         // SubTask_WLED_Animation_PhaseOut();
+//       // }else{
+//         EveryLoop(); //should service both methods now
+//       // }
+//     break;
+//     case FUNC_EVERY_SECOND:{
+
+      
+//     #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+//       char buffer[50];
+//       AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
+//         GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
+//       );
+//     #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+      
+
+
+
+//     }break;
+//     // case FUNC_EVERY_FIVE_SECOND:
+//     //    flags_hac_wled_animator_switch ^= 1;
+
+
+//     // break;
+//     /************
+//      * COMMANDS SECTION * 
+//     *******************/
+//     case FUNC_JSON_COMMAND_ID:
+//       parse_JSONCommand(obj);
+//     break;
+//     /************
+//      * TRIGGERS SECTION * 
+//     *******************/
+//     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+//       #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+//       CommandSet_Physical_UserInput_Buttons();
+//       #endif
+//     break;
+//     /************
+//      * MQTT SECTION * 
+//     *******************/
+//     #ifdef USE_MODULE_NETWORK_MQTT
+//     case FUNC_MQTT_HANDLERS_INIT:
+//     case FUNC_MQTT_HANDLERS_RESET:
+//       MQTTHandler_Init();
+//     break;
+//     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+//       MQTTHandler_Set_TelePeriod();
+//     break;
+//     case FUNC_MQTT_SENDER:
+//       MQTTHandler_Sender();
+//     break;
+//     case FUNC_MQTT_CONNECTED:
+//       MQTTHandler_Set_fSendNow();
+//     break;
+//     #endif //USE_MODULE_NETWORK_MQTT
+//     // Other stuff
+//     case FUNC_STATUS_MESSAGE_APPEND:
+//       Append_Hardware_Status_Message();
+//     break;
+//   } // end switch
+  
+//   /************
+//    * WEBPAGE SECTION * 
+//   *******************/  
+//   #ifdef USE_MODULE_NETWORK_WEBSERVER
+//   return Tasker_Web(function);
+//   #endif // USE_MODULE_NETWORK_WEBSERVER
+    
+// } // END function
+
+// #endif
+
+
+
 
 /*******************************************************************************************************************
 ********************************************************************************************************************
@@ -59,11 +398,11 @@ void mAnimatorLight::init(void){
   // delay(5000);
 
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
-      SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
+  SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
 
   pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
-pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
-  
+  pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+
   pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
   flashersettings.brightness_max = 255;
   flashersettings.brightness_min = 0;
@@ -114,7 +453,7 @@ pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
   #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-  #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   init_flasher_settings();
   #endif
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
@@ -122,6 +461,24 @@ pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
   #endif
 
   settings.flags.EnableModule = true;
+
+  
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  resetSegments();
+  #endif
+
+
+  #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+  
+  user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
+  user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
+  user_input.selected.effects_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[2];
+  user_input.selected.intensity_id = pCONT_set->Settings.animation_settings.xmas_controller_params[3];
+
+
+  PhysicalController_Convert_IDs_to_Internal_Parameters();
+  #endif
 
   // DrawTailPixels();
 
@@ -160,6 +517,16 @@ void mAnimatorLight::Settings_Load(){
   pCONT_iLight->animation.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
   pCONT_iLight->animation.transition.time_ms = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
   pCONT_iLight->animation.transition.rate_ms = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
+  pCONT_iLight->animation.intensity = 127;//pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
+
+#ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+      user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
+      user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
+      user_input.selected.effects_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[2];
+      user_input.selected.intensity_id = pCONT_set->Settings.animation_settings.xmas_controller_params[3];
+    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("LOADED user_input.selected.palette_id %d"),user_input.selected.palette_id);
+#endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
 
 }
 
@@ -191,6 +558,25 @@ void mAnimatorLight::Settings_Save(){
   pCONT_set->Settings.animation_settings.animation_transition_time_ms = pCONT_iLight->animation.transition.time_ms;
   pCONT_set->Settings.animation_settings.animation_transition_rate_ms = pCONT_iLight->animation.transition.rate_ms;
   // pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
+
+  // pCONT_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
+  // pCONT_set->Settings.animation_settings.xmas_controller_params[1] = user_input.selected.brightness_id;
+  // pCONT_set->Settings.animation_settings.xmas_controller_params[2] = user_input.selected.effects_id;
+  // pCONT_set->Settings.animation_settings.xmas_controller_params[3] = user_input.selected.intensity_id;
+  
+#ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+  pCONT_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
+  pCONT_set->Settings.animation_settings.xmas_controller_params[1] = user_input.selected.brightness_id;
+  pCONT_set->Settings.animation_settings.xmas_controller_params[2] = user_input.selected.effects_id;
+  pCONT_set->Settings.animation_settings.xmas_controller_params[3] = user_input.selected.intensity_id;
+
+  // PhysicalController_Convert_IDs_to_Internal_Parameters();
+
+  pCONT_set->Settings.animation_settings.xmas_controller_params[5] = 6;
+
+#endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
 
 }
 
@@ -272,14 +658,14 @@ DEBUG_LINE;
     #endif
     
     
-      #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     #ifdef DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID
       flashersettings.function = 1;/*DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID<EFFECTS_FUNCTION_LENGTH_ID?
                             DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID:EFFECTS_FUNCTION_SLOW_GLOW_ID;*/
     #else
       flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
     #endif
-    #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   }
 
 
@@ -341,442 +727,6 @@ void mAnimatorLight::GenerateAnimationPixelAmountMaps(){
 
 
 
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ END OF GENERAL INIT ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
-
-void mAnimatorLight::init_flasher_settings(){
-
-  flashersettings.flags.movement_direction = 0;
-  
-
-
-// A "wipe" or "sine wave" that applies a saturation change across the string. So either, from all christmas coloured to slowly blending from the top of the tree to the bottom, to white (or another solid colour), or apply the saturation change in a loop/rotation. 
-
-
-  
-}
-
-
-
-// simple blend function
-void mAnimatorLight::BlendAnimUpdate(const AnimationParam& param)
-{    
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-        animation_colours[pixel].StartingColor,
-        animation_colours[pixel].DesiredColour,
-        param.progress);
-    SetPixelColor(pixel, updatedColor);
-  } // END for
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void mAnimatorLight::AnimationProcess_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param)
-{   
-
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
-    SetPixelColor(ii,output_colour);
-  }
-
-}
-
-
-void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend(const AnimationParam& param)
-{    
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++)
-  {
-    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-        animation_colours[pixel].StartingColor,
-        animation_colours[pixel].DesiredColour,
-        param.progress);    
-    SetPixelColor(pixel, updatedColor);
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void mAnimatorLight::SubTask_Flasher_Main(){
-
-#ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  if(mixer.flags.Enabled){
-   SubTask_Flasher_Animate_Mixer();
-  }
-  #endif // ENABLE_PIXEL_FUNCTION_MIXER
-
-  SubTask_Flasher_Animate();
-
-} // SubTask_Flasher_Main
-
-
-
-void mAnimatorLight::SubTask_Flasher_Animate(){
-  
-  /**
-   * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
-   * */
-  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
-  /**
-   * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-   * */  
-  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
-  /**
-   * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-   * */    
-  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
-
-
-  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms))||(pCONT_iLight->animation.flags.fForceUpdate))
-  {
-
-    if(pCONT_iLight->animation.flags.fForceUpdate){ pCONT_iLight->animation.flags.fForceUpdate=false;
-      flashersettings.tSaved.Update = millis();
-    }
-
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    // char buffer[100];
-    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
-    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
-    //#endif
-    // #ifdef DEVICE_RGBFIREPLACE_TESTER
-    //     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-    // #endif
-
-    switch(flashersettings.function){
-      default:
-      case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
-        SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour();
-      break;
-      case EFFECTS_FUNCTION_SLOW_GLOW_ID:
-        SubTask_Flasher_Animate_Function__Slow_Glow();
-      break;
-      case EFFECTS_FUNCTION_STATIC_GLOW_ID:
-        SubTask_Flasher_Animate_Function__Static_Glow();
-      break;
-      case EFFECTS_FUNCTION_SEQUENTIAL_ID:
-        SubTask_Flasher_Animate_Function__Sequential();
-      break;
-      case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:
-        SubTask_Flasher_Animate_Function__Palette_Step_Through_Palette();
-      break;
-      //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
-      //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-      //  break;
-      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
-      //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-      //  break;
-      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
-      //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-      //  break;
-      //  case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
-      //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-      //  break;
-      //  case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
-      //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-      //  break;
-      //  case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
-      //    SubTask_Flasher_Animate_Function_Fade_Gradient();
-      //  break;
-      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
-      //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
-      //  break;
-      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
-      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-      //  break;
-      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
-      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-      //  break;
-      //  case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-      //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-      //  break;
-      //  case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-      //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01:
-      //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-      //  break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-      //  break;
-      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
-        SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-      break;
-      //  case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
-      //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-      //  break;
-      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
-        SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-      break;
-      case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:
-        SubTask_Flasher_Animate_Function_FirePlace_1D_01();
-      break;
-      #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
-      case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID:
-        SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
-      break;
-      // case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID:
-      //   SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
-      // break;
-      // case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
-      //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-      // break;
-      #endif // ENABLE_DEVFEATURE_RGB_CLOCK
-       case EFFECTS_FUNCTION_TESTER_ID:
-         SubTask_Flasher_Animate_Function_Tester();
-       break; 
-    } //end SWITCH
-
-    // Configure animator to show output
-    StartAnimation_AsAnimUpdateMemberFunction();
-
-  }//end if update reached
-
-   pCONT_iLight->animation.flags.animator_first_run = false;
-
-} //end flasher_animate
-
-
-/**
- * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
- * */
-void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region(){
-
-  if(flashersettings.update_colour_region.refresh_secs || flashersettings.update_colour_region.refresh_decounter_secs){ // >0 is active
-    if(mTime::TimeReached(&flashersettings.update_colour_region.tSaved, 1000)){
-      AddLog(LOG_LEVEL_TEST, PSTR("rate_colours_secs=%d, rate_decounter=%d"),flashersettings.update_colour_region.refresh_secs, flashersettings.update_colour_region.refresh_decounter_secs);
-      if(flashersettings.update_colour_region.refresh_decounter_secs == 1){
-        flashersettings.update_colour_region.refresh_decounter_secs = flashersettings.update_colour_region.refresh_secs; // reset
-        flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
-        flashersettings.flags.force_finish_flasher_pair_once = 1;
-      }else
-      if(flashersettings.update_colour_region.refresh_decounter_secs > 1){
-        flashersettings.update_colour_region.refresh_decounter_secs--;
-      }
-      //
-      else{
-        flashersettings.update_colour_region.refresh_decounter_secs = flashersettings.update_colour_region.refresh_secs; // reset
-      }
-    }
-  }
-
-}
-
- /**
-   * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-   * */  
-  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate(){
-  // Generate randomness to transitions if flag is set
-  // if(flashersettings.flags.enable_random_rate){
-  //   if(mTime::TimeReached(&flashersettings.random_transitions.tSavedNewSpeedUpdate,flashersettings.random_transitions.rate_ms)){
-  //     flashersettings.random_transitions.rate_ms = (random(flashersettings.random_transitions.lower_secs,flashersettings.random_transitions.upper_secs)*1000);
-  //     pCONT_iLight->animation.transition.rate_ms = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
-  //     if(flashersettings.random_transitions.array_index>=flashersettings.random_transitions.array_index_length) flashersettings.random_transitions.array_index=0;
-  //     pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
-  //   }
-  // }
-  }
-
-  /**
-   * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-   * */ 
-  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time(){
-  // if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*1000))){
-  //   uint8_t values[8] = {4,8,10,17,20,17,10,8};
-  //   pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
-  //   if(flashersettings.function_seq.rate_index>8) flashersettings.function_seq.rate_index=0;
-  //   pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
-  // }
-  }
-
-
-// /****
-//  * Changes pixels randomly to new colour, with slow blending
-//  * Requires new colour calculation each call
-//  */
-// void mAnimatorLight::SubTask_Flasher_Animate_Function__Slow_Glow(){
-//   // So colour region does not need to change each loop to prevent colour crushing
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-//   UpdateDesiredColourFromPaletteSelected();
-// }
-
-
-
-void mAnimatorLight::UpdateStartingColourWithGetPixel(){
-
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-
-    // Test fix, if desired does not match getcolour, then use ...
-
-
-    animation_colours[pixel].StartingColor = GetPixelColor(pixel);
-  }
-
-}
-
-void mAnimatorLight::UpdateDesiredColourWithGetPixel(){
-
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-
-    // Test fix, if desired does not match getcolour, then use ...
-
-
-    animation_colours[pixel].DesiredColour = GetPixelColor(pixel);
-  }
-
-}
-
-void mAnimatorLight::UpdateStartingColourWithSingleColour(RgbcctColor colour){
-
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    animation_colours[pixel].StartingColor = colour;
-  }
-
-}
-
-void mAnimatorLight::UpdateDesiredColourWithSingleColour(RgbcctColor colour){
-
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    animation_colours[pixel].DesiredColour = colour;
-  }
-
-}
-
-
-void mAnimatorLight::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction){
-
-//pixels_amount_to_shift loop this many times
-
-  if(direction){ // direction==1 move right ie AWAY from start
-
-    // Shift colours (rotate)
-    RgbcctColor colourlast = animation_colours[pCONT_iLight->settings.light_size_count-1].DesiredColour;//desired_colour[0];
-    // Shift towards first pixel
-    for(ledout.index=pCONT_iLight->settings.light_size_count-1; //last to first
-        ledout.index>0;
-        ledout.index--
-      ){ //+1?
-      // move backwards
-      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index-1].DesiredColour;
-    }
-    // Put first pixel on the end (wrap around)
-    animation_colours[0].DesiredColour = colourlast;
-
-  }else{
-
-    // Shift colours (rotate)
-    RgbcctColor colourfirst = animation_colours[0].DesiredColour;//desired_colour[0];
-    // Shift towards first pixel
-    for(ledout.index=0;ledout.index<pCONT_iLight->settings.light_size_count;ledout.index++){ 
-      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index+1].DesiredColour;
-    }
-    // Put first pixel on the end (wrap around)
-    animation_colours[ledout.index-1].DesiredColour = colourfirst;
-  }
-
-}
-
-
-
-// // Update struct that shows overview, always sends
-uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
-
-  char buffer[100];
-
-  JsonBuilderI->Start();
-
-  JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
-
-//   // root[D_JSON_ONOFF] = pCONT_iLight->light_power_state ? "ON" : "OFF";
-  JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-  JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
-  // root["region"] = GetFlasherRegionName();
-  // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-  // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
-  // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
-
-//   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
-//   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-//   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms,1000);
-//   //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms;
-//   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
-//   //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
-//   //   transitionobj[D_JSON_FUNCTION] = GetFlasherFunctionName();
-
-//   JsonObject seq_obj = root.createNestedObject("sequential");
-//     seq_obj["rate_index"] = flashersettings.function_seq.rate_index;
-
-// JsonBuilderI->Level_Start("slow_glow");
-//   JsonBuilderI->Add("rate_index", flashersettings.function_slo_glo.rate_index);
-// JsonBuilderI->Level_End();
-
-
-
-//   // Flags and states that are used during one transition and reset when completed
-//   // JsonObject overridesobj = root.createNestedObject("transition_overrides"); 
-//   //   overridesobj["fRefreshAllPixels"] = pCONT_iLight->animation_override.fRefreshAllPixels;
-  
-//   // root["ledout.length"] = ledout.length;
-
-//   data_buffer.payload.len = measureJson(root)+1;
-//   serializeJson(doc,data_buffer.payload.ctr);
-
-//   return (data_buffer.payload.len>3?1:0);
-  return JsonBuilderI->End();
-}
-
-
-
-#endif // ENABLE_PIXEL_FUNCTION_EFFECTS
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -795,14 +745,6 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 }
 
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ END OF ANIMATION/EFFECTS/MIXER DEFINITIONS ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
 
 
 
@@ -1098,6 +1040,7 @@ void mAnimatorLight::ApplyBrightnesstoDesiredColour(uint8_t brightness){
     animation_colours[pixel].DesiredColour.R = mapvalue(animation_colours[pixel].DesiredColour.R, 0, 255, 0, brightness);
     animation_colours[pixel].DesiredColour.G = mapvalue(animation_colours[pixel].DesiredColour.G, 0, 255, 0, brightness);
     animation_colours[pixel].DesiredColour.B = mapvalue(animation_colours[pixel].DesiredColour.B, 0, 255, 0, brightness);
+    // should be white channel here depending on type!
   }
 
 }
@@ -1164,26 +1107,9 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 
 
 
-uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
-  strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
-
-// AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
-
-  return strip_size_requiring_update; // also return the count
-
-}
-
-
-
-void mAnimatorLight::RefreshLEDIndexPattern(){
-
-  // AddLog(LOG_LEVEL_TEST, PSTR("f::%s"),__FUNCTION__);
-
-  // DEBUG_PRINT_FUNCTION_NAME_TEST;
-  // DEBUG_PRINT_FUNCTION_NAME;
-
-  // Somehow this orders need to become flasher... which I will rename pCONT_iLight->animation
+void mAnimatorLight::RefreshLEDIndexPattern()
+{
 
   //Serial.printf("animation.transition.order_id=%d\n\r",pCONT_iLight->animation.transition.order_id);
 
@@ -1216,6 +1142,8 @@ void mAnimatorLight::RefreshLEDIndexPattern(){
 
 
       // SetLEDOutAmountByPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+
+      // AddLog(LOG_LEVEL_TEST, PSTR("strip_size_requiring_update=%d"),strip_size_requiring_update);
 
             // Pick random indexes, from the entire pixel count, but only fill up pattern as needed
             for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){ 
@@ -1255,7 +1183,7 @@ void mAnimatorLight::RefreshLEDIndexPattern(){
             }
           #endif // ENABLE_DEVFEATURE_STDSHUFFLE_PIXEL_RANDOM
 
-      SetLEDOutAmountByPercentage(100);
+          SetLEDOutAmountByPercentage(100);
 
 
         break;
@@ -1270,27 +1198,15 @@ void mAnimatorLight::RefreshLEDIndexPattern(){
           }
           // Pick a index, fill output, remove option
           ledout.index = 0; //reset output indexing
-  // for(int remaining=pick_list_remaining;remaining>0;remaining--){
-          
-  // AddLog(LOG_LEVEL_TEST, PSTR("BEFORE pick_list_remaining=%d"), pick_list_remaining);
-          while(pick_list_remaining){
 
-
-  // AddLog_Array(LOG_LEVEL_TEST, "pick_list_remaining", pick_list,pick_list_remaining);
-  // AddLog(LOG_LEVEL_TEST, PSTR("pick_list_remaining=%d"), pick_list_remaining);
-
-
-      //   Serial.println("pick_list_remaining");
-      // for(int jj=0;jj<pick_list_remaining;jj++){ Serial.printf("%d, ",pick_list[jj]); } Serial.println();
-
-
+          while(pick_list_remaining)
+          {
             pick_list_index = random(0,pick_list_remaining);
             pick_list_val = pick_list[pick_list_index];
            // AddLog(LOG_LEVEL_TEST,PSTR("pick_list_remaining=%d [%d:%d]"),pick_list_remaining,pick_list_index,pick_list_val);
 
             ledout.pattern[ledout.index++] = pick_list_val;
 
-        // Serial.println("REMOVING");
             // Remove pick_list_index
             for(int ii=0;ii<pick_list_remaining-1;ii++){
               //check if we have matched
@@ -1321,37 +1237,6 @@ void mAnimatorLight::RefreshLEDIndexPattern(){
       // }
     }
     break;
-//     case TRANSITION_ORDER_ROTATE_ID:
-// // x = new index 0
-// //       [0,1,2,x,4,5] start
-// //       [0,1,2] //remember <x
-// //       [x,4,5] // shift down
-// //       [x,4,5,0,1,2] end
-
-// // ROTATE IS HANDLED BY NEOPIXEBUS FUNCTIONS, USE THEM!!
-
-//       uint16_t rotate_amount = 1;
-//       // Store last value
-//       uint16_t last_index = ledout.pattern[ledout.length-1];
-//       // Serial.println();
-//       // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
-
-//       // shift all values by 1
-//       for(ledout.index=0;ledout.index<ledout.length/2-1;ledout.index++){ 
-//         swap(
-//           ledout.pattern[ledout.length/2-ledout.index],
-//           ledout.pattern[ledout.length/2+ledout.index]
-//         );
-//       }
-//       // Move into first
-
-//       // for(int jj=0;jj<ledout.length;jj++){ Serial.printf("%d, ",ledout.pattern[jj]); } Serial.println();
-
-//       // Use existing pattern and rotate it
-//       // for(ledout.index=0;ledout.index<length_local;ledout.index++){ 
-//       //   index_pattern[ledout.index] = ledout.index; 
-//       // }
-//     break;
   }
 
 } //end function "RefreshLEDIndexPattern"
@@ -1411,6 +1296,8 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
         
 
           RefreshLEDIndexPattern();
+
+
           int16_t pixel_position = -2;
           for(ledout.index=0;ledout.index<strip_size_requiring_update;ledout.index++){
 
@@ -2482,36 +2369,6 @@ uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level){
 }
 
 
-#ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
-
-  Tasker_Override_Forcing_Variables_Testing();
-  // pCONT_iLight->_briRGB = 255;
-  // flashersettings.function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
-  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_EFFECTS_ID;
-  // pCONT_iLight->animation.transition.rate_ms = 400; // not sure if this will work? I probably have to force a check somewhere
-  // pCONT_iLight->animation.transition.time_ms.val = 2;
-  // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-  // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
-  // pCONT_iLight->animation.palette.id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
-  // pCONT_iLight->animation.palette_index_range_max_limit = 2;
-  // mixer.running_id = 10;
-  // mixer.flags.Enabled = false;
-
-
-  // pCONT_iLight->_briRGB = 255;
-  // flashersettings.function = EFFECTS_FUNCTION_TESTER_ID;//EFFECTS_FUNCTION_PULSE_RANDOM_ON
-  // pCONT_iLight->animation.mode_id = pCONT_iLight->ANIMATION_MODE_EFFECTS_ID;
-  // pCONT_iLight->animation.transition.rate_ms = 400; // not sure if this will work? I probably have to force a check somewhere
-  // pCONT_iLight->animation.transition.time_ms.val = 350;
-  // pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-  // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 50;
-  // pCONT_iLight->animation.palette.id = pCONT_iLight->PALETTELIST_VARIABLE_USER_01_ID;
-  // pCONT_iLight->animation.palette_index_range_max_limit = 2;
-  // mixer.running_id = 10;
-  // mixer.flags.Enabled = false;
-
-#endif // ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
-
 
 
 void mAnimatorLight::Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
@@ -2743,6 +2600,76 @@ void mAnimatorLight::DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index)
 
 
 
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Subtask:   Mixer (for changing animations)   ***************************************************************************************************************************************************************************
+**  @note:     to be renamed, "profiles?"  **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+
+
+
+
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   Notifications   ***************************************************************************************************************************************************************************
+**  @note:     **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+
+
+
+
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   Ambilight   ***************************************************************************************************************************************************************************
+**  @note:     **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+
+
+
+
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   HACS (Legacy)   ***************************************************************************************************************************************************************************
+**  @note:    HACS animation, to be phased out into Segments **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+
+void mAnimatorLight::init_flasher_settings(){
+
+  flashersettings.flags.movement_direction = 0;
+  
+
+
+// A "wipe" or "sine wave" that applies a saturation change across the string. So either, from all christmas coloured to slowly blending from the top of the tree to the bottom, to white (or another solid colour), or apply the saturation change in a loop/rotation. 
+
+
+  
+}
+
+
+
+// simple blend function
+void mAnimatorLight::BlendAnimUpdate(const AnimationParam& param)
+{    
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);
+    SetPixelColor(pixel, updatedColor);
+  } // END for
+}
 
 
 
@@ -2758,10 +2685,425 @@ void mAnimatorLight::DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index)
 
 
 
+void mAnimatorLight::AnimationProcess_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param)
+{   
+
+  RgbcctColor output_colour = RgbcctColor::LinearBlend(
+    animation_colours_rgbcct.StartingColor,
+    animation_colours_rgbcct.DesiredColour,
+    param.progress);
+
+  for(int ii=0;ii<pCONT_iLight->settings.light_size_count;ii++){
+    SetPixelColor(ii,output_colour);
+  }
+
+}
+
+
+void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend(const AnimationParam& param)
+{    
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++)
+  {
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);    
+    SetPixelColor(pixel, updatedColor);
+  }
+}
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+void mAnimatorLight::SubTask_Effects_PhaseOut(){
+
+  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  if(mixer.flags.Enabled){
+   SubTask_Flasher_Animate_Mixer();
+  }
+  #endif // ENABLE_PIXEL_FUNCTION_MIXER
+
+  SubTask_Flasher_Animate();
+
+} // SubTask_Effects_PhaseOut
+
+
+/**
+ * 
+ * Change this to be indexed to recall from _segment
+ * */
+void mAnimatorLight::SubTask_Flasher_Animate(){
+  
+  /**
+   * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
+   * */
+  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
+  /**
+   * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
+   * */  
+  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
+  /**
+   * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
+   * */    
+  SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
+
+
+  if((mTime::TimeReached(&flashersettings.tSaved.Update,pCONT_iLight->animation.transition.rate_ms))||(pCONT_iLight->animation.flags.fForceUpdate))
+  {
+
+    if(pCONT_iLight->animation.flags.fForceUpdate){ pCONT_iLight->animation.flags.fForceUpdate=false;
+      flashersettings.tSaved.Update = millis();
+    }
+
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+    // char buffer[100];
+    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
+    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
+    //#endif
+    // #ifdef DEVICE_RGBFIREPLACE_TESTER
+    //     flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+    // #endif
+
+    switch(flashersettings.function){
+      default:
+      /**
+       * Basic methods for christmas kept as legacy, until segments is fully working
+       * */
+      case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
+        SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour();
+      break;
+      case EFFECTS_FUNCTION_STATIC_PALETTE_ID:
+        SubTask_Flasher_Animate_Function__Static_Glow();
+      break;
+      case EFFECTS_FUNCTION_SLOW_GLOW_ID:
+        SubTask_Flasher_Animate_Function__Slow_Glow();
+      break;
+      case EFFECTS_FUNCTION_SEQUENTIAL_ID:
+        SubTask_Flasher_Animate_Function__Sequential();
+      break;
+      case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:
+        SubTask_Flasher_Animate_Function__Step_Through_Palette();
+      break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
+        SubTask_Flasher_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+      break;
+      case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
+        SubTask_Flasher_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+      break;
+      case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:
+        SubTask_Flasher_Animate_Function__FirePlace_1D_01();
+      break;
+      #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+      case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID:
+        SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
+      break;
+      // case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID:
+      //   SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
+      // break;
+      // case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
+      //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+      // break;
+      #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+      /**
+       * These other modes must be moved into the new segments class
+       * */
+      //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+      //  break;
+      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
+      //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+      //  break;
+      //  case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
+      //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+      //  break;
+      //  case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+      //  break;
+      //  case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
+      //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+      //  break;
+      //  case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
+      //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+      //  break;
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+      //  break;
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+      //  break;
+      // EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID
+      //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
+      //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+      //  break;
+      //  case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+      //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+      //  break;
+      //  case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+      //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01:
+      //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+      //  break;
+      //  case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
+      //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+      //  break;
+       case EFFECTS_FUNCTION_TESTER_ID:
+         SubTask_Flasher_Animate_Function_Tester();
+       break; 
+    } //end SWITCH
+
+    // Configure animator to show output
+    StartAnimation_AsAnimUpdateMemberFunction();
+
+  }//end if update reached
+
+   pCONT_iLight->animation.flags.animator_first_run = false;
+
+} //end flasher_animate
+
+
+/**
+ * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
+ * */
+void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region(){
+
+  if(flashersettings.update_colour_region.refresh_secs || flashersettings.update_colour_region.refresh_decounter_secs){ // >0 is active
+    if(mTime::TimeReached(&flashersettings.update_colour_region.tSaved, 1000)){
+      AddLog(LOG_LEVEL_TEST, PSTR("rate_colours_secs=%d, rate_decounter=%d"),flashersettings.update_colour_region.refresh_secs, flashersettings.update_colour_region.refresh_decounter_secs);
+      if(flashersettings.update_colour_region.refresh_decounter_secs == 1){
+        flashersettings.update_colour_region.refresh_decounter_secs = flashersettings.update_colour_region.refresh_secs; // reset
+        flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
+        flashersettings.flags.force_finish_flasher_pair_once = 1;
+      }else
+      if(flashersettings.update_colour_region.refresh_decounter_secs > 1){
+        flashersettings.update_colour_region.refresh_decounter_secs--;
+      }
+      //
+      else{
+        flashersettings.update_colour_region.refresh_decounter_secs = flashersettings.update_colour_region.refresh_secs; // reset
+      }
+    }
+  }
+
+}
+
+ /**
+   * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
+   * */  
+  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate(){
+  // Generate randomness to transitions if flag is set
+  // if(flashersettings.flags.enable_random_rate){
+  //   if(mTime::TimeReached(&flashersettings.random_transitions.tSavedNewSpeedUpdate,flashersettings.random_transitions.rate_ms)){
+  //     flashersettings.random_transitions.rate_ms = (random(flashersettings.random_transitions.lower_secs,flashersettings.random_transitions.upper_secs)*1000);
+  //     pCONT_iLight->animation.transition.rate_ms = flashersettings.random_transitions.array[flashersettings.random_transitions.array_index++]*10;
+  //     if(flashersettings.random_transitions.array_index>=flashersettings.random_transitions.array_index_length) flashersettings.random_transitions.array_index=0;
+  //     pCONT_iLight->animation.transition.time_ms.val = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
+  //   }
+  // }
+  }
+
+  /**
+   * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
+   * */ 
+  void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time(){
+  // if(mTime::TimeReached(&flashersettings.function_seq.tSavedNewSpeedUpdate,(random(3,10)*1000))){
+  //   uint8_t values[8] = {4,8,10,17,20,17,10,8};
+  //   pCONT_iLight->animation.transition.rate_ms = values[flashersettings.function_seq.rate_index++]*50;
+  //   if(flashersettings.function_seq.rate_index>8) flashersettings.function_seq.rate_index=0;
+  //   pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
+  // }
+  }
+
+
+// /****
+//  * Changes pixels randomly to new colour, with slow blending
+//  * Requires new colour calculation each call
+//  */
+// void mAnimatorLight::SubTask_Flasher_Animate_Function__Slow_Glow(){
+//   // So colour region does not need to change each loop to prevent colour crushing
+//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+//   UpdateDesiredColourFromPaletteSelected();
+// }
+
+
+
+/**
+ * This can be gotten from animator if start does not need to be saved
+ * 
+ * 3 per pixel, 1000 leds would need 3000 RGB bytes
+ * 
+ * */
+void mAnimatorLight::UpdateStartingColourWithGetPixel(){
+
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+
+    // Test fix, if desired does not match getcolour, then use ...
+
+
+    animation_colours[pixel].StartingColor = GetPixelColor(pixel);
+  }
+
+}
+
+void mAnimatorLight::UpdateDesiredColourWithGetPixel(){
+
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+
+    // Test fix, if desired does not match getcolour, then use ...
+
+
+    animation_colours[pixel].DesiredColour = GetPixelColor(pixel);
+  }
+
+}
+
+void mAnimatorLight::UpdateStartingColourWithSingleColour(RgbcctColor colour){
+
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+    animation_colours[pixel].StartingColor = colour;
+  }
+
+}
+
+void mAnimatorLight::UpdateDesiredColourWithSingleColour(RgbcctColor colour){
+
+  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
+    animation_colours[pixel].DesiredColour = colour;
+  }
+
+}
+
+
+void mAnimatorLight::RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction){
+
+//pixels_amount_to_shift loop this many times
+
+  if(direction){ // direction==1 move right ie AWAY from start
+
+    // Shift colours (rotate)
+    RgbcctColor colourlast = animation_colours[pCONT_iLight->settings.light_size_count-1].DesiredColour;//desired_colour[0];
+    // Shift towards first pixel
+    for(ledout.index=pCONT_iLight->settings.light_size_count-1; //last to first
+        ledout.index>0;
+        ledout.index--
+      ){ //+1?
+      // move backwards
+      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index-1].DesiredColour;
+    }
+    // Put first pixel on the end (wrap around)
+    animation_colours[0].DesiredColour = colourlast;
+
+  }else{
+
+    // Shift colours (rotate)
+    RgbcctColor colourfirst = animation_colours[0].DesiredColour;//desired_colour[0];
+    // Shift towards first pixel
+    for(ledout.index=0;ledout.index<pCONT_iLight->settings.light_size_count;ledout.index++){ 
+      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index+1].DesiredColour;
+    }
+    // Put first pixel on the end (wrap around)
+    animation_colours[ledout.index-1].DesiredColour = colourfirst;
+  }
+
+}
+
+
+
+// // Update struct that shows overview, always sends
+uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level){
+
+  char buffer[100];
+
+  JsonBuilderI->Start();
+
+  JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
+
+//   // root[D_JSON_ONOFF] = pCONT_iLight->light_power_state ? "ON" : "OFF";
+  JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
+  JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
+  // root["region"] = GetFlasherRegionName();
+  // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
+  // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
+  // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
+
+//   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
+//   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
+//   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms,1000);
+//   //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms;
+//   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
+//   //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
+//   //   transitionobj[D_JSON_FUNCTION] = GetFlasherFunctionName();
+
+//   JsonObject seq_obj = root.createNestedObject("sequential");
+//     seq_obj["rate_index"] = flashersettings.function_seq.rate_index;
+
+// JsonBuilderI->Level_Start("slow_glow");
+//   JsonBuilderI->Add("rate_index", flashersettings.function_slo_glo.rate_index);
+// JsonBuilderI->Level_End();
+
+
+
+//   // Flags and states that are used during one transition and reset when completed
+//   // JsonObject overridesobj = root.createNestedObject("transition_overrides"); 
+//   //   overridesobj["fRefreshAllPixels"] = pCONT_iLight->animation_override.fRefreshAllPixels;
+  
+//   // root["ledout.length"] = ledout.length;
+
+//   data_buffer.payload.len = measureJson(root)+1;
+//   serializeJson(doc,data_buffer.payload.ctr);
+
+//   return (data_buffer.payload.len>3?1:0);
+  return JsonBuilderI->End();
+}
+
+
+
+
+
+
+
+
+
+
+
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   WLED (Legacy)   ***************************************************************************************************************************************************************************
+**  @note:    WLED initial port, running as its own effect. To be phased out into Segments **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+#ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 
 
 float mAnimatorLight::minf2(float v, float w)
@@ -2846,6 +3188,11 @@ void mAnimatorLight::relativeChangeWhite(int8_t amount, byte lowerBoundary)
   col[3] = new_val;
 }
 
+
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+// #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
 void mAnimatorLight::colorHStoRGB(uint16_t hue, byte sat, byte* rgb) //hue, sat to rgb
 {
   float h = ((float)hue)/65535.0;
@@ -2924,15 +3271,13 @@ void mAnimatorLight::Init_WLED(void)
 }
 
 
-void mAnimatorLight::SubTask_WLED_Animation()
+void mAnimatorLight::SubTask_WLED_Animation_PhaseOut()
 {
   
   handleTransitions();
   mEffects->service();
 
 }
-
-
 
 
 
@@ -3133,6 +3478,7 @@ void mAnimatorLight::handleTransitions()
   }
 }
 
+    // #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
 
 
 //enable custom per-LED mapping. This can allow for better effects on matrices or special displays
@@ -3157,6 +3503,22 @@ const char* mAnimatorLight::GetEffectsModeNamebyID(uint8_t id, char* buffer, uin
   pCONT_sup->GetTextIndexed_P(buffer, buflen, id, PM_FX_MODES_NAMES_CTR);
   return buffer;
 }
+
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+
+#endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+
+/******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   Segments   ***************************************************************************************************************************************************************************
+**  @note:    New effect that merges HACS and WLED with segments and dynamic animation storage **************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+
+
 
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

@@ -13,7 +13,7 @@
 
 // #define DEVICE_FORCED_TO_BE_TESTER
 #define DISABLE_WEBSERVER
-#define FORCE_TEMPLATE_LOADING
+// //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -40,37 +40,29 @@
  * 
  * */
 
-
-
-
-/**
- * 4 Measurement recorders
- * Node0 - UAV
- * Node1 - OffUAVa
- * Node2 - OffUAVb
- * Node2r - Receive only test module for I2S sampling
- * */
-
 // //--------------------------------[Enable Device]-------------------------------------
 
 /**
  * PhD systems
  * */
 // #define DEVICE_NODE0_UAV_PIC32ADC
-#define DEVICE_NODE1_OFFUAV_PIC32ADC
+// #define DEVICE_NODE1_OFFUAV_PIC32ADC
 // #define DEVICE_NODE2_OFFUAV_PIC32ADC
-
 
 // #define DEVICE_NODE2R_OFFUAV_PIC32ADC_ESP32I2S
 
-// //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
-
+//-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
 
 #ifdef DEVICE_NODE0_UAV_PIC32ADC
   #define DEVICENAME_CTR            "node0"
   #define DEVICENAME_FRIENDLY_CTR   "node0"  //white wire, blue tape, to be uav 
   #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "ND0"
+  #define DEVICENUM_NUM   0
+
+  #define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+  #define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
+  #define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
 
   /**
    * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
@@ -154,7 +146,7 @@
    * */
   #ifdef USE_SYSTEM_SDCARD_LOGGING
     #define USE_MODULE_DRIVERS_SDCARD
-    #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
   #endif // USE_SYSTEM_SDCARD_LOGGING
 
   /**
@@ -212,7 +204,6 @@
     // #define ADC_CAPTURE_INPUT0_PIN 34
     // #define ADC_CAPTURE_INPUT1_PIN 35
   #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
-
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -276,27 +267,27 @@
   /**
    * Debug pins
    * */
-  #define DEBUG_PIN1_GPIO     21
-  #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
-  #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
-  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+  // #define DEBUG_PIN1_GPIO     21
+  // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
 
-  #define DEBUG_PIN2_GPIO     22
-  #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
-  #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
-  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+  // #define DEBUG_PIN2_GPIO     22
+  // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
 
-  #define DEBUG_PIN3_GPIO     0 //USED
-  #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
-  #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
-  #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+  // #define DEBUG_PIN3_GPIO     0 //USED
+  // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
 
-  #define DEBUG_PIN4_GPIO     27
-  #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
-  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+  // #define DEBUG_PIN4_GPIO     27
+  // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
 
-  #define DEBUG_ADC_ISR_EVENT_SET(X)          DEBUG_PIN1_SET(X)
+  // #define DEBUG_ADC_ISR_EVENT_SET(X)          DEBUG_PIN1_SET(X)
   //#define DEBUG_ADC_ISR_EVENT_SET(X)          // nothing
 
 
@@ -308,6 +299,12 @@
   #define DEVICENAME_CTR            "node1"
   #define DEVICENAME_FRIENDLY_CTR   "node1"  //white wire, blue tape, to be uav 
   #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "ND1"
+  #define DEVICENUM_NUM   1
+
+#define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+#define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
+#define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
+
 
   /**
    * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
@@ -391,7 +388,7 @@
    * */
   #ifdef USE_SYSTEM_SDCARD_LOGGING
     #define USE_MODULE_DRIVERS_SDCARD
-    #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
   #endif // USE_SYSTEM_SDCARD_LOGGING
 
   /**
@@ -544,6 +541,13 @@
   #define DEVICENAME_CTR            "node2"
   #define DEVICENAME_FRIENDLY_CTR   "node2"  //white wire, blue tape, to be uav 
   #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "ND2"
+  #define DEVICENUM_NUM   2
+
+#define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+#define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
+#define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
+
+
 
   /**
    * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
@@ -627,7 +631,7 @@
    * */
   #ifdef USE_SYSTEM_SDCARD_LOGGING
     #define USE_MODULE_DRIVERS_SDCARD
-    #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
   #endif // USE_SYSTEM_SDCARD_LOGGING
 
   /**
@@ -749,31 +753,35 @@
   /**
    * Debug pins
    * */
-  #define DEBUG_PIN1_GPIO     21
-  #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
-  #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
-  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+  // #define DEBUG_PIN1_GPIO     21
+  // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
 
-  #define DEBUG_PIN2_GPIO     22
-  #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
-  #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
-  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+  // #define DEBUG_PIN2_GPIO     22
+  // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
 
-  #define DEBUG_PIN3_GPIO     0 //USED
-  #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
-  #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
-  #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+  // #define DEBUG_PIN3_GPIO     0 //USED
+  // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
 
-  #define DEBUG_PIN4_GPIO     27
-  #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
-  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+  // #define DEBUG_PIN4_GPIO     27
+  // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
 
-  #define DEBUG_ADC_ISR_EVENT_SET(X)          DEBUG_PIN1_SET(X)
+  // #define DEBUG_ADC_ISR_EVENT_SET(X)          DEBUG_PIN1_SET(X)
   //#define DEBUG_ADC_ISR_EVENT_SET(X)          // nothing
 
 
 #endif // DEVICE_GPSPARSER_TESTER
+
+
+
+
 
 
 

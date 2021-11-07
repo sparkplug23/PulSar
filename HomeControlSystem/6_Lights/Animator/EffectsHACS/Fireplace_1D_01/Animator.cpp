@@ -1,7 +1,7 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 /**
@@ -16,7 +16,7 @@
  * Changes pixels randomly to new colour, with slow blending
  * Requires new colour calculation each call
  */
-void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_1D_01()
+void mAnimatorLight::SubTask_Flasher_Animate_Function__FirePlace_1D_01()
 {
   // So colour region does not need to change each loop to prevent colour crushing
   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
@@ -55,7 +55,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_FirePlace_1D_01()
 #endif 
 #endif // ENABLE_DEVFEATURE_FIREPLACE_SEGMENT_EXTRA_GENERATE
 
-AddLog(LOG_LEVEL_TEST,PSTR("SubTask_Flasher_Animate_Function_FirePlace_1D_01 %d"),animation_colours[0].DesiredColour.R);
+AddLog(LOG_LEVEL_TEST,PSTR("SubTask_Flasher_Animate_Function__FirePlace_1D_01 %d"),animation_colours[0].DesiredColour.R);
 
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();

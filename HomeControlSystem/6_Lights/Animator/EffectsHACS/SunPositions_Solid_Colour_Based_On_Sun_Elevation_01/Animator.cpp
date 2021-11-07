@@ -1,7 +1,7 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 // Make this an "Effects" which is public/friendly of animator, but not the same class
@@ -63,9 +63,9 @@ struct EFFECT_CONFIG {
 float sun_elevation = 0;
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
   #else
-  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position.elevation;
   #endif
 #endif
 

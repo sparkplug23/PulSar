@@ -106,6 +106,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
      * */
     if(sdcard_status.isopened)
     {
+      #ifdef USE_MODULE_DRIVERS_GPS
       pCONT_time->SetUTCTime(
                     pCONT_gps->gps_result_stored.dateTime.year,
                     pCONT_gps->gps_result_stored.dateTime.month,
@@ -114,6 +115,7 @@ void mSDCard::CommandSet_SDCard_Appending_File_Method_State(uint8_t state)
                     pCONT_gps->gps_result_stored.dateTime.minutes,
                     pCONT_gps->gps_result_stored.dateTime.seconds
                   );
+      #endif // USE_MODULE_DRIVERS_GPS
 
     }
 

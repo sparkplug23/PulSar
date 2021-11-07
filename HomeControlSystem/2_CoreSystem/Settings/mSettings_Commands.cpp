@@ -33,6 +33,23 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   }
 
 
+  /**
+   * Debug options
+   * */
+  if(jtok = obj["SettingSave"])
+  {
+    SettingsSaveAll();
+  }
+  if(jtok = obj["SettingLoad"])
+  {
+    SettingsLoad();
+  }
+
+
+
+  // ENABLE_DEVFEATURE_SAVE_REBOOT_COMMAND_FOR_SETTINGS_TESTING
+
+
   if(jtok = obj[PM_JSON_DEVICENAME]){ 
     // const char* onoff = jtok.getStr();
     
@@ -53,12 +70,12 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_list_id));
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS    
   
       if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer]){ 
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_TEST, PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
         #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
         
         JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
@@ -71,8 +88,8 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
             // DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             #ifdef ENABLE_LOG_LEVEL_COMMANDS
-            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
-            AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
             #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
           } //if array
         }//if array
@@ -120,6 +137,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     if(strstr(command,PSTR("reset_bootcount"))){ 
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"reset_bootcount\""));
       Settings.bootcount = 0;
+  AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Resetting Settings.bootcount"));
       SettingsSaveAll();
       data_buffer.isserviced++;
     }
@@ -273,7 +291,12 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
   /**
    * 0 = invalid
    * 1 = soft restart
-   * 2 = hardware wdt restart
+   * 2 = save reboot, save settings, then restart
+   * 3 = reboot into captive portal mode
+   * 4 = reboot and wait for 1 minute for OTA capture
+   * 5 = force crash with hardware WDT
+   * 6 = reboot and reset to default setting (not wifi)
+   * 7 (requires second command) = forced reset and all settings including wifi
    * 3+ is disabling things for stability ie fastboot or erasing settings to default
    * 
    * 
@@ -286,7 +309,35 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
    
   if(value == 1){
     pCONT_wif->EspRestart();
+  }else
+
+  if(value == 2){
+    AddLog(LOG_LEVEL_TEST, PSTR("REBOOT TEST" DEBUG_INSERT_PAGE_BREAK));
+
+    AddLog(LOG_LEVEL_TEST, PSTR("Current bootcount is %d"), Settings.bootcount);
+
+    pCONT_set->TestSettings_ShowLocal_Header();
+    pCONT_set->TestSettingsLoad();
+
+    AddLog(LOG_LEVEL_TEST, PSTR("Modying bootcount to %d"), Settings.bootcount++);
+
+    pCONT_set->SettingsSaveAll();
+
+    AddLog(LOG_LEVEL_TEST, PSTR("Settings should be saved now to %d"), Settings.bootcount);
+
+
+    pCONT_set->TestSettings_ShowLocal_Header();
+    pCONT_set->TestSettingsLoad();
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_wif->EspRestart(); is 5 seconds"));
+
+    // delay(5000);
+
+
+
+    pCONT_wif->EspRestart();
   }
+  
   #endif // ifdef USE_MODULE_NETWORK_WIFI
    
   

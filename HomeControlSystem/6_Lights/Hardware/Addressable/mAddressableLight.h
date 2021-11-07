@@ -58,7 +58,7 @@ class mAddressableLight :
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     RgbcctColor output_colour;
     void LightUpdate();
-    void SubTask_WLED_Animation();
+    void SubTask_WLED_Animation_PhaseOut();
     void LightSetPWMOutputsRgbcctColor(RgbcctColor colour);
 
 

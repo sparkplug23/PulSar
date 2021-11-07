@@ -24,6 +24,7 @@
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
 
 /*********************************************************************************************\
@@ -256,6 +257,11 @@
 #define FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES   false
 
 
+  #ifndef SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 10
+  #endif
+
+
 /*********************************************************************************************\
  * END OF SECTION 1
  *
@@ -468,6 +474,13 @@
 #define USE_SM16716                              // Add support for SM16716 RGB LED controller (+0k7 code)
 
 //#define USE_HRE                                  // Add support for Badger HR-E Water Meter (+1k4 code)
+
+#ifdef ESP8266
+#ifndef DISABLE_SETTINGS_STORAGE_OVERRIDE
+#define ENABLE_SETTINGS_STORAGE
+#endif
+#endif // ESP8266
+
 
 /*********************************************************************************************\
  * Debug features are only supported in development branch

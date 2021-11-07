@@ -61,6 +61,8 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
     snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s",name_ctr);  
   }
 
+  // delay(5000);
+
   // Name means friendly name (max 20 chars)
   if(jtok = obj[PM_JSON_FRIENDLYNAME]){
     const char* name_ctr = jtok.getStr();

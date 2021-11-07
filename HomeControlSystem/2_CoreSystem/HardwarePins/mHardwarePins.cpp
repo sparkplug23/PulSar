@@ -19,7 +19,7 @@ int8_t mHardwarePins::Tasker(uint8_t function, JsonParserObject obj){
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
   // DEBUG_PRINTF("works=%d\n\r",works);
   
-  if(function == FUNC_TEMPLATE_MODULE_LOAD){
+  if(function == FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM){
     Template_Load();
   }
 
@@ -1441,6 +1441,7 @@ void mHardwarePins::TemplateJson()
 int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   if(c=='\0'){ return -1; }
   if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
+  if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)==0){    return MODULE_SONOFF_BASIC_EXTERNAL_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_MAGICHOME_CTR)==0){       return MODULE_MAGICHOME_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY1_CTR)==0){         return MODULE_SHELLY1_ID; }
@@ -1464,6 +1465,7 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
     default:
     #ifdef ESP8266
     case MODULE_SONOFF_BASIC_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_CTR)); break;
+    case MODULE_SONOFF_BASIC_EXTERNAL_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)); break;
     case MODULE_SONOFF_IFAN03_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_IFAN03_CTR, sizeof(PM_MODULE_NAME_SONOFF_IFAN03_CTR)); break;
     case MODULE_H801_ID:   memcpy_P(buffer, PM_MODULE_NAME_H801_CTR, sizeof(PM_MODULE_NAME_H801_CTR)); break;
     case MODULE_MAGICHOME_ID:   memcpy_P(buffer, PM_MODULE_NAME_MAGICHOME_CTR, sizeof(PM_MODULE_NAME_MAGICHOME_CTR)); break;
@@ -1618,18 +1620,28 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   // #endif
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_INV_CTR)==0){  return GPIO_KEY1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_INV_CTR)==0){  return GPIO_KEY2_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_INV_CTR)==0){  return GPIO_KEY3_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY4_INV_CTR)==0){  return GPIO_KEY4_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY5_INV_CTR)==0){  return GPIO_KEY5_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY6_INV_CTR)==0){  return GPIO_KEY6_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY7_INV_CTR)==0){  return GPIO_KEY7_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY8_INV_CTR)==0){  return GPIO_KEY8_INV_ID; }
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY2_CTR)==0){  return GPIO_KEY2_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY3_CTR)==0){  return GPIO_KEY3_ID; }
 
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_NP_CTR)==0){  return GPIO_KEY1_NP_ID; }
+
+  // else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_PULLDOWN_CTR)==0){  return GPIO_KEY1_PULLDOWN_ID; }
+
+
 
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_TX_CTR)==0){  return GPIO_NEXTION_TX_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_NEXTION_RX_CTR)==0){  return GPIO_NEXTION_RX_ID; }
 
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_CTR)==0){  return GPIO_KEY1_ID; }
 
 
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IA_CTR)==0){  return GPIO_HBRIDGE_L9110_IA_ID; }
@@ -1643,6 +1655,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
   
   #ifdef ESP32
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH4_CTR)==0){  return GPIO_ADC1_CH4_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH6_CTR)==0){  return GPIO_ADC1_CH6_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_ADC1_CH7_CTR)==0){  return GPIO_ADC1_CH7_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR)==0){  return GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID; }
@@ -1728,6 +1741,18 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 //   GPIO_KEY4_NP_ID,
 //   GPIO_KEY4_INV_ID,
 //   GPIO_KEY4_INV_NP_ID,
+    case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
+    case GPIO_KEY2_ID: return PM_GPIO_FUNCTION_KEY2_CTR;
+    case GPIO_KEY3_ID: return PM_GPIO_FUNCTION_KEY3_CTR;
+    
+    case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
+    case GPIO_KEY2_INV_ID: return PM_GPIO_FUNCTION_KEY2_INV_CTR;
+    case GPIO_KEY3_INV_ID: return PM_GPIO_FUNCTION_KEY3_INV_CTR;
+    case GPIO_KEY4_INV_ID: return PM_GPIO_FUNCTION_KEY4_INV_CTR;
+    case GPIO_KEY5_INV_ID: return PM_GPIO_FUNCTION_KEY5_INV_CTR;
+    case GPIO_KEY6_INV_ID: return PM_GPIO_FUNCTION_KEY6_INV_CTR;
+    case GPIO_KEY7_INV_ID: return PM_GPIO_FUNCTION_KEY7_INV_CTR;
+    case GPIO_KEY8_INV_ID: return PM_GPIO_FUNCTION_KEY8_INV_CTR;
 
       // case  GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR;            // User connected external switches
       case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
@@ -1986,9 +2011,6 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 
 
     
-    case GPIO_KEY1_ID: return PM_GPIO_FUNCTION_KEY1_CTR;
-    
-    case GPIO_KEY1_INV_ID: return PM_GPIO_FUNCTION_KEY1_INV_CTR;
 
 //GPS?
 //  case GPIO_GPS_SERIAL0_RX

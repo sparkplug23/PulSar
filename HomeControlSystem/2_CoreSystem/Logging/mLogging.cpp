@@ -185,7 +185,9 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         pCONT_set->log_data
       );
     #else
+      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT START<<\n\r\n\r"); }
       SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
     #endif
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // Only flush if we all doing all for debugging
@@ -753,6 +755,7 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer){
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
+    case LOG_LEVEL_HIGHLIGHT:           memcpy_P(buffer, PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR, sizeof(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)); break;
     case LOG_LEVEL_INFO:           memcpy_P(buffer, PM_LOG_LEVEL_INFO_SHORT_CTR, sizeof(PM_LOG_LEVEL_INFO_SHORT_CTR)); break;
     case LOG_LEVEL_COMMANDS:   memcpy_P(buffer, PM_LOG_LEVEL_COMMANDS_SHORT_CTR, sizeof(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)); break;
     case LOG_LEVEL_DEBUG:          memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_SHORT_CTR)); break;

@@ -8,7 +8,15 @@ enum XsnsFunctions {
   // Init stuff (in importance of boot)
   
   // FUNC_CHECK_POINTERS, //phased out
-  FUNC_TEMPLATE_MODULE_LOAD,  // Read progmem configs if needed, read settings configuration
+
+  /**
+   * module load should only be things that can happen before the init phase, 
+   * or, I need to call this twice, so some functions required before init and after init are handled (yes, do this)
+   * */
+  FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
+  FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
+
+
   FUNC_SETTINGS_DEFAULT,   // Use defaults in code
   FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT,   // Use defaults in code
   FUNC_POINTER_INIT, // Any pointers to buffers, anything not set in this (unset nullptr) must be protected 
@@ -44,7 +52,6 @@ enum XsnsFunctions {
   FUNC_MQTT_HANDLERS_INIT,
   // FUNC_MQTT_INIT,
   
-  FUNC_TEMPLATE_DEVICE_LOAD,  // Read progmem configs if needed, read settings configuration
   FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD, // This is called from the above function, used to parse the object json
   
   // New trigger events which only modules to react to changes "triggers" from other modules or external sources
@@ -80,6 +87,9 @@ enum XsnsFunctions {
   // Saving/EEPROM related
   FUNC_SAVE_BEFORE_RESTART, //phase out
   
+  /**
+   * Transfer any local variables into settings struct for saving
+   * */
   FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE, // Save internal module values to global settings struct, prior to saving to memory
 
   // New call functio similar to mqtt method, called from class loop (checked in support)

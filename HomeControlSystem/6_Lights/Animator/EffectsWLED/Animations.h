@@ -120,7 +120,7 @@
 
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-#define MAX_NUM_SEGMENTS 1//10
+#define MAX_NUM_SEGMENTS 3//10
 
 /* How much data bytes all segments combined may allocate */
 #ifdef ESP8266
@@ -129,11 +129,12 @@
 #define MAX_SEGMENT_DATA 8192
 #endif
 
-#define LED_SKIP_AMOUNT  1
+#define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
 
 #define NUM_COLORS       3 /* number of colors per segment */
-#define SEGCOLOR(x)      gamma32(_segments[_segment_index].colors[x])
+// #define SEGCOLOR(x)      gamma32(_segments[_segment_index].colors[x])
+#define SEGCOLOR(x)      _segments[_segment_index].colors[x]
 #define SEGLEN           _virtualSegmentLength
 #define SPEED_FORMULA_L  5 + (50*(255 - _segments[_segment_index].speed))/_virtualSegmentLength
 #define RESET_RUNTIME    memset(_segment_runtimes, 0, sizeof(_segment_runtimes))
@@ -311,6 +312,15 @@ class WS2812FX
   
   // segment parameters
   public:
+
+
+  /**
+   * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
+   * */
+
+  /**
+   * how a section (single animation) is configured -- my HACS needs to change to conform to this
+   * */
     typedef struct Segment { // 24 bytes
       uint16_t start;
       uint16_t stop; //segment invalid if stop == 0
@@ -361,6 +371,9 @@ class WS2812FX
       }
     } segment;
 
+    /**
+     * Runtime data for that segment, ie holds animation data
+     * */
     // segment runtime parameters
     typedef struct Segment_runtime { // 28 bytes
       unsigned long next_time;
@@ -368,7 +381,7 @@ class WS2812FX
       uint32_t call;
       uint16_t aux0;
       uint16_t aux1;
-      byte* data = nullptr;
+      byte* data = nullptr; // note: how all my previous hardcorded structs will need to conform to this
       bool allocateData(uint16_t len){
         if (data && _dataLen == len) return true; //already allocated
         deallocateData();
@@ -715,11 +728,15 @@ class WS2812FX
       mode_flow(void),
       mode_chunchun(void);
 
+  public:
+  
+    uint32_t crgb_to_col(CRGB fastled);
+    CRGB col_to_crgb(uint32_t);
+    void load_gradient_palette(uint8_t);
+
   private:
     // NeoPixelWrapper *bus;
 
-    uint32_t crgb_to_col(CRGB fastled);
-    CRGB col_to_crgb(uint32_t);
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
 
@@ -729,7 +746,6 @@ class WS2812FX
     uint8_t _brightness;
     static uint16_t _usedSegmentData;
 
-    void load_gradient_palette(uint8_t);
     void handle_palette(void);
     void fill(uint32_t);
 

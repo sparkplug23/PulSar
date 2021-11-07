@@ -17,6 +17,14 @@ uint16_t BufferWriter::GetLength(){
   return strlen(writer.buffer);
   // return *writer.length; // needs testing, was not working
 }
+
+// // used in phd to force json and writer to work together
+// void BufferWriter::SetLength(uint16_t len){
+//   rwriter.length = len;
+//   // return *writer.length; // needs testing, was not working
+// }
+
+
 uint16_t* BufferWriter::GetLengthPtr(){
   return writer.length;
 }

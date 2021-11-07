@@ -13,7 +13,7 @@
 
 // #define DEVICE_FORCED_TO_BE_TESTER
 #define DISABLE_WEBSERVER
-#define FORCE_TEMPLATE_LOADING
+//#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -64,7 +64,7 @@
   #define DEVICENAME_CTR            "gpsparser_tester"
   #define DEVICENAME_FRIENDLY_CTR   "GPS Parser Tester"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
 
   #define USE_MODULE_DRIVERS_GPS
   
@@ -91,7 +91,7 @@
 //   #define DEVICENAME_CTR            "gpsparser_tester"
 //   #define DEVICENAME_FRIENDLY_CTR   "GPS Parser Tester"
 
-//   #define FORCE_TEMPLATE_LOADING
+//   //#define FORCE_TEMPLATE_LOADING
 //   //#define SETTINGS_HOLDER 21
 //   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
 
@@ -175,7 +175,7 @@
 //   #define DEVICENAME_CTR            "sdcardwriter_tester"
 //   #define DEVICENAME_FRIENDLY_CTR   "SD Card Writer Tester"
 
-//   #define FORCE_TEMPLATE_LOADING
+//   //#define FORCE_TEMPLATE_LOADING
 //   //#define SETTINGS_HOLDER 21
 
 //   #define USE_MODULE_DRIVERS_SDCARD
@@ -263,7 +263,7 @@
   #define DEVICENAME_CTR            "sdlogger1_tester"
   #define DEVICENAME_FRIENDLY_CTR   "SD & GPS Logger Tester"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_NETWORK_MQTT
@@ -938,7 +938,7 @@
 
   // // Section B: SDCard driver
   #define USE_MODULE_DRIVERS_SDCARD
-  #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // Seciton C: Logger controller
   #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
@@ -1124,7 +1124,7 @@
 
   // // // Section B: SDCard driver
   // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  // #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // Seciton C: Logger controller
   // #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
@@ -1569,7 +1569,7 @@
 
   // // Section B: SDCard driver
   // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  // #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // // Seciton C: Logger controller
   // #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
@@ -1845,7 +1845,7 @@
 
   // // Section B: SDCard driver
   // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  // #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // // Seciton C: Logger controller
   // #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
@@ -2090,7 +2090,7 @@ sync_counter = [0,0,0,0,0 1,1,1,,,,,,,, 40,40,40 ] where X for each number will 
 
   // // Section B: SDCard driver
   // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  // #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // // Seciton C: Logger controller
   #ifdef USE_SYSTEM_MAIN_LOGGER_CONTROLLER
@@ -2314,7 +2314,7 @@ sync_counter = [0,0,0,0,0 1,1,1,,,,,,,, 40,40,40 ] where X for each number will 
 
   // Section B: SDCard driver
   #define USE_MODULE_DRIVERS_SDCARD
-  #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // Seciton C: Logger controller
   #define USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
@@ -2560,7 +2560,7 @@ sync_counter = [0,0,0,0,0 1,1,1,,,,,,,, 40,40,40 ] where X for each number will 
 
   // // Section B: SDCard driver
   // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+  // #define USE_SDCARD_RINGBUFFER_STREAM_OUT
 
   // // // Seciton C: Logger controller
   #ifdef USE_SYSTEM_MAIN_LOGGER_CONTROLLER

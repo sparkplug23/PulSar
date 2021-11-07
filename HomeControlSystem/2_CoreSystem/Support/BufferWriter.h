@@ -34,6 +34,7 @@ class BufferWriter{
     uint16_t* GetLengthPtr();
     uint16_t GetLength();
     uint16_t GetBufferSize();
+    // void SetLength(uint16_t len);
 
     //FUTURE, create iterator that gets values
 

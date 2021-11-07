@@ -21,7 +21,7 @@ const char* mSettings::GetTaskName(uint8_t task, char* buffer){
   switch(task){
     default:
     case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
-    case FUNC_TEMPLATE_MODULE_LOAD:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
+    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
     // case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
     case FUNC_PRE_INIT:                               return PM_FUNC_PRE_INIT_CTR;
     case FUNC_INIT:                                   return PM_FUNC_INIT_CTR;
@@ -217,6 +217,24 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
     // Function_Template_Load();
 
+
+    // 
+    // TestSettingsLoad();
+
+    /**
+     * Decounter until saving.
+     * This is used when I want to force save data after an update has happened, but want the storage event to be delayed so it doesn't slow the event (eg relay set, mqtt response)
+     * */
+    if(settings_save_decounter_seconds_delayed_save)
+    {
+      settings_save_decounter_seconds_delayed_save--;
+      AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), settings_save_decounter_seconds_delayed_save);
+      if(settings_save_decounter_seconds_delayed_save==0)
+      {
+        pCONT_set->SettingsSaveAll();
+      }
+    }
+
     
   // AddLog(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
 
@@ -235,6 +253,9 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     case FUNC_EVERY_FIVE_SECOND:{
 
 
+      // #ifdef ENABLE_LOG_LEVEL_INFO
+      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
+      // #endif// ENABLE_LOG_LEVEL_INFO
     // Function_Template_Load();
 
 #ifdef ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
@@ -337,7 +358,9 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
       // Update Settings with local module values that need saving
       pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
 
-      pCONT_set->SettingsSave(1);
+      // pCONT_set->SettingsSave(1);
+      pCONT_set->SettingsSaveAll();
+
       #else 
       DEBUG_PRINTLN("SettingsSave dis");
       #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
@@ -390,7 +413,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
      * xx SECTION * 
     *******************/
 
-    case FUNC_TEMPLATE_DEVICE_LOAD:
+    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
       Function_Template_Load();
     break;
   }
@@ -520,36 +543,36 @@ bool mSettings::SettingsBufferAlloc(void)
  * */
 void mSettings::SettingsLoad_CheckSuccessful(){
   
-  if (Settings.param[P_BOOT_LOOP_OFFSET]) {
-    // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
-    if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET]) {       // Restart twice
-      Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
-      if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
-        // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
-        //   // if (bitRead(Settings.rule_stop, i)) {
-        //   //   bitWrite(Settings.rule_enabled, i, 0);  // Disable rules causing boot loop
-        //   // }
-        // }
-      }
-      // if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
-      //   Settings.rule_enabled = 0;                  // Disable all rules
-      // }
-      if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
-        for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
-          Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
-        }
-      }
-      if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
-        Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
-        Settings.last_module = MODULE_WEMOS_ID;
-      }
-      //reset 7 times, then fail into safe boot awaiting OTA
-      // HandleFailedBootFailBack();
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcReboot.fast_reboot_count);
-      #endif///   #ifdef ENABLE_LOG_LEVEL_INFO
-    }
-  }
+  // if (Settings.param[P_BOOT_LOOP_OFFSET]) {
+  //   // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
+  //   if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET]) {       // Restart twice
+  //     Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
+  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
+  //       // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
+  //       //   // if (bitRead(Settings.rule_stop, i)) {
+  //       //   //   bitWrite(Settings.rule_enabled, i, 0);  // Disable rules causing boot loop
+  //       //   // }
+  //       // }
+  //     }
+  //     // if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
+  //     //   Settings.rule_enabled = 0;                  // Disable all rules
+  //     // }
+  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
+  //       for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
+  //         Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
+  //       }
+  //     }
+  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
+  //       Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
+  //       Settings.last_module = MODULE_WEMOS_ID;
+  //     }
+  //     //reset 7 times, then fail into safe boot awaiting OTA
+  //     // HandleFailedBootFailBack();
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcReboot.fast_reboot_count);
+  //     #endif///   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   }
+  // }
 
   memset(Settings.mqtt.topic,0,sizeof(Settings.mqtt.topic));
   memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));

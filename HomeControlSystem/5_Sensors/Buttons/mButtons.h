@@ -76,7 +76,9 @@ class mButtons :
     
 bool ModuleEnabled();
 
-#define MAX_KEYS 4                 // Max number of keys or buttons
+#define MAX_KEYS 8                 // Max number of keys or buttons
+
+uint8_t GetHardwareSpecificPullMethod(uint8_t real_pin);
 
 // unsigned long button_debounce = 0;          // Button debounce timer
 
@@ -85,7 +87,7 @@ struct BUTTONS{
   uint8_t multiwindow = 0;      // Max time between button presses to record press count
   uint8_t multipress = 0;       // Number of button presses within multiwindow
   
-  uint8_t lastbutton = BUTTON_NOT_PRESSED_ID;  // Last button states
+  uint8_t lastbutton_active_state = BUTTON_NOT_PRESSED_ID;  // Last button states
   uint8_t active_state_value = false; //defualt active high
 
   /**
@@ -100,8 +102,8 @@ struct BUTTONS{
 }buttons[MAX_KEYS];
 
 uint8_t dual_hex_code = 0;                  // Sonoff dual input flag
-uint8_t key_no_pullup = 0;                  // key no pullup flag (1 = no pullup)
-uint8_t key_inverted = 0;                   // Key inverted flag (1 = inverted)
+uint8_t key_no_pullup = 0x00;                  // key no pullup flag (1 = no pullup)
+uint8_t key_inverted = 0x00; // Must be set to 0, 8 bits wide                   // Key inverted flag (1 = inverted)
 // uint8_t buttons_found = 0;                  // Number of buttons found flag
 
 // timereached_t tsaved_button_debounce;

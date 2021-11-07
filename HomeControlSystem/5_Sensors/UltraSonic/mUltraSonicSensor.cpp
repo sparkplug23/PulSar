@@ -2,20 +2,20 @@
 
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
 
-
 const char* mUltraSonicSensor::PM_MODULE_SENSORS_ULTRASONIC_CTR = D_MODULE_SENSORS_ULTRASONIC_CTR;
 const char* mUltraSonicSensor::PM_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR = D_MODULE_SENSORS_ULTRASONIC_FRIENDLY_CTR;
 
+void mUltraSonicSensor::Pre_Init()
+{ 
 
-
-
-void mUltraSonicSensor::Pre_Init(){ 
-
-  if(pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID)){
+  if(
+    pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && 
+    pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID)
+  ){
     pin_trig = pCONT_pins->GetPin(GPIO_SR04_TRIG_ID);
     pin_echo = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);
     pinMode(pin_trig, OUTPUT); // Sets the trigPin as an Output
-    pinMode(pin_echo, INPUT); // Sets the echoPin as an Input
+    pinMode(pin_echo, INPUT);  // Sets the echoPin as an Input
     settings.flags.EnableSensor = true;
   }else{
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_ULTRASONIC "Pin Invalid %d"),pin_trig);
@@ -25,7 +25,8 @@ void mUltraSonicSensor::Pre_Init(){
 }
 
 
-void mUltraSonicSensor::Init(void){
+void mUltraSonicSensor::Init(void)
+{
 
   memset(&averaged,0,sizeof(averaged));
 
@@ -39,18 +40,8 @@ void mUltraSonicSensor::Init(void){
 }
 
 
-//every millis, start an update, which turns on the interrupt
-
-/*
-ISR_Echo()
-
-check millis against
-
-
-
-*/
-
-int mUltraSonicSensor::GetDurationReading(void){
+int mUltraSonicSensor::GetDurationReading(void)
+{
 
   // If sensor is invalid, use shorter delay to read again (but not too fast)
   
@@ -71,6 +62,12 @@ int mUltraSonicSensor::GetDurationReading(void){
 
   float duration=0;
 
+  // uint16_t maxDistanceCm = 1000 ; //10m
+  // float speedOfSoundInCmPerMicroSec= 343*100*100000; // m/s approx
+
+  // // Compute max delay based on max distance with 25% margin in microseconds
+  //  float maxDistanceDurationMicroSec = 2.5 * maxDistanceCm / speedOfSoundInCmPerMicroSec;
+
   // Clears the trigPin
   digitalWrite(pin_trig, LOW);
   delayMicroseconds(2);
@@ -79,25 +76,26 @@ int mUltraSonicSensor::GetDurationReading(void){
   delayMicroseconds(10);
   digitalWrite(pin_trig, LOW);
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(pin_echo, HIGH);//, 40000);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
+  duration = pulseIn(pin_echo, HIGH, 10000);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
 
-//duration is microseconds
-// Reads the echoPin, returns the sound wave travel time in microseconds
-// duration = pulseIn(echoPin, HIGH);
-// Calculating the distance
-int distance= duration*0.034/2;
-// Prints the distance on the Serial Monitor
-// Serial.print("Distance: ");
-// Serial.println(distance);
+  //duration is microseconds
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  // duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  int distance= duration*0.034/2;
+  // Prints the distance on the Serial Monitor
+  // Serial.print("Distance: ");
+  // Serial.println(distance);
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "Distance=%d"),distance);
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d, maxDistanceDurationMicroSec=%d"),(int)duration, distance, (int)maxDistanceDurationMicroSec);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d, \tDistance=%d"),(int)duration, distance);
 
 
   ultrasonic.duration_raw = duration;
 
   // CHANGE TO USE INTERRUPT BASED METHOD, IE trigger (turn on interrupt) and have it compare start millis and triggered millis (is pulse nano or millis?)
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d %dnew"),(int)duration, (int)(duration/58));
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "duration=%d %dnew"),(int)duration, (int)(duration/58));
 
   #ifdef ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
   //if outside possible range
@@ -105,7 +103,7 @@ int distance= duration*0.034/2;
     
     //pCONT->mso->MessagePrintln("[ULTRA] SAMPLING");
     
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
 
     // float lower = (float)ultrasonic.duration*(1-(ultrasonic.threshold.narrowpercent/100.0));//0.9;
     // float upper = (float)ultrasonic.duration*(1+(ultrasonic.threshold.narrowpercent/100.0));
@@ -229,54 +227,57 @@ float mUltraSonicSensor::GetDistanceMMReading(void){
 
 // Instead of using 343m/s for speed of sound at 20 degrees celcius, if valid,
 // use the tank temperature sensor, to get speed of sound, else return 343
-float mUltraSonicSensor::GetSpeedOfSoundInMetres(){
+float mUltraSonicSensor::GetSpeedOfSoundInMetres()
+{
 
-    float speedofsound_inmps = 0;
+  float speedofsound_inmps = 0;
 
-    #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-        #ifdef USE_MODULE_SENSORS_DS18B20
-        int tempsensorid = -1;
-        float ambient_temperature;
-        if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)EM_MODULE_SENSORS_DB18S20_ID))>=0){
-            if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
-            ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
-            
-          AddLog(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
-            // Reduce frequency of updates to stop data jumps
-            if(abs(millis()-ultrasonic.tPermitTempUpdate)>60000){ultrasonic.tPermitTempUpdate = millis();
-                ultrasonic.temperature = ambient_temperature;
-            }
-            // float insidesqrt = (ultrasonic.temperature/273.15)+1;
-            // speedofsound_inmps = 331.227599 * sqrt(insidesqrt);
-            speedofsound_inmps = 331.3 + (0.606 * ultrasonic.temperature); //https://en.wikipedia.org/wiki/Speed_of_sound
-            }
-        }else{
-          AddLog(LOG_LEVEL_ERROR, PSTR("SOS missing"));
-        }
-        #endif
-    #endif
-
-    // Use default
-    if(speedofsound_inmps==0){
-      speedofsound_inmps = 343;
-      #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_ULTRASONIC "speedofsound_inmps = 343"));
+  #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+      #ifdef USE_MODULE_SENSORS_DS18B20
+      int tempsensorid = -1;
+      float ambient_temperature;
+      if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)EM_MODULE_SENSORS_DB18S20_ID))>=0){
+          if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
+          ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
+          
+        AddLog(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
+          // Reduce frequency of updates to stop data jumps
+          if(abs(millis()-ultrasonic.tPermitTempUpdate)>60000){ultrasonic.tPermitTempUpdate = millis();
+              ultrasonic.temperature = ambient_temperature;
+          }
+          // float insidesqrt = (ultrasonic.temperature/273.15)+1;
+          // speedofsound_inmps = 331.227599 * sqrt(insidesqrt);
+          speedofsound_inmps = 331.3 + (0.606 * ultrasonic.temperature); //https://en.wikipedia.org/wiki/Speed_of_sound
+          }
+      }else{
+        AddLog(LOG_LEVEL_ERROR, PSTR("SOS missing"));
+      }
       #endif
-    }
+  #endif
 
-    ultrasonic.speedofsound = speedofsound_inmps;
-    
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
+  // Use default
+  if(speedofsound_inmps==0){
+    speedofsound_inmps = 343;
+    #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_ULTRASONIC "speedofsound_inmps = 343"));
+    #endif
+  }
 
-    return speedofsound_inmps;
+  ultrasonic.speedofsound = speedofsound_inmps;
+  
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
+
+  return speedofsound_inmps;
 
 }
 
-void mUltraSonicSensor::AddMOTIONEventStatusSum(uint8_t status){
+void mUltraSonicSensor::AddMOTIONEventStatusSum(uint8_t status)
+{
   motion_event_status_sum.arr[motion_event_status_sum.idx++] = status;
   if(motion_event_status_sum.idx > MOTION_EVENT_STATUS_SUM_MAX){motion_event_status_sum.idx=0;}
 }
-uint8_t mUltraSonicSensor::GetMOTIONEventStatusSum(){
+uint8_t mUltraSonicSensor::GetMOTIONEventStatusSum()
+{
   uint8_t sum = 0;
   for(uint8_t ii=0;ii<MOTION_EVENT_STATUS_SUM_MAX;ii++){
     sum += motion_event_status_sum.arr[ii]; 
@@ -291,8 +292,8 @@ uint8_t mUltraSonicSensor::GetMOTIONEventStatusSum(){
 
 
 
-float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(void){
-
+float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(void)
+{
   //The speed of sound is: 343m/s = 0.0343 cm/uS = 1/29.1 cm/uS
   float speedofsound_inmetres = GetSpeedOfSoundInMetres();//@20 degrees cerr    0.34;
 
@@ -304,7 +305,8 @@ float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(void){
 }
 
 
-float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(int duration){
+float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(int duration)
+{
 
   //The speed of sound is: 343m/s = 0.0343 cm/uS = 1/29.1 cm/uS
   float speedofsound_inmetres = GetSpeedOfSoundInMetres();//@20 degrees cerr    0.34;
@@ -325,7 +327,8 @@ float mUltraSonicSensor::GetDistanceMMReadingAdjustedForTemp(int duration){
 }
 
 
-float mUltraSonicSensor::GetDistanceCMReadingAdjustedForTemp(void){
+float mUltraSonicSensor::GetDistanceCMReadingAdjustedForTemp(void)
+{
   return GetDistanceMMReadingAdjustedForTemp()/10;
 }
 
@@ -334,7 +337,8 @@ float mUltraSonicSensor::GetDistanceCMReadingAdjustedForTemp(void){
 // 1 exact value (instantaneous)
 // X times per tick (fast smoothing)
 // X times capturing 1 per tick (slow smoothing over time)
-void mUltraSonicSensor::SubTask_UltraSonicAverage(){
+void mUltraSonicSensor::SubTask_UltraSonicAverage()
+{
 
   // AddLog(LOG_LEVEL_TEST, PSTR("mUltraSonicSensor::SubTask_UltraSonicAverage"));
 
@@ -343,7 +347,7 @@ void mUltraSonicSensor::SubTask_UltraSonicAverage(){
     averaged.instant.final.distance_mm = GetDistanceMMReadingAdjustedForTemp(); //pin32
 
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_ULTRASONIC "distance_mm=%d"),(int)averaged.instant.final.distance_mm);
     // #endif // ENABLE_LOG_LEVEL_DEBUG
 
     averaged.instant.final.distance_cm = averaged.instant.final.distance_mm/10; //pin32
@@ -483,7 +487,8 @@ void mUltraSonicSensor::SubTask_UltraSonicAverage(){
 
 
 
-void mUltraSonicSensor::MQQTSendObjectDetected(void){
+void mUltraSonicSensor::MQQTSendObjectDetected(void)
+{
 
   if(motion_detect.ischanged){ motion_detect.ischanged=false;
 
@@ -508,7 +513,8 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void){
 
 
 
-int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   switch(function){
     case FUNC_PRE_INIT:
@@ -530,9 +536,14 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj){
       if(mTime::TimeReachedNonReset(&ultrasonic.tReadLast,1000)){//ultrasonic.settings.measure_rate_ms)){
         GetDurationReading(); 
 
-        float newdist = (5000*0.034)/2;
+        // float newdist = (5000*0.034)/2;
         
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms %dmetres %d"),ultrasonic.duration,ultrasonic.settings.measure_rate_ms,(int)newdist,(int)GetDistanceCMReading());
+        // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_ULTRASONIC "duration = %d %dms %dmetres %d"),
+        //   ultrasonic.duration,
+        //   ultrasonic.settings.measure_rate_ms,
+        //   (int)newdist,
+        //   (int)GetDistanceCMReading()
+        // );
         
         if(ultrasonic.isvalid){ // stop trying
           ultrasonic.tReadLast = millis();
@@ -581,7 +592,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj){
 } // END Tasker
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 void mUltraSonicSensor::WebAppend_Root_Status_Table_Draw(){
   
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);

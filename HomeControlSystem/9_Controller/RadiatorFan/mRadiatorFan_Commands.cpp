@@ -20,7 +20,7 @@ void mRadiatorFan::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
   char buffer[50];
 
-//   #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+//   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //   /**
 //    *  Flasher function specific commands
 //    * */

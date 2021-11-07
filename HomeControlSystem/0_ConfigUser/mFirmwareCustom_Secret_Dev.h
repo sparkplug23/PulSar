@@ -17,7 +17,7 @@
 
 // #define DEVICE_FORCED_TO_BE_TESTER
 #define DISABLE_WEBSERVER
-#define FORCE_TEMPLATE_LOADING
+// //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -44,8 +44,8 @@
 // #define DEVICE_DESKPANEL_01
 // #define DEVICE_HVAC_BEDROOM
 // #define DEVICE_BEDROOM_PZEM_TESTER
-// #define DEVICE_RGBDELL
 // #define DEVICE_RGBBEDROOM_H801_2
+// #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H //DEVICE_RGBDELL //delete?? phase out
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
 
 /**
@@ -127,7 +127,7 @@
   #define DEVICENAME_CTR          "pzem_tester"
   #define DEVICENAME_FRIENDLY_CTR "PZEM Tester"
   
-//   #define FORCE_TEMPLATE_LOADING
+//   //#define FORCE_TEMPLATE_LOADING
 //   #define SETTINGS_HOLDER 2
 
 //   #define USE_BUILD_TYPE_ENERGY
@@ -175,7 +175,7 @@
 //   #define DEVICENAME_CTR          "consumerunit33"
 //   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit33"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   #define USE_BUILD_TYPE_ENERGY
@@ -263,7 +263,7 @@
   #define DEVICENAME_FRIENDLY_CTR "Bedroom PZEM Tester"
   #define ESP32
     
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   #define USE_MODULE_ENERGY_INTERFACE
@@ -323,7 +323,7 @@
   #define DEVICENAME_CTR          "cam_tester"
   #define DEVICENAME_FRIENDLY_CTR "Camera OV2640 Tester"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1//random(1,1000)
 
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -332,7 +332,7 @@
 
   // #define ENABLE_DEVFEATURE_BREAK_ADDLOG
 
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 //  #define USE_PUBSUB_V1
 
@@ -417,7 +417,7 @@
   #define DEVICENAME_CTR          "camera_driveway"
   #define DEVICENAME_FRIENDLY_CTR "Camera OV2640 Driveway"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
 
   #define USE_MODULE_DRIVERS_CAMERA_OV2640
   
@@ -458,7 +458,7 @@
   #define DEVICENAME_CTR          "camera_2"
   #define DEVICENAME_FRIENDLY_CTR "Camera OV2640 2"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
 
   #define USE_MODULE_DRIVERS_CAMERA_OV2640
   
@@ -501,7 +501,7 @@
   #define DEVICENAME_CTR            "rgbstring_lights1"
   #define DEVICENAME_FRIENDLY_CTR   "String Lights 1"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -554,7 +554,7 @@
   #define DEVICENAME_CTR            "rgbstring_lights2"
   #define DEVICENAME_FRIENDLY_CTR   "String Lights 2"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -608,7 +608,7 @@
   #define DEVICENAME_CTR            "rgbstring_garden_tree1"
   #define DEVICENAME_FRIENDLY_CTR   "Garden Tree Lights 1"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -660,7 +660,7 @@
   #define DEVICENAME_CTR            "tester_rgbw"
   #define DEVICENAME_FRIENDLY_CTR   "Tester RGBW WS2812 Lights"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 21
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -715,12 +715,14 @@
 /**
  * Original screen, to be renamed
  * */
-#ifdef DEVICE_RGBDELL
-  #define DEVICENAME_CTR            "rgbdell"
+#ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
+  #define DEVICENAME_CTR            "rgb_computer_display_u25"//"rgbdell"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
+
+  #define USE_DEVFEATURE_PIXEL0_BOTTOM_RIGHT // tmp fix
    
   #define DISABLE_WEBSERVER
 
@@ -754,8 +756,9 @@
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  "Ambilight"  "\","
+     "\"" D_JSON_EFFECTS "\":{" 
+      // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
       "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
     "},"
     "\"" D_JSON_TRANSITION       "\":{"
@@ -768,7 +771,7 @@
     "\"" D_JSON_HUE "\":15,"
     "\"" D_JSON_SAT "\":90,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_CCT "\":1,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
 
@@ -777,9 +780,9 @@
 
 #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   #define DEVICENAME_CTR            "rgb_computer_display_p32"
-  #define DEVICENAME_FRIENDLY_CTR   "RGB Dell"
+  #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
    
   #define DISABLE_WEBSERVER
@@ -799,7 +802,9 @@
 
   #define ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  //#define USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
 
   #define USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX // set with commands later
@@ -841,12 +846,12 @@
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_CCT_TEMP "\":400,"
     "\"" D_JSON_HUE "\":15,"
     "\"" D_JSON_SAT "\":90,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-    "\"" D_JSON_BRIGHTNESS_CCT "\":10,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":10"
+    "\"" D_JSON_BRIGHTNESS_CCT "\":60,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
 
   /**
@@ -886,7 +891,7 @@
   #define DEVICENAME_CTR          "hvacbedroom"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Bedroom"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   // #define ENABLE_BUG_TRACING
@@ -1043,7 +1048,7 @@
   #define DEVICENAME_CTR          "heating_esp32_tester"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   // #define ENABLE_BUG_TRACING
@@ -1199,9 +1204,11 @@
   #define DEVICENAME_CTR            "rgbdesk"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Under Desk"
 
-  // #define FORCE_TEMPLATE_LOADING
+  // //#define FORCE_TEMPLATE_LOADING
    
   // #define USE_MODULE_SENSORS_MOTION
+  
+  ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
   // #define USE_MODULE_NETWORK_WEBSERVER
@@ -1293,10 +1300,10 @@
   #define DEVICENAME_CTR          "rgbmicro1"
   #define DEVICENAME_FRIENDLY_CTR "Glass Box Lights"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 11
    
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define DISABLE_WEBSERVER
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1344,7 +1351,7 @@
   #define DEVICENAME_CTR          "rgbmicro2"
   #define DEVICENAME_FRIENDLY_CTR "Projector Micro Lights"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1//random(1,1000)
 
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1353,7 +1360,7 @@
 
   // #define ENABLE_DEVFEATURE_BREAK_ADDLOG
 
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 //  #define USE_PUBSUB_V1
 
@@ -1441,7 +1448,7 @@
   #define DEVICENAME_CTR          "rgbmicro3"
   #define DEVICENAME_FRIENDLY_CTR "Micro Lights 3"  
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1498,7 +1505,7 @@
   #define DEVICENAME_CTR          "rgbfireplace_tester"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1567,7 +1574,7 @@
   #define DEVICENAME_CTR          "rgbesp32_1_tester"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 21
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1648,7 +1655,7 @@
   #define DEVICENAME_CTR          "rgbgazeboroof"
   #define DEVICENAME_FRIENDLY_CTR "rgbgazeboroof"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 21
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1762,7 +1769,7 @@
   #define DEVICENAME_CTR          "rgbmicro4"
   #define DEVICENAME_FRIENDLY_CTR "RGB Micro LED Lights 4"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 21
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1891,7 +1898,7 @@ use black etherhetn czble in dads rooms for it
   #define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
   #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   // #define ENABLE_BUG_TRACING
@@ -1906,7 +1913,7 @@ use black etherhetn czble in dads rooms for it
   #define DISABLE_WEBSERVER 
   
   #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
   #define STRIP_SIZE_MAX 1050// 750   *15 //changing gazebo to be 12v
@@ -1985,7 +1992,7 @@ use black etherhetn czble in dads rooms for it
   #define DEVICENAME_CTR          "rgbdisplay_garage"
   #define DEVICENAME_FRIENDLY_CTR "RGB Display Garage"
  
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   // #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2089,7 +2096,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   // #define ENABLE_BUG_TRACING
@@ -2101,7 +2108,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
 
@@ -2198,7 +2205,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 
   #define ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   // #define ENABLE_BUG_TRACING
@@ -2209,7 +2216,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define STRIP_SIZE_MAX 150
 
@@ -2293,7 +2300,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   // #define ENABLE_BUG_TRACING
@@ -2305,7 +2312,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define STRIP_SIZE_MAX 100
 
@@ -2362,7 +2369,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "h801_tester"
   #define DEVICENAME_FRIENDLY_CTR "H801 Tester Strip"
     
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
@@ -2412,7 +2419,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "rgbbedlight"
   #define DEVICENAME_FRIENDLY_CTR "H801 BedLight"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2462,7 +2469,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "h801_sunlight"
   #define DEVICENAME_FRIENDLY_CTR "H801 Sunlight"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2521,7 +2528,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "h801_sunlight_2"
   #define DEVICENAME_FRIENDLY_CTR "H801 Sunlight 2"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2577,7 +2584,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2624,7 +2631,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "rgbbedroom_h801_2"
   #define DEVICENAME_FRIENDLY_CTR "H801 rgbbedroom_h801_2"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -2677,7 +2684,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   
   // #define ENABLE_FUNCTION_DEBUG  
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
   #define USE_BUILD_TYPE_LIGHTING
@@ -2725,7 +2732,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "rgbcrystal2"
   #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Round 2"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 10
    
   #define USE_BUILD_TYPE_LIGHTING
@@ -2766,7 +2773,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "development_device"
   #define DEVICENAME_FRIENDLY_CTR "Development Device"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER random(1,10000)
   
   // #define ENABLE_BUG_TRACING
@@ -2882,7 +2889,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "bedroompanel"
   #define DEVICENAME_FRIENDLY_CTR   "Bedroom Control Panel"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
    
   // #define USE_BUILD_TYPE_LIGHTING
@@ -2978,7 +2985,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "deskpanel_01"
   #define DEVICENAME_FRIENDLY_CTR   "Desk Panel 01 Motion Alerts"
 
-  // #define FORCE_TEMPLATE_LOADING
+  // //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
    
   // #define USE_BUILD_TYPE_LIGHTING
@@ -3075,7 +3082,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "rgbclock_01"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Clock 0l"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
    
   #define USE_BUILD_TYPE_LIGHTING
@@ -3154,7 +3161,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "landingpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Landing Control Panel"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
    
   #define USE_MODULE_SENSORS_MOTION
@@ -3199,7 +3206,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Panel"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -3244,7 +3251,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    * Analog Light Sensor A0
    */
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -3272,7 +3279,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   
 
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // Test ultrasonic oilfurnace code
   // #define USE_MODULE_CONTROLLER_OILFURNACE
   // #define USE_MODULE_SENSORS_ULTRASONICS  
@@ -3432,7 +3439,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "nodemcu_tester"
   #define DEVICENAME_FRIENDLY_CTR "NodeMCU Tester"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
      
   // #define USE_MODULE_SENSORS_MOTION
@@ -3533,7 +3540,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "blackdoorbell"
   #define DEVICENAME_FRIENDLY_CTR "Black Doorbell"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   //#define SETTINGS_HOLDER 2 //maintain other settings (bootcount)
      
   #define USE_MODULE_SENSORS_MOTION
@@ -3570,21 +3577,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #endif
 
-#ifdef DEVICE_WHITEFAN1
-  #define DEVICENAME_CTR          "whitefan1"
-  #define DEVICENAME_FRIENDLY_CTR "White Fan 1"
-  #define USE_MODULE_DRIVERS_RELAY 1
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "relay"
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  
-    pCONT_set->Settings.module = MODULE_SONOFF_BASIC_ID;
-    //pCONT_set->Settings.module_pins.io[14]= GPIO_REL1_INV_ID; 
-    pCONT_set->devices_present = 1_ID;
-#endif
-
-
-
 
 
 
@@ -3593,7 +3585,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "kitchenlight5"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 5 Shelly 2 desktester"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
   
   // #define ENABLE_BUG_TRACING
@@ -3663,7 +3655,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "shellydimmer_globe" //shelly1
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer 1 Globe"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
   
   #define USE_MODULE_SENSORS_SWITCHES
@@ -3747,7 +3739,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR          "deskfan"
   #define DEVICENAME_FRIENDLY_CTR "Desk Fan"
     
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
@@ -3821,7 +3813,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 //   // #define USE_MODULE_ENERGY_INTERFACE
 //   // #define USE_MODULE_ENERGY_ADE7953
 
-//   #define FORCE_TEMPLATE_LOADING
+//   //#define FORCE_TEMPLATE_LOADING
 //   // #define SETTINGS_HOLDER 2
   
 //   #define USE_MODULE_SENSORS_SWITCHES
@@ -4054,7 +4046,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "esp32_devkit_basic"
   #define DEVICENAME_FRIENDLY_CTR   "esp32_devkit_basic"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define ESP32
@@ -4119,7 +4111,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define DEVICENAME_CTR            "esp32_webcam1"
   #define DEVICENAME_FRIENDLY_CTR   "esp32_webcam1"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define ESP32

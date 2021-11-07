@@ -38,6 +38,19 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
       StartISR_RingBuffers(); 
      }
 
+     
+//temp dump data so it doesnt fill
+
+      size_t rss_data_read_size = 0;
+      char *rss_data_read = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &rss_data_read_size, pdMS_TO_TICKS(1000));
+      if (rss_data_read != NULL) { // Read from buffer
+        //memcpy(isr_rss_buffer,rss_data_read,rss_data_read_size);
+        // for(int i=0;i<rss_data_read_size;i++){
+        //   BufferWriterI->Append_P(PSTR("%d%s"), rss_data_read[i], i<rss_data_read_size-1? ",": ""); 
+        // }
+        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
+      }
+
     // case FUNC_UPTIME_10_SECONDS: 
     // case FUNC_UPTIME_30_SECONDS: 
     //   StartISR_RingBuffers(); 

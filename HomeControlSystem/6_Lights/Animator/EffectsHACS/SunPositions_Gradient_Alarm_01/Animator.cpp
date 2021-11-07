@@ -1,6 +1,6 @@
 #include "../../mAnimatorLight.h"
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 // Make this an "Effects" which is public/friendly of animator, but not the same class

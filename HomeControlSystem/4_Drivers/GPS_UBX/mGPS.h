@@ -227,6 +227,8 @@ class mGPS :
     void EveryLoop_PollForGPSData(Stream& port);
     void EveryLoop_InputMethod_PollingSerial_BytesFromBuffer();
 
+uint32_t sequence_test_global = 0;
+
     // struct INTERNAL_BUFFER{
     //   uint16_t buflen = 0;
     //   uint16_t bufused = 0;
@@ -279,6 +281,20 @@ void changeBaud( const char *textCommand, unsigned long baud );
      * @note Stores a valid solution, merged from the parsing fix
      * */
     GPS_FIX   gps_result_stored;
+
+
+    struct MY_GPS_VALS{
+      int32_t lat = 1;
+      int32_t lon = 1;
+      int32_t alt = 1;
+      uint16_t speed = 1;
+      uint16_t heading_cd = 1;
+      int32_t geoidHeight_cm = 1;
+      uint8_t hours = 0;
+      uint8_t minutes = 0;
+      uint8_t seconds = 0;
+      uint16_t dateTime_ms = 0;
+    }my_gps_vals;
 
     // uint32_t tSaved_SplashFix = millis();
 

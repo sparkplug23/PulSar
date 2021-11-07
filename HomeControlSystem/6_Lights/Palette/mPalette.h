@@ -122,6 +122,7 @@ class mPalette
     void init_ColourPalettes_Christmas_14();
     void init_ColourPalettes_Christmas_15();
     void init_ColourPalettes_Christmas_16();
+    void init_ColourPalettes_Christmas_17();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
     void init_ColourPalettes_Sunrise_02();
@@ -252,6 +253,7 @@ class mPalette
     PALETTELIST_STATIC_CHRISTMAS_14_ID,
     PALETTELIST_STATIC_CHRISTMAS_15_ID,
     PALETTELIST_STATIC_CHRISTMAS_16_ID,
+    PALETTELIST_STATIC_CHRISTMAS_17_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_SUNRISE_02_ID,
     PALETTELIST_STATIC_SUNRISE_03_ID,
@@ -444,6 +446,7 @@ class mPalette
       PALETTE christmas_14;
       PALETTE christmas_15;
       PALETTE christmas_16;
+      PALETTE christmas_17;
       // Created for other people
       PALETTE custom_user_01;
     }palettelist;

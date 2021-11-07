@@ -369,6 +369,10 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){
 }
 
 
+/**
+ * should this be renamed, as "devices" needs to refer to the internal list, 
+ * but, I also want to have a list of connected hardware, so that might be better suited to devices (combining for now)
+ * */
 uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){ 
 
   JsonBuilderI->Start();
@@ -376,6 +380,15 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
     JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, sizeof(pCONT_set->Settings.device_name_buffer.device_id)/2);
     JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  sizeof(pCONT_set->Settings.device_name_buffer.class_id)/2);
     JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
+
+    
+
+  char mqtt_data[300];
+  pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+  // Serial.println(mqtt_data);
+  
+  //need to escape option to function above
+    JsonBuilderI->Add("I2C_Scan",          mqtt_data);
 
     #ifdef USE_FUNCTION_TEMPLATE
     //JsonBuilderI->Add("Function Template",   FUNCTION_TEMPLATE);
@@ -577,6 +590,59 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 { //BuildHealth
   char buffer[50];
   JsonBuilderI->Start();
+
+  JBI->Level_Start("Header");
+    JBI->Add("cfg_holder", pCONT_set->Settings.cfg_holder);
+    JBI->Add("cfg_size", pCONT_set->Settings.cfg_size);
+    JBI->Add("save_flag", pCONT_set->Settings.save_flag);
+    JBI->Add("version", pCONT_set->Settings.version);
+    JBI->Add("bootcount", pCONT_set->Settings.bootcount);
+    JBI->Add("cfg_crc", pCONT_set->Settings.cfg_crc);
+  JBI->Level_End();
+
+
+  JBI->Level_Start("Animations");
+  //   JBI->Array_AddArray("controller", 
+  //   &pCONT_set->Settings.animation_settings.xmas_controller_params, 
+  //   sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
+  // JBI->Level_End();
+  // JBI->Level_Start("Animations1");
+    JBI->Array_Start("controller"); 
+    // &pCONT_set->Settings.animation_settings.xmas_controller_params, 
+    // sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
+
+    for(int i=0;i<10;i++)
+    {
+      JBI->Add(pCONT_set->Settings.animation_settings.xmas_controller_params[i]);
+    }
+
+    JBI->Array_End();
+  JBI->Level_End();
+
+  /**
+   * Read stored values into temp struct, not use local variables
+   * */
+
+//   struct SYSCFGH {
+//   uint16_t      cfg_holder;                // 000 v6 header
+//   uint16_t      cfg_size;                  // 002
+//   unsigned long save_flag;                 // 004
+//   unsigned long version;                   // 008
+//   uint16_t      bootcount;                 // 00C
+//   uint16_t      cfg_crc;                   // 00E
+//   } _SettingsH;
+
+//     extern "C" uint32_t _FS_end;
+// const uint32_t SPIFFS_END = ((uint32_t)&_FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+// const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses EEPROM area
+// uint32_t flash_location = SETTINGS_LOCATION;
+// // Just read the header
+//  ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&_SettingsH, sizeof(_SettingsH));
+    
+
+
+
+
     // JsonBuilderI->Add("ALTITUDE_ABOVE_SEALEVEL",       (float)ALTITUDE_ABOVE_SEALEVEL);
     JsonBuilderI->Add("altitude",     pCONT_set->Settings.sensors.altitude);
     // JsonBuilderI->Add("LATITUDE",                      (float)LATITUDE);

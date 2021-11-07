@@ -1,7 +1,7 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
@@ -33,9 +33,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_
 float sun_elevation = 0;
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
   #else
-  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position.elevation;
   #endif
 #endif
   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;

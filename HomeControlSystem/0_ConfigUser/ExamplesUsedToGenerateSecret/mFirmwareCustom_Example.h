@@ -59,7 +59,7 @@
   #define DEVICENAME_CTR            "rgbcustomuser01"
   #define DEVICENAME_FRIENDLY_CTR   "String Lights 01"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -118,7 +118,7 @@
   #define DEVICENAME_CTR            "rgbcustomuser02"
   #define DEVICENAME_FRIENDLY_CTR   "PWM Lights 02"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
   #define USE_BUILD_TYPE_LIGHTING

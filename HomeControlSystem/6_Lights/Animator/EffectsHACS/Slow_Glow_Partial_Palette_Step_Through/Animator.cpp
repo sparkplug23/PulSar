@@ -1,14 +1,14 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 /****
  * Changes pixels randomly to new colour, with slow blending
  * Requires new colour calculation each call
  */
-void mAnimatorLight::SubTask_Flasher_Animate_Function__Palette_Step_Through_Palette(){
+void mAnimatorLight::SubTask_Flasher_Animate_Function__Step_Through_Palette(){
   // So colour region does not need to change each loop to prevent colour crushing
   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
   // Pick new colours
@@ -76,7 +76,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function__Palette_Step_Through_Pale
         colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 
         if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-          colour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->rgbcct_controller.getBrightnessRGB255());
+          colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
         }
 
 

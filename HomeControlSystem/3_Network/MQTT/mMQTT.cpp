@@ -175,7 +175,9 @@ void mMQTT::init(void){
   // snprintf(pCONT_set->Settings.mqtt.hostname_ctr,sizeof(pCONT_set->Settings.mqtt.hostname_ctr),MDNS_MQTT_HOSTNAME1);//,strlen(MDNS_MQTT_HOSTNAME1));
   // #endif // #ifdef USE_NETWORK_MDNS
 
-  memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
+  // AddLog(LOG_LEVEL_INFO, PSTR("Settings.system_name.device = %s"),pCONT_set->Settings.system_name.device);
+
+// delay(5000);
 
 //new name needed!
   setprefixtopic(pCONT_set->Settings.system_name.device);
@@ -564,6 +566,7 @@ void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
 
 
 void mMQTT::setprefixtopic(const char* _prefixtopic){
+  memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
   strncpy(pCONT_set->Settings.mqtt.prefixtopic,_prefixtopic,strlen(_prefixtopic));
 }
 

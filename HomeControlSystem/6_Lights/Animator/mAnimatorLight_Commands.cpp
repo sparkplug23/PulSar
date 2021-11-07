@@ -10,7 +10,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
   char buffer[50];
 
-  #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   /**
    *  Flasher function specific commands
    * */
@@ -71,7 +71,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-  #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
   #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
@@ -385,6 +385,9 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   
   byte effectCurrent=0,effectSpeed = 0,effectIntensity=0,effectPalette=0;
 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
   if(jtok = obj["Effects"].getObject()["Current"]){ // default to secs
     effectCurrent = jtok.getInt();
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -410,7 +413,10 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     // #endif // ENABLE_LOG_LEVEL_DEBUG
     mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
   }
+  
+#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
 
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   if(jtok = obj["Effects"].getObject()["Mode"]){ // default to secs
     CommandSet_EffectsModeID(jtok.getInt());
@@ -420,16 +426,16 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   }
 
 
-  if(jtok = obj["Effects"].getObject()["Select"]){ // default to secs
-    // effectPalette = jtok.getInt();
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-    flags_hac_wled_animator_switch = jtok.getInt();
+  // if(jtok = obj["Effects"].getObject()["Select"]){ // default to secs
+  //   // effectPalette = jtok.getInt();
+  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
+  //   flags_hac_wled_animator_switch = jtok.getInt();
 
-    Serial.printf("flags_hac_wled_animator_switch=%d\n\r", flags_hac_wled_animator_switch);
+  //   Serial.printf("flags_hac_wled_animator_switch=%d\n\r", flags_hac_wled_animator_switch);
     
-  }
+  // }
 
 
   //pCONT_iLight->animation.flags.fForceUpdate = true;
@@ -454,16 +460,22 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
 void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
 {
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  
+#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
   char buffer[50];
   mEffects->setMode(segment, mode);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
+#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+  #endif
 } 
 
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   /********************************************************************************************************************************
   **********Flasher Function ******************************************************************************************************
@@ -489,9 +501,11 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f){
 
   if(f=='\0') return -2;
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_COLOUR_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_GLOW_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID; }
   
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
@@ -508,7 +522,9 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen)
 const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen){
   switch(id){
     default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
+    case EFFECTS_FUNCTION_STATIC_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR);  break;
     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
+    case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
     case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
     case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
     case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR);  break;
@@ -685,7 +701,7 @@ void mAnimatorLight::CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPalette
     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
-  #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
   /********************************************************************************************************************************

@@ -41,16 +41,19 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     
 
     }break;
-    case FUNC_EVERY_SECOND:
+    case FUNC_EVERY_SECOND:{
 
 
+  // char mqtt_data[300];
+  // pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+  // Serial.println(mqtt_data);
     //add back that I divide supports into subtasks to split tasks evenly across a second
 
       // #ifdef ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
       //   return 0;
       // #endif
       PerformEverySecond();
-    break;
+    }break;
     case FUNC_EVERY_FIVE_MINUTE:
       //CmndCrash();
     break;
@@ -63,10 +66,10 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
     pCONT_set->RtcReboot.fast_reboot_count = 0;
     pCONT_set->RtcRebootSave();
-    pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "bootcount=%d"), pCONT_set->Settings.bootcount);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+
+    // delay(5000);
+    
   // }
 
     break;
@@ -2180,7 +2183,7 @@ void mSupport::Handle_OTA_URLS()
         #ifdef ESP8266
           ESPhttpUpdate.rebootOnUpdate(false);
         #endif
-// DEBUG_LINE_HERE;
+DEBUG_LINE_HERE;
         pCONT_set->SettingsSave(1);  // Free flash for OTA update
         
 // DEBUG_LINE_HERE;
@@ -2346,7 +2349,7 @@ void mSupport::CheckResetConditions()
         pCONT_set->SettingsDefault();
         pCONT_set->restart_flag = 2;
       }
-      pCONT_set->SettingsSaveAll();
+      // pCONT_set->SettingsSaveAll();
       pCONT_set->restart_flag--;
       if (pCONT_set->restart_flag <= 0) {
     #ifdef ENABLE_LOG_LEVEL_INFO

@@ -12,8 +12,28 @@
 
 //https://i.stack.imgur.com/6pPh9.png
 
+// extern bool extern_flag_sd_stream_buffer_lock ;
+
+
+// extern struct STREAM_TMP_BUFFERS
+// {
+  // extern char stream_tmp_buffer_0[1000];
+  // extern uint16_t stream_tmp_buflen_0;
+  // extern char stream_tmp_buffer_1[1000];
+  // extern uint16_t stream_tmp_buflen_1;
+  // extern uint8_t stream_tmp_buf_writer_index;
+// };
+//stream_tmp_buffers[4];
+
+
+
+// extern 
+// static SemaphoreHandle_t mutex_filling_sd_writer;
+
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR) "sdcard_superframe";
 
+    void ISR_Direct_SubTask_Generate_SyncFrame_To_SDCard_Stream();
+    
 class mSerialPositionalLogger :
   public mTaskerInterface
 {
@@ -40,6 +60,9 @@ class mSerialPositionalLogger :
     }settings;
 
     uint32_t rxon_counter = 0;
+
+    void UpdateInternalRTCTimeWithGPSTime();
+
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();

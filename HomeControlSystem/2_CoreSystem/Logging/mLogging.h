@@ -26,7 +26,14 @@
 enum LoggingLevels {LOG_LEVEL_NONE, 
                     LOG_LEVEL_ERROR, 
                     LOG_LEVEL_WARN, 
+                    /**
+                     * Used when developing a new thing
+                     * */
                     LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
+                    /**
+                     * Should be used only when I want to highlight it in the serial monitor, it will add new lines to show it better
+                     * */
+                    LOG_LEVEL_HIGHLIGHT, // New level with elevated previledge - during code development use only
                     LOG_LEVEL_INFO,
                     LOG_LEVEL_COMMANDS, // extra case, this will show when cases are matched 
                     LOG_LEVEL_DEBUG, 
@@ -186,6 +193,7 @@ extern "C" {
   DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_SHORT_CTR)           D_LOG_LEVEL_ERROR_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
+  DEFINE_PGM_CTR(PM_LOG_LEVEL_HIGHLIGHT_SHORT_CTR)       "HLT";
   DEFINE_PGM_CTR(PM_LOG_LEVEL_INFO_SHORT_CTR)            D_LOG_LEVEL_INFO_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_COMMANDS_SHORT_CTR)    D_LOG_LEVEL_COMMANDS_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_SHORT_CTR)           D_LOG_LEVEL_DEBUG_SHORT_CTR;

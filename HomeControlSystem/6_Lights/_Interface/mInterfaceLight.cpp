@@ -149,6 +149,17 @@ void mInterfaceLight::Template_Load(){
   memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
+  // AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Template_Load SettingsMerge\n\r\n\r\n\r\n\r"
+  //     //Test data
+  //     "%d:%d:%d:%d"
+  //   ),
+  //     //Testdata
+  //      pCONT_set->Settings.animation_settings.xmas_controller_params[0]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
+  // );
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
@@ -368,8 +379,22 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
-    case FUNC_TEMPLATE_MODULE_LOAD:
-    case FUNC_TEMPLATE_DEVICE_LOAD:
+    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:
+    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+    
+    AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Tasker\n\r\n\r\n\r\n\r"
+        //Test data
+        "%d:%d:%d:%d"
+      ),
+        //Testdata
+         pCONT_set->Settings.animation_settings.xmas_controller_params[0]
+        ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
+        ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
+        ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
+    );
+
+
+
       Template_Load();
     break;
     case FUNC_POINTER_INIT:
@@ -544,10 +569,10 @@ void mInterfaceLight::EveryLoop(){
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
     switch(animation.mode_id){
-      #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       case ANIMATION_MODE_EFFECTS_ID:
         //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
-        pCONT_lAni->SubTask_Flasher_Main();
+        pCONT_lAni->SubTask_Effects_PhaseOut();
         // light_power_state = true;
       break;
       #endif
@@ -561,40 +586,52 @@ void mInterfaceLight::EveryLoop(){
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     switch(animation.mode_id){
-      #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+
+      /**
+       * HACS Original: animations using neopixel animator (to be phased into segments)
+       * */
+      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       case ANIMATION_MODE_EFFECTS_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_8EFFECTS_ID"));
-        pCONT_lAni->SubTask_Flasher_Main();
-        // light_power_state = true;
+        pCONT_lAni->SubTask_Effects_PhaseOut();
       break;
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+      /**
+       * WLED Original: Based on WLED direct port (to be phased into segments)
+       * */
+      #ifdef ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
       case ANIMATION_MODE_WLED_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_8EFFECTS_ID"));
-        pCONT_lAni->SubTask_WLED_Animation();
-        // light_power_state = true;
+        pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
       break;
-      #endif // ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+      #endif // ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+
+      /**
+       * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
+       * */
+      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      case ANIMATION_MODE_SEGMENTS_ANIMATION_ID:
+        pCONT_lAni->SubTask_Segments_Animation();
+      break;
+      #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+      /**
+       * Notifications: Single pixel basic animations (pulse, flash, on/off)
+       * */
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_NOTIFICATIONS_IDu"));
         pCONT_lAni->SubTask_Notifications();
       break;
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT // Basic colours around boxed objects
+      /**
+       * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
+       * */
+      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
       case ANIMATION_MODE_AMBILIGHT_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_AMBILIGHT_ID"));
         pCONT_lAni->SubTask_Ambilight_Main();
-        // light_power_state = true;
       break;
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_ADALIGHT // serial, wifi udp connection
-      case ANIMATION_MODE_EFFECTS_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
-        pCONT_ladd->SubTask_Flasher_Main();
-        // light_power_state = true;
-      break;
-      #endif
+      /**
+       * Set Pixel: Manual method via mqtt json
+       * */
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
       case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
@@ -602,6 +639,16 @@ void mInterfaceLight::EveryLoop(){
         // light_power_state = true;
       break;
       #endif
+      /**
+       * protocol h1 something: Manual method via mqtt json
+       * */
+      // #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
+      // case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
+      //   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+      //   pCONT_ladd->SubTask_Manual_SetPixel();
+      //   // light_power_state = true;
+      // break;
+      // #endif
       case ANIMATION_MODE_NONE_ID: default: break; // resting position
     }
     #endif
@@ -774,8 +821,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
 
 
 
-
-////////////////////// START OF MQTT /////////////////////////
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mInterfaceLight::MQTTHandler_Init(){
 
@@ -842,6 +888,7 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 }
 
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 void mInterfaceLight::BootMessage(){

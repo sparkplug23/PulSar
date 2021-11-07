@@ -36,12 +36,20 @@ static const char *TAG = "uart_events";
 void UART1_ISR_Static(void* arg);
 void UART2_ISR_Static_ByteRingBuffer(void* arg);
 void UART2_ISR_Static_NoSplitRingBuffer(void* arg);
+void UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg);
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR) "uartinfo";
 
 //https://www.reddit.com/r/esp32/comments/8k6ruk/uart_interrupt_not_working/
 
 
+//  extern uint8_t uart_rss_tmp_buf_writer_index;
+//  extern  char uart_rss_tmp_buffer_0[300];
+//  extern  uint16_t uart_rss_tmp_buflen_0;
+//  extern  char uart_rss_tmp_buffer_1[300];
+//  extern  uint16_t uart_rss_tmp_buflen_1;
+//  extern  char uart_rss_tmp_buffer_2[300];
+//  extern  uint16_t uart_rss_tmp_buflen_2;
 /*
  * Connect the SD card to the following pins:
  *
@@ -85,6 +93,10 @@ class mSerialUART :
     };
     #endif
 
+
+    char special_json_part_of_gps_buffer[300] = {0};
+    uint16_t special_json_part_of_gps_buflen = 0;
+
     void Pre_Init_Pins();
     void Init();
     void StartISR_RingBuffers();
@@ -100,43 +112,49 @@ class mSerialUART :
      * UART1
      * 
      * */
-    #define RINGBUFFER_HANDLE_1_LENGTH 5000
+    // #ifdef ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+    // #define RINGBUFFER_HANDLE_1_LENGTH 5000 //gps buffer
+    // #else
+    #define RINGBUFFER_HANDLE_1_LENGTH 2500
+    // #endif
     void  init_UART1_RingBuffer();
     void  init_UART1_pins();
     void  init_UART1_ISR();
-    // Receive buffer to collect incoming data
-    uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
-    // Register to collect data length
-    uint16_t urxlen1 = 0;
-//R288132N @ 1000
-             
-
-//                   5000 u2 of                                                  
-// R270100N 0054 TST UART1073479894 >> EMPTY
-  
-
-// enum RINGBUFFER_TYPE_IDS
-// {
-//   RINGBUFFER_TYPE_BYTEBUFFER_ID,
-//   RINGBUFFER_TYPE_NOSPLIT_BUFFER_ID,
-//   RINGBUFFER_TYPE_SPLIT_BUFFER_ID
-// }ringbuffer_t;
+    // // Receive buffer to collect incoming data
+    // uint8_t rxbuf1[RINGBUFFER_HANDLE_1_LENGTH] = {0};
+    // // Register to collect data length
+    // uint16_t urxlen1 = 0;
 
 
-int sendData(const char* logName, const char* data);
+    //R288132N @ 1000    
+    //                   5000 u2 of                                                  
+    // R270100N 0054 TST UART1073479894 >> EMPTY    
+    // enum RINGBUFFER_TYPE_IDS
+    // {
+    //   RINGBUFFER_TYPE_BYTEBUFFER_ID,
+    //   RINGBUFFER_TYPE_NOSPLIT_BUFFER_ID,
+    //   RINGBUFFER_TYPE_SPLIT_BUFFER_ID
+    // }ringbuffer_t;
+
+    int sendData(const char* logName, const char* data);
 
     /***
      * UART2
      * 
      * */
-    #define RINGBUFFER_HANDLE_2_LENGTH 5000//15000
+    #ifdef ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+    #define RINGBUFFER_HANDLE_2_LENGTH 200 //not used, lets not waste ram
+    #else
+    #define RINGBUFFER_HANDLE_2_LENGTH 5000
+    #endif
+    // #define RINGBUFFER_HANDLE_2_LENGTH 5000//15000
     void  init_UART2_RingBuffer();
     void  init_UART2_pins();
     void  init_UART2_ISR();
-    // Receive buffer to collect incoming data
-    char rxbuf2[RINGBUFFER_HANDLE_2_LENGTH] = {0};
-    // Register to collect data length
-    uint16_t urxlen2 = 0;
+    // // Receive buffer to collect incoming data
+    // char rxbuf2[RINGBUFFER_HANDLE_2_LENGTH] = {0};
+    // // Register to collect data length
+    // uint16_t urxlen2 = 0;
 
     // #define ENABLE_BUILTIN_LED_ACTIVITY_BLINKING
     

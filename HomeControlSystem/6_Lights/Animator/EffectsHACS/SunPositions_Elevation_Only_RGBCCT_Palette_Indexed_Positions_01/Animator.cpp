@@ -3,9 +3,9 @@
 
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-
+// ADD a minute adjuster (signed) to allow the animation to happen before/after sunrise ie animated sunset happens 60 minutes after real life
 
 /**************************************************************************************************************************************************************
  * @brief  Solid_Colour_Based_On_Sun_Elevation_02
@@ -17,7 +17,7 @@
  * @note   Using RgbcctColour palette that is designed for each point in elevation
  * *************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01()
+void mAnimatorLight::SubTask_Flasher_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01()
 {
  
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
@@ -35,9 +35,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_SunPositions_Elevation_Onl
 float sun_elevation = 0;
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   #ifdef USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-  float sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position_testing.elevation;
   #else
-  float sun_elevation = (float)pCONT_solar->solar_position.elevation;
+  sun_elevation = (float)pCONT_solar->solar_position.elevation;
   #endif
 #endif
   bool sun_is_ascending = true;//pCONT_solar->solar_position_testing.direction.is_ascending;

@@ -39,9 +39,9 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 //   BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
 //   uint8_t animation_mode_list_ids[] = {
-//     #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+//     #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //     pCONT_iLight->ANIMATION_MODE_EFFECTS_ID, 
-//     #endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+//     #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //     //pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
 //     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
 //     ANIMATION_MODE_NOTIFICATIONS_ID,
@@ -100,7 +100,7 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 //         break;
 //         case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
 //         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
-//         #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+//         #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //         case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
 //         #endif
 //         case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
@@ -362,7 +362,7 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 // //   //         pCONT_iLight->animation.palette.id = arg_value;
 // //   //         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
 // //   //       break;
-// //   //     #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+// //   //     #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 // //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
 // //   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 // //   //         flashersettings.function = arg_value;  
@@ -1008,7 +1008,7 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 // ********************************************************************************************************************/
 
 
-// // #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+// // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 // // /******** Page items *****
 // //  * 
@@ -2143,7 +2143,7 @@ int8_t mCameraOV2640::Tasker_Web(uint8_t function){
 //   JsonBuilderI->Array_End();
 
 
-//   #ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+//   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //   // JsonBuilderI->Array_Start("g7");// Class name
 //   //   JsonBuilderI->Level_Start();
 //   //     JsonBuilderI->AddKey("eihr");           // function

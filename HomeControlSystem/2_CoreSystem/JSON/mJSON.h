@@ -60,6 +60,7 @@ class JsonBuilder{
     static JsonBuilder* instance;
     
     char* GetBufferPtr();
+char* GetPtr();
     uint16_t GetLength();
     uint16_t* GetLengthPtr();
     uint16_t GetBufferSize();
@@ -71,6 +72,8 @@ class JsonBuilder{
     void Level_Start(const char* key);
     void Level_Start_P(const char* keyP, ...);
     void Level_End();
+
+    void Start_NoMemClear();
 
     void Array_Start();
     void Array_Start(const char* key);

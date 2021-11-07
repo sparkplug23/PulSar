@@ -106,6 +106,11 @@ void mSerialUART::init_UART1_ISR(){
 }
 
 
+#define UART1_ISR_TMP_BUFFER_SIZE 5000
+// Receive buffer to collect incoming data
+uint8_t rxbuf1[UART1_ISR_TMP_BUFFER_SIZE] = {0};
+// Register to collect data length
+uint16_t urxlen1 = 0;
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
@@ -113,6 +118,9 @@ void mSerialUART::init_UART1_ISR(){
  **/
 void IRAM_ATTR UART1_ISR_Static(void *arg)
 { 
+
+// gps data
+
  // DEBUG_PIN1_SET(LOW);
   
   uint16_t rx_fifo_len, status;
@@ -123,17 +131,17 @@ void IRAM_ATTR UART1_ISR_Static(void *arg)
 
   while(UART1.status.rxfifo_cnt)
   {
-    pCONT_uart->rxbuf1[i++] = UART1.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp31s1 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
-    if(i>=RINGBUFFER_HANDLE_1_LENGTH-1)
+    rxbuf1[i++] = UART1.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp31s1 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
+    if(i>=UART1_ISR_TMP_BUFFER_SIZE-1)
     {
       break;
     }
     rx_fifo_len--;
   }
-  pCONT_uart->urxlen1 = i;
+  urxlen1 = i;
 
   BaseType_t dummyval;
-  UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart1.ringbuffer_handle, pCONT_uart->rxbuf1, pCONT_uart->urxlen1, &dummyval);
+  UBaseType_t res =  xRingbufferSendFromISR(pCONT_uart->settings.uart1.ringbuffer_handle, rxbuf1, urxlen1, &dummyval);
   
   // after reading bytes from buffer clear UART interrupt status
   uart_clear_intr_status(UART_NUM_1, 

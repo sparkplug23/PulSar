@@ -74,7 +74,7 @@ int8_t DeviceNameList::AddDeviceName(const char* name_ctr, int16_t class_id, int
   number_buffer.unique_group_ids[index] = class_id;
   number_buffer.index_ids[index] = device_id;
 
-  AddLog(LOG_LEVEL_TEST,PSTR("name_bufferE=%s"), buffer);
+  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("name_bufferE=%s"), buffer);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog_Array(LOG_LEVEL_DEBUG_MORE,PSTR("class_id"),number_buffer.unique_group_ids,(int16_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);

@@ -22,7 +22,7 @@
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
 
-#include "2_CoreSystem/Support/AveragingData.h"
+#include "2c_InternalHelper/Averaging/AveragingData.h"
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
@@ -332,6 +332,15 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
     EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_LSM303D
+    EM_MODULE_SENSORS_LSM303D_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_L3G
+    EM_MODULE_SENSORS_L3G_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_MPU9250
+    EM_MODULE_SENSORS_MPU9250_ID,
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -374,6 +383,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
     EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+    EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
@@ -616,6 +628,18 @@ enum MODULE_IDS{
   #define pCONT_adc_internal       static_cast<mADC_I2S_Sampler*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID])
   // pCONT_adc_i2s                           static_cast<mADC_I2S_Sampler*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_LSM303D
+  #include "5_Sensors/LSM303D_3Axis_AccMag/mSensorsLSM303D.h"
+  #define pCONT_LSM303D                      static_cast<mSensorsLSM303D*>(pCONT->pModule[EM_MODULE_SENSORS_LSM303D_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_L3G
+  #include "5_Sensors/L3GD20_3Axis_Gryo/mSensorsL3G.h"
+  #define pCONT_L3G                      static_cast<mSensorsL3G*>(pCONT->pModule[EM_MODULE_SENSORS_L3G_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_MPU9250
+  #include "5_Sensors/MPU9250/mSensorsMPU9250.h"
+  #define pCONT_MPU9250                      static_cast<mSensorsMPU9250*>(pCONT->pModule[EM_MODULE_SENSORS_MPU9250_ID])
+#endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -674,6 +698,10 @@ enum MODULE_IDS{
   #include "9_Controller/GPS_SD_Logger/mGPS_SD_Logger.h"
   #define pCONT_gps_sd_log                  static_cast<mGPS_SD_Logger*>(pCONT->pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID])
   #define pCONT_serial_pos_log  pCONT_gps_sd_log
+#endif
+#ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+  #include "9_Controller/SDLoggerIMURadiationPattern/mSDLoggerIMURadiationPattern.h"
+  #define pCONT_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"

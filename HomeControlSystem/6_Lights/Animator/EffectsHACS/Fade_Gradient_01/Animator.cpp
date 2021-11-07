@@ -1,6 +1,6 @@
 #include "../../mAnimatorLight.h"
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 // Fade solid colour from 0 to 75%, and a palette from 25 to 100% (50% overlap)
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Fade_Gradient(){

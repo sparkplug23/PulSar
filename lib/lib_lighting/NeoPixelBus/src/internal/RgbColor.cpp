@@ -85,6 +85,20 @@ RgbColor::RgbColor(const HsbColor& color)
     B = (uint8_t)(b * Max);
 }
 
+// RgbColor::RgbColor(const uint32_t color32bit_WRGB)
+// {
+//     uint8_t w = (color32bit_WRGB >> 24);
+//     uint8_t r = (color32bit_WRGB >> 16);
+//     uint8_t g = (color32bit_WRGB >>  8);
+//     uint8_t b =  color32bit_WRGB       ;
+
+//     R = r;
+//     G = g;
+//     B = b;
+// }
+
+
+
 uint8_t RgbColor::CalculateBrightness() const
 {
     return (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);

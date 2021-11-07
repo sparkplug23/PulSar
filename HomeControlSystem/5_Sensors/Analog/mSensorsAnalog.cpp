@@ -82,17 +82,17 @@ int8_t mSensorsAnalog::Tasker(uint8_t function, JsonParserObject obj){
       // EveryLoop();
     break;   
     case FUNC_EVERY_SECOND:
-      AddLog(LOG_LEVEL_TEST, PSTR("mSensorsAnalog"));
+      // AddLog(LOG_LEVEL_TEST, PSTR("mSensorsAnalog"));
     break;  
     /************
      * COMMANDS SECTION * 
     *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
-      // parsesub_JSONCommands();
-    break;  
+    // case FUNC_JSON_COMMAND_ID:
+    //   parse_JSONCommand(obj);
+    // break;
+    // case FUNC_TEMPLATE_DEVICE_EXECUTE_LOAD:
+    //   // parsesub_JSONCommands();
+    // break;  
     /************
      * MQTT SECTION * 
     *******************/
@@ -233,12 +233,7 @@ void mSensorsAnalog::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mSensorsAnalog::MQTTHandler_Connected(){
-  MQTTHandler_Set_fSendNow();
-}
-void mSensorsAnalog::MQTTHandler_Disconnected(){
-  // Nothing
-}
+// void mSey
 
 /**
  * @brief Set flag for all mqtthandlers to send

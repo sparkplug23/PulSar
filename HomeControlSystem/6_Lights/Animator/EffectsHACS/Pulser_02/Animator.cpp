@@ -1,7 +1,7 @@
 #include "../../mAnimatorLight.h"
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
@@ -22,7 +22,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On_2(){
         // Check if output multiplying has been set, if so, change desiredcolour array
         // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
 
-        test_flag^=1;
+        // test_flag^=1;
 
         // Go through strip, randomly change some to coloured or black
         mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);

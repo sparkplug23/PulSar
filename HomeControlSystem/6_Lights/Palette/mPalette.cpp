@@ -95,6 +95,7 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Christmas_14();
   init_ColourPalettes_Christmas_15();
   init_ColourPalettes_Christmas_16();
+  init_ColourPalettes_Christmas_17();
   init_ColourPalettes_Sunrise_01();
   init_ColourPalettes_Sunrise_02();
   init_ColourPalettes_Sunrise_03();
@@ -423,6 +424,16 @@ void mPalette::init_ColourPalettes_Christmas_16(){
   palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_16_COLOUR_MAP_IDS);
   palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_16_COLOUR_MAP_IDS;
   palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_16_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+
+void mPalette::init_ColourPalettes_Christmas_17(){
+  palettelist.ptr     = &palettelist.christmas_17;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_17_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_17_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_17_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_17_NAME_CTR;
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
 }
@@ -882,6 +893,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_CHRISTMAS_14_ID:     return &palettelist.christmas_14;
     case PALETTELIST_STATIC_CHRISTMAS_15_ID:     return &palettelist.christmas_15;
     case PALETTELIST_STATIC_CHRISTMAS_16_ID:     return &palettelist.christmas_16;
+    case PALETTELIST_STATIC_CHRISTMAS_17_ID:     return &palettelist.christmas_17;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID:     return &palettelist.gradient_sunlevel_group01_01;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ID:     return &palettelist.gradient_sunlevel_group01_02;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ID:     return &palettelist.gradient_sunlevel_group01_03;

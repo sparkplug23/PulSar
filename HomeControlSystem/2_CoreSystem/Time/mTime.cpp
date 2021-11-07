@@ -34,11 +34,11 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       if(uptime.seconds_nonreset<2*60){ show_time_rate = 1; } // first 2 minutes
       if(uptime.seconds_nonreset<10*60){ show_time_rate = 10; } // first 10 minutes
 
-      if(mTime::TimeReached(&tSavedUptime,show_time_rate*1000)){ // 10 secs then 60 secs
-        // #ifdef ENABLE_LOG_LEVEL_INFO
-        //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "%s"),uptime.hhmmss_ctr);    
-        // #endif// ENABLE_LOG_LEVEL_INFO
-      }
+      // if(mTime::TimeReached(&tSavedUptime,show_time_rate*1000)){ // 10 secs then 60 secs
+      //   // #ifdef ENABLE_LOG_LEVEL_INFO
+      //   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "%s"),uptime.hhmmss_ctr);    
+      //   // #endif// ENABLE_LOG_LEVEL_INFO
+      // }
 
       // if(mTime::TimeReached(&testtime,1)){ // 10 secs then 60 secs
       //   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPTIME "TEST %s"),uptime.hhmmss_ctr);    
@@ -61,12 +61,16 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       
       #ifndef DISABLE_NETWORK
         WifiPollNtp();
-      #endif DISABLE_NETWORK
+      #endif // DISABLE_NETWORK
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
         UpdateStoredRTCVariables();
       //   // Serial.printf("time_start2=%d\n\r",millis()-time_start);
         UpdateUpTime();
+
+        
+      // Serial.printf("uptime.seconds_nonreset=%d\n\r",uptime.seconds_nonreset);
+
 
       // Check for midnight
       if((RtcTime.hour==0)&&(RtcTime.minute==0)&&(RtcTime.second==0)&&(lastday_run != RtcTime.Yday)){
@@ -81,9 +85,9 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
       //I need another for stable boot
-      if(RtcTime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+      if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
 
-      if(RtcTime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+      if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
 
       // Uptime triggers
       if(uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
@@ -407,6 +411,7 @@ void mTime::UpdateStoredRTCVariables(void){
   RtcTime.Yseconds = 0;//timeClient->getEpochTime() - NTP_EPOCH_AT_START_OF_2019;
   RtcTime.Wseconds = (RtcTime.Wday*SEC2DAY)+(RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
   RtcTime.Dseconds = (RtcTime.hour*SEC2HOUR)+(RtcTime.minute*SEC2MIN)+(RtcTime.second);
+  RtcTime.seconds_nonreset++; // probably not needed, its just because of uptime sharing struct type
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,
@@ -769,24 +774,74 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
   int32_t time_until_end = end_sod-time_of_day_secs_now;
 
   bool flag_24hrs_added = false;
+  bool flag_time_period_over_midnight = false;
   bool flag_within_time_window = false;
 
   //if times are equal, return early as false
   if(start_sod == end_sod) return false;
 
-  //need to add check if start>end, then add 24 hours
-  if(end_sod < start_sod){
-    end_sod += SECS_PER_DAY;
-    time_of_day_secs_now += SECS_PER_DAY; // Also need the time_now needs moved forward into next bracket
-    flag_24hrs_added = true;
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
+  /**
+   * Check if condition has time going over midnight into next day
+   * */
+  if(end_sod < start_sod)
+  {
+    flag_time_period_over_midnight = true;
+  }
+  
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, flag_time_period_over_midnight = %d"), flag_time_period_over_midnight);
+
+  if(flag_time_period_over_midnight)
+  {
+    /**
+     * Check if current time is within current, or next day (after midnight)
+     * If tod < end, it is already inside time window
+     * */
+    if(time_of_day_secs_now < end_sod)
+    {
+      flag_within_time_window = true;
+    }
+    /**
+     * If not inside next day window, lets check previous day (ie from start to midnight)
+     * */
+    else
+    if(time_of_day_secs_now > start_sod)
+    {
+      flag_within_time_window = true;
+    }
+  }
+  /**
+   * time window spans same day ie start before end, on same day
+   * */
+  else
+  {
+
+    if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
+      flag_within_time_window = true;
+    }else{
+      flag_within_time_window = false;
+    }
+
   }
 
-  if((start_sod < time_of_day_secs_now)&&(time_of_day_secs_now < end_sod)){ //now>start AND now<END
-    flag_within_time_window = true;
-  }else{
-    flag_within_time_window = false;
-  }
+
+  /**
+   * If end of window is less than start of window, assume its the next day, so add 24hrs
+   * need to add check if start>end, then add 24 hours
+   * */
+  // if(end_sod < start_sod){
+  //   /**
+  //    * TOD now should only be added to "now" if it has went beyond midnight
+  //    * eg 9pm to 3am, 9pm check time should be after, but tod_now is only +24 when after 0am
+  //    * */
+  //   if(time_of_day_secs_now < end_sod){
+  //     time_of_day_secs_now += SECS_PER_DAY; // Also need the time_now needs moved forward into next bracket
+  //     end_sod += SECS_PER_DAY; // bring start to be the next day by adding 24 hours
+  //   }
+
+  //   flag_24hrs_added = true;
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "end<start, Add 24 hours"));
+  // }
+
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "%02d:%02d:%02d (%02d) | (%02d) | (%02d) %02d:%02d:%02d"),
@@ -802,7 +857,8 @@ int8_t mTime::CheckBetween_Day_DateTimesShort(time_short_t* start, time_short_t*
     start->hour,start->minute,start->second, start_sod, time_until_start,
     RtcTime.hour,RtcTime.minute,RtcTime.second, RtcTime.Dseconds, time_of_day_secs_now,
     end->hour,end->minute,end->second, end_sod, time_until_end,
-    flag_24hrs_added?"+24hrs added":"",
+    // flag_24hrs_added?"+24hrs added":"",
+    flag_time_period_over_midnight?"Window Across Midnight":"",
     flag_within_time_window?"WITHIN":"OUTSIDE"
   );
   #endif// ENABLE_LOG_LEVEL_INFO

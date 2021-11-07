@@ -168,6 +168,9 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
   // I2C_SDA_HELD_LOW            3 = I2C bus error. SDA line held low by slave/another_master after n bits
   // I2C_SDA_HELD_LOW_AFTER_INIT 4 = line busy. SDA again held low by another device. 2nd master?
 
+
+#ifdef ESP8266
+
   uint8_t error = 0;
   uint8_t address = 0;
   uint8_t any = 0;
@@ -192,6 +195,14 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
   else {
     snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
   }
+
+#else
+
+snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"not on esp32 yet\"}" ));
+  
+
+#endif
+
 }
 
 //old function that seems to be changed

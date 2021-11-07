@@ -500,54 +500,54 @@ class mInterfaceLight :
          * */
         uint16_t time_ms = 5000;  
       }transition;
-      /**
-       * WLED Test Variables 
-       * */
-      uint16_t start_index;
-      uint16_t stop_index; //segment invalid if stop == 0
-      uint8_t speed; 
-      uint8_t intensity;
-      uint8_t options; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
-      uint8_t grouping;
-      uint8_t spacing;
+      // /**
+      //  * WLED Test Variables 
+      //  * */
+      // uint16_t start_index;
+      // uint16_t stop_index; //segment invalid if stop == 0
+      // uint8_t speed; 
+      uint8_t intensity=1;
+      // uint8_t options; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
+      // uint8_t grouping;
+      // uint8_t spacing;
       uint8_t debug_mqtt_response_available = 0;
-      void setOption(uint8_t n, bool val)
-      {
-        if (val) {
-          options |= 0x01 << n;
-        } else
-        {
-          options &= ~(0x01 << n);
-        }
-      }
-      bool getOption(uint8_t n)
-      {
-        return ((options >> n) & 0x01);
-      }
-      bool isSelected()
-      {
-        return getOption(0);
-      }
-      bool isActive()
-      {
-        return stop_index > start_index;
-      }
-      uint16_t length()
-      {
-        return stop_index - start_index;
-      }
-      uint16_t groupLength()
-      {
-        return grouping + spacing;
-      }
-      uint16_t virtualLength()
-      {
-        uint16_t groupLen = groupLength();
-        uint16_t vLength = (length() + groupLen - 1) / groupLen;
-        // if (options & MIRROR)
-        //   vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
-        return vLength;
-      }   
+      // void setOption(uint8_t n, bool val)
+      // {
+      //   if (val) {
+      //     options |= 0x01 << n;
+      //   } else
+      //   {
+      //     options &= ~(0x01 << n);
+      //   }
+      // }
+      // bool getOption(uint8_t n)
+      // {
+      //   return ((options >> n) & 0x01);
+      // }
+      // bool isSelected()
+      // {
+      //   return getOption(0);
+      // }
+      // bool isActive()
+      // {
+      //   return stop_index > start_index;
+      // }
+      // uint16_t length()
+      // {
+      //   return stop_index - start_index;
+      // }
+      // uint16_t groupLength()
+      // {
+      //   return grouping + spacing;
+      // }
+      // uint16_t virtualLength()
+      // {
+      //   uint16_t groupLen = groupLength();
+      //   uint16_t vLength = (length() + groupLen - 1) / groupLen;
+      //   // if (options & MIRROR)
+      //   //   vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+      //   return vLength;
+      // }   
     };
     // store the current state
     ANIMATION_SETTINGS animation;
@@ -560,6 +560,12 @@ class mInterfaceLight :
       uint8_t _segment_index = 0;
       uint8_t _segment_index_palette_last = 99;
     };
+
+    
+    
+
+
+
 
     bool flag_test= false;
     uint16_t    pwm_test = 0;
@@ -585,7 +591,11 @@ class mInterfaceLight :
     // Flags and states that are used during one transition and reset when completed
     struct ANIMATIONOVERRIDES{
       uint8_t fRefreshAllPixels = false;
+      /**
+       * Can't be zero, as that means not active
+       * */
       uint16_t time_ms = 1000; //on boot
+      uint16_t rate_ms = 1000;
     }animation_override; // ie "oneshot" variables that get checked and executed one time only
     
     NeoPixelAnimator* animator_controller = nullptr;
@@ -611,19 +621,23 @@ class mInterfaceLight :
       //#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
       ANIMATION_MODE_AMBILIGHT_ID,
       //#endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      //#ifdef ENABLE_PIXEL_FUNCTION_EFFECTS
+      //#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       ANIMATION_MODE_EFFECTS_ID,
 
       // Tmp effects method that should allow easy switching until method is fully absorbed by effects above
       ANIMATION_MODE_WLED_ID, 
+      
 
-      //#endif // ENABLE_PIXEL_FUNCTION_EFFECTS
+      //#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       //#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       ANIMATION_MODE_NOTIFICATIONS_ID,
       //#endif
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       ANIMATION_MODE_MANUAL_SETPIXEL_ID,
       #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      ANIMATION_MODE_SEGMENTS_ANIMATION_ID,
+      #endif
       ANIMATION_MODE_LENGTH_ID
     };             
     int8_t GetAnimationModeIDbyName(const char* c);
@@ -966,6 +980,10 @@ void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
     uint8_t getBriRGB_Global(){
       return _briRGB_Global;
     }
+    uint8_t getBriCCT_Global(){
+      return _briCT_Global;
+    }
+
     void setBriRGB_Global(uint8_t bri_rgb) {
       _briRGB_Global = bri_rgb;
     }
