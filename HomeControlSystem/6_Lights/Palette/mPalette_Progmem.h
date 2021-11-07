@@ -248,6 +248,8 @@
     #define D_RGB255_WHITE_FADED    150, 150, 150,
     #define D_RGB255_WHITE_WARM     0xFF,0x52,0x18,//255,200,0,
 
+    #define D_RGB255_WHITE_WARM1    255, 140, 26,
+
 
 
     #define COLOUR_FLOAT_HUE_RED            0.0000f //0
@@ -454,10 +456,16 @@
       // End
       COLOUR_MAP_NONE_ID,
       //
-      COLOUR_MAP_LENGTH_ID //new end
+      COLOUR_MAP_LENGTH_ID, //new end
+      COLOUR_MAP_BUFFER_DELIMETER_ID=255
     };
 
-
+/***
+ * Allow more customisable palettes in the esp32
+ * Also, can these be combined and stored as one buffer
+ * 
+ * 
+ * */
 
 
 //Add that first pixel contains palette type? the type of encoding, yes do, this
@@ -613,6 +621,7 @@
   #endif          
   const char PM_PALETTE_RAINBOW_NAME_CTR[] PROGMEM = D_PALETTE_RAINBOW_NAME_CTR;
   const uint8_t colour_map_rainbow_id[] PROGMEM = {
+    // to make it visually nicer, I will compress the blue region
     0,   COLOUR_MAP_RED_ID, //0
     14,  COLOUR_MAP_LIGHTORANGE_ID, //20
     35,  COLOUR_MAP_YELLOW_ID, //50
@@ -667,7 +676,7 @@
     const char PM_PALETTE_HOLLOWEEN_OP_NAME_CTR[] PROGMEM = D_PALETTE_HOLLOWEEN_OP_NAME_CTR;
     const uint8_t colour_map_holloween_op_id[] PROGMEM = {
       255, 30, 0, //lihgt orange
-      D_RGB255_BLUE //purple
+      D_RGB255_PURPLE_BLUE //purple
     };
 
     #ifndef D_PALETTE_HOLLOWEEN_OGP_NAME_CTR
@@ -676,7 +685,7 @@
     const char PM_PALETTE_HOLLOWEEN_OGP_NAME_CTR[] PROGMEM = D_PALETTE_HOLLOWEEN_OGP_NAME_CTR;
     const uint8_t colour_map_holloween_ogp_id[] PROGMEM = {
       255, 30, 0, //lihgt orange
-      D_RGB255_BLUE //purple
+      D_RGB255_PURPLE_BLUE //purple
       20, 155, 0    //dim green
     };
 
@@ -1038,7 +1047,7 @@
   
       255, 5, 5,
       255, 213, 0,
-      0, 100, 200,
+      0, 100, 200,                                                                                                                                   
       157, 0, 255,
       255, 0, 128,
       
@@ -1153,6 +1162,74 @@
       D_RGB255_CYAN_FADED2
       D_RGB255_ORANGE_DEEP
     };
+
+
+    /**
+     * Make lights that have both coloured and some warm white white aka having both white/coloured on trees
+     * */
+
+    #ifndef D_PALETTE_CHRISTMAS_17_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_17_NAME_CTR        "warm whites Christmas Outside Many Multi Very different colours|Christmas 17"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_17_NAME_CTR)        D_PALETTE_CHRISTMAS_17_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_17_COLOUR_MAP_IDS)
+    { // R,G,B      
+      D_RGB255_RED
+      D_RGB255_WHITE_WARM1
+      D_RGB255_GREEN_FADED2
+      D_RGB255_WHITE_WARM1
+      D_RGB255_PINK_WARM
+      D_RGB255_WHITE_WARM1
+      D_RGB255_BLUE_FADED3
+      D_RGB255_WHITE_WARM1
+      D_RGB255_ORANGE_LIGHT    
+      D_RGB255_WHITE_WARM1   
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_WHITE_WARM1
+      D_RGB255_CYAN_FADED3
+      D_RGB255_WHITE_WARM1
+      D_RGB255_PINK_HOT
+      D_RGB255_WHITE_WARM1
+      D_RGB255_RED_PASTEL
+      D_RGB255_WHITE_WARM1
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_WHITE_WARM1
+      D_RGB255_YELLOW_WARM
+      D_RGB255_WHITE_WARM1
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_WHITE_WARM1
+      D_RGB255_GREEN_FADED2
+      D_RGB255_WHITE_WARM1
+      D_RGB255_PINK_WARM
+      D_RGB255_WHITE_WARM1
+      D_RGB255_BLUE_FADED3
+      D_RGB255_WHITE_WARM1
+      D_RGB255_ORANGE_LIGHT   
+      D_RGB255_WHITE_WARM1
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_WHITE_WARM1
+      D_RGB255_PINK_HOT2
+      D_RGB255_WHITE_WARM1
+      D_RGB255_CYAN_FADED3
+      D_RGB255_WHITE_WARM1
+      D_RGB255_RED_PASTEL
+      D_RGB255_WHITE_WARM1
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_WHITE_WARM1
+      D_RGB255_YELLOW_WARM
+      D_RGB255_WHITE_WARM1  
+    };
+
+    /**
+     * Make lights like the berry lights 
+     * */
+
+
+
+
+
+
 
 
     #ifndef D_PALETTE_CUSTOM_USER_01_NAME_CTR

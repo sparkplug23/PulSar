@@ -7,7 +7,7 @@
 
 // #define DEVICE_FORCED_TO_BE_TESTER
 #define DISABLE_WEBSERVER
-#define FORCE_TEMPLATE_LOADING
+// //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
@@ -28,8 +28,15 @@
 // #define DEVICE_TESTBED_MOTION
 // #define DEVICE_TESTBED_RGBCLOCK
 // #define DEVICE_RGBSTRING_ANIMATOR_01
+// #define DEVICE_RGBSTRING_CONTROLLER_01
+#define DEVICE_RGBOUTSIDE_CONTROLLER_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
-
+// #define DEVICE_TESTBED_ULTRASONIC
+              // #define DEVICE_TESTBED_9AXIS_GRYO
+// #define DEVICE_TESTBED_9AXIS_GRYO_MPU9250
+// #define DEVICE_TESTBED_9AXIS_GRYO_GY89
+// #define DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
+// #define DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D
 
 // #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
 
@@ -308,7 +315,7 @@
   #define DEVICENAME_CTR          "testbed_shelly1_01"
   #define DEVICENAME_FRIENDLY_CTR "Shelly1 Tester"
 
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
    
   /*
@@ -360,7 +367,7 @@
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D18:00:00\",\"OffTime\":\"00D06:00:00\"}"
   "}";
 
 
@@ -450,7 +457,7 @@
   #define DEVICENAME_CTR          "testbed_shellydimmer_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly Dimmer 2"
   
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
   
   #define USE_MODULE_SENSORS_INTERFACE
@@ -634,7 +641,7 @@
 
   // TEST DEVICE, NOT WORKING
  
-  #define FORCE_TEMPLATE_LOADING
+  //#define FORCE_TEMPLATE_LOADING
   // #define SETTINGS_HOLDER 1
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -660,7 +667,7 @@
   // #define DISABLE_WEBSERVER 
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  // #define ENABLE_PIXEL_FUNCTION_EFFECTS
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
   #define STRIP_SIZE_MAX 93// 750   *15 //changing gazebo to be 12v
@@ -725,15 +732,16 @@
 
 
 #ifdef DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
-  #define DEVICENAME_SOCKET_NUMBER_CTR 14
+  // #define DEVICENAME_SOCKET_NUMBER_CTR 2
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   
   /**
    * Disable serial logging
    * Use RX pin, gpio 1, as switch input
+   * TX pin should still allow debugging
    * */
-  #define DISABLE_SERIAL_LOGGING
+  // #define DISABLE_SERIAL_LOGGING
   
   #define DISABLE_WEBSERVER
   #define USE_MODULE_CORE_RULES
@@ -749,10 +757,13 @@
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"3\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
+    /**
+     * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
+     * */
+    // "\"" D_JSON_GPIOC "\":{"
+    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
@@ -791,7 +802,7 @@
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
@@ -809,9 +820,13 @@
 #ifdef DEVICE_RGBSTRING_ANIMATOR_01
   #define DEVICENAME_CTR          "testbed_string_animator_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
+  // New segments for joining everything together
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // HACS
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
@@ -849,7 +864,8 @@
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
     // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_ANIMATIONMODE    "\":"  "5"  "," //5
     "\"" D_JSON_EFFECTS "\":{" 
       // "\"Function\":\"FirePlace01\"" //slow glow
       "\"Function\":\"Static Glow\"" //slow glow
@@ -879,6 +895,201 @@
         "\"" "bedroom" "\""
       "]"
     "}"
+  "}";
+
+#endif
+
+
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * Push buttons will be placed onto a small bread board on the back, then using heatshrink attached and closed to the nodemcu
+ * Buttons: Brightness down, Brightness up (0,10,20,...80,90,92,94,96,98,100) .. or long press just increments!
+ *          Basic list of a few animations people might like, but default to static on
+ *          Pallette up, palette down
+ *          Animation speed up, speed down
+ * 
+ *          Maybe use one button to mean "option reverse, or, option 2", hence up/down, left/right can be selected by holding "shift" button
+ *          Instead of (button+1)*n for each new function, its (button*n)+1
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_01
+  #define DEVICENAME_CTR          "testbed_rgb_controller_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB testbed_rgb_controller_01 01"
+
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+  
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define SETTINGS_HOLDER 59
+
+  //define ENABLE_FORCED_TEMPLATE_LOADING_TO_OVERRIDE_SAVED_SETTINGS  // Previously "FORCE_TEMPLATE_LOADING"
+
+  // #define DISABLE_SETTINGS_STORAGE_OVERRIDE
+  // #define ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+
+  #define DISABLE_NETWORK
+  
+  #define ENABLE_DEVFEATURE_ADVANCED_SETTINGS_SAVE_DEBUG
+  #define ENABLE_DEVFEATURE_SAVE_REBOOT_COMMAND_FOR_SETTINGS_TESTING
+  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  #define ENABLE_DEVFEATURE_SETTINGS_SAVED_USED_CORRECTLY_AND_PROGMEM_TEMPLATES_ARE_ONLY_READ_WHEN_SETTINGS_HOLDER_CHANGES // ie works like tas
+  // Based on tasmota saving original vs new esp32 enabled
+  #define ENABLE_SETTINGS_VERSION_1_ESP8266_ONLY
+  // #define ENABLE_SETTINGS_VERSION_2_ESP32_JOINT_HARDWARE
+
+  /**
+   * Three types of animations, exclusive only
+   * */
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+  /**
+   * I might hard code the button config into eeprom, instead of fixing the complex saving method until next year.
+   * Load in animator, save every 5 seconds
+   * */
+  #define ENABLE_TEMPFEATURE_BASIC_SAVING_XMAS_CONTROLLER_SETTINGS
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"D0\":\"" D_GPIO_FUNCTION_KEY8_INV_CTR  "\"," // 3V for high
+      "\"D1\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_KEY5_INV_CTR  "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_KEY6_INV_CTR  "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+ #define STRIP_SIZE_MAX 100
+ #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\""
+    // "\"" D_JSON_EFFECTS "\":{" 
+    //   "\"Function\":\"Static Glow\""
+    // "},"    
+    // "\"" D_JSON_TRANSITION       "\":{"
+    //   // "\"" D_JSON_TIME_MS "\":500,"
+    //   // "\"" D_JSON_RATE_MS "\":2000,"
+    //   // "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+    //   "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    // "}"
+    // "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+    // "\"BrightnessRGB\":0"
+  "}";
+
+#endif
+
+/**
+ * Outside tree, ie testbed for esp32 controller with wifi if possible
+ * */
+#ifdef DEVICE_RGBOUTSIDE_CONTROLLER_01
+  // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
+  #define DEVICENAME_CTR          "outsidetree_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB testbed_rgb_controller_01 01"
+
+
+  /***                               Total
+   * 4 sets of 5v black              (200)
+   * 7 sets of 5v green              (350)
+   * 15 sets of 12v green            (750)
+   * 
+   *                                 (1300)  used to be 1000?
+   * */
+
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+  
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define SETTINGS_HOLDER 59
+
+  //define ENABLE_FORCED_TEMPLATE_LOADING_TO_OVERRIDE_SAVED_SETTINGS  // Previously "FORCE_TEMPLATE_LOADING"
+
+  // #define DISABLE_SETTINGS_STORAGE_OVERRIDE
+  // #define ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+
+  // #define DISABLE_NETWORK
+  
+  // #define ENABLE_DEVFEATURE_ADVANCED_SETTINGS_SAVE_DEBUG
+  // #define ENABLE_DEVFEATURE_SAVE_REBOOT_COMMAND_FOR_SETTINGS_TESTING
+  // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  // #define ENABLE_DEVFEATURE_SETTINGS_SAVED_USED_CORRECTLY_AND_PROGMEM_TEMPLATES_ARE_ONLY_READ_WHEN_SETTINGS_HOLDER_CHANGES // ie works like tas
+  // // Based on tasmota saving original vs new esp32 enabled
+  // #define ENABLE_SETTINGS_VERSION_1_ESP8266_ONLY
+  // #define ENABLE_SETTINGS_VERSION_2_ESP32_JOINT_HARDWARE
+
+  /**
+   * Three types of animations, exclusive only
+   * */
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+  // #define ENABLE_PIXEL_FUNCTION_MIXER // wait until december to fix this, as basic slow glow changes are enough for outside.
+
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  /**
+   * I might hard code the button config into eeprom, instead of fixing the complex saving method until next year.
+   * Load in animator, save every 5 seconds
+   * */
+  // #define ENABLE_TEMPFEATURE_BASIC_SAVING_XMAS_CONTROLLER_SETTINGS
+
+  // 256 leds = 75w so 15A
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+                                                                  
+  #define STRIP_SIZE_MAX 1300 // (26 sets)
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Slow Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1900,"
+      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"ColourPalette\":\"Christmas 07\","
+    "\"BrightnessRGB\":5"
   "}";
 
 #endif
@@ -976,7 +1187,7 @@
    * */
   #ifdef USE_SYSTEM_SDCARD_LOGGING
     #define USE_MODULE_DRIVERS_SDCARD
-    #define USE_SDCARD_RINGBUFFER_STEAM_OUT
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
   #endif // USE_SYSTEM_SDCARD_LOGGING
 
   /**
@@ -1125,6 +1336,491 @@
 
 
 #endif // DEVICE_GPS_SDCARD_LOGGER
+
+
+
+#ifdef DEVICE_TESTBED_ULTRASONIC
+  #define DEVICENAME_CTR          "testbed_ultrasonic"
+  #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
+
+  #define USE_MODULE_CONTROLLER_OILFURNACE
+    
+  // #define USE_MODULE_SENSORS_DS18B20
+  
+  #define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+
+  //#define ENABLE_DEVFEATURE_DELAYED_RESTART_WITHOTA_FOR_DEBUGGING
+  // #define ENABLE_DEVFEATURE_OTAFALLBACK_WITH_FASTBOOT_DETECTED //to be done long term
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_ULTRASONICS
+      "\"D1\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      #endif        
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+/**
+ * esp8266 version -- gy89
+ * As part of measurement system, add 9 axis gyro (GY89) to sensors
+ * */
+#ifdef DEVICE_TESTBED_9AXIS_GRYO
+  #define DEVICENAME_CTR          "testbed_9axis_gyro"
+  #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
+
+  //#define USE_MODULE_CONTROLLER_OILFURNACE
+    
+  // #define USE_MODULE_SENSORS_DS18B20
+
+  #define USE_MODULE_SENSORS_LSM303D
+  
+
+// I2C device found at address 0x1D  !
+// I2C device found at address 0x6B  !
+// I2C device found at address 0x77  !
+  
+  //#define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+
+  //#define ENABLE_DEVFEATURE_DELAYED_RESTART_WITHOTA_FOR_DEBUGGING
+  // #define ENABLE_DEVFEATURE_OTAFALLBACK_WITH_FASTBOOT_DETECTED //to be done long term
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+
+/**
+ * esp32 version -- mpu9250
+ * As part of measurement system, add 9 axis gyro (GY89) to sensors
+ * */
+#ifdef DEVICE_TESTBED_9AXIS_GRYO_GY89
+  #define DEVICENAME_CTR          "testbed_gy89"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed LSM303D2"
+
+
+  #define DISABLE_NETWORK
+  #define DISABLE_SLEEP
+  
+    #define USE_MODULE_SENSORS_LSM303D
+    #define USE_MODULE_SENSORS_L3G
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
+
+  // #ifdef SENSOR_MULTIPLE_MODULE // new way of defined multiple sensors contained on one hardware  
+
+// I2C device found at address 0x1D  !
+// I2C device found at address 0x6B  !
+// I2C device found at address 0x77  !
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+
+/**
+ * esp32 version -- mpu9250
+ * As part of measurement system, add 9 axis gyro (GY89) to sensors
+ * */
+#ifdef DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D
+  #define DEVICENAME_CTR          "testbed_6dof_ecompass"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed LSM303D2"
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_SLEEP
+  
+  #define USE_MODULE_SENSORS_LSM303D
+  // #define USE_MODULE_SENSORS_L3G
+
+  // #define I2C_ADDRESS_LSM303D 0x1d
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
+
+  // #ifdef SENSOR_MULTIPLE_MODULE // new way of defined multiple sensors contained on one hardware  
+
+// I2C device found at address 0x1D  !
+// I2C device found at address 0x6B  !
+// I2C device found at address 0x77  !
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "ARM"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "LEG"
+  
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_LSM303D_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+
+#endif
+
+
+/**
+ * esp32 version -- mpu9250
+ * As part of measurement system, add 9 axis gyro (GY89) to sensors
+ * */
+#ifdef DEVICE_TESTBED_9AXIS_GRYO_MPU9250
+  #define DEVICENAME_CTR          "testbed_9axis_gyro"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed MPU9260"
+
+  //#define USE_MODULE_CONTROLLER_OILFURNACE
+    
+  // #define USE_MODULE_SENSORS_DS18B20
+
+  #define USE_MODULE_SENSORS_MPU9250
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
+  
+
+// I2C device found at address 0x1D  !
+// I2C device found at address 0x6B  !
+// I2C device found at address 0x77  !
+  
+  //#define USE_MODULE_SENSORS_ULTRASONICS
+  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+  // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+
+  //#define ENABLE_DEVFEATURE_DELAYED_RESTART_WITHOTA_FOR_DEBUGGING
+  // #define ENABLE_DEVFEATURE_OTAFALLBACK_WITH_FASTBOOT_DETECTED //to be done long term
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_MPU9250)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+/**
+ * Need to add cc1110 input, simple low/high into json output so I can show sync messages in recording
+ * need 12v power source
+ * 
+ * */
+#ifdef DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
+  #define DEVICENAME_CTR            "radpattern"
+  #define DEVICENAME_FRIENDLY_CTR   "radpattern"  //white wire, blue tape, to be uav 
+  #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "RP2"
+  #define DEVICENUM_NUM   2
+
+  // #define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+  // #define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
+  #define ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
+
+  /**
+   * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
+   * */
+  #define USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+  #define USE_SYSTEM_OLED_LOGGER_FEEDBACK
+  #define USE_SYSTEM_SDCARD_LOGGING
+  #define USE_SYSTEM_IMU_RADIATIONPATTERN
+
+  /**
+   * Debug methods
+   * */
+  /**
+   * @note SD Card will still be enabled, but data will be pushed out of serial2(17) 
+   * */
+  // #define USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
+  // #define USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
+    // #define USE_MODULE_SENSORS_LSM303D
+
+  /**
+   * ADC written directly into controller, not as a module
+   * */
+  #define USE_DEVFEATURE_ADC_IN_CONTROLLER
+
+  /**
+   *  IMU recording
+   * */
+  #ifdef USE_SYSTEM_IMU_RADIATIONPATTERN
+    #define USE_MODULE_SENSORS_LSM303D
+    #define USE_MODULE_SENSORS_L3G
+    #define USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+  #endif
+
+  /**
+   * General defines to disable systems not needed
+   * */
+  #define DISABLE_NETWORK
+  #define DISABLE_SLEEP
+
+  /**
+   * SDCard
+   * */
+  #ifdef USE_SYSTEM_SDCARD_LOGGING
+    #define USE_MODULE_DRIVERS_SDCARD
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
+    #define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
+  #endif // USE_SYSTEM_SDCARD_LOGGING
+
+  /**
+   * Button input
+   * */
+  #ifdef USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+    #define USE_MODULE_CORE_RULES
+    #define USE_MODULE_SENSORS_BUTTONS
+  #endif // USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+
+  /**
+   * OLED display
+   * */
+  #ifdef USE_SYSTEM_OLED_LOGGER_FEEDBACK
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SSD1306
+    #define SHOW_SPLASH
+  #endif // USE_SYSTEM_OLED_LOGGER_FEEDBACK
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /** 4P large JST - ADC
+       * Yellow     32(I), ADC2G, ADC1_CH6
+       * White      35(I), ADC5G, ADC1_CH7
+       * Red        32(I), ADC Record Trigger
+       * Black      GND
+       * */
+      // "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
+      /** 5P small - UART2 RSS Stream
+       * Orange      17, UART2_TX
+       * Yellow      16, UART2_RX
+       * White       25, ie superframe event over, rising edge interrupt
+       * Red         5V
+       * Black       GND
+       * */
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MISO_CTR  "\","
+      /** Built in - OLED
+       * 
+       * */
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      /**
+       * Optional added switches for controls eg radiation pattern enabling
+       * GPIO21 - manual digitalread/set in radpat
+       * GPIO22 - manual digitalread/set in radpat
+       * */
+      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      // "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER 22
+  #define GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER 27
+
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "ARM"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "LEG"
+  
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_LSM303D_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+
+
+#endif // DEVICE_GPSPARSER_TESTER
 
 
 
