@@ -1,9 +1,15 @@
 #ifndef MFIRMWARECUSTOM_SECRET_HOME_H
 #define MFIRMWARECUSTOM_SECRET_HOME_H
 
+
+
 /**
  * TODO: Make a binder with all wiring diagrams and ideas as I move forward with designs
+ *
+ * Add in option that makes devices restart if no active internet connection is present. Test the "active" connection by updating the NTP time, as no response can be viewed as no external connection and not a dead AP
+ * Alternatively, the lack of ability to publish can also be viewed as no connection. mqtt_down || network_down || ntp_down = RESTART
  * 
+ *  
  * */
 
 // #ifdef USER_MICHAEL
@@ -77,6 +83,7 @@ Hallway
   - front door/table socket
   - hallway table
  */
+#define DEVICE_STAIRWAY_MOTION
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_HEATING
 // #define DEVICE_HEATING_ESP32
@@ -625,8 +632,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  
-  #define DISABLE_WEBSERVER
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -642,6 +648,26 @@ Bathroom
   #define STRIP_SIZE_MAX 33
 
  #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+  //   "},"
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":10000,"
+  //     "\"" D_JSON_RATE_MS "\":1000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+  //   "},"
+  //   "\"TimeMs\":30000,"
+  //   "\"ColourPalette\":\"Shelf Hearts\","
+  //   "\"BrightnessRGB\":70"
+  // "}";
+  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
@@ -649,17 +675,16 @@ Bathroom
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
+      "\"Function\":\"Static Glow\""
+    "},"    
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"TimeMs\":30000,"
-    "\"ColourPalette\":\"Shelf Hearts\","
-    "\"BrightnessRGB\":70"
+    "\"ColourPalette\":\"Christmas Warm White\","
+    "\"BrightnessRGB\":100"
   "}";
 
 #endif
@@ -668,16 +693,11 @@ Bathroom
   #define DEVICENAME_CTR          "rgbcrystal3"
   #define DEVICENAME_FRIENDLY_CTR "Glass Box Lights"
   
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 11
-   
-  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // #define DISABLE_WEBSERVER
-
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -691,25 +711,42 @@ Bathroom
   "}";
 
   #define STRIP_SIZE_MAX 50
-
- #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   #ifdef STRIP_SIZE_MAX
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   #else
+  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
+  //   #endif //STRIP_SIZE_MAX
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+  //   // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"Function\":1" //slow glow
+  //   "},"
+  //   "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+  //   "\"TimeMs\":5000,"
+  //   "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
+  //   "\"BrightnessRGB\":100"
+  // "}";
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":5000,"
-    "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
+    "\"ColourPalette\":\"Christmas Warm White\","
     "\"BrightnessRGB\":100"
   "}";
 
@@ -1032,16 +1069,13 @@ Bathroom
   #define DEVICENAME_CTR            "rgbcrystal1"
   #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder"
   
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 11
-   
-  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // #define DISABLE_WEBSERVER
-
+  
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE //temp fix
+  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1054,29 +1088,52 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 50
-  #define STRIP_REPEAT_OUTPUT_MAX 150
+  #define STRIP_SIZE_MAX 150
 
- #define USE_LIGHTING_TEMPLATE
+//   #define STRIP_REPEAT_OUTPUT_MAX 150
+
+//  #define USE_LIGHTING_TEMPLATE
+//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+//     #ifdef STRIP_SIZE_MAX
+//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     #else
+//     "\"" D_JSON_STRIP_SIZE       "\":50,"
+//     #endif //STRIP_SIZE_MAX
+//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+//     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+//     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+//     "\"" D_JSON_EFFECTS "\":{" 
+//       "\"Function\":1" //slow glow
+//     "},"
+//     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+//     "\"TimeMs\":5000,"
+//     "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
+//     "\"BrightnessRGB\":100"
+//   "}";
+
+  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-    "\"TimeMs\":5000,"
-    "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
-    "\"BrightnessRGB\":100"
+    "\"ColourPalette\":\"Christmas Warm White\","
+    "\"BrightnessRGB\":20"
   "}";
+
+
 
 
 
@@ -1393,6 +1450,90 @@ Bathroom
 ****** Hallway ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
+
+/**
+ * Create a 3D print that allows my PIR to plug into the wall all the time.
+ * IT would be cool if it could "rotate" to face any side (up or down)
+ * 
+ * 
+ * */
+#ifdef DEVICE_STAIRWAY_MOTION
+  #define DEVICENAME_CTR          "stairwaysensor"
+  #define DEVICENAME_FRIENDLY_CTR "Stairway Sensor"
+    
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_DEVFEATURE_DEBUG_DST_TIME
+ 
+  //#define DEBUG_MODULE_TIME_STD
+
+  #define USE_MODULE_CORE_RULES
+
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Stairs"
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR "\""
+      #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+  /**
+   * Add new function, if we try to access sensor name and none exists, then return the classname + number (which will be reading its internal sensor count)
+   */
+
+  
+  /**
+   * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+   * This will become part of init, perhaps its own call, "FUNC_INIT_RULES" or "FUNC_INIT_<MODULE/MINIMAL>_RULES"
+   * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
+    "}"
+  "}";
+
+
+#endif
+
 
 #ifdef DEVICE_RADIATORFAN
   /* Single Relay controls TWO 12V DC fans to improve heating (1 D_Out)
@@ -1917,10 +2058,6 @@ Bathroom
   #define DEVICENAME_CTR          "doorbellwallchime"
   #define DEVICENAME_FRIENDLY_CTR "Doorbell Wall Chime"
 
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  #define DISABLE_WEBSERVER
    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -1929,9 +2066,10 @@ Bathroom
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define STRIP_SIZE_MAX 12 // 8 front, 4 top
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
-  #define USE_MODULE_CONTROLLER_DOORCHIME
-  #define DOORALERT_PAYLOAD_CTR   "frontdoorbell"
+  // #define USE_MODULE_CONTROLLER_DOORCHIME
+  // #define DOORALERT_PAYLOAD_CTR   "frontdoorbell"
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1939,10 +2077,18 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_CONTROLLER_DOORCHIME
-      "\"D6\":\"" D_GPIO_FUNCTION_CHIME_INPUT_CTR     "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_CHIME_RINGER_CTR     "\","
-      #endif
+
+    
+      "\"D6\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","    //Active high to turn on, // requires adding new relay option for "freq_toggling"
+
+    /**
+     * These will be replaced by button/relay
+     * */
+      // #ifdef USE_MODULE_CONTROLLER_DOORCHIME
+      // "\"D6\":\"" D_GPIO_FUNCTION_CHIME_INPUT_CTR     "\","
+      // "\"D7\":\"" D_GPIO_FUNCTION_CHIME_RINGER_CTR     "\","
+      // #endif
       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1956,7 +2102,7 @@ Bathroom
     #else
     "\"" D_JSON_STRIP_SIZE       "\":50,"
     #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rGBw\","
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":1000,"
       "\"" D_JSON_RATE_MS "\":1000,"
@@ -1965,13 +2111,13 @@ Bathroom
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":8"
+      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
     "},"
-    "\"CCT_Temp\": 152,"
-    "\"Hue\":25,"
+    "\"CCT_Temp\":152,"
+    "\"Hue\":330,"
     "\"Sat\":100,"
     "\"ColourPalette\":10,"
-    "\"BrightnessCCT\":0,"
+    "\"BrightnessCCT\":100,"
     "\"BrightnessRGB\":100"
   "}";
   
@@ -2475,123 +2621,6 @@ Bathroom
   #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
   
-//   //#define FORCE_TEMPLATE_LOADING
-//   #define SETTINGS_HOLDER 1
-
-//   // Core
-//   #define USE_MODULE_CORE_RULES
-//   // Sensors 
-//   #define USE_MODULE_SENSORS_INTERFACE 
-//   #define USE_MODULE_SENSORS_MOTION
-//   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
-//   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
-//   // Drivers
-//   #define USE_MODULE_DRIVERS_INTERFACE
-//   #define USE_MODULE_DRIVERS_RELAY
-//   #define MAX_RELAYS 2
-//   // Energy
-//   #define USE_MODULE_ENERGY_INTERFACE
-//   #define USE_MODULE_ENERGY_ADE7953
-
-//   #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
-
-//   #define USE_MODULE_TEMPLATE
-//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
-//       #ifdef USE_MODULE_SENSORS_MOTION
-//       "\"13\":\"" D_GPIO_FUNCTION_PIR_1_NP_CTR     "\","
-//       "\"5\":\"" D_GPIO_FUNCTION_PIR_2_NP_CTR     "\","
-//       #endif
-//       #ifdef USE_MODULE_SENSORS_SWITCHES
-//       "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-//       "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-//       #endif
-//       #ifdef USE_MODULE_DRIVERS_RELAY
-//       "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-//       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-//       #endif 
-//       #ifdef USE_MODULE_ENERGY_ADE7953
-//       "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR  "\","
-//       "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
-//       "\"16\":\"" D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
-//       #endif 
-//       #ifdef USE_MODULE_SENSORS_ANALOG_TEMPERATURE
-//       "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_TEMPERATURE_CTR  "\","
-//       #endif 
-//       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-//     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-//   "}";
-
-//   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
-//   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden"
-
-//   #define USE_FUNCTION_TEMPLATE
-//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-//   "{"
-//     //device_names:{"module_name":["relay1","relay2"]}
-//     "\"" D_JSON_DEVICENAME "\":{"
-//       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-//         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-//         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-//       "],"
-//       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-//         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-//         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-//       "],"
-//       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-//         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-//         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
-//       "]"    
-//     "},"
-//     "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"},"
-//     "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D17:00:00\",\"OffTime\":\"00D00:00:00\"}"
-//   "}";
-
-
-//   #define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
-//   DEFINE_PGM_CTR(RULES_TEMPLATE)
-//   "{"
-//     "\"Rule0\":{"
-//       "\"Trigger\":{"
-//         "\"Module\":\"Motion\","
-//         "\"Function\":\"MotionStarted\","
-//         "\"DeviceName\":0,"
-//         "\"State\":2"
-//       "},"
-//       "\"Command\":{"
-//         "\"Module\":\"Relays\","
-//         "\"Function\":\"SetPower\","
-//         "\"DeviceName\":0,"
-//         "\"State\":1,"
-//         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
-//       "}"
-//     "},"
-//     "\"Rule1\":{"
-//       "\"Trigger\":{"
-//         "\"Module\":\"Motion\","
-//         "\"Function\":\"MotionStarted\","
-//         "\"DeviceName\":1,"
-//         "\"State\":1"
-//       "},"
-//       "\"Command\":{"
-//         "\"Module\":\"Relays\","
-//         "\"Function\":\"SetPower\","
-//         "\"DeviceName\":1,"
-//         "\"State\":1,"
-//         "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
-//       "}"
-//     "}"
-//   "}";
-
-// #endif
-// #ifdef DEVICE_TESTBED_SHELLY2P5_01
-  // #define DEVICENAME_CTR          "testbed_shelly25_01"
-  // #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly 2.5 #01"
-
   /*
     Method should only activate if boot loop happens 10 times
     Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
@@ -2655,8 +2684,8 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D19:00:00\",\"OffTime\":\"00D07:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D19:00:00\",\"OffTime\":\"00D07:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"},"
+    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"}"
   "}";
 
 
@@ -3511,8 +3540,15 @@ Bathroom
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define STRIP_SIZE_MAX 36
+   /**
+   * Three types of animations, exclusive only
+   * */
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
+  //#define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   
   #define DISABLE_WEBSERVER
 
@@ -3556,14 +3592,14 @@ Bathroom
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":8"
+      "\"" D_JSON_FUNCTION "\":\"Solid RGBCCT\""
     "},"
     "\"" D_JSON_CCT_TEMP "\":300,"
-    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_HUE "\":240,"
     "\"" D_JSON_SAT "\":100,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":1"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
@@ -3821,14 +3857,16 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR
   #define USE_MODULE_SENSORS_DS18B20
   
   #define USE_MODULE_CONTROLLER_SENSORCOLOURS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60
      
-  
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"

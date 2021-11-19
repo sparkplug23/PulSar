@@ -340,25 +340,40 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_TIMEZONE,   pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_SUNRISE,    pCONT_time->GetDateAndTimeCtr(DT_SUNRISE, buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_SUNSET,     pCONT_time->GetDateAndTimeCtr(DT_SUNSET, buffer, sizeof(buffer)));
-// #ifdef ENABLE_DEVFEATURE_RTC_TIME_V2_MQTT_DEBUG
+
+    #ifdef DEBUG_MODULE_TIME_STD
     JsonBuilderI->Level_Start("debug_v2");
       JsonBuilderI->Add("utc_time",pCONT_time->Rtc.utc_time);
-      // JsonBuilderI->Add("local_time",pCONT_time->Rtc.local_time);
-      // JsonBuilderI->Add("daylight_saving_time",pCONT_time->Rtc.daylight_saving_time);
-      // JsonBuilderI->Add("standard_time",pCONT_time->Rtc.standard_time);
-      // JsonBuilderI->Add("ntp_time",pCONT_time->Rtc.ntp_time);
-      // JsonBuilderI->Add("midnight",pCONT_time->Rtc.midnight);
-      // JsonBuilderI->Add("restart_time",pCONT_time->Rtc.restart_time);
-      // JsonBuilderI->Add("millis",pCONT_time->Rtc.millis);
-      // JsonBuilderI->Add("last_sync",pCONT_time->Rtc.last_sync);
-      // JsonBuilderI->Add("time_timezone",pCONT_time->Rtc.time_timezone);
-      // JsonBuilderI->Add("ntp_sync_minute",pCONT_time->Rtc.ntp_sync_minute);
-      // JsonBuilderI->Add("midnight_now",pCONT_time->Rtc.midnight_now);
-      // JsonBuilderI->Add("user_time_entry",pCONT_time->Rtc.user_time_entry);
-      // JsonBuilderI->Add("ntp_last_active_secs", (millis()-pCONT_time->Rtc.ntp_last_active)/1000);
-      // JsonBuilderI->Add("last_sync_secs", (pCONT_time->Rtc.utc_time-pCONT_time->Rtc.last_sync)/1000);
-      // JsonBuilderI->Add("GetUptime",pCONT_time->GetUptime().c_str());
-    JsonBuilderI->Level_End();
+      JsonBuilderI->Add("local_time",pCONT_time->Rtc.local_time);
+      JsonBuilderI->Add("daylight_saving_time",pCONT_time->Rtc.daylight_saving_time);
+      JsonBuilderI->Add("standard_time",pCONT_time->Rtc.standard_time);
+      JsonBuilderI->Add("ntp_time",pCONT_time->Rtc.ntp_time);
+      JsonBuilderI->Add("midnight",pCONT_time->Rtc.midnight);
+      JsonBuilderI->Add("restart_time",pCONT_time->Rtc.restart_time);
+      JsonBuilderI->Add("millis",pCONT_time->Rtc.millis);
+      JsonBuilderI->Add("last_sync",pCONT_time->Rtc.last_sync);
+      JsonBuilderI->Add("time_timezone",pCONT_time->Rtc.time_timezone);
+      JsonBuilderI->Add("ntp_sync_minute",pCONT_time->Rtc.ntp_sync_minute);
+      JsonBuilderI->Add("midnight_now",pCONT_time->Rtc.midnight_now);
+      JsonBuilderI->Add("user_time_entry",pCONT_time->Rtc.user_time_entry);
+      JsonBuilderI->Add("ntp_last_active_secs", (millis()-pCONT_time->Rtc.ntp_last_active)/1000);
+      JsonBuilderI->Add("last_sync_secs", (pCONT_time->Rtc.utc_time-pCONT_time->Rtc.last_sync)/1000);
+      JsonBuilderI->Add("GetUptime",pCONT_time->GetUptime().c_str());
+      JBI->Level_Start("DST");
+        JBI->Add("IsDst", pCONT_time->IsDst());
+        int32_t dstoffset = pCONT_set->Settings.toffset[1] * pCONT_time->SECS_PER_MIN;
+        int32_t stdoffset = pCONT_set->Settings.toffset[0] * pCONT_time->SECS_PER_MIN;
+        JBI->Add("utc_time>=dst_eoy",pCONT_time->Rtc.utc_time >= (pCONT_time->Rtc.daylight_saving_time - stdoffset));
+        JBI->Add("utc_time<standard_soy",pCONT_time->Rtc.utc_time < (pCONT_time->Rtc.standard_time - dstoffset));
+
+        JBI->Add("diff_sod", pCONT_time->Rtc.utc_time - (pCONT_time->Rtc.daylight_saving_time - stdoffset));
+        JBI->Add("dif_eod",pCONT_time->Rtc.utc_time - (pCONT_time->Rtc.standard_time - dstoffset));
+      JBI->Level_End();
+      JBI->Add("toffset[0]", pCONT_set->Settings.toffset[0]);
+      JBI->Add("toffset[1]", pCONT_set->Settings.toffset[1]);
+    JsonBuilderI->Level_End();    
+  #endif //  DEBUG_MODULE_TIME_STD
+
     // JsonBuilderI->Level_Start("RtcTime");
     //   JsonBuilderI->Add("valid",pCONT_time->RtcTime.valid);
     //   JsonBuilderI->Add_FV("time","\"%02d:%02d:%02d\"",pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);

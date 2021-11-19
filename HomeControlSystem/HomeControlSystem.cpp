@@ -684,6 +684,9 @@ void loop(void)
         // AddLog(LOG_LEVEL_INFO, PSTR("loop"));
 
   LoopTasker();
+  
+    // Serial.printf("LoopTasker=%d\r\n", millis());
+
     
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 

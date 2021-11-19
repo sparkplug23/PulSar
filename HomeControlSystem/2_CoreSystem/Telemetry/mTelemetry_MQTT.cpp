@@ -96,7 +96,11 @@ void mTelemetry::MQTTHandler_Init(){
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
+  #ifdef USE_DEVFEATURE_DEBUG_DST_TIME
+  p->tRateSecs = 1;//SEC_IN_HOUR; 
+  #else //ifdef USE_DEVFEATURE_DEBUG_DST_TIME
   p->tRateSecs = SEC_IN_HOUR; 
+  #endif
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;
@@ -181,7 +185,11 @@ void mTelemetry::MQTTHandler_Init(){
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
+  #ifdef USE_DEVFEATURE_DEBUG_SETTINGS_VIA_MQTT_FASTER_UPDATES
   p->tRateSecs = 1;//SEC_IN_HOUR; 
+  #else
+  p->tRateSecs = SEC_IN_HOUR; 
+  #endif
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;

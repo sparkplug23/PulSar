@@ -644,12 +644,15 @@ DEBUG_LINE;
 void mSettings::SettingsResetStd(void)
 {
   Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
-  Settings.tflag[0].week = TIME_STD_WEEK;
-  Settings.tflag[0].dow = TIME_STD_DAY;
+  Settings.tflag[0].week  = TIME_STD_WEEK;
+  Settings.tflag[0].dow   = TIME_STD_DAY;
   Settings.tflag[0].month = TIME_STD_MONTH;
-  Settings.tflag[0].hour = TIME_STD_HOUR;
-  Settings.toffset[0] = TIME_STD_OFFSET;
+  Settings.tflag[0].hour  = TIME_STD_HOUR;
+  Settings.toffset[0]     = TIME_STD_OFFSET;
 }
+
+
+
 
 void mSettings::SettingsResetDst(void)
 {

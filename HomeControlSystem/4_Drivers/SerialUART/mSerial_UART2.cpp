@@ -162,7 +162,11 @@ void mSerialUART::init_UART2_ISR(){
     UART_NUM_2,                 // UART_NUM_0, UART_NUM_1 or UART_NUM
   // #ifdef ENABLE_DEVFEATURE_RSS_UART2_RINGBUFFER_TYPE_NOSPLIT
     // UART2_ISR_Static_NoSplitRingBuffer, // Interrupt handler function.
+    #ifndef USE_DEVFEATURE_MEASUREMENT_SYSTEM_CALIBRATION_METHOD_1
     UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements, // Interrupt handler function.
+    #else
+    UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements_Calibration, // Interrupt handler function.
+    #endif
   // #else // ENABLE_DEVFEATURE_RSS_UART2_RINGBUFFER_TYPE_NOSPLIT
   //   UART2_ISR_Static_ByteRingBuffer, // Interrupt handler function.
   // #endif // ENABLE_DEVFEATURE_RSS_UART2_RINGBUFFER_TYPE_NOSPLIT
@@ -322,10 +326,10 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
       xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, "@{\"F\":[[A", 9, &dummyval);
       xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, rxbuf2, urxlen2-2, &dummyval); //dont send two EOL bytes
       // xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle, conversion_buffer, conversion_buflen, &dummyval);
-      if(pCONT_uart->special_json_part_of_gps_buflen)
-      {
-        xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle,  pCONT_uart->special_json_part_of_gps_buffer,  pCONT_uart->special_json_part_of_gps_buflen, &dummyval);
-      }
+      // if(pCONT_uart->special_json_part_of_gps_buflen)
+      // {
+      //   xRingbufferSendFromISR(pCONT_sdcard->stream.ringbuffer_handle,  pCONT_uart->special_json_part_of_gps_buffer,  pCONT_uart->special_json_part_of_gps_buflen, &dummyval);
+      // }
       // xRingbufferSend(pCONT_sdcard->stream.ringbuffer_handle, "]}\n\r", 4, pdMS_TO_TICKS(2));
 // }
 
@@ -400,6 +404,107 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
 }
 
 
+#ifdef USE_DEVFEATURE_MEASUREMENT_SYSTEM_CALIBRATION_METHOD_1
+/**
+ * @brief Define UART interrupt subroutine to ackowledge interrupt
+ * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+ * 
+ * Arriving data will be read (appended) to a global small buffer, each byte in will be checked. 
+ * If special EOF chars are found, then the data in the global buffer is commited to the ringbuffer nosplit, which allows retreiving one item at a time
+ * 
+ * 
+ * METHOD AUTOMATICALLY CREATES ARRAY FOR QUICK MOVE INTO JSON
+ * 
+ **/
+void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements_Calibration(void *arg)
+{ 
+//  DEBUG_PIN1_SET(LOW);
+  // gpio_set_level(GPIO_NUM_21, 0);
+  
+  uint16_t rx_fifo_len, status;
+  // uint16_t i = 0;
+  char byte_read = 0;
+  bool flag_end_of_frame_detected = false;
+
+  status = UART2.int_st.val; // read UART interrupt Status
+  rx_fifo_len = UART2.status.rxfifo_cnt; // read number of bytes in UART buffer
+
+  while(rx_fifo_len)
+  {
+
+    byte_read = UART2.fifo.rw_byte; // You can not directly access the UART0.fifo.rw_byte on esp32s2 but have to use READ_PERI_REG(UART_FIFO_AHB_REG(0))
+
+    rxbuf2[uart2_byte_index++] = byte_read;//(char)uart2_byte_index;//byte_read;
+    if(uart2_byte_index>=UART2_ISR_TMP_BUFFER_SIZE-1)
+    {
+      uart2_byte_index = 0; // forced reset
+      // We should never reach here, unless no EOF are detected then wrapping around will dump/lose all data
+      break;
+    }
+
+    /**
+     * Check if this byte and last byte are EOF chars
+     * */
+    if((byte_read==0xFF)&&(uart2_last_byte==0xFF))
+    {
+      flag_end_of_frame_detected = true;
+      break;
+    }
+
+    // rxbuf2[uart2_byte_index++] = ','; // Keep adding comma's only if needed
+
+    // Update last byte, with anticaption of being read later
+    uart2_last_byte = byte_read; //update with this recent byte
+
+    rx_fifo_len--;
+  }
+  urxlen2 = uart2_byte_index;
+
+  /**
+   * if EOF is detected, commit data into nosplit buffer
+   * */
+  if(flag_end_of_frame_detected)
+  {
+    // Only 4 bytes
+    simple_uart2_receive_frame_for_calibration[0] = rxbuf2[0];
+    simple_uart2_receive_frame_for_calibration[1] = rxbuf2[1];
+    simple_uart2_receive_frame_for_calibration[2] = rxbuf2[2];
+    simple_uart2_receive_frame_for_calibration[3] = rxbuf2[3];
+    flag_simple_uart2_receive_frame_for_calibration_updated = true;
+    /**
+     * Reset byte index for next frame
+     * */
+    uart2_byte_index = 0;
+  }
+  
+  // after reading bytes from buffer clear UART interrupt status
+  uart_clear_intr_status(UART_NUM_2, 
+    UART_RXFIFO_TOUT_INT_CLR |
+    //clearing more, maybe its the cause of crashes?
+    UART_BRK_DET_INT_CLR |
+    //clearing more, maybe its the cause of crashes?
+    UART_CTS_CHG_INT_CLR |
+    //clearing more, maybe its the cause of crashes?
+    UART_DSR_CHG_INT_CLR |
+    //clearing more, maybe its the cause of crashes?
+    UART_RXFIFO_OVF_INT_CLR |
+    UART_FRM_ERR_INT_CLR | // UART Frame Error
+    //clearing more, maybe its the cause of crashes?
+    UART_PARITY_ERR_INT_CLR |
+    UART_TXFIFO_EMPTY_INT_CLR | // Needed to enable transmitting on serial
+    UART_RXFIFO_FULL_INT_CLR 
+  );
+
+
+  #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
+  gpio_set_level(BLINK_GPIO, !gpio_get_level(BLINK_GPIO));
+  #endif
+  // gpio_set_level(GPIO_NUM_21, 1);
+
+//  DEBUG_PIN1_SET(HIGH);
+}
+
+#endif
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt

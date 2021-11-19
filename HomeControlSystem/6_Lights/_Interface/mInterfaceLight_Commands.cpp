@@ -1297,7 +1297,7 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 //temp feedback
 #ifdef USE_MODULE_NETWORK_MQTT
-pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
+// pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
 #endif // USE_MODULE_NETWORK_MQTT
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 

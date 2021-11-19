@@ -80,6 +80,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     break;
   } //END switch
 
+#ifdef  ENABLE_DEBUG_FUNCTION_NAMES
+    char buffer_taskname[50];
+  #endif
   #ifdef DEBUG_PIN3_GPIO
   for(int i=0;i<1;i++){
     DEBUG_PIN3_SET(0); //green
@@ -90,8 +93,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
     switch_index = target_tasker ? target_tasker : i;
-    #ifdef ENABLE_ADVANCED_DEBUGGING
+    // #ifdef ENABLE_ADVANCED_DEBUGGING
     // Serial.printf("switch_index=%d\n\r",switch_index);
+#ifdef  ENABLE_DEBUG_FUNCTION_NAMES
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     #ifdef ENABLE_ADVANCED_DEBUGGING
@@ -431,6 +435,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID] = new mSerialPositionalLogger();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
+    pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID] = new mSerialCalibrationMeasurmentLogger();
   #endif
   #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
     pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID] = new mGPS_SD_Logger();

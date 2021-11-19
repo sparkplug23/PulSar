@@ -344,7 +344,7 @@ if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
 uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add("motion", 0);
+    // JsonBuilderI->Add("motion", 0);
 
     
   //   for(uint8_t sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
@@ -433,7 +433,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 10; 
   #ifdef DEVICE_IMMERSIONSENSOR //temp fix
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   #endif
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -445,7 +445,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_ptr->tSavedLastSent = millis();
   mqtthandler_ptr->flags.PeriodicEnabled = false;
   mqtthandler_ptr->flags.SendNow = false;
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR;

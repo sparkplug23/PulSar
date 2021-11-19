@@ -6,8 +6,6 @@ const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIM
 const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
 
 
-// #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -23,19 +21,16 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       Pre_Init();  
       break;
     case FUNC_INIT:
-    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-      init();
-    #endif
-
-#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-      Init_WLED();
-#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-
+      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+        init();
+      #endif
+      #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+        Init_WLED();
+      #endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
       break;
     case FUNC_OVERRIDE_BOOT_INIT:
 
-    // stripbus->NeoRgbCurrentSettings(1,2,3);
+      // stripbus->NeoRgbCurrentSettings(1,2,3);
 
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       mqtthandler_debug_animations_progress.tRateSecs = 1;
@@ -50,8 +45,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * SETTINGS SECTION * 
     *******************/
-    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-
     case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
       Settings_Load();
     break;
@@ -62,118 +55,32 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
       Settings_Default();
     break;
-    #endif// ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-
-    // Tmp fix for xmas
-    #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-    
-// #ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-    case FUNC_ON_BOOT_COMPLETE:
-      // Physical_UserInput_Init();
-      // Physical_UserInput_Load();
-      
-
-
-    break;
-    // #endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-    #endif //  USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
     /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:{
-      
-    // Tmp fix for xmas
-    #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
     
-#ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-    // case FUNC_EVERY_SECOND:
-    Physical_UserInput_Save();
-    Physical_UserInput_Load();
-    // break;
-    
-#endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-
-
-    #endif //  USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
-
-
       //EverySecond();
 
-//       const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
-// uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
+      // const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
+      // uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-char buffer[50];
-      AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
-        pCONT_lAni->GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
-      );
+      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+        char buffer[50];
+        AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
+          pCONT_lAni->GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
+        );
       #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     }break;
     case FUNC_LOOP: 
-      // EveryLoop();
+      EveryLoop();
 
-#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+      #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
         SubTask_WLED_Animation_PhaseOut();
-#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-      // if(flags_hac_wled_animator_switch)
-      // {
-
-      // #if defined(USE_MODULE_LIGHTS_ANIMATOR) && !defined(USE_MODULE_LIGHTS_WLED_EFFECTS)
-    
-    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-      EveryLoop(); // hacs only
-       // AddLog(LOG_LEVEL_INFO, PSTR("EveryLoop"));
-        #endif
-    //   #else
-//       }else{
-
-// DEBUG_LINE_HERE;
-
-//     //   if(pCONT_lAni->flashersettings.function<EFFECTS_FUNCTION_LENGTH_ID)
-//     //   {
-//     //     EveryLoop(); // HACS
-//     //     // AddLog(LOG_LEVEL_INFO, PSTR("RUNNING = HACS %d"), pCONT_lAni->flashersettings.function);
-//     //     // delay(500);
-//     //   }
-//     //   else 
-//     //   if(
-//     //     (pCONT_lAni->flashersettings.function>=EFFECTS_MODE_STATIC) &&
-//     //     (pCONT_lAni->flashersettings.function<EFFECTS_MODE_COUNT)
-//     //   ){
-
-//     //     //shift function wled indexing from 0
-//     //     uint8_t wled_function_mode_index = EFFECTS_MODE_STATIC - pCONT_lAni->flashersettings.function;
-
-//     //     AddLog(LOG_LEVEL_INFO, PSTR("RUNNING = WLED %d -> %d"),pCONT_lAni->flashersettings.function,wled_function_mode_index);
-//     //     pCONT_lwled->mEffects->setMode(0, wled_function_mode_index);
-        
-// #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-//         SubTask_WLED_Animation_PhaseOut();
-// #endif// USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-//     //     AddLog(LOG_LEVEL_INFO, PSTR("OVER = WLED %d -> %d"),pCONT_lAni->flashersettings.function,wled_function_mode_index);
-//         AddLog(LOG_LEVEL_INFO, PSTR("SubTask_WLED_Animation_PhaseOut"));
-
-//     //   }
-//      }
-    // #endif
-
-
+      #endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 
     break;    
-
-    
-    #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-
-    case FUNC_EVERY_FIVE_SECOND:
-// #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-//       pCONT_set->SettingsSave(2);
-//       #endif // #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-    break;
-
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -206,13 +113,6 @@ char buffer[50];
       MQTTHandler_Set_fSendNow();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
-    // Other stuff
-    case FUNC_STATUS_MESSAGE_APPEND:
-      Append_Hardware_Status_Message();
-    break;
-
-
-    #endif // #ifndef ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
   }// switch(command)
 
   /************
@@ -223,121 +123,6 @@ char buffer[50];
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END FUNCTION
-
-
-// #else
-
-
-// // #endif
-
-// int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
-// {
-
-//   /************
-//    * INIT SECTION * 
-//   *******************/
-//   if(function == FUNC_INIT){
-//     init(); //ilight needs parts I think
-    
-//     #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-//       Init_WLED(); //new init of animator will override that set by hacs on that pin
-//     #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-  
-//   }
-
-//   switch(function){
-//     /************
-//      * SETTINGS SECTION * 
-//     *******************/
-//     case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-//       // Settings_Load();
-//     break;
-//     case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-//       // Settings_Save();
-//     break;
-//     case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-//     case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-//       // Settings_Default();  //only 1 animator can be attached to a pin, so WLED effects will need shifted to my animator
-//     break;
-//     /************
-//      * PERIODIC SECTION * 
-//     *******************/
-//     case FUNC_LOOP:
-//       // if(flags_hac_wled_animator_switch){
-//         // SubTask_WLED_Animation_PhaseOut();
-//       // }else{
-//         EveryLoop(); //should service both methods now
-//       // }
-//     break;
-//     case FUNC_EVERY_SECOND:{
-
-      
-//     #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-//       char buffer[50];
-//       AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
-//         GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
-//       );
-//     #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-      
-
-
-
-//     }break;
-//     // case FUNC_EVERY_FIVE_SECOND:
-//     //    flags_hac_wled_animator_switch ^= 1;
-
-
-//     // break;
-//     /************
-//      * COMMANDS SECTION * 
-//     *******************/
-//     case FUNC_JSON_COMMAND_ID:
-//       parse_JSONCommand(obj);
-//     break;
-//     /************
-//      * TRIGGERS SECTION * 
-//     *******************/
-//     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
-//       #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-//       CommandSet_Physical_UserInput_Buttons();
-//       #endif
-//     break;
-//     /************
-//      * MQTT SECTION * 
-//     *******************/
-//     #ifdef USE_MODULE_NETWORK_MQTT
-//     case FUNC_MQTT_HANDLERS_INIT:
-//     case FUNC_MQTT_HANDLERS_RESET:
-//       MQTTHandler_Init();
-//     break;
-//     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-//       MQTTHandler_Set_TelePeriod();
-//     break;
-//     case FUNC_MQTT_SENDER:
-//       MQTTHandler_Sender();
-//     break;
-//     case FUNC_MQTT_CONNECTED:
-//       MQTTHandler_Set_fSendNow();
-//     break;
-//     #endif //USE_MODULE_NETWORK_MQTT
-//     // Other stuff
-//     case FUNC_STATUS_MESSAGE_APPEND:
-//       Append_Hardware_Status_Message();
-//     break;
-//   } // end switch
-  
-//   /************
-//    * WEBPAGE SECTION * 
-//   *******************/  
-//   #ifdef USE_MODULE_NETWORK_WEBSERVER
-//   return Tasker_Web(function);
-//   #endif // USE_MODULE_NETWORK_WEBSERVER
-    
-// } // END function
-
-// #endif
 
 
 
@@ -372,23 +157,12 @@ void mAnimatorLight::init(void){
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
   DEBUG_LINE;
-  // #ifdef USE_WS28XX_HARDWARE_WS2801
-  //   stripbus = new NeoPixelBus<DotStarBgrFeature, DotStarMethod>(strip_size_tmp, pin_clock, pCONT_pins->GetPin(GPIO_RGB_DATA_ID));
-  // #else
-  //   #ifdef ENABLE_DEBUG_ESP_DECODER
-  //     stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 5);
-  //   #else
-
-  //     #ifdef ESP8266
-  //       stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, pCONT_pins->GetPin(GPIO_RGB_DATA_ID));
-  //     #else //esp32 testing
-        stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
-  //     #endif //esp8266
-  //   #endif
-  // #endif //USE_WS28XX_HARDWARE_WS2801
-
-  DEBUG_LINE;
-
+  
+  //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
+  //step2:  to become its own function, so strips can be changed at runtime
+  stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
+  
+  
   uint16_t animator_strip_size_tmp = 1;//animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
 
   pCONT_iLight->Init_NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE);  
@@ -3237,6 +3011,7 @@ void mAnimatorLight::colorCTtoRGB(uint16_t mired, byte* rgb) //white spectrum to
 }
 
 
+#ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 void mAnimatorLight::Init_WLED(void)
 {
 
@@ -3505,7 +3280,7 @@ const char* mAnimatorLight::GetEffectsModeNamebyID(uint8_t id, char* buffer, uin
 }
 
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
+ #endif//define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 
 #endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 

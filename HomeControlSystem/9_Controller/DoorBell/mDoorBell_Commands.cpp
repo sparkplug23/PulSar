@@ -3,39 +3,29 @@
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
 
 
-int8_t mDoorBell::CheckAndExecute_JSONCommands(){
 
-  // Check if instruction is for me
-  if(mSupport::SetTopicMatch(data_buffer.topic.ctr,"doorbell")>=0){
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT D_TOPIC_COMMAND "doorbell"));//D_MODULE_CONTROLLER_FAN_FRIENDLY_CTR));
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-    parse_JSONCommand();
-    return FUNCTION_RESULT_HANDLED_ID;
-  }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-  }
 
-}
+void mDoorBell::parse_JSONCommand(JsonParserObject obj)
+{
 
-void mDoorBell::parse_JSONCommand(void){
-
-  char buffer[50];
-
-  // Need to parse on a copy
-  char parsing_buffer[data_buffer.payload.len+1];
-  memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-  JsonParser parser(parsing_buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-    #endif //ENABLE_LOG_LEVEL_COMMANDS
-    return;
-  }  
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+  char buffer[50];
+  
+  // // Need to parse on a copy
+  // char parsing_buffer[data_buffer.payload.len+1];
+  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
+  // JsonParser parser(parsing_buffer);
+  // JsonParserObject obj = parser.getRootObject();   
+  // if (!obj) { 
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+  //   #endif //ENABLE_LOG_LEVEL_COMMANDS
+  //   return;
+  // }  
+  // JsonParserToken jtok = 0; 
+  // int8_t tmp_id = 0;
 
   uint8_t default_seconds = 2;
   uint16_t default_freq = 500;

@@ -56,6 +56,9 @@ void mRelays::parse_JSONCommand(JsonParserObject obj){
   }else
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
     CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
+  }else
+  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
+    CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   }
 
   if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.relays_connected)){

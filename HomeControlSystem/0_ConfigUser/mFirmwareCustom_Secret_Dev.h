@@ -93,6 +93,7 @@
 // #define DEVICE_TESTSENSOR
 // #define DEVICE_NODEMCU_TESTER
 // #define DEVICE_BEDROOMSENSOR_TESTER
+// #define DEVICE_ENSUITEFAN_SENSOR
 
 /**
  *  DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- DISPLAYS   -- 
@@ -1208,18 +1209,18 @@
    
   // #define USE_MODULE_SENSORS_MOTION
   
-  ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
   // #define USE_MODULE_NETWORK_WEBSERVER
-  #define DISABLE_WEBSERVER
+  // #define DISABLE_WEBSERVER
 
   // #define USE_MODULE_DRIVERS_FILESYSTEM
   //#define USE_MODULE_DRIVERS_FILESYSTEM
 
   // #define USE_MODULE_CORE_UPDATES
 
-  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_SENSORS_BUTTONS
   // #define ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
   // #define ENABLE_SETTINGS_STORAGE
@@ -1235,6 +1236,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1828,9 +1830,59 @@
 #endif
 
 
+#ifdef DEVICE_ENSUITEFAN_SENSOR
+  #define DEVICENAME_CTR          "ensuitefan_sensor"
+  #define DEVICENAME_FRIENDLY_CTR "ensuitefan Sensor"
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+     
+  // #define USE_MODULE_SENSORS_MOTION
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
+      #endif      
+      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "ExtractorEnsuite"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "ExtractorEnsuite"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 //rgbmicro2/set/light///Scene
 //{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBOUTSIDETREE
+
+
 
 //keep this, as esp32 test device 
   #define DEVICENAME_CTR          "rgboutsidetree"
@@ -2585,12 +2637,13 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
   //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2 
+  // #define SETTINGS_HOLDER 2 
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   
@@ -2607,20 +2660,16 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   "}";
  
 
+  #define STRIP_SIZE_MAX 1
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBcw\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":67,"
     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":21},"
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
   
@@ -2638,6 +2687,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 

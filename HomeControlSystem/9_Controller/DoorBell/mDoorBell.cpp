@@ -6,11 +6,25 @@
 const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_DOORBELL_CTR;
 const char* mDoorBell::PM_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR = D_MODULE_CONTROLLER_DOORBELL_FRIENDLY_CTR;
 
+/**
+ * phase out, this will be a button instead, linked via rules
+ * so "Init()" will append the neccesary rule
+ * mqtt into own file.cpp
+ * 
+ * relay for chime could also be changed, to be added into relay, and add as control options for relays ie some sort of interlock/sequence, or, does 
+ * this become some sort of buzzer thats simple logic?
+ * 
+ * event will also fire motion style event via rules, so app can send notificaiton on phone.
+ * 
+ * Lets also consider adding a "knock sensor" to the door
+ * 
+ * */
 
-void mDoorBell::Pre_Init(void){
-
+void mDoorBell::Pre_Init(void)
+{
 
 //These should configure the relay and switch input indirectly, never used pinmode studd here
+
 
 
 //should be rewritten to only pull from buttons/relays which are configured internally
@@ -37,11 +51,11 @@ void mDoorBell::Pre_Init(void){
 
 void mDoorBell::init(void){
 
-  sprintf(ringer.friendly_name_ctr,"Hallway Wall");
-  sprintf(doorbell_switch.friendly_name_ctr,"Front");
+  // sprintf(ringer.friendly_name_ctr,"Hallway Wall");
+  // sprintf(doorbell_switch.friendly_name_ctr,"Front");
 
-  sprintf(ringer.trigger_time_ctr,"%s","--:--:--");
-  sprintf(doorbell_switch.trigger_time_ctr,"%s","--:--:--");
+  // sprintf(ringer.trigger_time_ctr,"%s","--:--:--");
+  // sprintf(doorbell_switch.trigger_time_ctr,"%s","--:--:--");
 
 }
 
@@ -56,7 +70,7 @@ void mDoorBell::RingDoorBellSet(uint8_t seconds, uint16_t freq){
   ringer.freq = freq;
   ringer.seconds = seconds;
   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CHIME "Set"));
-  memcpy(ringer.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
+  // memcpy(ringer.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
 }
 
 // Function called each time
@@ -164,27 +178,28 @@ void mDoorBell::EveryLoop(){
 
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Tasker::mDoorBell"));
 
-  if((BellSwitch_OnOff()!=doorbell_switch.state)
-      &&mTime::TimeReachedNonReset(&doorbell_switch.tDetectTimeforDebounce,100)
-    ){
-    doorbell_switch.state = BellSwitch_OnOff(); //tDetectTime = millis();
-    
-    if(doorbell_switch.state){ Serial.print("Active high doorbell_switch");
-      doorbell_switch.isactive = true;
-      doorbell_switch.tDetectTimeforDebounce = millis();   
+  if((BellSwitch_OnOff()!=doorbell_switch.event.state)
+      &&mTime::TimeReachedNonReset(&tDetectTimeforDebounce,100)
+  ){
 
-      memcpy(doorbell_switch.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
+    doorbell_switch.event.state = BellSwitch_OnOff(); //tDetectTime = millis();
+    
+    if(doorbell_switch.event.state){ Serial.print("Active high doorbell_switch");
+      doorbell_switch.event.isactive = true;
+      tDetectTimeforDebounce = millis();   
+
+      // memcpy(doorbell_switch.trigger_time_ctr,pCONT_time->RtcTime.hhmmss_ctr,sizeof(pCONT_time->RtcTime.hhmmss_ctr)); 
 
       if(settings.fEnable_Switch_Relay_Binding){
         RingDoorBellSet(2, 500); //1 per sec for 2 secs (2 rings)
       }
 
     }else{ Serial.print("Active low doorbell_switch");
-      doorbell_switch.isactive = false;
+      doorbell_switch.event.isactive = false;
     }
-    doorbell_switch.ischanged = true;
+    doorbell_switch.event.ischanged = true;
     // doorbell_switch.changedtime = pCONT_time->RtcTime;
-    doorbell_switch.detected_time = pCONT_time->GetTimeShortNow();
+    doorbell_switch.event.detected_time = pCONT_time->GetTimeShortNowU32();
     // fUpdateSendDoorSensor = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
     
@@ -207,13 +222,13 @@ uint8_t mDoorBell::ConstructJSON_Settings(uint8_t json_method){
 
 uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_method){
 
-  if(doorbell_switch.ischanged){doorbell_switch.ischanged=false;
+  if(doorbell_switch.event.ischanged){doorbell_switch.event.ischanged=false;
 
     JsonBuilderI->Start();
       char buffer[80];
       JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_DOORBELL_ID, 0, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&doorbell_switch.detected_time, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_EVENT, doorbell_switch.isactive ? "detected": "over");
+      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&doorbell_switch.event.detected_time, buffer, sizeof(buffer)));
+      JsonBuilderI->Add(D_JSON_EVENT, doorbell_switch.event.isactive ? "detected": "over");
     JsonBuilderI->End();
 
   }
@@ -304,249 +319,6 @@ void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
 ////////////////////// END OF MQTT /////////////////////////
 
-
-
-
-
-
-//     case FUNC_WEB_APPEND_ROOT_BUTTONS:{
-//       // char relay_handle_ctr[20]; 
-//       // BufferWriterI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-//       // // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
-//       //   memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
-//       //   sprintf(relay_handle_ctr,"doorbell_ring");//,relay_id);
-//       //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
-//       //                                 100, 
-//       //                                 "buttonh " "doorbell_ring",
-//       //                                 relay_handle_ctr, 
-//       //                                 DEVICE_CONTROL_BUTTON_ON_ID, 
-//       //                                 "Ring Doorbell", ""
-//       //                               );
-//       // // }
-//       // BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
-
-      
-//   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
-//     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
-//                               100/2,
-//                               "", //no span
-//                               "buttonh",
-//                               D_JSON_RINGDOORBELL, 
-//                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
-//                               PSTR("Ring Doorbell"), ""
-//                             );               
-//   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-  
-
-      
-//   BufferWriterI->Append_P(PSTR("{t}<tr>"));                            
-//     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
-//                               100/2,
-//                               "", //no span
-//                               "buttonh",
-//                               D_JSON_RINGDOORBELL "_Single", 
-//                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
-//                               PSTR("Ring Doorbell Single"), ""
-//                             );               
-//   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-  
-
-
-
-// //  char relay_handle_ctr[10]; 
-// //   char buffer[30];
-// //   uint8_t relays_connected = 1;
-      
-//   // JsonBuilderI->Append_P(PSTR("%s"),PSTR("{t}<tr>"));
-//   // // for(uint8_t relay_id=0;relay_id<relays_connected;relay_id++){
-//   //   memset(relay_handle_ctr,0,sizeof(relay_handle_ctr));
-//   //   sprintf(relay_handle_ctr,"doorbell_ring");
-    
-//   //       JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
-//   //                                     100, 
-//   //                                     "buttonh " "doorbell_ring",
-//   //                                     relay_handle_ctr, 
-//   //                                     DEVICE_CONTROL_BUTTON_ON_ID, 
-//   //                                     "Ring Doorbell", ""
-//   //                                   );
-//   //     // }
-
-//   //   // JsonBuilderI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE2_HANDLE, 
-//   //   //                               100/relays_connected, 
-//   //   //                               "buttonh ""reltog",
-//   //   //                               relay_handle_ctr, 
-//   //   //                               DEVICE_CONTROL_BUTTON_TOGGLE_ID, 
-//   //   //                               "TEST", ""
-//   //   //                             );
-//   // // }
-//   // JsonBuilderI->Append_P("%s",PSTR("</tr>{t2}"));
-
-
-//     }break;
-
-    // case FUNC_WEB_ADD_MAIN_BUTTON:{
-
-    //     // Power Toggle
-    //     // pCONT_web->WSBufferAppend_P(HTTP_TABLE100);
-    //     // pCONT_web->WSBufferAppend_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    //     // pCONT_web->WSBufferAppend_P(HTTP_DEVICE_CONTROL_BUTTON_VARIABLE_HANDLE, 36, "doorbell_ring", 1, "Ring Doorbell", "");
-    //     // pCONT_web->WSBufferAppend_P(PSTR("</tr></table>"));
-
-    // }
-    // break;
-    // case FUNC_WEB_SHOW_PARAMETERS:{
-    
-    //   // uint8_t fsize = 16;
-    //   // char title_ctr[50];
-        
-    //   // memset(title_ctr,0,sizeof(title_ctr));
-    //   // sprintf(title_ctr,"Chime %s Rang",ringer.friendly_name_ctr);
-    //   // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
-    //   //   title_ctr,
-    //   //   ringer.trigger_time_ctr
-    //   // );
-
-    //   // memset(title_ctr,0,sizeof(title_ctr));
-    //   // sprintf(title_ctr,"Doorbell %s Pressed",doorbell_switch.friendly_name_ctr);
-    //   // pCONT_web->WSBufferAppend_P(HTTP_SNS_GENERIC, 
-    //   //   title_ctr,
-    //   //   doorbell_switch.trigger_time_ctr
-    //   // );
-
-    // }
-    // break;
-
-
-
-
-// void mDoorBell::MQQTSendDoorUpdate(void){
-
-//   D_DATA_BUFFER_CLEAR();
-
-//   //   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-//   //   JsonObject root = doc.to<JsonObject>();
-
-//   // JsonObject doorobj = root.createNestedObject("door");
-//   //   doorobj["position"] = BellSwitch_OnOff_Ctr();
-//   //   // char timectr[12]; memset(timectr,0,sizeof(timectr));
-//   //   // sprintf(timectr,"%sT%02d:%02d:%02d",
-//   //   //   pCONT_time->GetDOWShortctr(doorbell_switch.changedtime.Wday),
-//   //   //   doorbell_switch.changedtime.hour,
-//   //   //   doorbell_switch.changedtime.minute,
-//   //   //   doorbell_switch.changedtime.second
-//   //   // );
-//   //   // doorobj["changedtime"] = timectr;
-
-//   // #ifdef DOORLOCK_SWITCH_PIN
-//   // JsonObject lockobj = root.createNestedObject("lock");
-//   //   lockobj["position"] = LOCKOPENCTR;
-//   //   char timectr2[15]; memset(timectr2,0,sizeof(timectr2));
-//   //   sprintf(timectr2,"%sT%02d:%02d:%02d",
-//   //     pCONT_time->GetDOWShortctr(lock_detect.changedtime.Wday),
-//   //     lock_detect.changedtime.hour,
-//   //     lock_detect.changedtime.minute,
-//   //     lock_detect.changedtime.second
-//   //   );
-//   //   lockobj["changedtime"] = timectr2;
-//   // #endif
-
-//   // data_buffer.payload.len = measureJson(root)+1;
-//   // serializeJson(doc,data_buffer.payload.ctr);
-
-//   // pCONT->mqt->ppublish("status/door/status",data_buffer.payload.ctr,false);
-
-// }
-
-
-
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-
-
-void mDoorBell::WebAppend_Root_Status_Table_Draw(){
-
-      // char title_ctr[50];
-        
-      // memset(title_ctr,0,sizeof(title_ctr));
-      // sprintf(title_ctr,"Chime %s Rang",ringer.friendly_name_ctr);
-
-  // for(int ii=0;ii<fSensorCount;ii++){ //add number in name? List needed? also hold user defined name?
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      BufferWriterI->Append_P(PSTR("<td>Chime %s Rang</td>"), ringer.friendly_name_ctr);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dbl","?");   
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      BufferWriterI->Append_P(PSTR("<td>Doorbell %s Pressed</td>"), doorbell_switch.friendly_name_ctr);//pCONT_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, kTitle_TableTitles_Root));//"Animation List Tester");      //titles are fixed, so send them here using getindex
-      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_dbl","?");   
-    BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  // }
-}
-
-
-//append to internal buffer if any root messages table
-void mDoorBell::WebAppend_Root_Status_Table_Data(){
-  
-  // uint8_t sensor_counter = 0;
-
-  // BufferWriterI->Append_P(PSTR("\"%s\":["),PSTR("tab_dbl")); 
-  // for(int row=0;row<2;row++){
-  //   switch(row){
-  //     default:
-  //     case 0:{
-        
-  //       char float_ctr[10];
-  //       char colour_ctr[10];
-  //       char table_row[25]; memset(table_row,0,sizeof(table_row));       
-
-  //       sprintf(table_row,"%s",ringer.trigger_time_ctr);
-        
-  //       // if(sensor[sensor_counter].temperature<=25){
-  //       //   sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
-  //       // }else
-  //       // if(sensor[sensor_counter].temperature>25){
-  //       //   sprintf(colour_ctr,"%s","#fcba03");
-  //       // }else{
-  //         sprintf(colour_ctr,"%s","#ffffff");
-  //       // }
-    
-  //       BufferWriterI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
-  //         table_row, colour_ctr
-  //       );
-  //     }break;
-  //     case 1:{      
-
-  //       char float_ctr[10];
-  //       char colour_ctr[10];
-  //       char table_row[25]; memset(table_row,0,sizeof(table_row));        
-  //       sprintf(table_row,"%s",doorbell_switch.trigger_time_ctr);
-        
-  //       // if(sensor[sensor_counter].humidity>70){
-  //       //   sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
-  //       // }else
-  //       // {
-  //         sprintf(colour_ctr,"%s","#ffffff");
-  //       // }
-    
-  //       BufferWriterI->Append_P(PSTR("{\"id\":%d,\"ih\":\"%s\",\"fc\":\"%s\"},"),row,
-  //         table_row, colour_ctr
-  //       );
-  //       sensor_counter++;
-  //     }break;
-  //   }
-  // }
-  // *pCONT_web->buffer_writer_internal = (*pCONT_web->buffer_writer_internal) - 1;// remove extra comma
-  // BufferWriterI->Append_P(PSTR("],")); 
-
-}
-
-
-void mDoorBell::WebPage_Root_AddHandlers(){
-
-  /**
-   * Pages
-   * */
-
-}
-  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif

@@ -655,7 +655,7 @@ void mSensorsDB18::MQTTHandler_Init(){
   mqtthandler_ptr->flags.SendNow = true;
   mqtthandler_ptr->tRateSecs = 10; 
   #ifdef DEVICE_IMMERSIONSENSOR //temp fix
-  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->tRateSecs = 60; 
   #endif
   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;

@@ -417,3 +417,11 @@ For now, its so unlikely someone would be switching between both hardware its no
         - brightness by sun elevation
         - brightness by time of day
         
+
+#Idea 123 
+    Create longterm sunrise style animation to be triggered at ANY time. ie, When I wake up, even if nighttime, begin a 10m sunrise wakeup brightness routine to slowly wake me up that does not
+    use the elevation, but instead manually count up. It this that will later be triggered as part of an alarm (5 minute wakeup) or gradual (30 minute wakeup)
+
+#Idea 124
+
+Add sunelevation palette that is actually left on overnight, and is black when its nighttime

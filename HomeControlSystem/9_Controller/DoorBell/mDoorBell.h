@@ -13,6 +13,8 @@
 
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
 
+#include "5_Sensors/_Interface/mSensorsInterface.h"
+
 
 class mDoorBell :
   public mTaskerInterface
@@ -26,8 +28,7 @@ class mDoorBell :
     void BellChime_Toggle();
     void BellChime_Set(uint8_t state);
 
-    
-void EveryLoop();
+    void EveryLoop();
 
     int8_t pin_doorbell_button = -1;
     int8_t pin_relay_chime = -1;
@@ -48,42 +49,40 @@ void EveryLoop();
 
     #define ON_LOGIC_LEVEL LOW
 
-      #define BELLSWITCH_INIT()      pinMode(BELLSWITCH_PIN,INPUT) //Need to add extra external pullup
-      #define BELLSWITCH_ONOFF()     !digitalRead(BELLSWITCH_PIN) //opened when high
-      #define BELLSWITCH_ON()        digitalWrite(BELLSWITCH_PIN,ON_LOGIC_LEVEL) //opened when high
-      #define BELLSWITCH_OFF()       digitalWrite(BELLSWITCH_PIN,!ON_LOGIC_LEVEL) //opened when high
-      #define BELLSWITCH_SET(X)      digitalWrite(BELLSWITCH_PIN,!X) //opened when high
-      #define BELLSWITCH_ONOFF_CTR() BELLSWITCH_ONOFF() ? "ON" : "OFF"   
+    #define BELLSWITCH_INIT()      pinMode(BELLSWITCH_PIN,INPUT) //Need to add extra external pullup
+    #define BELLSWITCH_ONOFF()     !digitalRead(BELLSWITCH_PIN) //opened when high
+    #define BELLSWITCH_ON()        digitalWrite(BELLSWITCH_PIN,ON_LOGIC_LEVEL) //opened when high
+    #define BELLSWITCH_OFF()       digitalWrite(BELLSWITCH_PIN,!ON_LOGIC_LEVEL) //opened when high
+    #define BELLSWITCH_SET(X)      digitalWrite(BELLSWITCH_PIN,!X) //opened when high
+    #define BELLSWITCH_ONOFF_CTR() BELLSWITCH_ONOFF() ? "ON" : "OFF"   
 
-      #define BELLCHIME_INIT()      pinMode(BELLCHIME_PIN,OUTPUT) //Need to add extra external pullup
-      #define BELLCHIME_SET(X)      digitalWrite(BELLCHIME_PIN,!X) //on when low
-      #define BELLCHIME_TOGGLE()    digitalWrite(BELLCHIME_PIN,!digitalRead(BELLCHIME_PIN)) //on when low
+    #define BELLCHIME_INIT()      pinMode(BELLCHIME_PIN,OUTPUT) //Need to add extra external pullup
+    #define BELLCHIME_SET(X)      digitalWrite(BELLCHIME_PIN,!X) //on when low
+    #define BELLCHIME_TOGGLE()    digitalWrite(BELLCHIME_PIN,!digitalRead(BELLCHIME_PIN)) //on when low
 
 
-    //#endif
+    uint8_t test_state = 0;
+    void RingDoorBellSet(uint8_t seconds = 2, uint16_t freq = 500); //default half second ie 500ms
+    uint8_t RingDoorBellLoop(uint8_t reset = false);
 
-  uint8_t test_state = 0;
-  void RingDoorBellSet(uint8_t seconds = 2, uint16_t freq = 500); //default half second ie 500ms
-  uint8_t RingDoorBellLoop(uint8_t reset = false);
+    enum BELLCHIME_STATE{BELLCHIME_OFF=0,BELLCHIME_ON=1};
 
-  enum BELLCHIME_STATE{BELLCHIME_OFF=0,BELLCHIME_ON=1};
+    void WebCommand_Parse();
 
-  void WebCommand_Parse();
+    struct RINGER{
+      uint32_t start_millis;
+      uint32_t end_millis;
+      uint32_t toggle_millis;
+      uint8_t fIsRinging = false;
+      uint16_t freq = 1;
+      uint8_t seconds = 1;
+      uint32_t closed_millis_end; // when "on" is reset
 
-  struct RINGER{
-    uint32_t start_millis;
-    uint32_t end_millis;
-    uint32_t toggle_millis;
-    uint8_t fIsRinging = false;
-    uint16_t freq = 1;
-    uint8_t seconds = 1;
-    uint32_t closed_millis_end; // when "on" is reset
+      // char friendly_name_ctr[15];
+      // char trigger_time_ctr[10]; //HH:MM:SS\0  IMPORTANT! COPIED INTO GARAGE LIGHT, CAUSES ERROR IF CHANGED
 
-    char friendly_name_ctr[15];
-    char trigger_time_ctr[10]; //HH:MM:SS\0  IMPORTANT! COPIED INTO GARAGE LIGHT, CAUSES ERROR IF CHANGED
-
-    
-  }ringer; 
+      
+    }ringer; 
 
     void init(void);
 
@@ -96,43 +95,35 @@ void EveryLoop();
 
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    int8_t CheckAndExecute_JSONCommands(void);
-    void parse_JSONCommand(void);
-
+    void parse_JSONCommand(JsonParserObject obj);
 
     void parsesub_Settings();
     void parsesub_Command();
 
-    typedef struct GPIO_DETECT{
-      uint8_t state = false;
-      uint8_t isactive = false;
-      uint8_t ischanged = false;
-      // struct datetime changedtime;
-      uint32_t tSaved;
-      uint32_t tDetectTimeforDebounce;    
-  time_short_t detected_time;  
-      char friendly_name_ctr[15];
-      char trigger_time_ctr[10]; //HH:MM:SS\0  IMPORTANT! COPIED INTO GARAGE LIGHT, CAUSES ERROR IF CHANGED
-    };
-    GPIO_DETECT doorbell_switch;
+    struct GPIO_DETECT
+    {
+      
+      event_motion_t event;
+
+    }doorbell_switch;
+
+    
 
 
-    //#ifdef MQTT
-      // void SubTasker_MQTTSender();
-      // void MQTTSendDoorSensorIfChanged();
-      // void MQQTSendDoorUpdate();
-      uint32_t tSavedSendDoorSensor;
-      uint8_t fUpdateSendDoorSensor;
-    //#endif
-
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-void WebCommand_Parse(void);
 
 
-void WebAppend_Root_Draw_PageTable();
-void WebAppend_Root_Status_Table();
-  #endif// USE_MODULE_NETWORK_WEBSERVER
 
+    uint32_t tDetectTimeforDebounce;    
+
+    uint32_t tSavedSendDoorSensor;
+    uint8_t fUpdateSendDoorSensor;
+    
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    void WebCommand_Parse(void);
+    void WebAppend_Root_Draw_PageTable();
+    void WebAppend_Root_Status_Table();
+    #endif// USE_MODULE_NETWORK_WEBSERVER
 
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);

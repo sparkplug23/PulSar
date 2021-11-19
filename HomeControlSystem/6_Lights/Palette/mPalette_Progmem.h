@@ -1238,44 +1238,63 @@
     DEF_PGM_CTR  (PM_PALETTE_CUSTOM_USER_01_NAME_CTR)        D_PALETTE_CUSTOM_USER_01_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP_IDS)
     { // R,G,B
-      // 255, 0, 0,   // Red,   100%
-      // 0, 150, 0,   // Green, 100%
-      // D_RGB255_PINK_WARM // Christmas pink
-      // 0, 0, 200,   // Dark blue, faded
-      // D_RGB255_ORANGE_LIGHT  // Yellow
-      // 255, 30, 0,  // Orange
-      // 25, 112, 25, // Green Pastel
-      // 255, 40, 40, // Red Pastel
-      // 0, 100, 100, // cyan
-      // D_RGB255_PINK_HOT2  // hot pink
-      // D_RGB255_RED_PASTEL // pastel red
-      // D_RGB255_ORANGE_DEEP  //
-      // D_RGB255_YELLOW_WARM // warm yellow
-      // 255, 0, 250,  // Purple
-      // 255, 0, 72
-
-
-
-    // 224, 40, 228, // est. Thistle RGB: (224, 187, 228)
-    // 100, 20, 100, // est. Lavender Purple RGB: (149, 125, 173)
-    // 200, 20, 180, // est. Pastel Violet RGB: (210, 145, 188)
-    // 250, 25, 194, // est. Cotton Candy RGB: (254, 200, 216)
-    // 254, 118, 78  //est. Name: Lumber RGB: (255, 223, 211)
-
-      255, 0, 0,   // deep red
-      0, 100, 0,   // green
-      D_RGB255_PINK_WARM // christmas pink
-      D_RGB255_BLUE_FADED3   //dark blue, faded
+     
+      #if defined(USE_CUSTOM_USER_PAULA)
+      // R,G,B       
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
       D_RGB255_ORANGE_LIGHT   
       D_RGB255_GREEN_PASTEL_FADED
-      D_RGB255_CYAN_FADED3 // cyan
-      D_RGB255_PINK_HOT2 //hot pink
-      D_RGB255_RED_PASTEL   //pastel red
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
       D_RGB255_ORANGE_DEEP
-      252, 157, 3 //warm yellow 
-
-
-      
+      D_RGB255_YELLOW_WARM
+      #elif defined(USE_CUSTOM_USER_JACQUELINE)
+      // R,G,B       
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT   
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      #else 
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT     
+      #endif // USE_CUSTOM_USER_JACQUELINE
 
 
     };

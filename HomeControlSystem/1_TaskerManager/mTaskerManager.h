@@ -32,6 +32,7 @@
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Measurements_Calibration.h"
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/mUserConfig_Secret.h"
@@ -381,6 +382,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
     EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
+    EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
     EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID,
   #endif
@@ -693,6 +697,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
   #include "9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
   #define pCONT_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
+  #include "9_Controller/SerialCalibrationMeasurmentLogger/mSerialCalibrationMeasurmentLogger.h"
+  #define pCONT_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
   #include "9_Controller/GPS_SD_Logger/mGPS_SD_Logger.h"

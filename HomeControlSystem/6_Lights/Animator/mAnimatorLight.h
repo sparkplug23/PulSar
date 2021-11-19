@@ -1245,6 +1245,13 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
 
 
+  /**
+   * This will be moved into wled segments runtime. 
+   * Its a byte buffer, that holds the animation settings of the active animation
+   * This is performed by segment_runtime allocate later
+   * */
+  // struct HACS_TEMPORARY_SEGMENT_RUNTIME_DATA_BUFFER
+  uint8_t hacs_animation_runtime_data_buffer[100] = {0};
 
 
 

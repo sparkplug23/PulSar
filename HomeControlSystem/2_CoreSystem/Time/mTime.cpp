@@ -106,10 +106,12 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         //   16,
         //   17);
 
-//         char buffer[40];
-//         AddLog(LOG_LEVEL_TEST, PSTR("DT_LOCAL=%s"), pCONT_time->GetDateAndTimeCtr(DT_LOCAL, buffer, sizeof(buffer)));
-//   AddLog(LOG_LEVEL_TEST, PSTR("DT_LOCAL=%s"), pCONT_time->GetDateAndTimeCtr(DT_LOCAL, buffer, sizeof(buffer)));
-// AddLog(LOG_LEVEL_TEST, PSTR("DT_TIMEZONE=%s IsDst=%d"), pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)), IsDst());
+        #ifdef DEBUG_MODULE_TIME_STD
+        char buffer[40];
+        AddLog(LOG_LEVEL_TEST, PSTR("DT_DST=%s"), pCONT_time->GetDateAndTimeCtr(DT_DST, buffer, sizeof(buffer)));
+        AddLog(LOG_LEVEL_TEST, PSTR("DT_STD=%s"), pCONT_time->GetDateAndTimeCtr(DT_STD, buffer, sizeof(buffer)));
+        AddLog(LOG_LEVEL_TEST, PSTR("DT_TIMEZONE=%s IsDst=%d"), pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)), IsDst());
+        #endif
 
       // Serial.println(GetUptime());
       #endif
@@ -1330,6 +1332,11 @@ bool  mTime::IsDst(void) //is daylight savings time
 
 uint32_t mTime::RuleToTime(TimeRule r, int yr)
 {
+  
+  #ifdef DEBUG_MODULE_TIME_STD
+  AddLog(LOG_LEVEL_INFO, PSTR("mTime::RuleToTime"));
+  #endif// DEBUG_MODULE_TIME_STD
+  
   datetime_t tm;
   uint32_t t;
   uint8_t m;
@@ -1338,6 +1345,11 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
   m = r.month;
   w = r.week;
   if (0 == w) {             // Last week = 0
+
+    #ifdef DEBUG_MODULE_TIME_STD
+    AddLog(LOG_LEVEL_INFO, PSTR("mTime::RuleToTime LASTWEEK"));
+    #endif// DEBUG_MODULE_TIME_STD
+
     if (++m > 12) {         // for "Last", go to the next month
       m = 1;
       yr++;
@@ -1348,17 +1360,43 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
   tm.hour = r.hour;
   tm.minute = 0;
   tm.second = 0;
-  tm.Wday = 1;
+  tm.Mday = 1;
   tm.month = m;
   tm.year = yr - 1970;
+
+  #ifdef DEBUG_MODULE_TIME_STD
+  AddLog(LOG_LEVEL_INFO, PSTR(
+    "\n\r"
+    "hour=%d\n\r"
+    "minute=%d\n\r"
+    "second=%d\n\r"
+    "Wday=%d\n\r"
+    "month=%d\n\r"
+    "year=%d\n\r"
+    ),
+    tm.hour,// = r.hour;
+    tm.minute,// = 0;
+    tm.second,// = 0;
+    tm.Wday,// = 1;
+    tm.month,// = m;
+    tm.year// = yr - 1970;
+  );
+  #endif// DEBUG_MODULE_TIME_STD
+
+
   t = MakeTime(tm);         // First day of the month, or first day of next month for "Last" rules
   BreakTime(t, tm);
   t += (7 * (w - 1) + (r.dow - tm.Wday + 7) % 7) * SECS_PER_DAY;
   if (0 == r.week) {
     t -= 7 * SECS_PER_DAY;  // back up a week if this is a "Last" rule
   }
+  
   return t;
+
 }
+
+
+
 
 // uint32_t UtcTime(void)
 // {
@@ -1807,11 +1845,14 @@ void mTime::RtcSecond(void)
           }
           BreakTime(Rtc.utc_time, tmpTime);
           RtcTime.year = tmpTime.year + 1970;
+          /**
+           * Convert moments of DST change in seconds
+           * */
           Rtc.daylight_saving_time = RuleToTime(pCONT_set->Settings.tflag[1], RtcTime.year);
           Rtc.standard_time = RuleToTime(pCONT_set->Settings.tflag[0], RtcTime.year);
 
           // Do not use AddLog_P2 here (interrupt routine) if syslog or mqttlog is enabled. UDP/TCP will force exception 9
-          // PrepLog_P2(LOG_LEVEL_DEBUG, PSTR("NTP: " D_UTC_TIME " %s, " D_DST_TIME " %s, " D_STD_TIME " %s"),
+          // AddLog(LOG_LEVEL_DEBUG, PSTR("NTP: " D_UTC_TIME " %s, " D_DST_TIME " %s, " D_STD_TIME " %s"),
           //   GetDateAndTimeCtr(DT_UTC).c_str(), GetDateAndTimeCtr(DT_DST).c_str(), GetDateAndTimeCtr(DT_STD).c_str());
 
           // if (Rtc.local_time < START_VALID_TIME) {  // 2016-01-01
@@ -1837,7 +1878,13 @@ void mTime::RtcSecond(void)
       // Serial.printf("Rtc.utc_time=%d\n\r",Rtc.utc_time);
 
 
-  if (Rtc.local_time > START_VALID_TIME) {  // 2016-01-01
+
+  if (Rtc.local_time > START_VALID_TIME) // 2016-01-01
+  {  
+    #ifdef DEBUG_MODULE_TIME_STD
+    AddLog(LOG_LEVEL_INFO, PSTR("Rtc local_time Valid"));
+    #endif
+
     int16_t timezone_minutes = pCONT_set->Settings.timezone_minutes;
     if (pCONT_set->Settings.timezone < 0) { timezone_minutes *= -1; }
     Rtc.time_timezone = (pCONT_set->Settings.timezone * SECS_PER_HOUR) + (timezone_minutes * SECS_PER_MIN);
@@ -1845,6 +1892,11 @@ void mTime::RtcSecond(void)
     
     if (99 == pCONT_set->Settings.timezone)
     { // 99, means unset, so try work it out then set it
+    
+      #ifdef DEBUG_MODULE_TIME_STD
+      AddLog(LOG_LEVEL_INFO, PSTR("timezone == 99, so DST set by location"));
+      #endif
+
       int32_t dstoffset = pCONT_set->Settings.toffset[1] * SECS_PER_MIN;
       int32_t stdoffset = pCONT_set->Settings.toffset[0] * SECS_PER_MIN;
       
@@ -1862,10 +1914,94 @@ void mTime::RtcSecond(void)
         }
       } else {
         // Northern hemisphere
-        if ((Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && (Rtc.utc_time < (Rtc.standard_time - dstoffset)))
-        {
+        #ifdef DEBUG_MODULE_TIME_STD
+        AddLog(LOG_LEVEL_INFO, PSTR("Northern hemisphere"));
+        #endif
+
+        /**
+         * if(now >= DST_start) AND (now < DST_end)
+         * */
+        // if( // Check if utc_time is inside period of daylight savings     /// simplify without offsets for now, just to test
+        //   (Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && 
+        //   (Rtc.utc_time < (Rtc.standard_time - dstoffset))
+        // ){
+        if( // If UTC is between March and November, ie Summer
+          (Rtc.utc_time >= Rtc.daylight_saving_time) &&    //DST time is March
+          (Rtc.utc_time <  Rtc.standard_time)              // End of DST, ie ST, is November
+        ){
+
+          #ifdef DEBUG_MODULE_TIME_STD
+          AddLog(LOG_LEVEL_INFO, PSTR("DST: Daylight Saving Time"));
+          #endif
+
           Rtc.time_timezone = dstoffset;  // Daylight Saving Time
-        } else {
+
+          #ifdef DEBUG_MODULE_TIME_STD
+          AddLog(LOG_LEVEL_TEST,PSTR("DST: dstoffset=%d"), dstoffset);
+
+
+      // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%d,%d,%d \n\r%d>=(%d) \n\r%d,%d,%d \n\r%d<(%d)"),
+      
+      // // "\n\r\n\rDST check %d<%d -> %s"),
+
+      //   Rtc.utc_time,Rtc.daylight_saving_time,stdoffset,
+      //   Rtc.utc_time,Rtc.daylight_saving_time - stdoffset,
+
+      //   Rtc.utc_time,Rtc.standard_time,dstoffset,
+      //   Rtc.utc_time, Rtc.standard_time - dstoffset
+          
+      // );
+
+      AddLog(LOG_LEVEL_TEST,PSTR("Rtc.utc_time = \t\t %d"), Rtc.utc_time);
+      AddLog(LOG_LEVEL_TEST,PSTR("Rtc.daylight_saving_time = \t\t %d"), Rtc.daylight_saving_time);
+      AddLog(LOG_LEVEL_TEST,PSTR("stdoffset = \t\t %d "), stdoffset);
+      AddLog(LOG_LEVEL_TEST,PSTR("Rtc.standard_time = \t\t %d "), Rtc.standard_time);
+      AddLog(LOG_LEVEL_TEST,PSTR("dstoffset = \t\t %d "), dstoffset);
+      
+      // "\n\r\n\rDST check %d<%d -> %s"),
+
+      //   Rtc.utc_time,Rtc.daylight_saving_time,stdoffset,
+      //   Rtc.utc_time,Rtc.daylight_saving_time - stdoffset,
+
+      //   Rtc.utc_time,Rtc.standard_time,dstoffset,
+      //   Rtc.utc_time, Rtc.standard_time - dstoffset
+          
+      // );
+
+
+      AddLog(LOG_LEVEL_TEST,PSTR(
+        // "\n\r%d,%d,%d \n\r%d>=(%d) \n\r%d,%d,%d \n\r%d<(%d)"),
+      
+      "\n\r\n\rDST check %d<=%d -> %s"
+      "\n\r\n\rEST check %d>%d -> %s"
+      
+      
+      
+      ),
+        Rtc.utc_time,
+        Rtc.daylight_saving_time - stdoffset,
+        (Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset))?"T":"F",
+
+        Rtc.utc_time,
+        Rtc.standard_time - stdoffset,
+        (Rtc.utc_time < (Rtc.standard_time - dstoffset))?"T":"F"
+      );
+
+
+
+#endif // USE_DEVFEATURE_DEBUG_DST_TIME
+
+
+
+      
+      
+      
+        }
+        else 
+        {          
+          #ifdef DEBUG_MODULE_TIME_STD
+          AddLog(LOG_LEVEL_INFO, PSTR("DST: Standard Time"));
+          #endif
           Rtc.time_timezone = stdoffset;  // Standard Time
         }
       }
@@ -2261,6 +2397,7 @@ char* mTime::GetSunTimeAtHorizon(uint32_t dawn, char* buffer, uint8_t buflen)
   dawn &= 1;
   snprintf_P(buffer, buflen, PSTR("%02d:%02d"), hour[dawn], minute[dawn]);
   return buffer;
+
 }
 
 uint16_t mTime::SunMinutes(uint32_t dawn)
@@ -2271,6 +2408,7 @@ uint16_t mTime::SunMinutes(uint32_t dawn)
   DuskTillDawn(&hour[0], &minute[0], &hour[1], &minute[1]);
   dawn &= 1;
   return (hour[dawn] *60) + minute[dawn];
+
 }
 
 

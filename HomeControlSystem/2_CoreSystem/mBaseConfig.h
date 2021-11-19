@@ -26,6 +26,7 @@
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Measurements_Calibration.h"
 
 /*********************************************************************************************\
  * This file is one of two user configurable files
@@ -210,13 +211,14 @@
 #define TIME_DST_MONTH         Mar               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
 #define TIME_DST_HOUR          2                 // Hour (0 to 23)
 #define TIME_DST_OFFSET        +60              // Offset from UTC in minutes (-780 to +780)
+// #define TIME_DST_OFFSET        +60              // Offset from UTC in minutes (-780 to +780)
 
 // -- Time - Start Standard Time and timezone offset from UTC in minutes
 #define TIME_STD_HEMISPHERE    North             // [TimeStd] Hemisphere (0 or North, 1 or South)
 #define TIME_STD_WEEK          Last              // Week of month (0 or Last, 1 or First, 2 or Second, 3 or Third, 4 or Fourth)
 #define TIME_STD_DAY           Sun               // Day of week (1 or Sun, 2 or Mon, 3 or Tue, 4 or Wed, 5 or Thu, 6 or Fri, 7 or Sat)
 #define TIME_STD_MONTH         Oct               // Month (1 or Jan, 2 or Feb, 3 or Mar, 4 or Apr, 5 or May, 6 or Jun, 7 or Jul, 8 or Aug, 9 or Sep, 10 or Oct, 11 or Nov, 12 or Dec)
-#define TIME_STD_HOUR          3                 // Hour (0 to 23)
+#define TIME_STD_HOUR          2                 // Hour (0 to 23)
 #define TIME_STD_OFFSET        0                 // Offset from UTC in minutes (-780 to +780)
 
 // -- Location ------------------------------------
@@ -480,6 +482,13 @@
 #define ENABLE_SETTINGS_STORAGE
 #endif
 #endif // ESP8266
+
+
+/**
+ * DEBUG_MODULE_<class name>_<function or method inside the class>
+ * debug list
+ * */
+// #define DEBUG_MODULE_TIME_STD
 
 
 /*********************************************************************************************\

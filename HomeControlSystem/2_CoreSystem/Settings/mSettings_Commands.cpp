@@ -162,6 +162,23 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
 
 */
 
+
+
+  if(jtok = obj["MQTTUpdateSeconds"].getObject()["IfChanged"])
+  {
+    Settings.sensors.ifchanged_secs = jtok.getInt();
+    pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
+  }
+
+  if(jtok = obj["MQTTUpdateSeconds"].getObject()["Teleperiod"])
+  {
+    Settings.sensors.teleperiod_secs = jtok.getInt();
+    pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
+  }
+
+
+
+
 #ifdef ENABLE_BUFFER_STRUCT
   u
   int8_t tmp_id = 0;

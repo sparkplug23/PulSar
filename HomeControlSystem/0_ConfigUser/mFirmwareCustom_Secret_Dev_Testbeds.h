@@ -29,7 +29,8 @@
 // #define DEVICE_TESTBED_RGBCLOCK
 // #define DEVICE_RGBSTRING_ANIMATOR_01
 // #define DEVICE_RGBSTRING_CONTROLLER_01
-#define DEVICE_RGBOUTSIDE_CONTROLLER_01
+// #define DEVICE_RGBSTRING_CONTROLLER_STATIC_01
+// #define DEVICE_RGBOUTSIDE_CONTROLLER_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
 // #define DEVICE_TESTBED_ULTRASONIC
               // #define DEVICE_TESTBED_9AXIS_GRYO
@@ -925,6 +926,12 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
+  IDEA: for dinning room tree, use second controller (or alternate GRB lights) "inside" the tree on a lower brightness, to add "depth"
+
+  - can a esp32 be used with hardware output for leds? This could solve my issue of having single controller for different led types that can be addressed
+
+  alternatively, I could feed the GRB first, then RGB from it, and thus invert the signal colour order
+
   #define SETTINGS_HOLDER 59
 
   //define ENABLE_FORCED_TEMPLATE_LOADING_TO_OVERRIDE_SAVED_SETTINGS  // Previously "FORCE_TEMPLATE_LOADING"
@@ -997,6 +1004,122 @@
 
 #endif
 
+
+
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * For jacq/paula
+ * Manually pick the colours, then hardcode, it should only show that on static (in order)
+ * they might want the slow glow, maybe use a wire/jumper for it
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_STATIC_01
+  #define DEVICENAME_CTR          "rgb_static_controller_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 01"
+
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+  
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+
+  #define SETTINGS_HOLDER 1
+
+  //define ENABLE_FORCED_TEMPLATE_LOADING_TO_OVERRIDE_SAVED_SETTINGS  // Previously "FORCE_TEMPLATE_LOADING"
+
+  // #define DISABLE_SETTINGS_STORAGE_OVERRIDE
+  // #define ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+
+  // #define DISABLE_NETWORK
+  
+  // #define ENABLE_DEVFEATURE_ADVANCED_SETTINGS_SAVE_DEBUG
+  // #define ENABLE_DEVFEATURE_SAVE_REBOOT_COMMAND_FOR_SETTINGS_TESTING
+  // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  // #define ENABLE_DEVFEATURE_SETTINGS_SAVED_USED_CORRECTLY_AND_PROGMEM_TEMPLATES_ARE_ONLY_READ_WHEN_SETTINGS_HOLDER_CHANGES // ie works like tas
+  // Based on tasmota saving original vs new esp32 enabled
+  // #define ENABLE_SETTINGS_VERSION_1_ESP8266_ONLY
+  // #define ENABLE_SETTINGS_VERSION_2_ESP32_JOINT_HARDWARE
+
+  /**
+   * Three types of animations, exclusive only
+   * */
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+  /**
+   * I might hard code the button config into eeprom, instead of fixing the complex saving method until next year.
+   * Load in animator, save every 5 seconds
+   * */
+  #define ENABLE_TEMPFEATURE_BASIC_SAVING_XMAS_CONTROLLER_SETTINGS
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+  // #define USE_CUSTOM_USER_PAULA
+  #define USE_CUSTOM_USER_JACQUELINE
+
+
+  #ifdef USE_CUSTOM_USER_PAULA
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef USE_CUSTOM_USER_JACQUELINE
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":10,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":50"
+  "}";
+  #endif
+
+#endif
+
+
+
 /**
  * Outside tree, ie testbed for esp32 controller with wifi if possible
  * */
@@ -1004,6 +1127,14 @@
   // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
   #define DEVICENAME_CTR          "outsidetree_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB testbed_rgb_controller_01 01"
+
+  /***
+   * Use bh1520 lux sensor to control brightness
+   * 
+   * 
+   * ie, goes from upper boundary (before dark), then slowly drops brightness.
+   * probably better to use sun elevation for this instead? ie <10 degrees below horizon, then turn brightness down
+   * */
 
 
   /***                               Total
@@ -1024,6 +1155,8 @@
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
   #define SETTINGS_HOLDER 59
+
+  #define   USE_DEVFEATURE_DEBUG_DST_TIME
 
   //define ENABLE_FORCED_TEMPLATE_LOADING_TO_OVERRIDE_SAVED_SETTINGS  // Previously "FORCE_TEMPLATE_LOADING"
 
@@ -1049,7 +1182,7 @@
 
   // #define ENABLE_PIXEL_FUNCTION_MIXER // wait until december to fix this, as basic slow glow changes are enough for outside.
 
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+  //#define ENABLE_FREERAM_APPENDING_SERIAL
 
   /**
    * I might hard code the button config into eeprom, instead of fixing the complex saving method until next year.
@@ -1089,7 +1222,7 @@
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
     "\"ColourPalette\":\"Christmas 07\","
-    "\"BrightnessRGB\":5"
+    "\"BrightnessRGB\":1"
   "}";
 
 #endif

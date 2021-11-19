@@ -33,10 +33,18 @@
 
 static const char *TAG = "uart_events";
 
+
+ extern   uint8_t simple_uart2_receive_frame_for_calibration[4]; //adc2H, adc2L, adc5H, adc5L
+ extern  bool flag_simple_uart2_receive_frame_for_calibration_updated ;
+
+
 void UART1_ISR_Static(void* arg);
 void UART2_ISR_Static_ByteRingBuffer(void* arg);
 void UART2_ISR_Static_NoSplitRingBuffer(void* arg);
 void UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg);
+#ifdef USE_DEVFEATURE_MEASUREMENT_SYSTEM_CALIBRATION_METHOD_1
+void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements_Calibration(void *arg);
+#endif // USE_DEVFEATURE_MEASUREMENT_SYSTEM_CALIBRATION_METHOD_1
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR) "uartinfo";
 

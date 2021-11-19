@@ -10,6 +10,8 @@
 const char* mSerialUART::PM_MODULE_DRIVERS_SERIAL_UART_CTR = D_MODULE_DRIVERS_SERIAL_UART_CTR;
 const char* mSerialUART::PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR = D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
 
+  uint8_t simple_uart2_receive_frame_for_calibration[4] = {0};
+  bool flag_simple_uart2_receive_frame_for_calibration_updated = false;
 
 int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -37,7 +39,10 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
      {       
       StartISR_RingBuffers(); 
      }
+     
+    #ifndef USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
+This might be causing delays when not needed in measurements
      
 //temp dump data so it doesnt fill
 
@@ -50,6 +55,7 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
         // }
         vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
       }
+      #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
     // case FUNC_UPTIME_10_SECONDS: 
     // case FUNC_UPTIME_30_SECONDS: 
