@@ -186,16 +186,16 @@ void mAnimatorLight::init(void){
 //   pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = true;
 // #endif // ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
 
-
-  pixel_group.flags.fEnabled = false;
+  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
+  pixel_group.flags.fEnabled = true;
   pixel_group.flags.multiplier_mode_id = PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
-  pixel_group.multiplier = 2;
+  pixel_group.multiplier = 10;
   pixel_group.mapped_array_data.values = editable_mapped_array_data_array;
   pixel_group.flags.mapped_array_editable_or_progmem = 0;
   pixel_group.mapped_array_data.length = 0;
   // flashersettings.flags.enable_startcolour_as_alternate = true;
   // flashersettings.flags.enable_endingcolour_as_alternate = true;
-  
+  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   
   for(ledout.index=0;
     ledout.index<STRIP_SIZE_MAX;
@@ -578,6 +578,24 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal)
 {
 
+if(indexPixel<10)
+{
+    AddLog(LOG_LEVEL_DEBUG, PSTR("RGB(%d)=%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B);
+}
+
+
+  // #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
+  // switch(indexPixel)
+  // {
+  //   default:
+  //   case 0: color_internal = RgbcctColor(0,255,0,0,0); break;
+  // //   case 1: color_internal = RgbcctColor(255,0,0,0,0); break;
+  // //   case 2: color_internal = RgbcctColor(0,0,255,0,0); break;
+  // //   case 3: color_internal = RgbcctColor(255,255,0,0,0); break;
+  //   case 4: color_internal = RgbcctColor(0,255,255,0,0); break;
+  // }
+  // #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
+
   RgbcctColor color_hardware = color_internal;
 
   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order[0];
@@ -614,32 +632,35 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
   // Index Ranges: Using a preset index where pixel_index is shown between ranges (i.e., red for 10 pixels, green for 1 pixel) (passed with a pointer to array, enabling different array for different bit mapping)
   // Using percentage linear blend between "Index Ranges" to allow not only horizontal tree lines, but gradients on each line
 
-  #ifdef ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
     if(indexPixel == 0){
       setpixel_variable_index_counter = 0; // reset
       pixel_group.mapped_array_data.index = 0;
     }
 
-    if(setpixel_variable_index_counter>50){ return; }
+    if(setpixel_variable_index_counter>50){ return; } // @note: The "50" is the largest repeated pixel
 
-    if(pixel_group.flags.fEnabled){
+    if(pixel_group.flags.fEnabled)
+    {
 
       uint8_t pixel_multiplier_count = 0;
       switch(pixel_group.flags.multiplier_mode_id){
         case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
           pixel_multiplier_count = pixel_group.multiplier;
+            // AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID %d"),pixel_multiplier_count);
           break;
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-          pixel_multiplier_count = random(1,pixel_group.multiplier);
-          break;
+        //case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
+          //pixel_multiplier_count = random(1,pixel_group.multiplier);
+          //break;
         case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
-          if(pixel_group.mapped_array_data.values != nullptr){
+          if(pixel_group.mapped_array_data.values != nullptr)
+          {
             // if any match, then jump index of lights forward
             uint8_t check_index = pixel_group.mapped_array_data.index;
             pixel_multiplier_count = pixel_group.mapped_array_data.values[check_index];
             
-            //AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
+            AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
             pixel_group.mapped_array_data.index++;
             if(pixel_group.mapped_array_data.index >= 15){//pixel_group.mapped_array_data.length){
               pixel_group.mapped_array_data.index = 0;
@@ -669,7 +690,7 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
 
     //refer back to lighting interface which will pass to the right hardware
 
-  #endif // ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
 }
 
@@ -683,57 +704,98 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   }
 
   
-  #ifdef ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
-  #ifdef USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER
-  indexPixel *= USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER;
-  #endif
-    if(indexPixel == 0){
-      setpixel_variable_index_counter = 0; // reset
-      pixel_group.mapped_array_data.index = 0;
-    }
+  RgbcctColor color_hardware;
 
-    if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
+  // THIS IS ALL WRONG, ITS SETTING, NOT GETTING.
 
-    if(pixel_group.flags.fEnabled){
+  /**
+   * Depending on the mode, get must search differently, or, is get a simple "get?"
+   * */
+
+    // #ifdef USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER
+    // indexPixel *= USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER;
+    // #endif
+  //   if(indexPixel == 0){
+  //     setpixel_variable_index_counter = 0; // reset
+  //     pixel_group.mapped_array_data.index = 0;
+  //   }
+
+  //   if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
+
+    if(pixel_group.flags.fEnabled)
+    {
 
       uint8_t pixel_multiplier_count = 0;
       switch(pixel_group.flags.multiplier_mode_id){
         case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
-          pixel_multiplier_count = pixel_group.multiplier;
+          // pixel_multiplier_count = pixel_group.multiplier;
+
+          /***
+           * Since the pixels are multipled out
+           * 
+           * **/
+
+
+/**
+ * probably too slow, but should work
+ * */
+// int converted_index = 0;
+// for(int count=0;count<indexPixel; count++)
+// {
+//   if((count%pixel_group.multiplier)==0) // if remainder is 0, increment the pixel converted
+//   {
+
+//     converted_index++;
+
+//   }wrong
+
+// }
+
+
+
+// AddLog(LOG_LEVEL_DEBUG, PSTR("indexPixel=%d -> %d"),indexPixel,converted_index);
+
+
+// indexPixel /= pixel_group.multiplier; // Read the multipled region
+color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
+
           break;
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-          pixel_multiplier_count = random(1,pixel_group.multiplier);
-          break;
-        case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
-          if(pixel_group.mapped_array_data.values != nullptr){
-            // if any match, then jump index of lights forward
-            uint8_t check_index = pixel_group.mapped_array_data.index;
-            pixel_multiplier_count = pixel_group.mapped_array_data.values[check_index];
+  //       case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
+  //         pixel_multiplier_count = random(1,pixel_group.multiplier);
+  //         break;
+  //       case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
+  //         if(pixel_group.mapped_array_data.values != nullptr){
+  //           // if any match, then jump index of lights forward
+  //           uint8_t check_index = pixel_group.mapped_array_data.index;
+  //           pixel_multiplier_count = pixel_group.mapped_array_data.values[check_index];
             
-            //AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
-            pixel_group.mapped_array_data.index++;
-            if(pixel_group.mapped_array_data.index >= 15){//pixel_group.mapped_array_data.length){
-              pixel_group.mapped_array_data.index = 0;
-            }
+  //           //AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
+  //           pixel_group.mapped_array_data.index++;
+  //           if(pixel_group.mapped_array_data.index >= 15){//pixel_group.mapped_array_data.length){
+  //             pixel_group.mapped_array_data.index = 0;
+  //           }
 
-          }else{
-            pixel_multiplier_count = pixel_group.multiplier;
-          }
-          break;
+          // }else{
+          //   pixel_multiplier_count = pixel_group.multiplier;
+          // }
+          // break;
       }
 
-      for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
-        if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
+  //     for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
+  //       if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
 
-        pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,setpixel_variable_index_counter++);  
-      }
+  //       pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,setpixel_variable_index_counter++);  
+  //     }
 
     }else{
-      pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,indexPixel);
+      color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
     } // pixel_group.flags.fEnabled
 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
+  //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
+
+    // RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
 
   #else
 
@@ -1591,13 +1653,13 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
     if(pixel_group.flags.fEnabled){
 
       switch(pixel_group.flags.multiplier_mode_id){
-        // default:
+        default:
         case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
           pixel_multiplier_count = pixel_group.multiplier;
           break;
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-          pixel_multiplier_count = random(1,pixel_group.multiplier);
-          break;
+        //case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
+          //pixel_multiplier_count = random(1,pixel_group.multiplier);
+          //break;
         case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
           if(pixel_group.mapped_array_data.values != nullptr){
             // if any match, then jump index of lights forward
@@ -1611,6 +1673,7 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
           }
           break;
       }
+  AddLog(LOG_LEVEL_TEST, PSTR("pixel_multiplier_count=%d"),pixel_multiplier_count);
 
       for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
         animation_colours[setpixel_variable_index_counter++].DesiredColour = animation_colours[indexPixel].StartingColor;
@@ -1622,7 +1685,7 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
       animation_colours[indexPixel].DesiredColour = animation_colours[indexPixel].StartingColor;
     } // pixel_group.flags.fEnabled
 
-    //AddLog(LOG_LEVEL_TEST, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d %d"),indexPixel,setpixel_variable_index_counter,pixel_multiplier_count);
+    AddLog(LOG_LEVEL_TEST, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d %d"),indexPixel,setpixel_variable_index_counter,pixel_multiplier_count);
 
   }
 

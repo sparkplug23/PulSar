@@ -246,11 +246,11 @@
 //   #define D_MODULE_SENSORS_BME_CTR              "mSensorsBME"
 //   #define D_MODULE_SENSORS_BME_FRIENDLY_CTR     "bme"
 // //#endif
-// //#ifdef USE_MODULE_SENSORS_DS18B20
-//   #define D_MODULE_SENSORS_DB18S20_CTR              "mSensorsDB18"
+// //#ifdef USE_MODULE_SENSORS_DS18X
+//   #define D_MODULE_SENSORS_DB18S20_CTR              "mDS18X"
 //   #define D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR              "db18s20"
 // //#endif
-// //#ifdef USE_MODULE_SENSORS_DS18B20
+// //#ifdef USE_MODULE_SENSORS_DS18X
 //   #define D_MODULE_SENSORS_INA219_CTR              "mEnergyINA219"
 //   #define D_MODULE_SENSORS_INA219_FRIENDLY_CTR              "ina219"
 // //#endif

@@ -137,6 +137,14 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 // #endif
 
 
+/**
+ * Compact forms of basic AddLog, to make prototyping faster. 
+ * Release versions should avoid these, as they don't allow for changing the log_level at runtime
+ * */
+// #define AddLogI(...)  AddLog(LOG_LEVEL_INFO, 
+// ...)
+
+
 
 
 #ifdef USE_DEBUG_LINE_LED

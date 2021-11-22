@@ -274,7 +274,7 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 
 void mOilFurnace::init_ultrasonic_sensor_parameters(){
 
-// #ifdef USE_MODULE_SENSORS_DS18B20
+// #ifdef USE_MODULE_SENSORS_DS18X
   // pCONT_ult->ultrasonic.settings.measure_rate_ms = 2000;
   // pCONT_ult->ultrasonic.settings.blocking_time_ms = 1000;
   // pCONT_ult->ultrasonic.settings.duration_limit_max = 10000;
@@ -302,7 +302,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_LOOP: 
 
-      #ifdef USE_MODULE_SENSORS_DS18B20
+      #ifdef USE_MODULE_SENSORS_DS18X
       if(pCONT_ult->ultrasonic.isvalid&&fUpdateCalculations){ fUpdateCalculations = false;
         //AddLog(LOG_LEVEL_TEST,PSTR("OilFurnace::isvalid"));
         SubTask_CopyAveragedSensorValues();
@@ -632,7 +632,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
 //         char float_ctr[10];
 //         memset(float_ctr,0,sizeof(float_ctr));
         
-//       #ifdef USE_MODULE_SENSORS_DS18B20
+//       #ifdef USE_MODULE_SENSORS_DS18X
 //         float height = 120-pCONT_ult->GetDistanceCMReading();
 //         #else
 //         float height = 120-0;
@@ -787,7 +787,7 @@ uint8_t mOilFurnace::ConstructJSON_Furnace(uint8_t json_method){
 //   uint8_t ischanged=false;
   
 
-//   // #ifdef USE_MODULE_SENSORS_DS18B20
+//   // #ifdef USE_MODULE_SENSORS_DS18X
 //   // for(int i=0;i<pCONT_msdb18->db18_sensors_active;i++){
 //   //   if((pCONT_msdb18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
 //   //     JsonObject sensorobj = root.createNestedObject(pCONT_msdb18->db18_sensor[i].name.ctr);

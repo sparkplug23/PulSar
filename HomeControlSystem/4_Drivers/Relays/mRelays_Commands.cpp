@@ -4,7 +4,11 @@
 #ifdef USE_MODULE_DRIVERS_RELAY
 
 
-void mRelays::parse_JSONCommand(JsonParserObject obj){
+void mRelays::parse_JSONCommand(JsonParserObject obj)
+{
+
+
+  AddLog(LOG_LEVEL_INFO, PSTR("mRelays::parse_JSONCommand"));
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -60,6 +64,18 @@ void mRelays::parse_JSONCommand(JsonParserObject obj){
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
     CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   }
+
+  if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_OFF_THEN_ON_SECS]){
+    CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(jtok.getInt(), relay_id);
+  }
+
+
+
+
+
+
+
+
 
   if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.relays_connected)){
     CommandSet_Relay_Power(state,relay_id);
@@ -160,15 +176,6 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
 
 
 
-void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
-  relay_status[relay_id].timer_decounter.seconds = time_secs;
-  relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
-  #endif
-}
-
-
 
 /*********************************************************************************************
 * Input & Output Interface ******************************************************************
@@ -245,9 +252,155 @@ uint8_t mRelays::CommandGet_Relay_Power(uint8_t num){
 
 
 
+/**********************************************************************************************
+ *********************************************************************************************
+  Parameter: time_seconds_on
+ *********************************************************************************************
+ ********************************************************************************************/
+
+// void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
+//   relay_status[relay_id].timer_decounter.seconds = time_secs;
+//   relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+//   #endif
+// }
+
+uint32_t mRelays::CommandGet_SecondsRelayHasBeenOn(uint8_t relay_id)
+{
+  // relay_status[relay_id].timer_decounter.seconds = time_secs;
+  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  // #endif
+
+  return relay_status[relay_id].time_seconds_on;
+}
+
+
+
+
+/**********************************************************************************************
+ *********************************************************************************************
+  Parameter: TimerDecounter
+ *********************************************************************************************
+ ********************************************************************************************/
+
+void mRelays::CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id){
+  relay_status[relay_id].timer_decounter.seconds = time_secs;
+  relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  #endif
+}
+
+uint16_t mRelays::CommandGet_SecondsToRemainOn(uint8_t relay_id)
+{
+  // relay_status[relay_id].timer_decounter.seconds = time_secs;
+  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  // #endif
+
+  return relay_status[relay_id].timer_decounter.seconds;
+}
+
+
+/**********************************************************************************************
+ *********************************************************************************************
+  Parameter: New function, to briefly command a relay turns off, then to turn it on again (ie when used to reset devices)
+ *********************************************************************************************
+ ********************************************************************************************/
+
+void mRelays::CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(uint16_t time_secs, uint8_t relay_id)
+{
+  // relay_status[relay_id].timer_decounter.seconds = time_secs;
+  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  // #endif
+
+  /**
+   * Variable that is "off" peroid
+   * Variable that will then turn it on again
+   * */
+
+  relay_status[relay_id].timer_off_then_on_decounter.seconds = time_secs;
+  relay_status[relay_id].timer_off_then_on_decounter.active = time_secs > 0 ? true : false;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_off_then_on_decounter.seconds);  
+  #endif
+
+
+
+  // return relay_status[relay_id].time_seconds_on;
+}
+
+
+uint16_t mRelays::CommandGet_SecondsToRemainOff(uint8_t relay_id)
+{
+  // relay_status[relay_id].timer_decounter.seconds = time_secs;
+  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  // #endif
+
+  return relay_status[relay_id].timer_off_then_on_decounter.seconds;
+}
+
+
 
 
 
 
 
 #endif // USE_MODULE_DRIVERS_RELAY
+
+
+
+
+
+
+
+
+
+
+
+/***********
+ * 
+ * 
+ * 
+ * 
+ 
+ {
+  "PowerName": 0,
+  "Relay":{"TimeOffThenOnSecs": 5, "TimeOnSecs":10}
+}
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * ***/

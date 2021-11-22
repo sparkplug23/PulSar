@@ -5,6 +5,101 @@
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR = D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
 
+
+// Used for timed on or off events
+int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
+
+  int8_t function_result = 0;
+
+  /************
+   * INIT SECTION * 
+  *******************/
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();
+    break;
+    case FUNC_INIT:
+      init();
+    break;
+  }
+
+  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case FUNC_LOOP:
+      // if(mTime::TimeReached(&tSavedTest,1000)){
+      //   // SetAllPower(POWER_TOGGLE,SRC_IGNORE);
+      // }
+    break;      
+    case FUNC_EVERY_SECOND:
+      SubTask_Relay_Time_To_Remain_On_Seconds();
+      SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
+    break;
+    case FUNC_EVERY_MINUTE:
+      SubTask_Every_Minute();
+    break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    case FUNC_SET_POWER_ON_ID:
+      CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
+    break;    
+    /************
+     * RULES SECTION * 
+    *******************/
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_POWER_ID:
+      RulesEvent_Set_Power();
+    break;
+    #endif// USE_MODULE_CORE_RULES
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORKS_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+    break; 
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender(); //optional pass parameter
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_fSendNow();
+    break;
+    #endif    
+    /************
+     * WEBPAGE SECTION * 
+    *******************/
+    #ifndef DISABLE_WEBSERVER
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+      WebAppend_Root_Draw_PageTable();
+    break;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+      WebAppend_Root_Status_Table();
+    break;
+    case FUNC_WEB_APPEND_ROOT_BUTTONS:
+      WebAppend_Root_Add_Buttons();
+    break;
+    #endif // DISABLE_WEBSERVER
+  } // end switch
+} // END function
+
+
+
+
+
+
+
+
 /*
 1) MQTT control, including minutes on
 2) Report relay status correctly
@@ -196,92 +291,6 @@ void mRelays::init(void){
   SetPowerOnState();
 }
 
-// Used for timed on or off events
-int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
-
-  int8_t function_result = 0;
-
-  /************
-   * INIT SECTION * 
-  *******************/
-  switch(function){
-    case FUNC_PRE_INIT:
-      Pre_Init();
-    break;
-    case FUNC_INIT:
-      init();
-    break;
-  }
-
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
-  switch(function){
-    /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP:
-      // if(mTime::TimeReached(&tSavedTest,1000)){
-      //   // SetAllPower(POWER_TOGGLE,SRC_IGNORE);
-      // }
-    break;      
-    case FUNC_EVERY_SECOND:
-      SubTask_Relay_Timed_Seconds();
-    break;
-    case FUNC_EVERY_MINUTE:
-      SubTask_Every_Minute();
-    break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_SET_POWER_ON_ID:
-      CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
-    break;    
-    /************
-     * RULES SECTION * 
-    *******************/
-    #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
-      RulesEvent_Set_Power();
-    break;
-    #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORKS_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
-    break; 
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
-    break;
-    case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
-    break;
-    #endif    
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifndef DISABLE_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Draw_PageTable();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break;
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:
-      WebAppend_Root_Add_Buttons();
-    break;
-    #endif // DISABLE_WEBSERVER
-  } // end switch
-} // END function
-
 void mRelays::SubTask_Every_Minute(){
 
   #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
@@ -319,16 +328,28 @@ void mRelays::RulesEvent_Set_Power(){
 #endif // USE_MODULE_CORE_RULES
 
 
-
-void mRelays::SubTask_Relay_Timed_Seconds(){
+/**
+ * @note: Time a relay will remain ON
+ * */
+void mRelays::SubTask_Relay_Time_To_Remain_On_Seconds(){
   
   // Stop if no relays connected
   if(!settings.relays_connected){
     return;
   }
+
   
   // Loop across each connected relay
   for(int relay_id=0;relay_id<settings.relays_connected;relay_id++){
+    
+    /**
+     * Temporary timeoff will require blocking this command
+     * */
+    if(relay_status[relay_id].timer_off_then_on_decounter.seconds>0) //if active, then stop this function
+    {
+      AddLog(LOG_LEVEL_WARN, PSTR("SubTask_Relay_Time_To_Remain_On_Seconds BLOCKED by timeoffthenon"));
+      return;     
+    }
 
     //change seconds
     if(relay_status[relay_id].time_seconds_on){
@@ -355,7 +376,7 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
       #endif
 
-      mqtthandler_sensor_ifchanged.flags.SendNow = true;
+      mqtthandler_state_ifchanged.flags.SendNow = true;
 
     }else{
       //assumed off ie == 0
@@ -363,6 +384,50 @@ void mRelays::SubTask_Relay_Timed_Seconds(){
   }//end for
 
 }
+
+/**
+ * @brief: Time a relay will turn off in seconds, then return to on again
+ * */
+void mRelays::SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds(){
+  
+  // Stop if no relays connected
+  if(!settings.relays_connected){
+    return;
+  }
+  
+  // Loop across each connected relay
+  for(int relay_id=0;relay_id<settings.relays_connected;relay_id++){
+
+    // Auto time off decounters
+    if(relay_status[relay_id].timer_off_then_on_decounter.seconds == 1){ //if =1 then turn off and clear to 0
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
+      #endif       
+
+      CommandSet_Relay_Power(1, relay_id); // TURN ON
+
+      relay_status[relay_id].timer_off_then_on_decounter.seconds=0;
+
+    }else
+    if(relay_status[relay_id].timer_off_then_on_decounter.seconds>1){ //if =1 then turn off and clear to 0
+      relay_status[relay_id].timer_off_then_on_decounter.seconds--; //decrease
+
+      CommandSet_Relay_Power(0, relay_id); // TURN OFF
+      
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_off_then_on_decounter.seconds);
+      #endif
+
+      mqtthandler_state_ifchanged.flags.SendNow = true;
+
+    }else{
+      //assumed off ie == 0
+    }
+  }//end for
+
+}
+
+
 
 
 
@@ -689,8 +754,8 @@ void mRelays::RestorePower(bool publish_power, uint32_t source)
   if (pCONT_set->power != last_power) {
     SetDevicePower(last_power, source);
     if (publish_power) {
-      mqtthandler_sensor_teleperiod.flags.SendNow = true;
-      mqtthandler_sensor_ifchanged.flags.SendNow = true;
+      mqtthandler_state_teleperiod.flags.SendNow = true;
+      mqtthandler_state_ifchanged.flags.SendNow = true;
     }
   }
 }
@@ -726,8 +791,8 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
     SetDevicePower(pCONT_set->power, source);
   }
   if (publish_power) {
-    mqtthandler_sensor_teleperiod.flags.SendNow = true;
-    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    mqtthandler_state_teleperiod.flags.SendNow = true;
+    mqtthandler_state_ifchanged.flags.SendNow = true;
   }
 }
 
@@ -898,11 +963,11 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
   // }
 
   if (publish_power) {
-    mqtthandler_sensor_teleperiod.flags.SendNow = true;
-    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    mqtthandler_state_teleperiod.flags.SendNow = true;
+    mqtthandler_state_ifchanged.flags.SendNow = true;
   }
 
-//AddLog(LOG_LEVEL_TEST, PSTR("mqtthandler_sensor_teleperiod.flags.SendNow=%d"),mqtthandler_sensor_teleperiod.flags.SendNow);
+//AddLog(LOG_LEVEL_TEST, PSTR("mqtthandler_state_teleperiod.flags.SendNow=%d"),mqtthandler_state_teleperiod.flags.SendNow);
 
 
 }
@@ -927,7 +992,7 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mRelays::ConstructJSON_State(uint8_t json_level){
 
   char buffer[100];
 
@@ -944,7 +1009,10 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
           JsonBuilderI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
           JsonBuilderI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
           JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          JBI->Add("TimerDeCounter", relay_status[device_id].timer_decounter.seconds);
+          JBI->Add("TimerDeCounter", CommandGet_SecondsToRemainOn(device_id)); //Phase out
+          JBI->Add("SecondsToRemainOn", CommandGet_SecondsToRemainOn(device_id));          
+          JBI->Add("SecondsToRemainOff", CommandGet_SecondsRelayHasBeenOn(device_id));
+
 
           JsonBuilderI->Level_Start_P(PM_JSON_LAST);
             snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
@@ -977,7 +1045,7 @@ uint8_t mRelays::ConstructJSON_Sensor(uint8_t json_level){
         
       }
     }
-  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_Sensor %d"),JBI->GetLength());
+  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_State %d"),JBI->GetLength());
   JsonBuilderI->End();
 
 }
@@ -1034,93 +1102,6 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level){
 
 
 
-/*********************************************************************************************************************************************
-******** MQTT **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-void mRelays::MQTTHandler_Init(){
-
-  struct handler<mRelays>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 5; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Sensor;
-
-  
-  mqtthandler_ptr = &mqtthandler_scheduled_teleperiod;
-  mqtthandler_ptr->handler_id = MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60;//SEC_IN_HOUR; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRelays::ConstructJSON_Scheduled;
-
-
-  
-} //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mRelays::MQTTHandler_Set_fSendNow()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mRelays::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-void mRelays::MQTTHandler_Sender(uint8_t id){
-    
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_RELAY_ID, handle, id);
-  }
-
-}
-
-////////////////////// END OF MQTT /////////////////////////
 
 #endif
 

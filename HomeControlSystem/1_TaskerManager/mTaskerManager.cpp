@@ -354,8 +354,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_BME
     pModule[EM_MODULE_SENSORS_BME_ID] = new mSensorsBME();
   #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
-    pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mSensorsDB18();
+  #ifdef USE_MODULE_SENSORS_DS18X
+    pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mDS18X();
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new mUltraSonicSensor();

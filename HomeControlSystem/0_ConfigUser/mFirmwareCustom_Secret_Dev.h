@@ -672,7 +672,7 @@
   #define USE_SK6812_METHOD_DEFAULT
 
   // Advanced options  
-  //#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  //#define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   // #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
@@ -911,7 +911,7 @@
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_DHT
   // #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_REMOTE_DEVICE
 
   #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
@@ -1067,7 +1067,7 @@
   
   #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
 
   #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 1
   #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 1
@@ -1279,7 +1279,7 @@
     "\"" D_JSON_SAT "\":100,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
   
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Radar"
@@ -1947,7 +1947,7 @@ use black etherhetn czble in dads rooms for it
   };
 
 
-  #define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
   //#define FORCE_TEMPLATE_LOADING
@@ -2144,7 +2144,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 
 
 
-#define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+#define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
 
@@ -2252,7 +2252,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
   #define DEVICENAME_CTR          "rgbdiningroomtree"
   #define DEVICENAME_FRIENDLY_CTR "RGB Dining Room Tree"
 
- #define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+ #define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
   #define ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
@@ -2348,7 +2348,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 /*
 RAM:   [======    ]  56.2% (used 46024 bytes from 81920 bytes)
 Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
-  #define ENABLE_DEVFEATURE_SETPIXELOUTPUT_VARIABLE
+  #define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   #define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
 
 
@@ -2478,6 +2478,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
@@ -2678,8 +2679,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #ifdef DEVICE_RGBBEDROOM_H801_2
   #define DEVICENAME_CTR          "rgbbedroom_h801_2"
-  #define DEVICENAME_FRIENDLY_CTR "H801 rgbbedroom_h801_2"
-  
+  #define DEVICENAME_FRIENDLY_CTR "H801 rgbbedroom_h801_2 Hanging Wall"
+
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1   
 
@@ -2835,7 +2836,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // #define USE_MODULE_CONTROLLER_SONOFF_IFAN
   // #define USE_MODULE_DRIVERS_IRTRANSCEIVER
 
-  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18X
 
   // #define USE_MODULE_SENSORS_MOTION
   // #define MOTIONALERT_PAYLOAD1_CTR "bedroom"
@@ -2864,7 +2865,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18B20
+      #ifdef USE_MODULE_SENSORS_DS18X
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       //"\"D6\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
       #endif
@@ -3324,7 +3325,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   // // // #define USE_SENSOR_DOOR_LOCK
   // // #define DOORALERT_PAYLOAD_CTR "bedroom"
 
-  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18X
   // #define ENABLE_DEVFEATURE_DB18_TEMPLATE_CORRECTED_INDEXES
 
   
@@ -3378,7 +3379,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       // #endif
-      // #ifdef USE_MODULE_SENSORS_DS18B20
+      // #ifdef USE_MODULE_SENSORS_DS18X
       // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       // //"\"D6\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
       // #endif

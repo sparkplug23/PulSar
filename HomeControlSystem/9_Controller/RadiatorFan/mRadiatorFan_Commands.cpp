@@ -16,9 +16,9 @@ void mRadiatorFan::parse_JSONCommand(JsonParserObject obj){
   //   #endif// ENABLE_LOG_LEVEL_ERROR
   //   return;
   // }  
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-  char buffer[50];
+  // JsonParserToken jtok = 0; 
+  // int8_t tmp_id = 0;
+  // char buffer[50];
 
 //   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //   /**

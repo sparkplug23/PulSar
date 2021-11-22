@@ -601,17 +601,17 @@ class mAnimatorLight :
 
   enum EFFECTS_FUNCTION_MIXER{
     EFFECTS_FUNCTION_MIXER_01_ID=0,
-    EFFECTS_FUNCTION_MIXER_02_ID,
-    EFFECTS_FUNCTION_MIXER_03_ID,
-    EFFECTS_FUNCTION_MIXER_04_ID,
-    EFFECTS_FUNCTION_MIXER_05_ID,
-    EFFECTS_FUNCTION_MIXER_06_ID,
-    EFFECTS_FUNCTION_MIXER_07_ID,
-    EFFECTS_FUNCTION_MIXER_08_ID,
-    EFFECTS_FUNCTION_MIXER_09_ID,
-    EFFECTS_FUNCTION_MIXER_10_ID,
-    EFFECTS_FUNCTION_MIXER_11_ID,
-    EFFECTS_FUNCTION_MIXER_12_ID,
+    // EFFECTS_FUNCTION_MIXER_02_ID,
+    // EFFECTS_FUNCTION_MIXER_03_ID,
+    // EFFECTS_FUNCTION_MIXER_04_ID,
+    // EFFECTS_FUNCTION_MIXER_05_ID,
+    // EFFECTS_FUNCTION_MIXER_06_ID,
+    // EFFECTS_FUNCTION_MIXER_07_ID,
+    // EFFECTS_FUNCTION_MIXER_08_ID,
+    // EFFECTS_FUNCTION_MIXER_09_ID,
+    // EFFECTS_FUNCTION_MIXER_10_ID,
+    // EFFECTS_FUNCTION_MIXER_11_ID,
+    // EFFECTS_FUNCTION_MIXER_12_ID,
     // EFFECTS_FUNCTION_MIXER_13_ID,
     // EFFECTS_FUNCTION_MIXER_14_ID, 
     // EFFECTS_FUNCTION_MIXER_15_ID, 
@@ -655,6 +655,12 @@ class mAnimatorLight :
       
       uint16_t enable_force_preset_brightness_scaler : 1; // to allow manual brightness leveling
 
+
+/**
+ * Any mixer setting that needed this, should probably just becomes its own animation, and hence just a different animation mode will be chosen
+ * "Mixer" should be distilled down to ONLY picking animation, setting brightness, intensities etc
+ * 
+ * */
       uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
       uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
 
@@ -667,7 +673,7 @@ class mAnimatorLight :
   struct MIXER_SETTINGS{
    // #ifdef DEVICE_OUTSIDETREE
     struct MODE{
-      uint8_t running_id = EFFECTS_FUNCTION_MIXER_05_ID;
+      uint8_t running_id = EFFECTS_FUNCTION_MIXER_01_ID;
       uint16_t time_on_secs[EFFECTS_FUNCTION_MIXER_MAX]; // stores which to use
       int16_t time_on_secs_active = 60; //signed
       // char running_friendly_name_ctr[40];

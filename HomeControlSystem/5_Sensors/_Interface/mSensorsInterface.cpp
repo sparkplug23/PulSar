@@ -260,13 +260,13 @@ char buffer[50];
         {
 
 int8_t device_name_id = sensor_id;
-#ifdef USE_MODULE_SENSORS_DS18B20
+#ifdef USE_MODULE_SENSORS_DS18X
 //temp fix
 if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
 {
   device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
 }
-#endif // USE_MODULE_SENSORS_DS18B20
+#endif // USE_MODULE_SENSORS_DS18X
 
 
           JBI->Add(
@@ -289,7 +289,7 @@ if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
         {
 
 int8_t device_name_id = sensor_id;
-#ifdef USE_MODULE_SENSORS_DS18B20
+#ifdef USE_MODULE_SENSORS_DS18X
 //temp fix
 /**
  * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
@@ -301,7 +301,7 @@ if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
   device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
 }
 
-#endif// USE_MODULE_SENSORS_DS18B20
+#endif// USE_MODULE_SENSORS_DS18X
           // Convert into colour
           float temperature = val.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
           RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps(temperature,0);

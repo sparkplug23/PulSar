@@ -37,6 +37,15 @@
 //   D_MAPIDS_TYPE_RGBCOLOUR_LENGTH_ID
 // };
 
+/***
+ * Palette ideas to add
+ * 
+ * */
+
+/**
+ * Red, Green, Blue, Yellow(255,255,0), Purple(0,255,255)
+ * */
+
 
     // Predefined RGB colors
     typedef enum {

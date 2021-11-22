@@ -136,7 +136,7 @@ class mRelays :
 
     // #ifdef ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
     
-    void SubTask_Relay_Timed_Seconds();
+    void SubTask_Relay_Time_To_Remain_On_Seconds();
 
     // #endif // ENABLE_DEVFEATURE_ADVANCED_RELAY_CONTROLS
     
@@ -149,10 +149,19 @@ class mRelays :
        * 1 = turn off then set to 0 to be off
        * 2+ count down
        * */
-      struct TIME_DECOUNTERS{
+      struct TIME_ON_DECOUNTERS{
         uint16_t seconds = 0;
         uint8_t active = false;
-      }timer_decounter;
+      }timer_decounter;     
+      /**
+       * 0 = not running
+       * 1 = turn off then set to 0 to be off
+       * 2+ count down
+       * */
+      struct TIME_OFF_THEN_ON_DECOUNTERS{
+        uint16_t seconds = 0;
+        uint8_t active = false;
+      }timer_off_then_on_decounter;
       /**
        * Records when relays are turned on/off
        * */
@@ -183,6 +192,8 @@ class mRelays :
       //uint16_t time_minutes_on = 0; //phase out, make function to get minutes from seconds
 
       uint32_t time_seconds_on = 0;
+
+
      
       uint8_t ischanged = false;
 
@@ -194,12 +205,21 @@ void SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_index = 0);
 
 void SubTask_Every_Minute();
 
+void SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
+
 
     /**
      * Commands
      */
     void CommandSet_Timer_Decounter(uint16_t time_secs, uint8_t relay_id = 0);
+    uint16_t CommandGet_SecondsToRemainOn(uint8_t relay_id = 0);
 
+    
+uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
+
+    uint32_t CommandGet_SecondsRelayHasBeenOn(uint8_t relay_id = 0);
+    
+    void CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(uint16_t time_secs, uint8_t relay_id);
 
 
     void CommandSet_Relay_Power(uint8_t state, uint8_t relay_id = 0);
@@ -212,7 +232,7 @@ void SubTask_Every_Minute();
     int8_t GetDeviceIDbyName(const char* c);
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_State(uint8_t json_method = 0);
     uint8_t ConstructJSON_Scheduled(uint8_t json_level = 0);
 
 
@@ -223,20 +243,20 @@ void SubTask_Every_Minute();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     struct handler<mRelays> mqtthandler_settings_teleperiod;
-    struct handler<mRelays> mqtthandler_sensor_ifchanged;
-    struct handler<mRelays> mqtthandler_sensor_teleperiod;
+    struct handler<mRelays> mqtthandler_state_ifchanged;
+    struct handler<mRelays> mqtthandler_state_teleperiod;
     struct handler<mRelays> mqtthandler_scheduled_teleperiod;
 
     // Extra module only handlers
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
+    enum MQTT_HANDLER_MODULE_IDS{  // States need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
       
     struct handler<mRelays>* mqtthandler_list[4] = {
       &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
+      &mqtthandler_state_ifchanged,
+      &mqtthandler_state_teleperiod,
       &mqtthandler_scheduled_teleperiod
     };
 

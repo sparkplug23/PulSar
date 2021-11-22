@@ -425,3 +425,17 @@ For now, its so unlikely someone would be switching between both hardware its no
 #Idea 124
 
 Add sunelevation palette that is actually left on overnight, and is black when its nighttime
+
+#Idea 125
+
+    Effect animation, of mutliple group pixels that each section grows and shrinks
+    ie, say 50 leds, with 5 sections with 10 leds per section
+    Have the amount of leds per a section grow/shrink, with different intensities
+    The effect should be "bars" of growing and shrinking colours
+    Later, change the "colours in the section" to actually be palette, and hence a palette may be a single colour, or, a full rainbow
+    So a solid section, could have rainbows or another palette growing into/out of it
+
+#Idea 126
+
+    Create option that palette values can be turned off, ie, if 5 colours existed in a palette, have the option that I can select "on/off ratio" of that palette to be returned
+    So for 50%, 10 led length palette, then when showing that palette only half of them would be lit

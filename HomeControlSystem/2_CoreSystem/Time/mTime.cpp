@@ -1336,7 +1336,7 @@ uint32_t mTime::RuleToTime(TimeRule r, int yr)
   #ifdef DEBUG_MODULE_TIME_STD
   AddLog(LOG_LEVEL_INFO, PSTR("mTime::RuleToTime"));
   #endif// DEBUG_MODULE_TIME_STD
-  
+
   datetime_t tm;
   uint32_t t;
   uint8_t m;
@@ -1921,14 +1921,14 @@ void mTime::RtcSecond(void)
         /**
          * if(now >= DST_start) AND (now < DST_end)
          * */
-        // if( // Check if utc_time is inside period of daylight savings     /// simplify without offsets for now, just to test
-        //   (Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && 
-        //   (Rtc.utc_time < (Rtc.standard_time - dstoffset))
-        // ){
-        if( // If UTC is between March and November, ie Summer
-          (Rtc.utc_time >= Rtc.daylight_saving_time) &&    //DST time is March
-          (Rtc.utc_time <  Rtc.standard_time)              // End of DST, ie ST, is November
+        if( // Check if utc_time is inside period of daylight savings     /// simplify without offsets for now, just to test
+          (Rtc.utc_time >= (Rtc.daylight_saving_time - stdoffset)) && 
+          (Rtc.utc_time < (Rtc.standard_time - dstoffset))
         ){
+        // if( // If UTC is between March and November, ie Summer
+        //   (Rtc.utc_time >= Rtc.daylight_saving_time) &&    //DST time is March
+        //   (Rtc.utc_time <  Rtc.standard_time)              // End of DST, ie ST, is November
+        // ){
 
           #ifdef DEBUG_MODULE_TIME_STD
           AddLog(LOG_LEVEL_INFO, PSTR("DST: Daylight Saving Time"));
@@ -1989,7 +1989,7 @@ void mTime::RtcSecond(void)
 
 
 
-#endif // USE_DEVFEATURE_DEBUG_DST_TIME
+#endif // DEBUG_MODULE_TIME_STD
 
 
 

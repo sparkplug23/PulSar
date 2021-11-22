@@ -18,7 +18,7 @@
  * Personal configs for installed home devices as of 2021
 \*********************************************************************************************/
 
-  #define USE_MODULE_NETWORKS_MQTT
+#define USE_MODULE_NETWORKS_MQTT
 // #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
@@ -83,7 +83,7 @@ Hallway
   - front door/table socket
   - hallway table
  */
-#define DEVICE_STAIRWAY_MOTION
+// #define DEVICE_STAIRWAY_MOTION
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_HEATING
 // #define DEVICE_HEATING_ESP32
@@ -1468,10 +1468,8 @@ Bathroom
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_SWITCHES
 
-  #define USE_DEVFEATURE_DEBUG_DST_TIME
+  // #define DEBUG_MODULE_TIME_STD
  
-  //#define DEBUG_MODULE_TIME_STD
-
   #define USE_MODULE_CORE_RULES
 
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Stairs"
@@ -1539,7 +1537,8 @@ Bathroom
   /* Single Relay controls TWO 12V DC fans to improve heating (1 D_Out)
    * Measure PWM speed of motors (2 D_in) (Needs level shifter from 12v to 3.3v)
    * Motion sensor (1 D_in)
-   * Two DS18b20 to measure inside/outside of vent area (1 D_io)
+   * THREE DS18b20 to measure inside/outside of vent area (1 D_io)
+   *  - (3) on radiator pipe, to be used as fan trigger when set to auto mode
    * One DHT22 for climate sensing -- towards door (1 D_io)
    * One BME280 for improved climate sensing -- towards hallway (1 I2C) */
   #define DEVICENAME_CTR          "radiatorfan"
@@ -1549,7 +1548,7 @@ Bathroom
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_DHT
 
   #define USE_MODULE_DRIVERS_INTERFACE
@@ -1602,11 +1601,11 @@ Bathroom
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18B20
-      "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D6\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
@@ -1619,8 +1618,9 @@ Bathroom
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Fan"
   #define MAX_RELAYS 1
 
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "Top Vent"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "Inside Vent"
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "OutsideVent"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "InsideVent"
+  #define D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG "RadiatorPipe"
   #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "Hallway" //BME primary
   #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "Hallway-DHT" //secondary
   
@@ -1633,7 +1633,8 @@ Bathroom
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
@@ -1648,7 +1649,8 @@ Bathroom
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                
         "[40,170,231,153,29,19,02,43],"
-        "[40,170,221,101,29,19,02,113]"
+        "[40,170,221,101,29,19,02,113],"    
+        "[40,159,147,  2, 0, 0, 0,117]" //hex  28:9F:93:2:0:0:0:75    // Longer wire on radiator pipe (this will be used to trigger fan)
       "]"  
     "}"
   "}";
@@ -1697,7 +1699,7 @@ Bathroom
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_REMOTE_DEVICE
   
   #define REMOTE_SENSOR_1_MQTT_TOPIC "masterbedroomsensor/status/bme/+/sensors"
@@ -1893,7 +1895,7 @@ Bathroom
   
   // #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18X
   
   #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8
   // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
@@ -2217,7 +2219,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D18:00:00\",\"OffTime\":\"00D07:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D15:00:00\",\"OffTime\":\"00D09:00:00\"}"
   "}";
 
 
@@ -2276,7 +2278,7 @@ Bathroom
         "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":60}}\""
       "}"
     "},"
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
@@ -2478,7 +2480,7 @@ Bathroom
 
   #define USE_MODULE_CONTROLLER_OILFURNACE
     
-  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18X
   
   #define USE_MODULE_SENSORS_ULTRASONICS
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
@@ -2550,7 +2552,7 @@ Bathroom
   #define USE_MODULE_SENSORS_INTERFACE
   // #define USE_MODULE_SENSORS_ANALOG
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_BME //works
   // #define USE_MODULE_SENSORS_MOTION
 
@@ -3861,7 +3863,7 @@ Bathroom
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR
-  #define USE_MODULE_SENSORS_DS18B20
+  #define USE_MODULE_SENSORS_DS18X
   
   #define USE_MODULE_CONTROLLER_SENSORCOLOURS
 
@@ -3982,7 +3984,7 @@ Bathroom
   #define SETTINGS_HOLDER 1
   
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18B20
+  // #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_DHT
   
   #define USE_MODULE_TEMPLATE
@@ -3998,7 +4000,7 @@ Bathroom
       "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18B20
+      #ifdef USE_MODULE_SENSORS_DS18X
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif
       "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    

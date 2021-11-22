@@ -16,14 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mSensorsDB18.h"
+#include "mDS18X.h"
 
-#ifdef USE_MODULE_SENSORS_DS18B20
+#ifdef USE_MODULE_SENSORS_DS18X
 
-const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
-const char* mSensorsDB18::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
+const char* mDS18X::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
+const char* mDS18X::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
 
-int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
 
   int8_t function_result = 0;
   
@@ -48,10 +48,74 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP: 
-      EveryLoop();
+     EveryLoop();
     break;  
     case FUNC_EVERY_SECOND:{
 
+AddLog(LOG_LEVEL_INFO, PSTR("\t\t\tcount=%d"), sensor_group[0].dallas->getDeviceCount());
+
+// uint8_t sensor_group_count = 0;
+// sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
+//     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
+//     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
+//     sensor_group[sensor_group_count].dallas->begin();
+
+//  // Start up the library
+//   // sensors.begin();
+  
+//   // Grab a count of devices on the wire
+//  uint8_t  numberOfDevices = sensor_group[sensor_group_count].dallas->getDeviceCount();
+  
+//   // locate devices on the bus
+//   Serial.print("Locating devices...");
+  
+//   Serial.print("Found ");
+//   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "numberOfDevices=%d"), numberOfDevices);
+//   Serial.println(" devices.");
+
+//   // report parasite power requirements
+//   Serial.print("Parasite power is: "); 
+//   if (sensor_group[sensor_group_count].dallas->isParasitePowerMode()) Serial.println("ON");
+//   else Serial.println("OFF");
+
+//   DeviceAddress tempDeviceAddress;
+  
+//   // Loop through each device, print out address
+//   for(int i=0;i<numberOfDevices; i++)
+//   {
+//     // Search the wire for address
+//     if(sensor_group[sensor_group_count].dallas->getAddress(tempDeviceAddress, i))
+//     {
+//       Serial.print("Found device ");
+//       Serial.print(i, DEC);
+//       Serial.print(" with address: ");
+//       printAddress(tempDeviceAddress);
+//       Serial.println();
+      
+//       Serial.print("Setting resolution to ");
+//       Serial.println(TEMPERATURE_PRECISION, DEC);
+      
+//       // set the resolution to TEMPERATURE_PRECISION bit (Each Dallas/Maxim device is capable of several different resolutions)
+//       sensor_group[sensor_group_count].dallas->setResolution(tempDeviceAddress, TEMPERATURE_PRECISION);
+      
+//       Serial.print("Resolution actually set to: ");
+//       Serial.print(sensor_group[sensor_group_count].dallas->getResolution(tempDeviceAddress), DEC); 
+//       Serial.println();
+//     }else{
+//       Serial.print("Found ghost device at ");
+//       Serial.print(i, DEC);
+//       Serial.print(" but could not detect address. Check power and cabling");
+//     }
+
+//   }
+
+
+
+  // for(int i=0;i<DB18_SENSOR_MAX;i++){
+  //     printAddress(sensor[i].address);
+  //   }
+    // Init();
       // Pre_Init();
       // char buffer[100];
       // uint8_t ii = 5;
@@ -102,7 +166,7 @@ int8_t mSensorsDB18::Tasker(uint8_t function, JsonParserObject obj){
 }//end function
 
 
-void mSensorsDB18::Pre_Init(){
+void mDS18X::Pre_Init(){
 
   uint8_t sensor_count = 0;
   uint8_t sensor_group_count = 0;
@@ -166,9 +230,9 @@ void mSensorsDB18::Pre_Init(){
 
 
 
-void mSensorsDB18::Init(void){
+void mDS18X::Init(void){
 
-  // AddLog(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::init"));
+  AddLog(LOG_LEVEL_DEBUG,PSTR("mDS18X::init"));
 
   // sensor group 1 exists
   uint8_t sensor_group_count = 0;
@@ -200,10 +264,11 @@ void mSensorsDB18::Init(void){
           ){
         // get sensor and add to list 
         
-        if(sensor_group[sensor_group_id].dallas->getAddress(sensor[sensor_count].address,sensor_id)){  //what is this then, already stored?
+        if(sensor_group[sensor_group_id].dallas->getAddress(sensor[sensor_count].address,sensor_id))
+        {  //what is this then, already stored?
           // Remember group this sensor came from 
           
-          //AddLog_Array(LOG_LEVEL_INFO, "AFTER getAddress", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
+          AddLog_Array(LOG_LEVEL_INFO, "AFTER getAddress", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
 
           sensor[sensor_count].sensor_group_id = sensor_group_id;
           // sensor[sensor_count].address_stored = ;
@@ -228,7 +293,7 @@ void mSensorsDB18::Init(void){
 
 
   if(!sensor_count){    
-    // AddLog(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
+    AddLog(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
     return;
   }
 
@@ -245,7 +310,7 @@ void mSensorsDB18::Init(void){
 
 
 
-void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_completion){
+void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_completion){
 
   unsigned long timeout = millis();
   do{
@@ -307,11 +372,78 @@ void mSensorsDB18::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t requ
 }//end function
 
 
+/**
+ * Create a function that can scan for devices, and return all addresses as json formatted string (that can then be sent via serial or mqtt)
+ * Dont include the start and end chars, so this can be optional appended later as part of a larger json message
+ * */
+void mDS18X::ScanSensorAddresses_JsonObject(char* buffer, uint8_t buflen)
+{
+
+// uint8_t found_count = 0;
+// uint8_t found_on_pin = 0;
+  
+//   snprintf_P(buffer, buflen, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_DEVICES_FOUND_AT));
+  
+//     // wire->beginTransmission(address);
+//     // error = wire->endTransmission();
+
+//     /**
+//      * Search pin 1 if set
+//      * */
+//     if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID))
+//     {
+//       if(found_on_pin = sensor_group[0].dallas->getDeviceCount())
+//       {
+
+//         for (uint8_t index = 0; index < found_on_pin; index++) {
+         
+//           // snprintf_P(buffer, buflen, PSTR("[%02X,%02X,%02X,%02X,%02X,%02X,%02X,%02X]"), devs, address); //as hex
+//           snprintf_P(buffer, buflen, PSTR("[%d,%d,%d,%d,%d,%d,%d,%d]"), 
+
+
+          
+          
+          
+          
+//           ); //as dec
+//  if()
+//         }
+
+
+//       }
+//     }
+
+
+
+//   for (uint8_t index = 1; index < DB18_SENSOR_MAX; index++) {
+
+
+//     if (0 == error) {
+//       any = 1;
+//       snprintf_P(devs, devs_len, PSTR("%s 0x%02x"), devs, address);
+//     }
+//     else if (error != 2) {  // Seems to happen anyway using this scan
+//       any = 2;
+//       // snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
+//       break;
+//     }
+//   }
+//   if (any) {
+//     strncat(devs, "\"}", devs_len - strlen(devs) -1);
+//   }
+//   else {
+//     snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
+//   }
+
+
+
+  return;
+}
 
 
 //pubsub.ppublish("sensors/pipe","{\"ds\":{\"temp\":\"1\"},\"us\":{\"temp\":\"2\"},\"wb\":{\"temp\":\"3\"},\"ih\":{\"temp\":\"4\"},\"tt\":{\"temp\":\"5\"},\"tb\":{\"temp\":\"6\"}}"));
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
-uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mDS18X::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
   
@@ -343,7 +475,7 @@ uint8_t mSensorsDB18::ConstructJSON_Sensor(uint8_t json_level){
 
 }
 
-uint8_t mSensorsDB18::ConstructJSON_Settings(uint8_t json_level){
+uint8_t mDS18X::ConstructJSON_Settings(uint8_t json_level){
 
   char buffer[20];
 
@@ -376,6 +508,7 @@ JBI->Add("pindb1PinUsed", pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID));
 
   JsonBuilderI->Level_End();
 
+  // JsonBuilderI->Level_Start("AddressFull");
 
   //   root["rate_measure_ms"] = settings.rate_measure_ms;
   //   // root["tRateSecs"] = mqtthandler_sensor_ifchanged.tRateSecs;
@@ -392,7 +525,7 @@ JBI->Add("pindb1PinUsed", pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID));
 
 }
 
-int8_t mSensorsDB18::FindStructIndexByAddressID(int8_t address_id){
+int8_t mDS18X::FindStructIndexByAddressID(int8_t address_id){
 
   int8_t struct_index_id = -1;
 
@@ -410,25 +543,32 @@ int8_t mSensorsDB18::FindStructIndexByAddressID(int8_t address_id){
 
 
 // function to print a device address
-void mSensorsDB18::printAddress(DeviceAddress deviceAddress, int8_t index){
-  for (uint8_t i = 0; i < 8; i++){// zero pad the address if necessary
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
-  }
+void mDS18X::printAddress(DeviceAddress deviceAddress, int8_t index){
+  // for (uint8_t i = 0; i < 8; i++){// zero pad the address if necessary
+  //   if (deviceAddress[i] < 16) Serial.print("0");
+  //   Serial.print(deviceAddress[i], HEX);
+  // }
   
-  Serial.print("\tdec: ");
-  for (uint8_t i = 0; i < 8; i++){// zero pad the address if necessary
-    Serial.print(deviceAddress[i]);
-    if(i<7){Serial.print(",");}
-  }
-  Serial.println();
-  // AddLog(LOG_LEVEL_DEBUG,PSTR("printAddress %X:%X:%X:%X:%X:%X:%X:%X"),
+  // Serial.print("\tdec: ");
+  // for (uint8_t i = 0; i < 8; i++){// zero pad the address if necessary
+  //   Serial.print(deviceAddress[i]);
+  //   if(i<7){Serial.print(",");}
+  // }
+  // Serial.println();
+  // AddLog(LOG_LEVEL_DEBUG,PSTR("printAddress (%d) %X:%X:%X:%X:%X:%X:%X:%X"),
+  // index,
   //   deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
   //   deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
+
+  AddLog(LOG_LEVEL_DEBUG,PSTR("DS18: Add(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
+  index,
+    deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
+    deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
+
 }
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
+void mDS18X::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[100];
 
@@ -442,7 +582,7 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Draw(){
 }
 
 //append to internal buffer if any root messages table
-void mSensorsDB18::WebAppend_Root_Status_Table_Data(){
+void mDS18X::WebAppend_Root_Status_Table_Data(){
   
   uint8_t sensor_counter = 0;
   
@@ -490,53 +630,10 @@ void mSensorsDB18::WebAppend_Root_Status_Table_Data(){
 
 
 
-void mSensorsDB18::parse_JSONCommand(JsonParserObject obj){
-
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-
-  // Using a desired address, the sensor is searched for, then index (id) is updated
-  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR]){
-     
-    JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
-      
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 D_PARSING_MATCHED "%s count %d"), F(D_JSON_SENSORADDRESS),array_group.size()); 
-    #endif // LOG_LEVEL_COMMANDS
-    
-    uint8_t address_temp[8];
-    uint8_t address_index = 0;
-    uint8_t original_device_id = 0;
-    
-    for(auto group_iter : array_group) {
-
-      JsonParserArray array_sensor_address_iter = group_iter;
-      memset(address_temp,0,sizeof(address_temp));
-      address_index = 0;
-            
-      for(auto address_id : array_sensor_address_iter) {
-        int address = address_id.getInt();
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
-        //AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_DB18 "address = %d"),address); 
-        // #endif
-        address_temp[address_index++] = address;
-        // if(address_index>7){ break; } //error!
-      }
-
-      AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)8);
-      SetIDWithAddress(original_device_id++, address_temp);
-      Serial.println();
-
-    }
-    
-  }
-
-}
-
 
 // Search for address, if found, store id against it in struct
 // Assumes template load AFTER init of sensors
-void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
+void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
 
   // memcpy(sensor[device_id].address_stored,address_to_find,sizeof(sensor[device_id].address_stored));
 
@@ -589,10 +686,10 @@ void mSensorsDB18::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find
 }
 
 
-void mSensorsDB18::EveryLoop(){
+void mDS18X::EveryLoop(){
   if(mTime::TimeReachedNonReset(&tSavedMeasureSensor,settings.rate_measure_ms)){
     
-    // AddLog(LOG_LEVEL_DEBUG,PSTR("mSensorsDB18::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
+    // AddLog(LOG_LEVEL_DEBUG,PSTR("mDS18X::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
 
     if(!db18_sensors_active){ // Retry init if failed
       Init(); //search again
@@ -616,86 +713,5 @@ void mSensorsDB18::EveryLoop(){
   }
 
 }//end
-
-
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-void mSensorsDB18::MQTTHandler_Init(){
-
-  struct handler<mSensorsDB18>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true; // DEBUG CHANGE
-  mqtthandler_ptr->tRateSecs = 600; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 10; 
-  #ifdef DEVICE_IMMERSIONSENSOR //temp fix
-  mqtthandler_ptr->tRateSecs = 60; 
-  #endif
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_IFCHANGED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSensorsDB18::ConstructJSON_Sensor;
-
-} //end "MQTTHandler_Init"
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsDB18::MQTTHandler_Set_fSendNow()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsDB18::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSensorsDB18::MQTTHandler_Sender(uint8_t id)
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DB18S20_ID, handle, id);
-  }
-}
 
 #endif

@@ -31,6 +31,7 @@
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
+#include "0_ConfigUser/mFirmwareCustom_Secret_Christmas_Devices.h""
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
 #include "0_ConfigUser/mFirmwareCustom_Secret_Measurements_Calibration.h"
 #endif // D_USER_MICHAEL
@@ -300,7 +301,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_BME
     EM_MODULE_SENSORS_BME_ID,
   #endif
-  #ifdef USE_MODULE_SENSORS_DS18B20
+  #ifdef USE_MODULE_SENSORS_DS18X
     EM_MODULE_SENSORS_DB18S20_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
@@ -587,9 +588,9 @@ enum MODULE_IDS{
   #include "5_Sensors/BME/mSensorsBME.h"
   #define pCONT_bme                             static_cast<mSensorsBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_DS18B20
-  #include "5_Sensors/DB18x20/mSensorsDB18.h"
-  #define pCONT_msdb18                          static_cast<mSensorsDB18*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
+#ifdef USE_MODULE_SENSORS_DS18X
+  #include "5_Sensors/DB18x20/mDS18X.h"
+  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"

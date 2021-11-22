@@ -111,6 +111,131 @@ void mAnimatorLight::init_mixer_defaults(){
    * need to add an override brightness level, or a ratio, ie so berry can be 80% of "set brigtnhess"
    * */
 
+  /** Christmas Outside Tree 2021 Animation Design
+   * 
+   * Palette C1: 10: The coloured icecle lights (6-8)
+   * Palette C2: 11: As many colours as possible (15 or more, leaning orange, red and pink ie "warm")
+   * Palette C3: 12: "Warm colours" used for 2 (or 3?) sequential picking from palette
+   * 
+   * Use a palette that will also have white, warm white, side by side... ie tree can go day white, then warm white, then all the other colours, only used in palette sequential stepper
+   * 
+   * "rows" this year, shall be made from 3 rows, to make it more noticable
+   * 
+   * animations of changing quickly are only enabled before 8pm, after, only static or slow glow
+   * 
+   * 
+   * >> Overview basic <<
+   * (1) Static, warm palette
+   * (2) Slow glow, random, slow changing
+   * (3) "Pop" changing or warm palette, (instant change)
+   * (4) "Burst pops", the nice decaying brightness pop from last year. Ie 10% randomly instant changes, while all 100% will decay to a lower brightness level (but still overall on)
+   * (5) 3 row, in order palette, have them squentially rotate up the tree (ie bands will move up the tree)
+   * 
+   * (6) twinkle effect, have single colours turn off for one cycle, ie every 1 second, new animation, just instant overwrite a pixel off, next time it will turb back on
+   * (7) twinkle effect, with the "on" this time, where it turns to white (lower the brightness of the white so its not insaley bright)
+   * (8) lighting effect with raindbow palette, have the tree mostly off, with burst of colours
+   * 
+   * (9) transition from lighting effect to static, ie, a special static version that auto flashes pixels from OFF to full set brightness
+   *       - the effect would be all pixels are set to the desired colour, but the brightness will twinkle on until they all reach the desired colour.
+   * 
+   * 
+   * 
+   * Section A: "Coloured, Single Multiplier, Basic"
+   * 
+   * (A-1)
+   * Palette:    Coloured Short (User10)
+   * Flasher:    Slow Glow
+   * Transition: Blend (1000)
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * (A-2)
+   * Palette:    Coloured Short (User10)
+   * Flasher:    Slow Glow
+   * Transition: Blend (1000)
+   * Order:      Random                                     *
+   * Multiplier: None
+   *  
+   * (A-3)
+   * Palette:    Coloured Long (User11)                     *
+   * Flasher:    Slow Glow
+   * Transition: Blend (1000)
+   * Order:      Random                                     *
+   * Multiplier: None
+   * 
+   * Section B: "Horizontal array methods"
+   *  
+   * (B-6)       "Bars in order, Most colours"
+   * Palette:    Coloured Long (User11)
+   * Flasher:    Slow Glow
+   * Transition: Blend   (3 seconds ie faster than above)
+   * Order:      Random
+   * Multiplier: None
+   * 
+   * (B-7)       "Bars in order, fewer colours"
+   * Palette:    Coloured Short (User10)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * (B-8)       "Bars in order, fewer colours (so movement is clearer)  - sequential movement"
+   * Palette:    Coloured Short (User10)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * //to be tried, probably needs to use a different mapping?
+   * (B-8 test to try)       "Bars in order, fewer colours (so movement is clearer)  - sequential movement"
+   * Palette:    Coloured Short (User10)    --use multiplier that makes "quarters" per row
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * Twinkle with mostly off
+   * 
+   * (A-4)
+   * Palette:    Coloured Long (User11)
+   * Flasher:    Twinkle                                    *
+   * Transition: Instant                                    *
+   * Order:      Random
+   * Multiplier: None
+   * 
+   * (C-9)       "Twinkle with mostly off ie what I do with AlternateBrightnessMax"
+   * Palette:    Coloured Long (User11)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   *  
+   * (C-10)      "Twinkle as a pulsing effect, more on than off"
+   * Palette:    Coloured Long (User11)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * Berry green
+   * 
+   * (D-11)      berry single pixels"
+   * Palette:    Coloured (Berry Green)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * (D-12)       "berry rows inorder"
+   * Palette:    Coloured (Berry Green)
+   * Flasher:    Slow Glow
+   * Transition: Instant
+   * Order:      InOrder
+   * Multiplier: None
+   * 
+   * 
+   * need to add an override brightness level, or a ratio, ie so berry can be 80% of "set brigtnhess"
+   * */
 
   mixer.mode.running_id = EFFECTS_FUNCTION_MIXER_01_ID;
 
@@ -199,242 +324,242 @@ void mAnimatorLight::init_mixer_defaults(){
   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].starttime = {8, 1, 2, 3};
 
-  // Group 1 "Random, slow, few"
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixels_to_update_as_percentage = 30; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].isenabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.time = 2500;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.rate = 10000;//5000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
+//   // Group 1 "Random, slow, few"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixels_to_update_as_percentage = 30; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].isenabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.time = 2500;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.rate = 10000;//5000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixel_multiplier_enabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
-  // Group 2 "Random, fast, many"
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixels_to_update_as_percentage = 30; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.time = 1000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.rate = 10000;//600;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_10_ID;
+//   // Group 2 "Random, fast, many"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixels_to_update_as_percentage = 30; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.time = 1000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.rate = 10000;//600;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixel_multiplier_enabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_10_ID;
 
-// Section B
+// // Section B
 
-  // Group 3 "random, rows, slow"
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixels_to_update_as_percentage = 40;  //needs to be higher to increase chance of first pixels changed as they are multipled
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.time = 4500;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.rate = 10000;//5000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixel_multiplier_enabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_11_ID;
+//   // Group 3 "random, rows, slow"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixels_to_update_as_percentage = 40;  //needs to be higher to increase chance of first pixels changed as they are multipled
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.time = 4500;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.rate = 10000;//5000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixel_multiplier_enabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_11_ID;
 
-  // Group 4 "Random, rows, faster"
-  // EFFECTS_FUNCTION_MIXER_05_ID
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixels_to_update_as_percentage = 40; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].isenabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.time = 1500;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.rate = 10000;//2000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixel_multiplier_enabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
+//   // Group 4 "Random, rows, faster"
+//   // EFFECTS_FUNCTION_MIXER_05_ID
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixels_to_update_as_percentage = 40; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].isenabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.time = 1500;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.rate = 10000;//2000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixel_multiplier_enabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
-  // Group 5 "Static/Inorder, rows, few  colours"
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].isenabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.time = 9500;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.rate = 10000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixel_multiplier_enabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
+//   // Group 5 "Static/Inorder, rows, few  colours"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixels_to_update_as_percentage = 100; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].isenabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.time = 9500;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.rate = 10000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixel_multiplier_enabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
-  // Group 6 "Now rotate the rows"
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].isenabled = true; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.time = 250;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.rate = 300;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixel_multiplier_enabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
+//   // Group 6 "Now rotate the rows"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixels_to_update_as_percentage = 100; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].isenabled = true; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.time = 250;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.rate = 300;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixel_multiplier_enabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
-// Berry green
-// Group 7
+// // Berry green
+// // Group 7
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flags.enable_force_preset_brightness_scaler = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixels_to_update_as_percentage = 100; 
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].ifenabled_forced_brightness_level_percentage = 100;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].isenabled = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time = 2000;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.rate = 2000;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].run_time_duration_sec = 60;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+
+// // // 8
+
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flags.enable_force_preset_brightness_scaler = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixels_to_update_as_percentage = 100; 
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].ifenabled_forced_brightness_level_percentage = 100;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].isenabled = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time = 2000;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.rate = 2000;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].run_time_duration_sec = 60;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_enabled = false;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+
+// //   // Idea
+// //   // Darker many colours, with a few (instant) bright leds changing to brighter (and thus transitioning into the new twinkle modes)
+// // //9
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flags.enable_force_preset_brightness_scaler = true;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixels_to_update_as_percentage = 100; //1000
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].isenabled = false;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time = 0;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.rate = 600;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].run_time_duration_sec = 60;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_enabled = false;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+
+
+
+// // Section C  : Twinkle
+
+//   // Group 10
 //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flags.enable_force_preset_brightness_scaler = true;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixels_to_update_as_percentage = 100; 
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].ifenabled_forced_brightness_level_percentage = 100;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].isenabled = true;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time = 2000;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.rate = 2000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixels_to_update_as_percentage = 3; //1000
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time = 950;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.rate = 1000;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].run_time_duration_sec = 60;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = false;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;//EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
-// // 8
+// // Step thorugh
 
+// //too much blue
+//   // Group 11 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flags.enable_force_preset_brightness_scaler = true;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixels_to_update_as_percentage = 100; 
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].ifenabled_forced_brightness_level_percentage = 100;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].isenabled = true;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time = 2000;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.rate = 2000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value-10;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time = 4950;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.rate = 5000;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].run_time_duration_sec = 120;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_enabled = false;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_15_ID;
 
-//   // Idea
-//   // Darker many colours, with a few (instant) bright leds changing to brighter (and thus transitioning into the new twinkle modes)
-// //9
+// //too much pink
+//   // Group 11 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flags.enable_force_preset_brightness_scaler = true;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixels_to_update_as_percentage = 100; //1000
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixels_to_update_as_percentage = 100; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value-10;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].isenabled = false;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time = 0;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.rate = 600;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time = 4950;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.rate = 5000;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].run_time_duration_sec = 120;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_enabled = false;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 
 
-// Section C  : Twinkle
+//   // Group 12 "where palette 5 has off colours too"
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixels_to_update_as_percentage = 100; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flags.enable_force_preset_brightness_scaler = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
 
-  // Group 10
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixels_to_update_as_percentage = 3; //1000
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time = 950;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.rate = 1000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;//EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
-
-// Step thorugh
-
-//too much blue
-  // Group 11 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value-10;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time = 4950;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.rate = 5000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].run_time_duration_sec = 120;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_15_ID;
-
-//too much pink
-  // Group 11 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value-10;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time = 4950;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.rate = 5000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].run_time_duration_sec = 120;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
-
-
-
-  // Group 12 "where palette 5 has off colours too"
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flags.enable_force_preset_brightness_scaler = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].brightness_higher_255 = 255;    //I can have brightest, as less will be on
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].brightness_lower_255  = 70;  // dont have totally off
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].brightness_higher_255 = 255;    //I can have brightest, as less will be on
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].brightness_lower_255  = 70;  // dont have totally off
   
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.time = 950;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.rate = 1000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;  // palette is the desired brightness!
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.time = 950;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.rate = 1000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].run_time_duration_sec = 60;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixel_multiplier_enabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;  // palette is the desired brightness!
 
-//testing
-  // mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-
-
+// //testing
+//   // mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 
 
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixels_to_update_as_percentage = 100; 
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].isenabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.time = 1000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.rate = 60000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].run_time_duration_sec = 60*5;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixel_multiplier_enabled = false;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
+
+
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].flags.enable_force_preset_brightness_scaler = true;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixels_to_update_as_percentage = 100; 
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].isenabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.time = 1000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.rate = 60000;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].run_time_duration_sec = 60*5;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixel_multiplier_enabled = false;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 
   // Animation idea #1
@@ -483,9 +608,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer()
 
 
       if(!pCONT_time->CheckBetween_Day_DateTimesShort(&mixer.group[mixer.running_id].starttime,
-                                                   &mixer.group[mixer.running_id].endtime)){
+                                                   &mixer.group[mixer.running_id].endtime))
+      {
         //add here to pass if the running_id is restricted
-        if(mixer.group[mixer.running_id].enable_skip_restricted_by_time){ //if true, skip
+        if(mixer.group[mixer.running_id].enable_skip_restricted_by_time)
+        { //if true, skip
           do{ //skip until we reach an acceptable mixer      
             mixer.running_id++;     
             if(mixer.running_id>+EFFECTS_FUNCTION_MIXER_LENGTH_ID){
@@ -584,10 +711,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Mixer()
       //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "Time until MillisReached = %d"),mixer.tSavedMillisToChangeAt-millis());
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
     
-      if(mixer.group[mixer.running_id].time_on_secs_decounter < -2){
+      if(mixer.group[mixer.running_id].time_on_secs_decounter < -2)
+      {
         mixer.group[mixer.running_id].time_on_secs_decounter = 0;
         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEO "RESET < -1 mixer[%d]..time_on_secs_decounter = %d"),mixer.running_id,mixer.group[mixer.running_id].time_on_secs_decounter);  
       }
+
     }
 
   } //tSavedTrigger  

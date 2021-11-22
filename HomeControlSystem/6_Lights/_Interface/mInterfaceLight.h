@@ -21,8 +21,17 @@
 
 enum PIXEL_MULTIPLIER_MODE_IDS{
   PIXEL_MULTIPLIER_MODE_NONE_ID,
+  /**
+   * using a fixed amount, multiply the output/set, divide the input/get
+   * */ 
   PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID,
-  PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
+  /**
+   * Random will not work, unless I record the mapped values
+   * */
+  // PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
+  /**
+   * I need this for the outside tree
+   * */
   PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID
 };
 

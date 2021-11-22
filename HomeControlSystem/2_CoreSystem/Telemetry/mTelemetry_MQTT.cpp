@@ -96,9 +96,9 @@ void mTelemetry::MQTTHandler_Init(){
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
-  #ifdef USE_DEVFEATURE_DEBUG_DST_TIME
+  #ifdef DEBUG_MODULE_TIME_STD
   p->tRateSecs = 1;//SEC_IN_HOUR; 
-  #else //ifdef USE_DEVFEATURE_DEBUG_DST_TIME
+  #else //ifdef DEBUG_MODULE_TIME_STD
   p->tRateSecs = SEC_IN_HOUR; 
   #endif
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;

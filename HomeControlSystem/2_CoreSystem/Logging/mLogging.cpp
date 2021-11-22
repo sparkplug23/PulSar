@@ -142,18 +142,22 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   char mxtime[25];  // "13:45:21 " //9
 
+  /**
+   * Change to different log layouts, using a switch case. Each method (serial/web etc) can use different formats
+   * */
+
   memset(mxtime,0,sizeof(mxtime));
   if(pCONT_set->Settings.log_time_isshort){
-    if(pCONT_time->RtcTime.hour<1){
+    if(pCONT_time->uptime.hour<1){
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
         pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
         pCONT_time->uptime.minute,pCONT_time->uptime.second);
     }else{
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "), //add hour
+      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %02d:%02d:%02d "), //add hour
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
-        pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-        pCONT_time->uptime.minute,pCONT_time->uptime.second);
+        pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
+        pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     }
     
   }else{

@@ -233,7 +233,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres()
   float speedofsound_inmps = 0;
 
   #ifdef USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-      #ifdef USE_MODULE_SENSORS_DS18B20
+      #ifdef USE_MODULE_SENSORS_DS18X
       int tempsensorid = -1;
       float ambient_temperature;
       if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)EM_MODULE_SENSORS_DB18S20_ID))>=0){

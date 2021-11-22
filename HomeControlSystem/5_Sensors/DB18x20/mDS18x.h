@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_DS18B20
+#ifdef USE_MODULE_SENSORS_DS18X
 
 #define REQUIRESALARMS false //turn off
 
@@ -21,13 +21,13 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mSensorsDB18 :
+class mDS18X :
   public mTaskerInterface
 {
 
   private:
   public:
-    mSensorsDB18(){};
+    mDS18X(){};
     void Init(void);
     void Pre_Init();
     
@@ -39,7 +39,7 @@ class mSensorsDB18 :
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
-      return sizeof(mSensorsDB18);
+      return sizeof(mDS18X);
     };
     #endif
 
@@ -54,6 +54,7 @@ class mSensorsDB18 :
 
     void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
 
+    void ScanSensorAddresses_JsonObject(char* buffer, uint8_t buflen);
 
     void SplitTask_UpdateSensors(uint8_t sensor_id, uint8_t require_completion);
     uint8_t sReadSensor;
@@ -165,14 +166,14 @@ int8_t FindStructIndexByAddressID(int8_t address_id);
     // void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     // void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    struct handler<mSensorsDB18> mqtthandler_settings_teleperiod;
-    struct handler<mSensorsDB18> mqtthandler_sensor_ifchanged;
-    struct handler<mSensorsDB18> mqtthandler_sensor_teleperiod;
+    struct handler<mDS18X> mqtthandler_settings_teleperiod;
+    struct handler<mDS18X> mqtthandler_sensor_ifchanged;
+    struct handler<mDS18X> mqtthandler_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     
-    struct handler<mSensorsDB18>* mqtthandler_list[3] = {
+    struct handler<mDS18X>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod
