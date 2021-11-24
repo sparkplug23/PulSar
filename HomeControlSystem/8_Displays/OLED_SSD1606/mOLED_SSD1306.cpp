@@ -309,7 +309,7 @@ void mOLED_SSD1306::MQTTHandler_Init(){
 
 
 // Can these be replaced by mqtt shared function that gets the mqtt from the module
-void mOLED_SSD1306::MQTTHandler_Set_fSendNow(){
+void mOLED_SSD1306::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
 

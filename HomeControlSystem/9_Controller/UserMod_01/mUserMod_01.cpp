@@ -50,7 +50,7 @@ int8_t mUserMod_01::Tasker(uint8_t function, JsonParserObject obj){
     //   MQTTHandler_Sender(); //optional pass parameter
     // break;
     // case FUNC_MQTT_CONNECTED:
-    //   MQTTHandler_Set_fSendNow();
+    //   MQTTHandler_Set_RefreshAll();
     // break;
   }
   
@@ -383,7 +383,7 @@ void mUserMod_01::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mUserMod_01::MQTTHandler_Set_fSendNow()
+void mUserMod_01::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

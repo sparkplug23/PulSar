@@ -156,7 +156,7 @@ ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     

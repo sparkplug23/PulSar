@@ -83,7 +83,7 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT    
   }
@@ -178,7 +178,7 @@ void mLEDs::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mLEDs::MQTTHandler_Set_fSendNow(){
+void mLEDs::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -497,7 +497,7 @@ void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 //   //     MQTTHandler_Sender(); //optional pass parameter
 //   //   break;
 //   //   case FUNC_MQTT_CONNECTED:
-//   //     MQTTHandler_Set_fSendNow();
+//   //     MQTTHandler_Set_RefreshAll();
 //   //   break;
 //   // }
   
@@ -779,7 +779,7 @@ void mLEDs::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } //end "MQTTHandler_Init"
 
 
-// void mLEDs::MQTTHandler_Set_fSendNow(){
+// void mLEDs::MQTTHandler_Set_RefreshAll(){
 
 //   mqtthandler_settings_teleperiod.flags.SendNow = true;
 //   mqtthandler_sensor_ifchanged.flags.SendNow = true;

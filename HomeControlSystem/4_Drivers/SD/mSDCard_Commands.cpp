@@ -86,7 +86,7 @@ void mSDCard::parse_JSONCommand(JsonParserObject obj){
   // }
   
   #ifdef USE_MODULE_NETWORK_MQTT
-  MQTTHandler_Set_fSendNow();
+  MQTTHandler_Set_RefreshAll();
   #endif// USE_MODULE_NETWORK_MQTT
 
 }

@@ -1137,7 +1137,7 @@ void mCameraOV2640::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mCameraOV2640::MQTTHandler_Set_fSendNow(){
+void mCameraOV2640::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   // mqtthandler_animation_teleperiod.flags.SendNow = true;
@@ -1943,7 +1943,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 

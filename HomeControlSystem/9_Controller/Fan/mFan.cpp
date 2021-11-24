@@ -137,7 +137,7 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
   }
   
@@ -207,7 +207,7 @@ void mFan::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mFan::MQTTHandler_Set_fSendNow()
+void mFan::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

@@ -110,7 +110,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }// switch(command)
@@ -453,6 +453,7 @@ DEBUG_LINE;
   // #endif
 
   
+  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   memset(&editable_mapped_array_data_array,0,sizeof(editable_mapped_array_data_array));
   
   uint16_t single_row_count_array[] = {
@@ -485,6 +486,7 @@ DEBUG_LINE;
   pixel_group.mapped_array_data.length = ArrayCountUntilNull(editable_mapped_array_data_array, (uint8_t)D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH); //values before 0
 
 DEBUG_LINE;
+  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
 
 }
@@ -578,10 +580,12 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal)
 {
 
+  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 if(indexPixel<10)
 {
     AddLog(LOG_LEVEL_DEBUG, PSTR("RGB(%d)=%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B);
 }
+  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
 
   // #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
@@ -1632,6 +1636,7 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
+  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
   //Use starting pixel as temporary buffer, record desired as already set
@@ -1693,6 +1698,7 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
 }
 
+  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
 
 

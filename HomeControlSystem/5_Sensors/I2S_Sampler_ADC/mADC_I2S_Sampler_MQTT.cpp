@@ -70,7 +70,7 @@ void mADC_I2S_Sampler::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mADC_I2S_Sampler::MQTTHandler_Set_fSendNow()
+void mADC_I2S_Sampler::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

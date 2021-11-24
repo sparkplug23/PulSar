@@ -75,7 +75,7 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 
@@ -190,7 +190,7 @@ void mUpdates::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mUpdates::MQTTHandler_Set_fSendNow(){
+void mUpdates::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   // mqtthandler_animation_teleperiod.flags.SendNow = true;

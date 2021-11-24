@@ -95,7 +95,7 @@ void WebAppend_Root_Status_Table_Data();
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     

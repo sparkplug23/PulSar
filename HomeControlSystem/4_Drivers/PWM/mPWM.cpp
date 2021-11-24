@@ -315,7 +315,7 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj){
 //       MQTTHandler_Sender(); //optional pass parameter
 //     break;
 //     case FUNC_MQTT_CONNECTED:
-//       MQTTHandler_Set_fSendNow();
+//       MQTTHandler_Set_RefreshAll();
 //     break;
   }
   
@@ -536,7 +536,7 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj){
 // } //end "MQTTHandler_Init"
 
 
-// void mPWM::MQTTHandler_Set_fSendNow(){
+// void mPWM::MQTTHandler_Set_RefreshAll(){
 
 //   mqtthandler_settings_teleperiod.flags.SendNow = true;
 //   mqtthandler_sensor_ifchanged.flags.SendNow = true;

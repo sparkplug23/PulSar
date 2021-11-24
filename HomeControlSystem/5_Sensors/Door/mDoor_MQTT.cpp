@@ -43,7 +43,7 @@ void mDoorSensor::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mDoorSensor::MQTTHandler_Set_fSendNow()
+void mDoorSensor::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

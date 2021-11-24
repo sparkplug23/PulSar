@@ -56,14 +56,14 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     
     break;
     case FUNC_EVERY_SECOND:
+
       // AddLog(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
-
-//  Serial.println(WiFi.localIP());
-
+      //  Serial.println(WiFi.localIP());
       // #ifdef ESP32
       // #endif
 
-      if (pCONT_set->Settings.flag_network.network_wifi) {
+      if (pCONT_set->Settings.flag_network.network_wifi) 
+      {
         WifiCheck(pCONT_set->wifi_state_flag);
         pCONT_set->wifi_state_flag = WIFI_RESTART;
       }
@@ -659,7 +659,7 @@ void mWiFi::WifiCheckIp(void)
 // #endif  // LWIP_IPV6=1
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "Connected to IP:%s (%s) WiFi.status() = WL_CONNECTED")); //ip, ssid, connected uptime, connected total downtime
     #endif// ENABLE_LOG_LEVEL_INFO
 
@@ -1442,8 +1442,14 @@ void mWiFi::MdnsAddServiceHttp(void) {
     MDNS.addServiceTxt("http", "tcp", "devicetype", "tasmota");
   }
 }
-#ifdef ESP8266 //Not needed with esp32 mdns
-void mWiFi::MdnsUpdate(void) {
+#endif  // WEBSERVER_HOST_DISCOVERY
+#endif  // USE_DISCOVERY
+
+
+
+#if defined(USE_NETWORK_MDNS) && defined(ESP8266) //Not needed with esp32 mdns
+void mWiFi::MdnsUpdate(void) 
+{
   MDNS.update();
   if (2 == Mdns.begun) {
     MDNS.update(); // this is basically passpacket like a webserver
@@ -1451,11 +1457,6 @@ void mWiFi::MdnsUpdate(void) {
   }
 }
 #endif  // ESP8266
-#endif  // WEBSERVER_HOST_DISCOVERY
-#endif  // USE_DISCOVERY
-
-
-
 
 
 // In 1dB increments

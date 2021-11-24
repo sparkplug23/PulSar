@@ -45,7 +45,7 @@ void mRadiatorFan::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mRadiatorFan::MQTTHandler_Set_fSendNow()
+void mRadiatorFan::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

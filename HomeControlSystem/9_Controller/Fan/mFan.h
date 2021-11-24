@@ -102,7 +102,7 @@ void WebAppend_Root_Status_Table();
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
     struct handler<mFan>* mqtthandler_ptr;

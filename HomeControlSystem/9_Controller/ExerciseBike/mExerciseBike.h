@@ -72,7 +72,7 @@ uint8_t ConstructJSON_LightStates(uint8_t json_level);
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
     struct handler<mExerciseBike>* mqtthandler_ptr;

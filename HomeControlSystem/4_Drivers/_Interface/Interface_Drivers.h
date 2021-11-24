@@ -431,7 +431,7 @@ enum drivers_type_t{
 //   //#ifdef USE_CORE_MQTT 
 
 //     void MQTTHandler_Init();
-//     void MQTTHandler_Set_fSendNow();
+//     void MQTTHandler_Set_RefreshAll();
 //     void MQTTHandler_Set_TelePeriod();
     
 //     struct handler<mNextionPanel>* mqtthandler_ptr;

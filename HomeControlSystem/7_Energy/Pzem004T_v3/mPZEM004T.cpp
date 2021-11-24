@@ -399,7 +399,7 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mEnergyPZEM004T::MQTTHandler_Set_fSendNow()
+void mEnergyPZEM004T::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

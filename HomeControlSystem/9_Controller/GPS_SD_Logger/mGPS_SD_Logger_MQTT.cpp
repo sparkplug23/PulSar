@@ -57,7 +57,7 @@ void mGPS_SD_Logger::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mGPS_SD_Logger::MQTTHandler_Set_fSendNow()
+void mGPS_SD_Logger::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

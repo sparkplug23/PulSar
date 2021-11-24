@@ -418,7 +418,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
   #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
     struct handler<mGPS>* mqtthandler_ptr;

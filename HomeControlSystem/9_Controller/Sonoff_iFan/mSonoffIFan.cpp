@@ -57,7 +57,7 @@ int8_t mSonoffIFan::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
   }
   
@@ -359,7 +359,7 @@ void mSonoffIFan::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mSonoffIFan::MQTTHandler_Set_fSendNow()
+void mSonoffIFan::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

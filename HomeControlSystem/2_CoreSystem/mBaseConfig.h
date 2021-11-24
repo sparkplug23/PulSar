@@ -289,7 +289,7 @@
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
-  //#define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
+  #define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
   #define MQTT_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
 // -- mDNS ----------------------------------------
 // #define USE_NETWORK_MDNS           1                 // [SetOption55] Use mDNS (0 = Disable, 1 = Enable)

@@ -158,7 +158,7 @@ int8_t mDoorBell::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
   }
   
@@ -278,7 +278,7 @@ void mDoorBell::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mDoorBell::MQTTHandler_Set_fSendNow(){
+void mDoorBell::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;

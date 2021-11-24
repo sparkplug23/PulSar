@@ -29,7 +29,7 @@ class mLEDs {
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
   
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     

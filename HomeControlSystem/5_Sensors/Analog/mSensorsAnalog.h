@@ -65,7 +65,7 @@ class mSensorsAnalog :
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Connected();
     void MQTTHandler_Disconnected();

@@ -299,7 +299,7 @@ void mSR04::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mSR04::MQTTHandler_Set_fSendNow(){
+void mSR04::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;

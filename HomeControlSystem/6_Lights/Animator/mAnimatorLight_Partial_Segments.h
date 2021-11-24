@@ -1894,7 +1894,7 @@
 
 //   #ifdef USE_MODULE_NETWORK_MQTT
 //     void MQTTHandler_Init();
-//     void MQTTHandler_Set_fSendNow();
+//     void MQTTHandler_Set_RefreshAll();
 //     void MQTTHandler_Set_TelePeriod();
     
 //     struct handler<mAnimatorLight>* mqtthandler_ptr;

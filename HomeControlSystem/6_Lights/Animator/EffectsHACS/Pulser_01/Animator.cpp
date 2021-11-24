@@ -18,8 +18,10 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Pulse_Random_On(){
   for(uint16_t index=0; index<pixels_to_clear; index++ ){
     animation_colours[random(0,pCONT_iLight->settings.light_size_count)].DesiredColour = RgbColor(0);
   }
+  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   // Check if output multiplying has been set, if so, change desiredcolour array
   OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  #endif// ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   // Get starting positions already on show
   // UpdateStartingColourWithGetPixel();
   // Call the animator to blend from previous to new

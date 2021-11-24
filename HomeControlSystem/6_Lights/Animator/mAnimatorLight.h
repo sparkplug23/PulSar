@@ -34,7 +34,7 @@
 #include "mAnimatorLight_web.h"
 #include "6_Lights/Animator/EffectsWLED/Animations.h"
 
-#define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+// #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
@@ -292,7 +292,6 @@ class mAnimatorLight :
     ANIM_FUNCTION_SIGNATURE;
     mAnimatorLight& setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE);
 
-    bool OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
     void RotateDesiredColour(uint8_t pixels, uint8_t direction = 0);
     void UpdateStartingColourWithGetPixel();
     void UpdateDesiredColourWithGetPixel();
@@ -336,6 +335,7 @@ class mAnimatorLight :
   void CommandSet_PixelGrouping_Flag_ModeID(uint8_t value);
   void CommandSet_PixelGrouping_Flag_Multiplier(uint8_t value);
   void CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* value, uint8_t length);
+  bool OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
   
@@ -500,7 +500,7 @@ class mAnimatorLight :
 
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
     struct handler<mAnimatorLight>* mqtthandler_ptr;

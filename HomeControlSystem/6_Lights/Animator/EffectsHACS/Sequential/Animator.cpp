@@ -18,8 +18,13 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function__Sequential(){
         AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
         #endif
         UpdateDesiredColourFromPaletteSelected();
+        
+        #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
         // Check if output multiplying has been set, if so, change desiredcolour array
-        OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+        OverwriteUpdateDesiredColourIfMultiplierIsEnabled();      
+        #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+
+
         // Get starting positions already on show
         UpdateStartingColourWithGetPixel();
         

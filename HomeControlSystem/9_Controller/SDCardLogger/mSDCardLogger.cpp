@@ -241,7 +241,7 @@ void mSDCardLogger::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mSDCardLogger::MQTTHandler_Set_fSendNow(){
+void mSDCardLogger::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;

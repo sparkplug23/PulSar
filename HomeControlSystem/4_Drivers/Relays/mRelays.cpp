@@ -5,9 +5,11 @@
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
 const char* mRelays::PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR = D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR;
 
-
-// Used for timed on or off events
-int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
+/**
+ * @brief: Module Interface
+ * */
+int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   int8_t function_result = 0;
 
@@ -29,11 +31,6 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP:
-      // if(mTime::TimeReached(&tSavedTest,1000)){
-      //   // SetAllPower(POWER_TOGGLE,SRC_IGNORE);
-      // }
-    break;      
     case FUNC_EVERY_SECOND:
       SubTask_Relay_Time_To_Remain_On_Seconds();
       SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
@@ -66,14 +63,14 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
-    break; 
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+    break; 
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif    
     /************
@@ -127,132 +124,31 @@ Relay Name:    ontime, offtime, timeon, last controlled by//
 void mRelays::Pre_Init(void){
   
   settings.fEnableSensor = false;
-   //LEDS
-      //  if ((mpin >= GPIO_LED1_INV_ID) && (mpin < (GPIO_LED1_INV_ID + MAX_LEDS))) {
-      //   bitSet(pCONT_set->led_inverted, mpin - GPIO_LED1_INV_ID);
-      //   // mpin -= (GPIO_LED1_INV_ID - GPIO_LED1_ID);
-      // }
+  settings.relays_connected = 0;
 
-      //  #ifdef USE_MODULE_DRIVERS_RELAY
-      // if ((mgpio >= GPIO_REL1_INV_ID) && (mgpio < (GPIO_REL1_INV_ID + MAX_RELAYS))) {
-      //   bitSet(pCONT_mry->rel_inverted, mgpio - GPIO_REL1_INV_ID);
-      //   mgpio -= (GPIO_REL1_INV_ID - GPIO_REL1_ID);
-      // }
-      // #endif
-
-
-
-    // #ifdef USE_MODULE_DRIVERS_RELAY
-    // Configure relay pins
-    // for (uint8_t i = 0; i < MAX_RELAYS; i++) {
-    //   if (PinUsed(GPIO_REL1_ID,i)) {
-    //     pinMode(Pin(GPIO_REL1_ID, i), OUTPUT);
-    //     pCONT_set->devices_present++;
-    //     settings.fEnableSensor = true;
-    //     // if (MODULE_EXS_RELAY == pCONT_set->my_module_type) {
-    //     //   digitalWrite(pCONT_set->pin[GPIO_REL1 +i], bitRead(pCONT->mry->rel_inverted, i) ? 1 : 0);
-    //     //   if (i &1) { pCONT_set->devices_present--; }
-    //     // }
-    //   }
-    // }
-    // #endif
-
-    settings.relays_connected = 0;
-
-    /**
-     * Using a different index since gpio cant be used, and pin_number is not the same
-     * */    
-
-    // Lets check each type on their own, normal, inverted etc
-    for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
+  // Lets check each type on their own, normal, inverted etc
+  for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
+  {
+    if(pCONT_pins->PinUsed(GPIO_REL1_ID, driver_index))
     {
-      if(pCONT_pins->PinUsed(GPIO_REL1_ID, driver_index))
-      {
-        uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
-        pinMode(pin_number, OUTPUT);
-        settings.fEnableSensor = true;
-        pCONT_set->devices_present++;
-        if(settings.relays_connected++ >= MAX_RELAYS){ break; }
-      }else
-      if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
-      {
-        uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
-        pinMode(pin_number, OUTPUT);
-        bitSet(rel_inverted, driver_index); //temp fix
-        settings.fEnableSensor = true;
-        pCONT_set->devices_present++;
-        if(settings.relays_connected++ >= MAX_RELAYS){ break; }
-      }
+      uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_ID, driver_index);
+      pinMode(pin_number, OUTPUT);
+      settings.fEnableSensor = true;
+      pCONT_set->devices_present++;
+      if(settings.relays_connected++ >= MAX_RELAYS){ break; }
+    }else
+    if(pCONT_pins->PinUsed(GPIO_REL1_INV_ID, driver_index))
+    {
+      uint8_t pin_number = pCONT_pins->Pin(GPIO_REL1_INV_ID, driver_index);
+      pinMode(pin_number, OUTPUT);
+      bitSet(rel_inverted, driver_index); //temp fix
+      settings.fEnableSensor = true;
+      pCONT_set->devices_present++;
+      if(settings.relays_connected++ >= MAX_RELAYS){ break; }
     }
-
-
-
-  //   uint8_t relay_index = 0;
-
-
-
-
-  // for(uint8_t pin_id=GPIO_REL1_ID;pin_id<GPIO_REL1_ID+(MAX_RELAYS*4);pin_id++){
-
-  //       // Serial.printf("pin=%d/%d\n\r",pin_id,GPIO_KEY1_ID+(MAX_BUTTONS*4));
-  //   if(pCONT_pins->PinUsed(pin_id)){
-  //       // Serial.printf("PinUsed\t\tpin=%d\n\r",pin_id);
-
-  //       uint8_t pin_number = pCONT_pins->Pin(pin_id);
-      
-  //       pinMode(pin_number, OUTPUT);
-  //       settings.fEnableSensor = true;
-  //       pCONT_set->devices_present++;
-  //     // buttons[settings.relays_connected].pin = pCONT_pins->GetPin(pin_id);
-
-  //     // Standard pin
-  //     if((pin_id >= GPIO_REL1_ID)&&(pin_id < GPIO_REL1_ID+MAX_RELAYS)
-  //     ){
-        
-        
-  //     }else
-  //     // Inverted pin, active low, with pulls
-  //     if( (pin_id >= GPIO_REL1_INV_ID)&&(pin_id < GPIO_REL1_INV_ID+MAX_RELAYS))
-  //     {
-  //       bitSet(rel_inverted, relay_index); //temp fix
-  //     }else
-  //     {
-  //       Serial.printf("NO MATCH GPIO_REL1_ID pin=%d\n\r\n\r\n\r\n\r\n\r\n\r",pin_id);
-  //     }
-
-  //     // Get boot state of button (this may also be better placed in a delay task from boot)
-  //     // buttons[settings.relays_connected].lastbutton = digitalRead(buttons[settings.relays_connected].pin);  
-      
-  //     #ifdef ENABLE_LOG_LEVEL_INFO
-  //       // AddLog(LOG_LEVEL_TEST, PSTR("Relay %d %d %d"), pin_id, settings.relays_connected, buttons[settings.relays_connected].pin);
-  //     #endif // ENABLE_LOG_LEVEL_INFO
-      
-  //     if(settings.relays_connected++ >= MAX_RELAYS){ break; }
-
-  //   } // if PinUsed
-
-
-  //   relay_index++ ; // increase relay count
-  // }//end for
-
-
-
-
-
-  // if(pCONT_pins->PinUsed(GPIO_LED1_ID)) {  // not set when 255
-  //   // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
-  //   // if()
-  //   pinMode(pCONT_pins->GetPin(GPIO_LED1_ID), OUTPUT);
-  //   digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), HIGH); //OFF
-  //   settings.fEnableSensor = true;
-  // }else{
-  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_LED1_ID));
-  //   //disable pir code
-  // }
-
+  }
 
 }
-
 
 
 void mRelays::init(void){
@@ -322,7 +218,7 @@ void mRelays::RulesEvent_Set_Power(){
 
   ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
   
-  // MQTTHandler_Set_fSendNow();
+  // MQTTHandler_Set_RefreshAll();
 
 }
 #endif // USE_MODULE_CORE_RULES
@@ -428,99 +324,6 @@ void mRelays::SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds(){
 }
 
 
-
-
-
-#ifndef DISABLE_WEBSERVER
-void mRelays::WebAppend_Root_Add_Buttons(){
-
-  if(!settings.relays_connected){
-    return;
-  }
-
-  char button_text_ctr[30];
-  char relay_name_ctr[30];
-  char dlist_json_template[100];
-  
-  //PSTR CRASHED!!
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,"Relay Controls","");//PSTR("Relay Controls"),"");
-
-  BufferWriterI->Append_P(PSTR("{t}<tr>"));
-    for(uint8_t button_id=0;button_id<settings.relays_connected;button_id++){
-      // Create json template
-      snprintf(dlist_json_template, sizeof(dlist_json_template), 
-        "{\\\"" D_JSON_POWERNAME "\\\":\\\"%s\\\",\\\"" D_JSON_ONOFF "\\\":\\\"%s\\\"}",
-        GetRelayNamebyIDCtr(button_id, relay_name_ctr, sizeof(relay_name_ctr)),
-        "%s"
-      );
-      // Build button
-      BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_KEY_TEMPLATED_VARIABLE_INSERTS_HANDLE_IHR2, 
-                                100/settings.relays_connected,
-                                "", 
-                                "buttonh " "reltog",
-                                dlist_json_template, 
-                                D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR, //button_value_ctr
-                                GetRelayNameWithStateLongbyIDCtr(button_id, button_text_ctr, sizeof(button_text_ctr)),
-                                ""
-                              );
-    }
-  BufferWriterI->Append_P(PSTR("</tr>{t2}"));
-
-}
-
-
-
-void mRelays::WebAppend_Root_Draw_PageTable(){
-
-  if(!settings.relays_connected){
-    return;
-  }
-  char buffer[50];
-  
-  DEBUG_LINE;
-  if(settings.fShowTable){
-    for(int ii=0;ii<settings.relays_connected;ii++){
-      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-        BufferWriterI->Append_P(PSTR("<td>%s</td>"), GetRelayNamebyIDCtr(ii,buffer,sizeof(buffer)));
-        BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"relpow_tab","?");   
-      BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-    }    
-  }
-
-}
-
-
-//append to internal buffer if any root messages table
-void mRelays::WebAppend_Root_Status_Table(){
-  
-  if(!settings.relays_connected){
-    return;
-  }
-  char buffer[20]; memset(buffer,0,sizeof(buffer));
-
-  if(settings.fShowTable){
-    JsonBuilderI->Array_Start("relpow_tab");// Class name
-    for(int row=0;row<settings.relays_connected;row++){  
-      JsonBuilderI->Level_Start();
-        JsonBuilderI->Add("id",row);
-        JsonBuilderI->Add("ih",CommandGet_Relay_Power(row) ? PSTR("ON") : PSTR("Off"));
-      JsonBuilderI->Level_End();
-    }
-    JsonBuilderI->Array_End();  
-  }
-
-  JsonBuilderI->Array_Start("reltog");// Class name
-  for(int row=0;row<settings.relays_connected;row++){  
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
-      JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
-      JsonBuilderI->Add("bc",CommandGet_Relay_Power(row) ? "#00ff00" : "#ee2200");    
-    JsonBuilderI->Level_End();
-  }  
-  JsonBuilderI->Array_End();
-
-}
-#endif // DISABLE_WEBSERVER
 
 
 

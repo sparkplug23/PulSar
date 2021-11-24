@@ -130,7 +130,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     const char* command = obj[F("command")];
     if(strstr(command,PSTR("system_send_all"))){ 
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_SETTINGS D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-      //MQTTHandler_Set_fSendNow();
+      //MQTTHandler_Set_RefreshAll();
       data_buffer.isserviced++;
     }
     else

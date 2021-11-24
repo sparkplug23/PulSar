@@ -1502,7 +1502,7 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
 //   //   const char* command = obj["command"];
 //   //   if(strstr(command,"system_send_all")){ 
 //   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-//   //     MQTTHandler_Set_fSendNow();
+//   //     MQTTHandler_Set_RefreshAll();
 //   //     isserviced++;
 //   //   }
 //   //   else{

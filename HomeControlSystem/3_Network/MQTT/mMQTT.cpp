@@ -645,7 +645,7 @@ void mMQTT::parsesub_MQTTSettingsCommand(){
   //   const char* command = obj["command"];
   //   if(strcmp(command,"system_send_all")==0){ 
   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-  //     //MQTTHandler_Set_fSendNow();
+  //     //MQTTHandler_Set_RefreshAll();
   //     data_buffer.isserviced++;
   //   }
   //   else{

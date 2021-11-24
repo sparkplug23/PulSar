@@ -1000,7 +1000,7 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
 
@@ -1141,7 +1141,7 @@ void mFileSystem::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mFileSystem::MQTTHandler_Set_fSendNow(){
+void mFileSystem::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   // mqtthandler_animation_teleperiod.flags.SendNow = true;
@@ -1365,7 +1365,7 @@ void mFileSystem::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 // } //end "MQTTHandler_Init"
 
 
-// void mFileSystem::MQTTHandler_Set_fSendNow(){
+// void mFileSystem::MQTTHandler_Set_RefreshAll(){
 
 //   mqtthandler_settings_teleperiod.flags.SendNow = true;
 //   mqtthandler_sensor_ifchanged.flags.SendNow = true;

@@ -84,7 +84,7 @@ void mEnergyInterface::MQTTHandler_Init(){
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mEnergyInterface::MQTTHandler_Set_fSendNow()
+void mEnergyInterface::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

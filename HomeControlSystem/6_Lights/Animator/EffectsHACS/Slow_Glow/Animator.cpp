@@ -44,8 +44,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function__Slow_Glow(){
   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
   // Pick new colours
   UpdateDesiredColourFromPaletteSelected();
+  
+  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   // Check if output multiplying has been set, if so, change desiredcolour array
   OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+  
   // Get starting positions already on show
   UpdateStartingColourWithGetPixel();
   // Call the animator to blend from previous to new

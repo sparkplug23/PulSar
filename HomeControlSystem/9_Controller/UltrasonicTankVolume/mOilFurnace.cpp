@@ -260,7 +260,7 @@ void mOilFurnace::SubTask_RecordLitresOverDays(void){
 //   //   const char* command = obj["command"];
 //   //   if(strstr(command,"system_send_all")){ 
 //   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-//   //     MQTTHandler_Set_fSendNow();
+//   //     MQTTHandler_Set_RefreshAll();
 //   //     isserviced++;
 //   //   }
 //   //   else{
@@ -326,7 +326,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
       // #endif
       
       // if(mTime::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
-      //   MQTTHandler_Set_fSendNow();
+      //   MQTTHandler_Set_RefreshAll();
       //   // mqtthandler_.flags.SendNow = true;
       //   // mqtthandler_ifchanged_detailed.flags.SendNow = true;
       // }
@@ -359,7 +359,7 @@ int8_t mOilFurnace::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_fSendNow();
+      MQTTHandler_Set_RefreshAll();
     break;
   }
 
@@ -882,7 +882,7 @@ void mOilFurnace::MQTTHandler_Init(){
 } //end "MQTTHandler_Init"
 
 
-void mOilFurnace::MQTTHandler_Set_fSendNow(){
+void mOilFurnace::MQTTHandler_Set_RefreshAll(){
 
   mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_litres_ifchanged.flags.SendNow = true;

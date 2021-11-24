@@ -121,7 +121,7 @@ void mAnimatorLight::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mAnimatorLight::MQTTHandler_Set_fSendNow()
+void mAnimatorLight::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

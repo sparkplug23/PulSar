@@ -58,7 +58,7 @@ void mRelays::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mRelays::MQTTHandler_Set_fSendNow()
+void mRelays::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;

@@ -425,7 +425,7 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
   //#ifdef USE_CORE_MQTT 
 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_fSendNow();
+    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
     struct handler<mOilFurnace>* mqtthandler_ptr;
