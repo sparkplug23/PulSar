@@ -58,7 +58,8 @@
 #define LATITUDE               54.6         // [Latitude] Your location to be used with sunrise and sunset
 #undef LONGTITUDE
 #define LONGITUDE              5.9          // [Longitude] Your location to be used with sunrise and sunset
-
+#undef ALTITUDE_ABOVE_SEALEVEL
+#define ALTITUDE_ABOVE_SEALEVEL 25
 
 #endif // MUSERCONFIG_EXAMPLE_HEADER
 

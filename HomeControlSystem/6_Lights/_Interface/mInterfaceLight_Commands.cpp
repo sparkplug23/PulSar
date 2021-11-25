@@ -1194,7 +1194,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
-****************** LightsCountToUpdateAsNumber *****************************************************************************************
+****************** LightsCountToUpdateAsNumber DUPLICATED EFFECT 1/2*****************************************************************************************
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
@@ -1203,8 +1203,9 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   animation.transition.pixels_to_update_as_number = value;
   // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
 
-  // Tmp fix until I merge them
-  pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+  // Tmp fix until I merge them - UNTESTED HOW THIS WILL AFFECT CODE
+  // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+  // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ; COULD CAUSE ERROR "));
   // SetLEDOutAmountByPercentage(animation.transition.pixels_to_update_as_number)
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -1212,30 +1213,6 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   #endif
 
 }
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** LightsCountToUpdateAsPercentage *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
-
-  animation.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
-  // animation.transition.pixels_to_update_as_percentage = value;
-  
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
-  #endif
-
-}
-uint16_t mInterfaceLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage){
-  return mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
-}
-uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
-  return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
-}
-
 /**
  * Duplicate parameter, needs merging with above in long term if it is really the same
  * */
@@ -1247,6 +1224,36 @@ uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
   return strip_size_requiring_update; // also return the count
 
+}
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** LightsCountToUpdateAsPercentage DUPLICATED EFFECT 2/2*****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
+
+  animation.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
+  // animation.transition.pixels_to_update_as_percentage = value;
+  
+  // TEMP FIX!! - UNTESTED HOW THIS WILL AFFECT CODE
+  // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number COULD CAUSE ERROR "));
+  // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
+  #endif
+
+}
+
+uint16_t mInterfaceLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage){
+  return mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+}
+uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
+  return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
 }
 
 

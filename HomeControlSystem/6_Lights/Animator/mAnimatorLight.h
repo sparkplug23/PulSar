@@ -122,10 +122,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)   "debug/a
  * Effects Function names (Giving multiple names using delimeter)
  * */
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)                        "Slow Glow|Blend";    
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)                      "Static Glow|InOrder";     
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)                   "Static Glow|Static|InOrder";     
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR)                       "Sequential"; 
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)                     D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR;//"Solid RGBCCT"; 
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)                  "Step Palette";
+
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR)         "SLOW_FADE_BRIGHTNESS_ALL";
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR)         "SLOW_FADE_SATURATION_ALL";
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR)      "SLOW_FADE_BRIGHTNESS_RANDOM";
@@ -239,6 +240,8 @@ class mAnimatorLight :
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
     uint16_t animator_strip_size = ANIMATOR_SIZE_MAX; //allow variable control of size
+
+    
 
     // what is stored for state is specific to the need, in this case, the colors.
     // Basically what ever you need inside the animation update function
@@ -1294,9 +1297,9 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_02/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_03/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_04/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_05/Animator.h"
+#include "6_Lights/Animator/EffectsHACS/SunPositions_SolidColourElevation05/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01/Animator.h"
+#include "6_Lights/Animator/EffectsHACS/SunPositions_RgbcctPaletteElevationAugmented01/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_Controlled_CCT_Temperature_01/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/Development_Tester/Animator.h"
 

@@ -621,7 +621,7 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
 
   // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
   // {
-    if(internal_pin_index != 1)
+    if(internal_pin_index != -1) // -1 means unset pin
 {
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
   

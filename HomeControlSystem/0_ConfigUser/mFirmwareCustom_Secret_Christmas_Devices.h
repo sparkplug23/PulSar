@@ -30,7 +30,7 @@
  * Outside tree
  * DIOT esp32
  * */
-#define DEVICE_RGBOUTSIDE_CONTROLLER_01
+// #define DEVICE_RGBOUTSIDE_CONTROLLER_01
 
 /**
  * Dining Room tree 
@@ -41,7 +41,7 @@
 /**
  * Hallway tree 
  * */
-// #define DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01
+#define DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01
 
 
 // Include the home devices, which should ONLY contain final hardware
@@ -400,7 +400,7 @@
 
 
 
-  
+
 
 // //keep this, as esp32 test device 
 //   #define DEVICENAME_CTR          "rgboutsidetree"
@@ -727,6 +727,10 @@
   // Currently being testing on bedroom tree with white 12mm, but will be moved directly to hallway
   // Note, this controller also needs a 5v relay to control the secondary leds(400) that are also on tree
 
+  // #define USE_DEVFEATURE_FUNCTION_UPGRADE_CORE_TRANSITIONMETHODS
+  // #define DEBUG_ANIMATIONS_REFRESHPIXELINDEXING
+  // #define ENABLE_LOG_LEVEL_DEBUG 
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -744,7 +748,7 @@
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 500
+  #define STRIP_SIZE_MAX 200
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -753,11 +757,12 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static Glow\""
+      "\"Function\":\"Slow Glow\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10,"
-      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_TIME_MS "\":2000,"                // 2000
+      "\"" D_JSON_RATE_MS "\":5000,"             // 5000
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2" // Not function right now
     "},"
     "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
     "\"BrightnessRGB\":50"

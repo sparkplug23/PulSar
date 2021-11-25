@@ -439,3 +439,7 @@ Add sunelevation palette that is actually left on overnight, and is black when i
 
     Create option that palette values can be turned off, ie, if 5 colours existed in a palette, have the option that I can select "on/off ratio" of that palette to be returned
     So for 50%, 10 led length palette, then when showing that palette only half of them would be lit
+
+#Idea 127
+    Use "intensity" parameter as global option for all animations, with flag to set on/off
+    The should enable a basic/advanced user to have basic or granular control of effects
