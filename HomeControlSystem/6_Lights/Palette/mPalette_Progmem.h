@@ -784,7 +784,7 @@
     DEF_PGM_CTR  (PM_PALETTE_BERRY_GREEN_NAME_CTR)        D_PALETTE_BERRY_GREEN_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_BERRY_GREEN_COLOUR_MAP_IDS)
     { // pos%,R,G,B
-      255, 0, 0,
+      D_RGB255_RED
       0, 40, 0,
       0, 40, 0,
       // 0, 120, 0,
@@ -851,8 +851,8 @@
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_04_NAME_CTR)        D_PALETTE_CHRISTMAS_04_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_04_COLOUR_MAP_IDS)
     { // R,G,B
-      255, 0, 0,
-      0, 255, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN
       D_RGB255_PINK
       D_RGB255_BLUE
       255, 213, 0,     //COLOUR_FLOAT_HUE_YELLOW       
@@ -956,21 +956,21 @@
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_09_NAME_CTR)        D_PALETTE_CHRISTMAS_09_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_09_COLOUR_MAP_IDS)
     { // R,G,B
-      255, 0, 0,
-      0, 150, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM
       D_RGB255_BLUE
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
-      0, 255, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN
       D_RGB255_PINK_WARM
       0, 0, 150,
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
+      D_RGB255_RED
       0, 155, 0,
       D_RGB255_PINK_WARM
       0, 0, 200,
@@ -995,21 +995,21 @@
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_10_NAME_CTR)        D_PALETTE_CHRISTMAS_10_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_10_COLOUR_MAP_IDS)
     { // R,G,B
-      255, 0, 0,
-      0, 150, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM
       D_RGB255_BLUE
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
-      0, 255, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN
       D_RGB255_PINK_WARM
       0, 0, 150,
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
+      D_RGB255_RED
       0, 155, 0,
       D_RGB255_PINK_WARM
       0, 0, 200,
@@ -1033,21 +1033,21 @@
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_11_NAME_CTR)        D_PALETTE_CHRISTMAS_11_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_11_COLOUR_MAP_IDS)
     { // R,G,B
-      255, 0, 0,
-      0, 150, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM
       D_RGB255_BLUE
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
-      0, 255, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN
       D_RGB255_PINK_WARM
       0, 0, 150,
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
 
       //test with dimmer colours
-      255, 0, 0,
+      D_RGB255_RED
       0, 155, 0,
       D_RGB255_PINK_WARM
       0, 0, 200,
@@ -1122,19 +1122,19 @@
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_14_NAME_CTR)        D_PALETTE_CHRISTMAS_14_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_14_COLOUR_MAP_IDS)
     { // R,G,B
-      255, 0, 0,
-      0, 150, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM
       D_RGB255_BLUE
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
       //test with dimmer colours
-      255, 0, 0,
-      0, 255, 0,
+      D_RGB255_RED
+      D_RGB255_GREEN
       D_RGB255_PINK_WARM
       0, 0, 150,
       D_RGB255_ORANGE_LIGHT     //COLOUR_FLOAT_HUE_ORANGE 
       //test with dimmer colours
-      255, 0, 0,
+      D_RGB255_RED
       0, 155, 0,
       D_RGB255_PINK_WARM
       0, 0, 200,
@@ -1299,10 +1299,41 @@
       D_RGB255_ORANGE_DEEP
       D_RGB255_YELLOW_WARM
       #else 
+      // D_RGB255_RED
+      // D_RGB255_GREEN_FADED2
+      // D_RGB255_BLUE_FADED3
+      // D_RGB255_ORANGE_LIGHT
       D_RGB255_RED
       D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
       D_RGB255_BLUE_FADED3
-      D_RGB255_ORANGE_LIGHT     
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      // D_RGB255_ORANGE_LIGHT   
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      //D_RGB255_YELLOW_WARM
+      21,0,26, //deep darker purple
+      255,0,43,
+      D_RGB255_CYAN_FADED3
+      // D_RGB255_PINK_HOT2
+      // D_RGB255_RED
+
+
+
       #endif // USE_CUSTOM_USER_JACQUELINE
 
 

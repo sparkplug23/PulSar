@@ -22,6 +22,12 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
     SetBrightnessFade();
 
   }
+
+  if(jtok = obj["ShellyDimmer"].getObject()["TriggerEdge"]){
+
+    CmndShdLeadingEdge( jtok.getInt());
+
+  }
   
   
   mqtthandler_state_teleperiod.flags.SendNow = true;
@@ -35,7 +41,7 @@ bool mShellyDimmer::SetChannels(void)
 {
 #ifdef SHELLY_DIMMER_DEBUG
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "SetChannels:"));
-    AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t *)XdrvMailbox.data, XdrvMailbox.data_len);
+    // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t *)XdrvMailbox.data, XdrvMailbox.data_len);
 #endif  // SHELLY_DIMMER_DEBUG
 
     // uint16_t brightness = ((uint32_t *)XdrvMailbox.data)[0];
@@ -52,7 +58,7 @@ bool mShellyDimmer::SetChannels(void)
 bool mShellyDimmer::SetPower(void)
 {
   #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
+  // AddLog(LOG_LEVEL_INFO, PSTR(SHD_LOGNAME "Set Power, Power 0x%02x"), XdrvMailbox.index);
   #endif  // SHELLY_DIMMER_DEBUG
 
   req_on = 1;//(bool)XdrvMailbox.index;
@@ -65,6 +71,26 @@ bool mShellyDimmer::SetPower(void)
  * Commands
 \*********************************************************************************************/
 
+void mShellyDimmer::CmndShdLeadingEdge(uint8_t edge_type)
+{
+    if (edge_type == 0 || edge_type == 1)
+    {
+        leading_edge = 2 - edge_type;
+        // pCN Settings.shd_leading_edge = edge_type;
+#ifdef SHELLY_DIMMER_DEBUG
+        if (leading_edge == 1)
+            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to trailing edge"));
+        else
+            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to leading edge"));
+#endif  // SHELLY_DIMMER_DEBUG
+        SendSettings();
+    }
+    SaveSettings();
+    // ResponseCmndNumber(Settings.shd_leading_edge);
+}
+
+
+
 #ifdef SHELLY_CMDS
 
 const char kShdCommands[] PROGMEM = D_PRFX_SHD "|"  // Prefix
@@ -72,24 +98,6 @@ const char kShdCommands[] PROGMEM = D_PRFX_SHD "|"  // Prefix
 
 void (* const ShdCommand[])(void) PROGMEM = {
   &CmndShdLeadingEdge, &CmndShdWarmupBrightness, &CmndShdWarmupTime };
-
-void CmndShdLeadingEdge(void)
-{
-    if (XdrvMailbox.payload == 0 || XdrvMailbox.payload == 1)
-    {
-        leading_edge = 2 - XdrvMailbox.payload;
-        Settings.shd_leading_edge = XdrvMailbox.payload;
-#ifdef SHELLY_DIMMER_DEBUG
-        if (leading_edge == 1)
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to trailing edge"));
-        else
-            AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set to leading edge"));
-#endif  // SHELLY_DIMMER_DEBUG
-        ShdSendSettings();
-    }
-    ShdSaveSettings();
-    ResponseCmndNumber(Settings.shd_leading_edge);
-}
 
 void CmndShdWarmupBrightness(void)
 {

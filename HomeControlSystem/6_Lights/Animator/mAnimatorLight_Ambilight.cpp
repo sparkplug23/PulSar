@@ -173,7 +173,7 @@ animation_colours[i].DesiredColour = ApplyBrightnesstoRgbcctColour(animation_col
   #ifdef USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
 
 
-  switch(1//)
+  switch(1)
   {
     case 0: // method 4 different sides
     { 

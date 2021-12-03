@@ -49,7 +49,7 @@
 #define XDRV_45                     45
 #define XNRG_31                     31
 
-// #define SHELLY_DIMMER_DEBUG
+#define SHELLY_DIMMER_DEBUG
 // #define SHELLY_HW_DIMMING
 
 #define SHD_LOGNAME                 "SHD: "
@@ -60,6 +60,28 @@
 #define D_CMND_WARMUPBRIGHTNESS     "WarmupBrightness"
 #define D_CMND_WARMUPTIME           "WarmupTime"
 #endif // SHELLY_CMDS
+
+// #define SHD_SWITCH_CMD              0x01
+// #define SHD_SWITCH_FADE_CMD         0x02
+// #define SHD_POLL_CMD                0x10
+// #define SHD_VERSION_CMD             0x11
+// #define SHD_SETTINGS_CMD            0x20
+// #define SHD_WARMUP_CMD              0x21
+// #define SHD_CALIBRATION1_CMD        0x30
+// #define SHD_CALIBRATION2_CMD        0x31
+
+// #define SHD_SWITCH_SIZE             2
+// #define SHD_SWITCH_FADE_SIZE        6
+// #define SHD_SETTINGS_SIZE           10
+// #define SHD_WARMUP_SIZE             4
+// #define SHD_CALIBRATION_SIZE        200
+
+// #define SHD_START_BYTE              0x01
+// #define SHD_END_BYTE                0x04
+
+// #define SHD_BUFFER_SIZE             256
+// #define SHD_ACK_TIMEOUT             200 // 200 ms ACK timeout
+
 
 #define SHD_SWITCH_CMD              0x01
 #define SHD_SWITCH_FADE_CMD         0x02
@@ -81,6 +103,7 @@
 
 #define SHD_BUFFER_SIZE             256
 #define SHD_ACK_TIMEOUT             200 // 200 ms ACK timeout
+
 
 #ifdef SHELLY_FW_UPGRADE
 #include <stm32flash.h>
@@ -130,24 +153,42 @@ class mShellyDimmer :
       uint32_t fade_rate = 0;
     } SHD_DIMMER;
 
-    // struct SHD
-    // {
+    // // struct SHD
+    // // {
+    // uint8_t *buffer = nullptr;          // Serial receive buffer
+    // int byte_counter = 0;               // Index in serial receive buffer
+    // uint16_t req_brightness = 0;
+    // bool req_on = false;
+    // SHD_DIMMER dimmer;
+    // uint32_t start_time = 0;
+    // uint8_t counter = 1;                // Packet counter
+    // uint16_t req_fade_rate = 0;
+    // uint16_t leading_edge = 2;          // Leading edge = 2 Trailing edge = 1
+    // uint16_t warmup_brightness = 100;   // 10%
+    // uint16_t warmup_time = 20;          // 20ms
+    // #ifdef USE_ENERGY_SENSOR
+    //   uint32_t last_power_check = 0;      // Time when last power was checked
+    // #endif // USE_ENERGY_SENSOR
+    // bool hardware_serial_active = false;
+    // // } param;
+
+    
+    SHD_DIMMER dimmer;
     uint8_t *buffer = nullptr;          // Serial receive buffer
     int byte_counter = 0;               // Index in serial receive buffer
-    uint16_t req_brightness = 0;
-    bool req_on = false;
-    SHD_DIMMER dimmer;
+#ifdef USE_ENERGY_SENSOR
+    uint32_t last_power_check = 0;      // Time when last power was checked
+#endif // USE_ENERGY_SENSOR
     uint32_t start_time = 0;
-    uint8_t counter = 1;                // Packet counter
+    uint16_t req_brightness = 0;
     uint16_t req_fade_rate = 0;
     uint16_t leading_edge = 2;          // Leading edge = 2 Trailing edge = 1
-    uint16_t warmup_brightness = 1000;   // 10%
+    uint16_t warmup_brightness = 100;   // 10%
     uint16_t warmup_time = 20;          // 20ms
-    #ifdef USE_ENERGY_SENSOR
-      uint32_t last_power_check = 0;      // Time when last power was checked
-    #endif // USE_ENERGY_SENSOR
-    bool hardware_serial_active = false;
-    // } param;
+    uint8_t counter = 1;                // Packet counter
+    uint8_t hw_version = 0;             // Dimmer 1 = 1 Dimmer 2 = 2
+    bool present = false;
+    bool req_on = false;
 
     #ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
@@ -160,6 +201,9 @@ class mShellyDimmer :
     bool SendCmd(uint8_t cmd, uint8_t *payload, uint8_t len);
     void SetBrightness();
     void SetBrightnessFade();
+    
+    void CmndShdLeadingEdge(uint8_t edge_type);
+
     void SendSettings();
     void SendWarmup();
     void SendCalibration(uint16_t brightness, uint16_t func, uint16_t fade_rate);

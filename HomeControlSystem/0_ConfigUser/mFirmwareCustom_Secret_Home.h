@@ -190,8 +190,10 @@ Bathroom
   #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
+
   #define USE_MODULE_CORE_RULES
   
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
   
   #define USE_MODULE_DRIVERS_RELAY
@@ -218,7 +220,7 @@ Bathroom
     "}"
   "}";
   
-
+ 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
@@ -580,7 +582,7 @@ Bathroom
         "\"Function\":\"SetPower\","
         "\"DeviceName\":0,"
         "\"State\":0,"
-        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"socket_number_11/set/relays\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
+        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"socket_number_11/set\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
       "}"
     "}"
   "}";
@@ -668,23 +670,43 @@ Bathroom
   //   "\"BrightnessRGB\":70"
   // "}";
   
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"Function\":\"Static Glow\""
+  //   "},"    
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":1000,"
+  //     "\"" D_JSON_RATE_MS "\":2000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+  //   "},"
+  //   "\"ColourPalette\":\"Christmas Warm White\","
+  //   "\"BrightnessRGB\":100"
+  // "}";
+
+  #define USE_CUSTOM_USER_PAULA
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RgB\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":\"Static Glow\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":2000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+      "\"" D_JSON_RATE_MS "\":5000,"
     "},"
-    "\"ColourPalette\":\"Christmas Warm White\","
-    "\"BrightnessRGB\":100"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":70"
   "}";
 
 #endif
@@ -769,6 +791,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -782,6 +805,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
   "}";
   
+  #define STRIP_SIZE_MAX 1
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -809,8 +833,8 @@ Bathroom
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
      
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_MOTION
-
   #define USE_MODULE_SENSORS_BME
 
   #define USE_MODULE_TEMPLATE
@@ -861,6 +885,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR 
   
@@ -873,6 +898,7 @@ Bathroom
   "}";
 
 
+  #define STRIP_SIZE_MAX 1
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -926,6 +952,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -948,7 +975,7 @@ Bathroom
   //   "\"" D_JSON_BRIGHTNESS     "\":100"
   // "}";
 
-  
+  #define STRIP_SIZE_MAX 1
  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1067,7 +1094,7 @@ Bathroom
 
 #ifdef DEVICE_RGBCRYSTAL1
   #define DEVICENAME_CTR            "rgbcrystal1"
-  #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder"
+  #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder Utility"
   
   
   #define USE_BUILD_TYPE_LIGHTING
@@ -1092,7 +1119,7 @@ Bathroom
 
 //   #define STRIP_REPEAT_OUTPUT_MAX 150
 
-//  #define USE_LIGHTING_TEMPLATE
+ #define USE_LIGHTING_TEMPLATE
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
 //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
@@ -1121,16 +1148,14 @@ Bathroom
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static Glow\""
+      "\"Function\":\"Static\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":2000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+      "\"" D_JSON_RATE_MS "\":10000"
     "},"
-    "\"ColourPalette\":\"Christmas Warm White\","
-    "\"BrightnessRGB\":20"
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+    "\"BrightnessRGB\":60"
   "}";
 
 
@@ -1290,11 +1315,11 @@ Bathroom
 
   #define USE_MODULE_CORE_RULES
 
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "DriveFront"
-  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "LivingRoom"
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "LivingRoom"
+  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "DriveFront"
   // #define D_DEVICE_SENSOR_MOTION_2_FRIENDLY_NAME_LONG "LivingRadar" // Test device
 
-  #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "DriveFront"
+  #define D_DEVICE_SENSOR_DRIVEWAY_ULTRSONIC_FRIENDLY_NAME_LONG "DriveFrontUltra"
 
   // #define USE_MODULE_SENSORS_ANALOG
 
@@ -1316,8 +1341,6 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_ULTRASONICS
       "\"D8\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\"," //d0 to d3
       "\"D3\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
-      // "\"D3\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR     "\"," //d0 to d3
-      // "\"D8\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\","
@@ -1343,7 +1366,6 @@ Bathroom
       "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-        // "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -2364,6 +2386,8 @@ Bathroom
   #define DEVICENAME_CTR          "gazebosensor"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
   
+  #define USE_SSIDS_OUTSIDE_HOUSE
+
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
@@ -2478,6 +2502,8 @@ Bathroom
   #define DEVICENAME_CTR          "oiltank"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
 
+  #define USE_SSIDS_OUTSIDE_HOUSE
+
   #define USE_MODULE_CONTROLLER_OILFURNACE
     
   // #define USE_MODULE_SENSORS_DS18X
@@ -2537,6 +2563,7 @@ Bathroom
   #define DEVICENAME_CTR          "oilfurnace"
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
 
+  #define USE_SSIDS_OUTSIDE_HOUSE
   /**
    * 2 pipe sensors (boiler_in, boiler_out, maybe on the heat pipe?)
    * light sensor for lock_out
@@ -2619,9 +2646,12 @@ Bathroom
 
 #endif
 
+
 #ifdef DEVICE_GARAGELIGHT
   #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
+
+  #define USE_SSIDS_OUTSIDE_HOUSE
   
   /*
     Method should only activate if boot loop happens 10 times
@@ -2908,6 +2938,8 @@ Bathroom
   
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
+
+  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
   
   #define USE_MODULE_SENSORS_SWITCHES
 
@@ -2915,6 +2947,7 @@ Bathroom
   #define USE_HARDWARE_DEFAULT_RULES_1
 
   #define DISABLE_SERIAL_LOGGING //temp measure
+  // #define DISABLE_SERIAL0_CORE //dont think its needed
 
   #define USE_MODULE_DRIVERS_SHELLY_DIMMER
 
@@ -3161,6 +3194,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
   // // New segments for joining everything together
@@ -3227,7 +3261,8 @@ Bathroom
    * */
 
 
- #define USE_LIGHTING_TEMPLATE
+  #define STRIP_SIZE_MAX                      50   
+  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
@@ -3247,7 +3282,6 @@ Bathroom
     "\"BrightnessRGB\":100"
   "}";
   #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
-  #define STRIP_SIZE_MAX                      50   
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -3539,13 +3573,13 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define STRIP_SIZE_MAX 36
    /**
    * Three types of animations, exclusive only
    * */
-  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
@@ -3594,12 +3628,12 @@ Bathroom
     "},"
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"Solid RGBCCT\""
+      "\"" D_JSON_FUNCTION "\":\"Static\""
     "},"
     "\"" D_JSON_CCT_TEMP "\":300,"
     "\"" D_JSON_HUE "\":240,"
     "\"" D_JSON_SAT "\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas 01\"," //ie 10
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";

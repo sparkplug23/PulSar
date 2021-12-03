@@ -25,12 +25,13 @@
  * nodemuc v3
  * */
 // #define DEVICE_RGBSTRING_CONTROLLER_STATIC_01
+//#define DEVICE_RGBSTRING_CONTROLLER_STATIC_JACQUELINE_01
 
 /**
  * Outside tree
  * DIOT esp32
  * */
-// #define DEVICE_RGBOUTSIDE_CONTROLLER_01
+// #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
 
 /**
  * Dining Room tree 
@@ -41,7 +42,7 @@
 /**
  * Hallway tree 
  * */
-#define DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01
+// #define DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01
 
 
 // Include the home devices, which should ONLY contain final hardware
@@ -268,14 +269,221 @@
 #endif
 
 
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * For jacq/paula
+ * Manually pick the colours, then hardcode, it should only show that on static (in order)
+ * they might want the slow glow, maybe use a wire/jumper for it
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_STATIC_JACQUELINE_01
+  #define DEVICENAME_CTR          "rgb_static_jacq_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 01"
+
+  #define USE_CUSTOM_USER_JACQUELINE
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define DISABLE_NETWORK
+
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":5000,"
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":100"
+  "}";
+
+#endif
+
+
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * For jacq/paula
+ * Manually pick the colours, then hardcode, it should only show that on static (in order)
+ * they might want the slow glow, maybe use a wire/jumper for it
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_STATIC_PAULA_01
+  #define DEVICENAME_CTR          "rgb_static_paula_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 01"
+
+  #define USE_CUSTOM_USER_PAULA
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define DISABLE_NETWORK
+
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":5000,"
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":40"
+  "}";
+
+#endif
+
+
+
 
 /**
  * Outside tree, ie testbed for esp32 controller with wifi if possible
  * */
-#ifdef DEVICE_RGBOUTSIDE_CONTROLLER_01
+#ifdef DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
   // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
   #define DEVICENAME_CTR          "outsidetree_01"
-  #define DEVICENAME_FRIENDLY_CTR "RGB testbed_rgb_controller_01 01"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree ESP32 Basic" // Basic version used until I redo the animations later
+
+  /***
+   * Use bh1520 lux sensor to control brightness
+   * 
+   * 
+   * ie, goes from upper boundary (before dark), then slowly drops brightness.
+   * probably better to use sun elevation for this instead? ie <10 degrees below horizon, then turn brightness down
+   * */
+
+
+  /***                               Total
+   * 4 sets of 5v black              (200)   4
+   * 7 sets of 5v green              (350)   7
+   * 15 sets of 12v green            (750) ONE FAULT    14
+   * 
+   *                                 (1300)  used to be 1000?   25
+   * */
+
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLLED_VIA_ANIMATIONS_OUTPUT
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"22\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\"" // not using "un"inverted, as I want the power to stay on by default
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+                                                                  
+  #define STRIP_SIZE_MAX 1300 // (26 sets)
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":0,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+    "},"
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+    "\"BrightnessRGB\":0"
+  "}";
+
+  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+/**
+ * Outside tree, ie testbed for esp32 controller with wifi if possible
+ * */
+#ifdef DEVICE_OUTSIDETREE_CONTROLLER_ADVANCED_01
+  // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
+  #define DEVICENAME_CTR          "outsidetree_01"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree ESP32 Basic" // Basic version used until I redo the animations later
 
   /***
    * Use bh1520 lux sensor to control brightness
@@ -297,16 +505,23 @@
   // #define USE_MODULE_SENSORS_BUTTONS
   // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
   // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-  
+
+  #define ENABLE_DEVFEATURE_RELAY_CONTROLLED_VIA_ANIMATIONS_OUTPUT
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-  #define SETTINGS_HOLDER 59
+  #define SETTINGS_HOLDER 1
 
-  #define ENABLE_PIXEL_FUNCTION_MIXER
+  // #define ENABLE_PIXEL_FUNCTION_MIXER
 
   // #define   DEBUG_MODULE_TIME_STD
 
@@ -355,7 +570,7 @@
   "}";
 
                                                                   
-  #define STRIP_SIZE_MAX 50//1300 // (26 sets)
+  #define STRIP_SIZE_MAX 1300 // (26 sets)
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -364,16 +579,16 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static Glow\""
+      "\"Function\":\"Slow Glow\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":0,"
-      "\"" D_JSON_RATE_MS "\":2000,"
+      "\"" D_JSON_TIME_MS "\":5000,"
+      "\"" D_JSON_RATE_MS "\":10000,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
     "},"
     "\"ColourPalette\":\"Christmas 01\","
-    "\"BrightnessRGB\":100,"
+    "\"BrightnessRGB\":70"
 
     // // Dev testing
     // "\"Mixer\":{"
@@ -381,9 +596,22 @@
     //   // "\"" D_JSON_RUNNING_ID "\":7,"
     //   "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
     // "},"
-    "\"PixelGrouping\":{"
-      // "\"Enabled\":\"Off\","
-      "\"Mode\":1"
+    // "\"PixelGrouping\":{"
+    //   // "\"Enabled\":\"Off\","
+    //   "\"Mode\":1"
+    // "}"
+  "}";
+
+  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "PowerSupplies"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
     "}"
   "}";
 
@@ -557,6 +785,7 @@
 #endif
 
 
+
 /**
  * User:      Me
  * Location:  Diningroom tree, new LEDs
@@ -589,17 +818,17 @@
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Slow Glow\""
+      "\"Function\":\"Static Glow\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":10,"
-      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":10000,"
     "},"
-    "\"ColourPalette\":\"Christmas 07\","
-    "\"BrightnessRGB\":50"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":40"
   "}";
 
 #endif
@@ -610,8 +839,8 @@
  * Networked: Yes
  * */
 #ifdef DEVICE_RGBSTRING_DININGROOM_CONTROLLER_02
-  #define DEVICENAME_CTR          "xmas_dinigroom_01"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 01"
+  #define DEVICENAME_CTR          "xmas_dinigroom_02"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 02"
 
   // #define USE_MODULE_SENSORS_BUTTONS
   // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
@@ -621,6 +850,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define SETTINGS_HOLDER 1
 
@@ -642,7 +872,6 @@
   /**
    * Three types of animations, exclusive only
    * */
-  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
@@ -664,41 +893,41 @@
   "}";
 
 
-  // #define USE_CUSTOM_USER_PAULA
-  #define USE_CUSTOM_USER_JACQUELINE
+  // // #define USE_CUSTOM_USER_PAULA
+  // #define USE_CUSTOM_USER_JACQUELINE
 
 
-  #ifdef USE_CUSTOM_USER_PAULA
+  // #ifdef USE_CUSTOM_USER_PAULA
+  // #define STRIP_SIZE_MAX 100
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"Function\":\"Static Glow\""
+  //   "},"    
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":1000,"
+  //     "\"" D_JSON_RATE_MS "\":2000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+  //   "},"
+  //   "\"ColourPalette\":\"Custom User 01\","
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif
+
+  // #ifdef USE_CUSTOM_USER_JACQUELINE
   #define STRIP_SIZE_MAX 100
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static Glow\""
-    "},"    
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":2000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"ColourPalette\":\"Custom User 01\","
-    "\"BrightnessRGB\":100"
-  "}";
-  #endif
-
-  #ifdef USE_CUSTOM_USER_JACQUELINE
-  #define STRIP_SIZE_MAX 100
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":\"Static Glow\""
@@ -708,9 +937,9 @@
       "\"" D_JSON_RATE_MS "\":1000,"
     "},"
     "\"ColourPalette\":\"Custom User 01\","
-    "\"BrightnessRGB\":50"
+    "\"BrightnessRGB\":40"
   "}";
-  #endif
+  // #endif
 
 #endif
 
@@ -723,6 +952,11 @@
 #ifdef DEVICE_RGBSTRING_HALLWAY_CONTROLLER_01
   #define DEVICENAME_CTR          "xmas_hallway_tree_01"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Hallway Tree 1/1"
+
+
+//hallway tree could have animation, that, when motion, it goes from warm white to coloured after a few seconds... then after 5 minutes
+// will saturate back to warmwhite again
+
 
   // Currently being testing on bedroom tree with white 12mm, but will be moved directly to hallway
   // Note, this controller also needs a 5v relay to control the secondary leds(400) that are also on tree
@@ -774,4 +1008,7 @@
 
 
 #endif // MSYSTEMCONFIG_HARDWAREDEFAULTS_H
+
+
+
 

@@ -451,6 +451,55 @@
 #endif
 
 
+
+// #ifdef DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
+//   #define DEVICENAME_CTR          "shellydimmer_spareroom"
+//   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
+  
+//   //#define FORCE_TEMPLATE_LOADING
+//   #define SETTINGS_HOLDER 2
+
+//   #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+  
+//   #define USE_MODULE_SENSORS_SWITCHES
+
+//   #define USE_MODULE_CORE_RULES
+//   #define USE_HARDWARE_DEFAULT_RULES_1
+
+//   #define DISABLE_SERIAL_LOGGING //temp measure
+//   #define DISABLE_SERIAL0_CORE //dont think its needed
+
+//   #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+//   "}";
+
+//   #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+//   #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+//   #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+//   #define USE_FUNCTION_TEMPLATE
+//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//   "{"
+//     "\"" D_JSON_DEVICENAME "\":{"
+//       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+//         "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+//       "]"
+//     "}"
+//   "}";
+
+// #endif
+
+
 #ifdef DEVICE_TESTBED_SHELLY2_DIMMER
   #define DEVICENAME_CTR          "testbed_shellydimmer_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly Dimmer 2"

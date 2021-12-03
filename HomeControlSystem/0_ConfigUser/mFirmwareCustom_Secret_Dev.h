@@ -616,6 +616,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -641,8 +642,8 @@
     #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":9000,"
-      "\"" D_JSON_RATE_MS "\":30000,"
+      "\"" D_JSON_TIME_MS "\":0,"
+      "\"" D_JSON_RATE_MS "\":10,"
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
@@ -651,7 +652,7 @@
       "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
     "},"
     "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":10"
   "}";
 
 #endif
@@ -731,6 +732,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   //#define ENABLE_PIXEL_FUNCTION_AMBILIGHT
   
@@ -798,8 +800,8 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //#define USE_TASK_RGBLIGHTING_NOTIFICATIONS  // BREAKS
   #define USE_SK6812_METHOD_DEFAULT
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   #define ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
@@ -851,7 +853,7 @@
     "\"" D_JSON_HUE "\":15,"
     "\"" D_JSON_SAT "\":90,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-    "\"" D_JSON_BRIGHTNESS_CCT "\":60,"
+    "\"" D_JSON_BRIGHTNESS_CCT "\":40,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
 

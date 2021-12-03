@@ -1298,7 +1298,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_03/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_04/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_SolidColourElevation05/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01/Animator.h"
+#include "6_Lights/Animator/EffectsHACS/Sun_Elevation_RGBCCT_Palette_Indexed_Positions_01/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_RgbcctPaletteElevationAugmented01/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_Controlled_CCT_Temperature_01/Animator.h"
 #include "6_Lights/Animator/EffectsHACS/Development_Tester/Animator.h"

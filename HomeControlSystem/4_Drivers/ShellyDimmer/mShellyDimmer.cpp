@@ -30,6 +30,13 @@ const char* mShellyDimmer::PM_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR = D_MODU
 void mShellyDimmer::init(void)
 {
 
+
+  #ifdef ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+    leading_edge = 1;
+    CmndShdLeadingEdge(0);
+
+  #endif
+
 }
 
 void mShellyDimmer::Pre_Init(){
@@ -53,7 +60,7 @@ void mShellyDimmer::Pre_Init(){
     ShdSerial = new TasmotaSerial(pCONT_pins->GetPin(GPIO_HWSERIAL0_RX_ID), pCONT_pins->GetPin(GPIO_HWSERIAL0_TX_ID), 2, 0, SHD_BUFFER_SIZE);
     if (ShdSerial->begin(115200))
     {
-      hardware_serial_active = true;
+      // hardware_serial_active = true;
 
       if (ShdSerial->hardwareSerial())
         pCONT_sup->ClaimSerial();
@@ -173,7 +180,7 @@ uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_method){
 
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
 
-    JBI->Add("serial_active",hardware_serial_active);
+    // JBI->Add("serial_active",hardware_serial_active);
 
     JBI->Add("version_major",dimmer.version_major);
     JBI->Add("version_minor",dimmer.version_minor);
@@ -206,7 +213,7 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
 
 #ifdef SHELLY_DIMMER_DEBUG
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "Tx Packet:"));
-  AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t*)data, len);
+  // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t*)data, len);
 #endif  // SHELLY_DIMMER_DEBUG
 
   while (retries--)
@@ -374,7 +381,7 @@ bool mShellyDimmer::SyncState()
 #ifdef SHELLY_DIMMER_DEBUG
   AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdSerial %p"), ShdSerial);
   AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Brightness Want %d, Is %d"), req_brightness, dimmer.brightness);
-  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Fade Want %d, Is %d"), Settings.light_speed, dimmer.fade_rate);
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Set Fade Want %d, Is %d"), Settings.light_speed, dimmer.fade_rate);
 #endif  // SHELLY_DIMMER_DEBUG
 
   if (!ShdSerial)
@@ -405,7 +412,7 @@ void mShellyDimmer::DebugState()
         AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "MCU v%d.%d, Brightness:%d(%d%%), Power:%d, Fade:%d"),
                             dimmer.version_major, dimmer.version_minor,
                             dimmer.brightness,
-                            changeUIntScale(dimmer.brightness, 0, 1000, 0, 100),
+                            map(dimmer.brightness, 0, 1000, 0, 100),
                             dimmer.power,
                             dimmer.fade_rate);
 #endif  // SHELLY_DIMMER_DEBUG
@@ -611,7 +618,7 @@ bool mShellyDimmer::SerialInput(void)
 #ifdef SHELLY_DIMMER_DEBUG
       byte_counter++;
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "Rx Packet:"));
-      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
+      // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
       byte_counter = 0;
 
@@ -625,7 +632,7 @@ bool mShellyDimmer::SerialInput(void)
 #ifdef SHELLY_DIMMER_DEBUG
       AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Byte %i of received data frame is invalid. Rx Packet:"), byte_counter);
       byte_counter++;
-      AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
+      // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
       byte_counter = 0;
     }

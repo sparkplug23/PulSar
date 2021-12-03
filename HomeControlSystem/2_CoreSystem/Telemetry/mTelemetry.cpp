@@ -289,6 +289,13 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
     JsonBuilderI->Add(PM_JSON_MAC, WiFi.macAddress().c_str());
     JsonBuilderI->Add(PM_JSON_WEBSERVER_ENABLED, pCONT_set->Settings.webserver);
     JsonBuilderI->Add(PM_JSON_WIFICONFIG_STATE, pCONT_set->Settings.sta_config);
+
+  JBI->Array_Start("AP_List");
+    JBI->Add(pCONT_set->Settings.sta_ssid[0]);
+    JBI->Add(pCONT_set->Settings.sta_ssid[1]);
+    JBI->Add(pCONT_set->Settings.sta_ssid[2]);
+  JBI->Array_End();
+
   return JsonBuilderI->End();
 
 }
