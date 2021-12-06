@@ -21,7 +21,7 @@
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
-o
+
 const uint16_t PixelCount = 4; // make sure to set this to the number of pixels in your strip
 const uint8_t PixelPin = 2;  // make sure to set this to the correct pin, ignored for Esp8266
 

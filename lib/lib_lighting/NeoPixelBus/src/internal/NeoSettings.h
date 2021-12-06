@@ -61,6 +61,7 @@ public:
     uint16_t WhiteCurrent; // in 1/10th ma
 };
 
+// ADDED BY MICHAEL
 class NeoRgbcctCurrentSettings
 {
 public:

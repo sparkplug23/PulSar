@@ -24,6 +24,14 @@ License along with NeoPixel.  If not, see
 <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------*/
 
+// #include "RgbColor.h"
+// #include "Rgb48Color.h"
+// #include "HslColor.h"
+// #include "HsbColor.h"
+// #include "RgbwColor.h"
+// #include "HtmlColor.h"
+
+// ADDED BY MICHAEL
 #include "RgbColor.h"
 #include "RgbcctColor.h"
 #include "Rgb48Color.h"
@@ -66,7 +74,7 @@ RgbwColor::RgbwColor(const RgbcctColor& color)
 
 uint8_t RgbwColor::CalculateBrightness() const
 {
-    uint8_t colorB = (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);
+    uint8_t colorB = static_cast<uint8_t>((static_cast<uint16_t>(R) + static_cast<uint16_t>(G) + static_cast<uint16_t>(B)) / 3);
     if (W > colorB)
     {
         return W;

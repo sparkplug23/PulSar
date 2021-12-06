@@ -46,8 +46,10 @@ License along with NeoPixel.  If not, see
 // '_state' flags for internal state
 #define NEO_DIRTY   0x80 // a change was made to pixel data that requires a show
 
+// ADDED BY MICHAEL
 #include "internal/lib8tion/lib8tion.h"
 #include "internal/lib8tion/math8.h"
+
 
 #include "internal/NeoHueBlend.h"
 
@@ -56,12 +58,16 @@ License along with NeoPixel.  If not, see
 #include "internal/RgbColor.h"
 #include "internal/Rgb16Color.h"
 #include "internal/Rgb48Color.h"
+// #include "internal/Rgbw64Color.h"//
 
 #include "internal/HslColor.h"
 #include "internal/HsbColor.h"
 #include "internal/HtmlColor.h"
 
 #include "internal/RgbwColor.h"
+#include "internal/Rgbw64Color.h"//
+
+// ADDED BY MICHAEL
 #include "internal/RgbcctColor.h"
 #include "internal/RgbcctColor_Controller.h"
 
@@ -69,6 +75,7 @@ License along with NeoPixel.  If not, see
 
 #include "internal/NeoColorFeatures.h"
 #include "internal/NeoTm1814ColorFeatures.h"
+#include "internal/NeoTm1914ColorFeatures.h"
 #include "internal/DotStarColorFeatures.h"
 #include "internal/Lpd8806ColorFeatures.h"
 #include "internal/Lpd6803ColorFeatures.h"
@@ -110,6 +117,7 @@ License along with NeoPixel.  If not, see
 #include "internal/NeoEsp32I2sMethod.h"
 #include "internal/NeoEsp32RmtMethod.h"
 #include "internal/NeoEspBitBangMethod.h"
+#include "internal/DotStarEsp32DmaSpiMethod.h"
 
 #elif defined(ARDUINO_ARCH_NRF52840) // must be before __arm__
 
@@ -175,14 +183,21 @@ public:
     void Begin()
     {
         _method.Initialize();
-        Dirty();
+        ClearTo(0);
     }
 
-    // used by DotStartSpiMethod if pins can be configured
+    // used by DotStarSpiMethod/DotStarEsp32DmaSpiMethod if pins can be configured
     void Begin(int8_t sck, int8_t miso, int8_t mosi, int8_t ss)
     {
         _method.Initialize(sck, miso, mosi, ss);
-        Dirty();
+        ClearTo(0);
+    }
+
+    // used by DotStarEsp32DmaSpiMethod if pins can be configured - reordered and extended version supporting quad SPI
+    void Begin(int8_t sck, int8_t dat0, int8_t dat1, int8_t dat2, int8_t dat3, int8_t ss)
+    {
+        _method.Initialize(sck, dat0, dat1, dat2, dat3, ss);
+        ClearTo(0);
     }
 
     void Show(bool maintainBufferConsistency = true)
@@ -382,6 +397,12 @@ public:
     void SetPixelSettings(const typename T_COLOR_FEATURE::SettingsObject& settings)
     {
         T_COLOR_FEATURE::applySettings(_method.getData(), settings);
+        Dirty();
+    };
+
+    void SetMethodSettings(const typename T_METHOD::SettingsObject& settings)
+    {
+        _method.applySettings(settings);
         Dirty();
     };
  

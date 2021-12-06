@@ -237,7 +237,38 @@ rules_active_index = 0;
 
 }
 
+/**
+ * @brief: Function that will append a rule to the current list
+ * */
+bool mRuleEngine::AppendRule()
+{
 
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_2p5"));
+
+    // mEvent::EVENT_PART* p_event = nullptr;
+
+    // if(pCONT_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
+
+    // #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
+    
+    // // Trigger0
+    // pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true;   
+    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
+    // p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
+    // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
+    // p_event->device_id = 0;
+    // p_event->value.length = 0;
+    // p_event->value.data[p_event->value.length++] = 2;  // Toggled 
+    // // Command0
+    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
+    // p_event->module_id = EM_MODULE_DRIVERS_RELAY_ID;
+    // p_event->function_id = FUNC_EVENT_SET_POWER_ID;
+    // p_event->device_id = 0;
+    // p_event->value.length = 0;
+    // p_event->value.data[p_event->value.length++] = 2;  // Toggle
+    // pCONT_rules->rules_active_index++;
+
+}
 
 
 uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){

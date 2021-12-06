@@ -726,8 +726,6 @@
 
   #define USE_DEVFEATURE_PIXEL0_BOTTOM_RIGHT // tmp fix
    
-  #define DISABLE_WEBSERVER
-
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -761,7 +759,6 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  "Ambilight"  "\","
      "\"" D_JSON_EFFECTS "\":{" 
-      // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
       "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
     "},"
     "\"" D_JSON_TRANSITION       "\":{"
@@ -775,7 +772,7 @@
     "\"" D_JSON_SAT "\":90,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
     "\"" D_JSON_BRIGHTNESS_CCT "\":1,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
 
 #endif
@@ -1059,8 +1056,6 @@
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
   #define ENABLE_DEBUG_DELAYS
-
-  #define USE_INTERNAL_HOME_APS_ONLY
 
   #define DISABLE_WEBSERVER
   #define ESP32

@@ -1,6 +1,7 @@
 #pragma once
 
-#if defined(ARDUINO_ARCH_ESP32)
+// ESP32C3 I2S is not supported yet due to significant changes to interface
+#if defined(ARDUINO_ARCH_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +26,8 @@ void i2sInit(uint8_t bus_num,
     i2s_tx_fifo_mod_t fifo_mod, 
     size_t dma_count, 
     size_t dma_len);
+
+void i2sDeinit(uint8_t bus_num);
 
 void i2sSetPins(uint8_t bus_num, int8_t out, bool invert);
 

@@ -26,15 +26,19 @@ License along with NeoPixel.  If not, see
 #pragma once
 
 #include <Arduino.h>
+// ADDED BY MICHAEL
 #include "lib8tion/math8.h"
 #include "NeoSettings.h"
 #include "RgbColorBase.h"
 
+// struct RgbwColor;
+// ADDED BY MICHAEL
 struct RgbwColor;
 struct HslColor;
 struct HsbColor;
 struct RgbcctColor;
 struct HtmlColor;
+
 
 // ------------------------------------------------------------------------
 // RgbColor represents a color object that is represented by Red, Green, Blue
@@ -105,8 +109,6 @@ struct RgbColor : RgbColorBase
     RgbColor()
     {
     };
-    
-    
 
    /// add one RGB to another, saturating at 0xFF for each channel
     inline RgbColor& operator+= (const RgbColor& rhs )
@@ -135,7 +137,6 @@ struct RgbColor : RgbColorBase
         // WC = qadd8( WC, rhs.WC);
         return *this;
     }
-
 
     // ------------------------------------------------------------------------
     // Comparison operators
@@ -178,7 +179,6 @@ struct RgbColor : RgbColorBase
     // delta - (0-255) the amount to dim the color
     // ------------------------------------------------------------------------
     void Darken(uint8_t delta);
-    void DarkenDivided(uint8_t dividor);
 
     // ------------------------------------------------------------------------
     // Lighten will adjust the color by the given delta toward white

@@ -221,6 +221,7 @@ class mAnimatorLight :
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #endif
     #endif   
+    void Init_NeoPixelBus();
     NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
 
 
@@ -252,7 +253,7 @@ class mAnimatorLight :
     };
     AnimationColours animation_colours[STRIP_SIZE_MAX];
 
-    void BlendAnimUpdate(const AnimationParam& param);
+    // void BlendAnimUpdate(const AnimationParam& param);
     void AnimUpdate_ShowStartingThenDesiredColors(const AnimationParam& param);
 
     void StartAnimation_AsAnimUpdateMemberFunction();
@@ -366,6 +367,7 @@ class mAnimatorLight :
 
 /**
  * Make this definable, and or remove it, because it grows with pixel size and will waste memory
+ * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
  * */
     struct LEDOUTPUTSETTINGS{
       uint16_t length = 0;
@@ -420,7 +422,6 @@ class mAnimatorLight :
 
     void UpdateDesiredColourFromPaletteSelected(void);
     void TurnLEDsOff();
-    void Append_Hardware_Status_Message();
     void EveryLoop();
     void WebPage_Root_AddHandlers();
     void WebPage_Root_SendInformationModule();

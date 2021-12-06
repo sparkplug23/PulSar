@@ -22,7 +22,7 @@
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
 
-#include "2c_InternalHelper/Averaging/AveragingData.h"
+#include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
@@ -577,7 +577,7 @@ enum MODULE_IDS{
   #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ANALOG
-  #include "5_Sensors/Analog/mSensorsAnalog.h"
+  #include "5_Sensors/Analog_PhasedIntoADCInternal/mSensorsAnalog.h"
   #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DHT

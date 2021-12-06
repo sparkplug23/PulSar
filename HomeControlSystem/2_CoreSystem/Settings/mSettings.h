@@ -1196,6 +1196,8 @@ typedef union {
 // };
 
 
+#define palette_encoded_users_colour_map_LENGTH 200
+
 // #define PALETTE_USER_NAME_LIST_LENGTH 300
 struct AnimationSettings{
   // HsbColour map ids
@@ -1203,7 +1205,7 @@ struct AnimationSettings{
   //rgbcct user values
   uint8_t palette_rgbcct_users_colour_map[5*5];//20][20]; 
   //generic variable buffer
-  uint8_t palette_encoded_users_colour_map[200];//20][20]; 
+  uint8_t palette_encoded_users_colour_map[palette_encoded_users_colour_map_LENGTH];//20][20]; 
   // Change names to be a klist =   // char    palette_user_variable_name_ctr[20][20];
 
   //move into devicelist?

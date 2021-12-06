@@ -105,7 +105,7 @@ bool mInterfaceLight::Pre_Init(void)
   }
 
   
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
   order->red = 0;
   order->green = 1;
   order->blue = 2;
@@ -779,11 +779,11 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
       JsonBuilderI->Add("WC", rgbcct_controller.WC); 
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
-      JsonBuilderI->Add("R", hardware_element_colour_order[0].r); 
-      JsonBuilderI->Add("G", hardware_element_colour_order[0].g); 
-      JsonBuilderI->Add("B", hardware_element_colour_order[0].b); 
-      JsonBuilderI->Add("WW", hardware_element_colour_order[0].w); 
-      JsonBuilderI->Add("WC", hardware_element_colour_order[0].c); 
+      JsonBuilderI->Add("R", hardware_element_colour_order.r); 
+      JsonBuilderI->Add("G", hardware_element_colour_order.g); 
+      JsonBuilderI->Add("B", hardware_element_colour_order.b); 
+      JsonBuilderI->Add("WW", hardware_element_colour_order.w); 
+      JsonBuilderI->Add("WC", hardware_element_colour_order.c); 
     JsonBuilderI->Level_End();
 
     JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);

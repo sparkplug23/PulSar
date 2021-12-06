@@ -31,7 +31,10 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+#ifdef ESP32
 #include <driver/adc.h>
+#endif
+
 // C:\Users\Michael Doone\.platformio\packages\framework-arduinoespressif32\tools\sdk\include\driver\driver
 #include <vector>
 
@@ -68,22 +71,6 @@ class mADCInternal :
     uint8_t interruptPin = 12;
 
 
-struct ISR_DUAL_CAPTURE{
-  struct ADC_PIN1{
-    uint16_t buffer_ch6[40];
-    uint16_t buffer_ch7[40];
-  }adc_readings[2]; //single struct, 2 buffers
-  
-  /**
-   * One buffer will be filled, while the other is read from 
-   * In seriallogger, this needs to happen because the previous recorded syncframe on the pic32 is transmitted during the next syncframe interval
-   * */
-  uint8_t within_buffer_iter_counter = 0;
-  uint8_t active_buffer_to_write_to_index = 0;
-
-}isr_capture;
-  
-
 
     void Pre_Init(void);
     void Init(void);
@@ -108,6 +95,23 @@ struct ISR_DUAL_CAPTURE{
       uint16_t measure_rate_ms = 1000;
     }settings;
 
+  
+
+#ifdef ESP32
+struct ISR_DUAL_CAPTURE{
+  struct ADC_PIN1{
+    uint16_t buffer_ch6[40];
+    uint16_t buffer_ch7[40];
+  }adc_readings[2]; //single struct, 2 buffers
+  
+  /**
+   * One buffer will be filled, while the other is read from 
+   * In seriallogger, this needs to happen because the previous recorded syncframe on the pic32 is transmitted during the next syncframe interval
+   * */
+  uint8_t within_buffer_iter_counter = 0;
+  uint8_t active_buffer_to_write_to_index = 0;
+
+}isr_capture;
   
 // typedef enum {
 //     ADC1_CHANNEL_0 = 0, /*!< ADC1 channel 0 is GPIO36 */
@@ -189,6 +193,8 @@ struct ISR_DUAL_CAPTURE{
       bool flag_enabled = false;
 
     }external_interrupt;
+
+#endif //ESP32
 
     // Going to be the size of the superframe, ie 50 samples * channels (4) [3 active + guard] = 200
     #define STORED_VALUE_ADC_MAX 250

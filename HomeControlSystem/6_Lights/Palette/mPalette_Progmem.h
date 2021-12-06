@@ -245,6 +245,10 @@
 
     #define D_RGB255_PURPLE_BLUE     120, 16, 144,
     #define D_RGB255_PURPLE_RED      255, 16, 44,
+
+
+    #define D_RGB255_PURPLE_DEEP     21,0,26,
+
     #define D_RGB255_PINK_WARM       255, 26, 64,
     #define D_RGB255_PINK_HOT        255, 16, 44,
     #define D_RGB255_PINK_HOT2       255, 0, 72,
@@ -1236,6 +1240,68 @@
 
 
 
+    #ifndef D_PALETTE_CHRISTMAS_18_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_18_NAME_CTR        "Woolworths berry lights Red,Green.Yellow,purple,cyan|Christmas 18"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_18_NAME_CTR)        D_PALETTE_CHRISTMAS_17_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_18_COLOUR_MAP_IDS)
+    { // R,G,B      
+    
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT
+      D_RGB255_PURPLE_DEEP
+    
+    };
+
+    #ifndef D_PALETTE_CHRISTMAS_19_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_19_NAME_CTR        "tbd|Christmas 19"   
+    #endif
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_19_NAME_CTR)        D_PALETTE_CHRISTMAS_17_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_19_COLOUR_MAP_IDS)
+    { // R,G,B      
+    
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT
+    
+    };
+
+    #ifndef D_PALETTE_CHRISTMAS_20_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_20_NAME_CTR        "MultiColoured Snow Tree Dinning Room|Christmas 20"   
+    #endif
+    // #define PM_PALETTE_CHRISTMAS_20_DESCRIPTION_CTR   "Dining room 2021 Palette" // new optional (for memory) descriptions
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_20_NAME_CTR)        D_PALETTE_CHRISTMAS_17_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_20_COLOUR_MAP_IDS)
+    { // R,G,B      
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_PINK_HOT3
+      D_RGB255_CYAN_FADED3
+    };
+
 
 
 
@@ -1326,13 +1392,9 @@
       D_RGB255_RED_PASTEL
       D_RGB255_ORANGE_DEEP
       //D_RGB255_YELLOW_WARM
-      21,0,26, //deep darker purple
-      255,0,43,
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_PINK_HOT3
       D_RGB255_CYAN_FADED3
-      // D_RGB255_PINK_HOT2
-      // D_RGB255_RED
-
-
 
       #endif // USE_CUSTOM_USER_JACQUELINE
 

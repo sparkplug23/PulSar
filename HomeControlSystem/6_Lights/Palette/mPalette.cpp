@@ -437,6 +437,33 @@ void mPalette::init_ColourPalettes_Christmas_17(){
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
 }
+void mPalette::init_ColourPalettes_Christmas_18(){
+  palettelist.ptr     = &palettelist.christmas_18;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_18_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_18_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_18_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_18_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+void mPalette::init_ColourPalettes_Christmas_19(){
+  palettelist.ptr     = &palettelist.christmas_19;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_19_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_19_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_19_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_19_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
+void mPalette::init_ColourPalettes_Christmas_20(){
+  palettelist.ptr     = &palettelist.christmas_20;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_20_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_20_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_20_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_20_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
 
 void mPalette::init_ColourPalettes_Sunrise_01(){
   palettelist.ptr     = &palettelist.sunrise_01;  
@@ -744,6 +771,28 @@ void mPalette::init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id){
 
 void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
 
+// {
+//   "ColourPalette": 15,
+//   "PaletteEdit": {
+//     "ColourPalette": 15,
+//     "Data": [
+//       3,
+//       6,
+//       0,
+//       0,
+//       0,
+//       255,0,0,
+//       0,255,0,
+//       0,0,255
+//     ]
+//   },
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": "Static"
+//   },
+//   "Rate":1
+// }
+
   /**
    * [0] pixel_size, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
    * [1] map_type      eg (6=rgb no_index, )
@@ -894,6 +943,9 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_CHRISTMAS_15_ID:     return &palettelist.christmas_15;
     case PALETTELIST_STATIC_CHRISTMAS_16_ID:     return &palettelist.christmas_16;
     case PALETTELIST_STATIC_CHRISTMAS_17_ID:     return &palettelist.christmas_17;
+    case PALETTELIST_STATIC_CHRISTMAS_18_ID:     return &palettelist.christmas_18;
+    case PALETTELIST_STATIC_CHRISTMAS_19_ID:     return &palettelist.christmas_19;
+    case PALETTELIST_STATIC_CHRISTMAS_20_ID:     return &palettelist.christmas_20;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID:     return &palettelist.gradient_sunlevel_group01_01;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ID:     return &palettelist.gradient_sunlevel_group01_02;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ID:     return &palettelist.gradient_sunlevel_group01_03;

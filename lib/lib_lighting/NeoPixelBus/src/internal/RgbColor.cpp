@@ -24,6 +24,15 @@ License along with NeoPixel.  If not, see
 <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------*/
 
+// #include "RgbColor.h"
+// #include "Rgb16Color.h"
+// #include "Rgb48Color.h"
+// #include "HslColor.h"
+// #include "HsbColor.h"
+// #include "HtmlColor.h"
+// #include "RgbwColor.h"
+
+// ADDED BY MICHAEL
 #include "RgbColor.h"
 #include "RgbwColor.h"
 #include "RgbcctColor.h"
@@ -67,9 +76,9 @@ RgbColor::RgbColor(const HslColor& color)
 
     _HslToRgb(color, &r, &g, &b);
 
-    R = (uint8_t)(r * Max);
-    G = (uint8_t)(g * Max);
-    B = (uint8_t)(b * Max);
+    R = static_cast<uint8_t>(r * Max);
+    G = static_cast<uint8_t>(g * Max);
+    B = static_cast<uint8_t>(b * Max);
 }
 
 RgbColor::RgbColor(const HsbColor& color)
@@ -80,28 +89,23 @@ RgbColor::RgbColor(const HsbColor& color)
 
     _HsbToRgb(color, &r, &g, &b);
 
-    R = (uint8_t)(r * Max);
-    G = (uint8_t)(g * Max);
-    B = (uint8_t)(b * Max);
+    R = static_cast<uint8_t>(r * Max);
+    G = static_cast<uint8_t>(g * Max);
+    B = static_cast<uint8_t>(b * Max);
 }
 
-// RgbColor::RgbColor(const uint32_t color32bit_WRGB)
-// {
-//     uint8_t w = (color32bit_WRGB >> 24);
-//     uint8_t r = (color32bit_WRGB >> 16);
-//     uint8_t g = (color32bit_WRGB >>  8);
-//     uint8_t b =  color32bit_WRGB       ;
-
-//     R = r;
-//     G = g;
-//     B = b;
-// }
-
+// ADDED BY MICHAEL
+RgbColor::RgbColor(const RgbcctColor& color)
+{
+    R = color.R;
+    G = color.G;
+    B = color.B;
+}
 
 
 uint8_t RgbColor::CalculateBrightness() const
 {
-    return (uint8_t)(((uint16_t)R + (uint16_t)G + (uint16_t)B) / 3);
+    return static_cast<uint8_t>((static_cast<uint16_t>(R) + static_cast<uint16_t>(G) + static_cast<uint16_t>(B)) / 3);
 }
 
 RgbColor RgbColor::Dim(uint8_t ratio) const
@@ -145,14 +149,6 @@ void RgbColor::Darken(uint8_t delta)
         B = 0;
     }
 }
-
-RgbColor::RgbColor(const RgbcctColor& color)
-{
-    R = color.R;
-    G = color.G;
-    B = color.B;
-}
-
 
 void RgbColor::Lighten(uint8_t delta)
 {

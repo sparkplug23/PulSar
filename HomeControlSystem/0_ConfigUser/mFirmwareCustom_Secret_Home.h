@@ -34,6 +34,7 @@
  * Generic devices ie those configured via `ini` configs
  */
 // #define DEVICE_SOCKET_NUMBERED
+// #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
 
 /**
 Kitchen/Dining
@@ -242,6 +243,91 @@ Bathroom
 
 #endif
 
+
+#ifdef DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
+  // #define DEVICENAME_SOCKET_NUMBER_CTR 2
+  #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  
+  /**
+   * Disable serial logging
+   * Use RX pin, gpio 1, as switch input
+   * TX pin should still allow debugging
+   * */
+  // #define DISABLE_SERIAL_LOGGING
+  
+  #define DISABLE_WEBSERVER
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    /**
+     * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
+     * */
+    // "\"" D_JSON_GPIOC "\":{"
+    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Builtin Button as toggle
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "}"
+  "}";
+
+#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -768,7 +854,7 @@ Bathroom
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"ColourPalette\":\"Christmas Warm White\","
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
     "\"BrightnessRGB\":100"
   "}";
 
@@ -830,12 +916,15 @@ Bathroom
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
 
+  #define USE_MODULE_CORE_RULES
+
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
-     
+       
   #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -848,9 +937,8 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      #endif      
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      "\"D4\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
+      #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -865,9 +953,33 @@ Bathroom
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
+    "}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":1" // Started
+      "}"
     "}"
   "}";
 
@@ -1002,6 +1114,8 @@ Bathroom
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
+
+  #define USE_MODULE_CORE_RULES
      
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
@@ -1115,7 +1229,7 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 150
+  #define STRIP_SIZE_MAX 155
 
 //   #define STRIP_REPEAT_OUTPUT_MAX 150
 
@@ -1148,14 +1262,14 @@ Bathroom
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static\""
+      "\"Function\":\"Slow Glow\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":1000,"
       "\"" D_JSON_RATE_MS "\":10000"
     "},"
     "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":60"
+    "\"BrightnessRGB\":40"
   "}";
 
 
@@ -1710,8 +1824,6 @@ Bathroom
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
-  #define USE_INTERNAL_HOME_APS_ONLY
-
   //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
   // #define ENABLE_HVAC_DEBUG_TIMES
   #define DISABLE_WEBSERVER
@@ -1879,6 +1991,24 @@ Bathroom
 #endif
 
 
+/***
+ * Gen 2 will stickw ith current wiring
+ *  - I will add an ethernet wire down the house, if just temporary for new internet
+ * 
+ * 
+ * Gen 3
+ * New Split Heating controller
+ * "heating" as primary
+ * "heating_remote_1" as device in hotpress
+ *    - remote tank sensors
+ *    - remote upstairs temperatures
+ *    - relay control for immersion
+ * (initally connected via mqtt in json format, eventually socket directly but also by json format)
+ * (this allows both to be connected via ethernet indirectly with switches, future esp32-poe)
+ * 
+ * */
+
+
 #ifdef DEVICE_HEATING_ESP32
 
 /**
@@ -1905,8 +2035,6 @@ Bathroom
   //#define ENABLE_MQTT_DEBUG_MESSAGES
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
-
-  #define USE_INTERNAL_HOME_APS_ONLY
 
   #define DISABLE_WEBSERVER
   #define ESP32
@@ -1937,30 +2065,58 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
 
-      "\"25\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
-      "\"26\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-      "\"27\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
-      "\"14\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
-
-      // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
-
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
-
-      /**
-       * Upstairs
-       * */
-      "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
+    // Phase 1 - Just relays, no sensors
 
 
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
-      // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
+      "\"5\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
+      "\"19\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
+      "\"18\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      "\"21\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
 
-      // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
-      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
-      // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      // // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
+
+      // "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
+
+      // /**
+      //  * Upstairs
+      //  * */
+      // "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
+
+
+      // "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
+      // // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
+
+      // // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      // // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
+      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
+      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
+      // // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
+
+
+      // "\"25\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
+      // "\"26\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
+      // "\"27\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      // "\"14\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
+
+      // // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
+
+      // "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
+
+      // /**
+      //  * Upstairs
+      //  * */
+      // "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
+
+
+      // "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
+      // // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
+
+      // // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      // // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
+      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
+      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
+      // // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
+      // // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
 
 /**
  * 
@@ -1968,7 +2124,7 @@ Bathroom
  * */
 
 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builtin led
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builti n led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -3175,7 +3331,6 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
 
-  //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
 
   /**
@@ -3195,42 +3350,6 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
-
-  // // New segments for joining everything together
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  // // HACS
-  // // WLED
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  
-  /**
-   * The types of WLED includes, exclusive
-   * */
-  // WLED ran as its own "mode", but entirely using the WLED method as original merged into project. This is temp solution.
-  //#define USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-  // WLED built as new method into my code, which will eventually become the merged WLED/HACS solution (ie not its own mode, but simply "effects")
-  //#define USE_DEVFEATURE_WLED_METHOD_NEW_SEGMENTS_EFFECT_THAT_MERGES_HACS_AND_WLED_AS_EFFECT
-  
-
-
-  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
-
-
-
-  // #define ENABLE_DEVFEATURE_MUSIC_ANIMATION_OPTIONS // ie esp32 speaker with timed animations for xmas 2022
-
-
-
-
-  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
-  // #define ENABLE_BOOT_OVERRIDE_INIT
-
-
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3243,6 +3362,12 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
+
+      /**
+       * Going forward, motion type will be used again
+       * Its effect will be to turn on switches like these directly
+       * This will require making a way to append to the rules, thus removing its need to add a rule by remplate
+       * */
       "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR     "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
@@ -3254,12 +3379,6 @@ Bathroom
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-
-  /**
-   * Allow using notifications with pixel groupings, ie applying pixel notificaiton across entire strip or section with pixel_index ranges
-   * 
-   * */
-
 
   #define STRIP_SIZE_MAX                      50   
   #define USE_LIGHTING_TEMPLATE
@@ -3274,11 +3393,13 @@ Bathroom
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":1" //slow glow
+      "\"Function\":\"RGBCCT Solid\"" //slow glow
     "},"
-    "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
+    "\"Transition\":{\"Order\":\"InOrder\",\"RateMs\":1000},"
+    "\"Hue\":30,"
+    "\"Sat\":100,"
     "\"TimeMs\":500,"
-    "\"ColourPalette\":43," //c12    43 is the colours for this christmas
+    "\"ColourPalette\":10," //c12    43 is the colours for this christmas
     "\"BrightnessRGB\":100"
   "}";
   #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
@@ -3555,6 +3676,154 @@ Bathroom
 
 
 
+#ifdef DEVICE_SHELLYDIMMER_BEDROOM_CEILING
+  #define DEVICENAME_CTR          "dimmer_bedroom_ceiling"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
+  
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_CORE_RULES
+  #define USE_HARDWARE_DEFAULT_RULES_1
+
+  #define DISABLE_SERIAL_LOGGING //temp measure
+  // #define DISABLE_SERIAL0_CORE //dont think its needed
+
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+  "}";
+
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+
+
+#ifdef DEVICE_SHELLYDIMMER_BEDROOM_LAMP
+  #define DEVICENAME_CTR          "dimmer_bedroom_lamp"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
+  
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_CORE_RULES
+  #define USE_HARDWARE_DEFAULT_RULES_1
+
+  #define DISABLE_SERIAL_LOGGING //temp measure
+  // #define DISABLE_SERIAL0_CORE //dont think its needed
+
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+  "}";
+
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+
+
+#ifdef DEVICE_SHELLYDIMMER_LIVING_LAMP
+  #define DEVICENAME_CTR          "dimmer_living_lamp"
+  #define DEVICENAME_FRIENDLY_CTR "Dimmer LivingRoom Lamp tbc ceiling"
+  
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_CORE_RULES
+  #define USE_HARDWARE_DEFAULT_RULES_1
+
+  #define DISABLE_SERIAL_LOGGING //temp measure
+  // #define DISABLE_SERIAL0_CORE //dont think its needed
+
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+  "}";
+
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -3744,7 +4013,7 @@ Bathroom
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLFY_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
       // #ifdef USE_MODULE_SENSORS_BME
       // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","

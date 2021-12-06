@@ -53,7 +53,7 @@ class mAddressableLight :
     };
     AnimationColours animation_colours;
 
-    void BlendAnimUpdate(const AnimationParam& param);
+    // void BlendAnimUpdate(const AnimationParam& param);
 
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     RgbcctColor output_colour;

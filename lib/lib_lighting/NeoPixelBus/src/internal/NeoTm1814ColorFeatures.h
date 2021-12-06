@@ -51,7 +51,7 @@ public:
     }
 };
 
-class Neo4ElementsTm1814Settings : public Neo4Elements
+class Neo4ByteElementsTm1814Settings : public Neo4ByteElements
 {
 public:
     typedef NeoTm1814Settings SettingsObject;
@@ -83,12 +83,12 @@ public:
 
     static const uint8_t* pixels(const uint8_t* pData)
     {
-        return pData;
+        return pData + SettingsSize;
     }
 };
 
 
-class NeoWrgbTm1814Feature : public Neo4ElementsTm1814Settings
+class NeoWrgbTm1814Feature : public Neo4ByteElementsTm1814Settings
 {
 public:
     static void applyPixelColor(uint8_t* pPixels, uint16_t indexPixel, ColorObject color)

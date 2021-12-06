@@ -422,7 +422,11 @@ class mInterfaceLight :
       };
     } HARDWARE_ELEMENT_COLOUR_ORDER;
 
-    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order[2];
+
+/**
+ * removing this as an array, it will be in segment instead
+ * */
+    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
     // FUTURE, using range values (0-50 = this, 51-100 = that) or wled segment style
 
 

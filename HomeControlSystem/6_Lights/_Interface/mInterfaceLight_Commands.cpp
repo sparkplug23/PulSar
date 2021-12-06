@@ -439,7 +439,7 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
     return;
   }
 
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
 
   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
@@ -1374,7 +1374,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
     // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     
-    // AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
+    AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID;    
     palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
@@ -1385,7 +1385,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
     // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
     
     // Clear old buffer space
-    memset(palette_buffer,0,100); //200 now   
+    memset(palette_buffer,0,palette_encoded_users_colour_map_LENGTH); //200 now   
     // Write new palette data into buffer space
     memcpy(palette_buffer,buffer,buflen);
     // Parse buffer data to correctly set data parameters

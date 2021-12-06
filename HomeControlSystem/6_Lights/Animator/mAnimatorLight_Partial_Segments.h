@@ -1722,7 +1722,6 @@
 // // void parsesub_CheckAll(JsonObjectConst obj);
 // void TurnLEDsOff();
 // // void AddToJsonObject_AddHardware(JsonObject root);
-// void Append_Hardware_Status_Message();
 // // void WebSendBody_Palette();
 // // void WebSendBody_Liveview();
 // // void WebSendBody_InfoTable();

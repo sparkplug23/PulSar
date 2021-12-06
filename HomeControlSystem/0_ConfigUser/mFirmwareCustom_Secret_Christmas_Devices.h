@@ -33,6 +33,9 @@
  * */
 // #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
 
+
+// #define DEVICE_LIVINGROOM_TREE_WATER_SENSOR
+
 /**
  * Dining Room tree 
  * */
@@ -982,13 +985,13 @@
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 200
+  #define STRIP_SIZE_MAX 150
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
       "\"Function\":\"Slow Glow\""
@@ -1004,6 +1007,97 @@
 
 #endif
 
+
+/**
+ * User:      Me
+ * Location:  Hallway tree, 12mm style
+ * Networked: Yes
+ * */
+#ifdef DEVICE_RGBSTRING_HALLWAY2_CONTROLLER_01
+  #define DEVICENAME_CTR          "xmas_hallway2_tree_01"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Hallway2 Tree 1/1"
+
+
+//hallway tree could have animation, that, when motion, it goes from warm white to coloured after a few seconds... then after 5 minutes
+// will saturate back to warmwhite again
+
+
+  // Currently being testing on bedroom tree with white 12mm, but will be moved directly to hallway
+  // Note, this controller also needs a 5v relay to control the secondary leds(400) that are also on tree
+
+  // #define USE_DEVFEATURE_FUNCTION_UPGRADE_CORE_TRANSITIONMETHODS
+  // #define DEBUG_ANIMATIONS_REFRESHPIXELINDEXING
+  // #define ENABLE_LOG_LEVEL_DEBUG 
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 150
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Slow Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":3900,"                // 2000
+      "\"" D_JSON_RATE_MS "\":4000,"             // 5000
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2" // Not function right now
+    "},"
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+    "\"BrightnessRGB\":50"
+  "}";
+
+#endif
+
+
+
+
+/**
+ * User:      Me
+ * Location:  Hallway tree, 12mm style
+ * Networked: Yes
+ * */
+#ifdef DEVICE_LIVINGROOM_TREE_WATER_SENSOR
+  #define DEVICENAME_CTR          "xmas_livingroom_water"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS LivingRoom Water Sensor"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_ADC_INTERNAL
+
+  // new devfeature controller
+  #define USE_CONTROLLER_ADC_WATER // needs better name
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+#endif
 
 
 

@@ -70,6 +70,12 @@ public:
         _brightness(255)
     {
     }
+    
+    NeoPixelBrightnessBus(uint16_t countPixels, uint8_t pin, NeoBusChannel channel) :
+        NeoPixelBus<T_COLOR_FEATURE, T_METHOD>(countPixels, pin, channel),
+        _brightness(255)
+    {
+    }
 
     NeoPixelBrightnessBus(uint16_t countPixels, uint8_t pinClock, uint8_t pinData) :
         NeoPixelBus<T_COLOR_FEATURE, T_METHOD>(countPixels, pinClock, pinData),
@@ -88,7 +94,7 @@ public:
         // Only update if there is a change
         if (brightness != _brightness)
         { 
-            uint16_t scale = (((uint16_t)brightness + 1) << 8) / ((uint16_t)_brightness + 1);
+            uint16_t scale = ((static_cast<uint16_t>(brightness) + 1) << 8) / (static_cast<uint16_t>(_brightness) + 1);
 
             // scale existing pixels
             //

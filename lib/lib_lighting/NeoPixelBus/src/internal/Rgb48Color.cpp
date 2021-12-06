@@ -30,17 +30,6 @@ License along with NeoPixel.  If not, see
 #include "HsbColor.h"
 #include "HtmlColor.h"
 
-Rgb48Color::Rgb48Color(const HtmlColor& color)
-{
-    uint32_t temp = color.Color;
-
-    B = (temp & 0xff);
-    temp = temp >> 8;
-    G = (temp & 0xff);
-    temp = temp >> 8;
-    R = (temp & 0xff);
-};
-
 Rgb48Color::Rgb48Color(const HslColor& color)
 {
     float r;
@@ -49,9 +38,9 @@ Rgb48Color::Rgb48Color(const HslColor& color)
 
     _HslToRgb(color, &r, &g, &b);
 
-    R = (uint16_t)(r * Max);
-    G = (uint16_t)(g * Max);
-    B = (uint16_t)(b * Max);
+    R = static_cast<uint16_t>(r * Max);
+    G = static_cast<uint16_t>(g * Max);
+    B = static_cast<uint16_t>(b * Max);
 }
 
 Rgb48Color::Rgb48Color(const HsbColor& color)
@@ -62,14 +51,14 @@ Rgb48Color::Rgb48Color(const HsbColor& color)
 
     _HsbToRgb(color, &r, &g, &b);
 
-    R = (uint16_t)(r * Max);
-    G = (uint16_t)(g * Max);
-    B = (uint16_t)(b * Max);
+    R = static_cast<uint16_t>(r * Max);
+    G = static_cast<uint16_t>(g * Max);
+    B = static_cast<uint16_t>(b * Max);
 }
 
 uint16_t Rgb48Color::CalculateBrightness() const
 {
-    return (uint16_t)(((uint32_t)R + (uint32_t)G + (uint32_t)B) / 3);
+    return static_cast<uint16_t>((static_cast<uint32_t>(R) + static_cast<uint32_t>(G) + static_cast<uint32_t>(B)) / 3);
 }
 
 Rgb48Color Rgb48Color::Dim(uint16_t ratio) const

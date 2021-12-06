@@ -1,9 +1,5 @@
 # NeoPixelBus
 
-##Edits by me
-
-# Inclusion of Rgbcct
-
 [![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6AA97KE54UJR4)
 
 Arduino NeoPixel library
@@ -28,7 +24,7 @@ See [Why this Library in the Wiki](https://github.com/Makuna/NeoPixelBus/wiki/Li
 ## Documentation
 [See Wiki](https://github.com/Makuna/NeoPixelBus/wiki)
 
-## Installing This Library (prefered, you just want to use it)
+## Installing This Library (preferred, you just want to use it)
 Open the Library Manager and search for "NeoPixelBus by Makuna" and install
 
 ## Installing This Library From GitHub (advanced, you want to contribute)

@@ -60,6 +60,8 @@ bool loaded_default_for_moduled = false;
 
     }jsonbuffer;
 
+bool AppendRule();
+
     // need a group of functions to "add" and remove from the buffer,
     // what about buffers? they can includes ids
 

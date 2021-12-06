@@ -27,7 +27,7 @@
  * */
 // #define DEVICE_TESTBED_MOTION
 // #define DEVICE_TESTBED_RGBCLOCK
-// #define DEVICE_RGBSTRING_ANIMATOR_01
+#define DEVICE_RGBSTRING_ANIMATOR_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
 // #define DEVICE_TESTBED_ULTRASONIC
               // #define DEVICE_TESTBED_9AXIS_GRYO
@@ -36,7 +36,6 @@
 // #define DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
 // #define DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D
 
-// #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
@@ -778,112 +777,25 @@
 
 
 
-#ifdef DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
-  // #define DEVICENAME_SOCKET_NUMBER_CTR 2
-  #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
-  #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
-  
-  /**
-   * Disable serial logging
-   * Use RX pin, gpio 1, as switch input
-   * TX pin should still allow debugging
-   * */
-  // #define DISABLE_SERIAL_LOGGING
-  
-  #define DISABLE_WEBSERVER
-  #define USE_MODULE_CORE_RULES
-  
-  #define USE_MODULE_SENSORS_BUTTONS
-  
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 1
-  #define USE_MODULE_DRIVERS_INTERFACE
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    /**
-     * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
-     * */
-    // "\"" D_JSON_GPIOC "\":{"
-    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
-    // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-  
-
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Builtin Button as toggle
-    "\"Rule0\":{" //switch example
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," //number, name, or all
-        "\"State\":2" // toggle
-      "}"
-    "},"
-    // Optional external button on RX pin
-    "\"Rule1\":{" //switch example
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," //number, name, or all
-        "\"State\":2" // toggle
-      "}"
-    "}"
-  "}";
-
-#endif
-
 
 #ifdef DEVICE_RGBSTRING_ANIMATOR_01
   #define DEVICENAME_CTR          "testbed_string_animator_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
-
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-  // New segments for joining everything together
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  // HACS
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   // WLED
-  #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-  #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // new method for 2022
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT      // current method for xmas 2021
+
+  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   
   #define ENABLE_BOOT_OVERRIDE_INIT
 

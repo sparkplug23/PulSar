@@ -142,8 +142,10 @@ void mAnimatorLight::Pre_Init(void){
 
 }
 
-void mAnimatorLight::init(void){ 
-    
+
+void mAnimatorLight::Init_NeoPixelBus()
+{
+
   // if pixel size changes, free and init again
   uint16_t strip_size_tmp = STRIP_SIZE_MAX;
   #ifdef STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
@@ -151,7 +153,17 @@ void mAnimatorLight::init(void){
   #endif
   // uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
   
+  //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
+  //step2:  to become its own function, so strips can be changed at runtime
+  stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
   
+
+}
+
+
+
+void mAnimatorLight::init(void){ 
+    
   ledout.length = STRIP_SIZE_MAX; 
   
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
@@ -160,16 +172,14 @@ void mAnimatorLight::init(void){
   
   //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
   //step2:  to become its own function, so strips can be changed at runtime
-  stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
+  // stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
+
+  Init_NeoPixelBus();
   
   
   uint16_t animator_strip_size_tmp = 1;//animator_strip_size<ANIMATOR_SIZE_MAX?animator_strip_size:ANIMATOR_SIZE_MAX; // Catch values exceeding limit
 
   pCONT_iLight->Init_NeoPixelAnimator(animator_strip_size_tmp, NEO_ANIMATION_TIMEBASE);  
-
-  // delay(5000);
-  // SetPixelColor_All(RgbcctColor(0,10,0,0,0));
-  // delay(5000);
 
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
@@ -602,10 +612,14 @@ if(indexPixel<10)
 
   RgbcctColor color_hardware = color_internal;
 
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order[0];
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order;
 
   // if(indexPixel<100){
-    order = pCONT_iLight->hardware_element_colour_order[0];
+
+
+
+
+    order = pCONT_iLight->hardware_element_colour_order;
   // }else{
   //   order = pCONT_iLight->hardware_element_colour_order[1];
   // }
@@ -826,11 +840,11 @@ color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
   //   case  4: color_internal.B = color_hardware.G; color_internal.G = color_hardware.R; color_internal.R = color_hardware.B; break; //4 = BGR
   //   default: color_internal.G = color_hardware.G; color_internal.B = color_hardware.R; color_internal.R = color_hardware.B; break; //5 = GBR
   // }
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order[0];
+  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order;
 
 
   // if(indexPixel<100){
-    order = pCONT_iLight->hardware_element_colour_order[0];
+    order = pCONT_iLight->hardware_element_colour_order;
   // }else{
   //   order = pCONT_iLight->hardware_element_colour_order[1];
   // }
@@ -1947,7 +1961,7 @@ void mAnimatorLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_
   }
 
   
-  pCONT_iLight->animator_controller->StartAnimation(0, _time_to_newcolour, [this](const AnimationParam& param){ this->BlendAnimUpdate(param);} );
+  pCONT_iLight->animator_controller->StartAnimation(0, _time_to_newcolour, [this](const AnimationParam& param){ this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);} );
   
 } // END function
 
@@ -1997,7 +2011,7 @@ void mAnimatorLight::StartAnimationAsBlendFromStartingColorToDesiredColor(){
   }
 
 
-  pCONT_iLight->animator_controller->StartAnimation(0, time_tmp, [this](const AnimationParam& param){ this->BlendAnimUpdate(param);} );
+  pCONT_iLight->animator_controller->StartAnimation(0, time_tmp, [this](const AnimationParam& param){ this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);} );
 
 
 
@@ -2218,59 +2232,6 @@ void mAnimatorLight::SetPixelColor_All(RgbcctColor colour){
   }
   pCONT_iLight->ShowInterface();
 }
-
-
-
-
-
-
-void mAnimatorLight::Append_Hardware_Status_Message(){
-
-  // struct STATUSHARDWARE{
-  //   char ctr[200];
-  //   uint8_t len = 0;
-  //   uint8_t importance = 0; //0 low, 1 med, 2 high
-  // };
-
-  // int numpixels = pCONT_iLight->settings.light_size_count;
-  // if(numpixels>55){numpixels=55;}
-
-  uint32_t colourcount = 0;
-
-  //for(int i=0;i<numpixels;i++){
-    RgbTypeColor c = GetPixelColor(0);
-    colourcount += c.R+c.G+c.B;
-  //}
-
-  if(colourcount){
-
-    // pCONT_tel->hardwarestatus.len += pCONT_sup->WriteBuffer_P(pCONT_tel->hardwarestatus.ctr+pCONT_tel->hardwarestatus.len,
-    //   PSTR("%s%02X%02X%02X ON"),
-    //     pCONT_tel->hardwarestatus.len>0?"":"', ",
-    //     c.R,c.G,c.B
-    // );
-
-    // SetAndKeepHighestNumber(&pCONT_tel->hardwarestatus.importance, (uint8_t) HARDWARE_STATUS_IMPORTANCE_MEDIUM_ID);
-
-  }
-
-  //status on
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2596,23 +2557,30 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 
 uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_method){
 
-  D_DATA_BUFFER_CLEAR();
-  pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr,
-    PSTR("{"
-      "\"" "ledout"       "\":%d,"
-      "\"" "pCONT_iLight->settings.light_size_count"        "\":%d,"
-      "\"" "STRIP_SIZE_MAX"          "\":%d,"
-      "\"" "animator_strip_size"  "\":%d,"
-      "\"" "ANIMATOR_SIZE_MAX"         "\":%d"
-    "}"),
-    ledout.length,
-    pCONT_iLight->settings.light_size_count,
-    STRIP_SIZE_MAX,
-    animator_strip_size,
-    ANIMATOR_SIZE_MAX
-  );
+  // D_DATA_BUFFER_CLEAR();
+  // pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr,
+  //   PSTR("{"
+  //     "\"" "ledout"       "\":%d,"
+  //     "\"" "pCONT_iLight->settings.light_size_count"        "\":%d,"
+  //     "\"" "STRIP_SIZE_MAX"          "\":%d,"
+  //     "\"" "animator_strip_size"  "\":%d,"
+  //     "\"" "ANIMATOR_SIZE_MAX"         "\":%d"
+  //   "}"),
+  //   ledout.length,
+  //   pCONT_iLight->settings.light_size_count,
+  //   STRIP_SIZE_MAX,
+  //   animator_strip_size,
+  //   ANIMATOR_SIZE_MAX
+  // );
 
-  return strlen(data_buffer.payload.ctr) ? 1 : 0;
+  // return strlen(data_buffer.payload.ctr) ? 1 : 0;
+
+  JBI->Start();
+
+    JBI->Add("ledout_length", ledout.length);
+    JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
+
+  return JBI->End();
 
 }
 
@@ -2636,15 +2604,6 @@ uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
   // // root[D_JSON_BRIGHTNESS_PERCENTAGE] = pCONT_iLight->animation.brightness*100;
   // root[D_JSON_BRIGHTNESS] = pCONT_iLight->animation.brightness;
 
-  // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
-  //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-  //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
-  //   transitionobj[D_JSON_TIME_MS] = pCONT_iLight->animation.transition.time_ms.val;
-  //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
-  //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
-  //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-  //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
-  //   transitionobj[D_JSON_ORDER] = GetTransitionOrderName();
 
   // // Flags and states that are used during one transition and reset when completed
   // // JsonObject overridesobj = root.createNestedObject("transition_overrides"); 
@@ -2655,7 +2614,31 @@ uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
   // data_buffer.payload.len = measureJson(root)+1;
   // serializeJson(doc,data_buffer.payload.ctr);
 
-  return 0;
+  // return 0;
+
+  
+  JBI->Start();
+
+    JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
+    // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
+
+    JBI->Level_Start(D_JSON_TRANSITION);
+    //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
+    //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
+      JBI->Add(D_JSON_TIME_MS, pCONT_iLight->animation.transition.time_ms);
+    //   transitionobj[D_JSON_TIME_MS] = ;
+    //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
+    //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
+    //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
+    //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
+    //   transitionobj[D_JSON_ORDER] = GetTransitionOrderName();
+    JBI->Level_End();
+
+
+
+
+  return JBI->End();
+
 
 }
 
@@ -2664,21 +2647,16 @@ uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
 uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
   // Awaiting total redesign
   
-  #ifdef ENABLE_LOG_LEVEL_DEBUG
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
-  #endif
+  // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
+  // #endif
 
-  
-  // DynamicJsonDocument doc(1500);
-  // JsonObject root = doc.to<JsonObject>();
+  JBI->Start();
 
-  // root["ambilight"] =0;//ledout.length;
+    // JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
+    // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
 
-  // data_buffer.payload.len = measureJson(root)+1;
-  // serializeJson(doc,data_buffer.payload.ctr);
-
-  return 0;//data_buffer.payload.len;
-
+  return JBI->End();
 }
 
 
@@ -2998,32 +2976,9 @@ void mAnimatorLight::init_flasher_settings(){
 
 
 
-// simple blend function
-void mAnimatorLight::BlendAnimUpdate(const AnimationParam& param)
-{    
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
-        animation_colours[pixel].StartingColor,
-        animation_colours[pixel].DesiredColour,
-        param.progress);
-    SetPixelColor(pixel, updatedColor);
-  } // END for
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+ * @brief: Single colour, replicated for all output values (all pixels for ws2811 or pwm for h801)
+ * */
 void mAnimatorLight::AnimationProcess_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param)
 {   
 
@@ -3038,7 +2993,9 @@ void mAnimatorLight::AnimationProcess_Generic_RGBCCT_Single_Colour_All(const Ani
 
 }
 
-
+/**
+ * @brief: Ws2811 style output, single pixels
+ * */
 void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend(const AnimationParam& param)
 {    
   for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++)
@@ -3281,18 +3238,6 @@ void mAnimatorLight::SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change
   //   pCONT_iLight->animation.transition.time_ms = pCONT_iLight->animation.transition.rate_ms/4; //75% of time spent on desired colour
   // }
   }
-
-
-// /****
-//  * Changes pixels randomly to new colour, with slow blending
-//  * Requires new colour calculation each call
-//  */
-// void mAnimatorLight::SubTask_Flasher_Animate_Function__Slow_Glow(){
-//   // So colour region does not need to change each loop to prevent colour crushing
-//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-//   UpdateDesiredColourFromPaletteSelected();
-// }
-
 
 
 /**
