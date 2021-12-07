@@ -45,8 +45,9 @@ class ProgramTemperature; //tmp fix
 #include <NeoPixelBus.h>
 
 
-
+#ifndef HEATING_DEVICE_MAX
    #define HEATING_DEVICE_MAX 4
+   #endif
 
 #include <stdio.h>
 #include <stdlib.h>

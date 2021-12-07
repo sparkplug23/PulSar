@@ -30,6 +30,9 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
       break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_RefreshAll(); // This needs later to not do it if first connect
+      break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
 

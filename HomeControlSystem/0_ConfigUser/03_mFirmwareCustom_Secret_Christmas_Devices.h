@@ -2,7 +2,7 @@
 #define MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWARE_CHRISTMAS_DEVICES_H
 
 /*********************************************************************************************\
- * Testbeds: Development devices to get specialised hardware working in their default minimum/basic operation
+ * Christmas devices: Temporary devices only for the christmas season of 2021, to be removed after
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
@@ -19,7 +19,7 @@
  * For therese, buttons allow controls
  * nodemcu v3
  * */
-// #define DEVICE_RGBSTRING_CONTROLLER_01
+//#define DEVICE_RGBSTRING_CONTROLLER_01
 /**
  * Jacqueline and Paula, programmed to be exact, never change
  * nodemuc v3
@@ -31,7 +31,7 @@
  * Outside tree
  * DIOT esp32
  * */
-// #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
+//#define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
 
 
 // #define DEVICE_LIVINGROOM_TREE_WATER_SENSOR
@@ -49,7 +49,7 @@
 
 
 // Include the home devices, which should ONLY contain final hardware
-#include "0_ConfigUser/mFirmwareCustom_Secret_Home.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -383,6 +383,116 @@
 
 #endif
 
+
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * For jacq/paula
+ * Manually pick the colours, then hardcode, it should only show that on static (in order)
+ * they might want the slow glow, maybe use a wire/jumper for it
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_RGB_01
+  #define DEVICENAME_CTR          "rgb_static_therese_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Static Controller 01"
+
+  #define USE_CUSTOM_USER_PAULA
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define DISABLE_NETWORK
+
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":5000,"
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":100"
+  "}";
+
+#endif
+
+/**
+ * For christmas lights to be given to other people as a closed unit
+ * Test hardware is nodemcu VERSION 3 (4MB)
+ * For jacq/paula
+ * Manually pick the colours, then hardcode, it should only show that on static (in order)
+ * they might want the slow glow, maybe use a wire/jumper for it
+ * */
+#ifdef DEVICE_RGBSTRING_CONTROLLER_STATIC_THERESE_GRB_01
+  #define DEVICENAME_CTR          "grb_static_therese_01"
+  #define DEVICENAME_FRIENDLY_CTR "GRB Static Controller 01"
+
+  #define USE_CUSTOM_USER_PAULA
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  #define DISABLE_NETWORK
+
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":1000,"
+      "\"" D_JSON_RATE_MS "\":5000,"
+    "},"
+    "\"ColourPalette\":\"Custom User 01\","
+    "\"BrightnessRGB\":100"
+  "}";
+
+#endif
 
 
 

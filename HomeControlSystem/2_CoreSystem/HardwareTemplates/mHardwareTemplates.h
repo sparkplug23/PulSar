@@ -316,10 +316,10 @@ const uint8_t kList_Selectable_Function_IDs[] PROGMEM = {
   GPIO_DHT22_1OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
   GPIO_DHT22_2OF2_ID,          // DHT21, DHT22, AM2301, AM2302, AM2321
 #endif
-#if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
+//#if defined(USE_DS18B20) || defined(USE_DS18x20) || defined(USE_DS18x20_LEGACY)
   GPIO_DSB_1OF2_ID,            // Single wire DS18B20 or DS18S20
   GPIO_DSB_2OF2_ID,            // Single wire DS18B20 or DS18S20
-#endif
+//#endif
 #ifdef USE_WS2812
   GPIO_RGB_DATA_ID,         // WS2812 Led string
   GPIO_RGB_CLOCK_ID,         // WS2812 Led string

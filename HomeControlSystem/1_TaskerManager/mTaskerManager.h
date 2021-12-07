@@ -28,12 +28,16 @@
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #endif // D_USER_MICHAEL // Include my personally named secret file
 #ifdef D_USER_MICHAEL // Include my personally named secret file
-#include "0_ConfigUser/mFirmwareCustom_Secret_Dev.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret_DevLogging.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret_Dev_Testbeds.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret_Christmas_Devices.h""
-#include "0_ConfigUser/mFirmwareCustom_Secret_Measurements.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret_Measurements_Calibration.h"
+/**
+ * In order of importance
+ * */
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
+#include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
+/**
+ * Temporary files
+ * */
+#include "0_ConfigUser/03_mFirmwareCustom_Secret_Christmas_Devices.h"
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/mUserConfig_Secret.h"

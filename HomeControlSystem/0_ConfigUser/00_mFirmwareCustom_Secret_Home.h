@@ -4,6 +4,9 @@
 
 
 /**
+ * Installed in the home permenantly
+ * 
+ * 
  * TODO: Make a binder with all wiring diagrams and ideas as I move forward with designs
  *
  * Add in option that makes devices restart if no active internet connection is present. Test the "active" connection by updating the NTP time, as no response can be viewed as no external connection and not a dead AP
@@ -1111,9 +1114,6 @@ Bathroom
 #ifdef DEVICE_UTILITYSENSOR
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
 
   #define USE_MODULE_CORE_RULES
      

@@ -3,6 +3,8 @@
 
 /*********************************************************************************************\
  * Testbeds: Development devices to get specialised hardware working in their default minimum/basic operation
+ *           This will be examples for others to follow
+ * - Finished testbeds should be moved into "Examples" to be generated for others first build
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
@@ -27,7 +29,7 @@
  * */
 // #define DEVICE_TESTBED_MOTION
 // #define DEVICE_TESTBED_RGBCLOCK
-#define DEVICE_RGBSTRING_ANIMATOR_01
+// #define DEVICE_RGBSTRING_ANIMATOR_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
 // #define DEVICE_TESTBED_ULTRASONIC
               // #define DEVICE_TESTBED_9AXIS_GRYO
@@ -42,7 +44,7 @@
 // #define DEVICE_ESP32_WEBCAM1
 
 // Include the home devices, which should ONLY contain final hardware
-#include "0_ConfigUser/mFirmwareCustom_Secret_Home.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

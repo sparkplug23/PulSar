@@ -476,12 +476,35 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
   IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
     
+  /**
+   * using mdns instead of just IP
+   * */
+  #ifdef USE_MQTT_MDNS_HOST
+
+  // try mdns, if it fails, then fallback to IP, really try both?
+  // if(host_server_type== 0)
+  // {
     
+  // pubsub->setServer(mqqtserver, 1883);
+  // }
+  // pubsub->setServer(mqqtserver, 1883);
+
+  // This will require testng with connect()
+
+  
+  pubsub->setServer(mqqtserver, 1883);
+
+
+  #else
+
+
+  pubsub->setServer(mqqtserver, 1883);
+
+  #endif
     
     // 192,168,1,65); //desktop
 
 
-  pubsub->setServer(mqqtserver, 1883);
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];

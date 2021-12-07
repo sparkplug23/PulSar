@@ -96,8 +96,14 @@ void mSensorsBME::Pre_Init(){
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
     sensor[settings.fSensorCount].bme = new Adafruit_BME280();
+    if (sensor[settings.fSensorCount].bme->begin(0x76, pCONT_sup->wire)) {
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
+      sensor[settings.fSensorCount].i2c_address = 0x76;
+      settings.fSensorCount++;
+    }else
     if (sensor[settings.fSensorCount].bme->begin(0x77, pCONT_sup->wire)) {
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
+      sensor[settings.fSensorCount].i2c_address = 0x77;
       settings.fSensorCount++;
     }else{
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280 sensor not detected"));
@@ -118,6 +124,7 @@ void mSensorsBME::Init(void){
   for (int sensor_id=0;sensor_id<MAX_SENSORS;sensor_id++){    
     sensor[sensor_id].tSavedMeasureClimate = millis();
     sensor[sensor_id].sReadSensor = SPLIT_TASK_SEC1_ID;    
+    sensor[sensor_id].temperature_threshold_value = 0.1; 
   }
 
   settings.measure_rate_ms = 1000;
@@ -169,7 +176,7 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
         }
         
         if(
-          (fabsf(sensor[sensor_id].temperature-sensor[sensor_id].bme->readTemperature())>0.1)||
+          (fabsf(sensor[sensor_id].temperature-sensor[sensor_id].bme->readTemperature())>sensor[sensor_id].temperature_threshold_value)||
           (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())&&(abs(millis()-sensor[sensor_id].ischangedtLast)>60000)  
         ){
           sensor[sensor_id].ischanged_over_threshold = true;
@@ -213,10 +220,6 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
 }//end function
 
 
-/*********************************************************************************************************************************************
-******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
 
 uint8_t mSensorsBME::ConstructJSON_Settings(uint8_t json_method){
 
@@ -250,86 +253,5 @@ uint8_t mSensorsBME::ConstructJSON_Sensor(uint8_t json_level){
   return JsonBuilderI->End();
 
 }
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-#ifdef USE_MODULE_NETWORK_MQTT
-
-void mSensorsBME::MQTTHandler_Init(){
-
-  struct handler<mSensorsBME>* ptr;
-
-  ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
-
-  ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mSensorsBME::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsBME::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsBME::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSensorsBME::MQTTHandler_Sender(uint8_t id)
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle, id);
-  }
-}
-
-#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

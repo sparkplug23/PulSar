@@ -5,46 +5,8 @@
 const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DOOR_CTR;
 const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
 
-void mDoorSensor::Pre_Init(void){
-  
-  settings.fEnableSensor = false;
-
-  if(pCONT_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
-    // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
-    pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
-    settings.fEnableSensor = true;
-  }else{
-    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
-    //disable pir code
-  }
-
-  // if(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID] < 99) {  // not set when 255
-  //   pin_lock = pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID];
-  //   pinMode(pin_lock,INPUT_PULLUP);
-  // }else{
-  //   AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pin_lock);
-  //   //disable pir code
-  // }
-
-  // pin_open = D6;
-  // pinMode(pin_open,INPUT_PULLUP);
-
-}
-
-
-uint8_t mDoorSensor::IsDoorOpen(){
-  return digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
-}
-
-
-void mDoorSensor::init(void){
-
-  door_detect.state = IsDoorOpen();
-
-}
-
-
-int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   /************
    * INIT SECTION * 
@@ -99,6 +61,46 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj){
   }
 
 } // END function
+
+
+
+void mDoorSensor::Pre_Init(void){
+  
+  settings.fEnableSensor = false;
+
+  if(pCONT_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
+    // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
+    pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
+    settings.fEnableSensor = true;
+  }else{
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
+    //disable pir code
+  }
+
+
+  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID))
+  {
+    pinMode(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
+  }else{
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID));
+    //disable pir code
+  }
+
+}
+
+
+uint8_t mDoorSensor::IsDoorOpen(){
+  return digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
+}
+
+
+void mDoorSensor::init(void){
+
+  door_detect.state = IsDoorOpen();
+
+}
+
+
 
 void mDoorSensor::EveryLoop(){
 
@@ -187,8 +189,8 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
 
 }
 
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
-    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
   if(door_detect.isactive){
@@ -221,6 +223,9 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
     JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
     JsonBuilderI->Add(D_JSON_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
+
+  JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
+  JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
 
   return JsonBuilderI->End();
 

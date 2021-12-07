@@ -1128,43 +1128,43 @@ HsbColor mPalette::GetHsbColour(uint8_t id){
   }
 
   // Get hue
-  if(id>=COLOUR_MAP_RED_ID    && id<=COLOUR_MAP_RED_PASTEL0_ID){
+  if(id>=COLOUR_MAP_RED_ID    && id<=COLOUR_MAP_RED_ID){
     colour.H = pgm_read_float(&colour_float_map_values[0]); // progmem here might not be useful
   }else
-  if(id>=COLOUR_MAP_ORANGE_ID && id<=COLOUR_MAP_ORANGE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_ORANGE_ID && id<=COLOUR_MAP_ORANGE_ID){
     colour.H = pgm_read_float(colour_float_map_values+1);
   }else
-  if(id>=COLOUR_MAP_LIGHTORANGE_ID && id<=COLOUR_MAP_LIGHTORANGE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_LIGHTORANGE_ID && id<=COLOUR_MAP_LIGHTORANGE_ID){
     colour.H = pgm_read_float(colour_float_map_values+2);
   }else
-  if(id>=COLOUR_MAP_WHITE_ID && id<=COLOUR_MAP_WHITE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_WHITE_ID && id<=COLOUR_MAP_WHITE_ID){
     colour.H = pgm_read_float(colour_float_map_values+3);
   }else
-  if(id>=COLOUR_MAP_YELLOW_ID && id<=COLOUR_MAP_YELLOW_PASTEL0_ID){
+  if(id>=COLOUR_MAP_YELLOW_ID && id<=COLOUR_MAP_YELLOW_ID){
     colour.H = pgm_read_float(colour_float_map_values+4);
   }else
-  if(id>=COLOUR_MAP_LIMEGREEN_ID && id<=COLOUR_MAP_LIMEGREEN_PASTEL0_ID){
+  if(id>=COLOUR_MAP_LIMEGREEN_ID && id<=COLOUR_MAP_LIMEGREEN_ID){
     colour.H = pgm_read_float(colour_float_map_values+5);
   }else
-  if(id>=COLOUR_MAP_GREEN_ID && id<=COLOUR_MAP_GREEN_PASTEL0_ID){
+  if(id>=COLOUR_MAP_GREEN_ID && id<=COLOUR_MAP_GREEN_ID){
     colour.H = pgm_read_float(colour_float_map_values+6);
   }else
-  if(id>=COLOUR_MAP_CYAN_ID && id<=COLOUR_MAP_CYAN_PASTEL0_ID){
+  if(id>=COLOUR_MAP_CYAN_ID && id<=COLOUR_MAP_CYAN_ID){
     colour.H = pgm_read_float(colour_float_map_values+7);
   }else
-  if(id>=COLOUR_MAP_BLUE_ID && id<=COLOUR_MAP_BLUE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_BLUE_ID && id<=COLOUR_MAP_BLUE_ID){
     colour.H = pgm_read_float(colour_float_map_values+8);
   }else
-  if(id>=COLOUR_MAP_BLUEPURPLE_ID && id<=COLOUR_MAP_BLUEPURPLE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_BLUEPURPLE_ID && id<=COLOUR_MAP_BLUEPURPLE_ID){
     colour.H = pgm_read_float(colour_float_map_values+9);
   }else
-  if(id>=COLOUR_MAP_PURPLE_ID && id<=COLOUR_MAP_PURPLE_PASTEL0_ID){
+  if(id>=COLOUR_MAP_PURPLE_ID && id<=COLOUR_MAP_PURPLE_ID){
     colour.H = pgm_read_float(colour_float_map_values+10);
   }else
-  if(id>=COLOUR_MAP_PINK_ID && id<=COLOUR_MAP_PINK_PASTEL0_ID){
+  if(id>=COLOUR_MAP_PINK_ID && id<=COLOUR_MAP_PINK_ID){
     colour.H = pgm_read_float(colour_float_map_values+11);
   }else
-  if(id>=COLOUR_MAP_HOTPINK_ID && id<=COLOUR_MAP_HOTPINK_PASTEL0_ID){
+  if(id>=COLOUR_MAP_HOTPINK_ID && id<=COLOUR_MAP_HOTPINK_ID){
     colour.H = pgm_read_float(colour_float_map_values+12);
   }
 

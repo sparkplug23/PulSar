@@ -613,7 +613,7 @@ DEBUG_LINE;
   Settings.flag_system.mqtt_button_retain = 0;//MQTT_BUTTON_RETAIN;
   Settings.flag_system.mqtt_switch_retain = 0;//MQTT_SWITCH_RETAIN;
   Settings.flag_network.button_switch_force_local =0;// MQTT_BUTTON_SWITCH_FORCE_LOCAL;
-  Settings.flag_network.hass_tele_on_power = TELE_ON_POWER;
+ // Settings.flag_network.hass_tele_on_power = TELE_ON_POWER;
 //  Settings.flag_system.mqtt_sensor_retain = 0;
 //  Settings.flag_system.mqtt_offline = 0;
 //  Settings.flag_system.mqtt_serial = 0;

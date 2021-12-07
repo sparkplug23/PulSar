@@ -32,7 +32,6 @@
 class Adafruit_BME280;
 
 #include "1_TaskerManager/mTaskerManager.h"
-
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mSensorsBME :
@@ -86,6 +85,10 @@ class mSensorsBME :
       float humidity;
       float pressure;
       float altitude;
+      /**
+       * if change exceeds this, it is a significant change
+       * */
+      float temperature_threshold_value;
       uint8_t isvalid=false;
       uint8_t ischanged=false;
       uint8_t ischanged_over_threshold=false;
@@ -98,6 +101,7 @@ class mSensorsBME :
       unsigned long tWithinLimit;
       uint8_t sReadSensor;
       Adafruit_BME280* bme = NULL;
+      uint8_t i2c_address = 0x00;
     }sensor[MAX_SENSORS];
 
     
@@ -116,8 +120,6 @@ class mSensorsBME :
       value->data.push_back(sensor[index].humidity);
       value->sensor_id = index;
     };
-
-
 
         
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);

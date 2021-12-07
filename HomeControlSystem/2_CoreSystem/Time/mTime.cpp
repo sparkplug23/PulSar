@@ -124,16 +124,22 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_SENDER:
       //SubTasker_MQTTSender();
     break;
-    case FUNC_MQTT_CONNECTED:{
-      char message[50];
-      memset(message,0,sizeof(message));
-      sprintf_P(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"), uptime.hhmmss_ctr);
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
-    #endif// ENABLE_LOG_LEVEL_INFO
-     pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
-    }
-    break;
+    // case FUNC_MQTT_CONNECTED:{
+    //   char message[50];
+    //   memset(message,0,sizeof(message));
+    //   sprintf_P(message,PSTR("{\"connected\":{\"time\":\"%s\"}}"), uptime.hhmmss_ctr);
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog(LOG_LEVEL_INFO,PSTR("FUNC_MQTT_CONNECTED %s %d"),message, strlen(message));
+    // #endif// ENABLE_LOG_LEVEL_INFO
+
+    // /**
+    //  * This needs to become just inside the normal telemetry for mqtt
+    //  * */
+
+
+    //  pCONT_mqtt->ppublish("status/system/mqtt/event",message,false); //reconnect message
+    // }
+    // break;
     #endif // USE_MODULE_NETWORK_MQTT
   }
 

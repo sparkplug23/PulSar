@@ -180,6 +180,8 @@ class mMQTT :
     // StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
     // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
 
+    uint8_t host_server_type = 0;
+
 
     void DiscoverServer(void);
 
