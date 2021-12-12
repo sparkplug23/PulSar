@@ -31,6 +31,8 @@
 enum GPIO_COMPLETE_STATIC_LIST_IDS {
   // Default for unused
   GPIO_NONE_ID,
+  GPIO_ANALOG_ID, // basic analog that any enabled modules can use on the esp8266, this will need changed to be numbers so esp8266 defaults to 1 and esp32 cna use them all
+
   // DHT11/22 pins (enabled auto detect?)
   GPIO_DHT11_1OF2_ID, GPIO_DHT11_2OF2_ID,
   // DHT22
@@ -454,6 +456,11 @@ const uint8_t kList_Selectable_Function_IDs[] PROGMEM = {
 // Friendly names of gpio functions (add ifdefs later)
 
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_NONE_CTR)              D_GPIO_FUNCTION_NONE_CTR;
+
+
+DEFINE_PGM_CTR(PM_GPIO_FUNCTION_ANALOG_CTR)      D_GPIO_FUNCTION_ANALOG_CTR;
+
+
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_DHT11_1_CTR)           D_GPIO_FUNCTION_DHT11_1_CTR;
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_DHT11_2_CTR)           D_GPIO_FUNCTION_DHT11_2_CTR;
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_DHT22_1_CTR)           D_GPIO_FUNCTION_DHT22_1_CTR;

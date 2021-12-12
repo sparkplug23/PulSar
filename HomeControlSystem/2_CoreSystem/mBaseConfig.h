@@ -22,7 +22,7 @@
 
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
-#include "0_ConfigUser/mFirmwareCustom_Secret.h"
+#include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef D_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
@@ -310,7 +310,7 @@
 
 // Anything added by this file must "undef" then "ifdef" to replace it
 #ifdef USE_CONFIG_OVERRIDE
-#include "0_ConfigUser/mUserConfig_Secret.h"
+#include "0_ConfigUser/G1_mUserConfig_Secret.h"
 #endif
 
 

@@ -119,7 +119,7 @@ void NeoPixelAnimator::StopAll()
 }
 
 
-void NeoPixelAnimator::UpdateAnimations()
+void NeoPixelAnimator::UpdateAnimations(uint8_t segment_index)
 {
     if (_isRunning)
     {
@@ -139,6 +139,7 @@ void NeoPixelAnimator::UpdateAnimations()
                 AnimationParam param;
                 
                 param.index = iAnim;
+                param.segment_index = segment_index;
 
                 if (pAnim->_remaining > delta)
                 {

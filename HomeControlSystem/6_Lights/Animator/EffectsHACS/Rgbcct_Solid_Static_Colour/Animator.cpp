@@ -58,7 +58,7 @@ void mAnimatorLight::AnimationProcess_BlendStartingToDesiredColour_SOLID_COLOUR(
     SetPixelColor(ii,output_colour);
   }
 
-  // pCONT_iLight->SetPixelColourHardwareInterface(output_colour,0,true);
+  // pCONT_iLight->SetPixelColourHardwareInterface(output_colour,0,true); // THIS WOULD BE AN ERROR SINCE ITS NOT USING RGB TYPE TO FLIP WHEN USED
   
 }
 

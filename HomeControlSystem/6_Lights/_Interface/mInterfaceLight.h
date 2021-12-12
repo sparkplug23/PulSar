@@ -147,8 +147,8 @@ enum LightSubtypes{
       TRANSITION_ORDER_NONE_ID=0,
       TRANSITION_ORDER_RANDOM_ID,
       TRANSITION_ORDER_INORDER_ID,
-      TRANSITION_ORDER_CENTRE_OUT_ID,
-      TRANSITION_ORDER_GRADIENT_ID,
+      // TRANSITION_ORDER_CENTRE_OUT_ID,
+      // TRANSITION_ORDER_GRADIENT_ID,
       TRANSITION_ORDER_LENGTH_ID
     }; 
 
@@ -429,7 +429,9 @@ class mInterfaceLight :
     HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
     // FUTURE, using range values (0-50 = this, 51-100 = that) or wled segment style
 
-
+/**
+ * to be phased out and moved back into animations!! segments
+ * */
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 
@@ -524,55 +526,19 @@ class mInterfaceLight :
       // uint8_t grouping;
       // uint8_t spacing;
       uint8_t debug_mqtt_response_available = 0;
-      // void setOption(uint8_t n, bool val)
-      // {
-      //   if (val) {
-      //     options |= 0x01 << n;
-      //   } else
-      //   {
-      //     options &= ~(0x01 << n);
-      //   }
-      // }
-      // bool getOption(uint8_t n)
-      // {
-      //   return ((options >> n) & 0x01);
-      // }
-      // bool isSelected()
-      // {
-      //   return getOption(0);
-      // }
-      // bool isActive()
-      // {
-      //   return stop_index > start_index;
-      // }
-      // uint16_t length()
-      // {
-      //   return stop_index - start_index;
-      // }
-      // uint16_t groupLength()
-      // {
-      //   return grouping + spacing;
-      // }
-      // uint16_t virtualLength()
-      // {
-      //   uint16_t groupLen = groupLength();
-      //   uint16_t vLength = (length() + groupLen - 1) / groupLen;
-      //   // if (options & MIRROR)
-      //   //   vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
-      //   return vLength;
-      // }   
+      
     };
     // store the current state
     ANIMATION_SETTINGS animation;
     // store animation to return to, use override when possible
     ANIMATION_SETTINGS animation_stored;
 
-    #define MAX_NUM_SEGMENTS 2
-    ANIMATION_SETTINGS animation_segment[MAX_NUM_SEGMENTS];
-    struct SEGMENT_RUNTIME{
-      uint8_t _segment_index = 0;
-      uint8_t _segment_index_palette_last = 99;
-    };
+    // #define MAX_NUM_SEGMENTS 2
+    // ANIMATION_SETTINGS animation_segment[MAX_NUM_SEGMENTS];
+    // struct SEGMENT_RUNTIME{
+    //   uint8_t _segment_index = 0;
+    //   uint8_t _segment_index_palette_last = 99;
+    // };
 
     
     
@@ -686,6 +652,7 @@ class mInterfaceLight :
     void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
     bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
     void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+    void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
     
     void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
 

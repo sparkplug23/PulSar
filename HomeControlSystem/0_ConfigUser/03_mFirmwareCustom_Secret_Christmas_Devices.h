@@ -31,7 +31,8 @@
  * Outside tree
  * DIOT esp32
  * */
-//#define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
+// #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
+// #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_02
 
 
 // #define DEVICE_LIVINGROOM_TREE_WATER_SENSOR
@@ -553,7 +554,7 @@
   "}";
 
                                                                   
-  #define STRIP_SIZE_MAX 1300 // (26 sets)
+  #define STRIP_SIZE_MAX 1400 // (26 sets)
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -588,6 +589,102 @@
   "}";
 
 #endif
+
+
+
+/**
+ * Outside tree, ie testbed for esp32 controller with wifi if possible
+ * */
+#ifdef DEVICE_OUTSIDETREE_CONTROLLER_BASIC_02
+  // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
+  #define DEVICENAME_CTR          "outsidetree_02"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree ESP32 Basic" // Basic version used until I redo the animations later
+
+  /***
+   * Use bh1520 lux sensor to control brightness
+   * 
+   * 
+   * ie, goes from upper boundary (before dark), then slowly drops brightness.
+   * probably better to use sun elevation for this instead? ie <10 degrees below horizon, then turn brightness down
+   * */
+
+
+  /***                               Total
+   * 4 sets of 5v black              (200)   4
+   * 7 sets of 5v green              (350)   7
+   * 15 sets of 12v green            (750) ONE FAULT    14
+   * 
+   *                                 (1300)  used to be 1000?   25
+   * */
+
+  // #define USE_MODULE_SENSORS_BUTTONS
+  // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+  // #define ENABLE_DEVFEATURE_RELAY_CONTROLLED_VIA_ANIMATIONS_OUTPUT
+
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  // #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"22\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\"" // not using "un"inverted, as I want the power to stay on by default
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+                                                                  
+  #define STRIP_SIZE_MAX 1400 // (26 sets)
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"Function\":\"Static Glow\""
+    "},"    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":0,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+    "},"
+    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+    "\"BrightnessRGB\":0"
+  "}";
+
+  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 /**
@@ -1095,7 +1192,7 @@
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 150
+  #define STRIP_SIZE_MAX 200 // might be pushing memory??
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -1104,7 +1201,7 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
     "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Slow Glow\""
+      "\"Function\":\"Static\""
     "},"    
     "\"" D_JSON_TRANSITION       "\":{"
       "\"" D_JSON_TIME_MS "\":2000,"                // 2000
@@ -1112,7 +1209,7 @@
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2" // Not function right now
     "},"
     "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":50"
+    "\"BrightnessRGB\":100"
   "}";
 
 #endif

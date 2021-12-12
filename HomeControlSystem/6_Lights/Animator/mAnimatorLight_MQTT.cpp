@@ -7,6 +7,10 @@
 void mAnimatorLight::MQTTHandler_Init()
 {
 
+  struct handler<mAnimatorLight>* mqtthandler_ptr;
+  
+DEBUG_LINE_HERE;
+
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -18,6 +22,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
 
+DEBUG_LINE_HERE;
   mqtthandler_ptr = &mqtthandler_animation_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -29,6 +34,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Animation;
 
+DEBUG_LINE_HERE;
   mqtthandler_ptr = &mqtthandler_ambilight_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -40,6 +46,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Ambilight;
   
+DEBUG_LINE_HERE;
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   mqtthandler_ptr = &mqtthandler_notifications_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID;
@@ -64,7 +71,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_State;
   
-  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  #if defined(ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT) || defined(ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS)
   mqtthandler_ptr = &mqtthandler_flasher_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -115,6 +122,7 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Animations_Progress;
   #endif
+DEBUG_LINE_HERE;
 
 } //end "MQTTHandler_Init"
 

@@ -1,5 +1,5 @@
 #ifndef _MWIFI_H
-#define _MWIFI_H 0.4
+#define _MWIFI_H
 
 #define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
 
@@ -15,25 +15,21 @@
 #endif
 
 #ifdef ENABLE_USER_CONFIG_OVERRIDE 
-  #include "0_ConfigUser/mUserConfig_Secret.h"
+  #include "0_ConfigUser/G1_mUserConfig_Secret.h"
 #endif
 #include "2_CoreSystem/Logging/mLogging.h"
 
-
-
-//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #ifdef ESP32
   #include <WiFi.h>
-#include <ESPmDNS.h>
+  #include <ESPmDNS.h>
   #include "2_CoreSystem/Support/mSupport.h"
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>            // Wifi, MQTT, Ota, WifiManager
   // #include <ESP8266mDNS.h>
 #endif
-
 
 #ifdef ESP8266
   #include "2_CoreSystem/Support/SupportESP8266.h"
@@ -43,15 +39,6 @@
   #include "2_CoreSystem/Support/SupportESP32.h"
   #define mSupportHardware SupportESP32
 #endif
-
-
-    const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
-    const uint8_t WIFI_CHECK_SEC = 20;         // seconds
-    const uint8_t WIFI_RETRY_OFFSET_SEC = 20;  // seconds
-
-    #define D_WIFI_CONFIG_SEC 180
-    #define D_WIFI_cONFIG_SEC_FIRST_CONNECT 5
-
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -70,11 +57,8 @@ class mWiFi :
     };
     #endif
     
-    void WifiConnectAP(uint8_t ap_index);
-
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void init(void);
-    
+    void init(void);    
 
     static const char* PM_MODULE_NETWORK_WIFI_CTR;
     static const char* PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
@@ -82,13 +66,19 @@ class mWiFi :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WIFI_ID; }
 
-
     void parse_JSONCommand(JsonParserObject obj);
    
+    void WifiConnectAP(uint8_t ap_index);
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();
 
     
+    const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
+    const uint8_t WIFI_CHECK_SEC = 20;         // seconds
+    const uint8_t WIFI_RETRY_OFFSET_SEC = 20;  // seconds
+
+    #define D_WIFI_CONFIG_SEC 180
+    #define D_WIFI_cONFIG_SEC_FIRST_CONNECT 5
 
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;
@@ -128,7 +118,6 @@ void StartMdns(void);
 void MqttDiscoverServer(void);
 void MdnsAddServiceHttp(void);
 void MdnsUpdate(void);
-// uint8_t mdns_begun = 0;             // mDNS active
 
 struct {
   uint8_t begun = 0;                  // mDNS active

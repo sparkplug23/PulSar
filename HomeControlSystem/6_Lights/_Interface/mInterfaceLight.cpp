@@ -375,6 +375,10 @@ void mInterfaceLight::init_Animations(){
 // // Used for timed on or off events
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
   
+//       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// DEBUG_LINE_HERE;
+//       #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
   int8_t function_result = 0;
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
@@ -444,6 +448,11 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;
     case FUNC_EVERY_SECOND:{
+
+      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//Serial.println("every second");
+      #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
       //Temp fix until proper monitoring of on/off states
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // replace with GetLightPower() so its updated internally
@@ -502,7 +511,7 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardwar
   switch(pCONT_set->Settings.light_settings.type){
     case LT_ADDRESSABLE:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      pCONT_ladd->SetPixelColorHardware(index,colour_hardware, flag_replicate_for_total_pixel_length);
+      pCONT_ladd->SetPixelColorHardware(index, colour_hardware, flag_replicate_for_total_pixel_length);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
     break;
     case LT_PWM1:
@@ -563,17 +572,17 @@ void mInterfaceLight::ShowInterface(){
 
 void mInterfaceLight::EveryLoop(){
       
-  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE HERE %d"),pCONT_set->Settings.light_settings.type);
-  // Single colour methods
+  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE HERE %d"),pCONT_set->Settings.light_settings.type);
+  #endif
+
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
     switch(animation.mode_id){
       #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       case ANIMATION_MODE_EFFECTS_ID:
-        //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
         pCONT_lAni->SubTask_Effects_PhaseOut();
-        // light_power_state = true;
       break;
       #endif
       case ANIMATION_MODE_NONE_ID: default: break; // resting position
@@ -585,25 +594,24 @@ void mInterfaceLight::EveryLoop(){
     
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    switch(animation.mode_id){
-
-      /**
-       * HACS Original: animations using neopixel animator (to be phased into segments)
-       * */
-      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Effects_PhaseOut();
-      break;
-      #endif
-      /**
-       * WLED Original: Based on WLED direct port (to be phased into segments)
-       * */
-      #ifdef ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-      case ANIMATION_MODE_WLED_ID:
-        pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
-      break;
-      #endif // ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
+    switch(animation.mode_id)
+    {
+            /**
+             * HACS Original: animations using neopixel animator (to be phased into segments)
+             * */
+            #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+            case ANIMATION_MODE_EFFECTS_ID:
+              pCONT_lAni->SubTask_Effects_PhaseOut();
+            break;
+            #endif
+            /**
+             * WLED Original: Based on WLED direct port (to be phased into segments)
+             * */
+            #ifdef ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+            case ANIMATION_MODE_WLED_ID:
+              pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
+            break;
+            #endif
       /**
        * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
        * */
@@ -611,8 +619,7 @@ void mInterfaceLight::EveryLoop(){
       case ANIMATION_MODE_SEGMENTS_ANIMATION_ID:
         pCONT_lAni->SubTask_Segments_Animation();
       break;
-      #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
+      #endif
       /**
        * Notifications: Single pixel basic animations (pulse, flash, on/off)
        * */
@@ -639,16 +646,6 @@ void mInterfaceLight::EveryLoop(){
         // light_power_state = true;
       break;
       #endif
-      /**
-       * protocol h1 something: Manual method via mqtt json
-       * */
-      // #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
-      // case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
-      //   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
-      //   pCONT_ladd->SubTask_Manual_SetPixel();
-      //   // light_power_state = true;
-      // break;
-      // #endif
       case ANIMATION_MODE_NONE_ID: default: break; // resting position
     }
     #endif
@@ -656,7 +653,9 @@ void mInterfaceLight::EveryLoop(){
   }
   else
   {
+    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Invalid Light Type"));
+    #endif
   }
 
 } // END everyloop

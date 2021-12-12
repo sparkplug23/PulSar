@@ -9,7 +9,7 @@ if os.path.isfile("HomeControlSystem/0_ConfigUser/G0_mFirmwareCustom_Secret.h"):
 else: 
     print ("********* WARNING **************************** Creating mFirmwareCustom_Secret.h from mFirmwareCustom_Example ***********")
     # Read from example
-    f = open("HomeControlSystem/0_ConfigUser/ExamplesUsedToGenerateSecret/mFirmwareCustom_Example.h", "r")
+    f = open("HomeControlSystem/0_ConfigUser/ExamplesUsedToGenerateSecret/E0_mFirmwareCustom_Example.h", "r")
     read_input = f.read()
 
     # Change header guards
@@ -27,7 +27,7 @@ if os.path.isfile("HomeControlSystem/0_ConfigUser/G1_mUserConfig_Secret.h"):
 else: 
     print ("********* WARNING **************************** Creating mUserConfig_Secret.h from mUserConfig_Example ***********")
     # Read from example
-    f = open("HomeControlSystem/0_ConfigUser/ExamplesUsedToGenerateSecret/mUserConfig_Example.h", "r")
+    f = open("HomeControlSystem/0_ConfigUser/ExamplesUsedToGenerateSecret/E1_mUserConfig_Example.h", "r")
     read_input = f.read()
     
     # Change header guards

@@ -445,6 +445,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
     pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID] = new mSDLoggerIMURadiationPattern();
   #endif
+  #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
+    pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID] = new mBucketWaterLevel();
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();
   #endif

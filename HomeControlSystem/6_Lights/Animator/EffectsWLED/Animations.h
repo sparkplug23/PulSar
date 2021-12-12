@@ -3,12 +3,8 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
 
-#include "6_Lights/Animator/EffectsWLED/progmem_defines.h"
-
-#define FASTLED_INTERNAL //remove annoying pragma messages
-#include "6_Lights/Animator/FastLED_Modified/FastLED.h"
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /**
  * Steps required for better WLED integration
@@ -120,7 +116,7 @@
 
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-#define MAX_NUM_SEGMENTS 3//10
+#define MAX_NUM_SEGMENTS 5
 
 /* How much data bytes all segments combined may allocate */
 #ifdef ESP8266
@@ -131,6 +127,17 @@
 
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
+
+
+#endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+#ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+
+#include "6_Lights/Animator/EffectsWLED/progmem_defines.h"
+
+#define FASTLED_INTERNAL //remove annoying pragma messages
+#include "6_Lights/Animator/FastLED_Modified/FastLED.h"
+
 
 #define NUM_COLORS       3 /* number of colors per segment */
 // #define SEGCOLOR(x)      gamma32(_segments[_segment_index].colors[x])

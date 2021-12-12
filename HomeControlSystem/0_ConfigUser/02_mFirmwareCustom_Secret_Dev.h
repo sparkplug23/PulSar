@@ -34,6 +34,11 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 /**
+ * New devices
+ * */
+#define DEVICE_RGBSTRING_TESTBED_SEGMENT
+// #define DEVICE_BUCKET_WATER_LEVEL
+/**
  *  SHORT TERM DEVICES IN BEDROOM -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- 
 **/  
 // #define DEVICE_RGBBEDLIGHT 
@@ -54,7 +59,7 @@
 // #define DEVICE_BEDROOM_PZEM_TESTER
 // #define DEVICE_RGBBEDROOM_H801_2
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
-#define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
+// #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -130,6 +135,130 @@
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
+
+
+
+#ifdef DEVICE_RGBSTRING_TESTBED_SEGMENT
+  #define DEVICENAME_CTR          "testbed_string_segment_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // WLED
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
+  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
+
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // new method for 2022
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT      // current method for xmas 2021
+
+  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  
+ // #define ENABLE_BOOT_OVERRIDE_INIT
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+ #define STRIP_SIZE_MAX 50
+ #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    #else
+    "\"" D_JSON_STRIP_SIZE       "\":50,"
+    #endif //STRIP_SIZE_MAX
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
+    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_ANIMATIONMODE    "\":"  "5"  "," //5
+    "\"" D_JSON_EFFECTS "\":{" 
+      // "\"Function\":\"FirePlace01\"" //slow glow
+      "\"Function\":\"Static Glow\"" //slow glow
+    "},"
+    // "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
+    // "\"TimeMs\":500,"
+    
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":5000,"
+      "\"" D_JSON_RATE_MS "\":5001,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"ColourPalette\":\"Christmas 06\"," //c12    43 is the colours for this christmas
+    // "\"ColourPalette\":\"Single Fire 01\"," //c12    43 is the colours for this christmas
+    // "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
+    "\"BrightnessRGB\":100"
+  "}";
+  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
+  #define STRIP_SIZE_MAX                      50   
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //       "\"" "bedroom" "\""
+  //     "]"
+  //   "}"
+  // "}";
+
+#endif
+
+
+#ifdef DEVICE_BUCKET_WATER_LEVEL
+  #define DEVICENAME_CTR          "bucketwatersensor"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
+  #define USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+
+      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\""
+
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+
+  #define D_DEVICE_ADC_INPUT_NAME_LONG "WaterSensor"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_ADC_INPUT_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+
 
 
 #ifdef DEVICE_PZEM_TESTER
@@ -789,16 +918,6 @@
 #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   #define DEVICENAME_CTR            "rgb_computer_display_p32"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-   
-  #define DISABLE_WEBSERVER
-
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -810,16 +929,9 @@
 
   #define ENABLE_PIXEL_FUNCTION_AMBILIGHT
 
-  //#define USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-
-
   #define USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX // set with commands later
   #define USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
-
-
-  
+ 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -834,7 +946,6 @@
   //ADALIGHT_ViaSerialAndWifi
   //SCREENEDGES
 
-
   #define STRIP_SIZE_MAX 133
 
   #define USE_LIGHTING_TEMPLATE
@@ -844,8 +955,7 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
     "\"" D_JSON_ANIMATIONMODE    "\":\""  "Ambilight"  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+    "\"" D_JSON_EFFECTS "\":{"
       "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
     "},"
     "\"" D_JSON_TRANSITION       "\":{"
@@ -854,41 +964,13 @@
       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
       "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
     "},"
-    "\"" D_JSON_CCT_TEMP "\":400,"
+    "\"" D_JSON_CCT_PERCENTAGE "\":100,"
     "\"" D_JSON_HUE "\":15,"
     "\"" D_JSON_SAT "\":90,"
     "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
     "\"" D_JSON_BRIGHTNESS_CCT "\":40,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":0"
   "}";
-
-  /**
-   * Test of solar light (to be tried on cct device next)
-   * */
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  "Effects"  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-  //     "\"" D_JSON_FUNCTION "\":18"
-  //   "},"
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME_MS "\":1000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"" D_JSON_CCT_TEMP "\":300,"
-  //   "\"" D_JSON_HUE "\":15,"
-  //   "\"" D_JSON_SAT "\":90,"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-  //   "\"" D_JSON_BRIGHTNESS_CCT "\":10,"
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":10"
-  // "}";
 
 #endif
 

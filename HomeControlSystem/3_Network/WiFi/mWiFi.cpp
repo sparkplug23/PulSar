@@ -59,6 +59,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
       // AddLog(LOG_LEVEL_INFO,PSTR("connection.config_type=%s"),GetWiFiConfigTypeCtr());
       //  Serial.println(WiFi.localIP());
+      // Serial.println(pCONT_set->Settings.sta_ssid[0]);
       // #ifdef ESP32
       // #endif
 

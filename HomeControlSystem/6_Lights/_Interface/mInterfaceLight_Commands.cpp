@@ -4,6 +4,9 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
+    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+DEBUG_LINE_HERE;
+      #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
@@ -382,6 +385,9 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
   
 #endif //ifdef USE_MODULE_NETWORK_MQTT
   animation.flags.fForceUpdate = true;
+    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+DEBUG_LINE_HERE;
+      #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 }
 
@@ -713,9 +719,12 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
         #ifdef USE_MODULE_LIGHTS_ANIMATOR
         case ANIMATION_MODE_EFFECTS_ID:
           AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
+          
+      #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
           #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
           pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
           #endif
+      #endif// ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
           
 
         break;
@@ -1013,6 +1022,16 @@ bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
+void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc){
+  rgbcct_controller.setChannelsRaw(r,g,b,ww,wc);    
+  animation.flags.fForceUpdate = true;  
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // char buffer[30];
+  // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+  // #endif // ENABLE_LOG_LEVEL_DEBUG
+}
+
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
   rgbcct_controller.setChannelsRaw(values);    
   animation.flags.fForceUpdate = true;  
@@ -1136,7 +1155,7 @@ const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer
     case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
     case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
-    case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
+    // case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
     // case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
     // case TRANSITION_ORDER_FIXED_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
     }

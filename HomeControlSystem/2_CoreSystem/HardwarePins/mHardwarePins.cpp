@@ -1832,6 +1832,9 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
 // #ifdef USE_DISPLAY
 //   GPIO_BACKLIGHT_ID,      // Display backlight control
 // #endif
+
+  case GPIO_ANALOG_ID: return PM_GPIO_FUNCTION_ANALOG_CTR;
+
   case GPIO_DHT11_1OF2_ID: return PM_GPIO_FUNCTION_DHT11_1_CTR;
   case GPIO_DHT11_2OF2_ID: return PM_GPIO_FUNCTION_DHT11_2_CTR;
   case GPIO_DHT22_1OF2_ID: return PM_GPIO_FUNCTION_DHT22_1_CTR;

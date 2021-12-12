@@ -153,6 +153,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
 
   
+#ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
   if(jtok = obj[PM_JSON_BRIGHTNESS_MIN]){ 
     CommandSet_Brightness_Min(jtok.getInt());
     #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -176,6 +177,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+#endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 
 
   #ifdef ENABLE_DEVFEATURE_RGB_CLOCK

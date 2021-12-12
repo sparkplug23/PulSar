@@ -492,7 +492,7 @@
 //     void UpdateStartingColourWithGetPixel();
 //     void     UpdateDesiredColourWithGetPixel();
 
-//     void UpdateStartingColourWithGetPixel_Segments();
+//     void Segments_UpdateStartingColourWithGetPixel();
     
 
 
@@ -1302,7 +1302,7 @@
       
 //     segment_runtime _segment_runtimes[MAX_NUM_SEGMENTS]; // SRAM footprint: 28 bytes per element
 
-//     void UpdateDesiredColourFromPaletteSelected_Segments(void);
+//     void Segments_UpdateDesiredColourFromPaletteSelected(void);
 //     void Segment_SubTask_Flasher_Animate_Function__Slow_Glow();
 // void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
       
@@ -1626,7 +1626,6 @@
 //         //                 96,97,98,99,100};
 
 
-//     float rainbowpartialprogress = 0;
 
 //     void Ws2812Init();
     

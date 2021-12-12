@@ -41,6 +41,7 @@ struct AnimationParam
     float progress;
     uint16_t index;
     AnimationState state;
+    uint8_t segment_index;
 };
 
 #if defined(NEOPIXEBUS_NO_STL)
@@ -111,7 +112,7 @@ public:
 
     void ChangeAnimationDuration(uint16_t indexAnimation, uint16_t newDuration);
 
-    void UpdateAnimations();
+    void UpdateAnimations(uint8_t segment_index = 0);
 
     bool IsPaused()
     {

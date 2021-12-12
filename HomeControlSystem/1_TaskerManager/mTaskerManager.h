@@ -40,7 +40,7 @@
 #include "0_ConfigUser/03_mFirmwareCustom_Secret_Christmas_Devices.h"
 #endif // D_USER_MICHAEL
 
-#include "0_ConfigUser/mUserConfig_Secret.h"
+#include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 
 #include "2_CoreSystem/Events/mEvents.h"
 
@@ -396,6 +396,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
     EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
+    EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -715,6 +718,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   #include "9_Controller/SDLoggerIMURadiationPattern/mSDLoggerIMURadiationPattern.h"
   #define pCONT_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
+  #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
+  #define pCONT_bucket_water_level                static_cast<mBucketWaterLevel*>(pCONT->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
