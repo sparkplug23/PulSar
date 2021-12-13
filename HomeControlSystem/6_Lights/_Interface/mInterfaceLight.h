@@ -429,9 +429,7 @@ class mInterfaceLight :
     HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
     // FUTURE, using range values (0-50 = this, 51-100 = that) or wled segment style
 
-/**
- * to be phased out and moved back into animations!! segments
- * */
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 
@@ -531,7 +529,7 @@ class mInterfaceLight :
     // store the current state
     ANIMATION_SETTINGS animation;
     // store animation to return to, use override when possible
-    ANIMATION_SETTINGS animation_stored;
+    //ANIMATION_SETTINGS animation_stored;
 
     // #define MAX_NUM_SEGMENTS 2
     // ANIMATION_SETTINGS animation_segment[MAX_NUM_SEGMENTS];
@@ -540,7 +538,7 @@ class mInterfaceLight :
     //   uint8_t _segment_index_palette_last = 99;
     // };
 
-    
+    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     
 
 
@@ -552,21 +550,16 @@ class mInterfaceLight :
 
     uint8_t debug_mqtt_response_available_but_not_yet_set = false;
 
-    // segment _segments[MAX_NUM_SEGMENTS];
-    //  = { // SRAM footprint: 24 bytes per element
-    //   // start, stop, speed, intensity, palette, mode, options, grouping, spacing, opacity (unused), color[]
-    //   { 0, 7, DEFAULT_SPEED, 128, 0, DEFAULT_MODE, NO_OPTIONS, 1, 0, 255, {DEFAULT_COLOR}}
-    // };
-
     //Temp array, to be later absorbed like wled
-    #define D_EFFECTS_DATA_BUFFER_SIZE 100
-    uint8_t effects_data_buffer[D_EFFECTS_DATA_BUFFER_SIZE];
+    // #define D_EFFECTS_DATA_BUFFER_SIZE 100
+    // uint8_t effects_data_buffer[D_EFFECTS_DATA_BUFFER_SIZE];
     
 
     const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
     int8_t GetHardwareColourTypeIDbyName(const char* c);
 
+    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     // Flags and states that are used during one transition and reset when completed
     struct ANIMATIONOVERRIDES{
       uint8_t fRefreshAllPixels = false;
@@ -576,6 +569,7 @@ class mInterfaceLight :
       uint16_t time_ms = 1000; //on boot
       uint16_t rate_ms = 1000;
     }animation_override; // ie "oneshot" variables that get checked and executed one time only
+    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     
     NeoPixelAnimator* animator_controller = nullptr;
     void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
@@ -689,70 +683,6 @@ class mInterfaceLight :
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
 
     void CheckHardwareElementColourOrder();
-
-    
-// #ifndef ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
-//     uint16_t getCT10bits();
-//     void setCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
-//     void getCTRange(uint16_t ct_min_range, uint16_t ct_max_range) ;
-//     void getCTRange(uint16_t *ct_min_range, uint16_t *ct_max_range) ;
-//     uint16_t getHue();
-//     uint8_t  getSat();
-//     uint8_t getColorMode();
-
-//      uint8_t setBriRGB(uint8_t bri_rgb);
-//     uint8_t setBriRGB_As_Percentage(uint8_t bri_rgb);
-
-//     void getXY(float *x, float *y);
-//     void setBri(uint8_t bri);
-   
-//  uint8_t SetBrightnessCCT255(uint8_t bri_ct);
-//     uint8_t getBriRGB();
-//     void setDimmer(uint8_t dimmer);
-//     void setCT(uint16_t ct);
-//     void setCW(uint8_t c, uint8_t w, bool free_range = false);
-//     uint8_t setRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-//     void setHS(uint16_t hue, uint8_t sat);
-//     void setChannelsRaw(uint8_t *channels);
-//     void setChannels(uint8_t *channels);
-//     void RgbToHsb(uint8_t r, uint8_t g, uint8_t b, uint16_t *r_hue, uint8_t *r_sat, uint8_t *r_bri);
-//     void HsToRgb(uint16_t hue, uint8_t sat, uint8_t *r_r, uint8_t *r_g, uint8_t *r_b);
-//     void RgbToXy(uint8_t i_r, uint8_t i_g, uint8_t i_b, float *r_x, float *r_y);
-//     void XyToRgb(float x, float y, uint8_t *rr, uint8_t *rg, uint8_t *rb);
-//     void setSubType(uint8_t sub_type);
-//     bool CommandSet_RGBCT_Linked(bool ct_rgb_linked);
-//     void setAlexaCTRange(bool alexa_ct_range);
-//     bool Get_RGBCT_Linked();
-//     bool setPWMMultiChannel(bool pwm_multi_channels);
-//     bool isPWMMultiChannel(void);
-//     void debugLogs();
-//     void loadSettings();
-//     void changeCTB(uint16_t new_ct, uint8_t briCT);
-//     void changeDimmer(uint8_t dimmer, uint32_t mode = 0);
-//     void changeBri(uint8_t bri);
-//     void changeRGB(uint8_t r, uint8_t g, uint8_t b, bool keep_bri = false);
-//     void UpdateFinalColourComponents(uint8_t *current_color = nullptr);
-//     void changeHSB(uint16_t hue, uint8_t sat, uint8_t briRGB);   
-   
-//     power_t LightPower(void);
-//     power_t LightPowerIRAM(void);
-//     uint8_t LightDevice(void);
-//     uint8_t setColorMode(uint8_t cm);
-//     void addRGBMode();
-//     void addCTMode();
-//     void getRGB(uint8_t *r, uint8_t *g, uint8_t *b);
-//     void getCW(uint8_t *rc, uint8_t *rw);
-//     void getActualRGBCW(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *c, uint8_t *w);
-//     uint8_t getChannels(uint8_t *channels);
-//     void getChannelsRaw(uint8_t *channels);
-//     void getHSB(uint16_t *hue, uint8_t *sat, uint8_t *bri);
-//     uint8_t getBri(void);
-//     uint8_t getBriCT();
-//     static inline uint8_t DimmerToBri(uint8_t dimmer);
-//     static uint8_t BriToDimmer(uint8_t bri);
-//     uint8_t getDimmer(uint32_t mode = 0);
-//     uint16_t getCT();
-// #endif // ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
 
     int8_t GetPixelHardwareTypeIDbyName(const char* c);
     const char* GetPixelHardwareTypeName(char* buffer);
