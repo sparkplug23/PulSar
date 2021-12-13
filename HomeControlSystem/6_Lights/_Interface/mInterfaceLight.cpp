@@ -46,7 +46,12 @@ void mInterfaceLight::Settings_Default(){
 RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
   // Update pointer of struct
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   mPaletteI->SetPaletteListPtrFromID(animation.palette.id);
+#else
+  mPaletteI->SetPaletteListPtrFromID(pCONT_lAni->_segments[0].palette.id);
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
   
   uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
           
@@ -82,8 +87,17 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
     JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
     JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
     JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(animation.transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
+#else
+    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
+    JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
   return JsonBuilderI->End();
 
 }
@@ -338,7 +352,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 // changeBri(0); //default off
 
   //create copy for pCONT_iLight->animation stored
-  memcpy(&animation_stored,&animation,sizeof(animation_stored));// RESTORE copy of state
+  // memcpy(&animation_stored,&animation,sizeof(animation_stored));// RESTORE copy of state
 
 } //light_init
 
@@ -361,8 +375,15 @@ void mInterfaceLight::init_Animations(){
   // animation.flags.fForceUpdate = true;
   // animation.transition.time_ms.val = 1000;
   // animation.transition.rate_ms = 20*1000;
+
+  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fEnable_Animation = true;
   animation.flags.NewAnimationRequiringCompleteRefresh = true;
+  #else
+  pCONT_lAni->_segments[0].flags.fEnable_Animation = true;
+  pCONT_lAni->_segments[0].flags.NewAnimationRequiringCompleteRefresh = true;
+  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
 
 }
 
@@ -579,7 +600,12 @@ void mInterfaceLight::EveryLoop(){
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
-    switch(animation.mode_id){
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    switch(aniamtion.mode_id)
+#else
+    switch(pCONT_lAni->_segments[0].mode_id)    
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+      {
       #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       case ANIMATION_MODE_EFFECTS_ID:
         pCONT_lAni->SubTask_Effects_PhaseOut();
@@ -594,7 +620,12 @@ void mInterfaceLight::EveryLoop(){
     
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    switch(animation.mode_id)
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    switch(aniamtion.mode_id)
+#else
+    switch(pCONT_lAni->_segments[0].mode_id)    
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     {
             /**
              * HACS Original: animations using neopixel animator (to be phased into segments)
@@ -753,9 +784,15 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
   // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, animation.transition.pixels_to_update_as_number);
-  
-  // GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage));
+#else 
+  JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->_segments[0].transition.pixels_to_update_as_number);
+#endif
+
+
+ // GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage));
   #endif // USE_MODULE_LIGHTS_ANIMATOR
 
   return JsonBuilderI->End();

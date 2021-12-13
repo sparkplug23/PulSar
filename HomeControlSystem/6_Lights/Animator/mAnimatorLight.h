@@ -312,7 +312,7 @@ class mAnimatorLight :
     void parse_JSONCommand(JsonParserObject obj);
       
     #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      void CommandSet_Flasher_FunctionID(uint8_t value);
+void CommandSet_Flasher_FunctionID(uint8_t value);
       void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value);
       void CommandSet_Flasher_Flags_Movement_Direction(uint8_t value);
       void CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value);
@@ -322,6 +322,13 @@ class mAnimatorLight :
       void CommandSet_Brightness_Min(uint8_t value);
       void CommandSet_Brightness_Max(uint8_t value);    
     void CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value);
+    
+    void CommandSet_EffectsModeID(uint8_t mode, uint8_t segment = 0);
+    const char* GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen);
+
+    void CommandSet_BrightnessRGB_Limits_Lower(uint8_t value);
+    void CommandSet_BrightnessRGB_Limits_Upper(uint8_t value);
+      
     #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
@@ -335,9 +342,6 @@ class mAnimatorLight :
 
     
 
-    void CommandSet_BrightnessRGB_Limits_Lower(uint8_t value);
-    void CommandSet_BrightnessRGB_Limits_Upper(uint8_t value);
-      
     void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
 
     const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
@@ -383,8 +387,6 @@ class mAnimatorLight :
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
     RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
 
-    void CommandSet_EffectsModeID(uint8_t mode, uint8_t segment = 0);
-    const char* GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen);
 
     void Settings_Load();
     void Settings_Save();

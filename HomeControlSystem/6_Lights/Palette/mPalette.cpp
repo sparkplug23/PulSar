@@ -1091,7 +1091,13 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
     }break;
   }
 
-  if(pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique){
+  if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique){
     HsbColor hsb = RgbColor(colour.R, colour.G, colour.B);
     hsb.S = GetRandomSaturationVariation(100,8,92,100)/100.0f;
     colour = hsb;
@@ -1294,7 +1300,13 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 // Check for friendly names first
 const char* mPalette::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  return GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
+  return GetPaletteFriendlyNameByID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id, buffer, buflen);
   // #else
   // return GetPaletteFriendlyNameByID(0, buffer);
   // #endif
@@ -1321,7 +1333,13 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
 const char* mPalette::GetPaletteName(char* buffer, uint8_t buflen){
   
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  return GetPaletteFriendlyNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
+  return GetPaletteFriendlyNameByID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id, buffer, buflen);
   // return GetPaletteNameByID(pCONT_iLight->animation.palette.id, buffer, buflen);
   // #else
   // return GetPaletteNameByID(0, buffer, buflen);

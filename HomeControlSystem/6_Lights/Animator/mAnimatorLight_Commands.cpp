@@ -2,6 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
@@ -10,69 +11,150 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
   char buffer[50];
 
-  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  /**
-   *  Flasher function specific commands
-   * */
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION]){
-    if(jtok.isStr()){
-      if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0){
-        CommandSet_Flasher_FunctionID(tmp_id);
-        data_buffer.isserviced++;
+  uint8_t segment_index = 0;
+
+  
+  if(jtok = obj["Segments"].getObject()["Index"]){ 
+    segment_index = jtok.getInt();
+    //#ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K("Segments" "Index")), segment_index);
+    //#endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj["Segments"].getObject()["PixelRange"]){ 
+    // CommandSet_PixelGrouping_MappedMultiplierData();
+    if(jtok.isArray()){
+      uint8_t array[2];
+      uint8_t arrlen = 0;
+      JsonParserArray arrobj = jtok;
+      for(auto v : arrobj) {
+        if(arrlen > 2){ break; }
+
+        switch(arrlen)
+        {
+          case 0: _segments[segment_index].pixel_range.start = v.getInt(); break;
+          case 1: _segments[segment_index].pixel_range.stop  = v.getInt(); break;
+        }
+
+        array[arrlen++] = v.getInt();
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
+        // #endif// ENABLE_LOG_LEVEL_DEBUG          
       }
-    }else
-    if(jtok.isNum()){
-      CommandSet_Flasher_FunctionID(jtok.getInt());
+      // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
+      
       data_buffer.isserviced++;
     }
+  }
+
+
+
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION])
+  {
+
+
+    //if code below is dropped into function, then arrays can easily call it
+    if(jtok.isArray())
+    {
+      JsonParserArray arrobj = jtok;
+      for(auto v : arrobj)
+      {
+        if(v.isStr()){
+          if((tmp_id=GetFlasherFunctionIDbyName(v.getStr()))>=0){
+            CommandSet_Flasher_FunctionID(tmp_id, segment_index);
+            data_buffer.isserviced++;
+          }
+        }else
+        if(v.isNum()){
+          CommandSet_Flasher_FunctionID(v.getInt(), segment_index);
+          data_buffer.isserviced++;
+        }
+      }
+    }else{
+
+      if(jtok.isStr()){
+        if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0){
+          CommandSet_Flasher_FunctionID(tmp_id, segment_index);
+          data_buffer.isserviced++;
+        }
+      }else
+      if(jtok.isNum()){
+        CommandSet_Flasher_FunctionID(jtok.getInt(), segment_index);
+        data_buffer.isserviced++;
+      }
+
+    }
+
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_COLOUR_REFRESH_RATE]){ 
-    CommandSet_Flasher_UpdateColourRegion_RefreshSecs(jtok.getInt());
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_COLOUR_REFRESH_RATE])
+  { 
+    CommandSet_Flasher_UpdateColourRegion_RefreshSecs(jtok.getInt(), segment_index);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_DIRECTION]){ 
-    CommandSet_Flasher_Flags_Movement_Direction(jtok.getInt());
+  
+  if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
+    if(jtok.isStr()){
+      if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+        CommandSet_PaletteID(tmp_id, segment_index);
+        data_buffer.isserviced++;
+      }
+    }else
+    if(jtok.isNum()){
+      CommandSet_PaletteID(jtok.getInt(), segment_index);
+      data_buffer.isserviced++;
+    }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MIN]){ 
-    CommandSet_Flasher_Alternate_Brightness_Min(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MAX]){ 
-    CommandSet_Flasher_Alternate_Brightness_Max(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_AMOUNT]){ 
-    CommandSet_Flasher_Alternate_RandomAmountPercentage(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_AGED_COLOURING]){
-    pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = jtok.getInt();
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
+  
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_DIRECTION])
+  // { 
+  //   CommandSet_Flasher_Flags_Movement_Direction(jtok.getInt());
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+  
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MIN]){ 
+  //   CommandSet_Flasher_Alternate_Brightness_Min(jtok.getInt());
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_BRIGHTNESS_MAX]){ 
+  //   CommandSet_Flasher_Alternate_Brightness_Max(jtok.getInt());
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_ALTERNATE_AMOUNT]){ 
+  //   CommandSet_Flasher_Alternate_RandomAmountPercentage(jtok.getInt());
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_AGED_COLOURING]){
+  //   pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = jtok.getInt();
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
 
   #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   /**
@@ -153,31 +235,38 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
 
   
-#ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
-  if(jtok = obj[PM_JSON_BRIGHTNESS_MIN]){ 
-    CommandSet_Brightness_Min(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  // #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  //   if(jtok = obj[PM_JSON_BRIGHTNESS_MIN]){ 
+  //     CommandSet_Brightness_Min(jtok.getInt());
+  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+  //     #endif // ENABLE_LOG_LEVEL_DEBUG
+  //   }
 
-  if(jtok = obj[PM_JSON_BRIGHTNESS_MAX]){ 
-    CommandSet_Brightness_Max(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  //   if(jtok = obj[PM_JSON_BRIGHTNESS_MAX]){ 
+  //     CommandSet_Brightness_Max(jtok.getInt());
+  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
+  //     #endif // ENABLE_LOG_LEVEL_DEBUG
+  //   }
 
 
 
-  if(jtok = obj[PM_JSON_PALETTE_GENERATION].getObject()[PM_JSON_RANDOMISE_BRIGHTNESS_MODE]){
-    CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  //   if(jtok = obj[PM_JSON_PALETTE_GENERATION].getObject()[PM_JSON_RANDOMISE_BRIGHTNESS_MODE]){
+  //     CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
+  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+  //     #endif // ENABLE_LOG_LEVEL_DEBUG
+  //   }
+    
+  //   if(jtok = obj["Effects"].getObject()["Mode"]){ // default to secs
+  //     CommandSet_EffectsModeID(jtok.getInt());
+  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //     //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), animation.transition.time_ms.val);  
+  //     #endif // ENABLE_LOG_LEVEL_DEBUG
+  //   }
 
-#endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
 
 
   #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
@@ -188,35 +277,31 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-
-
-  
-
   #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
 
-  if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
+  // if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
 
-  // maybe to be done with a topic directly so its faster, straight buffer into setpixel
+  // // maybe to be done with a topic directly so its faster, straight buffer into setpixel
 
-    // uint8_t colour_array[5];
-    // memset(colour_array,0,sizeof(colour_array));
-    // uint8_t jsonpair_count = jtok.size();
+  //   // uint8_t colour_array[5];
+  //   // memset(colour_array,0,sizeof(colour_array));
+  //   // uint8_t jsonpair_count = jtok.size();
 
-    // for(int index = 0; index < jsonpair_count; index++){
-    //   jtok.nextOne(); //skip start of object
-    //   Serial.println(jtok.getInt());
-    //   colour_array[index] = jtok.getInt();
-    // }
+  //   // for(int index = 0; index < jsonpair_count; index++){
+  //   //   jtok.nextOne(); //skip start of object
+  //   //   Serial.println(jtok.getInt());
+  //   //   colour_array[index] = jtok.getInt();
+  //   // }
     
-    // CommandSet_ActiveSolidPalette_Raw(colour_array);
-    // data_buffer.isserviced++;
+  //   // CommandSet_ActiveSolidPalette_Raw(colour_array);
+  //   // data_buffer.isserviced++;
 
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
 
 
 
@@ -384,61 +469,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   //   }
   // }
 
-  
-  byte effectCurrent=0,effectSpeed = 0,effectIntensity=0,effectPalette=0;
-
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-  if(jtok = obj["Effects"].getObject()["Current"]){ // default to secs
-    effectCurrent = jtok.getInt();
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  if(jtok = obj["Effects"].getObject()["Speed"]){ // default to secs
-    effectSpeed = jtok.getInt();
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  if(jtok = obj["Effects"].getObject()["Intensity"]){ // default to secs
-    effectIntensity = jtok.getInt();
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  if(jtok = obj["Effects"].getObject()["Palette"]){ // default to secs
-    effectPalette = jtok.getInt();
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    // #endif // ENABLE_LOG_LEVEL_DEBUG
-    mEffects->setEffectConfig(effectCurrent, effectSpeed, effectIntensity, effectPalette);
-  }
-  
-#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-  if(jtok = obj["Effects"].getObject()["Mode"]){ // default to secs
-    CommandSet_EffectsModeID(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)), animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-
-  // if(jtok = obj["Effects"].getObject()["Select"]){ // default to secs
-  //   // effectPalette = jtok.getInt();
-  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
-  //   flags_hac_wled_animator_switch = jtok.getInt();
-
-  //   Serial.printf("flags_hac_wled_animator_switch=%d\n\r", flags_hac_wled_animator_switch);
-    
-  // }
-
 
   //pCONT_iLight->animation.flags.fForceUpdate = true;
   
@@ -460,358 +490,400 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
 
 
-void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
-{
-  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
+// {
+//   #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   
-#ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-  char buffer[50];
-  mEffects->setMode(segment, mode);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-#endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+// #ifdef USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
+//   char buffer[50];
+//   mEffects->setMode(segment, mode);
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetEffectsModeName(buffer, sizeof(buffer)));
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// #endif // USE_DEVFEATURE_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
 
-  #endif
-} 
+//   #endif
+// } 
 
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-  /********************************************************************************************************************************
-  **********Flasher Function ******************************************************************************************************
-  ********************************************************************************************************************************/
-void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value){
+//   /********************************************************************************************************************************
+//   **********Flasher Function ******************************************************************************************************
+//   ********************************************************************************************************************************/
+// void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value){
   
-  flashersettings.function = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
-  flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
-  pCONT_iLight->animation.flags.animator_first_run= true; // first run, so do extra things
+//   flashersettings.function = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
+//   flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
+//   pCONT_iLight->animation.flags.animator_first_run= true; // first run, so do extra things
   
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
-  #endif
+//   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+//   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
+//   #endif
   
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  char buffer[30];
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_EFFECTS, D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   char buffer[30];
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_EFFECTS, D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
-}
+// }
 
-int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f){
+// int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f){
 
-  if(f=='\0') return -2;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_COLOUR_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID; }
+//   if(f=='\0') return -2;
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)){ return EFFECTS_FUNCTION_SOLID_COLOUR_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID; }
   
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID; }
   
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_TESTER_NAME_CTR)){ return EFFECTS_FUNCTION_TESTER_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_TESTER_NAME_CTR)){ return EFFECTS_FUNCTION_TESTER_ID; }
 
-  return -1;
+//   return -1;
 
-}
-const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen){
-  return GetFlasherFunctionNamebyID(flashersettings.function, buffer, buflen);
-}
-const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen){
-  switch(id){
-    default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
-    case EFFECTS_FUNCTION_STATIC_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
-    case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
-    case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR);  break;
+// }
+// const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen){
+//   return GetFlasherFunctionNamebyID(flashersettings.function, buffer, buflen);
+// }
+// const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen){
+//   switch(id){
+//     default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
+//     case EFFECTS_FUNCTION_STATIC_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
+//     case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
+//     case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR);  break;
 
-    case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR);  break;
+//     case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR);  break;
   
   
-   case EFFECTS_FUNCTION_TESTER_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_TESTER_NAME_CTR);  break;
+//    case EFFECTS_FUNCTION_TESTER_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_TESTER_NAME_CTR);  break;
 
-  }
-  return buffer;
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-int8_t mAnimatorLight::GetFlasherRegionIDbyName(const char* c){
-  if(c=='\0') return -1;
-  if(     strcmp_P(c,PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)==0){ return EFFECTS_REGION_COLOUR_SELECT_ID; }
-  else if(strcmp_P(c,PM_EFFECTS_REGION_ANIMATE_NAME_CTR)==0){       return EFFECTS_REGION_ANIMATE_ID; }
-  return -1;
-}
-const char* mAnimatorLight::GetFlasherRegionName(char* buffer){
-  return GetFlasherRegionNamebyID(flashersettings.region, buffer);
-}
-const char* mAnimatorLight::GetFlasherRegionNamebyID(uint8_t id, char* buffer){
-  switch(id){
-    case EFFECTS_REGION_COLOUR_SELECT_ID:   memcpy_P(buffer,PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR));
-    case EFFECTS_REGION_ANIMATE_ID:         memcpy_P(buffer,PM_EFFECTS_REGION_ANIMATE_NAME_CTR,sizeof(PM_EFFECTS_REGION_ANIMATE_NAME_CTR));
-  }
-  return buffer;
-}
-
-
-
-
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-
-
-void mAnimatorLight::CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value){
-  
-  flashersettings.update_colour_region.refresh_secs = value; 
-  
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-  /********************************************************************************************************************************
-  ********** Palette_Generation_Randomise_Brightness_Enable ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-void mAnimatorLight::CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value){
-
-  //instead of simple on and off, it will contain a list of modes
-  
-    // 0, 1, 2
-    // 0 = off, 1 = between range, 2 = switch between max and min randomly, 3 = switch between max and min alternatively 
-
-  pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = value;
-pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = value; // phase out, as its probably not needed to have both methods
-  
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_PALETTE_GENERATION, D_JSON_RANDOMISE_BRIGHTNESS_MODE)), value);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-
-
-
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Flasher_Flags_Movement_Direction(uint8_t value){
-
-  flashersettings.flags.movement_direction = value;
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Brightness_Min(uint8_t value){
-  
-  flashersettings.brightness_min = value;
-  
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Brightness_Max(uint8_t value){
-  
-  flashersettings.brightness_max = value;
-  
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value){
-  
-  shared_flasher_parameters.alternate_brightness_min = value;
-  
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-void mAnimatorLight::CommandSet_Flasher_Alternate_Brightness_Max(uint8_t value){
-  
-  shared_flasher_parameters.alternate_brightness_max = value;
-  
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Flasher_Alternate_RandomAmountPercentage(uint8_t value){
-    shared_flasher_parameters.alternate_random_amount_as_percentage = value;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-void mAnimatorLight::CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPaletteColours(uint8_t value){
-    pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = value;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-#ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-void mAnimatorLight::CommandSet_PixelGrouping_Flag_AgedColouring(uint8_t value){
-    pixel_group.flags.fEnabled = value;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_PixelGrouping_Flag_ModeID(uint8_t value){
-    pixel_group.flags.multiplier_mode_id = value;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-void mAnimatorLight::CommandSet_PixelGrouping_Flag_Multiplier(uint8_t value){
-    pixel_group.multiplier = value;
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_PIXELGROUPING,D_JSON_MULTIPLIER)), pixel_group.multiplier);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* value, uint8_t length){
-
-  memcpy(editable_mapped_array_data_array, value, sizeof(uint8_t)*length);
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  for(uint8_t index=0;index<length;index++){
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index,editable_mapped_array_data_array[index]);
-  }
-  #endif// ENABLE_LOG_LEVEL_COMMANDS         
-  
-}
-#endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
-
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-//  void mAnimatorLight:: CommandSet_Mixer_Flags_Enabled
-//   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-//     mixer.flags.Enabled = jtok.getInt();
-//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-//     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //   }
+//   return buffer;
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// int8_t mAnimatorLight::GetFlasherRegionIDbyName(const char* c){
+//   if(c=='\0') return -1;
+//   if(     strcmp_P(c,PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)==0){ return EFFECTS_REGION_COLOUR_SELECT_ID; }
+//   else if(strcmp_P(c,PM_EFFECTS_REGION_ANIMATE_NAME_CTR)==0){       return EFFECTS_REGION_ANIMATE_ID; }
+//   return -1;
+// }
+// const char* mAnimatorLight::GetFlasherRegionName(char* buffer){
+//   return GetFlasherRegionNamebyID(flashersettings.region, buffer);
+// }
+// const char* mAnimatorLight::GetFlasherRegionNamebyID(uint8_t id, char* buffer){
+//   switch(id){
+//     case EFFECTS_REGION_COLOUR_SELECT_ID:   memcpy_P(buffer,PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR,sizeof(PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR));
+//     case EFFECTS_REGION_ANIMATE_ID:         memcpy_P(buffer,PM_EFFECTS_REGION_ANIMATE_NAME_CTR,sizeof(PM_EFFECTS_REGION_ANIMATE_NAME_CTR));
+//   }
+//   return buffer;
+// }
+
+
+
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+
+
+// void mAnimatorLight::CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value){
+  
+//   flashersettings.update_colour_region.refresh_secs = value; 
+  
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+//   /********************************************************************************************************************************
+//   ********** Palette_Generation_Randomise_Brightness_Enable ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// void mAnimatorLight::CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value){
+
+//   //instead of simple on and off, it will contain a list of modes
+  
+//     // 0, 1, 2
+//     // 0 = off, 1 = between range, 2 = switch between max and min randomly, 3 = switch between max and min alternatively 
+
+//   pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = value;
+// pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = value; // phase out, as its probably not needed to have both methods
+  
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_PALETTE_GENERATION, D_JSON_RANDOMISE_BRIGHTNESS_MODE)), value);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+
+
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_Flasher_Flags_Movement_Direction(uint8_t value){
+
+//   flashersettings.flags.movement_direction = value;
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_DIRECTION)), flashersettings.flags.movement_direction);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_Brightness_Min(uint8_t value){
+  
+//   flashersettings.brightness_min = value;
+  
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_Brightness_Max(uint8_t value){
+  
+//   flashersettings.brightness_max = value;
+  
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MAX)), flashersettings.brightness_max);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value){
+  
+//   shared_flasher_parameters.alternate_brightness_min = value;
+  
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MIN)), shared_flasher_parameters.alternate_brightness_min);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// void mAnimatorLight::CommandSet_Flasher_Alternate_Brightness_Max(uint8_t value){
+  
+//   shared_flasher_parameters.alternate_brightness_max = value;
+  
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE_BRIGHTNESS_MAX)), shared_flasher_parameters.alternate_brightness_max);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+// }
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_Flasher_Alternate_RandomAmountPercentage(uint8_t value){
+//     shared_flasher_parameters.alternate_random_amount_as_percentage = value;
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ALTERNATE D_JSON_RANDOM_AMOUNT)), shared_flasher_parameters.alternate_random_amount_as_percentage);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// void mAnimatorLight::CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPaletteColours(uint8_t value){
+//     pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = value;
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+//   #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+// void mAnimatorLight::CommandSet_PixelGrouping_Flag_AgedColouring(uint8_t value){
+//     pixel_group.flags.fEnabled = value;
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_ENABLED)), pixel_group.flags.fEnabled);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_PixelGrouping_Flag_ModeID(uint8_t value){
+//     pixel_group.flags.multiplier_mode_id = value;
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_PIXELGROUPING D_JSON_MODE)), pixel_group.flags.multiplier_mode_id);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+// void mAnimatorLight::CommandSet_PixelGrouping_Flag_Multiplier(uint8_t value){
+//     pixel_group.multiplier = value;
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_PIXELGROUPING,D_JSON_MULTIPLIER)), pixel_group.multiplier);
+//     #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+// void mAnimatorLight::CommandSet_PixelGrouping_MappedMultiplierData(uint8_t* value, uint8_t length){
+
+//   memcpy(editable_mapped_array_data_array, value, sizeof(uint8_t)*length);
+
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   for(uint8_t index=0;index<length;index++){
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index,editable_mapped_array_data_array[index]);
+//   }
+//   #endif// ENABLE_LOG_LEVEL_COMMANDS         
+  
+// }
+// #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+//   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+// //  void mAnimatorLight:: CommandSet_Mixer_Flags_Enabled
+// //   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
+// //     mixer.flags.Enabled = jtok.getInt();
+// //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+// //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
+// //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+// //   }
    
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
 
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
-  //   mixer.time_scaler = jtok.getInt();
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-  //   #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
+//   //   mixer.time_scaler = jtok.getInt();
+//   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
+//   //   #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // }
+
+//   // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){
+//   // void mAnimatorLight::  CommandSet_Mixer_RunTimeScalerPercentage 
+//   //   mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
+//   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
+//   //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // }
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+//   // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
+//   //   void mAnimatorLight::
+//   //   CommandSet_Mixer_RunningID(jtok.getInt());
+//   //   uint8_t val = jtok.getInt();
+//   //   mixer.running_id = val;
+//   //   LoadMixerGroupByID(val);
+//   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+//   //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // }
+//   #endif //ENABLE_PIXEL_FUNCTION_MIXER
+
+
+//   /********************************************************************************************************************************
+//   **********Flasher Region ******************************************************************************************************
+//   ********************************************************************************************************************************/
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** PaletteID *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
+{
+
+  char buffer[50];
+
+  _segments[segment_index].palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
+
+  //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
+  if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID))
+  {
+    pCONT_iLight->CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
+  }
+
+  // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
+  //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
   // }
+  // #endif
+  #ifdef ENABLE_PALETTE_FORCED_MODE
+  //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+  #endif
+  
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), 
+  _segments[segment_index].palette.id);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), 
+  mPaletteI->GetPaletteNameByID(_segments[segment_index].palette.id, buffer, sizeof(buffer)));
+  #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){
-  // void mAnimatorLight::  CommandSet_Mixer_RunTimeScalerPercentage 
-  //   mixer.run_time_duration_scaler_as_percentage = jtok.getInt();
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // }
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
-
-
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-  //   void mAnimatorLight::
-  //   CommandSet_Mixer_RunningID(jtok.getInt());
-  //   uint8_t val = jtok.getInt();
-  //   mixer.running_id = val;
-  //   LoadMixerGroupByID(val);
-  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // }
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
+}
 
 
-  /********************************************************************************************************************************
-  **********Flasher Region ******************************************************************************************************
-  ********************************************************************************************************************************/
 
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

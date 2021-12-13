@@ -5,6 +5,436 @@
 #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
+void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param)
+{    
+
+  uint8_t segment_index = segment_iters._segment_index;
+  // param.segment_index;
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("segment_indexA = %d"),segment_index);
+
+  // segment_index = constrain(segment_index,0,2); //tmp in testing
+  // AddLog(LOG_LEVEL_TEST, PSTR("segment_indexB = %d"),segment_index);
+  
+  uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+  uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+
+
+  for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
+  {
+    RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
+        animation_colours[pixel].StartingColor,
+        animation_colours[pixel].DesiredColour,
+        param.progress);    
+    SetPixelColor(pixel, updatedColor);
+  }
+  
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Solid Colour
+ * @note : Shows only 1 colour, preferably rgbcct palette or else the first of the palette (Add optional index for this later?)
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colour()
+{
+  
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+    
+  // Set up colours
+  // Brightness is generated internally, and rgbcct solid palettes are output values
+  _segments[0].flags.brightness_applied_during_colour_generation = false;
+
+  animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+
+  // animation_colours_rgbcct.DesiredColour = RgbColor(255,1,2);
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
+  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+    animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
+      animation_colours_rgbcct.DesiredColour, 
+      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
+      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+    );
+  }
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
+    
+  animation_colours_rgbcct.StartingColor = GetPixelColor(_segments[segment_iters._segment_index].pixel_range.start);
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("%d StartingColour2=%d,%d,%d,%d,%d"),
+  // _segments[segment_iters._segment_index].pixel_range.start,
+  //  animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
+    
+  // Call the animator to blend from previous to new
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+    [this](const AnimationParam& param){
+      this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
+    }
+  );
+
+}
+
+
+void mAnimatorLight::AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param)
+{   
+
+  uint8_t segment_index = segment_iters._segment_index;  
+  uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+  uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+
+  
+  // AddLog(LOG_LEVEL_TEST, PSTR("start_pixel s%d %d %d" DEBUG_INSERT_PAGE_BREAK),segment_index , start_pixel,end_pixel);
+
+  RgbcctColor output_colour = RgbcctColor::LinearBlend(
+    animation_colours_rgbcct.StartingColor,
+    animation_colours_rgbcct.DesiredColour,
+    param.progress);
+
+  for (
+    uint16_t pixel = _segments[segment_index].pixel_range.start; 
+    pixel <= _segments[segment_index].pixel_range.stop; 
+    pixel++)
+  {
+    SetPixelColor(pixel, output_colour);
+  }
+
+  
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Static Palette
+ * @note : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
+{
+
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[0].transition.order_id = TRANSITION_ORDER_INORDER_ID;
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  
+  // Pick new colours
+  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  Segments_UpdateStartingColourWithGetPixel();
+  // Call the animator to blend from previous to new
+
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+    }
+  );
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Slow Glow
+ * @note : Randomly changes colours of pixels, and blends to the new one
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
+{
+
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[0].transition.order_id = TRANSITION_ORDER_RANDOM_ID;
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  
+
+  // Pick new colours
+  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  Segments_UpdateStartingColourWithGetPixel();
+  // Call the animator to blend from previous to new
+
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+    }
+  );
+
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Slow Glow
+ * @note : Randomly changes colours of pixels, and blends to the new one
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Animate_Function__Step_Through_Palette()
+{
+
+  uint8_t segment_index = segment_iters._segment_index;
+
+  uint16_t* region_p          = &_segment_runtimes[segment_index].aux0;
+  uint16_t* indexes_active_p  = &_segment_runtimes[segment_index].aux1; // shared_flasher_parameters_segments.indexes.active
+  uint16_t* indexes_counter_p = &_segment_runtimes[segment_index].aux2; // shared_flasher_parameters_segments.indexes.counter
+
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[0].flags.brightness_applied_during_colour_generation = true;
+
+  desired_pixel=0;
+
+  switch(*region_p){
+    case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
+
+      _segments[0].flags.brightness_applied_during_colour_generation = true;
+      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+        
+      int16_t pixel_position = -2;
+      uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+    
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+
+      
+      desired_pixel = *indexes_active_p;
+      uint8_t pixels_map_upper_limit = *indexes_active_p+1;
+      uint8_t pixels_map_lower_limit = *indexes_active_p;
+
+      uint8_t index_1, index_2;
+      uint8_t counter = 0;
+          
+      //if last pixel, then include it and the first, else include it and the next
+      if(*indexes_active_p == pixels_in_map-1){ //wrap wround
+        index_1 = 0;
+        index_2 = *indexes_active_p;
+        counter = 0;
+      }else{
+        index_1 = *indexes_active_p;
+        index_2 = *indexes_active_p+1;
+        counter = 1;
+
+      }
+
+      *indexes_counter_p ^= 1;
+
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
+
+      RgbTypeColor colour;
+
+      for(uint16_t index=_segments[segment_index].pixel_range.start;
+                   index<=_segments[segment_index].pixel_range.stop;
+                   index++
+      ){
+
+        if(counter^=1){
+          desired_pixel = *indexes_counter_p ? index_2 : index_1;
+        }else{
+          desired_pixel = *indexes_counter_p ? index_1 : index_2;
+        }
+        
+        colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+
+        if(_segments[0].flags.brightness_applied_during_colour_generation){
+          colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
+        }
+
+        animation_colours[index].DesiredColour = colour;
+         
+        //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "desired_pixel= %d/%d/%d"),pixels_map_lower_limit,desired_pixel,pixels_map_upper_limit);
+  
+        // if(++desired_pixel>pixels_map_upper_limit){
+        //   desired_pixel = pixels_map_lower_limit;
+        // }
+
+      } 
+
+      //progress active index by 1 or reset
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters_segments.indexes.active=%d"), shared_flasher_parameters_segments.indexes.active);
+      
+      if(++*indexes_active_p>pixels_in_map-1){
+        *indexes_active_p=0;
+      }
+      
+      *region_p = EFFECTS_REGION_ANIMATE_ID;
+  
+    }break;
+    case EFFECTS_REGION_ANIMATE_ID: //shift along
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_ANIMATE_ID"));
+
+      // Check if output multiplying has been set, if so, change desiredcolour array
+      // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();  // THIS SHOULD PROBABLY JUST BE MOVED INTO THE SETPIXEL AND RAN BEFORE STRIPUPDATE
+      // Get starting positions already on show
+      Segments_UpdateStartingColourWithGetPixel();
+      // Call the animator to blend from previous to new
+     
+      setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+        [this](const AnimationParam& param){ 
+          this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+        }
+      );
+
+      *region_p = EFFECTS_REGION_COLOUR_SELECT_ID;
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "part2 region = %d"), _segment_runtimes[segment_index].aux0);
+
+      break;
+  }
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Sequential
+ * @note : Randomly changes colours of pixels, and blends to the new one
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential(){
+
+  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  
+  // flashersettings_segments.flag_finish_flasher_pair = false;
+  // flashersettings_segments.flags.enable_random_rate = true;
+  
+  uint8_t segment_index = segment_iters._segment_index;
+  uint16_t* region_p             = &_segment_runtimes[segment_index].aux0;
+  uint16_t* movement_direction_p = &_segment_runtimes[segment_index].aux1; // flashersettings_segments.flags.movement_direction
+  uint16_t* flag_finish_flasher_pair_p = &_segment_runtimes[segment_index].aux2;
+  uint16_t* force_finish_flasher_pair_once_p = &_segment_runtimes[segment_index].aux3;
+  
+  // do{ //must complete the pair together //move inside functions
+    switch(*region_p){
+      case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+        // #endif
+
+        Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+        
+        #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+        // Check if output multiplying has been set, if so, change desiredcolour array
+        OverwriteUpdateDesiredColourIfMultiplierIsEnabled();      
+        #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+
+        // Get starting positions already on show
+        Segments_UpdateStartingColourWithGetPixel();
+        
+        *region_p = EFFECTS_REGION_ANIMATE_ID;
+      // break; not into next right away
+      case EFFECTS_REGION_ANIMATE_ID: //shift along
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+        // #endif
+        Segments_RotateDesiredColour(1, *movement_direction_p);//flashersettings_segments.flags.movement_direction);
+
+        // Get starting positions already on show
+        Segments_UpdateStartingColourWithGetPixel();
+        
+        setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+          [this](const AnimationParam& param){ 
+            this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+          }
+        );
+
+        // if(*force_finish_flasher_pair_once_p){
+        //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+        //   *force_finish_flasher_pair_once_p = false;
+        // }
+      break;
+    }
+  // }while(*flag_finish_flasher_pair_p || *force_finish_flasher_pair_once_p);
+
+}
+
+
+void mAnimatorLight::Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction)
+{
+
+//pixels_amount_to_shift loop this many times
+  uint8_t segment_index = segment_iters._segment_index;
+  uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+  uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+
+direction=1;
+
+          //AddLog(LOG_LEVEL_TEST, PSTR("(ledout.index%d"),ledout.index);
+
+  if(direction){ // direction==1 move right ie AWAY from start
+
+    // Shift colours (rotate)
+    RgbcctColor colourlast = animation_colours[end_pixel].DesiredColour;//desired_colour[0];
+    // Shift towards first pixel
+    for(ledout.index=end_pixel; //last to first
+        ledout.index>start_pixel;
+        ledout.index--
+      ){ //+1?
+      
+        //  AddLog(LOG_LEVEL_TEST, PSTR("(ledout.index%d"),ledout.index);
+
+
+      // move backwards
+      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index-1].DesiredColour;
+    }
+    // Put first pixel on the end (wrap around)
+    animation_colours[start_pixel].DesiredColour = colourlast;
+
+  }else{
+
+    // Shift colours (rotate)
+    RgbcctColor colourfirst = animation_colours[start_pixel].DesiredColour;//desired_colour[0];
+    // Shift towards first pixel
+    for(ledout.index=start_pixel;ledout.index<end_pixel;ledout.index++){ 
+      animation_colours[ledout.index].DesiredColour = animation_colours[ledout.index+1].DesiredColour;
+    }
+    // Put first pixel on the end (wrap around)
+    animation_colours[ledout.index-1].DesiredColour = colourfirst;
+  }
+
+}
+
+
+
+
+
+
 /***
  * 
  * Create an animator for each segment, or do one by hand?

@@ -191,10 +191,28 @@ void mAnimatorLight::init(void){
   // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
 
-  pCONT_iLight->animation.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
-  pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
 
-  pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
   
 #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
   flashersettings.brightness_max = 255;
@@ -235,7 +253,7 @@ void mAnimatorLight::init(void){
     pCONT_iLight->ShowInterface();
   }
 
-  pCONT_iLight->animation_override.fRefreshAllPixels = true;
+  // pCONT_iLight->animation_override.fRefreshAllPixels = true;
 
   GenerateAnimationPixelAmountMaps();
 
@@ -305,13 +323,55 @@ void mAnimatorLight::Settings_Load(){
   //   memcpy(palettelist_variable_users_ctr,pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,sizeof(palettelist_variable_users_ctr));
   // }
 
-  pCONT_iLight->animation.mode_id = pCONT_set->Settings.animation_settings.animation_mode;
-  pCONT_iLight->animation.palette.id = pCONT_set->Settings.animation_settings.animation_palette;
-  pCONT_iLight->animation.transition.order_id   = pCONT_set->Settings.animation_settings.animation_transition_order;
-  pCONT_iLight->animation.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
-  pCONT_iLight->animation.transition.time_ms = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
-  pCONT_iLight->animation.transition.rate_ms = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
-  pCONT_iLight->animation.intensity = 127;//pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.mode_id = pCONT_set->Settings.animation_settings.animation_mode;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id = pCONT_set->Settings.animation_settings.animation_palette;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.order_id   = pCONT_set->Settings.animation_settings.animation_transition_order;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.method_id  = pCONT_set->Settings.animation_settings.animation_transition_method;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms = pCONT_set->Settings.animation_settings.animation_transition_time_ms;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.rate_ms = pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
+  
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation
+// #else
+//   pCONT_lAni->_segments[0]
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// .intensity() = 127;//pCONT_set->Settings.animation_settings.animation_transition_rate_ms;
 
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
       user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
@@ -345,12 +405,48 @@ void mAnimatorLight::Settings_Save(){
   //   memcpy(pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,palettelist_variable_users_ctr,sizeof(palettelist_variable_users_ctr));
   // }
 
-  pCONT_set->Settings.animation_settings.animation_mode = pCONT_iLight->animation.mode_id;
-  pCONT_set->Settings.animation_settings.animation_palette = pCONT_iLight->animation.palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_order = pCONT_iLight->animation.transition.order_id;
-  pCONT_set->Settings.animation_settings.animation_transition_method = pCONT_iLight->animation.transition.method_id;
-  pCONT_set->Settings.animation_settings.animation_transition_time_ms = pCONT_iLight->animation.transition.time_ms;
-  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = pCONT_iLight->animation.transition.rate_ms;
+  pCONT_set->Settings.animation_settings.animation_mode = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.mode_id;
+  pCONT_set->Settings.animation_settings.animation_palette = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id;
+  pCONT_set->Settings.animation_settings.animation_transition_order = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.order_id;
+  pCONT_set->Settings.animation_settings.animation_transition_method = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.method_id;
+  pCONT_set->Settings.animation_settings.animation_transition_time_ms = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms;
+  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.rate_ms;
   // pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
 
   // pCONT_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
@@ -561,9 +657,21 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
     snprintf_P(buffer, buflen, PSTR("Animating"));
     return buffer;
   }
-  if(pCONT_iLight->animation.flags.fEnable_Animation){
+  if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int16_t until_next_millis = pCONT_iLight->animation.transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
+    int16_t until_next_millis = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
     int16_t secs_until_next_event = until_next_millis/1000;
     // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -943,7 +1051,13 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
 
 
-  if(pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice){
+  if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice){
 #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
     uint8_t temp_max_brightness = flashersettings.brightness_max;
     #else
@@ -951,7 +1065,13 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
     uint8_t temp_max_brightness = 255;
 
 #endif // ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
-    if(pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB){
+    if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.Limit_Upper_Brightness_With_BrightnessRGB){
       temp_max_brightness = pCONT_iLight->getBriRGB_Global();
     }
     #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
@@ -971,7 +1091,13 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   // );
 
   #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
-  if(pCONT_iLight->animation.flags.use_gamma_for_brightness){
+  if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.use_gamma_for_brightness){
     new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
   }
   #endif // ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
@@ -1483,7 +1609,13 @@ void mAnimatorLight::RefreshLEDIndexPattern()
   //Serial.printf("animation.transition.order_id=%d\n\r",pCONT_iLight->animation.transition.order_id);
 
   // Generate lighting pattern
-  switch(pCONT_iLight->animation.transition.order_id){
+  switch(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.order_id){
     case TRANSITION_ORDER_INORDER_ID:
 
       SetLEDOutAmountByPercentage(100);
@@ -1622,7 +1754,13 @@ void mAnimatorLight::RefreshLEDIndexPattern()
 void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
 
   // Update pointer of struct
-  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+  mPaletteI->SetPaletteListPtrFromID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id);
 
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),mPaletteI->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
   // AddLog(LOG_LEVEL_DEBUG_MORE
@@ -1655,11 +1793,23 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
       
       // Other types with random led patterns, or,
       
-      switch(pCONT_iLight->animation.transition.order_id){
+      switch(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.order_id){
         case TRANSITION_ORDER_RANDOM_ID:{
 
           // new transition, so force full update
-          if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
+          if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.NewAnimationRequiringCompleteRefresh){
             strip_size_requiring_update = STRIP_SIZE_MAX;
           }
         
@@ -1684,7 +1834,13 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
 
             #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-            if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+            if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.brightness_applied_during_colour_generation){
               animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour,pCONT_iLight->getBriRGB_Global());
             }
             #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
@@ -1702,7 +1858,13 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
         }break;
         case TRANSITION_ORDER_INORDER_ID:{
           // new transition, so force full update
-          if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
+          if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.NewAnimationRequiringCompleteRefresh){
             strip_size_requiring_update = STRIP_SIZE_MAX;
           }
           RefreshLEDIndexPattern();
@@ -1727,7 +1889,13 @@ void mAnimatorLight::UpdateDesiredColourFromPaletteSelected(void){
               // RgbColor colourbefore = animation_colours[ledout.pattern[ledout.index]].DesiredColour;
             animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
            #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
-            if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
+            if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.brightness_applied_during_colour_generation){
               animation_colours[ledout.pattern[ledout.index]].DesiredColour = ApplyBrightnesstoDesiredColourWithGamma(animation_colours[ledout.pattern[ledout.index]].DesiredColour, pCONT_iLight->getBriRGB_Global());
             }
             #endif //             ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
@@ -1955,12 +2123,22 @@ void mAnimatorLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_
     _time_to_newcolour /= 1000;// ms to seconds
   }
 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
-    _time_to_newcolour = pCONT_iLight->animation_override.time_ms;
+    time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
-  
+
+#else
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(segment_animation_override.time_ms){
+    _time_to_newcolour = segment_animation_override.time_ms;
+    segment_animation_override.time_ms = 0;//reset overwrite
+  }
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // AnimEaseFunction easing = NeoEase::CubicIn;  
 
   // Translation
@@ -2002,15 +2180,32 @@ void mAnimatorLight::StartAnimationAsBlendFromStartingColorToDesiredColor(){
   //   default: 
   //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
   //   case TRANSITION_METHOD_BLEND_ID:   
-    time_tmp = pCONT_iLight->animation.transition.time_ms; 
+    time_tmp = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms; 
   //   break;
   // }
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
     time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
+
+#else
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(segment_animation_override.time_ms){
+    time_tmp = segment_animation_override.time_ms;
+    segment_animation_override.time_ms = 0;//reset overwrite
+  }
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   if(time_tmp>0){
     if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
@@ -2058,15 +2253,33 @@ void mAnimatorLight::StartAnimationAsSwitchingFromStartingColorToDesiredColor(){
   //   default: 
   //   case TRANSITION_METHOD_INSTANT_ID: time_tmp = 0; break;
     // case TRANSITION_METHOD_BLEND_ID:  
-     time_tmp = pCONT_iLight->animation.transition.time_ms; 
+     time_tmp = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms; 
   //    break;
   // }
+
+ 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
     time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
+
+#else
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(segment_animation_override.time_ms){
+    time_tmp = segment_animation_override.time_ms;
+    segment_animation_override.time_ms = 0;//reset overwrite
+  }
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   if(time_tmp>0){
     if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
@@ -2109,18 +2322,53 @@ void mAnimatorLight::StartAnimation_AsAnimUpdateMemberFunction(){
     
   //    break;
     // case TRANSITION_METHOD_BLEND_ID:   
-    time_tmp = pCONT_iLight->animation.transition.time_ms; 
+    time_tmp = 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms; 
   //   break;
   // }
+
+
+
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   // Overwriting single pCONT_iLight->animation methods, set, then clear
   if(pCONT_iLight->animation_override.time_ms){
     time_tmp = pCONT_iLight->animation_override.time_ms;
     pCONT_iLight->animation_override.time_ms = 0;//reset overwrite
   }
+
+#else
+  // Overwriting single pCONT_iLight->animation methods, set, then clear
+  if(segment_animation_override.time_ms){
+    time_tmp = segment_animation_override.time_ms;
+    segment_animation_override.time_ms = 0;//reset overwrite
+  }
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
   //clear forced once only flags
-  if(pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh){
-    pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh = false;    
+  if(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.NewAnimationRequiringCompleteRefresh){
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.flags.NewAnimationRequiringCompleteRefresh = false;    
   }
   
     // Serial.printf("TRANSITION_METHOD_INSTANT_ID = %d\n\r",time_tmp);
@@ -2287,9 +2535,18 @@ void mAnimatorLight::SetPixelColor_All(RgbcctColor colour){
 
 void mAnimatorLight::SetRefreshLEDs(){
 
-  pCONT_iLight->animation.flags.fForceUpdate = true;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   pCONT_iLight->animation_override.fRefreshAllPixels = true;
   pCONT_iLight->animation_override.time_ms = 10;
+  pCONT_lAni->animation.flags.fForceUpdate = true;
+#else
+  segment_animation_override.fRefreshAllPixels = true;
+  segment_animation_override.time_ms = 10;
+  _segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
 
   // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
@@ -2554,7 +2811,13 @@ return 0;
     JBI->Level_Start(D_JSON_TRANSITION);
     //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
     //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
-      JBI->Add(D_JSON_TIME_MS, pCONT_iLight->animation.transition.time_ms);
+      JBI->Add(D_JSON_TIME_MS, 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.time_ms);
     //   transitionobj[D_JSON_TIME_MS] = ;
     //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
     //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
@@ -2606,8 +2869,20 @@ return 0;
   JsonBuilderI->Start();  
     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH_ID);
-    JBI->Add("ColourPaletteID", pCONT_iLight->animation.palette.id );
-    JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(pCONT_iLight->animation.palette.id, buffer, sizeof(buffer)));
+    JBI->Add("ColourPaletteID", 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id );
+    JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id, buffer, sizeof(buffer)));
     // JsonBuilderI->Array_Start("rgb");
     // for(int i=0;i<numpixels;i++){
     //   RgbTypeColor c = GetPixelColor(i);

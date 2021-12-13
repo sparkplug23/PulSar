@@ -33,9 +33,8 @@ DEBUG_LINE_HERE;
    * As order of importance, others that rely on previous commands must come after
    * */
   int val = 0;
-  jtok = obj["test"];
-    AddLog(LOG_LEVEL_TEST, PSTR("val=%d"),jtok.getInt());
 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
     if(jtok.isStr()){
       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
@@ -51,6 +50,9 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
   
   if(jtok = obj[PM_JSON_HARDWARE_TYPE]){
     if(jtok.isStr()){
@@ -302,7 +304,14 @@ DEBUG_LINE_HERE;
     if(jtok.isNum()){
       state = jtok.getInt(); 
     }
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
+#else
+    ModifyStateNumberIfToggled(&state, pCONT_lAni->_segments[0].flags.fEnable_Animation);
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
     CommandSet_EnabledAnimation_Flag(state);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
@@ -376,7 +385,16 @@ DEBUG_LINE_HERE;
 
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI){
+
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     animation_override.time_ms = 100;
+#else
+ pCONT_lAni->segment_animation_override.time_ms = 100;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
   }
 
 #ifdef USE_MODULE_NETWORK_MQTT
@@ -384,7 +402,15 @@ DEBUG_LINE_HERE;
   mqtthandler_scene_teleperiod.flags.SendNow = true;
   
 #endif //ifdef USE_MODULE_NETWORK_MQTT
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
     #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 DEBUG_LINE_HERE;
       #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -498,7 +524,17 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
 
 }
 const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen){
-  return GetHardwareColourTypeNameByID(pCONT_iLight->animation.mode_id, buffer, buflen);
+
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  return GetHardwareColourTypeNameByID(animation.mode_id, buffer, buflen);
+#else
+  return GetHardwareColourTypeNameByID(pCONT_lAni->_segments[0].mode_id, buffer, buflen);
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+
 }
 const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen){
   sprintf(buffer, D_NO_MATCH_CTR);
@@ -702,111 +738,111 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT DEBUG_INSERT_PAGE_BREAK "f::CommandSet_LightPowerState %d"), state);
   #endif
           
-  switch(state){
-    case LIGHT_POWER_STATE_ON_ID:
-      // SetAnimationProfile(ANIMATION_PROFILE_TURN_ON_ID);
+  // switch(state){
+  //   case LIGHT_POWER_STATE_ON_ID:
+  //     // SetAnimationProfile(ANIMATION_PROFILE_TURN_ON_ID);
 
-      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-      memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
-      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation loading previous state"));
-      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+  //     memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
+  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation loading previous state"));
+  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
 
-      // Handle depending on hardware type
+  //     // Handle depending on hardware type
       
-      switch(animation.mode_id){
-        default:
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
-        #ifdef USE_MODULE_LIGHTS_ANIMATOR
-        case ANIMATION_MODE_EFFECTS_ID:
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
+  //     switch(animation.mode_id){
+  //       default:
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
+  //       #ifdef USE_MODULE_LIGHTS_ANIMATOR
+  //       case ANIMATION_MODE_EFFECTS_ID:
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
           
-      #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
-          #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
-          pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
-          #endif
-      #endif// ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
-          
-
-        break;
-        #endif // 
-        // case ANIMATION_MODE_SCENE_ID:
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "scene"));
-        //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-        //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
-        // break;
-      }
-
-      animation_override.time_ms = 1000; //force fast rate to turn on
-      rgbcct_controller.setBrightness255(255);
-      animation.flags.fForceUpdate = true;
-      //pCONT_ladd->first_set = 1;//set all
-
-      light_power_state = true;
-
-    break;
-    case LIGHT_POWER_STATE_OFF_ID:
-      // SetAnimationProfile(ANIMATION_PROFILE_TURN_OFF_ID);
-
-
-      // Remember previous state for returning to later  
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-      memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
-      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation SAVING state to return to"));
-      // If I use overrides, is this neccesary?
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-      light_power_state = false;
-
-      //if palette, set colour to black and update all
-      switch(animation.mode_id){
-        default:
-          // #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
-          // #endif
-        case ANIMATION_MODE_EFFECTS_ID://PRESETS_ID:
-          // #ifdef ENABLE_LOG_LEVEL_DEBUG
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
-          // #endif
-          animation_override.time_ms = 1000; //force fast rate to turn on
-          // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-          // animation.flags.fForceUpdate = true;
-          // animation.brightness = 0;
-          // first_set = 1;//set all
-
-          animation.transition.time_ms = 1000;
-          animation.flags.fForceUpdate = true;
-          animation_override.time_ms = 1000; //force fast rate to turn on
-
-          rgbcct_controller.setBrightness255(0);
-
+  //     #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  //         #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
+  //         pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
+  //         #endif
+  //     #endif// ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
           
 
-        break;
-        // case ANIMATION_MODE_SCENE_ID:
-        //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
-        //   // #endif
-        //   // setBriRGB(0);
-        //   // animation.brightness = 0;
-        //   animation.transition.time_ms = 1000;
-        //   animation.flags.fForceUpdate = true;
-        //   animation_override.time_ms = 1000; //force fast rate to turn on
+  //       break;
+  //       #endif // 
+  //       // case ANIMATION_MODE_SCENE_ID:
+  //       //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "scene"));
+  //       //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  //       //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
+  //       // break;
+  //     }
 
-        //   rgbcct_controller.setBrightness255(0);
+  //     animation_override.time_ms = 1000; //force fast rate to turn on
+  //     rgbcct_controller.setBrightness255(255);
+  //     animation.flags.fForceUpdate = true;
+  //     //pCONT_ladd->first_set = 1;//set all
 
-        //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-        //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
+  //     light_power_state = true;
+
+  //   break;
+  //   case LIGHT_POWER_STATE_OFF_ID:
+  //     // SetAnimationProfile(ANIMATION_PROFILE_TURN_OFF_ID);
+
+
+  //     // Remember previous state for returning to later  
+  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+  //     memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
+  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation SAVING state to return to"));
+  //     // If I use overrides, is this neccesary?
+  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
+  //     light_power_state = false;
+
+  //     //if palette, set colour to black and update all
+  //     switch(animation.mode_id){
+  //       default:
+  //         // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
+  //         // #endif
+  //       case ANIMATION_MODE_EFFECTS_ID://PRESETS_ID:
+  //         // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
+  //         // #endif
+  //         animation_override.time_ms = 1000; //force fast rate to turn on
+  //         // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+  //         // animation.flags.fForceUpdate = true;
+  //         // animation.brightness = 0;
+  //         // first_set = 1;//set all
+
+  //         animation.transition.time_ms = 1000;
+  //         animation.flags.fForceUpdate = true;
+  //         animation_override.time_ms = 1000; //force fast rate to turn on
+
+  //         rgbcct_controller.setBrightness255(0);
+
           
-        //   // first_set = 1;//set all
-        // break;
-      }
-      animation.flags.fEndUpdatesWhenAnimationCompletes = true; //once turned off, stop animations
+
+  //       break;
+  //       // case ANIMATION_MODE_SCENE_ID:
+  //       //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //       //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
+  //       //   // #endif
+  //       //   // setBriRGB(0);
+  //       //   // animation.brightness = 0;
+  //       //   animation.transition.time_ms = 1000;
+  //       //   animation.flags.fForceUpdate = true;
+  //       //   animation_override.time_ms = 1000; //force fast rate to turn on
+
+  //       //   rgbcct_controller.setBrightness255(0);
+
+  //       //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
+  //       //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
+          
+  //       //   // first_set = 1;//set all
+  //       // break;
+  //     }
+  //     animation.flags.fEndUpdatesWhenAnimationCompletes = true; //once turned off, stop animations
 
 
 
 
 
-    break;
-  } // END switch
+  //   break;
+  // } // END switch
 }
 
   
@@ -860,7 +896,17 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
  
   // Serial.println("HER"); Serial.flush();
   rgbcct_controller.setRGB(colour.R, colour.G, colour.B);
+
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getrgb());
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "%d  %d,%d,%d,%d"), colour32bit, colour.R, colour.G, colour.B, colour.W);
@@ -894,7 +940,11 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
   // Serial.println("HER"); Serial.flush();
   rgbcct_controller.setHue360(hue_new);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
@@ -908,7 +958,11 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
   rgbcct_controller.setSat255(sat_new);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
@@ -922,7 +976,11 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
 
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   rgbcct_controller.setBrightness255(brt_new);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriRGB_Global(brt_new);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
@@ -938,7 +996,11 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
   rgbcct_controller.setBrightnessRGB255(bri);
   _briRGB_Global = bri;
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightnessRGB255());
@@ -954,7 +1016,11 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
 void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
   rgbcct_controller.setBrightnessCCT255(bri);
   _briCT_Global = bri;
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBrightnessCCT255());
@@ -970,7 +1036,11 @@ void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
   rgbcct_controller.setCCT(ct);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
@@ -995,7 +1065,11 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_
  * */
 void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
   rgbcct_controller.setCCT(ct);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 }
 
 /******************************************************************************************************************************
@@ -1006,7 +1080,11 @@ void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
 
 bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked) {
   rgbcct_controller.setRGBCCTLinked(ct_rgb_linked);
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
@@ -1023,8 +1101,12 @@ bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc){
-  rgbcct_controller.setChannelsRaw(r,g,b,ww,wc);    
-  animation.flags.fForceUpdate = true;  
+  rgbcct_controller.setChannelsRaw(r,g,b,ww,wc);  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // #ifdef ENABLE_LOG_LEVEL_INFO
   // char buffer[30];
   // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
@@ -1034,7 +1116,11 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
   rgbcct_controller.setChannelsRaw(values);    
-  animation.flags.fForceUpdate = true;  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[30];
   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
@@ -1050,11 +1136,24 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
 
 void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 
+
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fEnable_Animation = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), animation.flags.fEnable_Animation);    
   #endif // ENABLE_LOG_LEVEL_COMMANDS
+#else
+  pCONT_lAni->_segments[0].flags.fEnable_Animation = value;
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_lAni->_segments[0].flags.fEnable_Animation);    
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
 
 }
 
@@ -1066,11 +1165,21 @@ void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 
 void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
     
-  animation.transition.time_ms = value;
+  
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
-  #endif
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation.transition.time_ms = value;
+#else
+  pCONT_lAni->_segments[0].transition.time_ms = value;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
+  // #endif
 
 }
 
@@ -1082,13 +1191,31 @@ void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
 
 void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
     
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.transition.rate_ms = value;
+  
+  if(animation.transition.rate_ms<animation.transition.time_ms){ 
+    animation.transition.time_ms = animation.transition.rate_ms;
+  }
 
-  if(animation.transition.rate_ms<animation.transition.time_ms){ animation.transition.time_ms = animation.transition.rate_ms;}
+#else
+  pCONT_lAni->_segments[0].transition.rate_ms = value;
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
-  #endif
+  
+  if(pCONT_lAni->_segments[0].transition.rate_ms<pCONT_lAni->_segments[0].transition.time_ms){ 
+    pCONT_lAni->_segments[0].transition.time_ms = pCONT_lAni->_segments[0].transition.rate_ms;
+  }
+
+
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
+  // #endif
 
 }
 
@@ -1137,8 +1264,16 @@ void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
 
 void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value){
   
-  animation.transition.order_id = value;
   
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation.transition.order_id = value;
+#else
+  pCONT_lAni->_segments[0].transition.order_id = value;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+
   char buffer[50];
 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -1148,7 +1283,19 @@ void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value){
 }
 
 const char* mInterfaceLight::GetTransitionOrderName(char* buffer, uint8_t buflen){
-  return GetTransitionOrderNameByID(animation.transition.order_id, buffer, buflen);
+  return GetTransitionOrderNameByID(
+    
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+.transition.order_id, buffer, buflen);
+
+
+
 }
 const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen){
   switch(id){  default:    
@@ -1219,7 +1366,13 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 
 void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   
-  animation.transition.pixels_to_update_as_number = value;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.transition.pixels_to_update_as_number = value;
   // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
 
   // Tmp fix until I merge them - UNTESTED HOW THIS WILL AFFECT CODE
@@ -1254,7 +1407,14 @@ uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
 void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
 
-  animation.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
   // animation.transition.pixels_to_update_as_percentage = value;
   
   // TEMP FIX!! - UNTESTED HOW THIS WILL AFFECT CODE
@@ -1304,7 +1464,13 @@ void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t 
 void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 
   char buffer[50];
-  animation.palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
 
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
@@ -1320,16 +1486,21 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
   #endif
   
-#ifdef USE_MODULE_LIGHTS_ANIMATOR
-//temp feedback
-#ifdef USE_MODULE_NETWORK_MQTT
-// pCONT_lAni->mqtthandler_state_teleperiod.flags.SendNow = true;
-#endif // USE_MODULE_NETWORK_MQTT
-#endif // USE_MODULE_LIGHTS_ANIMATOR
-
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), animation.palette.id);
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.palette.id, buffer, sizeof(buffer)));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1371,7 +1542,11 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   memcpy(palette_buffer,buffer,buflen);
 
   // rgbcct_controller.UpdateFromExternalBuffer();
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
@@ -1388,7 +1563,11 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   memcpy(palette_buffer,buffer,buflen);
 
   rgbcct_controller.UpdateFromExternalBuffer();
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
+#else
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
     // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
@@ -1446,7 +1625,13 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
 
   char buffer[60];
-  animation.mode_id = value;        
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.mode_id = value;        
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
   #endif
@@ -1455,7 +1640,13 @@ void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
 
 
 const char* mInterfaceLight::GetAnimationModeName(char* buffer, uint16_t buflen){
-  return GetAnimationModeNameByID(animation.mode_id, buffer, buflen);
+  return GetAnimationModeNameByID(
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  animation
+#else
+  pCONT_lAni->_segments[0]
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+.mode_id, buffer, buflen);
 }
 const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
   switch(id){

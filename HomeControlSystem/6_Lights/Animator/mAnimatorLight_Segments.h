@@ -628,6 +628,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       uint8_t options = NO_OPTIONS2; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
       uint8_t grouping = 1; //multiplers
       uint8_t spacing = 0; //??
+      // uint8_t intensity = 127;
 
       uint32_t tSaved_AnimateRunTime = millis();
     uint8_t effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
@@ -720,7 +721,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       }
       uint16_t length()
       {
-        return pixel_range.stop - pixel_range.start;
+        return pixel_range.stop - pixel_range.start + 1;
       }
       uint16_t groupLength()
       {
@@ -744,6 +745,15 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     //   { 0, 7, DEFAULT_SPEED2, 128, 0, DEFAULT_MODE2, NO_OPTIONS2, 1, 0, 255, {DEFAULT_COLOR2}}
     // };
 
+    // Flags and states that are used during one transition and reset when completed
+    struct SEGMENT_ANIMATION_OVERRIDES{
+      uint8_t fRefreshAllPixels = false;
+      /**
+       * Can't be zero, as that means not active
+       * */
+      uint16_t time_ms = 1000; //on boot
+      uint16_t rate_ms = 1000;
+    }segment_animation_override; // ie "oneshot" variables that get checked and executed one time only
 
     /**
      * values that are used as global iters rather than passing between each function
@@ -870,6 +880,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     void SubTask_Segment_Flasher_Animate_Function__Sequential();
     void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
 
+    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index);
 
 
     void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
@@ -877,6 +888,8 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
     void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0);
       
+
+
     void resetSegments();
     void handle_palette(void);
     
@@ -884,6 +897,16 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
     #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+
+    void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
+    int8_t GetFlasherFunctionIDbyName(const char* f);
+    const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
+    const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen);
+
+    void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
+
+
 
     uint32_t tSaved_Test_Segment_Animation = 0;
 
