@@ -3849,7 +3849,7 @@ Bathroom
    /**
    * Three types of animations, exclusive only
    * */
-  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 

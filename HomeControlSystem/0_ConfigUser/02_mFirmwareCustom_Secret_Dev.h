@@ -142,22 +142,46 @@
   #define DEVICENAME_CTR          "testbed_string_segment_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // WLED
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
-  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // new method for 2022
-  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT      // current method for xmas 2021
+  #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+  //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+  //#define USE_DEVFEATURE_METHOD_WLED_BUILD
+ 
+ 
+  #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    // enable some wled conerted aniamtions
+    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION  // to test existing effects in wled
+    #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "WLED"
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+  #endif
 
-  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
- // #define ENABLE_BOOT_OVERRIDE_INIT
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -171,50 +195,91 @@
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
+/**
+ * @brief 
+ Segment command for single segment to replace old effects
+ Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
+ * 
+ */
  #define STRIP_SIZE_MAX 50
  #define USE_LIGHTING_TEMPLATE
+
+//  #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
-    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_ANIMATIONMODE    "\":"  "5"  "," //5
-    "\"" D_JSON_EFFECTS "\":{" 
-      // "\"Function\":\"FirePlace01\"" //slow glow
-      "\"Function\":\"Static Glow\"" //slow glow
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
     "},"
-    // "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
-    // "\"TimeMs\":500,"
-    
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":5000,"
-      "\"" D_JSON_RATE_MS "\":5001,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"ColourPalette\":\"Christmas 06\"," //c12    43 is the colours for this christmas
-    // "\"ColourPalette\":\"Single Fire 01\"," //c12    43 is the colours for this christmas
-    // "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
+    "\"ColourPalette\":\"Christmas 01\","
+    "\"Transition\":{"
+      "\"TimeMs\":3000,"
+      "\"RateMs\":10000"
+    "},"    
     "\"BrightnessRGB\":100"
   "}";
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
-  #define STRIP_SIZE_MAX                      50   
+  #endif
 
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"" D_JSON_DEVICENAME "\":{"
-  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-  //       "\"" "bedroom" "\""
-  //     "]"
-  //   "}"
-  // "}";
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
 
 #endif
 
@@ -1727,7 +1792,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
@@ -1795,7 +1860,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
@@ -1877,7 +1942,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
 
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
@@ -1990,7 +2055,7 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
   // #define USE_MODULE_DRIVERS_LEDS
@@ -6117,7 +6182,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // //   // #define USE_MODULE_LIGHTS_INTERFACE
 // // //   // #define USE_MODULE_LIGHTS_ANIMATOR
 // // //   // #define USE_MODULE_LIGHTS_ADDRESSABLE
-// // //   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+// // //   // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 // // //   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
 // // //   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
 // // //   // #define USE_MODULE_DRIVERS_LEDS
@@ -6185,7 +6250,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // //   // #define USE_MODULE_LIGHTS_INTERFACE
 // // //   // #define USE_MODULE_LIGHTS_ANIMATOR
 // // //   // #define USE_MODULE_LIGHTS_ADDRESSABLE
-// // //   // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+// // //   // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 // // //   // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
 // // //   // #define DISABLE_PIXEL_FUNCTION_EFFECTS
 // // //   // #define USE_MODULE_DRIVERS_LEDS

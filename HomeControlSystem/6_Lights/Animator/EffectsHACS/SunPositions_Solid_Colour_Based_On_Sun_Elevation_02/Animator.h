@@ -1,4 +1,0 @@
-#pragma once
-
-void SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-void AnimationProcess_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02(const AnimationParam& param);

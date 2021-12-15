@@ -92,7 +92,6 @@ enum LightTypes_IDS{
   LT_LIGHT_INTERFACE_END,
   // Anything after this will not be handled in lightinterface
   LT_ADDRESSABLE, 
-  // LT_ADDRESSABLE, //replacing above
   LT_RGBW,  LT_RGBWC, // This are not needed, as they are either ADD or PWM
 };
 
@@ -107,50 +106,6 @@ enum LightSubtypes{
   LST_RGBCW
 };
 
-// enum PIXEL_HARDWARE_COLOR_ORDER_IDS{
-//   PIXEL_HARDWARE_COLOR_ORDER_GRB_ID = 0, //default
-//   PIXEL_HARDWARE_COLOR_ORDER_RGB_ID, //common for WS2811
-//   PIXEL_HARDWARE_COLOR_ORDER_BRG_ID, 
-//   PIXEL_HARDWARE_COLOR_ORDER_RBG_ID, 
-//   PIXEL_HARDWARE_COLOR_ORDER_BGR_ID, 
-//   PIXEL_HARDWARE_COLOR_ORDER_GBR_ID,
-//   PIXEL_HARDWARE_COLOR_ORDER_GRBW_ID,
-//   PIXEL_HARDWARE_COLOR_LENGTH_ID
-// };
-
-/**************
- * BLEND - Move between colours with delay
- * INSTANT   - no delay
- * TWINKLE1 - random bulbs flash
- * GLIMMER - random bulbs blend (flash with blend) - could use progress in animation random(progress)
-**************/ 
-// enum TRANSITION_METHOD{
-//   TRANSITION_METHOD_NONE_ID,
-//   TRANSITION_METHOD_BLEND_ID,
-//   TRANSITION_METHOD_INSTANT_ID,
-//   TRANSITION_METHOD_TWINKLE_ID,
-//   TRANSITION_METHOD_GLIMMER_ID, //should be an animation only, on brightness #Idea#105
-//   TRANSITION_METHOD_LENGTH_ID
-// };   
-
-    /** PATTERNS ************
-     * RANDOM - LED pixel indexing chosen at random
-     * INORDER - first to last pixel index
-     * CENTRE_OUT   - Chosen from center out, showing same pixel on outward pairs (update together)
-     * GRADIENT - takes any palette, and stretches the palette across the leds
-     *    -- Full span
-     *    -- Repeated X times   * 
-     * MAPPED -
-    **************/ 
-
-    enum PALETTE_PATTERN_IDS{ //TRANSITION_ORDER{
-      TRANSITION_ORDER_NONE_ID=0,
-      TRANSITION_ORDER_RANDOM_ID,
-      TRANSITION_ORDER_INORDER_ID,
-      // TRANSITION_ORDER_CENTRE_OUT_ID,
-      // TRANSITION_ORDER_GRADIENT_ID,
-      TRANSITION_ORDER_LENGTH_ID
-    }; 
 
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -164,18 +119,17 @@ enum LightSubtypes{
 
 // DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PARAMETERS_CTR) "values/parameters";
 
+#define WEB_CLASS_RGB_LIVE "rgb_live"
 
-  #define WEB_CLASS_RGB_LIVE "rgb_live"
-  
-    // Arrays to hold palettes, called via pointer
-    // Variable user maps need to be variable  
-    #ifndef D_PALETTE_HSBID_NAME_CTR
-    #define D_PALETTE_HSBID_NAME_CTR        "User"   
-    #endif
-    #ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
-    #define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   
-    #endif
-    #define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
+// Arrays to hold palettes, called via pointer
+// Variable user maps need to be variable  
+#ifndef D_PALETTE_HSBID_NAME_CTR
+#define D_PALETTE_HSBID_NAME_CTR        "User"   
+#endif
+#ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
+#define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   
+#endif
+#define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
 
 //#define DEBUG_LIGHT
@@ -186,26 +140,6 @@ typedef unsigned long power_t;              // Power (Relay) type
 enum LightColorModes {
   LCM_RGB = 1, LCM_CT = 2, LCM_BOTH = 3 
 };
-
-// struct LRgbColor {
-//   uint8_t R, G, B;
-// };
-// const uint8_t MAX_FIXED_COLOR = 12;
-// // const LRgbColor kFixedColor[MAX_FIXED_COLOR] PROGMEM =
-// //   { 255,0,0, 0,255,0, 0,0,255, 228,32,0, 0,228,32, 0,32,228, 188,64,0, 0,160,96, 160,32,240, 255,255,0, 255,0,170, 255,255,255 };
-
-// struct LWColor {
-//   uint8_t W;
-// };
-// const uint8_t MAX_FIXED_WHITE = 4;
-// // const LWColor kFixedWhite[MAX_FIXED_WHITE] PROGMEM = { 0, 255, 128, 32 };
-
-// struct LCwColor {
-//   uint8_t C, W;
-// };
-// const uint8_t MAX_FIXED_COLD_WARM = 4;
-// const LCwColor kFixedColdWarm[MAX_FIXED_COLD_WARM] PROGMEM = { 0,0, 255,0, 0,255, 128,128 };
-
 
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 // New version of Gamma correction compute
@@ -303,25 +237,8 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;
 #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
 #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-  
-//     #define D_MODE_SINGLECOLOUR_NOTACTIVE_NAME_CTR       "NOTACTIVE"    
-//     #define D_MODE_SINGLECOLOUR_DAYON_NAME_CTR           "DAYON"    
-//     #define D_MODE_SINGLECOLOUR_DAYOFF_NAME_CTR          "DAYOFF"    
-//     #define D_MODE_SINGLECOLOUR_EVENINGON_NAME_CTR       "EVENINGON"    
-//     #define D_MODE_SINGLECOLOUR_EVENINGOFF_NAME_CTR      "EVENINGOFF"    
-//     #define D_MODE_SINGLECOLOUR_MIDNIGHTON_NAME_CTR      "MIDNIGHTON"    
-//     #define D_MODE_SINGLECOLOUR_MIDNIGHTOFF_NAME_CTR     "MIDNIGHTOFF"    
-// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_COLOURSCENE_NAME_CTR)   "ColourSingle"; //COLOURSCENE
-// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTE_SINGLE_NAME_CTR) "PaletteSingle";
-// DEFINE_PGM_CTR(PM_MODE_SINGLECOLOUR_PALETTELOOP_NAME_CTR)   "PaletteLoop";
-//     #define D_MODE_SINGLECOLOUR_FLASHCOLOUR_NAME_CTR     "FLASHCOLOUR"    
-//     #define D_MODE_SINGLECOLOUR_SUNRISE_SINGLE_NAME_CTR  "SUNRISE_SINGLE"  
-//     #define D_MODE_SINGLECOLOUR_SUNRISE_DUAL_NAME_CTR    "SUNRISE_DUAL" 
-
-
 
 #define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
-
 
 enum RGB_VIEW_SHOW_TYPE_IDS{
   RGB_VIEW_SHOW_TYPE_NONE_ID=0,
@@ -341,6 +258,7 @@ class mInterfaceLight :
 {
   public:
     mInterfaceLight(){};
+    bool Pre_Init(void);
 
     
     static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
@@ -354,8 +272,6 @@ class mInterfaceLight :
       return sizeof(mInterfaceLight);
     };
     #endif
-
-
 
     /**
      * Module settings other tasks/module may need
@@ -382,6 +298,9 @@ class mInterfaceLight :
       uint16_t light_size_count = 1;
       uint8_t pwm_offset = 0;                 // Offset in color buffer
     }settings;
+
+
+    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
     #define D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE 7
     typedef union {
@@ -422,14 +341,8 @@ class mInterfaceLight :
       };
     } HARDWARE_ELEMENT_COLOUR_ORDER;
 
+    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
 
-/**
- * removing this as an array, it will be in segment instead
- * */
-    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
-    // FUTURE, using range values (0-50 = this, 51-100 = that) or wled segment style
-
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 
@@ -537,13 +450,6 @@ class mInterfaceLight :
     //   uint8_t _segment_index = 0;
     //   uint8_t _segment_index_palette_last = 99;
     // };
-
-    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    
-
-
-
-
     bool flag_test= false;
     uint16_t    pwm_test = 0;
 
@@ -554,6 +460,13 @@ class mInterfaceLight :
     // #define D_EFFECTS_DATA_BUFFER_SIZE 100
     // uint8_t effects_data_buffer[D_EFFECTS_DATA_BUFFER_SIZE];
     
+
+    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    
+
+
+
+
 
     const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
@@ -590,27 +503,24 @@ class mInterfaceLight :
     **************/ 
     enum ANIMATION_MODE{
       ANIMATION_MODE_NONE_ID = 0,
-      ANIMATION_MODE_CHANGE_POWER_ID = 0,
-      //#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      ANIMATION_MODE_AMBILIGHT_ID,
-      //#endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      //#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+      ANIMATION_MODE_CHANGE_POWER_ID,
+      /**
+       * @brief Segments effects
+       **/
       ANIMATION_MODE_EFFECTS_ID,
-
-      // Tmp effects method that should allow easy switching until method is fully absorbed by effects above
-      ANIMATION_MODE_WLED_ID, 
-      
-
-      //#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      //#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      ANIMATION_MODE_AMBILIGHT_ID,
+      #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       ANIMATION_MODE_NOTIFICATIONS_ID,
-      //#endif
+      #endif
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
       ANIMATION_MODE_MANUAL_SETPIXEL_ID,
       #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      ANIMATION_MODE_SEGMENTS_ANIMATION_ID,
-      #endif
+      /**
+       * @brief WLED is only included so debugging WLED effects insitu can be performed, no release build will include this option
+       * **/
+      ANIMATION_MODE_WLED_ID, 
       ANIMATION_MODE_LENGTH_ID
     };             
     int8_t GetAnimationModeIDbyName(const char* c);
@@ -634,35 +544,34 @@ class mInterfaceLight :
 
     void CommandSet_PixelHardwareTypeID(uint8_t value);
     void CommandSet_LightPowerState(uint8_t value);
-
     void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
-    // Global and shared with activergb
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);
     void CommandSet_BrtCT_255(uint8_t bri);
-
     void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
     void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
     void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
     bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
     void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
     void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
-    
     void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
-
-    void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
-    void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-    // void CommandSet_SingleColourMode_ID(uint8_t value);
-    // #endif// ENABLE_DEVFEATURE_PHASING_SCENE_OUT
     void CommandSet_PaletteID(uint8_t value);
     void CommandSet_AnimationModeID(uint8_t value);
+    
+    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    void CommandSet_Animation_Transition_Time_Ms(uint16_t value);
+    void CommandSet_Animation_Transition_Rate_Ms(uint16_t value);
     void CommandSet_HardwareColourOrderTypeByStr(const char* value);
-    void CommandSet_LightSizeCount(uint16_t value);
+    void CommandSet_TransitionOrderID(uint8_t value);
     void CommandSet_LightsCountToUpdateAsNumber(uint16_t value);
     void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value);
-    void CommandSet_TransitionOrderID(uint8_t value);
+    int8_t GetTransitionOrderIDbyName(const char* c);     
+    const char* GetTransitionOrderName(char* buffer, uint8_t buflen);
+    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen);
+    #endif// ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+    void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
     void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
@@ -670,14 +579,6 @@ class mInterfaceLight :
     /******************************************************************************************************************************
     ****************** CommandGet_x *************************************************************************************************************
     ******************************************************************************************************************************/
-
-    // int8_t GetTransitionMethodIDbyName(const char* c);     
-    // const char* GetTransitionMethodName(char* buffer, uint8_t buflen);
-    // const char* GetTransitionMethodNameByID(uint8_t id, char* buffer, uint8_t buflen);
-
-    int8_t GetTransitionOrderIDbyName(const char* c);     
-    const char* GetTransitionOrderName(char* buffer, uint8_t buflen);
-    const char* GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen);
 
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
@@ -687,7 +588,6 @@ class mInterfaceLight :
     int8_t GetPixelHardwareTypeIDbyName(const char* c);
     const char* GetPixelHardwareTypeName(char* buffer);
     const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
-
 
     void SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index = 0, bool flag_replicate_for_total_pixel_length = false);
     RgbcctColor GetPixelColourHardwareInterface(uint16_t index = 0);
@@ -716,8 +616,12 @@ class mInterfaceLight :
     uint32_t RgbColorto32bit(RgbColor rgb);
     
     RgbcctColor GetActiveFirstColourFromCurrentPalette();
-    
-    void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
+        
+    #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+        void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
+    #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+
+    void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
 
     RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
@@ -733,25 +637,29 @@ class mInterfaceLight :
     void Init(void);
     
 
+    #ifndef DISABLE_WEBSERVER
     void WebAppend_Root_Buttons();
     void WebAppend_Root_Draw_Table();
     void WebCommand_Parse();
     void WebAppend_Root_Draw_RGBLive();
     void WebAppend_Root_Draw_RGBTable(uint8_t rows = 8);
-
-    void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
-
     
-    // struct BRIGHTNESS_RGB_BOUNDARIES{
-    //   uint8_t  lower = 0;  // 0..255
-    //   uint8_t  upper = 255;  // 0..255
-    // }brtRGB_limits;
+    struct LIVEVIEW_SETTINGS{
+      uint8_t show_type = RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID;
+      uint8_t height_as_percentage = 15;
+      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
+      uint16_t refresh_rate = 250;
+    }liveview;
+    struct PALETTE_VIEW_SETTINGS{
+      uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
+      uint8_t height_as_percentage = 15;
+      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
+    }palette_view;
+    uint32_t WebColorFromColourMap(uint8_t i);
+    uint32_t WebColorFromColourType(RgbColor rgb);
+    #endif // DISABLE_WEBSERVER
 
-    
-
-
-
-
+ 
     uint8_t light_power_state = 0;
     uint8_t light_power_Saved = 0;
     uint8_t subtype = 0;                    // LST_ subtype
@@ -760,21 +668,6 @@ class mInterfaceLight :
     bool     fade_initialized = false;      // dont't fade at startup
     uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
-
-
-    struct LIVEVIEW_SETTINGS{
-      uint8_t show_type = RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID;
-      uint8_t height_as_percentage = 15;
-      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
-      uint16_t refresh_rate = 250;
-    }liveview;
-
-
-    struct PALETTE_VIEW_SETTINGS{
-      uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
-      uint8_t height_as_percentage = 15;
-      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
-    }palette_view;
 
 
     void init_Animations();
@@ -796,12 +689,10 @@ class mInterfaceLight :
     uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
     #endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-
+    // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
-void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
-
-    bool Pre_Init(void);
+    void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
 
     float    HueN2F(uint16_t hue);
     float    SatN2F(uint8_t sat);
@@ -812,9 +703,6 @@ void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
 
     RgbcctColor GetRandomColour(RgbcctColor colour1, RgbcctColor colour2);
     HsbColor GetHSBColour();
-    uint32_t WebColorFromColourMap(uint8_t i);
-    // uint32_t WebColorFromColourType(RgbwColor rgb);
-    uint32_t WebColorFromColourType(RgbColor rgb);
 
     RgbcctColor Color32bit2RgbColour(uint32_t colour32bit);
 
@@ -862,28 +750,7 @@ void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
     };
     #endif
 
-    
-// void CommandSet_ColourTemp(uint16_t ct)
-// {
   
-//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
-//   // #endif //#ifdef ENABLE_LOG_LEVEL_COMMANDS
-
-// /* Color Temperature (https://developers.meethue.com/documentation/core-concepts)
-//  * ct = 153 = 6500K = Cold = CCWW = FF00
-//  * ct = 600 = 2000K = Warm = CCWW = 00FF  */
-//   // don't set CT if not supported
-//   if ((_LST_COLDWARM != _subtype) && (_LST_RGBCW != _subtype)) {
-//     return;
-//   }
-//   changeCTB(ct, getBriCT());
-// }
-
-
-
-
-
     uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
       return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
     }
@@ -952,266 +819,3 @@ private:
 #endif
 
 #endif
-
-
-
-
-// // #ifdef USE_LIGHT
-// /*********************************************************************************************\
-//  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
-//  *
-//  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
-//  * ----------  ---------  -----  ---------  ----------------------------
-//  *  0          -                 no         (Sonoff Basic)
-//  *  1          PWM1       W      no         (Sonoff BN-SZ)
-//  *  2          PWM2       CW     yes        (Sonoff Led)
-//  *  3          PWM3       RGB    no         (H801, MagicHome and Arilux LC01)
-//  *  4          PWM4       RGBW   no         (H801, MagicHome and Arilux)
-//  *  5          PWM5       RGBCW  yes        (H801, Arilux LC11)
-//  *  9          reserved          no
-//  * 10          reserved          yes
-//  * 11          +WS2812    RGB    no         (One WS2812 RGB or RGBW ledstrip)
-//  * 12          AiLight    RGBW   no
-//  * 13          Sonoff B1  RGBCW  yes
-//  *
-//  * light_scheme  WS2812  3+ Colors  1+2 Colors  Effect
-//  * ------------  ------  ---------  ----------  -----------------
-//  *  0            yes     yes        yes         Color On/Off
-//  *  1            yes     yes        yes         Wakeup light
-//  *  2            yes     yes        no          Color cycle RGB
-//  *  3            yes     yes        no          Color cycle RBG
-//  *  4            yes     yes        no          Random RGB colors
-//  *  5            yes     no         no          Clock
-//  *  6            yes     no         no          Incandescent
-//  *  7            yes     no         no          RGB
-//  *  8            yes     no         no          Christmas
-//  *  9            yes     no         no          Hanukkah
-//  * 10            yes     no         no          Kwanzaa
-//  * 11            yes     no         no          Rainbow
-//  * 12            yes     no         no          Fire
-//  *
-// \*********************************************************************************************/
-
-// /*********************************************************************************************\
-//  *
-//  * Light management has been refactored to provide a cleaner class-based interface.
-//  * Also, now all values are stored as integer, no more floats that could generate
-//  * rounding errors.
-//  *
-//  * Two singletons are now used to control the state of the light.
-//  *  - light_state (LightStateClass) stores the color / white temperature and
-//  *    brightness. Use this object to READ only.
-//  *  - light_controller (LightControllerClass) is used to change light state
-//  *    and adjust all Settings and levels accordingly.
-//  *    Always use this object to change light status.
-//  *
-//  * As there have been lots of changes in light control, here is a summary out
-//  * the whole flow from setting colors to drving the PMW pins.
-//  *
-//  * 1.  To change colors, always use 'light_controller' object.
-//  *     'light_state' is only to be used to read current state.
-//  *  .a For color bulbs, set color via changeRGB() or changeHS() for Hue/Sat.
-//  *     Set the overall brightness changeBri(0..255) or changeDimmer(0..100%)
-//  *     RGB and Hue/Sat are always kept in sync. Internally, RGB are stored at
-//  *     full range (max brightness) so that when you reduce brightness and
-//  *     raise it back again, colors don't change due to rounding errors.
-//  *  .b For white bulbs with Cold/Warm colortone, use changeCW() or changeCT()
-//  *     to change color-tone. Set overall brightness separately.
-//  *     Color-tone temperature can range from 153 (Cold) to 500 (Warm).
-//  *     SetOption82 can expand the rendering from 200-380 due to Alexa reduced range.
-//  *     CW channels are stored at full brightness to avoid rounding errors.
-//  *  .c Alternatively, you can set all 5 channels at once with changeChannels(),
-//  *     in this case it will also set the corresponding brightness.
-//  *
-//  * 2.a After any change, the Settings object is updated so that changes
-//  *     survive a reboot and can be stored in flash - in saveSettings()
-//  *  .b Actual channel values are computed from RGB or CT combined with brightness.
-//  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
-//  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-//  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
-//  *     1 channel  - 0:Brightness
-//  *     2 channels - 0:Coldwhite 1:Warmwhite
-//  *     3 channels - 0:Red 1:Green 2:Blue
-//  *     4 chennels - 0:Red 1:Green 2:Blue 3:White
-//  *     5 chennels - 0:Red 1:Green 2:Blue 3:ColdWhite 4:Warmwhite
-//  *
-//  * 3.  In LightAnimate(), final PWM values are computed at next tick.
-//  *  .a If color did not change since last tick - ignore.
-//  *  .b Extend resolution from 8 bits to 10 bits, which makes a significant
-//  *     difference when applying gamma correction at low brightness.
-//  *  .c Apply Gamma Correction if LedTable==1 (by default).
-//  *     Gamma Correction uses an adaptative resolution table from 11 to 8 bits.
-//  *  .d For Warm/Cold-white channels, Gamma correction is calculated in combined mode.
-//  *     Ie. total white brightness (C+W) is used for Gamma correction and gives
-//  *     the overall light power required. Then this light power is split among
-//  *     Wamr/Cold channels.
-//  *  .e Gamma correction is still applied to 8 bits channels for compatibility
-//  *     with other non-PMW modules.
-//  *  .f Apply color balance correction from rgbwwTable[].
-//  *     Note: correction is done after Gamma correction, it is meant
-//  *     to adjust leds with different power
-//  *  .g If rgbwwTable[4] is zero, blend RGB with White and adjust the level of
-//  *     White channel according to rgbwwTable[3]
-//  *  .h Scale ranges from 10 bits to 0..PWMRange (by default 1023) so no change
-//  *     by default.
-//  *  .i Apply port remapping from Option37
-//  *  .j Invert PWM value if port is of type PMWxi instead of PMWx
-//  *  .k Apply PWM value with analogWrite() - if pin is configured
-//  *
-// \*********************************************************************************************/
-
-// // #ifdef USE_LIGHT
-// /*********************************************************************************************\
-//  * PWM, WS2812, Sonoff B1, AiLight, Sonoff Led and BN-SZ01, H801, MagicHome and Arilux
-//  *
-//  * Settings.light_settings.type  Module     Color  ColorTemp  Modules
-//  * ----------  ---------  -----  ---------  ----------------------------
-//  *  0          -                 no         (Sonoff Basic)
-//  *  1          PWM1       W      no         (Sonoff BN-SZ)
-//  *  2          PWM2       CW     yes        (Sonoff Led)
-//  *  3          PWM3       RGB    no         (H801, MagicHome and Arilux LC01)
-//  *  4          PWM4       RGBW   no         (H801, MagicHome and Arilux)
-//  *  5          PWM5       RGBCW  yes        (H801, Arilux LC11)
-//  *  9          reserved          no
-//  * 10          reserved          yes
-//  * 11          +WS2812    RGB    no         (One WS2812 RGB or RGBW ledstrip)
-//  * 12          AiLight    RGBW   no
-//  * 13          Sonoff B1  RGBCW  yes
-//  *
-//  * light_scheme  WS2812  3+ Colors  1+2 Colors  Effect
-//  * ------------  ------  ---------  ----------  -----------------
-//  *  0            yes     yes        yes         Color On/Off
-//  *  1            yes     yes        yes         Wakeup light
-//  *  2            yes     yes        no          Color cycle RGB
-//  *  3            yes     yes        no          Color cycle RBG
-//  *  4            yes     yes        no          Random RGB colors
-//  *  5            yes     no         no          Clock
-//  *  6            yes     no         no          Incandescent
-//  *  7            yes     no         no          RGB
-//  *  8            yes     no         no          Christmas
-//  *  9            yes     no         no          Hanukkah
-//  * 10            yes     no         no          Kwanzaa
-//  * 11            yes     no         no          Rainbow
-//  * 12            yes     no         no          Fire
-//  *
-// \*********************************************************************************************/
-
-// /*********************************************************************************************\
-//  *
-//  * Light management has been refactored to provide a cleaner class-based interface.
-//  * Also, now all values are stored as integer, no more floats that could generate
-//  * rounding errors.
-//  *
-//  * Two singletons are now used to control the state of the 
-//  *  - light_state (LightStateClass) stores the color / white temperature and
-//  *    brightness. Use this object to READ only.
-//  *  - light_controller (LightControllerClass) is used to change light state
-//  *    and adjust all Settings and levels accordingly.
-//  *    Always use this object to change light status.
-//  *
-//  * As there have been lots of changes in light control, here is a summary out
-//  * the whole flow from setting colors to drving the PMW pins.
-//  *
-//  * 1.  To change colors, always use 'light_controller' object.
-//  *     'light_state' is only to be used to read current state.
-//  *  .a For color bulbs, set color via changeRGB() or changeHS() for Hue/Sat.
-//  *     Set the overall brightness changeBri(0..255) or changeDimmer(0..100%)
-//  *     RGB and Hue/Sat are always kept in sync. Internally, RGB are stored at
-//  *     full range (max brightness) so that when you reduce brightness and
-//  *     raise it back again, colors don't change due to rounding errors.
-//  *  .b For white bulbs with Cold/Warm colortone, use changeCW() or changeCT()
-//  *     to change color-tone. Set overall brightness separately.
-//  *     Color-tone temperature can range from 153 (Cold) to 500 (Warm).
-//  *     SetOption82 can expand the rendering from 200-380 due to Alexa reduced range.
-//  *     CW channels are stored at full brightness to avoid rounding errors.
-//  *  .c Alternatively, you can set all 5 channels at once with changeChannels(),
-//  *     in this case it will also set the corresponding brightness.
-//  *
-//  * 2.a After any change, the Settings object is updated so that changes
-//  *     survive a reboot and can be stored in flash - in saveSettings()
-//  *  .b Actual channel values are computed from RGB or CT combined with brightness.
-//  *     Range is still 0..255 (8 bits) - in getActualRGBCW()
-//  *  .c The 5 internal channels RGBWC are mapped to the actual channels supported
-//  *     by the Settings.light_settings.type: in UpdateFinalColourComponents()
-//  *     1 channel  - 0:Brightness
-//  *     2 channels - 0:Coldwhite 1:Warmwhite
-//  *     3 channels - 0:Red 1:Green 2:Blue
-//  *     4 chennels - 0:Red 1:Green 2:Blue 3:White
-//  *     5 chennels - 0:Red 1:Green 2:Blue 3:ColdWhite 4:Warmwhite
-//  *
-//  * 3.  In LightAnimate(), final PWM values are computed at next tick.
-//  *  .a If color did not change since last tick - ignore.
-//  *  .b Extend resolution from 8 bits to 10 bits, which makes a significant
-//  *     difference when applying gamma correction at low brightness.
-//  *  .c Apply Gamma Correction if LedTable==1 (by default).
-//  *     Gamma Correction uses an adaptative resolution table from 11 to 8 bits.
-//  *  .d For Warm/Cold-white channels, Gamma correction is calculated in combined mode.
-//  *     Ie. total white brightness (C+W) is used for Gamma correction and gives
-//  *     the overall light power required. Then this light power is split among
-//  *     Wamr/Cold channels.
-//  *  .e Gamma correction is still applied to 8 bits channels for compatibility
-//  *     with other non-PMW modules.
-//  *  .f Apply color balance correction from rgbwwTable[].
-//  *     Note: correction is done after Gamma correction, it is meant
-//  *     to adjust leds with different power
-//  *  .g If rgbwwTable[4] is zero, blend RGB with White and adjust the level of
-//  *     White channel according to rgbwwTable[3]
-//  *  .h Scale ranges from 10 bits to 0..PWMRange (by default 1023) so no change
-//  *     by default.
-//  *  .i Apply port remapping from Option37
-//  *  .j Invert PWM value if port is of type PMWxi instead of PMWx
-//  *  .k Apply PWM value with analogWrite() - if pin is configured
-//  *
-// \*********************************************************************************************/
-
-
-
-// //
-// // LightStateClass
-// // This class is an abstraction of the current light state.
-// // It allows for b/w, full colors, or white colortone
-// //
-// // This class has 2 independant slots
-// // 1/ Brightness 0.255, dimmer controls both RGB and WC (warm-cold)
-// // 1/ RGB and Hue/Sat - always kept in sync and stored at full brightness,
-// //    i.e. R G or B are 255
-// //    briRGB specifies the brightness for the RGB slot.
-// //    If Brightness is 0, it is equivalent to Off (for compatibility)
-// //    Dimmer is Brightness converted to range 0..100
-// // 2/ White with colortone - or CW (Cold / Warm)
-// //    ct is 153..500 temperature (153=cold, 500=warm)
-// //    briCT specifies the brightness for white channel
-// //
-// // Dimmer (0.100) is automatically derived from brightness
-// //
-// // INVARIANTS:
-// // 1.  RGB components are always stored at full brightness and modulated with briRGB
-// //     ((R == 255) || (G == 255) || (B == 255))
-// // 2.  RGB and Hue/Sat are always kept in sync whether you use setRGB() or setHS()
-// // 3.  Warm/Cold white channels are always stored at full brightness
-// //     ((WW == 255) || (WC == 255))
-// // 4.  WC/WW and CT are always kept in sync.
-// //     Note: if you use setCT() then WC+WW == 255 (both channels are linked)
-// //     but if you use setCW() both channels can be set independantly
-// // 5.  If RGB or CT channels are deactivated, then corresponding brightness is zero
-// //     if (colot_tone == LCM_RGB) then briCT = 0
-// //     if (color_tone == LCM_CT)  then briRGB = 0
-// //     if (colot_tone == LCM_BOTH) then briRGB and briCT can have any values
-// //
-// // Note:  If you want the actual RGB, you need to multiply with Bri, or use getActualRGBCW()
-// // Note: all values are stored as unsigned integer, no floats.
-// // Note: you can query vaules from this singleton. But to change values,
-// //   use the LightController - changing this object will have no effect on actual 
-// //
-
-
-
-/**
-{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":120,"sat":100,"brt_rgb":5,"brt_cct":100}
-{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":20,"brt_cct":100,"time_ms":1000}
-{"SceneName":"PaletteSingle","ColourPalette":31,"brt_rgb":100,"brt_cct":100,"time_ms":1000}
-{"AnimationMode":"Scene","SceneName":"ColourSingle","hue":0,"sat":100,"cct_temp":600,"brt_rgb":100,"brt_cct":10,"time_ms":10000}
-{"AnimationMode":"Flasher","ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
-{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate":1},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
-{"AnimationMode":"Flasher","flasher":{"function":1},"transition":{"order":"Random","rate_ms":1000},"ColourPalette":1,"brt_rgb":100,"brt_cct":1,"time_ms":1000}
-*/

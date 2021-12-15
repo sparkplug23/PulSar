@@ -1,3 +1,0 @@
-#pragma once
-
-void SubTask_Flasher_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();

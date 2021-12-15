@@ -1531,6 +1531,7 @@
 #define D_JSON_DURATION_RAW "DurationRaw"
 #define D_JSON_ERROR "Error"
 #define D_JSON_EFFECTS "Effects"
+#define D_JSON_EFFECT "Effect"
 #define D_JSON_FUNCTION "Function"
 
 #define D_JSON_ENABLED "Enabled"

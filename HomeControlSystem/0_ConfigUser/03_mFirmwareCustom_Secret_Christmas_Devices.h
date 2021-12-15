@@ -24,7 +24,7 @@
  * Jacqueline and Paula, programmed to be exact, never change
  * nodemuc v3
  * */
-// #define DEVICE_RGBSTRING_CONTROLLER_STATIC_01
+// #define DEVICE_RGBSTRING_CONTROLLER_STATIC_PAULA_01
 //#define DEVICE_RGBSTRING_CONTROLLER_STATIC_JACQUELINE_01
 
 /**
@@ -107,7 +107,7 @@
    * Three types of animations, exclusive only
    * */
   #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   /**
@@ -201,7 +201,7 @@
    * Three types of animations, exclusive only
    * */
   #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   /**
@@ -347,7 +347,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
+  
   #define DISABLE_NETWORK
 
   #define SETTINGS_HOLDER 1
@@ -753,7 +753,7 @@
   /**
    * Three types of animations, exclusive only
    * */
-  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   // #define ENABLE_PIXEL_FUNCTION_MIXER // wait until december to fix this, as basic slow glow changes are enough for outside.
@@ -1082,7 +1082,7 @@
   /**
    * Three types of animations, exclusive only
    * */
-  // #define ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   /**

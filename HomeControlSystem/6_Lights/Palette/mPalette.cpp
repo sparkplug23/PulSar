@@ -1093,7 +1093,7 @@ RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t p
 
   if(
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
+  pCONT_iLight->animation
 #else
   pCONT_lAni->_segments[0]
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -1302,7 +1302,7 @@ const char* mPalette::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
   return GetPaletteFriendlyNameByID(
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
+  pCONT_iLight->animation
 #else
   pCONT_lAni->_segments[0]
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -1335,7 +1335,7 @@ const char* mPalette::GetPaletteName(char* buffer, uint8_t buflen){
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
   return GetPaletteFriendlyNameByID(
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
+  pCONT_iLight->animation
 #else
   pCONT_lAni->_segments[0]
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT

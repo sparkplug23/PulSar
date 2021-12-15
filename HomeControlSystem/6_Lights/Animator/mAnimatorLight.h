@@ -34,7 +34,18 @@
 #include "6_Lights/Palette/mPalette_Progmem.h"
 #include "6_Lights/Palette/mPalette.h"
 #include "mAnimatorLight_web.h"
-#include "6_Lights/Animator/EffectsWLED/Animations.h"
+
+#ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
+#include "6_Lights/Animator/EffectsWLEDConversion/Animations.h"
+#endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
+
+
+#ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+#define FASTLED_INTERNAL //remove annoying pragma messages
+#include "6_Lights/FastLED_Modified/FastLED.h"
+#endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+
+
 
 // #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -148,18 +159,10 @@ DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR;
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR;
 
-
-
-
 #include <functional>
-// #define ANIM_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned int)> callback
-// #define ANIM_CALLBACK_SIGNATURE std::function<void(const AnimationParam& param)> callback
-#define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
-// #define ANIM_FUNCTION_SIGNATURE std::function<void(const AnimationParam& param)> anim_function_callback
-#define ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE std::function<void()> anim_progress_mqtt_function_callback
-
-
-#define ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED std::function<void(const uint8_t segment_index, const AnimationParam& param)> anim_function_callback_indexed
+#define ANIM_FUNCTION_SIGNATURE                     std::function<void(const AnimationParam& param)>                              anim_function_callback
+#define ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE   std::function<void()>                                                         anim_progress_mqtt_function_callback
+#define ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED     std::function<void(const uint8_t segment_index, const AnimationParam& param)> anim_function_callback_indexed
 
 
 class mAnimatorLight :
@@ -172,7 +175,8 @@ class mAnimatorLight :
   public:
     mAnimatorLight(){};
     void Pre_Init(void);
-    void init(void);
+    void Init(void);
+    
     
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -186,6 +190,19 @@ class mAnimatorLight :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
 
+
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    int8_t Tasker_Web(uint8_t function);
+
+    void Settings_Load();
+    void Settings_Save();
+    void Settings_Default();
+    void Settings_Reset();
+
+    void parse_JSONCommand(JsonParserObject obj);
+    uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);
+      
+
     // Put settings at top of class from now on, use it for common settings
     struct SETTINGS{
       struct FLAGS{
@@ -195,6 +212,10 @@ class mAnimatorLight :
       }flags;
     }settings;
 
+    /**
+     * @brief To be changed into runtime methods
+     * 
+     */
     #if defined(ESP8266)
       #if defined(USE_WS28XX_METHOD_800KBPS)
         typedef Neo800KbpsMethod selectedNeoSpeedType;
@@ -228,13 +249,10 @@ class mAnimatorLight :
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
-    uint16_t animator_strip_size = ANIMATOR_SIZE_MAX; //allow variable control of size
-
     
-    void SetPixelColor(uint16_t indexPixel, RgbcctColor color);
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, uint8_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
     
-
     // what is stored for state is specific to the need, in this case, the colors.
     // Basically what ever you need inside the animation update function
     struct AnimationColours
@@ -244,16 +262,9 @@ class mAnimatorLight :
     };
     AnimationColours animation_colours[STRIP_SIZE_MAX];
 
-    void AnimUpdate_ShowStartingThenDesiredColors(const AnimationParam& param);
 
     void StartAnimation_AsAnimUpdateMemberFunction();
-    void AnimUpdateMemberFunction(const AnimationParam& param);
-    void AnimationProcess_TraditionalChasing(const AnimationParam& param);
-    void AnimationProcess_TraditionalChasing2(const AnimationParam& param);
-    void AnimationProcess_Generic_AnimationColour_LinearBlend(const AnimationParam& param);
     
-    void LoadMixerGroupByID(uint8_t id);
-
     
     void Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
                                       RgbcctColor colour_circumference, 
@@ -281,56 +292,7 @@ class mAnimatorLight :
                                       bool values_are_percentage_of_strip_size = false
     );
     
-    void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
-
-    ANIM_FUNCTION_SIGNATURE;
-    mAnimatorLight& setAnimFunctionCallback(ANIM_FUNCTION_SIGNATURE);
-
-    
-
-    void RotateDesiredColour(uint8_t pixels, uint8_t direction = 0);
-    void UpdateStartingColourWithGetPixel();
-    void UpdateDesiredColourWithGetPixel();
-    void Segments_UpdateStartingColourWithGetPixel();
-    
-
-    void init_flasher_settings();
-    uint16_t SetLEDOutAmountByPercentage(uint8_t percentage);
-    void ShowStatusViaPixels(uint8_t mode);      
-
-
-    uint8_t fPixelsUpdated = false;
-    uint8_t update_all = false;
-    uint8_t blocking_force_animate_to_complete = true;
-    uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
-    uint16_t setpixel_variable_index_counter = 0;
-    
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    int8_t Tasker_Web(uint8_t function);
-
-
-    void parse_JSONCommand(JsonParserObject obj);
-      
-    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-void CommandSet_Flasher_FunctionID(uint8_t value);
-      void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value);
-      void CommandSet_Flasher_Flags_Movement_Direction(uint8_t value);
-      void CommandSet_Flasher_Alternate_Brightness_Min(uint8_t value);
-      void CommandSet_Flasher_Alternate_Brightness_Max(uint8_t value);
-      void CommandSet_Flasher_Alternate_RandomAmountPercentage(uint8_t value);
-      void CommandSet_Flasher_Flags_ApplySaturationRandomnessOnPaletteColours(uint8_t value);
-      void CommandSet_Brightness_Min(uint8_t value);
-      void CommandSet_Brightness_Max(uint8_t value);    
-    void CommandSet_Palette_Generation_Randomise_Brightness_Mode(uint8_t value);
-    
-    void CommandSet_EffectsModeID(uint8_t mode, uint8_t segment = 0);
-    const char* GetEffectsModeNamebyID(uint8_t id, char* buffer, uint8_t buflen);
-
-    void CommandSet_BrightnessRGB_Limits_Lower(uint8_t value);
-    void CommandSet_BrightnessRGB_Limits_Upper(uint8_t value);
-      
-    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
+    const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
 
     #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
     void CommandSet_PixelGrouping_Flag_AgedColouring(uint8_t value);
@@ -341,37 +303,65 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
     #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
     
+    #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+        void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
+        
+      // totally random, or random but not repeating
+      enum TRANSITION_ORDER_RANDOM_METHOD_IDS{
+        TRANSITION_ORDER_RANDOM_METHOD_REPEATING = 0,
+        TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE,
+        TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING
+      };
+      uint8_t transition_order_random_type = TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE;
+   
+      uint8_t update_all = false;
+      uint32_t tSavedBlocking_ForceAnimateToComplete = millis();
+      uint16_t setpixel_variable_index_counter = 0;  
+      uint32_t tSavedUpdateRGBString;
+      uint8_t first_set;
+      uint16_t rotate_start_index = 0;
+      uint16_t LEDp, LEDe,             desired_pixel;  // PHASE OUT!
 
-    void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
+      void AnimUpdate_ShowStartingThenDesiredColors(const AnimationParam& param);
+      void AnimUpdateMemberFunction(const AnimationParam& param);
+      void AnimationProcess_TraditionalChasing(const AnimationParam& param);
+      void AnimationProcess_TraditionalChasing2(const AnimationParam& param);
+      void DesiredColourWrite_Safe(RgbcctColor colour, uint16_t index);
+      
+      void StartAnimationAsBlendFromStartingColorToDesiredColor(void);
+      void StartAnimationAsSwitchingFromStartingColorToDesiredColor();
 
-    const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
+      void WebPage_Root_AddHandlers();
+      void WebPage_Root_SendInformationModule();
+      void WebAppend_JSON_RootPage_LiveviewPixels();
+    
+     #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
 
-    uint32_t tSavedCheckAnyLEDsOnOff = 0;
+    /**
+     * @brief 
+     Confirmed as needed variables
+     * 
+     */
     uint16_t fAnyLEDsOnOffCount = 0;
+    uint8_t blocking_force_animate_to_complete = true;
+    uint8_t fPixelsUpdated = false;
+    uint16_t desired_pixel;
+    void EveryLoop();
+    void SetRefreshLEDs();    
+    void StripUpdate();
+    void SetPixelColor_All(RgbcctColor colour);
+
 
     /**
      * Make this definable, and or remove it, because it grows with pixel size and will waste memory
      * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
+     * WARNING! : Significant memory usage, needs changed to dynamic runtime
      * */
     struct LEDOUTPUTSETTINGS{
       uint16_t length = 0;
       uint16_t index = 0;
       uint16_t pattern[STRIP_SIZE_MAX];
-    }ledout;
-
-    // totally random, or random but not repeating
-    enum TRANSITION_ORDER_RANDOM_METHOD_IDS{
-      TRANSITION_ORDER_RANDOM_METHOD_REPEATING = 0,
-      TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE,
-      TRANSITION_ORDER_RANDOM_METHOD_NONREPEATING
-    };
-    uint8_t transition_order_random_type = TRANSITION_ORDER_RANDOM_METHOD_REPEATING_WITH_PERCENTAGE;
-    
-  
-    uint32_t tSavedUpdateRGBString;
-    uint8_t first_set;
-    uint16_t rotate_start_index = 0;
-    uint16_t LEDp, LEDe,             desired_pixel;  // PHASE OUT!
+    }ledout;    
     
 
     HsbColor GetColourFromMapUsingType(
@@ -380,33 +370,10 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
       uint16_t* total_hsbcolours_in_map, uint16_t* pixel_index_out, uint16_t* pixel_width_including_indexing //returns
     );
         
-    void ApplyBrightnesstoDesiredColour(uint8_t brightness);
 
     RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
-    RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
-
-
-    void Settings_Load();
-    void Settings_Save();
-    void Settings_Default();
-    void Settings_Reset();
-
-    void RefreshLEDIndexPattern();
-    void StripUpdate();
-
-    void StartAnimationAsBlendFromStartingColorToDesiredColor(void);
-    void StartAnimationAsSwitchingFromStartingColorToDesiredColor();
-
-    void UpdateDesiredColourFromPaletteSelected(void);
-    void TurnLEDsOff();
-    void EveryLoop();
-    void WebPage_Root_AddHandlers();
-    void WebPage_Root_SendInformationModule();
-    void SetRefreshLEDs();    
-    void GenerateAnimationPixelAmountMaps();
-    void WebAppend_JSON_RootPage_LiveviewPixels();
 
 
     #ifndef DISABLE_WEBSERVER
@@ -438,32 +405,31 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
 
 
 
-  struct POWER_RATING{
-    float Average_mA_Per_Pixel_Step = 0.0784; //  20/255    //MAKE PROGMEM
-    // uint8_t G_Channel_mA = 20;
-    // uint8_t B_Channel_mA = 20;
-    // uint8_t W_Channel_mA = 20;
-    float current_mA;
-    uint8_t power;
-  }power_rating;
+  #ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
+    struct POWER_RATING{
+      float Average_mA_Per_Pixel_Step = 0.0784; //  20/255    //MAKE PROGMEM
+      // uint8_t G_Channel_mA = 20;
+      // uint8_t B_Channel_mA = 20;
+      // uint8_t W_Channel_mA = 20;
+      float current_mA;
+      uint8_t power;
+    }power_rating;
 
-  template<typename T>
-  void swap(T& x, T& y)
-  {
-    T tmp = x;
-    x = y;
-    y = tmp;
-  }
+    template<typename T>
+    void swap(T& x, T& y)
+    {
+      T tmp = x;
+      x = y;
+      y = tmp;
+    }
 
-  timereached_t tSavedCalculatePowerUsage;
+    timereached_t tSavedCalculatePowerUsage;
+  #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
   #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-    void SubTask_Manual_SetPixel();
-    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
+  void SubTask_Manual_SetPixel();
+  uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
   #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-
-  void SetPixelColor_All(RgbcctColor colour);
-
 
   uint8_t ConstructJSON_Settings(uint8_t json_level = 0);
   uint8_t ConstructJSON_Animation(uint8_t json_level = 0);
@@ -484,12 +450,9 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
-    
+    void MQTTHandler_Set_TelePeriod();  
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
   
-    struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;
-
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
@@ -509,6 +472,7 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
+    struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;
     struct handler<mAnimatorLight> mqtthandler_animation_teleperiod;  
     struct handler<mAnimatorLight> mqtthandler_ambilight_teleperiod;
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
@@ -579,151 +543,9 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
 *****************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
-
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-
-  enum EFFECTS_FUNCTION_MIXER{
-    EFFECTS_FUNCTION_MIXER_01_ID=0,
-    // EFFECTS_FUNCTION_MIXER_02_ID,
-    // EFFECTS_FUNCTION_MIXER_03_ID,
-    // EFFECTS_FUNCTION_MIXER_04_ID,
-    // EFFECTS_FUNCTION_MIXER_05_ID,
-    // EFFECTS_FUNCTION_MIXER_06_ID,
-    // EFFECTS_FUNCTION_MIXER_07_ID,
-    // EFFECTS_FUNCTION_MIXER_08_ID,
-    // EFFECTS_FUNCTION_MIXER_09_ID,
-    // EFFECTS_FUNCTION_MIXER_10_ID,
-    // EFFECTS_FUNCTION_MIXER_11_ID,
-    // EFFECTS_FUNCTION_MIXER_12_ID,
-    // EFFECTS_FUNCTION_MIXER_13_ID,
-    // EFFECTS_FUNCTION_MIXER_14_ID, 
-    // EFFECTS_FUNCTION_MIXER_15_ID, 
-    EFFECTS_FUNCTION_MIXER_LENGTH_ID
-  };
-  #define EFFECTS_FUNCTION_MIXER_MAX EFFECTS_FUNCTION_MIXER_LENGTH_ID
-  // #define MIXER_GROUP_MAX 7
-
-  
-  typedef union {
-    uint16_t data; // allows full manipulating
-    struct { 
-      // enable animations (pause)
-      uint16_t Enabled : 1;
-      /**
-       * 0 - None
-       * 1 - Basic multiplier
-       * 2 - Using mapped index array 
-      */
-      // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
-      // uint16_t mapped_array_editable_or_progmem : 1;
-
-      
-
-
-    };
-  } MIXER_SETTINGS_FLAGS;
-
-   typedef union {
-    uint16_t data; // allows full manipulating
-    struct { 
-      // enable animations (pause)
-      uint16_t Enabled : 1;
-      /**
-       * 0 - None
-       * 1 - Basic multiplier
-       * 2 - Using mapped index array 
-      */
-      // uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
-      // uint16_t mapped_array_editable_or_progmem : 1;
-      
-      uint16_t enable_force_preset_brightness_scaler : 1; // to allow manual brightness leveling
-
-
-/**
- * Any mixer setting that needed this, should probably just becomes its own animation, and hence just a different animation mode will be chosen
- * "Mixer" should be distilled down to ONLY picking animation, setting brightness, intensities etc
- * 
- * */
-      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
-      uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
-
-
-
-    };
-  } MIXER_SETTINGS_GROUP_FLAGS;
-  
-
-  struct MIXER_SETTINGS{
-   // #ifdef DEVICE_OUTSIDETREE
-    struct MODE{
-      uint8_t running_id = EFFECTS_FUNCTION_MIXER_01_ID;
-      uint16_t time_on_secs[EFFECTS_FUNCTION_MIXER_MAX]; // stores which to use
-      int16_t time_on_secs_active = 60; //signed
-      // char running_friendly_name_ctr[40];
-      struct TIMES{
-       // uint16_t enable_skip_restricted_by_time[EFFECTS_FUNCTION_MIXER_MAX]; // if set, this mode will only run if INSIDE the "flashy" time period
-        struct time_short flashing_starttime; //shortime
-        struct time_short flashing_endtime;
-        uint8_t skip_restricted_by_time_isactive = 0;
-      }times;
-    }mode; //active 
-    // #endif
-    
-    // uint32_t tSavedMillisToChangeAt = 0;
-    uint32_t tSavedTrigger = millis();
-    // uint32_t tSavedRestart = millis();
-    // uint8_t enabled = false;
-    // uint8_t time_scaler = 6;
-    // uint32_t tSavedSendData;
-    uint8_t enabled_mixer_count = 0; // 10 max
-
-    // Shared loaded values to act on
-    uint8_t brightness_lower_255 = 0;
-    uint8_t brightness_higher_255 = 255;
-
-    MIXER_SETTINGS_FLAGS flags;
-
-
-    //int16_t time_on_secs_active = 10; //signed
-    // char running_friendly_name_ctr[100];
-    uint8_t running_id = EFFECTS_FUNCTION_MIXER_01_ID;
-    uint8_t run_time_duration_scaler_as_percentage = 100; // for debugging, running faster
-      
-    struct GROUPS_SETTINGS{
-      int16_t time_on_secs_decounter = -1;
-      struct time_short starttime;
-      struct time_short endtime;
-      uint8_t enable_skip_restricted_by_time = 0;
-      uint8_t isenabled = true;
-
-      uint8_t ifenabled_forced_brightness_level_percentage = 100;
-      int8_t pixels_to_update_as_percentage = 10;//-1; // -1 disables, ie ALL
-
-      struct TRANSITION{
-        uint16_t time = 0;
-        uint16_t rate = 0;
-        uint8_t  time_unit_id = 0; // secs vs ms
-      }transition;
-
-      uint8_t brightness_lower_255 = 0;
-      uint8_t brightness_higher_255 = 255;
-
-      uint8_t animation_transition_order = 0;//TRANSITION_ORDER_INORDER_ID;
-      uint8_t flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-      uint16_t run_time_duration_sec = 120;
-      uint8_t palette_id = 0;
-
-      uint8_t pixel_multiplier_id = 0;//PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
-      uint8_t pixel_multiplier_enabled = false;
-
-      MIXER_SETTINGS_GROUP_FLAGS flags;
-
-    }group[EFFECTS_FUNCTION_MIXER_MAX];
-
-  }mixer;
-
-  void init_mixer_defaults();
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
+#ifdef ENABLE_PIXEL_FUNCTION_MIXER
+#include "mAnimatorLight_Mixer.h"
+#endif
 
 /*********************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
@@ -735,7 +557,9 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 *** Animation Effect:   Notifications   ***************************************************************************************************************************************************************************
-**  @note:     **************************************************************************************************************************************************************************
+**  @note:     This is highly specialised effect, and will unlikely ever run next to "animated segment effect"
+               It makes sense to keep this as its own effect type
+**************************************************************************************************************************************************************************
 **************************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
@@ -743,11 +567,11 @@ void CommandSet_Flasher_FunctionID(uint8_t value);
 **********************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
-
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   #ifndef STRIP_NOTIFICATION_SIZE
     #define STRIP_NOTIFICATION_SIZE (STRIP_SIZE_MAX>12?12:STRIP_SIZE_MAX) // Set max if not defined as 20
   #endif
+    RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
 
   void init_Notifications();
   void SubTask_Notifications();
@@ -897,12 +721,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   uint32_t tSavedUpdate = millis();
   uint32_t ratemsSavedUpdate = 1000;
   uint8_t fUpdate = false;
-  
-  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
-  //mInterfaceLight::LightTypes_IDS light_type = LT_ADDRESSABLE;
-
-
-
   struct SCREENS{
     struct EDGE{
       RgbcctColor colour;
@@ -941,687 +759,29 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 
 
   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  const char* GetFlasherFunctionName(char* buffer, uint8_t buflen);
-  const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen);
-  int8_t      GetFlasherFunctionIDbyName(const char* c);
+  #include "EffectsHACS/HACS_mAnimatorLight_PhaseOut.h"
+  #endif
 
-  /**
-   * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
-   * */
-  enum EFFECTS_FUNCTION_IDS{
-    /**
-     * Default
-     * Desc: Same colour across all pixels.
-     * Param: palette (will always use index 0 colour regardless of palette length)
-     * */
-    EFFECTS_FUNCTION_SOLID_COLOUR_ID,
-    /**
-     * Desc: Using EFFECTS_FUNCTION_SLOW_GLOW_ID, with pixel order set to "inorder"
-     *       Each sequential pixel will repeat the palette if type is list, if gradient, then palette is linear blended across output
-     * Parameters: Palette, time to blend, rate of new colours, percentage of new colours changed
-     * */
-    EFFECTS_FUNCTION_STATIC_PALETTE_ID,
-    /**
-     * Desc: Random change of colours (pixel order is random)
-     *       Pixel elements randomly select colour from palette, then slowly blend those pixels to the new colour
-     * Parameters: 
-     *    Palette = Pick colours to chose from
-     *    Transition time = blend time between last and new colours
-     *    Transition rate = time between new colours are selected
-     *    Percentage of change = Number of new colours to change this time (eg 10% of total count will randomly change)
-     * */
-    EFFECTS_FUNCTION_SLOW_GLOW_ID,
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * */
-    EFFECTS_FUNCTION_SEQUENTIAL_ID,
-    /**
-     * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
-     *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
-     * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
-     * TODO: Add size of step as percentage ie to show 50% of 4 colours would be 2 of 4, 75% of 4 is 3
-     * */
-    EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID,
-    /**
-     * Desc: Twinkle on, fade off
-     *      Random burst of pixels are turned on based on palette, then fade off
-     * 
-     * Method: randomly pick burst of pixels to turn on, ie animation period starts of Y, then decays (thereby increasing next run time)
-     *         Do this until X pixels (animation periods) have occured,
-     *         Every 1 second of animation that elapses, half the brightness of all pixels (ie the fade)
-     *         Intensity1: will dictate how many pixels are turned on
-     *         Intensity2: may dictate the decay rate (ie much slower would leave pixels on for longer meaning more of the lights remain on) 
-     * NotActive
-     * EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID
-     * */
-    EFFECTS_FUNCTION_TWINKLE_RANDOM_BURSTS_ON_WITH_SLOW_FADE_OFF_ID,
-    /**
-     * Palette is first drawn with certain lower brightness level, then
-     * additional changes takes those colours and bumbs their brightness up to desired brightness
-     * Few change, random pixels bumped up
-     * Check if their brightness is <upper, before asserting them brighter (or convert to hsbcolour, flick up brightness if needed then change back to rgb)
-     * Goes from low to high then stops
-     * */
-    EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY,
-    /**
-     * Desc: Twinkle
-     *  Random pixels will turn off for random times (ie apply inorder palette always, then random turn colours to off and on(brightness) again)
-     * */
-
-    /**
-     * Desc: Twinkle with glimmer
-     *  Twinkle as above, but the entire global brightness will flicker gently (so limit how much) based on pixels energy count ie twinkle filament lights
-     * */
-
-    /**
-     * 0/100% animaiton progress is low brightness, 50% flips to upper brightness
-     * ie randomly change pixels between two brightness levels, with optional boundaries only or as range
-    */
-    EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK,
-
-    /**
-     *  Instead of just applying new colours, also randomise the brightness levels between range
-     * */
-    EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID,
-
-    /**
-     * Desc: randomly slow glow with triangular brightness between colours
-     * Or, so at 50% transition, the new colour is at 100%, with 100% brightness, then fade brightness back down to lower_global brightness
-     * So, pixel red (50%) changing to pixel blue, would go red to blue (bright 100%) then fade down brightness 50%
-     * Optional, could also be non-equal triangle ie have value for peak of traingle, so 20% would mean 0.2 seconds flash to new colour then slowly decay (0.8 seconds) to new brightness
-     * */
-    // EFECT
-
-    /**
-     * Fire animations
-     * rename from fireplace to another name, simply fire
-     * */
-
-     EFFECTS_FUNCTION_FIREPLACE_1D_01_ID, // solid colours, 1 100%, moving from previous to next
-
-    /******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Specialised: Matric 3D Animations (with MxN pixel grid) ***************************************************************************************************************************************************************************
-    **  Requires:     **************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-
-
-    // EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,   
-   
-    /******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Specialised: Sun positions to control animation***************************************************************************************************************************************************************************
-    **  Requires:    Internet to know time and location for sun calculations **************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-    //linear palette group colour, changing by triggered and over a period of time (eg an alarm -30 minutes)
-    EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01, //group01? bring all together, have settings to configure how the effect runs
-    //linear palettes group colour, enabled by a time window, but sets linear gradient by sun azimuth
-    EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_01, //this is elevation only
-    //enabled by a time window, GENERATE manually, brightness by sun elevaltion, sun position from left to right by azimuth
-    //far left = east from position, and far right = wast from position using sunset position
-    EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
-    EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
-
-    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID,
-    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID,
-    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID, // Using stored rgbcct palette
-    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID, // Using stored rgbcct palette
-    EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID, // CCT only, mapped directly, no palette
-    
-    /**
-     * Eleveation controls that use rgbcct palette (that has elevation in its index byte) to display solid colour only
-     * */
-    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID,
-    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID,
-
-    /**
-     * Elevation controls the CCT channels only
-     **/
-    EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID,
-
-
-    // palette to step through, which gives single colour sun
-    EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
-    //enabled CCT by azimuth 
-    EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_SUN_ELEVATION_01,
-
-    /******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Specialised: RGB Segment Clock  ***************************************************************************************************************************************************************************
-    **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-    EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID,
-    EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID,
-    EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID, // show number commanded via mqtt
-
-
-    // /******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // *** Specialised: RGB Segment Clock  ***************************************************************************************************************************************************************************
-    // **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************/
-
-
-    // // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
-    // EFFECTS_FUNCTION_PULSE_SINE_WAVE_BRIGHTNESS, //pul
-    // // The one when applybrightness was broke
-    // // done by applying new cl/brightness to some, then each call reducing the colour crushing it
-    // //do with percent to show on at one time
-    // EFFECTS_FUNCTION_PULSE_RANDOM_ON, 
-    // EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID,
-    
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
-    // EFFECTS_FUNCTION_FADE_GRADIENT_ID, //single pixels: static, twinkle, pick from palette
-    // //another flash to "off" or simple set flash colour to off??
-    // EFFECTS_FUNCTION_FLASH_GLIMMER_RANDOM_ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
-    /**
-     * Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
-     * */
-    // EFFECTS_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID,
-    /**
-     * Sun positional effects
-     */
-    // New with solarlunar
-
-
-    /**
-     * Christmas Controller Effects: 6 (without static) that replicate christmas lights
-     * Note: This will take several extra forms, as I will want fading of those lights with the animations, some lights are instant
-     * Also, I might keep 5 lights static and apply the pattern by turned off bulbs like real lights 
-     * 8 different control settings
-
-      make special christmas ones that apply this over a group, ie single red, green, blue,pink light would instead be a sine wave of brightness (including into)
-
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), with an "off" section in between
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), BUT "off" section in between IS INSTEAD INVERTING WITH ON SECTION
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), but no off section, instead it blends evening between the two colours with varying blend weights (ie even blend, or only 10% of pixel length blend of each colour group)
-
-    EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-
-
-     * */
-
-    /**
-     * Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
-     *
-      1 - Combination (ommited, can be performed using mixer)
-      2 - In Waves
-      3 - Sequentials
-      4 - Slo-Glo
-      5 - Chasing / Flash
-      6 - Slow Fade
-      7 - Twinkle / Flash
-      8 - Steady on (already added)
-     * */
-    // EFFECTS_FUNCTION_XMAS_IN_WAVES_ID
-    // EFFECTS_FUNCTION_XMAS_SEQUENTIAL_ID
-    // EFFECTS_FUNCTION_XMAS_SLO_GLO_ID
-    // EFFECTS_FUNCTION_XMAS_CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION_XMAS_SLOW_FADE_ID
-    // EFFECTS_FUNCTION_XMAS_TWINKLE_AND_FLASH_ID
-
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-
-
-    /**
-     * Development methods
-     * */
-
-    /**
-     * Functional methods of sunrise
-     * EFFECTS_FUNCTION_SUNPOSITIONS_<SOLIDCOLOUR/2D_ARRAY>
-     * */
-    //create a palette to leave on ALL the time, ie deep red at night instead of blue... testing for the clocks later I guess
-
-    /**
-     * Not currently working
-     * */
-    /**
-     * Clock animations for 3d printed display
-     **/
-
-    /**
-     * Create special musical christmas lights, that will only be available on esp32 with a speaker (larger RAM)
-     * */
-
-    /**
-     * Designing and quick test of animations before creating its own animaiton profile
-     * */
-    EFFECTS_FUNCTION_TESTER_ID,
-    // Length
-    EFFECTS_FUNCTION_LENGTH_ID
-  };         
-
-  //https://www.youtube.com/watch?v=D2IBGlDJ3lg @2.50
-
-
-  // Make generate function with lots of mapped values, with percentage 0 to 255 to retrieve it
-
-  void SubTask_Effects_PhaseOut();
-  void SubTask_Flasher_Animate();
-  void SubTask_Flasher_Animate_Mixer();    
-
-  void AnimationProcess_Generic_RGBCCT_Single_Colour_All(const AnimationParam& param);
-    
-
-  struct AnimationColours_SOLID_COLOUR
-  {
-    RgbcctColor StartingColor;
-    RgbcctColor DesiredColour;
-  };
-  AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
-
-
-  /**
-   * This will be moved into wled segments runtime. 
-   * Its a byte buffer, that holds the animation settings of the active animation
-   * This is performed by segment_runtime allocate later
-   * */
-  // struct HACS_TEMPORARY_SEGMENT_RUNTIME_DATA_BUFFER
-  uint8_t hacs_animation_runtime_data_buffer[100] = {0};
-
-
-
-  
-
-
-
-
-/**
- * inline animation header includes
- * */
-#include "EffectsHACS/Slow_Glow/Animator.h"
-#include "EffectsHACS/Static_Glow/Animator.h"
-#include "EffectsHACS/Fireplace_1D_01/Animator.h"
-// #include "6_Lights/Animator/EffectsHACS/Sequential/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Pulser_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Pulser_02/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Twinkle_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Twinkle_02/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Pulse_Random_On_Fade_Off/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Popping_Palette_Brightness_From_Lower_To_Upper_Boundary/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Slow_Glow_Partial_Palette_Step_Through/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Rgbcct_Solid_Static_Colour/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Fade_Gradient_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Slow_Fade_Brightness_All/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Slow_Fade_Saturation_All/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Slow_Glow_On_Brightness/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Gradient_Alarm_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Gradient_Sun_Elevation_And_Azimuth_01/Animator.h"
-
-
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_02/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_03/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Solid_Colour_Based_On_Sun_Elevation_04/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_SolidColourElevation05/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Sun_Elevation_RGBCCT_Palette_Indexed_Positions_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_RgbcctPaletteElevationAugmented01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/SunPositions_Elevation_Only_Controlled_CCT_Temperature_01/Animator.h"
-#include "6_Lights/Animator/EffectsHACS/Development_Tester/Animator.h"
-
-
-
-
-
-
-void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
-void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
-void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
-
-
-  /**
-   * This is what needs converted to permitting "segments", and thus, the eventual inclusion of WLED directly 
-   * 
-   * The animator will need moved into here, and hence, each segment will need its own animator! (this is probably why wled wrote its own, instead, tighten up neopixel)
-   * 
-   * 
-   * */
-  
-  typedef union {
-    uint16_t data;
-    struct { 
-      // enable animations (pause)
-      uint16_t enable_random_rate : 1;
-      // used when internal timers or modes change and both need to execute the one time
-      uint16_t force_finish_flasher_pair_once : 1;
-      /* direction of animation
-      / 00(0) - clockwise
-      / 01(1) - anticlockwise
-      / 10(2) - edges towards center (flipped image)
-      / 11(3) - center towards edges (flipped image) */
-      uint16_t movement_direction : 2;
-
-      uint16_t enable_startcolour_as_alternate : 1;
-      uint16_t enable_endingcolour_as_alternate : 1;
-    
-      // Reserved
-      uint16_t reserved : 12;
-    };
-  } EFFECTSSETTINGS_FLAGS;
-  
-
-  // Segments runtime??
-  struct EFFECTSSETTINGS{
-    // Flashing function
-    uint8_t function = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
-    // Section of animation
-    uint8_t region = EFFECTS_REGION_COLOUR_SELECT_ID;
-    // flag needed to force completion between regions
-    uint8_t flag_finish_flasher_pair = false;
-
-    EFFECTSSETTINGS_FLAGS flags;
-
-    struct RANDOM_TRANSITIONS{
-      uint32_t rate_ms = 1000;
-      uint8_t upper_secs = 20;
-      uint8_t lower_secs = 1;
-      uint8_t array_index = 0;
-      uint8_t array_index_length = 0;
-      //uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
-      // uint8_t profile_id;
-      uint32_t tSavedNewSpeedUpdate = millis();
-    }random_transitions;
-    
-
-    struct UPDATE_COLOUR_GENERATION_REGION{
-      // 0 is not active, 
-      // 1 is everytime
-      // 2+ is seconds
-      uint16_t refresh_secs = 0; 
-      uint16_t refresh_decounter_secs = 10; 
-      uint32_t tSaved = millis();
-    }update_colour_region;
-    
-      uint8_t brightness_max = 255;
-      uint8_t brightness_min = 0;
-    struct TSAVED{
-      uint32_t Update = millis();
-      // uint32_t tSavedChange_animation_something;
-      //uint32_t Update2 = millis();
-    }tSaved;
-    
-  }flashersettings;
-  
-  int8_t GetFlasherRegionIDbyName(const char* c);
-  const char* GetFlasherRegionName(char* buffer);
-  const char* GetFlasherRegionNamebyID(uint8_t id, char* buffer); 
-  enum EFFECTSREGION{EFFECTS_REGION_COLOUR_SELECT_ID=1,
-                     EFFECTS_REGION_ANIMATE_ID};           
-
-  void UpdateStartingColourWithSingleColour(RgbcctColor colour);      
-  void UpdateDesiredColourWithSingleColour(RgbcctColor colour);   
-
-
-  enum RANDOM_TRANSITION_TIMINGS_PROFILES_IDS{
-    RANDOM_TRANSITION_TIMINGS_PROFILES_TRIANGLE_RAMP_ID=0,
-    RANDOM_TRANSITION_TIMINGS_PROFILES_EXPONENTIAL_HIGH_ID, //more on higher
-    RANDOM_TRANSITION_TIMINGS_PROFILES_EXPONENTIAL_LOW_ID,  //More on lower
-  };
-
-  
-    // #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 20
-    // // uint8_t mapped_array_data_array[15] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-    // uint8_t mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
-    //  = {
-    //   20,19, //39
-    //   15,16, //70
-    //   13,9, //92
-    //   7,1  //100
-    // };
-    
-
-  
-  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-    #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
-    uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
-    
-    typedef union {
-      uint16_t data; // allows full manipulating
-      struct { 
-        // enable animations (pause)
-        uint16_t fEnabled : 1;
-        /**
-         * 0 - None
-         * 1 - Basic multiplier
-         * 2 - Using mapped index array 
-        */
-        uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
-        uint16_t mapped_array_editable_or_progmem : 1;
-      };
-    } PIXEL_GROUPED_FLAGS;
-    
-    struct PIXEL_GROUPED{
-      uint8_t method_id = 0;
-      uint8_t multiplier = 5; // nearby pixels repeat colours
-      struct MAPPED_ARRAY_DATA{
-        uint16_t* values = nullptr;
-        uint8_t  index = 0;
-        uint8_t  length = 0;
-      }mapped_array_data;
-      PIXEL_GROUPED_FLAGS flags;
-    }pixel_group;
-  
-  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
-  
-
-  struct SHARED_EFFECTS_PARAMETERS{
-    // uint8_t alternate_brightness;
-    uint8_t alternate_brightness_min = 0; //set min and max to same to not use a range
-    uint8_t alternate_brightness_max = 255;
-    //flag use single bringhtess or range
-    uint8_t alternate_random_amount_as_percentage = 2;
-    /*
-    * Holds the last percentage animation was run on, to be checked in animupdates to make sure not to double change values
-    * ie anim.progress as float 0 to 1, in range 0 to 100 will repeat each integer value many times
-    * */
-    uint8_t progress_percentage_last_animated_on = 100;
-
-    struct INDEX_COUNTERS{
-      uint16_t lower_limit = 0;
-      uint16_t upper_limit = 0; 
-      uint16_t active = 0;
-      uint8_t counter = 0;
-
-
-    }indexes;
-
-
-  }shared_flasher_parameters;
-  
-
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-  
-/************************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Animation Effect:   WLED (Legacy)   ***************************************************************************************************************************************************************************
-**  @note:    WLED initial port, running as its own effect. To be phased out into Segments **************************************************************************************************************************************************************************
-*************************************************************************************************************************************************************************************
+/*************************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ***********************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** Animation Effect:   WLED Testing code   ***************************************************************************************************************************************************************************
+**  @note:    HACS animation, to be phased out into Segments **************************************************************************************************************************************************************************
+**************************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+**********************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
 
-                    
-//   // WLED functions I am merging, will use the 'ID' to select which animator to use, as I migrate between animator methods        
-//   enum EFFECTS_WLED_FUNCTION_IDS{
-//     EFFECTS_WLED_FUNCTION_01_ID = EFFECTS_FUNCTION_LENGTH_ID,
-// // Static
-//   FX_MODE_STATIC=0,
-//   FX_MODE_STATIC_PATTERN,
-//   FX_MODE_TRI_STATIC_PATTERN,
-//   FX_MODE_SPOTS,
-//   FX_MODE_PERCENT,
-//   // One colour changes
-//   FX_MODE_RANDOM_COLOR,
-//   // Wipe/Sweep/Runners 
-//   FX_MODE_COLOR_WIPE, 
-//   FX_MODE_COLOR_WIPE_RANDOM,
-//   FX_MODE_COLOR_SWEEP,
-//   FX_MODE_COLOR_SWEEP_RANDOM,
-//   FX_MODE_TRICOLOR_WIPE,
-//   FX_MODE_ANDROID,
-//   FX_MODE_RUNNING_RED_BLUE,
-//   FX_MODE_RUNNING_COLOR,
-//   FX_MODE_RUNNING_RANDOM,
-//   FX_MODE_GRADIENT,
-//   FX_MODE_LOADING,
-//   FX_MODE_POLICE,
-//   FX_MODE_POLICE_ALL,
-//   FX_MODE_TWO_DOTS,
-//   FX_MODE_TWO_AREAS,
-//   FX_MODE_MULTI_COMET,
-//   FX_MODE_OSCILLATE,
-//   FX_MODE_BPM,
-//   FX_MODE_JUGGLE,
-//   FX_MODE_PALETTE,
-//   FX_MODE_COLORWAVES,
-//   FX_MODE_LAKE,
-//   FX_MODE_GLITTER,
-//   FX_MODE_METEOR,
-//   FX_MODE_METEOR_SMOOTH,
-//   FX_MODE_PRIDE_2015,
-//   FX_MODE_RIPPLE_RAINBOW,
-//   FX_MODE_PACIFICA,
-//   FX_MODE_SUNRISE,
-//   FX_MODE_SINEWAVE,
-//   FX_MODE_FLOW,
-//   FX_MODE_PHASEDNOISE,
-//   FX_MODE_PHASED,
-//   FX_MODE_RUNNING_LIGHTS,
-//   FX_MODE_RAINBOW_CYCLE,
-//   FX_MODE_MERRY_CHRISTMAS,
-//   FX_MODE_HALLOWEEN,
-//   // Chase
-//   FX_MODE_CHASE_COLOR,
-//   FX_MODE_CHASE_RANDOM,
-//   FX_MODE_CHASE_RAINBOW, 
-//   FX_MODE_CHASE_FLASH,
-//   FX_MODE_CHASE_FLASH_RANDOM, 
-//   FX_MODE_CHASE_RAINBOW_WHITE,
-//   FX_MODE_THEATER_CHASE,
-//   FX_MODE_THEATER_CHASE_RAINBOW,
-//   FX_MODE_TRICOLOR_CHASE,
-//   FX_MODE_RANDOM_CHASE,
-//   FX_MODE_CIRCUS_COMBUSTUS,
-//   // Breathe/Fade/Pulse
-//   FX_MODE_BREATH,
-//   FX_MODE_FADE,
-//   FX_MODE_TRICOLOR_FADE,
-//   FX_MODE_SPOTS_FADE,
-//   // Fireworks
-//   FX_MODE_FIREWORKS,
-//   FX_MODE_STARBURST,
-//   FX_MODE_EXPLODING_FIREWORKS,
-//   FX_MODE_RAIN,
-//   // Sparkle/Twinkle
-//   FX_MODE_SOLID_GLITTER,
-//   FX_MODE_POPCORN,
-//   FX_MODE_PLASMA,
-//   FX_MODE_FIRE_FLICKER,
-//   FX_MODE_SPARKLE,
-//   FX_MODE_FLASH_SPARKLE,
-//   FX_MODE_HYPER_SPARKLE,
-//   FX_MODE_TWINKLE,
-//   FX_MODE_COLORTWINKLE,
-//   FX_MODE_TWINKLEFOX,
-//   FX_MODE_TWINKLECAT,
-//   FX_MODE_TWINKLEUP,
-//   FX_MODE_DYNAMIC,
-//   FX_MODE_SAW,
-//   FX_MODE_DISSOLVE,
-//   FX_MODE_DISSOLVE_RANDOM,
-//   FX_MODE_COLORFUL,
-//   FX_MODE_TRAFFIC_LIGHT,
-//   FX_MODE_CANDLE,
-//   FX_MODE_CANDLE_MULTI,
-//   FX_MODE_HALLOWEEN_EYES,
-//   #ifdef ENABLE_ADVANCED_EFFECTS  
-//   // Blink/Strobe
-//   FX_MODE_BLINK,
-//   FX_MODE_BLINK_RAINBOW,
-//   FX_MODE_STROBE,
-//   FX_MODE_MULTI_STROBE,
-//   FX_MODE_STROBE_RAINBOW, 
-//   FX_MODE_RAINBOW,
-//   FX_MODE_LIGHTNING,     
-//   FX_MODE_FIRE_2012,
-//   FX_MODE_RAILWAY,
-//   FX_MODE_HEARTBEAT, 
-//   // Noise
-//   FX_MODE_FILLNOISE8,
-//   FX_MODE_NOISE16_1,
-//   FX_MODE_NOISE16_2,
-//   FX_MODE_NOISE16_3,
-//   FX_MODE_NOISE16_4,
-//   FX_MODE_NOISEPAL,
-//   // Scan
-//   FX_MODE_SCAN,
-//   FX_MODE_DUAL_SCAN,
-//   FX_MODE_LARSON_SCANNER,
-//   FX_MODE_DUAL_LARSON_SCANNER,
-//   FX_MODE_ICU,
-//   FX_MODE_RIPPLE,
-//   FX_MODE_COMET,
-//   FX_MODE_CHUNCHUN,
-//   FX_MODE_BOUNCINGBALLS,
-//   FX_MODE_SINELON,
-//   FX_MODE_SINELON_DUAL,
-//   FX_MODE_SINELON_RAINBOW,
-//   FX_MODE_DRIP,      
-//   #endif // ENABLE_ADVANCED_EFFECTS   
-//   // Length of Effects
-//   MODE_COUNT,
-
-//     EFFECTS_WLED_FUNCTION_LENGTH_ID,
-//   };
-
-//realtime modes
-#define REALTIME_MODE_INACTIVE    0
-#define REALTIME_MODE_GENERIC     1
-#define REALTIME_MODE_UDP         2
-#define REALTIME_MODE_HYPERION    3
-#define REALTIME_MODE_E131        4
-#define REALTIME_MODE_ADALIGHT    5
-#define REALTIME_MODE_ARTNET      6
-#define REALTIME_MODE_TPM2NET     7
-
-//realtime override modes
-#define REALTIME_OVERRIDE_NONE    0
-#define REALTIME_OVERRIDE_ONCE    1
-#define REALTIME_OVERRIDE_ALWAYS  2
-
-
+#ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
+#include "6_Lights/Animator/EffectsWLEDConversion/mAnimations_WLED_Conversion.h"
+#endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
 
 /******************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************
@@ -1640,7 +800,7 @@ void SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
 ******************************************************************************************************************************************************************************/
 
 #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-#include "6_Lights/Animator/mAnimatorLight_Segments.h"   
+#include "6_Lights/Animator/EffectSubTasks/mAnimatorLight_Segments.h"   
 #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************************************************************
@@ -1793,52 +953,3 @@ struct USER_INPUT_SAVED_IN_EEPROM
 #endif
 
 #endif
-
-// {
-//   "Effects": {
-//     "Function":3,
-//     "Mode":88,
-//     "Speed":100,
-//     "Current":1,
-//     "Intensity":100,
-//     "Palette":30
-//   }
-// }
-
-
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function":34
-//   },
-//   "ColourPalette":62,
-//   "BrightnessRGB": 0,
-//   "PaletteGeneration":{"RandomiseBrightnessMode":1},
-//   "Transition": {
-//     "Time": 20,
-//     "RateMs":100,
-//     "Order":"Random"
-//   }
-// }
-
-
-    // uint32_t tSavedSendData, tSavedSendData2, fSendRGBDellStatus;
-    // uint8_t testvariable=0;
-    // uint8_t testvariable2=0,testvariable3=0;
-    // uint8_t timerenabled = false;
-
-    // int blend_count=0;
-    // enum BLEND_STEPS{BLEND_START=1,
-    //                  BLEND_DELAYS,
-    //                  BLEND_DONE
-    // };
-    // uint8_t blend_state;
-    // uint32_t tTimeout;
-
-
-
-        // make number generator, random, with skewness
-        // int Range0to100[20] = {0,10,20,30,40, // random(12,24)*10;
-        //                 50,60,70,80,90,
-        //                 91,92,93,94,95,
-        //                 96,97,98,99,100};

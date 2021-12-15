@@ -4,6 +4,7 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj){
+  
     #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 DEBUG_LINE_HERE;
       #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -17,9 +18,9 @@ DEBUG_LINE_HERE;
   // pCONT_lPWM->parse_JSONCommand(obj);
   // #endif // USE_MODULE_LIGHTS_PWM
 
-  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // pCONT_lwled->parse_JSONCommand(obj);
-  // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
   // pCONT_lAni->parse_JSONCommand(obj);
@@ -172,6 +173,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   } 
 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
     data_buffer.isserviced++;
@@ -232,6 +234,7 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   if(jtok = obj[PM_JSON_TIME_ON]){ // default to secs
     CommandSet_Auto_Time_Off_Secs(jtok.getInt());
@@ -305,12 +308,11 @@ DEBUG_LINE_HERE;
       state = jtok.getInt(); 
     }
     
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
-#else
+    #else
     ModifyStateNumberIfToggled(&state, pCONT_lAni->_segments[0].flags.fEnable_Animation);
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
+    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
     CommandSet_EnabledAnimation_Flag(state);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -319,6 +321,7 @@ DEBUG_LINE_HERE;
   }
 
   
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
     if(jtok.isStr()){
       // if((tmp_id=GetHardwareColourTypeIDbyName(jtok.getStr()))>=0){
@@ -335,6 +338,7 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   // if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER2]){
   //   if(jtok.isStr()){
@@ -352,6 +356,12 @@ DEBUG_LINE_HERE;
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
+  /**
+   * @brief Construct a new if object
+   * 
+   PixelRange replaces this, stripsize will instead be total length of max pixel
+   * 
+   */
   if(jtok = obj[PM_JSON_STRIP_SIZE]){
     CommandSet_LightSizeCount(jtok.getInt());
     data_buffer.isserviced++;
@@ -457,6 +467,7 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
   char buffer[60];
   // settings.pixel_hardware_color_order_id = value; 
@@ -470,6 +481,11 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
     AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
     return;
   }
+
+
+  
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
 
   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
 
@@ -508,6 +524,58 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
     order->w
   );
 
+#else
+
+pCONT_lAni->_segments[0].hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+ pCONT_lAni-> _segments[0].hardware_element_colour_order.b = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+ pCONT_lAni-> _segments[0].hardware_element_colour_order.blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+ pCONT_lAni-> _segments[0].hardware_element_colour_order.white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+pCONT_lAni->  _segments[0].hardware_element_colour_order.white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+
+
+  for(uint8_t index=0;index<strlen(c);index++){
+    // if(c[index]==0){ break; }
+
+    if((c[index]=='R')||(c[index]=='r')){
+      pCONT_lAni->_segments[0].hardware_element_colour_order.r = index;
+    }else
+    if((c[index]=='G')||(c[index]=='g')){
+     pCONT_lAni-> _segments[0].hardware_element_colour_order.g = index;
+    }else
+    if((c[index]=='B')||(c[index]=='b')){
+     pCONT_lAni-> _segments[0].hardware_element_colour_order.b = index;
+    }else
+    if((c[index]=='C')||(c[index]=='c')){
+     pCONT_lAni-> _segments[0].hardware_element_colour_order.c = index;
+    }else
+    if((c[index]=='W')||(c[index]=='w')){
+    pCONT_lAni->  _segments[0].hardware_element_colour_order.w = index;
+    }
+
+  }
+
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+   pCONT_lAni-> _segments[0].hardware_element_colour_order.r,
+   pCONT_lAni-> _segments[0].hardware_element_colour_order.g,
+   pCONT_lAni-> _segments[0].hardware_element_colour_order.b,
+   pCONT_lAni-> _segments[0].hardware_element_colour_order.c,
+  pCONT_lAni->  _segments[0].hardware_element_colour_order.w
+  );
+
+
+
+
+
+
+
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
+
+
+
   //tmp fix, copy, flip 1 and 2
 
   // memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
@@ -523,6 +591,11 @@ void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
 
 
 }
+
+
+
+
+
 const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen){
 
   
@@ -622,6 +695,7 @@ void mInterfaceLight::CheckHardwareElementColourOrder(){
 
 }
 
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 // /******************************************************************************************************************************
@@ -756,11 +830,11 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
   //       case ANIMATION_MODE_EFFECTS_ID:
   //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
           
-  //     #ifdef ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  //     #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   //         #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
   //         pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
   //         #endif
-  //     #endif// ENABLE_PIXEL_FUNCTION_WLED_PHASEOUT
+  //     #endif// USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
           
 
   //       break;
@@ -1157,6 +1231,8 @@ void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 
 }
 
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** Animation_Transition_Time_Ms *****************************************************************************************
@@ -1219,6 +1295,10 @@ void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
 
 }
 
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** TransitionMethodName *****************************************************************************************
@@ -1258,77 +1338,6 @@ void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
-****************** TransitionOrder *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value){
-  
-  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.transition.order_id = value;
-#else
-  pCONT_lAni->_segments[0].transition.order_id = value;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
-
-  char buffer[50];
-
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-const char* mInterfaceLight::GetTransitionOrderName(char* buffer, uint8_t buflen){
-  return GetTransitionOrderNameByID(
-    
-  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-.transition.order_id, buffer, buflen);
-
-
-
-}
-const char* mInterfaceLight::GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen){
-  switch(id){  default:    
-    case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
-    // case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
-    // case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
-    // case TRANSITION_ORDER_FIXED_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
-    }
-  return buffer;
-}
-int8_t mInterfaceLight::GetTransitionOrderIDbyName(const char* c){
-  if(c=='\0'){ return -1; }
-
-  // strcmp_P
-
-  if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
-    return TRANSITION_ORDER_RANDOM_ID;
-  }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
-    return TRANSITION_ORDER_INORDER_ID;
-  }
-
-  // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)){ return TRANSITION_ORDER_CENTRE_OUT_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER_INORDER_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_FIXED_NAME_CTR)){ return TRANSITION_ORDER_FIXED_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_ROTATE_NAME_CTR)){ return TRANSITION_ORDER_ROTATE_ID; }
-  return -1;
-}
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
 ****************** Auto_Time_Off_Secs *****************************************************************************************
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
@@ -1357,6 +1366,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1385,18 +1395,18 @@ void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   #endif
 
 }
-/**
- * Duplicate parameter, needs merging with above in long term if it is really the same
- * */
-uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
+// /**
+//  * Duplicate parameter, needs merging with above in long term if it is really the same
+//  * */
+// uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
-  strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+//   strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
 
-// AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
+// // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
-  return strip_size_requiring_update; // also return the count
+//   return strip_size_requiring_update; // also return the count
 
-}
+// }
 
 
 /******************************************************************************************************************************
@@ -1435,6 +1445,7 @@ uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number
   return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
 }
 
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
@@ -1686,11 +1697,45 @@ int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
   #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
   if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_EFFECTS_ID; }
-  #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
-  if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
-  #endif
+  // #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
+  // if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
+  // #endif
   return -1;
 }
+
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value)
+{
+  animation.transition.order_id = value;
+
+  char buffer[50];
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+}
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+int8_t mInterfaceLight::GetTransitionOrderIDbyName(const char* c)
+{
+  if(c=='\0'){ return -1; }
+  if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
+    return mAnimatorLight::TRANSITION_ORDER_RANDOM_ID;
+  }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
+    return mAnimatorLight::TRANSITION_ORDER_INORDER_ID;
+  }
+
+  // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)){ return TRANSITION_ORDER_CENTRE_OUT_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER_INORDER_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_FIXED_NAME_CTR)){ return TRANSITION_ORDER_FIXED_ID; }
+  // if(strstr(c,D_TRANSITION_ORDER_ROTATE_NAME_CTR)){ return TRANSITION_ORDER_ROTATE_ID; }
+  return -1;
+}
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

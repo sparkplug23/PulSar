@@ -789,7 +789,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   // WLED
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS
+  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
   // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)

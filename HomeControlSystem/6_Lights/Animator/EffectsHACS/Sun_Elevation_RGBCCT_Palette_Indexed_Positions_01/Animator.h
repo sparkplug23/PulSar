@@ -1,4 +1,0 @@
-#pragma once
-
-
-void SubTask_Flasher_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();

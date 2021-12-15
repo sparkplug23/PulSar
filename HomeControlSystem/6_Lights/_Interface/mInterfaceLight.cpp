@@ -119,12 +119,25 @@ bool mInterfaceLight::Pre_Init(void)
   }
 
   
+
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
   order->red = 0;
   order->green = 1;
   order->blue = 2;
   order->white_cold = 3;
   order->white_warm = 4;
+
+
+#else
+  
+  pCONT_lAni->_segments[0].hardware_element_colour_order.red = 0;
+  pCONT_lAni->_segments[0].hardware_element_colour_order.green = 1;
+  pCONT_lAni->_segments[0].hardware_element_colour_order.blue = 2;
+  pCONT_lAni->_segments[0].hardware_element_colour_order.white_cold = 3;
+  pCONT_lAni->_segments[0].hardware_element_colour_order.white_warm = 4;
+
+#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
   //temp fix
@@ -481,6 +494,10 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
 
+
+      // AddLog(LOG_LEVEL_TEST, PSTR("sizeof(RgbcctColor_Controller)=%d"),sizeof(RgbcctColor_Controller));
+      
+
       EverySecond_AutoOff();
     
     }break;
@@ -601,7 +618,7 @@ void mInterfaceLight::EveryLoop(){
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    switch(aniamtion.mode_id)
+    switch(animation.mode_id)
 #else
     switch(pCONT_lAni->_segments[0].mode_id)    
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -622,32 +639,32 @@ void mInterfaceLight::EveryLoop(){
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    switch(aniamtion.mode_id)
+    switch(animation.mode_id)
 #else
     switch(pCONT_lAni->_segments[0].mode_id)    
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     {
-            /**
-             * HACS Original: animations using neopixel animator (to be phased into segments)
-             * */
-            #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-            case ANIMATION_MODE_EFFECTS_ID:
-              pCONT_lAni->SubTask_Effects_PhaseOut();
-            break;
-            #endif
-            /**
-             * WLED Original: Based on WLED direct port (to be phased into segments)
-             * */
-            #ifdef ENABLE_PIXEL_FUNCTION_WLED_METHOD_ORIGINAL_ADDED_AS_EFFECT
-            case ANIMATION_MODE_WLED_ID:
-              pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
-            break;
-            #endif
+      /**
+       * HACS Original: animations using neopixel animator (to be phased into segments)
+       * */
+      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+      case ANIMATION_MODE_EFFECTS_ID:
+        pCONT_lAni->SubTask_Effects_PhaseOut();
+      break;
+      #endif
+      /**
+       * WLED Original: Based on WLED direct port (to be phased into segments)
+       * */
+      #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+      case ANIMATION_MODE_WLED_ID:
+        pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
+      break;
+      #endif
       /**
        * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
        * */
       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      case ANIMATION_MODE_SEGMENTS_ANIMATION_ID:
+      case ANIMATION_MODE_EFFECTS_ID:
         pCONT_lAni->SubTask_Segments_Animation();
       break;
       #endif
@@ -815,11 +832,34 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
       JsonBuilderI->Add("WC", rgbcct_controller.WC); 
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
+    
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
       JsonBuilderI->Add("R", hardware_element_colour_order.r); 
       JsonBuilderI->Add("G", hardware_element_colour_order.g); 
       JsonBuilderI->Add("B", hardware_element_colour_order.b); 
       JsonBuilderI->Add("WW", hardware_element_colour_order.w); 
       JsonBuilderI->Add("WC", hardware_element_colour_order.c); 
+
+
+  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
+  // order->red = 0;
+  // order->green = 1;
+  // order->blue = 2;
+  // order->white_cold = 3;
+  // order->white_warm = 4;
+
+
+#else
+
+      JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
+      JsonBuilderI->Add("G", pCONT_lAni->_segments[0].hardware_element_colour_order.g); 
+      JsonBuilderI->Add("B", pCONT_lAni->_segments[0].hardware_element_colour_order.b); 
+      JsonBuilderI->Add("WW", pCONT_lAni->_segments[0].hardware_element_colour_order.w); 
+      JsonBuilderI->Add("WC", pCONT_lAni->_segments[0].hardware_element_colour_order.c); 
+
+#endif
+
     JsonBuilderI->Level_End();
 
     JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
@@ -935,18 +975,6 @@ void mInterfaceLight::BootMessage(){
 
 }
 
-
-uint32_t mInterfaceLight::WebColorFromColourMap(uint8_t i)
-{
-  RgbColor rgb = RgbColor(mPaletteI->GetHsbColour(i));
-  uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-  return tcolor;
-}
-uint32_t mInterfaceLight::WebColorFromColourType(RgbColor rgb)
-{
-  uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-  return tcolor;
-}
 
 RgbcctColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
   RgbcctColor rgb;

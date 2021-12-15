@@ -48,6 +48,18 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
 }
 
 
+uint32_t mInterfaceLight::WebColorFromColourMap(uint8_t i)
+{
+  RgbColor rgb = RgbColor(mPaletteI->GetHsbColour(i));
+  uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
+  return tcolor;
+}
+uint32_t mInterfaceLight::WebColorFromColourType(RgbColor rgb)
+{
+  uint32_t tcolor = (rgb.R << 16) | (rgb.G << 8) | rgb.B;
+  return tcolor;
+}
+
 void mInterfaceLight::WebAppend_Root_ControlUI(){
 
   char end_colour[8];

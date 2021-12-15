@@ -35,7 +35,9 @@ class mAddressableLight :
 
     void LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10);
 
+#ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
     void FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0));
+#endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
                 
     void parse_JSONCommand(JsonParserObject obj);
 
