@@ -48,9 +48,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   
   mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
     
+
+  uint8_t segment_index = segment_iters._segment_index;
+
   // Set up colours
   // Brightness is generated internally, and rgbcct solid palettes are output values
-  _segments[0].flags.brightness_applied_during_colour_generation = false;
+  _segments[segment_index].flags.brightness_applied_during_colour_generation = false;
 
   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
 
@@ -58,11 +61,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
+  if(!_segment_runtimes[segment_index].rgbcct_controller->getApplyBrightnessToOutput()){ // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
-      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
@@ -684,12 +687,12 @@ float sun_elevation = 0;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+  if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
   { // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
-      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
@@ -762,11 +765,11 @@ float sun_elevation = 0;
 
   if(sun_elevation < -20)
   {
-    pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMax());      
+    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMax());      
   }else
   if(sun_elevation > 20)
   {
-    pCONT_iLight->rgbcct_controller.setCCT(pCONT_iLight->get_CTRangeMin());      
+    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMin());      
   }else{
     // Convert elevation into percentage
     uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
@@ -775,7 +778,7 @@ float sun_elevation = 0;
  
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
     // Set the colour temp
-    pCONT_iLight->rgbcct_controller.setCCT(cct_val);    
+    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(cct_val);    
   }
 
   _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = false;
@@ -784,12 +787,12 @@ float sun_elevation = 0;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+  if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
   { // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
-      pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
@@ -1614,7 +1617,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
 //       // }
 
-//       pCONT_iLight->rgbcct_controller.setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
+//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
 
 
 //       UpdateDesiredColourFromPaletteSelected();
@@ -2124,7 +2127,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //         // Global brightness is already applied, and will be known as "max range"
 //         // Min range will be another map change here
-//         uint8_t max_brightness = pCONT_iLight->rgbcct_controller.getBrightnessRGB255();
+//         uint8_t max_brightness = _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255();
 //         uint8_t min_brightness = flashersettings.brightness_min;
 //         uint8_t random_brightness = 0;
 
@@ -2856,12 +2859,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput())
+//   if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB255(),
-//       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
+//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
+//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
 //     );
 //   }
 
@@ -3028,7 +3031,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //     uint8_t blue =  map(sun_elevation,-50,10,255,0);
 
-//     pCONT_iLight->rgbcct_controller.setRGB(0,0,blue);
+//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setRGB(0,0,blue);
 
 //     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
@@ -3037,7 +3040,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //     uint8_t brightness_255 = map(sun_elevation,-50,10,255,0);
 
-//     pCONT_iLight->rgbcct_controller.setBrightnessRGB255(brightness_255);
+//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessRGB255(brightness_255);
 
 //   }
 
@@ -3053,12 +3056,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //     // Convert percentage into cct
 //     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
 //     // Set the colour temp
-//     pCONT_iLight->rgbcct_controller.setCCT(cct_val);
+//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(cct_val);
 
 
 //     uint8_t brightness_255 = map(sun_elevation,-10,25,0,255);
 
-//     pCONT_iLight->rgbcct_controller.setBrightnessCCT255(brightness_255);
+//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessCCT255(brightness_255);
 
 //   }
 
@@ -8512,6 +8515,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
 
   // Set palette pointer
   mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
   // Brightness is generated internally, and rgbcct solid palettes are output values
   _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
 
@@ -8520,10 +8524,11 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
     //allocate segment data
     uint16_t dataSize = (segment_length -1) *3;
     #ifdef DEBUG_WLED_EFFECT_FUNCTIONS
-    AddLog(LOG_LEVEL_TEST, PSTR("WS2812FX::candle dataSize=%d"),dataSize);
+    // AddLog(LOG_LEVEL_TEST, PSTR("WS2812FX::candle dataSize=%d"),dataSize);
     #endif
     if (!_segment_runtimes[segment_index].allocateData(dataSize))
     {
+      // AddLog(LOG_LEVEL_TEST, PSTR("WS2812FX::candle dataSize=%d FAILED TO ALLOCATE" DEBUG_INSERT_PAGE_BREAK),dataSize);
       // either just fail, or force animation to use simple version instead
       // return candle(false); //allocation failed
     } 
@@ -8600,10 +8605,13 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
       if (fadeStep == 0) fadeStep = 1;
     }
 
+    // uint8_t palette_with_multi_is_random = 1;
+
     /**
      * Generate show colour 
      */
     // blend ratio from WLED uses 255 range, neopixel is 0 to 1 range
+    // blend ratio is really a brightness level
     float blend_ratio = mSupport::mapfloat(s, 0.0f, 255.0f, 0.0f, 1.0f);
 
     /**
@@ -8612,25 +8620,47 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
      * */
     RgbcctColor colour1 = RgbcctColor(0);
     RgbcctColor colour2 = RgbcctColor(0);
+    RgbcctColor colour_blended = RgbcctColor(0);
     if(mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr) == 1)
     {
       colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
       colour2 = RgbcctColor(0);
+      colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+
+      // AddLog(LOG_LEVEL_TEST, PSTR("if(mPaletteI->GetPixelsInMap(telist.ptr) == %d)"),
+      // // mPaletteI->palettelist.
+      // );
     }else{
-      colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
-      colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 1);
+      // AddLog(LOG_LEVEL_TEST, PSTR("ELSEif(mPaletteI->GetPixelsInMap(telist.ptr) == 1)"));
+      // if(palette_with_multi_is_random)
+      // {
+      //   colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
+      //   colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1));
+      //   colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+      //   colour_blended = ApplyBrightnesstoRgbcctColour(colour_blended, s);
+      // }else{        
+        colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
+        colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 1);
+        colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+      // }
     }
 
-    RgbcctColor colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio);
+    // AddLog(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p = %d,%d,%d,%d,%d"),
+    // _segment_runtimes[0].active_rgbcct_colour_p[0],
+    // _segment_runtimes[0].active_rgbcct_colour_p[1],
+    // _segment_runtimes[0].active_rgbcct_colour_p[2],
+    // _segment_runtimes[0].active_rgbcct_colour_p[3],
+    // _segment_runtimes[0].active_rgbcct_colour_p[4]);
 
     /**
      * Apply colour to output: different per pixel
      **/
-     if (i > 0) {
+    if(i > 0) 
+    {
    
       SetPixelColor(start_pixel + i, colour_blended, segment_index);
 
-      _segment_runtimes[segment_index].data[d] = s; 
+      _segment_runtimes[segment_index].data[d  ] = s; 
       _segment_runtimes[segment_index].data[d+1] = s_target; 
       _segment_runtimes[segment_index].data[d+2] = fadeStep;
 
@@ -8661,9 +8691,257 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
 }
 
 
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : Candle Flicker
+ * @name : Candle_Flicker_Over_Palette -- this looks like shimmering lights
+ * @note : Based on WLED candle effect
+ * 
+ * Static palette with pixels in order is redrawn, then blend is used to create flickering
+ * 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette()
+{
+
+  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_iters._segment_index].length();
+  uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel = _segments[segment_index].pixel_range.stop;
+
+  bool use_multi = true;
+
+  // Set palette pointer
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
+  // Brightness is generated internally, and rgbcct solid palettes are output values
+  _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
+
+  if (use_multi)
+  {
+    //allocate segment data
+    uint16_t dataSize = (segment_length -1) *3;
+    #ifdef DEBUG_WLED_EFFECT_FUNCTIONS
+    // AddLog(LOG_LEVEL_TEST, PSTR("WS2812FX::candle dataSize=%d"),dataSize);
+    #endif
+    if (!_segment_runtimes[segment_index].allocateData(dataSize))
+    {
+      // AddLog(LOG_LEVEL_TEST, PSTR("WS2812FX::candle dataSize=%d FAILED TO ALLOCATE" DEBUG_INSERT_PAGE_BREAK),dataSize);
+      // either just fail, or force animation to use simple version instead
+      // return candle(false); //allocation failed
+    } 
+  }
+
+  //max. flicker range controlled by intensity
+  uint8_t valrange = _segments[segment_index].intensity();
+  uint8_t rndval = valrange >> 1;
+
+    uint8_t pixel_palette_counter = 0;
+
+  #ifdef DEBUG_WLED_EFFECT_FUNCTIONS
+  // AddLog(LOG_LEVEL_TEST, PSTR("step=%d"),_segment_runtimes[segment_index].step);
+  // AddLog(LOG_LEVEL_TEST, PSTR("valrange=%d"),valrange);
+  // AddLog(LOG_LEVEL_TEST, PSTR("rndval=%d"),rndval);
+  #endif
+
+  //step (how much to move closer to target per frame) coarsely set by speed
+  uint8_t speedFactor = 4;
+  if (_segments[segment_index].speed() > 252) { //epilepsy
+    speedFactor = 1;
+  } else if (_segments[segment_index].speed() > 99) { //regular candle (mode called every ~25 ms, so 4 frames to have a new target every 100ms)
+    speedFactor = 2;
+  } else if (_segments[segment_index].speed() > 49) { //slower fade
+    speedFactor = 3;
+  } //else 4 (slowest)
+
+  uint16_t numCandles = (use_multi) ? segment_length : 1;
+
+  for (uint16_t i = 0; i < numCandles; i++)
+  {
+    uint16_t d = 0; //data location
+
+    uint8_t s = _segment_runtimes[segment_index].aux0, 
+            s_target = _segment_runtimes[segment_index].aux1, 
+            fadeStep = _segment_runtimes[segment_index].step;
+
+    if (i > 0) {
+      d = (i-1) *3;
+      s = _segment_runtimes[segment_index].data[d]; 
+      s_target = _segment_runtimes[segment_index].data[d+1]; 
+      fadeStep = _segment_runtimes[segment_index].data[d+2];
+    }
+    if (fadeStep == 0) { //init vals
+      s = 128; s_target = 130 + random8(4); fadeStep = 1;
+    }
+
+    bool newTarget = false;
+    if (s_target > s) { //fade up
+
+      #ifdef DEBUG_WLED_EFFECT_FUNCTIONS
+      // AddLog(LOG_LEVEL_TEST, PSTR("fade up s_target > s %d=%d"),s_target,s);
+      #endif
+
+      s = qadd8(s, fadeStep);
+      if (s >= s_target) newTarget = true;
+    } else {
+      s = qsub8(s, fadeStep);
+      if (s <= s_target) newTarget = true;
+          
+      #ifdef DEBUG_WLED_EFFECT_FUNCTIONS
+      // AddLog(LOG_LEVEL_TEST, PSTR("fade down=%d"),s);
+      #endif
+
+    }
+
+    if (newTarget) {
+      s_target = random8(rndval) + random8(rndval);
+      if (s_target < (rndval >> 1)) s_target = (rndval >> 1) + random8(rndval);
+      uint8_t offset = (255 - valrange) >> 1;
+      s_target += offset;
+
+      uint8_t dif = (s_target > s) ? s_target - s : s - s_target;
+    
+      fadeStep = dif >> speedFactor;
+      if (fadeStep == 0) fadeStep = 1;
+    }
+
+    // uint8_t palette_with_multi_is_random = 1;
+
+
+    // GetColourFromPalette();
+    // counter for segment length, reset 2nd counter for pixel_palette_size
+    // blend with "off"
+
+
+
+
+    /**
+     * If palette has only 1 colour, then second/bottom colour defaults to OFF
+     * If pixels > 1, then use first two colours only or else horrible flicker
+     * */
+    // if(mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr) == 1)
+    // {
+    //   colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
+    //   colour2 = RgbcctColor(0);
+    //   colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+
+    //   // AddLog(LOG_LEVEL_TEST, PSTR("if(mPaletteI->GetPixelsInMap(telist.ptr) == %d)"),
+    //   // // mPaletteI->palettelist.
+    //   // );
+    // }else{
+    //   // AddLog(LOG_LEVEL_TEST, PSTR("ELSEif(mPaletteI->GetPixelsInMap(telist.ptr) == 1)"));
+    //   // if(palette_with_multi_is_random)
+    //   // {
+    //   //   colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
+    //   //   colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1));
+    //   //   colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+    //   //   colour_blended = ApplyBrightnesstoRgbcctColour(colour_blended, s);
+    //   // }else{        
+    //     colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 1);
+    //     colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 2);
+    //     colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+    //   // }
+    // }
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("active_rgbcct_colour_p = %d,%d,%d,%d,%d"),
+    // _segment_runtimes[0].active_rgbcct_colour_p[0],
+    // _segment_runtimes[0].active_rgbcct_colour_p[1],
+    // _segment_runtimes[0].active_rgbcct_colour_p[2],
+    // _segment_runtimes[0].active_rgbcct_colour_p[3],
+    // _segment_runtimes[0].active_rgbcct_colour_p[4]);
+
+    /**
+     * Apply colour to output: different per pixel
+     **/
+    if(i > 0) 
+    {
+   
+    RgbcctColor colour1 = RgbcctColor(0);
+    RgbcctColor colour2 = RgbcctColor(0);
+    RgbcctColor colour_blended = RgbcctColor(0);
+    // blend ratio from WLED uses 255 range, neopixel is 0 to 1 range
+    // blend ratio is really a brightness level
+    float blend_ratio = mSupport::mapfloat(s, 0.0f, 255.0f, 0.0f, 1.0f);
+    // for(uint16_t p = start_pixel;
+    //              p <= stop_pixel;
+    //              p++
+    //   ){
+        colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        colour2 = RgbcctColor(0);
+        colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+
+        if(pixel_palette_counter++ >= pixels_in_palette-1)
+        {
+          pixel_palette_counter = 0;
+        }
+
+       SetPixelColor(start_pixel + i, colour_blended, segment_index);
+
+      // }
+
+
+      _segment_runtimes[segment_index].data[d  ] = s; 
+      _segment_runtimes[segment_index].data[d+1] = s_target; 
+      _segment_runtimes[segment_index].data[d+2] = fadeStep;
+
+    } 
+    /**
+     * Single mode, one colour applied across all leds
+     * */
+    else
+    {
+      
+    RgbcctColor colour1 = RgbcctColor(0);
+    RgbcctColor colour2 = RgbcctColor(0);
+    RgbcctColor colour_blended = RgbcctColor(0);
+    // blend ratio from WLED uses 255 range, neopixel is 0 to 1 range
+    // blend ratio is really a brightness level
+    float blend_ratio = mSupport::mapfloat(s, 0.0f, 255.0f, 0.0f, 1.0f);
+    uint8_t pixel_palette_counter = 0;
+    for(uint16_t p = start_pixel;
+                 p <= stop_pixel;
+                 p++
+      ){
+        colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        colour2 = RgbcctColor(0);
+        colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
+
+        SetPixelColor(p, colour_blended, segment_index);
+
+        if(pixel_palette_counter++ > pixels_in_palette)
+        {
+          pixel_palette_counter = 0;
+        }
+
+
+      }
+
+      // for (uint16_t j = start_pixel; j <= stop_pixel; j++) {
+      //   SetPixelColor(j, colour_blended, segment_index);
+      // }
+
+      _segment_runtimes[segment_index].aux0 = s; 
+      _segment_runtimes[segment_index].aux1 = s_target; 
+      _segment_runtimes[segment_index].step = fadeStep;
+
+    }
+  }
+
+  /**
+   * Direct update, disable neopixel callback 
+   **/
+  StripUpdate();
+  _segment_runtimes[segment_index].anim_function_callback = nullptr; // When no animation callback is needed
+
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Drip Effect
  * @note : Part of WLED Effects
  * @note : Randomly changes colours of pixels, and blends to the new one
  * 

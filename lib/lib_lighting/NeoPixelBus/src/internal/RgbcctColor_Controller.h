@@ -46,7 +46,14 @@ private:
   // Full range values
   void set_R(uint8_t r){
     R = r;
-    if(external_rgbcct_memory_writer != nullptr){ *(external_rgbcct_memory_writer+0) = R; }
+    if(external_rgbcct_memory_writer != nullptr){ *(external_rgbcct_memory_writer+0) = R; 
+    
+    // Serial.printf("external_rgbcct_memory_writer = %d", external_rgbcct_memory_writer[0]);
+    
+    
+    } else {
+      // Serial.println("external_rgbcct_memory_writer == nullptr");
+      }
   }
   void set_G(uint8_t g){
     G = g;
@@ -165,6 +172,7 @@ private:
         set_B(colour_out.B);
         break;
     }
+
   }
     
   void setHS_FullBrightness(HsbColor hsb, bool flag_hue_sat_stored_as_full_brightness_range = true){

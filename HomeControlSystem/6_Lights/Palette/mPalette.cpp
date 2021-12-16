@@ -96,12 +96,17 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Christmas_15();
   init_ColourPalettes_Christmas_16();
   init_ColourPalettes_Christmas_17();
+  init_ColourPalettes_Christmas_18();
+  init_ColourPalettes_Christmas_19();
+  init_ColourPalettes_Christmas_20();
+  init_ColourPalettes_Christmas_21();
   init_ColourPalettes_Sunrise_01();
   init_ColourPalettes_Sunrise_02();
   init_ColourPalettes_Sunrise_03();
   init_ColourPalettes_Sunrise_04();
   init_ColourPalettes_Sunset_01();
   init_ColourPalettes_Sunset_02();
+  init_ColourPalettes_Candle_Flame_01();
   init_ColourPalettes_Custom_User_01();
   init_ColourPalettes_Gradient_SunLevel_Group01_01();
   init_ColourPalettes_Gradient_SunLevel_Group01_02();
@@ -464,6 +469,15 @@ void mPalette::init_ColourPalettes_Christmas_20(){
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
 }
+void mPalette::init_ColourPalettes_Christmas_21(){
+  palettelist.ptr     = &palettelist.christmas_21;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CHRISTMAS_21_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CHRISTMAS_21_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CHRISTMAS_21_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CHRISTMAS_21_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID;
+}
 
 void mPalette::init_ColourPalettes_Sunrise_01(){
   palettelist.ptr     = &palettelist.sunrise_01;  
@@ -523,6 +537,16 @@ void mPalette::init_ColourPalettes_Sunset_02(){
   palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_SUNSET_02_NAME_CTR;
   palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID;
+}
+
+void mPalette::init_ColourPalettes_Candle_Flame_01(){
+  palettelist.ptr     = &palettelist.candle_flame_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_CANDLE_FLAME_01_ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP_IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP_IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_CANDLE_FLAME_01_NAME_CTR;
+  palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID;
 }
 
 void mPalette::init_ColourPalettes_Custom_User_01(){
@@ -926,6 +950,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_SUNRISE_04_ID:      return &palettelist.sunrise_04;
     case PALETTELIST_STATIC_SUNSET_01_ID:      return &palettelist.sunset_01;
     case PALETTELIST_STATIC_SUNSET_02_ID:      return &palettelist.sunset_02;
+    case PALETTELIST_STATIC_CANDLE_FLAME_01_ID:      return &palettelist.candle_flame_01;
     case PALETTELIST_STATIC_CHRISTMAS_01_ID:     return &palettelist.christmas_01;
     case PALETTELIST_STATIC_CHRISTMAS_02_ID:     return &palettelist.christmas_02;
     case PALETTELIST_STATIC_CHRISTMAS_03_ID:     return &palettelist.christmas_03;
@@ -946,6 +971,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_CHRISTMAS_18_ID:     return &palettelist.christmas_18;
     case PALETTELIST_STATIC_CHRISTMAS_19_ID:     return &palettelist.christmas_19;
     case PALETTELIST_STATIC_CHRISTMAS_20_ID:     return &palettelist.christmas_20;
+    case PALETTELIST_STATIC_CHRISTMAS_21_ID:     return &palettelist.christmas_21;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID:     return &palettelist.gradient_sunlevel_group01_01;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ID:     return &palettelist.gradient_sunlevel_group01_02;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ID:     return &palettelist.gradient_sunlevel_group01_03;
@@ -973,6 +999,11 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
 
 RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
+
+  if(ptr == nullptr)
+  {
+    ptr = palettelist.ptr;
+  }
 
   RgbcctColor colour = RgbcctColor(0);
   // AddLog(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
@@ -1376,6 +1407,12 @@ uint8_t mPalette::GetPixelsWithByMapIDType(uint8_t fMapIDs_Type){
 uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit){
   uint16_t pixel_width = 0;
   uint16_t pixel_length = 0;
+
+  if(ptr == nullptr)
+  {
+    ptr = palettelist.ptr; // use internal if not set already
+  }
+
   switch(ptr->flags.fMapIDs_Type){
     default:
     

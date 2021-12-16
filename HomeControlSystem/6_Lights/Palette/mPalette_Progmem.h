@@ -263,6 +263,12 @@
 
     #define D_RGB255_WHITE_WARM1    255, 140, 26,
 
+    /**
+     * Warm white looks different on different string types, so these are visually confirmed by myself (personal perference)
+     * 
+     */
+    #define D_RGB255_WHITE_WARM_MICROLEDS_50SET    255, 140, 26,
+
 
 
     #define COLOUR_FLOAT_HUE_RED            0.0000f //0
@@ -1231,9 +1237,27 @@
       D_RGB255_PURPLE_DEEP
       D_RGB255_PINK_HOT3
       D_RGB255_CYAN_FADED3
+      
     };
 
 
+    #ifndef D_PALETTE_CHRISTMAS_21_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_21_NAME_CTR        "Chrismtas White Warm80Cold20|Christmas 21"   
+    #endif
+    // #define PM_PALETTE_CHRISTMAS_21_DESCRIPTION_CTR   "Mostly white white with some cold white" // new optional (for memory) descriptions
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_21_NAME_CTR)        D_PALETTE_CHRISTMAS_21_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_21_COLOUR_MAP_IDS)
+    { // R,G,B      
+
+    // I think "cold white" should actually be much dimmer than warm white, this will "even" the brightness
+    
+      D_RGB255_WHITE_WARM_MICROLEDS_50SET
+      D_RGB255_WHITE_WARM_MICROLEDS_50SET
+      D_RGB255_WHITE_WARM_MICROLEDS_50SET
+      D_RGB255_WHITE_WARM_MICROLEDS_50SET
+      D_RGB255_WHITE_FADED
+    
+    };
 
 
 
@@ -1810,6 +1834,46 @@
       140, 0x59, 0x95, 0xB7, 175, 175,
       255, 255, 255,   255, 255, 255,
     };
+
+
+    /**
+     * Candle Flame for Candle Animation
+     * */
+    #ifndef D_PALETTE_CANDLE_FLAME_01_NAME_CTR
+    #define D_PALETTE_CANDLE_FLAME_01_NAME_CTR        "Candle|Candle Flame 01"   
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+    DEF_PGM_CTR  (PM_PALETTE_CANDLE_FLAME_01_NAME_CTR)        D_PALETTE_CANDLE_FLAME_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP_IDS)
+    { //R,G,B,WW,CW
+      // 0x06, 0x2B, 0x79, 0, 0, // Dark Blue
+      // 0x16, 0x49, 0x8A, 0, 0,
+      // 0x16, 0x49, 0x8A, 25, 25,
+      // 0x16, 0x49, 0x8A, 50, 50,
+      // 0x59, 0x95, 0xB7, 100, 100,
+      // 0x59, 0x95, 0xB7, 175, 175,
+      // 255, 255,   255, 255, 255,
+
+      /**
+       * Animations can work by either using only first two colours, or randomly picking them all
+       * 
+       */
+D_RGB255_WHITE_WARM 0, 0, 
+      
+      // D_RGB255_RED 0, 0, 
+      D_RGB255_ORANGE_DEEP   0, 0, 
+      // D_RGB255_RED_ALT 0, 0, 
+      // D_RGB255_ORANGE_DEEP   0, 0, 
+      // D_RGB255_RED 0, 0, 
+      // D_RGB255_RED 0, 0, 
+      // D_RGB255_ORANGE_DEEP   0, 0, 
+      // D_RGB255_RED 0, 0, 
+      // 25, 2, 0,    0, 0, 
+
+
+    };
+
+
 
 
 // const RgbColor Palette[] PROGMEM = {HsbColor(0.5f, 0.5f, 0.5f), HsbColor(1.0f, 0.5f, 0.5f)};

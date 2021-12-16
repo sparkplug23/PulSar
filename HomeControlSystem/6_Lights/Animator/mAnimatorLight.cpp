@@ -31,6 +31,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   DEBUG_LINE_HERE;
   DEBUG_LINE_HERE;
   DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
 
       #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       // Init_HACS();
@@ -109,21 +115,21 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * MQTT SECTION * 
     *******************/   
-    // #ifdef USE_MODULE_NETWORK_MQTT
-    // case FUNC_MQTT_HANDLERS_INIT:
-    // case FUNC_MQTT_HANDLERS_RESET:
-    //   MQTTHandler_Init();
-    // break;
-    // case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-    //   MQTTHandler_Set_TelePeriod();
-    // break;
-    // case FUNC_MQTT_SENDER:
-    //   MQTTHandler_Sender();
-    // break;
-    // case FUNC_MQTT_CONNECTED:
-    //   MQTTHandler_Set_RefreshAll();
-    // break;
-    // #endif //USE_MODULE_NETWORK_MQTT
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case FUNC_MQTT_HANDLERS_INIT:
+    case FUNC_MQTT_HANDLERS_RESET:
+      MQTTHandler_Init();
+    break;
+    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+      MQTTHandler_Set_TelePeriod();
+    break;
+    case FUNC_MQTT_SENDER:
+      MQTTHandler_Sender();
+    break;
+    case FUNC_MQTT_CONNECTED:
+      MQTTHandler_Set_RefreshAll();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
   }// switch(command)
 
   /************

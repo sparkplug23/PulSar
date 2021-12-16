@@ -211,6 +211,7 @@ void Init_Segments();
     #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
     EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
     EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
+    EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
 
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
@@ -860,6 +861,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       uint8_t grouping = 1; //multiplers
       uint8_t spacing = 0;
       uint32_t tSaved_AnimateRunTime = millis();
+
       uint8_t effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
 
       uint16_t pixels_to_update_this_cycle = 0;
@@ -1014,7 +1016,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     /**
      * replacing "flashersettings_segments.region"
      * */
-      uint16_t aux0 = 0; //flashersettings_segments.region
+      uint16_t aux0 = 0;
       uint16_t aux1 = 0;
       uint16_t aux2 = 0;
       uint16_t aux3 = 0;
@@ -1050,10 +1052,12 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
        * Each segment will have its own animator
        * This will also need to share its index into the animation so it knows what segments to run
        * */
-      NeoPixelAnimator* animator = nullptr; //one animator for each segment, which is only init when needed or else delete
+      NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
       
-      // RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
-
+      // can I default this to nullptr when not used, will this actually reduce memory?
+      RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
+      RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
+    
       /**
        * Using "index" inside animator as segment index
        * */
@@ -1146,12 +1150,14 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
 
 
+void Init_Segments_RgbcctControllers();
 
 
     mAnimatorLight& setAnimFunctionCallback_Segments_Indexed(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
     void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
 
 
+void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
 
 
     void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
@@ -1177,6 +1183,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
     void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
     void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
+    void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
 
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
@@ -1304,6 +1311,31 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index = 0);
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage, uint8_t segment_index = 0);
     uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index = 0);
+
+    /**
+     * rgbcctcontroller commands
+     */
+    void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0);
+    void CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uint8_t segment_index = 0);
+
+    // void CommandSet_PixelHardwareTypeID(uint8_t value);
+    // void CommandSet_LightPowerState(uint8_t value);
+    // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
+    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index);
+    // void CommandSet_Brt_255(uint8_t value);
+    void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
+    // void CommandSet_BrtCT_255(uint8_t bri);
+    // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
+    // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
+    // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
+    // bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
+    // void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+    // void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
+    // void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
+    // void CommandSet_Auto_Time_Off_Secs(uint16_t value);
+    // void CommandSet_PaletteID(uint8_t value);
+    // void CommandSet_AnimationModeID(uint8_t value);
+
 
 /***************
  * END

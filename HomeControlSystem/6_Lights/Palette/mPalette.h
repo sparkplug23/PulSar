@@ -126,6 +126,7 @@ class mPalette
     void init_ColourPalettes_Christmas_18();
     void init_ColourPalettes_Christmas_19();
     void init_ColourPalettes_Christmas_20();
+    void init_ColourPalettes_Christmas_21();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
     void init_ColourPalettes_Sunrise_02();
@@ -133,6 +134,7 @@ class mPalette
     void init_ColourPalettes_Sunrise_04();
     void init_ColourPalettes_Sunset_01();
     void init_ColourPalettes_Sunset_02();
+    void init_ColourPalettes_Candle_Flame_01();
     void init_ColourPalettes_Gradient_SunLevel_Group01_01();
     void init_ColourPalettes_Gradient_SunLevel_Group01_02();
     void init_ColourPalettes_Gradient_SunLevel_Group01_03();
@@ -260,12 +262,14 @@ class mPalette
     PALETTELIST_STATIC_CHRISTMAS_18_ID,
     PALETTELIST_STATIC_CHRISTMAS_19_ID,
     PALETTELIST_STATIC_CHRISTMAS_20_ID,
+    PALETTELIST_STATIC_CHRISTMAS_21_ID,
     PALETTELIST_STATIC_SUNRISE_01_ID,
     PALETTELIST_STATIC_SUNRISE_02_ID,
     PALETTELIST_STATIC_SUNRISE_03_ID,
     PALETTELIST_STATIC_SUNRISE_04_ID,
     PALETTELIST_STATIC_SUNSET_01_ID,
     PALETTELIST_STATIC_SUNSET_02_ID,
+    PALETTELIST_STATIC_CANDLE_FLAME_01_ID,
     PALETTELIST_STATIC_GRADIENT_FIRE_01_ID,
     /**
      * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
@@ -388,7 +392,6 @@ class mPalette
         // Active pixels
         uint8_t colour_map_size = 0;
       };
-      PALETTE *ptr;
       // Can be edited
       PALETTE hsbid_users[10]; //reduce to 10, as "hsb_colour_ids"
       // Can be edited
@@ -422,6 +425,7 @@ class mPalette
       PALETTE sunrise_04;
       PALETTE sunset_01;
       PALETTE sunset_02;
+      PALETTE candle_flame_01;
       PALETTE berry_green;
       PALETTE gradient_sunlevel_group01_01;
       PALETTE gradient_sunlevel_group01_02;
@@ -456,12 +460,14 @@ class mPalette
       PALETTE christmas_18;
       PALETTE christmas_19;
       PALETTE christmas_20;
+      PALETTE christmas_21;
       // Created for other people
       PALETTE custom_user_01;
+      PALETTE *ptr = &rainbow;
     }palettelist;
 
     // One of the variable rgbcct is used as the function colour manipulators
-    uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+    // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
 
     const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen);
@@ -482,7 +488,7 @@ class mPalette
 
     
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
- uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit = 0);
+ uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
     
 uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
               

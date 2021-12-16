@@ -84,9 +84,27 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
   //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-    JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+    JsonBuilderI->Add_P(PM_JSON_HUE, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getHue360());
+    JsonBuilderI->Add_P(PM_JSON_SAT, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getSat255());
+    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
 
     
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -96,6 +114,9 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+
 
 
   return JsonBuilderI->End();
@@ -253,23 +274,72 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
 
 
+  DEBUG_LINE_HERE;
   /***
    * Configure RgbcctController Instance
    * */
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
-  rgbcct_controller.setSubType(subtype);
-  rgbcct_controller.setApplyBrightnessToOutput(false);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setSubType(subtype);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setApplyBrightnessToOutput(false);
   if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
-    rgbcct_controller.setColorMode(LCM_RGB);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setColorMode(LCM_RGB);
   }else{
-    rgbcct_controller.setColorMode(LCM_BOTH);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setColorMode(LCM_BOTH);
   }
-  rgbcct_controller.Sync();    // calculate the initial values (#8058)
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+Sync();    // calculate the initial values (#8058)
   // RGB parts
-  rgbcct_controller.setRGB(1,2,3);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setRGB(1,2,3);
   // CCT parts
-  rgbcct_controller.setRGBCCTLinked(false);
-  rgbcct_controller.setCCT(153);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setRGBCCTLinked(false);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setCCT(153);
   
 
 
@@ -438,10 +508,23 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_POINTER_INIT:
 
       mPaletteI->init_PresetColourPalettes();
+      
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+      // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+      // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
+      CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+#else
+
       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+  DEBUG_LINE_HERE;
+
+
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     break;
     case FUNC_PRE_INIT:
@@ -490,9 +573,38 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
       //Temp fix until proper monitoring of on/off states
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // replace with GetLightPower() so its updated internally
+      
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      light_power_state = pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightness255()?1:0;
+#else
       light_power_state = rgbcct_controller.getBrightness255()?1:0;
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
+
+
+Serial.println("palette_rgbcct_users_colour_map");
+for(int i=0;i<25;i++)
+{
+  Serial.printf("%d,", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[i]);
+}
+Serial.println("every second");
+
+Serial.println("rgbcct0");
+for(int i=0;i<5;i++)
+{
+  Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].colour_map_id[i]);
+}
+Serial.println("rgbcct1");
+for(int i=0;i<5;i++)
+{
+  Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
+}
+Serial.println("every second");
+
+// (&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index])
+
 
 
       // AddLog(LOG_LEVEL_TEST, PSTR("sizeof(RgbcctColor_Controller)=%d"),sizeof(RgbcctColor_Controller));
@@ -736,11 +848,41 @@ void mInterfaceLight::EverySecond_AutoOff(){
 
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
-  colour->R  = mapvalue(colour->R,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
-  colour->G  = mapvalue(colour->G,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
-  colour->B  = mapvalue(colour->B,  0, 255, 0, rgbcct_controller.getBrightnessRGB255());
-  colour->WW = mapvalue(colour->WW, 0, 255, 0, rgbcct_controller.getBrightnessCCT255());
-  colour->WC = mapvalue(colour->WC, 0, 255, 0, rgbcct_controller.getBrightnessCCT255());
+  colour->R  = mapvalue(colour->R,  0, 255, 0, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
+  colour->G  = mapvalue(colour->G,  0, 255, 0, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
+  colour->B  = mapvalue(colour->B,  0, 255, 0, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
+  colour->WW = mapvalue(colour->WW, 0, 255, 0, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessCCT255());
+  colour->WC = mapvalue(colour->WC, 0, 255, 0, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessCCT255());
 
 }
 
@@ -786,17 +928,42 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
-  JsonBuilderI->Add_P(PM_JSON_HUE, rgbcct_controller.getHue360());
-  JsonBuilderI->Add_P(PM_JSON_SAT, rgbcct_controller.getSat255());
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, rgbcct_controller.getBrightnessRGB255());
+  JsonBuilderI->Add_P(PM_JSON_HUE, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getHue360());
+  JsonBuilderI->Add_P(PM_JSON_SAT, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getSat255());
+
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
 
   
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_colour_order);
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
 
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, rgbcct_controller.getBrightnessCCT255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessCCT255());
 
 
   // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
@@ -824,12 +991,12 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
 
   JsonBuilderI->Level_Start("RgbcctController");
   
-    JsonBuilderI->Level_Start("raw");
-      JsonBuilderI->Add("R", rgbcct_controller.R); 
-      JsonBuilderI->Add("G", rgbcct_controller.G); 
-      JsonBuilderI->Add("B", rgbcct_controller.B); 
-      JsonBuilderI->Add("WW", rgbcct_controller.WW); 
-      JsonBuilderI->Add("WC", rgbcct_controller.WC); 
+    // JsonBuilderI->Level_Start("raw");
+    //   JsonBuilderI->Add("R", rgbcct_controller.R); 
+    //   JsonBuilderI->Add("G", rgbcct_controller.G); 
+    //   JsonBuilderI->Add("B", rgbcct_controller.B); 
+    //   JsonBuilderI->Add("WW", rgbcct_controller.WW); 
+    //   JsonBuilderI->Add("WC", rgbcct_controller.WC); 
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
     
@@ -862,7 +1029,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
 
     JsonBuilderI->Level_End();
 
-    JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
+    // JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
 
   JsonBuilderI->Level_End();
 

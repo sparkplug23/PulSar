@@ -624,8 +624,15 @@ class mInterfaceLight :
     void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
 
+#ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+    // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
+    RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
+
     RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
     void Template_Load();
 
     void parse_JSONCommand(JsonParserObject obj);
@@ -688,9 +695,6 @@ class mInterfaceLight :
     uint16_t fadeGamma(uint32_t channel, uint16_t v);
     uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
     #endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-    // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
-    RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
     void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
 
@@ -779,6 +783,14 @@ class mInterfaceLight :
       return _ct_max_range;
     }
 
+    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
+    uint16_t _ct_min_range = 153;   // the minimum CT rendered range
+    uint16_t _ct_max_range = 500;   // the maximum CT rendered range
+
+
+  // I need to keep brightness on its own, with functions for it  
+    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
+    uint8_t  _briCT_Global = 255;
 
 
 private:
@@ -801,14 +813,6 @@ private:
 //     uint8_t  _color_mode = LCM_RGB; // RGB by default
 // #endif // ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
 
-    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
-    uint16_t _ct_min_range = 153;   // the minimum CT rendered range
-    uint16_t _ct_max_range = 500;   // the maximum CT rendered range
-
-
-  // I need to keep brightness on its own, with functions for it  
-    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
-    uint8_t  _briCT_Global = 255;
 
 
 

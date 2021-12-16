@@ -79,7 +79,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  
+  #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   if(jtok = obj[PM_JSON_HUE]){ // Assume range 0-359
     CommandSet_ActiveSolidPalette_Hue_360(jtok.getInt());
     data_buffer.isserviced++;
@@ -87,6 +87,7 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
   if(jtok = obj[PM_JSON_SAT]){ // Assume range 0-100
     CommandSet_ActiveSolidPalette_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255));
@@ -969,7 +970,13 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
 
  
   // Serial.println("HER"); Serial.flush();
-  rgbcct_controller.setRGB(colour.R, colour.G, colour.B);
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setRGB(colour.R, colour.G, colour.B);
 
   
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -1005,6 +1012,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
 }
  
 
+  #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** Hue *****************************************************************************************
@@ -1023,6 +1031,7 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
+  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1031,14 +1040,26 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
-  rgbcct_controller.setSat255(sat_new);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setSat255(sat_new);
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), rgbcct_controller.getSat255());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getSat255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1049,7 +1070,13 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
-  rgbcct_controller.setBrightness255(brt_new);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setBrightness255(brt_new);
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
@@ -1057,7 +1084,13 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriRGB_Global(brt_new);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightness255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1068,7 +1101,13 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
-  rgbcct_controller.setBrightnessRGB255(bri);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setBrightnessRGB255(bri);
   _briRGB_Global = bri;
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
@@ -1077,7 +1116,13 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightnessRGB255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1088,7 +1133,13 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
-  rgbcct_controller.setBrightnessCCT255(bri);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setBrightnessCCT255(bri);
   _briCT_Global = bri;
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
@@ -1097,7 +1148,13 @@ void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), rgbcct_controller.getBrightnessCCT255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getBrightnessCCT255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1109,14 +1166,26 @@ void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
-  rgbcct_controller.setCCT(ct);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setCCT(ct);
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getCCT());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1138,7 +1207,13 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_
  * "InternalSet" ie direct control, does not have Addlog feedback like commandset
  * */
 void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
-  rgbcct_controller.setCCT(ct);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setCCT(ct);
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
@@ -1153,14 +1228,26 @@ void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
 *******************************************************************************************************************************/
 
 bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked) {
-  rgbcct_controller.setRGBCCTLinked(ct_rgb_linked);
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setRGBCCTLinked(ct_rgb_linked);
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
 #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)),   
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+getRGBCCTLinked());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1175,7 +1262,13 @@ bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc){
-  rgbcct_controller.setChannelsRaw(r,g,b,ww,wc);  
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setChannelsRaw(r,g,b,ww,wc);  
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
@@ -1189,7 +1282,13 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint
 }
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
-  rgbcct_controller.setChannelsRaw(values);    
+    
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+setChannelsRaw(values);    
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
@@ -1450,6 +1549,7 @@ uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number
 
 
 
+// #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** ActiveRgbcctColourPaletteIDUsedAsScene *****************************************************************************************
@@ -1460,11 +1560,17 @@ void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t 
 
   uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID;  
   
-  mPaletteI->active_scene_palette_id = palette_id;
+  //mPaletteI->active_scene_palette_id = palette_id;
+  #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
-  
+  #endif //  ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+
+
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
 }
+
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1573,7 +1679,13 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   // Add to select correct buffer depending on palette type
   memcpy(palette_buffer,buffer,buflen);
 
-  rgbcct_controller.UpdateFromExternalBuffer();
+  
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+#else
+      rgbcct_controller.
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+UpdateFromExternalBuffer();
 #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   animation.flags.fForceUpdate = true;
 #else
