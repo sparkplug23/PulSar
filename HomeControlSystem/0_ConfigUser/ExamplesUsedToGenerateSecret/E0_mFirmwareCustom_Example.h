@@ -162,6 +162,223 @@
 #endif
 
 
+#ifdef DEVICE_RGBSTRING_EXAMPLE_SEGMENT
+  #define DEVICENAME_CTR          "testbed_string_segment_01"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
 
+  #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+  //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+  //#define USE_DEVFEATURE_METHOD_WLED_BUILD
+ 
+ 
+  #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    // enable some wled conerted aniamtions
+    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION  // to test existing effects in wled
+    #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "WLED"
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+  #endif
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ Segment command for single segment to replace old effects
+ Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
+ * 
+ */
+ #define STRIP_SIZE_MAX 50
+ #define USE_LIGHTING_TEMPLATE
+
+//  #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":3000,"
+      "\"RateMs\":10000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 21\"," 
+    "\"Effects\":{"
+      "\"Function\":29"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":29"
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":23"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":28"
+      "},"
+      "\"ColourPalette\":11,"
+      "\"Hue\":20,"
+      "\"Sat\":90,"
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":25"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+#endif
 
 #endif // MFIRMWARECUSTOM_EXAMPLE_HEADER
