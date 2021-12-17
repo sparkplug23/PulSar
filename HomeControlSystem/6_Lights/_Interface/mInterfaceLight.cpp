@@ -584,23 +584,23 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
       #endif // USE_MODULE_LIGHTS_ANIMATOR
 
 
-Serial.println("palette_rgbcct_users_colour_map");
-for(int i=0;i<25;i++)
-{
-  Serial.printf("%d,", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[i]);
-}
-Serial.println("every second");
+// Serial.println("palette_rgbcct_users_colour_map");
+// for(int i=0;i<25;i++)
+// {
+//   Serial.printf("%d,", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[i]);
+// }
+// Serial.println("every second");
 
-Serial.println("rgbcct0");
-for(int i=0;i<5;i++)
-{
-  Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].colour_map_id[i]);
-}
-Serial.println("rgbcct1");
-for(int i=0;i<5;i++)
-{
-  Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
-}
+// Serial.println("rgbcct0");
+// for(int i=0;i<5;i++)
+// {
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].colour_map_id[i]);
+// }
+// Serial.println("rgbcct1");
+// for(int i=0;i<5;i++)
+// {
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
+// }
 Serial.println("every second");
 
 // (&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index])

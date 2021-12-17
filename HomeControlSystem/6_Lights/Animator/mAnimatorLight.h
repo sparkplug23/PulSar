@@ -252,6 +252,18 @@ class mAnimatorLight :
     
     void SetPixelColor(uint16_t indexPixel, RgbcctColor color, uint8_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
+
+    /**
+     * @brief 
+     * Tmp wled conversions
+     * 
+     */
+    
+void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length = 0);  
+void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length = 0);
+
+
+
     
     // what is stored for state is specific to the need, in this case, the colors.
     // Basically what ever you need inside the animation update function

@@ -13,10 +13,8 @@ build
 firmware.map
 platformio_override.ini
 # FutureIdeas.txt
-HomeControlSystem/0_ConfigUser/mUserConfig_Secret.h
-HomeControlSystem/0_ConfigUser/mUserConfig_Secret_Michael.h
-HomeControlSystem/0_ConfigUser/mFirmwareCustom_Secret.h
-HomeControlSystem/0_ConfigUser/mFirmwareCustom_Secret_Michael.h
+HomeControlSystem/0_ConfigUser/G1_mUserConfig_Secret.h
+HomeControlSystem/0_ConfigUser/G0_mFirmwareCustom_Secret.h
 
 ## Visual Studio Code specific ######
 .vscode

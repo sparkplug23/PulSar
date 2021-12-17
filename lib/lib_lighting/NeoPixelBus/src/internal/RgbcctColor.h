@@ -117,6 +117,11 @@ struct RgbcctColor
     {
     };
 
+    // RgbcctColor RgbcctColor(uint32_t color32bit)
+    // {
+    //     return RgbcctColor(color32bit & 0x000F);
+    // }
+
     // ------------------------------------------------------------------------
     // Comparison operators
     // ------------------------------------------------------------------------
@@ -149,6 +154,18 @@ struct RgbcctColor
         WC = qadd8( WC, rhs.WC);
         return *this;
     }
+
+    /// scale down a RGB to N 256ths of it's current brightness, using
+    /// 'plain math' dimming rules, which means that if the low light levels
+    /// may dim all the way to 100% black.
+    inline RgbcctColor& nscale8 (const RgbcctColor & scaledown )
+    {
+        R = ::scale8(R, scaledown.R);
+        G = ::scale8(G, scaledown.G);
+        B = ::scale8(B, scaledown.B);
+        return *this;
+    }
+
 
 
 
@@ -231,6 +248,21 @@ struct RgbcctColor
     // uint8_t B;
     // uint8_t WW;
     // uint8_t WC;
+
+    /**
+     * @brief 
+     * Conversion from Rgbcct into uint32_t (dropping the second white colour)
+     * 
+     */
+    static uint32_t GetU32Colour(RgbcctColor c)
+    {
+        uint32_t c_out =
+            ((uint32_t)c.warm_white << 24) |
+            ((uint32_t)c.red        << 16) |
+            ((uint32_t)c.green      <<  8) |
+            ((uint32_t)c.blue            ) ;
+        return c_out;
+    }
 
     // Unions allow overlapping of parameters, size of parameters below is only 5 bytes, but can be accessed by multiple ways
     union {

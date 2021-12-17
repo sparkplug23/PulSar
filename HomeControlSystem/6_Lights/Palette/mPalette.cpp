@@ -997,6 +997,20 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
 
 // }
 
+/**
+ * @brief 
+ * Variation of using pointer, instead, pointer id mostly for testing
+ * 
+ * @param ptr 
+ * @param pixel_num 
+ * @param pixel_position 
+ * @return RgbcctColor 
+ */
+RgbcctColor mPalette::GetColourFromPalette(uint16_t palette_id, uint16_t pixel_num, int16_t *pixel_position)
+{
+  return GetColourFromPalette(GetPalettePointerByID(palette_id), pixel_num, pixel_position);
+}
+
 RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
 

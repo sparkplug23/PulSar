@@ -8,6 +8,9 @@
 
     #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
 #define MAX_NUM_SEGMENTS 5
@@ -21,6 +24,45 @@
 
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
+
+
+//Segment option byte bits
+#define SEG_OPTION_SELECTED       0
+#define SEG_OPTION_REVERSED       1
+#define SEG_OPTION_ON             2
+#define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME or needs getPixelColor
+#define SEG_OPTION_TRANSITIONAL   7
+
+// some common colors
+#define RED        (uint32_t)0xFF0000
+#define GREEN      (uint32_t)0x00FF00
+#define BLUE       (uint32_t)0x0000FF
+#define WHITE      (uint32_t)0xFFFFFF
+#define BLACK      (uint32_t)0x000000
+#define YELLOW     (uint32_t)0xFFFF00
+#define CYAN       (uint32_t)0x00FFFF
+#define MAGENTA    (uint32_t)0xFF00FF
+#define PURPLE     (uint32_t)0x400080
+#define ORANGE     (uint32_t)0xFF3000
+#define PINK       (uint32_t)0xFF1493
+#define ULTRAWHITE (uint32_t)0xFFFFFFFF
+
+
+#define SEGCOLOR(x)      _segments[segment_index].colors[x]
+
+    CRGBPalette16 currentPalette;
+    CRGBPalette16 targetPalette;
+uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri);
+
+// void fill_ranged(uint32_t c) ;
+
+void fill(uint32_t c);
+// void seg_fill_ranged(uint32_t c) ;
+
+uint32_t color_wheel(uint8_t pos);
+uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend);
+
 
     void Segments_UpdateStartingColourWithGetPixel();
 void Init_Segments();
@@ -212,6 +254,8 @@ void Init_Segments();
     EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
     EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
     EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
+    EFFECTS_FUNCTION_WLED_FIREWORKS_ID,
+    EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID,
 
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
@@ -869,7 +913,9 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
   
     //   uint8_t opacity = 255; //??
-    //   uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR2}; //? really not needed or understood
+
+    // To be phased out, only for easy conversion
+      uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR2}; //? really not needed or understood
 
       /**
        * Flags
@@ -928,29 +974,29 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       }transition;
       uint8_t speed() //legacy for wled effects, made up from time/rate
       {
-        return 100;
+        return 127;
       }
       uint8_t intensity() //legacy for wled effects, made up from time/rate
       {
-        return 100; // amount of animations in it
+        return 127; // amount of animations in it
       }
-      // void setOption(uint8_t n, bool val)
-      // {
-      //   if (val) {
-      //     options |= 0x01 << n;
-      //   } else
-      //   {
-      //     options &= ~(0x01 << n);
-      //   }
-      // }
-      // bool getOption(uint8_t n)
-      // {
-      //   return ((options >> n) & 0x01);
-      // }
-      // bool isSelected()
-      // {
-      //   return getOption(0);
-      // }
+      void setOption(uint8_t n, bool val)
+      {
+        if (val) {
+          options |= 0x01 << n;
+        } else
+        {
+          options &= ~(0x01 << n);
+        }
+      }
+      bool getOption(uint8_t n)
+      {
+        return ((options >> n) & 0x01);
+      }
+      bool isSelected()
+      {
+        return getOption(0);
+      }
       bool isActive()
       {
         return pixel_range.stop > pixel_range.start;
@@ -1053,6 +1099,8 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
        * This will also need to share its index into the animation so it knows what segments to run
        * */
       NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
+
+      bool animation_has_anim_callback = true;
       
       // can I default this to nullptr when not used, will this actually reduce memory?
       RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
@@ -1184,6 +1232,17 @@ void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
     void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
     void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
     void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
+    void SubTask_Segment_Flasher_Animate_Function__Fireworks();
+    void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
+
+    // Temporary helper functions to be cleaned up and converted
+    void blur(uint8_t blur_amount);
+    void fade_out(uint8_t rate);
+    uint32_t crgb_to_col(CRGB fastled);
+    CRGB col_to_crgb(uint32_t);
+
+
+
 
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 

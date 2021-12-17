@@ -937,21 +937,34 @@ uint16_t WS2812FX::mode_fireworks() {
   }
   bool valid1 = (_segment_runtimes[_segment_index].aux0 < SEGLEN);
   bool valid2 = (_segment_runtimes[_segment_index].aux1 < SEGLEN);
+  
+  SPF("_segment_runtimes[_segment_index].aux0","%d",_segment_runtimes[_segment_index].aux0);
+  SPF("_segment_runtimes[_segment_index].aux1","%d",_segment_runtimes[_segment_index].aux1);
+
+
   uint32_t sv1 = 0, sv2 = 0;
+  // Current pixel colour of now and previous, at the center locations
   if (valid1) sv1 = getPixelColor(_segment_runtimes[_segment_index].aux0);
   if (valid2) sv2 = getPixelColor(_segment_runtimes[_segment_index].aux1);
-  blur(255-_segments[_segment_index].speed);
-  if (valid1) setPixelColor(_segment_runtimes[_segment_index].aux0 , sv1);
+  // Blur must take this, and blend the pixel outwards
+  blur(255-_segments[_segment_index].speed); // blur width is related to speed? 
+  // Redraw the original pixel I got
+  if (valid1) setPixelColor(_segment_runtimes[_segment_index].aux0, sv1);
   if (valid2) setPixelColor(_segment_runtimes[_segment_index].aux1, sv2);
 
   for(uint16_t i=0; i<MAX(1, SEGLEN/20); i++) {
-    if(random8(129 - (_segments[_segment_index].intensity >> 1)) == 0) {
+    if(random8(129 - (_segments[_segment_index].intensity >> 1)) == 0) { // is this setting when aux0 and aux1 change?, i will only be 0 or 1
       uint16_t index = random(SEGLEN);
+      
+      AddLog(LOG_LEVEL_TEST, "index=%d\t%d",i,index);
       setPixelColor(index, color_from_palette(random8(), false, false, 0));
       _segment_runtimes[_segment_index].aux1 = _segment_runtimes[_segment_index].aux0;
       _segment_runtimes[_segment_index].aux0 = index;
     }
   }
+
+delay(1000);
+
   return FRAMETIME;
 }
 
@@ -3137,7 +3150,7 @@ uint16_t WS2812FX::mode_popcorn(void) {
 
 uint16_t WS2812FX::candle(bool multi)
 {
-multi=1;
+
     AddLog(LOG_LEVEL_TEST, PSTR("multi=%d"),multi);
   // DEBUG_LINE_HERE;
   if (multi)

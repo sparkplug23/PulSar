@@ -492,6 +492,8 @@ class mPalette
     
 uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
               
+              
+    RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
     RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
 
     PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);

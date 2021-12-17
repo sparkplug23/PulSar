@@ -702,6 +702,25 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 }
 
 
+/**
+ * Alternate SetPixelColor to make WLED conversion easier, but to be phased out later
+ */
+
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length)
+{
+  SetPixelColor(indexPixel, RgbColor(red,green,blue));
+}
+  
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length)
+{
+  RgbcctColor col;
+  col.red =   (color >> 16 & 0xFF);
+  col.green = (color >> 8  & 0xFF);
+  col.blue =  (color       & 0xFF);
+  SetPixelColor(indexPixel, col);
+}
+
+
 void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, uint8_t segment_length)
 {
 
@@ -827,6 +846,12 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "stripbus == nullptr"));
     #endif
+  }
+
+  // Temp fix for WLED animations
+  if(indexPixel > STRIP_SIZE_MAX)
+  {
+    return RgbcctColor(0);
   }
 
   

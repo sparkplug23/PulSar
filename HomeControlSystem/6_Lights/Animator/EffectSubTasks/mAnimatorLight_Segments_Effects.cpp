@@ -5277,45 +5277,17 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 
 
-// //each needs 12 bytes
-// //Spark type is used for popcorn, 1D fireworks, and drip
-// typedef struct Spark {
-//   float pos;
-//   float vel;
-//   uint16_t col;
-//   uint8_t colIndex;
-// } spark;
+//each needs 12 bytes
+//Spark type is used for popcorn, 1D fireworks, and drip
+typedef struct Spark {
+  float pos;
+  float vel;
+  uint16_t col;
+  uint8_t colIndex;
+} spark;
 
 
     #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-
-/*
- * Fills segment with color
- */
-void mAnimatorLight::fill_ranged(uint32_t c) 
-{
-
-  uint16_t start_pixel = _segments[_segment_index].start_pixel_index;
-  uint16_t end_pixel = _segments[_segment_index].stop_pixel_index;
-
-  for(uint16_t i = start_pixel; i <= end_pixel; i++) {
-    pCONT_lAni->mEffects->setPixelColor(i, c);
-  }
-
-}
-
-void mAnimatorLight::seg_fill_ranged(uint32_t c) 
-{
-
-  uint16_t start_pixel = _segments[_segment_index].start_pixel_index;
-  uint16_t end_pixel = _segments[_segment_index].stop_pixel_index;
-
-  for(uint16_t i = start_pixel; i <= end_pixel; i++) {
-    // pCONT_lAni->mEffects->setPixelColor(i, c);
-    pCONT_lAni->animation_colours[i].DesiredColour = RgbColor(c);
-  }
-
-}
 
 
 /****************************************************************************************************************************
@@ -5335,7 +5307,7 @@ uint16_t mAnimatorLight::seg_mode_static(void) {
   handle_palette();
 
   seg_fill_ranged(SEGCOLOR(0));
-  return (_segments[_segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+  return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
 }
 
 
@@ -5349,10 +5321,10 @@ uint16_t mAnimatorLight::mode_static(void) {
   handle_palette();
 
   fill_ranged(SEGCOLOR(0));
-  return (_segments[_segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+  return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
 }
 
-//Speed slider sets amount of LEDs lit, intensity sets unlit
+//Speed slider sets amount of LEDs lit, intensity() sets unlit
 uint16_t mAnimatorLight::mode_static_pattern()
 {
   /**
@@ -5360,14 +5332,14 @@ uint16_t mAnimatorLight::mode_static_pattern()
    * */
   handle_palette();
 
-  uint16_t lit = 1 + _segments[_segment_index].speed;
-  uint16_t unlit = 1 + _segments[_segment_index].intensity;
+  uint16_t lit = 1 + _segments[segment_index].speed();
+  uint16_t unlit = 1 + _segments[segment_index].intensity();
   bool drawingLit = true;
   uint16_t cnt = 0;
-  uint16_t start_pixel = _segments[_segment_index].start_pixel_index;
+  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
 
-  for (uint16_t i = 0; i < SEGLEN; i++) {
-    pCONT_lAni->mEffects->setPixelColor(i+start_pixel, 
+  for (uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i+start_pixel, 
       (drawingLit) ? 
       pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : 
       SEGCOLOR(1));
@@ -5388,18 +5360,18 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
    * */
   handle_palette();
 
-  uint8_t segSize = (_segments[_segment_index].intensity >> 5) +1;
+  uint8_t segSize = (_segments[segment_index].intensity() >> 5) +1;
   uint8_t currSeg = 0;
   uint16_t currSegCount = 0;
-  uint16_t start_pixel = _segments[_segment_index].start_pixel_index;
+  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
 
-  for (uint16_t i = 0; i < SEGLEN; i++) {
+  for (uint16_t i = 0; i < segment_length; i++) {
     if ( currSeg % 3 == 0 ) {
-      pCONT_lAni->mEffects->setPixelColor(i+start_pixel, SEGCOLOR(0));
+      SetPixelColor(i+start_pixel, SEGCOLOR(0));
     } else if( currSeg % 3 == 1) {
-      pCONT_lAni->mEffects->setPixelColor(i+start_pixel, SEGCOLOR(1));
+      SetPixelColor(i+start_pixel, SEGCOLOR(1));
     } else {
-      pCONT_lAni->mEffects->setPixelColor(i+start_pixel, (SEGCOLOR(2) > 0 ? SEGCOLOR(2) : WHITE));
+      SetPixelColor(i+start_pixel, (SEGCOLOR(2) > 0 ? SEGCOLOR(2) : WHITE));
     }
     currSegCount += 1;
     if (currSegCount >= segSize) {
@@ -5424,31 +5396,31 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
 //  * NOTE: Maybe re-rework without timer
 //  */
 // uint16_t mAnimatorLight::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
-//   uint16_t stateTime = _segment_runtimes[_segment_index].aux1;
-//   uint32_t cycleTime = (255 - _segments[_segment_index].speed)*20;
+//   uint16_t stateTime = _segment_runtimes[segment_index].aux1;
+//   uint32_t cycleTime = (255 - _segments[segment_index].speed())*20;
 //   uint32_t onTime = 0;
 //   uint32_t offTime = cycleTime;
 
 //   if (!strobe) {
-//     onTime = (cycleTime * _segments[_segment_index].intensity) >> 8;
+//     onTime = (cycleTime * _segments[segment_index].intensity()) >> 8;
 //     offTime = cycleTime - onTime;
 //   }
   
-//   stateTime = ((_segment_runtimes[_segment_index].aux0 & 1) == 0) ? onTime : offTime;
+//   stateTime = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? onTime : offTime;
 //   stateTime += 20;
     
-//   if (now - _segment_runtimes[_segment_index].step > stateTime)
+//   if (now - _segment_runtimes[segment_index].step > stateTime)
 //   {
-//     _segment_runtimes[_segment_index].aux0++;
-//     _segment_runtimes[_segment_index].aux1 = stateTime;
-//     _segment_runtimes[_segment_index].step = now;
+//     _segment_runtimes[segment_index].aux0++;
+//     _segment_runtimes[segment_index].aux1 = stateTime;
+//     _segment_runtimes[segment_index].step = now;
 //   }
 
-//   uint32_t color = ((_segment_runtimes[_segment_index].aux0 & 1) == 0) ? color1 : color2;
+//   uint32_t color = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? color1 : color2;
 //   if (color == color1 && do_palette)
 //   {
-//     for(uint16_t i = 0; i < SEGLEN; i++) {
-//       pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//     for(uint16_t i = 0; i < segment_length; i++) {
+//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //     }
 //   } else fill(color);
 
@@ -5468,7 +5440,7 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
 //  * Classic Blink effect. Cycling through the rainbow.
 //  */
 // uint16_t mAnimatorLight::mode_blink_rainbow(void) {
-//   return blink(color_wheel(_segment_runtimes[_segment_index].call & 0xFF), SEGCOLOR(1), false, false);
+//   return blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), false, false);
 // }
 
 
@@ -5484,31 +5456,31 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
 //  * Classic Strobe effect. Cycling through the rainbow.
 //  */
 // uint16_t mAnimatorLight::mode_strobe_rainbow(void) {
-//   return blink(color_wheel(_segment_runtimes[_segment_index].call & 0xFF), SEGCOLOR(1), true, false);
+//   return blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), true, false);
 // }
 
 // /*
-//  * Strobe effect with different strobe count and pause, controlled by speed.
+//  * Strobe effect with different strobe count and pause, controlled by speed().
 //  */
 // uint16_t mAnimatorLight::mode_multi_strobe(void) {
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
 //   }
 //   //blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
 
-//   uint16_t delay = 50 + 20*(uint16_t)(255-_segments[_segment_index].speed);
-//   uint16_t count = 2 * ((_segments[_segment_index].speed / 10) + 1);
-//   if(_segment_runtimes[_segment_index].step < count) {
-//     if((_segment_runtimes[_segment_index].step & 1) == 0) {
-//       for(uint16_t i = 0; i < SEGLEN; i++) {
-//         pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//   uint16_t delay = 50 + 20*(uint16_t)(255-_segments[segment_index].speed());
+//   uint16_t count = 2 * ((_segments[segment_index].speed() / 10) + 1);
+//   if(_segment_runtimes[segment_index].step < count) {
+//     if((_segment_runtimes[segment_index].step & 1) == 0) {
+//       for(uint16_t i = 0; i < segment_length; i++) {
+//         SetPixelColor(i, SEGCOLOR(0));
 //       }
 //       delay = 20;
 //     } else {
 //       delay = 50;
 //     }
 //   }
-//   _segment_runtimes[_segment_index].step = (_segment_runtimes[_segment_index].step + 1) % (count + 1);
+//   _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % (count + 1);
 //   return delay;
 // }
 
@@ -5531,60 +5503,60 @@ uint16_t mAnimatorLight::color_wipe(bool rev, bool useRandomColors) {
    * */
   handle_palette();
 
-  uint16_t start_pixel = _segments[_segment_index].start_pixel_index;
-  uint32_t cycleTime = 750 + (255 - _segments[_segment_index].speed)*150;
+  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
+  uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
   uint32_t perc = now % cycleTime;
   uint16_t prog = (perc * 65535) / cycleTime;
   bool back = (prog > 32767);
 
   if (back) {
     prog -= 32767;
-    if (_segment_runtimes[_segment_index].step == 0) _segment_runtimes[_segment_index].step = 1;
+    if (_segment_runtimes[segment_index].step == 0) _segment_runtimes[segment_index].step = 1;
   } else {
-    if (_segment_runtimes[_segment_index].step == 2) _segment_runtimes[_segment_index].step = 3; //trigger color change
+    if (_segment_runtimes[segment_index].step == 2) _segment_runtimes[segment_index].step = 3; //trigger color change
   }
 
   if (useRandomColors) {
-    if (_segment_runtimes[_segment_index].call == 0) {
-      _segment_runtimes[_segment_index].aux0 = random8();
-      _segment_runtimes[_segment_index].step = 3;
+    if (_segment_runtimes[segment_index].call == 0) {
+      _segment_runtimes[segment_index].aux0 = random8();
+      _segment_runtimes[segment_index].step = 3;
     }
-    if (_segment_runtimes[_segment_index].step == 1) { //if flag set, change to new random color
-      _segment_runtimes[_segment_index].aux1 = 
-        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[_segment_index].aux0);
-      _segment_runtimes[_segment_index].step = 2;
+    if (_segment_runtimes[segment_index].step == 1) { //if flag set, change to new random color
+      _segment_runtimes[segment_index].aux1 = 
+        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+      _segment_runtimes[segment_index].step = 2;
     }
-    if (_segment_runtimes[_segment_index].step == 3) {
-      _segment_runtimes[_segment_index].aux0 = 
-        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[_segment_index].aux1);
-      _segment_runtimes[_segment_index].step = 0;
+    if (_segment_runtimes[segment_index].step == 3) {
+      _segment_runtimes[segment_index].aux0 = 
+        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux1);
+      _segment_runtimes[segment_index].step = 0;
     }
   }
 
-  uint16_t ledIndex = (prog * SEGLEN) >> 15;
+  uint16_t ledIndex = (prog * segment_length) >> 15;
   uint16_t rem = 0;
-  rem = (prog * SEGLEN) * 2; //mod 0xFFFF
-  rem /= (_segments[_segment_index].intensity +1);
+  rem = (prog * segment_length) * 2; //mod 0xFFFF
+  rem /= (_segments[segment_index].intensity() +1);
   if (rem > 255) rem = 255;
 
-  uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[_segment_index].aux1) : SEGCOLOR(1);
-  for (uint16_t i = 0; i < SEGLEN; i++)
+  uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux1) : SEGCOLOR(1);
+  for (uint16_t i = 0; i < segment_length; i++)
   {
-    uint16_t index = (rev && back)? SEGLEN -1 -i : i;
+    uint16_t index = (rev && back)? segment_length -1 -i : i;
     uint32_t col0 = 
       useRandomColors ? 
-      pCONT_lAni->mEffects->color_wheel(_segment_runtimes[_segment_index].aux0) : 
+      pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux0) : 
       pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
     
     if (i < ledIndex) 
     {
-      pCONT_lAni->mEffects->setPixelColor(index, back? col1 : col0);
+      SetPixelColor(index, back? col1 : col0);
     } else
     {
-      pCONT_lAni->mEffects->setPixelColor(index, back? col0 : col1);
+      SetPixelColor(index, back? col0 : col1);
       if (i == ledIndex) 
       {
-        pCONT_lAni->mEffects->setPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
+        SetPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
       }
     }
   } 
@@ -5625,6 +5597,143 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
     #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
 
+/*
+ * Fills segment with color
+ */
+
+
+/*
+ * Gets a single color from the currently selected palette.
+ * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
+ * @param mapping if true, LED position in segment is considered for color
+ * @param wrap FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
+ * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
+ * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
+ * @returns Single color from palette
+ */
+uint32_t mAnimatorLight::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
+{
+
+currentPalette = RainbowColors_p; // always use rainbow for now
+
+  uint8_t segment_index  = segment_iters._segment_index;
+
+  return RgbcctColor::GetU32Colour(RgbcctColor(0,255,2550));
+
+  // if (_segments[segment_index].palette == 0 && mcol < 3) return SEGCOLOR(mcol); //WS2812FX default
+  // uint8_t paletteIndex = i;
+  // // if (mapping) paletteIndex = (i*255)/(_virtualSegmentLength -1);
+  // // if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end"
+
+
+  // CRGB fastled_col;
+  // fastled_col = ColorFromPalette( currentPalette, paletteIndex, pbri, (paletteBlend == 3)? NOBLEND:LINEARBLEND);
+  // return  fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
+}
+
+
+
+
+uint32_t mAnimatorLight::color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
+  if(blend == 0)   return color1;
+  if(blend == 255) return color2;
+
+  uint32_t w1 = (color1 >> 24) & 0xff;
+  uint32_t r1 = (color1 >> 16) & 0xff;
+  uint32_t g1 = (color1 >>  8) & 0xff;
+  uint32_t b1 =  color1        & 0xff;
+
+  uint32_t w2 = (color2 >> 24) & 0xff;
+  uint32_t r2 = (color2 >> 16) & 0xff;
+  uint32_t g2 = (color2 >>  8) & 0xff;
+  uint32_t b2 =  color2        & 0xff;
+
+  uint32_t w3 = ((w2 * blend) + (w1 * (255 - blend))) >> 8;
+  uint32_t r3 = ((r2 * blend) + (r1 * (255 - blend))) >> 8;
+  uint32_t g3 = ((g2 * blend) + (g1 * (255 - blend))) >> 8;
+  uint32_t b3 = ((b2 * blend) + (b1 * (255 - blend))) >> 8;
+
+  return ((w3 << 24) | (r3 << 16) | (g3 << 8) | (b3));
+}
+
+/*
+ * Put a value 0 to 255 in to get a color value.
+ * The colours are a transition r -> g -> b -> back to r
+ * Inspired by the Adafruit examples.
+ */
+uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
+
+  uint8_t segment_index  = segment_iters._segment_index;
+
+
+  return RgbcctColor::GetU32Colour(RgbcctColor(0,255,2550));
+  // if (_segments[segment_index].palette) return color_from_palette(pos, false, true, 0);
+  // pos = 255 - pos;
+  // if(pos < 85) {
+  //   return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
+  // } else if(pos < 170) {
+  //   pos -= 85;
+  //   return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
+  // } else {
+  //   pos -= 170;
+  //   return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+  // }
+}
+
+
+
+/*
+ * Fills segment with color
+ */
+void mAnimatorLight::fill(uint32_t c) {
+
+  // for(uint16_t i = 0; i < _virtualSegmentLength; i++) {
+  //   SetPixelColor(i, c);
+  // }
+  
+  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+
+  for(uint16_t i = start_pixel; i <= stop_pixel; i++) {
+    SetPixelColor(i, c);
+  }
+}
+
+
+
+void mAnimatorLight::fill_ranged(uint32_t c) 
+{
+  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+
+  for(uint16_t i = start_pixel; i <= stop_pixel; i++) {
+    SetPixelColor(i, c);
+  }
+
+}
+
+void mAnimatorLight::seg_fill_ranged(uint32_t c) 
+{
+
+  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  
+
+  for(uint16_t i = start_pixel; i <= stop_pixel; i++) {
+    // SetPixelColor(i, c);
+    // pCONT_lAni->animation_colours[i].DesiredColour = RgbColor(c);
+  }
+
+}
+
+
+
 // /****************************************************************************************************************************
 //  **************************************************************************************************************************** 
 //  * Scan
@@ -5637,26 +5746,26 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::scan(bool dual)
 // {
-//   uint32_t cycleTime = 750 + (255 - _segments[_segment_index].speed)*150;
+//   uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
 //   uint32_t perc = now % cycleTime;
 //   uint16_t prog = (perc * 65535) / cycleTime;
-//   uint16_t size = 1 + ((_segments[_segment_index].intensity * SEGLEN) >> 9);
-//   uint16_t ledIndex = (prog * ((SEGLEN *2) - size *2)) >> 16;
+//   uint16_t size = 1 + ((_segments[segment_index].intensity() * segment_length) >> 9);
+//   uint16_t ledIndex = (prog * ((segment_length *2) - size *2)) >> 16;
 
 //   fill(SEGCOLOR(1));
 
-//   int led_offset = ledIndex - (SEGLEN - size);
+//   int led_offset = ledIndex - (segment_length - size);
 //   led_offset = abs(led_offset);
 
 //   if (dual) {
 //     for (uint16_t j = led_offset; j < led_offset + size; j++) {
-//       uint16_t i2 = SEGLEN -1 -j;
-//       pCONT_lAni->mEffects->setPixelColor(i2, pCONT_lAni->mEffects->color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
+//       uint16_t i2 = segment_length -1 -j;
+//       SetPixelColor(i2, pCONT_lAni->mEffects->color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
 //     }
 //   }
 
 //   for (uint16_t j = led_offset; j < led_offset + size; j++) {
-//     pCONT_lAni->mEffects->setPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+//     SetPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
 //   }
 
 //   return FRAMETIME;
@@ -5687,18 +5796,18 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // }
 
 // uint16_t mAnimatorLight::larson_scanner(bool dual) {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) +8);
-//   uint16_t index = counter * SEGLEN  >> 16;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
+//   uint16_t index = counter * segment_length  >> 16;
 
-//   fade_out(_segments[_segment_index].intensity);
+//   fade_out(_segments[segment_index].intensity());
 
-//   if (_segment_runtimes[_segment_index].step > index && _segment_runtimes[_segment_index].step - index > SEGLEN/2) {
-//     _segment_runtimes[_segment_index].aux0 = !_segment_runtimes[_segment_index].aux0;
+//   if (_segment_runtimes[segment_index].step > index && _segment_runtimes[segment_index].step - index > segment_length/2) {
+//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
 //   }
   
-//   for (uint16_t i = _segment_runtimes[_segment_index].step; i < index; i++) {
-//     uint16_t j = (_segment_runtimes[_segment_index].aux0)?i:SEGLEN-1-i;
-//     pCONT_lAni->mEffects->setPixelColor( j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+//   for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
+//     uint16_t j = (_segment_runtimes[segment_index].aux0)?i:segment_length-1-i;
+//     SetPixelColor( j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
 //   }
 //   if (dual) {
 //     uint32_t c;
@@ -5708,13 +5817,13 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       c = pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
 //     }
 
-//     for (uint16_t i = _segment_runtimes[_segment_index].step; i < index; i++) {
-//       uint16_t j = (_segment_runtimes[_segment_index].aux0)?SEGLEN-1-i:i;
-//       pCONT_lAni->mEffects->setPixelColor(j, c);
+//     for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
+//       uint16_t j = (_segment_runtimes[segment_index].aux0)?segment_length-1-i:i;
+//       SetPixelColor(j, c);
 //     }
 //   }
 
-//   _segment_runtimes[_segment_index].step = index;
+//   _segment_runtimes[segment_index].step = index;
 //   return FRAMETIME;
 // }
 
@@ -5742,66 +5851,66 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * color2 and color3 = colors of two adjacent leds
 //  */
 // uint16_t mAnimatorLight::chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette) {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) + 1);
-//   uint16_t a = counter * SEGLEN  >> 16;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
+//   uint16_t a = counter * segment_length  >> 16;
 
-//   bool chase_random = (_segments[_segment_index].mode == FX_MODE_CHASE_RANDOM);
+//   bool chase_random = (_segments[segment_index].mode == FX_MODE_CHASE_RANDOM);
 //   if (chase_random) {
-//     if (a < _segment_runtimes[_segment_index].step) //we hit the start again, choose new color for Chase random
+//     if (a < _segment_runtimes[segment_index].step) //we hit the start again, choose new color for Chase random
 //     {
-//       _segment_runtimes[_segment_index].aux1 = _segment_runtimes[_segment_index].aux0; //store previous random color
-//       _segment_runtimes[_segment_index].aux0 = get_random_wheel_index(_segment_runtimes[_segment_index].aux0);
+//       _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0; //store previous random color
+//       _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
 //     }
-//     color1 = color_wheel(_segment_runtimes[_segment_index].aux0);
+//     color1 = color_wheel(_segment_runtimes[segment_index].aux0);
 //   }
-//   _segment_runtimes[_segment_index].step = a;
+//   _segment_runtimes[segment_index].step = a;
 
-//   // Use intensity setting to vary chase up to 1/2 string length
-//   uint8_t size = 1 + (_segments[_segment_index].intensity * SEGLEN >> 10);
+//   // Use intensity() setting to vary chase up to 1/2 string length
+//   uint8_t size = 1 + (_segments[segment_index].intensity() * segment_length >> 10);
 
 //   uint16_t b = a + size; //"trail" of chase, filled with color1 
-//   if (b > SEGLEN) b -= SEGLEN;
+//   if (b > segment_length) b -= segment_length;
 //   uint16_t c = b + size;
-//   if (c > SEGLEN) c -= SEGLEN;
+//   if (c > segment_length) c -= segment_length;
 
 //   //background
 //   if (do_palette)
 //   {
-//     for(uint16_t i = 0; i < SEGLEN; i++) {
-//       pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+//     for(uint16_t i = 0; i < segment_length; i++) {
+//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
 //     }
 //   } else fill(color1);
 
 //   //if random, fill old background between a and end
 //   if (chase_random)
 //   {
-//     color1 = color_wheel(_segment_runtimes[_segment_index].aux1);
-//     for (uint16_t i = a; i < SEGLEN; i++)
-//       pCONT_lAni->mEffects->setPixelColor(i, color1);
+//     color1 = color_wheel(_segment_runtimes[segment_index].aux1);
+//     for (uint16_t i = a; i < segment_length; i++)
+//       SetPixelColor(i, color1);
 //   }
 
 //   //fill between points a and b with color2
 //   if (a < b)
 //   {
 //     for (uint16_t i = a; i < b; i++)
-//       pCONT_lAni->mEffects->setPixelColor(i, color2);
+//       SetPixelColor(i, color2);
 //   } else {
-//     for (uint16_t i = a; i < SEGLEN; i++) //fill until end
-//       pCONT_lAni->mEffects->setPixelColor(i, color2);
+//     for (uint16_t i = a; i < segment_length; i++) //fill until end
+//       SetPixelColor(i, color2);
 //     for (uint16_t i = 0; i < b; i++) //fill from start until b
-//       pCONT_lAni->mEffects->setPixelColor(i, color2);
+//       SetPixelColor(i, color2);
 //   }
 
 //   //fill between points b and c with color2
 //   if (b < c)
 //   {
 //     for (uint16_t i = b; i < c; i++)
-//       pCONT_lAni->mEffects->setPixelColor(i, color3);
+//       SetPixelColor(i, color3);
 //   } else {
-//     for (uint16_t i = b; i < SEGLEN; i++) //fill until end
-//       pCONT_lAni->mEffects->setPixelColor(i, color3);
+//     for (uint16_t i = b; i < segment_length; i++) //fill until end
+//       SetPixelColor(i, color3);
 //     for (uint16_t i = 0; i < c; i++) //fill from start until c
-//       pCONT_lAni->mEffects->setPixelColor(i, color3);
+//       SetPixelColor(i, color3);
 //   }
 
 //   return FRAMETIME;
@@ -5828,9 +5937,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Primary, secondary running on rainbow.
 //  */
 // uint16_t mAnimatorLight::mode_chase_rainbow(void) {
-//   uint8_t color_sep = 256 / SEGLEN;
-//   uint8_t color_index = _segment_runtimes[_segment_index].call & 0xFF;
-//   uint32_t color = color_wheel(((_segment_runtimes[_segment_index].step * color_sep) + color_index) & 0xFF);
+//   uint8_t color_sep = 256 / segment_length;
+//   uint8_t color_index = _segment_runtimes[segment_index].call & 0xFF;
+//   uint32_t color = color_wheel(((_segment_runtimes[segment_index].step * color_sep) + color_index) & 0xFF);
 
 //   return chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
 // }
@@ -5841,25 +5950,25 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // #define FLASH_COUNT 4
 // uint16_t mAnimatorLight::mode_chase_flash(void) {
-//   uint8_t flash_step = _segment_runtimes[_segment_index].call % ((FLASH_COUNT * 2) + 1);
+//   uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
 
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //   }
 
-//   uint16_t delay = 10 + ((30 * (uint16_t)(255 - _segments[_segment_index].speed)) / SEGLEN);
+//   uint16_t delay = 10 + ((30 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
 //   if(flash_step < (FLASH_COUNT * 2)) {
 //     if(flash_step % 2 == 0) {
-//       uint16_t n = _segment_runtimes[_segment_index].step;
-//       uint16_t m = (_segment_runtimes[_segment_index].step + 1) % SEGLEN;
-//       pCONT_lAni->mEffects->setPixelColor( n, SEGCOLOR(1));
-//       pCONT_lAni->mEffects->setPixelColor( m, SEGCOLOR(1));
+//       uint16_t n = _segment_runtimes[segment_index].step;
+//       uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
+//       SetPixelColor( n, SEGCOLOR(1));
+//       SetPixelColor( m, SEGCOLOR(1));
 //       delay = 20;
 //     } else {
 //       delay = 30;
 //     }
 //   } else {
-//     _segment_runtimes[_segment_index].step = (_segment_runtimes[_segment_index].step + 1) % SEGLEN;
+//     _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
 //   }
 //   return delay;
 // }
@@ -5870,30 +5979,30 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Prim flashes running, followed by random color.
 //  */
 // uint16_t mAnimatorLight::mode_chase_flash_random(void) {
-//   uint8_t flash_step = _segment_runtimes[_segment_index].call % ((FLASH_COUNT * 2) + 1);
+//   uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
 
-//   for(uint16_t i = 0; i < _segment_runtimes[_segment_index].step; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, color_wheel(_segment_runtimes[_segment_index].aux0));
+//   for(uint16_t i = 0; i < _segment_runtimes[segment_index].step; i++) {
+//     SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].aux0));
 //   }
 
-//   uint16_t delay = 1 + ((10 * (uint16_t)(255 - _segments[_segment_index].speed)) / SEGLEN);
+//   uint16_t delay = 1 + ((10 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
 //   if(flash_step < (FLASH_COUNT * 2)) {
-//     uint16_t n = _segment_runtimes[_segment_index].step;
-//     uint16_t m = (_segment_runtimes[_segment_index].step + 1) % SEGLEN;
+//     uint16_t n = _segment_runtimes[segment_index].step;
+//     uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
 //     if(flash_step % 2 == 0) {
-//       pCONT_lAni->mEffects->setPixelColor( n, SEGCOLOR(0));
-//       pCONT_lAni->mEffects->setPixelColor( m, SEGCOLOR(0));
+//       SetPixelColor( n, SEGCOLOR(0));
+//       SetPixelColor( m, SEGCOLOR(0));
 //       delay = 20;
 //     } else {
-//       pCONT_lAni->mEffects->setPixelColor( n, color_wheel(_segment_runtimes[_segment_index].aux0));
-//       pCONT_lAni->mEffects->setPixelColor( m, SEGCOLOR(1));
+//       SetPixelColor( n, color_wheel(_segment_runtimes[segment_index].aux0));
+//       SetPixelColor( m, SEGCOLOR(1));
 //       delay = 30;
 //     }
 //   } else {
-//     _segment_runtimes[_segment_index].step = (_segment_runtimes[_segment_index].step + 1) % SEGLEN;
+//     _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
 
-//     if(_segment_runtimes[_segment_index].step == 0) {
-//       _segment_runtimes[_segment_index].aux0 = get_random_wheel_index(_segment_runtimes[_segment_index].aux0);
+//     if(_segment_runtimes[segment_index].step == 0) {
+//       _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
 //     }
 //   }
 //   return delay;
@@ -5904,10 +6013,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Primary running on rainbow.
 //  */
 // uint16_t mAnimatorLight::mode_chase_rainbow_white(void) {
-//   uint16_t n = _segment_runtimes[_segment_index].step;
-//   uint16_t m = (_segment_runtimes[_segment_index].step + 1) % SEGLEN;
-//   uint32_t color2 = color_wheel(((n * 256 / SEGLEN) + (_segment_runtimes[_segment_index].call & 0xFF)) & 0xFF);
-//   uint32_t color3 = color_wheel(((m * 256 / SEGLEN) + (_segment_runtimes[_segment_index].call & 0xFF)) & 0xFF);
+//   uint16_t n = _segment_runtimes[segment_index].step;
+//   uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
+//   uint32_t color2 = color_wheel(((n * 256 / segment_length) + (_segment_runtimes[segment_index].call & 0xFF)) & 0xFF);
+//   uint32_t color3 = color_wheel(((m * 256 / segment_length) + (_segment_runtimes[segment_index].call & 0xFF)) & 0xFF);
 
 //   return chase(SEGCOLOR(0), color2, color3, false);
 // }
@@ -5917,25 +6026,25 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * theater chase function
 //  */
 // uint16_t mAnimatorLight::theater_chase(uint32_t color1, uint32_t color2, bool do_palette) {
-//   byte gap = 2 + ((255 - _segments[_segment_index].intensity) >> 5);
-//   uint32_t cycleTime = 50 + (255 - _segments[_segment_index].speed)*2;
+//   byte gap = 2 + ((255 - _segments[segment_index].intensity()) >> 5);
+//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
 //   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[_segment_index].step) //new color
+//   if (it != _segment_runtimes[segment_index].step) //new color
 //   {
-//     _segment_runtimes[_segment_index].aux0 = (_segment_runtimes[_segment_index].aux0 +1) % gap;
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % gap;
+//     _segment_runtimes[segment_index].step = it;
 //   }
   
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     if((i % gap) == _segment_runtimes[_segment_index].aux0) {
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     if((i % gap) == _segment_runtimes[segment_index].aux0) {
 //       if (do_palette)
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //       } else {
-//         pCONT_lAni->mEffects->setPixelColor(i, color1);
+//         SetPixelColor(i, color1);
 //       }
 //     } else {
-//       pCONT_lAni->mEffects->setPixelColor(i, color2);
+//       SetPixelColor(i, color2);
 //     }
 //   }
 //   return FRAMETIME;
@@ -5956,7 +6065,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Inspired by the Adafruit examples.
 //  */
 // uint16_t mAnimatorLight::mode_theater_chase_rainbow(void) {
-//   return theater_chase(color_wheel(_segment_runtimes[_segment_index].step), SEGCOLOR(1), false);
+//   return theater_chase(color_wheel(_segment_runtimes[segment_index].step), SEGCOLOR(1), false);
 // }
 
 
@@ -5966,19 +6075,19 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Tricolor chase function
 //  */
 // uint16_t mAnimatorLight::tricolor_chase(uint32_t color1, uint32_t color2) {
-//   uint32_t cycleTime = 50 + (255 - _segments[_segment_index].speed)*2;
+//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
 //   uint32_t it = now / cycleTime;
-//   uint8_t width = (1 + _segments[_segment_index].intensity/32) * 3; //value of 1-8 for each colour
+//   uint8_t width = (1 + _segments[segment_index].intensity()/32) * 3; //value of 1-8 for each colour
 //   uint8_t index = it % width;
   
-//   for(uint16_t i = 0; i < SEGLEN; i++, index++) {
+//   for(uint16_t i = 0; i < segment_length; i++, index++) {
 //     if(index > width-1) index = 0;
 
 //     uint32_t color = color1;
 //     if(index > width*2/3-1) color = pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
 //     else if(index > width/3-1) color = color2;
 
-//     pCONT_lAni->mEffects->setPixelColor(SEGLEN - i -1, color);
+//     SetPixelColor(segment_length - i -1, color);
 //   }
 
 //   return FRAMETIME;
@@ -5999,21 +6108,21 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_random_chase(void)
 // {
-//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[_segment_index].speed));
+//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
 //   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[_segment_index].step == it) return FRAMETIME;
+//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
 
-//   for(uint16_t i = SEGLEN -1; i > 0; i--) {
-//     pCONT_lAni->mEffects->setPixelColor(i, getPixelColor(i-1));
+//   for(uint16_t i = segment_length -1; i > 0; i--) {
+//     SetPixelColor(i, getPixelColor(i-1));
 //   }
 //   uint32_t color = getPixelColor(0);
-//   if (SEGLEN > 1) color = getPixelColor( 1);
+//   if (segment_length > 1) color = getPixelColor( 1);
 //   uint8_t r = random8(6) != 0 ? (color >> 16 & 0xFF) : random8();
 //   uint8_t g = random8(6) != 0 ? (color >> 8  & 0xFF) : random8();
 //   uint8_t b = random8(6) != 0 ? (color       & 0xFF) : random8();
-//   pCONT_lAni->mEffects->setPixelColor(0, r, g, b);
+//   SetPixelColor(0, r, g, b);
 
-//   _segment_runtimes[_segment_index].step = it;
+//   _segment_runtimes[segment_index].step = it;
 //   return FRAMETIME;
 // }
 
@@ -6037,14 +6146,14 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 // uint16_t mAnimatorLight::mode_fillnoise8()
 // {
-//   if (_segment_runtimes[_segment_index].call == 0) _segment_runtimes[_segment_index].step = random16(12345);
+//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].step = random16(12345);
 //   CRGB fastled_col;
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     uint8_t index = inoise8(i * SEGLEN, _segment_runtimes[_segment_index].step + i * SEGLEN);
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     uint8_t index = inoise8(i * segment_length, _segment_runtimes[segment_index].step + i * segment_length);
 //     fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
-//   _segment_runtimes[_segment_index].step += beatsin8(_segments[_segment_index].speed, 1, 6); //10,1,4
+//   _segment_runtimes[segment_index].step += beatsin8(_segments[segment_index].speed(), 1, 6); //10,1,4
 
 //   return FRAMETIME;
 // }
@@ -6053,24 +6162,24 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   uint16_t scale = 320;                                      // the "zoom factor" for the noise
 //   CRGB fastled_col;
-//   _segment_runtimes[_segment_index].step += (1 + _segments[_segment_index].speed/16);
+//   _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed()/16);
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   for (uint16_t i = 0; i < segment_length; i++) {
 
 //     uint16_t shift_x = beatsin8(11);                           // the x position of the noise field swings @ 17 bpm
-//     uint16_t shift_y = _segment_runtimes[_segment_index].step/42;             // the y position becomes slowly incremented
+//     uint16_t shift_y = _segment_runtimes[segment_index].step/42;             // the y position becomes slowly incremented
 
 
 //     uint16_t real_x = (i + shift_x) * scale;                  // the x position of the noise field swings @ 17 bpm
 //     uint16_t real_y = (i + shift_y) * scale;                  // the y position becomes slowly incremented
-//     uint32_t real_z = _segment_runtimes[_segment_index].step;                          // the z position becomes quickly incremented
+//     uint32_t real_z = _segment_runtimes[segment_index].step;                          // the z position becomes quickly incremented
 
 //     uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
 
 //     uint8_t index = sin8(noise * 3);                         // map LED color based on noise data
 
 //     fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 
 //   return FRAMETIME;
@@ -6081,12 +6190,12 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   uint16_t scale = 1000;                                       // the "zoom factor" for the noise
 //   CRGB fastled_col;
-//   _segment_runtimes[_segment_index].step += (1 + (_segments[_segment_index].speed >> 1));
+//   _segment_runtimes[segment_index].step += (1 + (_segments[segment_index].speed() >> 1));
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   for (uint16_t i = 0; i < segment_length; i++) {
 
-//     uint16_t shift_x = _segment_runtimes[_segment_index].step >> 6;                         // x as a function of time
-//     uint16_t shift_y = _segment_runtimes[_segment_index].step/42;
+//     uint16_t shift_x = _segment_runtimes[segment_index].step >> 6;                         // x as a function of time
+//     uint16_t shift_y = _segment_runtimes[segment_index].step/42;
 
 //     uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
 
@@ -6095,7 +6204,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
 
 //     fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 
 //   return FRAMETIME;
@@ -6106,23 +6215,23 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   uint16_t scale = 800;                                       // the "zoom factor" for the noise
 //   CRGB fastled_col;
-//   _segment_runtimes[_segment_index].step += (1 + _segments[_segment_index].speed);
+//   _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed());
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   for (uint16_t i = 0; i < segment_length; i++) {
 
 //     uint16_t shift_x = 4223;                                  // no movement along x and y
 //     uint16_t shift_y = 1234;
 
 //     uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
 //     uint32_t real_y = (i + shift_y) * scale;                  // based on the precalculated positions
-//     uint32_t real_z = _segment_runtimes[_segment_index].step*8;  
+//     uint32_t real_z = _segment_runtimes[segment_index].step*8;  
 
 //     uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;    // get the noise data and scale it down
 
 //     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
 
 //     fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 
 //   return FRAMETIME;
@@ -6133,29 +6242,29 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::mode_noise16_4()
 // {
 //   CRGB fastled_col;
-//   uint32_t stp = (now * _segments[_segment_index].speed) >> 7;
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   uint32_t stp = (now * _segments[segment_index].speed()) >> 7;
+//   for (uint16_t i = 0; i < segment_length; i++) {
 //     int16_t index = inoise16(uint32_t(i) << 12, stp);
 //     fastled_col = ColorFromPalette(currentPalette, index);
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 //   return FRAMETIME;
 // }
 
 // // Peaceful noise that's slow and with gradually changing palettes. Does not support WLED palettes or default colours or controls.
 // uint16_t mAnimatorLight::mode_noisepal(void) {                                    // Slow noise palette by Andrew Tuline.
-//   uint16_t scale = 15 + (_segments[_segment_index].intensity >> 2); //default was 30
+//   uint16_t scale = 15 + (_segments[segment_index].intensity() >> 2); //default was 30
 //   //#define scale 30
 
 //   uint16_t dataSize = sizeof(CRGBPalette16) * 2; //allocate space for 2 Palettes
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
 
-//   CRGBPalette16* palettes = reinterpret_cast<CRGBPalette16*>(_segment_runtimes[_segment_index].data);
+//   CRGBPalette16* palettes = reinterpret_cast<CRGBPalette16*>(_segment_runtimes[segment_index].data);
 
-//   uint16_t changePaletteMs = 4000 + _segments[_segment_index].speed *10; //between 4 - 6.5sec
-//   if (millis() - _segment_runtimes[_segment_index].step > changePaletteMs)
+//   uint16_t changePaletteMs = 4000 + _segments[segment_index].speed() *10; //between 4 - 6.5sec
+//   if (millis() - _segment_runtimes[segment_index].step > changePaletteMs)
 //   {
-//     _segment_runtimes[_segment_index].step = millis();
+//     _segment_runtimes[segment_index].step = millis();
 
 //     uint8_t baseI = random8();
 //     palettes[1] = CRGBPalette16(CHSV(baseI+random8(64), 255, random8(128,255)), CHSV(baseI+128, 255, random8(128,255)), CHSV(baseI+random8(92), 192, random8(128,255)), CHSV(baseI+random8(92), 255, random8(128,255)));
@@ -6166,15 +6275,15 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   //EVERY_N_MILLIS(10) { //(don't have to time this, effect function is only called every 24ms)
 //   nblendPaletteTowardPalette(palettes[0], palettes[1], 48);               // Blend towards the target palette over 48 iterations.
 
-//   if (_segments[_segment_index].palette > 0) palettes[0] = currentPalette;
+//   if (_segments[segment_index].palette > 0) palettes[0] = currentPalette;
 
-//   for(int i = 0; i < SEGLEN; i++) {
-//     uint8_t index = inoise8(i*scale, _segment_runtimes[_segment_index].aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
+//   for(int i = 0; i < segment_length; i++) {
+//     uint8_t index = inoise8(i*scale, _segment_runtimes[segment_index].aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
 //     color = ColorFromPalette(palettes[0], index, 255, LINEARBLEND);       // Use the my own palette.
-//     pCONT_lAni->mEffects->setPixelColor(i, color.red, color.green, color.blue);
+//     SetPixelColor(i, color.red, color.green, color.blue);
 //   }
 
-//   _segment_runtimes[_segment_index].aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
+//   _segment_runtimes[segment_index].aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
 
 //   return FRAMETIME;
 // }
@@ -6185,24 +6294,24 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::phased_base(uint8_t moder) {                  // We're making sine waves here. By Andrew Tuline.
 
 //   uint8_t allfreq = 16;                                          // Base frequency.
-//   //float* phasePtr = reinterpret_cast<float*>(_segment_runtimes[_segment_index].step);       // Phase change value gets calculated.
+//   //float* phasePtr = reinterpret_cast<float*>(_segment_runtimes[segment_index].step);       // Phase change value gets calculated.
 //   static float phase = 0;//phasePtr[0];
-//   uint8_t cutOff = (255-_segments[_segment_index].intensity);                      // You can change the number of pixels.  AKA INTENSITY (was 192).
-//   uint8_t modVal = 5;//_segments[_segment_index].fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
+//   uint8_t cutOff = (255-_segments[segment_index].intensity());                      // You can change the number of pixels.  AKA intensity() (was 192).
+//   uint8_t modVal = 5;//_segments[segment_index].fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
 
-//   uint8_t index = now/64;                                    // Set color rotation speed
-//   phase += _segments[_segment_index].speed/32.0;                                   // You can change the speed of the wave. AKA SPEED (was .4)
+//   uint8_t index = now/64;                                    // Set color rotation speed()
+//   phase += _segments[segment_index].speed()/32.0;                                   // You can change the speed() of the wave. AKA SPEED (was .4)
 //   //phasePtr[0] = phase; 
 
-//   for (int i = 0; i < SEGLEN; i++) {
+//   for (int i = 0; i < segment_length; i++) {
 //     if (moder == 1) modVal = (inoise8(i*10 + i*10) /16);         // Let's randomize our mod length with some Perlin noise.
 //     uint16_t val = (i+1) * allfreq;                              // This sets the frequency of the waves. The +1 makes sure that leds[0] is used.
 //     if (modVal == 0) modVal = 1;
 //     val += phase * (i % modVal +1) /2;                           // This sets the varying phase change of the waves. By Andrew Tuline.
 //     uint8_t b = cubicwave8(val);                                 // Now we make an 8 bit sinewave.
 //     b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(index, false, false, 0), b));
-//     index += 256 / SEGLEN;
+//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(index, false, false, 0), b));
+//     index += 256 / segment_length;
 //   }
 
 //   return FRAMETIME;
@@ -6236,7 +6345,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_breath(void) {
 //   uint16_t var = 0;
-//   uint16_t counter = (now * ((_segments[_segment_index].speed >> 3) +10));
+//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
 //   counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
 //   if (counter < 16384) {
 //     if (counter > 8192) counter = 8192 - (counter - 8192);
@@ -6244,8 +6353,8 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   }
   
 //   uint8_t lum = 30 + var;
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
 //   }
 
 //   return FRAMETIME;
@@ -6256,11 +6365,11 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Fades the LEDs between two colors
 //  */
 // uint16_t mAnimatorLight::mode_fade(void) {
-//   uint16_t counter = (now * ((_segments[_segment_index].speed >> 3) +10));
+//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
 //   uint8_t lum = triwave16(counter) >> 8;
 
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
 //   }
 
 //   return FRAMETIME;
@@ -6268,49 +6377,207 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 
 
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Fireworks
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Fireworks
+ * @note : Converted from WLED Effects
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
 
+uint32_t mAnimatorLight::crgb_to_col(CRGB fastled)
+{
+  return (((uint32_t)fastled.red << 16) | ((uint32_t)fastled.green << 8) | fastled.blue);
+}
 
-// /*
-//  * Fireworks function.
-//  */
-// uint16_t mAnimatorLight::mode_fireworks() {
-//   fade_out(0);
-//   if (_segment_runtimes[_segment_index].call == 0) {
-//     _segment_runtimes[_segment_index].aux0 = UINT16_MAX;
-//     _segment_runtimes[_segment_index].aux1 = UINT16_MAX;
-//   }
-//   bool valid1 = (_segment_runtimes[_segment_index].aux0 < SEGLEN);
-//   bool valid2 = (_segment_runtimes[_segment_index].aux1 < SEGLEN);
-//   uint32_t sv1 = 0, sv2 = 0;
-//   if (valid1) sv1 = getPixelColor(_segment_runtimes[_segment_index].aux0);
-//   if (valid2) sv2 = getPixelColor(_segment_runtimes[_segment_index].aux1);
-//   blur(255-_segments[_segment_index].speed);
-//   if (valid1) pCONT_lAni->mEffects->setPixelColor(_segment_runtimes[_segment_index].aux0 , sv1);
-//   if (valid2) pCONT_lAni->mEffects->setPixelColor(_segment_runtimes[_segment_index].aux1, sv2);
 
-//   for(uint16_t i=0; i<MAX(1, SEGLEN/20); i++) {
-//     if(random8(129 - (_segments[_segment_index].intensity >> 1)) == 0) {
-//       uint16_t index = random(SEGLEN);
-//       pCONT_lAni->mEffects->setPixelColor(index, pCONT_lAni->mEffects->color_from_palette(random8(), false, false, 0));
-//       _segment_runtimes[_segment_index].aux1 = _segment_runtimes[_segment_index].aux0;
-//       _segment_runtimes[_segment_index].aux0 = index;
+CRGB mAnimatorLight::col_to_crgb(uint32_t color)
+{
+  CRGB fastled_col;
+  fastled_col.red =   (color >> 16 & 0xFF);
+  fastled_col.green = (color >> 8  & 0xFF);
+  fastled_col.blue =  (color       & 0xFF);
+  return fastled_col;
+}
+
+/*
+ * blurs segment content, source: FastLED colorutils.cpp
+ */
+void mAnimatorLight::blur(uint8_t blur_amount)
+{
+  uint8_t keep = 255 - blur_amount;
+  uint8_t seep = blur_amount >> 1;
+  CRGB carryover = HTMLColorCode::Black;
+
+  for(uint16_t i = 0; i < _virtualSegmentLength; i++)
+  {
+
+    CRGB cur = col_to_crgb( RgbcctColor::GetU32Colour(GetPixelColor(i)));
+    CRGB part = cur;
+    part.nscale8(seep);
+    cur.nscale8(keep);
+    cur += carryover;
+    if(i > 0) {
+      uint32_t c = RgbcctColor::GetU32Colour(GetPixelColor(i-1));
+      uint8_t r = (c >> 16 & 0xFF);
+      uint8_t g = (c >> 8  & 0xFF);
+      uint8_t b = (c       & 0xFF);
+      SetPixelColor(i-1, RgbColor(qadd8(r, part.red), qadd8(g, part.green), qadd8(b, part.blue)));
+    }
+    SetPixelColor(i, RgbColor(cur.red, cur.green, cur.blue));
+    carryover = part;
+  }
+
+  
+}
+
+
+// void mAnimatorLight::blur(uint8_t blur_amount)
+// {
+//   uint8_t keep = 255 - blur_amount;
+//   uint8_t seep = blur_amount >> 1;
+  
+//   // CRGB carryover = HTMLColorCode::Black;
+//   RgbcctColor carryover = RgbcctColor(0);
+
+//   for(uint16_t i = 0; i < _virtualSegmentLength; i++)
+//   {
+
+//     // CRGB cur = col_to_crgb( RgbcctColor::GetU32Colour(test));//GetPixelColor(i)));
+//     RgbcctColor cur = GetPixelColor(i);
+//     RgbcctColor part = cur;
+//     part.nscale8(seep);
+//     cur.nscale8(keep);
+//     cur += carryover;
+
+//     if(i > 0) {
+//       RgbcctColor c = GetPixelColor(i-1);
+//       SetPixelColor(i-1, RgbColor(qadd8(c.R, part.red), qadd8(c.G, part.green), qadd8(c.B, part.blue)));
 //     }
+//     SetPixelColor(i, RgbColor(cur.red, cur.green, cur.blue));
+//     carryover = part;
 //   }
-//   return FRAMETIME;
 // }
+
+/*
+ * fade out function, higher rate = quicker fade
+ Adding this helper function temporarily until I convert it to linearblend methods
+ */
+void mAnimatorLight::fade_out(uint8_t rate) 
+{
+  rate = (255-rate) >> 1;
+  float mappedRate = float(rate) +1.1;
+
+  uint32_t color = RgbcctColor::GetU32Colour(RgbColor(0));// SEGCOLOR(1); // target color
+  int w2 = (color >> 24) & 0xff;
+  int r2 = (color >> 16) & 0xff;
+  int g2 = (color >>  8) & 0xff;
+  int b2 =  color        & 0xff;
+
+  // r2 = 255;
+
+  for(uint16_t i = 0; i < _virtualSegmentLength; i++) {
+    color = RgbcctColor::GetU32Colour(GetPixelColor(i));
+    int w1 = (color >> 24) & 0xff;
+    int r1 = (color >> 16) & 0xff;
+    int g1 = (color >>  8) & 0xff;
+    int b1 =  color        & 0xff;
+
+    int wdelta = (w2 - w1) / mappedRate;  //linearblend
+    int rdelta = (r2 - r1) / mappedRate;
+    int gdelta = (g2 - g1) / mappedRate;
+    int bdelta = (b2 - b1) / mappedRate;
+
+    // if fade isn't complete, make sure delta is at least 1 (fixes rounding issues)
+    wdelta += (w2 == w1) ? 0 : (w2 > w1) ? 1 : -1;
+    rdelta += (r2 == r1) ? 0 : (r2 > r1) ? 1 : -1;
+    gdelta += (g2 == g1) ? 0 : (g2 > g1) ? 1 : -1;
+    bdelta += (b2 == b1) ? 0 : (b2 > b1) ? 1 : -1;
+
+    SetPixelColor(i, RgbwColor(r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta));
+  }
+
+}
+
+/*
+ * Fireworks function.
+
+ @param aux0 Current center index of firework (which blurs outwards)
+ @param aux1 Previous location of center index of firework
+ @param aux2 Iter to wrap palette
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
+{
+  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("segment_length=%d"), segment_length);
+  // AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[segment_index].call=%d"), _segment_runtimes[segment_index].call);
+  
+  fade_out(0);
+
+  if (_segment_runtimes[segment_index].call == 0) {
+    _segment_runtimes[segment_index].aux0 = UINT16_MAX;
+    _segment_runtimes[segment_index].aux1 = UINT16_MAX;
+  }
+  bool valid1 = (_segment_runtimes[segment_index].aux0 < segment_length);
+  bool valid2 = (_segment_runtimes[segment_index].aux1 < segment_length);
+  RgbcctColor sv1 = 0, sv2 = 0;
+  if (valid1) sv1 = GetPixelColor(_segment_runtimes[segment_index].aux0);
+  if (valid2) sv2 = GetPixelColor(_segment_runtimes[segment_index].aux1);
+  blur(255-_segments[segment_index].speed());
+  if (valid1)       SetPixelColor(_segment_runtimes[segment_index].aux0, sv1);
+  if (valid2)       SetPixelColor(_segment_runtimes[segment_index].aux1, sv2);
+
+
+  // This actually only runs when a new colour is made, and its index is stored so the next animation call will propogate it out
+
+  for(uint16_t i=0; i<MAX(1, segment_length/20); i++) { 
+    if(random8(129 - (_segments[segment_index].intensity() >> 1)) == 0) {
+      uint16_t index = random(segment_length);
+      // AddLog(LOG_LEVEL_TEST, "index=%d\t%d",i,index);
+
+      
+      // Set palette to be sure
+      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+      uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
+      _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
+
+
+      SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), 0);
+      // SetPixelColor(index, mPaletteI->GetColourFromPalette(nullptr, 0));//random(0,pixels_in_palette-1)));
+      // SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(random8(), false, false, 0));
+      _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0;
+      _segment_runtimes[segment_index].aux0 = index;
+    }
+  }
+   /**
+   * Direct update, disable neopixel callback 
+   **/
+  StripUpdate();
+  _segment_runtimes[segment_index].anim_function_callback = nullptr; // When no animation callback is needed
+
+
+  // return FRAMETIME;
+}
 
 
 
 // /*
 // / Fireworks in starburst effect
 // / based on the video: https://www.reddit.com/r/arduino/comments/c3sd46/i_made_this_fireworks_effect_for_my_led_strips/
-// / Speed sets frequency of new starbursts, intensity is the intensity of the burst
+// / Speed sets frequency of new starbursts, intensity() is the intensity() of the burst
 // */
 // #define STARBURST_MAX_FRAG 12
 
@@ -6325,15 +6592,15 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // } star;
 
 // uint16_t mAnimatorLight::mode_starburst(void) {
-//   uint8_t numStars = 1 + (SEGLEN >> 3);
+//   uint8_t numStars = 1 + (segment_length >> 3);
 //   if (numStars > 15) numStars = 15;
 //   uint16_t dataSize = sizeof(star) * numStars;
 
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
   
 //   uint32_t it = millis();
   
-//   star* stars = reinterpret_cast<star*>(_segment_runtimes[_segment_index].data);
+//   star* stars = reinterpret_cast<star*>(_segment_runtimes[segment_index].data);
   
 //   float          maxSpeed                = 375.0f;  // Max velocity
 //   float          particleIgnition        = 250.0f;  // How long to "flash"
@@ -6341,11 +6608,11 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
      
 //   for (int j = 0; j < numStars; j++)
 //   {
-//     // speed to adjust chance of a burst, max is nearly always.
-//     if (random8((144-(_segments[_segment_index].speed >> 1))) == 0 && stars[j].birth == 0)
+//     // speed() to adjust chance of a burst, max is nearly always.
+//     if (random8((144-(_segments[segment_index].speed() >> 1))) == 0 && stars[j].birth == 0)
 //     {
 //       // Pick a random color and location.  
-//       uint16_t startPos = random16(SEGLEN-1);
+//       uint16_t startPos = random16(segment_length-1);
 //       float multiplier = (float)(random8())/255.0 * 1.0;
 
 //       stars[j].color = col_to_crgb(color_wheel(random8()));
@@ -6354,7 +6621,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       stars[j].birth = it;
 //       stars[j].last = it;
 //       // more fragments means larger burst effect
-//       int num = random8(3,6 + (_segments[_segment_index].intensity >> 5));
+//       int num = random8(3,6 + (_segments[segment_index].intensity() >> 5));
 
 //       for (int i=0; i < STARBURST_MAX_FRAG; i++) {
 //         if (i < num) stars[j].fragment[i] = startPos;
@@ -6418,9 +6685,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //         int end = loc + particleSize;
 //         if (start < 0) start = 0;
 //         if (start == end) end++;
-//         if (end > SEGLEN) end = SEGLEN;    
+//         if (end > segment_length) end = segment_length;    
 //         for (int p = start; p < end; p++) {
-//           pCONT_lAni->mEffects->setPixelColor(p, c.r, c.g, c.b);
+//           SetPixelColor(p, c.r, c.g, c.b);
 //         }
 //       }
 //     }
@@ -6430,138 +6697,174 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 
 
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Exploding fireworks effect
+ * @note : Converted from WLED Effects
+ * 
 // /*
 //  * Exploding fireworks effect
 //  * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
-//  */
+//  *
 
-// uint16_t mAnimatorLight::mode_exploding_fireworks(void)
-// {
-//   //allocate segment data
-//   uint16_t numSparks = 2 + (SEGLEN >> 1); 
-//   if (numSparks > 80) numSparks = 80;
-//   uint16_t dataSize = sizeof(spark) * numSparks;
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+ @param aux0 Current center index of firework (which blurs outwards)
+ @param aux1 Previous location of center index of firework
+ @param aux2 Iter to wrap palette
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   fill(BLACK);
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks()
+{
+  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
   
-//   bool actuallyReverse = _segments[_segment_index].getOption(SEG_OPTION_REVERSED);
-//   //have fireworks start in either direction based on intensity
-//   _segments[_segment_index].setOption(SEG_OPTION_REVERSED, _segment_runtimes[_segment_index].step);
-  
-//   Spark* sparks = reinterpret_cast<Spark*>(_segment_runtimes[_segment_index].data);
-//   Spark* flare = sparks; //first spark is flare data
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
 
-//   float gravity = -0.0004 - (_segments[_segment_index].speed/800000.0); // m/s/s
-//   gravity *= SEGLEN;
-  
-//   if (_segment_runtimes[_segment_index].aux0 < 2) { //FLARE
-//     if (_segment_runtimes[_segment_index].aux0 == 0) { //init flare
-//       flare->pos = 0;
-//       uint16_t peakHeight = 75 + random8(180); //0-255
-//       peakHeight = (peakHeight * (SEGLEN -1)) >> 8;
-//       flare->vel = sqrt(-2.0 * gravity * peakHeight);
-//       flare->col = 255; //brightness
 
-//       _segment_runtimes[_segment_index].aux0 = 1; 
-//     }
+// AddLog(LOG_LEVEL_TEST, "segment_index=%d", segment_index);
+// AddLog(LOG_LEVEL_TEST, "_segment_runtimes[segment_index].anim_function_callback=%d", _segment_runtimes[segment_index].anim_function_callback);
+
+  //allocate segment data
+  uint16_t numSparks = 2 + (segment_length >> 1); 
+  if (numSparks > 80) numSparks = 80;
+  uint16_t dataSize = sizeof(spark) * numSparks;
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){
+    return;
+  // } return mode_static(); //allocation failed
+  }
+
+  fill(BLACK);
+  
+  bool actuallyReverse = _segments[segment_index].getOption(SEG_OPTION_REVERSED);
+  //have fireworks start in either direction based on intensity()
+  _segments[segment_index].setOption(SEG_OPTION_REVERSED, _segment_runtimes[segment_index].step);
+  
+  Spark* sparks = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
+  Spark* flare = sparks; //first spark is flare data
+
+  float gravity = -0.0004 - (_segments[segment_index].speed()/800000.0); // m/s/s
+  gravity *= segment_length;
+  
+  if (_segment_runtimes[segment_index].aux0 < 2) { //FLARE
+    if (_segment_runtimes[segment_index].aux0 == 0) { //init flare
+      flare->pos = 0;
+      uint16_t peakHeight = 75 + random8(180); //0-255
+      peakHeight = (peakHeight * (segment_length -1)) >> 8;
+      flare->vel = sqrt(-2.0 * gravity * peakHeight);
+      flare->col = 255; //brightness
+
+      _segment_runtimes[segment_index].aux0 = 1; 
+    }
     
-//     // launch 
-//     if (flare->vel > 12 * gravity) {
-//       // flare
-//       pCONT_lAni->mEffects->setPixelColor(int(flare->pos),flare->col,flare->col,flare->col);
+    // launch 
+    if (flare->vel > 12 * gravity) {
+      // flare
+      SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col);
   
-//       flare->pos += flare->vel;
-//       flare->pos = constrain(flare->pos, 0, SEGLEN-1);
-//       flare->vel += gravity;
-//       flare->col -= 2;
-//     } else {
-//       _segment_runtimes[_segment_index].aux0 = 2;  // ready to explode
-//     }
-//   } else if (_segment_runtimes[_segment_index].aux0 < 4) {
-//     /*
-//      * Explode!
-//      * 
-//      * Explosion happens where the flare ended.
-//      * Size is proportional to the height.
-//      */
-//     int nSparks = flare->pos;
-//     nSparks = constrain(nSparks, 0, numSparks);
-//     static float dying_gravity;
+      flare->pos += flare->vel;
+      flare->pos = constrain(flare->pos, 0, segment_length-1);
+      flare->vel += gravity;
+      flare->col -= 2;
+    } else {
+      _segment_runtimes[segment_index].aux0 = 2;  // ready to explode
+    }
+  } else if (_segment_runtimes[segment_index].aux0 < 4) {
+    /*
+     * Explode!
+     * 
+     * Explosion happens where the flare ended.
+     * Size is proportional to the height.
+     */
+    int nSparks = flare->pos;
+    nSparks = constrain(nSparks, 0, numSparks);
+    static float dying_gravity;
   
-//     // initialize sparks
-//     if (_segment_runtimes[_segment_index].aux0 == 2) {
-//       for (int i = 1; i < nSparks; i++) { 
-//         sparks[i].pos = flare->pos; 
-//         sparks[i].vel = (float(random16(0, 20000)) / 10000.0) - 0.9; // from -0.9 to 1.1
-//         sparks[i].col = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright 
-//         //sparks[i].col = constrain(sparks[i].col, 0, 345); 
-//         sparks[i].colIndex = random8();
-//         sparks[i].vel *= flare->pos/SEGLEN; // proportional to height 
-//         sparks[i].vel *= -gravity *50;
-//       } 
-//       //sparks[1].col = 345; // this will be our known spark 
-//       dying_gravity = gravity/2; 
-//       _segment_runtimes[_segment_index].aux0 = 3;
-//     }
+    // initialize sparks
+    if (_segment_runtimes[segment_index].aux0 == 2) {
+      for (int i = 1; i < nSparks; i++) { 
+        sparks[i].pos = flare->pos; 
+        sparks[i].vel = (float(random16(0, 20000)) / 10000.0) - 0.9; // from -0.9 to 1.1
+        sparks[i].col = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright 
+        //sparks[i].col = constrain(sparks[i].col, 0, 345); 
+        sparks[i].colIndex = random8();
+        sparks[i].vel *= flare->pos/segment_length; // proportional to height 
+        sparks[i].vel *= -gravity *50;
+      } 
+      //sparks[1].col = 345; // this will be our known spark 
+      dying_gravity = gravity/2; 
+      _segment_runtimes[segment_index].aux0 = 3;
+    }
   
-//     if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
-//       for (int i = 1; i < nSparks; i++) { 
-//         sparks[i].pos += sparks[i].vel; 
-//         sparks[i].vel += dying_gravity; 
-//         if (sparks[i].col > 3) sparks[i].col -= 4; 
+    if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
+      for (int i = 1; i < nSparks; i++) { 
+        sparks[i].pos += sparks[i].vel; 
+        sparks[i].vel += dying_gravity; 
+        if (sparks[i].col > 3) sparks[i].col -= 4; 
 
-//         if (sparks[i].pos > 0 && sparks[i].pos < SEGLEN) {
-//           uint16_t prog = sparks[i].col;
-//           uint32_t spColor = (_segments[_segment_index].palette) ? color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
-//           CRGB c = HTMLColorCode::Black; //HeatColor(sparks[i].col);
-//           if (prog > 300) { //fade from white to spark color
-//             c = col_to_crgb(color_blend(spColor, WHITE, (prog - 300)*5));
-//           } else if (prog > 45) { //fade from spark color to black
-//             c = col_to_crgb(color_blend(BLACK, spColor, prog - 45));
-//             uint8_t cooling = (300 - prog) >> 5;
-//             c.g = qsub8(c.g, cooling);
-//             c.b = qsub8(c.b, cooling * 2);
-//           }
-//           pCONT_lAni->mEffects->setPixelColor(int(sparks[i].pos), c.red, c.green, c.blue);
-//         }
-//       }
-//       dying_gravity *= .99; // as sparks burn out they fall slower
-//     } else {
-//       _segment_runtimes[_segment_index].aux0 = 6 + random8(10); //wait for this many frames
-//     }
-//   } else {
-//     _segment_runtimes[_segment_index].aux0--;
-//     if (_segment_runtimes[_segment_index].aux0 < 4) {
-//       _segment_runtimes[_segment_index].aux0 = 0; //back to flare
-//       _segment_runtimes[_segment_index].step = (_segments[_segment_index].intensity > random8()); //decide firing side
-//     }
-//   }
+        if (sparks[i].pos > 0 && sparks[i].pos < segment_length) {
+          uint16_t prog = sparks[i].col;
+          // uint32_t spColor = (_segments[segment_index].palette) ? color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
+          uint32_t spColor = RgbcctColor::GetU32Colour(RgbColor(0,255,10));
+          CRGB c = HTMLColorCode::Black; //HeatColor(sparks[i].col);
+          if (prog > 300) { //fade from white to spark color
+            c = col_to_crgb(color_blend(spColor, WHITE, (prog - 300)*5));
+          } else if (prog > 45) { //fade from spark color to black
+            c = col_to_crgb(color_blend(BLACK, spColor, prog - 45));
+            uint8_t cooling = (300 - prog) >> 5;
+            c.g = qsub8(c.g, cooling);
+            c.b = qsub8(c.b, cooling * 2);
+          }
+          SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue);
+        }
+      }
+      dying_gravity *= .99; // as sparks burn out they fall slower
+    } else {
+      _segment_runtimes[segment_index].aux0 = 6 + random8(10); //wait for this many frames
+    }
+  } else {
+    _segment_runtimes[segment_index].aux0--;
+    if (_segment_runtimes[segment_index].aux0 < 4) {
+      _segment_runtimes[segment_index].aux0 = 0; //back to flare
+      _segment_runtimes[segment_index].step = (_segments[segment_index].intensity() > random8()); //decide firing side
+    }
+  }
 
-//   _segments[_segment_index].setOption(SEG_OPTION_REVERSED, actuallyReverse);
+  _segments[segment_index].setOption(SEG_OPTION_REVERSED, actuallyReverse);
   
-//   return FRAMETIME;  
-// }
+  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+
+  StripUpdate();
+
+
+//   // return FRAMETIME;  
+}
 
 
 // //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
 // uint16_t mAnimatorLight::mode_rain()
 // {
-//   _segment_runtimes[_segment_index].step += FRAMETIME;
-//   if (_segment_runtimes[_segment_index].step > SPEED_FORMULA_L) {
-//     _segment_runtimes[_segment_index].step = 0;
+//   _segment_runtimes[segment_index].step += FRAMETIME;
+//   if (_segment_runtimes[segment_index].step > SPEED_FORMULA_L) {
+//     _segment_runtimes[segment_index].step = 0;
 //     //shift all leds right
-//     uint32_t ctemp = getPixelColor(SEGLEN -1);
-//     for(uint16_t i = SEGLEN -1; i > 0; i--) {
-//       pCONT_lAni->mEffects->setPixelColor(i, getPixelColor(i-1));
+//     uint32_t ctemp = getPixelColor(segment_length -1);
+//     for(uint16_t i = segment_length -1; i > 0; i--) {
+//       SetPixelColor(i, getPixelColor(i-1));
 //     }
-//     pCONT_lAni->mEffects->setPixelColor(0, ctemp);
-//     _segment_runtimes[_segment_index].aux0++;
-//     _segment_runtimes[_segment_index].aux1++;
-//     if (_segment_runtimes[_segment_index].aux0 == 0) _segment_runtimes[_segment_index].aux0 = UINT16_MAX;
-//     if (_segment_runtimes[_segment_index].aux1 == 0) _segment_runtimes[_segment_index].aux0 = UINT16_MAX;
-//     if (_segment_runtimes[_segment_index].aux0 == SEGLEN) _segment_runtimes[_segment_index].aux0 = 0;
-//     if (_segment_runtimes[_segment_index].aux1 == SEGLEN) _segment_runtimes[_segment_index].aux1 = 0;
+//     SetPixelColor(0, ctemp);
+//     _segment_runtimes[segment_index].aux0++;
+//     _segment_runtimes[segment_index].aux1++;
+//     if (_segment_runtimes[segment_index].aux0 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
+//     if (_segment_runtimes[segment_index].aux1 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
+//     if (_segment_runtimes[segment_index].aux0 == segment_length) _segment_runtimes[segment_index].aux0 = 0;
+//     if (_segment_runtimes[segment_index].aux1 == segment_length) _segment_runtimes[segment_index].aux1 = 0;
 //   }
 //   return mode_fireworks();
 // }
@@ -6571,26 +6874,26 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Fire flicker function
 //  */
 // uint16_t mAnimatorLight::mode_fire_flicker(void) {
-//   uint32_t cycleTime = 40 + (255 - _segments[_segment_index].speed);
+//   uint32_t cycleTime = 40 + (255 - _segments[segment_index].speed());
 //   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[_segment_index].step == it) return FRAMETIME;
+//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
   
 //   byte w = (SEGCOLOR(0) >> 24) & 0xFF;
 //   byte r = (SEGCOLOR(0) >> 16) & 0xFF;
 //   byte g = (SEGCOLOR(0) >>  8) & 0xFF;
 //   byte b = (SEGCOLOR(0)        & 0xFF);
-//   byte lum = (_segments[_segment_index].palette == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
-//   lum /= (((256-_segments[_segment_index].intensity)/16)+1);
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
+//   byte lum = (_segments[segment_index].palette == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
+//   lum /= (((256-_segments[segment_index].intensity())/16)+1);
+//   for(uint16_t i = 0; i < segment_length; i++) {
 //     byte flicker = random8(lum);
-//     if (_segments[_segment_index].palette == 0) {
-//       pCONT_lAni->mEffects->setPixelColor(i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
+//     if (_segments[segment_index].palette == 0) {
+//       SetPixelColor(i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
 //     } else {
-//       pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
+//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
 //     }
 //   }
 
-//   _segment_runtimes[_segment_index].step = it;
+//   _segment_runtimes[segment_index].step = it;
 //   return FRAMETIME;
 // }
 
@@ -6608,18 +6911,18 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
 //  */
 // uint16_t mAnimatorLight::mode_sparkle(void) {
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
 //   }
-//   uint32_t cycleTime = 10 + (255 - _segments[_segment_index].speed)*2;
+//   uint32_t cycleTime = 10 + (255 - _segments[segment_index].speed())*2;
 //   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[_segment_index].step)
+//   if (it != _segment_runtimes[segment_index].step)
 //   {
-//     _segment_runtimes[_segment_index].aux0 = random16(SEGLEN); // aux0 stores the random led index
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
+//     _segment_runtimes[segment_index].step = it;
 //   }
   
-//   pCONT_lAni->mEffects->setPixelColor(_segment_runtimes[_segment_index].aux0, SEGCOLOR(0));
+//   SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(0));
 //   return FRAMETIME;
 // }
 
@@ -6629,16 +6932,16 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
 //  */
 // uint16_t mAnimatorLight::mode_flash_sparkle(void) {
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //   }
 
 //   if(random8(5) == 0) {
-//     _segment_runtimes[_segment_index].aux0 = random16(SEGLEN); // aux0 stores the random led index
-//     pCONT_lAni->mEffects->setPixelColor(_segment_runtimes[_segment_index].aux0, SEGCOLOR(1));
+//     _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
+//     SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(1));
 //     return 20;
 //   } 
-//   return 20 + (uint16_t)(255-_segments[_segment_index].speed);
+//   return 20 + (uint16_t)(255-_segments[segment_index].speed());
 // }
 
 
@@ -6647,17 +6950,17 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
 //  */
 // uint16_t mAnimatorLight::mode_hyper_sparkle(void) {
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //   }
 
 //   if(random8(5) < 2) {
-//     for(uint16_t i = 0; i < MAX(1, SEGLEN/3); i++) {
-//       pCONT_lAni->mEffects->setPixelColor(random16(SEGLEN), SEGCOLOR(1));
+//     for(uint16_t i = 0; i < MAX(1, segment_length/3); i++) {
+//       SetPixelColor(random16(segment_length), SEGCOLOR(1));
 //     }
 //     return 20;
 //   }
-//   return 20 + (uint16_t)(255-_segments[_segment_index].speed);
+//   return 20 + (uint16_t)(255-_segments[segment_index].speed());
 // }
 
 
@@ -6679,11 +6982,11 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::mode_twinkleup(void) {                 // A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
 //   random16_set_seed(535);                                 // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
 
-//   for (int i = 0; i<SEGLEN; i++) {
+//   for (int i = 0; i<segment_length; i++) {
 //     uint8_t ranstart = random8();                         // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
-//     uint8_t pixBri = sin8(ranstart + 16 * now/(256-_segments[_segment_index].speed));
-//     if (random8() > _segments[_segment_index].intensity) pixBri = 0;
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*20, false, PALETTE_SOLID_WRAP, 0), pixBri));
+//     uint8_t pixBri = sin8(ranstart + 16 * now/(256-_segments[segment_index].speed()));
+//     if (random8() > _segments[segment_index].intensity()) pixBri = 0;
+//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*20, false, PALETTE_SOLID_WRAP, 0), pixBri));
 //   }
 
 //   return FRAMETIME;
@@ -6698,10 +7001,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * to the next random color.
 //  */
 // uint16_t mAnimatorLight::mode_random_color(void) {
-//   uint32_t cycleTime = 200 + (255 - _segments[_segment_index].speed)*50;
+//   uint32_t cycleTime = 200 + (255 - _segments[segment_index].speed())*50;
 //   uint32_t it = now / cycleTime;
 //   uint32_t rem = now % cycleTime;
-//   uint16_t fadedur = (cycleTime * _segments[_segment_index].intensity) >> 8;
+//   uint16_t fadedur = (cycleTime * _segments[segment_index].intensity()) >> 8;
 
 //   uint32_t fade = 255;
 //   if (fadedur) {
@@ -6709,18 +7012,18 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     if (fade > 255) fade = 255;
 //   }
 
-//   if (_segment_runtimes[_segment_index].call == 0) {
-//     _segment_runtimes[_segment_index].aux0 = random8();
-//     _segment_runtimes[_segment_index].step = 2;
+//   if (_segment_runtimes[segment_index].call == 0) {
+//     _segment_runtimes[segment_index].aux0 = random8();
+//     _segment_runtimes[segment_index].step = 2;
 //   }
-//   if (it != _segment_runtimes[_segment_index].step) //new color
+//   if (it != _segment_runtimes[segment_index].step) //new color
 //   {
-//     _segment_runtimes[_segment_index].aux1 = _segment_runtimes[_segment_index].aux0;
-//     _segment_runtimes[_segment_index].aux0 = get_random_wheel_index(_segment_runtimes[_segment_index].aux0); //aux0 will store our random color wheel index
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0;
+//     _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0); //aux0 will store our random color wheel index
+//     _segment_runtimes[segment_index].step = it;
 //   }
 
-//   fill(color_blend(color_wheel(_segment_runtimes[_segment_index].aux1), color_wheel(_segment_runtimes[_segment_index].aux0), fade));
+//   fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux1), color_wheel(_segment_runtimes[segment_index].aux0), fade));
 //   return FRAMETIME;
 // }
 
@@ -6730,24 +7033,24 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // // * to new random colors.
 //  */
 // uint16_t mAnimatorLight::mode_dynamic(void) {
-//   if (!_segment_runtimes[_segment_index].allocateData(SEGLEN)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
   
-//   if(_segment_runtimes[_segment_index].call == 0) {
-//     for (uint16_t i = 0; i < SEGLEN; i++) _segment_runtimes[_segment_index].data[i] = random8();
+//   if(_segment_runtimes[segment_index].call == 0) {
+//     for (uint16_t i = 0; i < segment_length; i++) _segment_runtimes[segment_index].data[i] = random8();
 //   }
 
-//   uint32_t cycleTime = 50 + (255 - _segments[_segment_index].speed)*15;
+//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*15;
 //   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[_segment_index].step && _segments[_segment_index].speed != 0) //new color
+//   if (it != _segment_runtimes[segment_index].step && _segments[segment_index].speed() != 0) //new color
 //   {
-//     for (uint16_t i = 0; i < SEGLEN; i++) {
-//       if (random8() <= _segments[_segment_index].intensity) _segment_runtimes[_segment_index].data[i] = random8();
+//     for (uint16_t i = 0; i < segment_length; i++) {
+//       if (random8() <= _segments[segment_index].intensity()) _segment_runtimes[segment_index].data[i] = random8();
 //     }
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].step = it;
 //   }
   
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, color_wheel(_segment_runtimes[_segment_index].data[i]));
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].data[i]));
 //   }
 //   return FRAMETIME;
 // }
@@ -6758,11 +7061,11 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Cycles all LEDs at once through a rainbow.
 //  */
 // uint16_t mAnimatorLight::mode_rainbow(void) {
-//   uint16_t counter = (now * ((_segments[_segment_index].speed >> 2) +2)) & 0xFFFF;
+//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
 //   counter = counter >> 8;
 
-//   if (_segments[_segment_index].intensity < 128){
-//     fill(color_blend(color_wheel(counter),WHITE,128-_segments[_segment_index].intensity));
+//   if (_segments[segment_index].intensity() < 128){
+//     fill(color_blend(color_wheel(counter),WHITE,128-_segments[segment_index].intensity()));
 //   } else {
 //     fill(color_wheel(counter));
 //   }
@@ -6775,13 +7078,13 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Cycles a rainbow over the entire string of LEDs.
 //  */
 // uint16_t mAnimatorLight::mode_rainbow_cycle(void) {
-//   uint16_t counter = (now * ((_segments[_segment_index].speed >> 2) +2)) & 0xFFFF;
+//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
 //   counter = counter >> 8;
   
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     //intensity/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
-//     uint8_t index = (i * (16 << (_segments[_segment_index].intensity /29)) / SEGLEN) + counter;
-//     pCONT_lAni->mEffects->setPixelColor(i, color_wheel(index));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     //intensity()/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
+//     uint8_t index = (i * (16 << (_segments[segment_index].intensity() /29)) / segment_length) + counter;
+//     SetPixelColor(i, color_wheel(index));
 //   }
 
 //   return FRAMETIME;
@@ -6792,10 +7095,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Running lights effect with smooth sine transition base.
 //  */
 // uint16_t mAnimatorLight::running_base(bool saw) {
-//   uint8_t x_scale = _segments[_segment_index].intensity >> 2;
-//   uint32_t counter = (now * _segments[_segment_index].speed) >> 9;
+//   uint8_t x_scale = _segments[segment_index].intensity() >> 2;
+//   uint32_t counter = (now * _segments[segment_index].speed()) >> 9;
 
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
+//   for(uint16_t i = 0; i < segment_length; i++) {
 //     uint8_t s = 0;
 //     uint8_t a = i*x_scale - counter;
 //     if (saw) {
@@ -6807,7 +7110,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       }
 //     }
 //     s = sin8(a);
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
+//     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
 //   }
 //   return FRAMETIME;
 // }
@@ -6836,28 +7139,28 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::mode_twinkle(void) {
 //   fill(SEGCOLOR(1));
 
-//   uint32_t cycleTime = 20 + (255 - _segments[_segment_index].speed)*5;
+//   uint32_t cycleTime = 20 + (255 - _segments[segment_index].speed())*5;
 //   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[_segment_index].step)
+//   if (it != _segment_runtimes[segment_index].step)
 //   {
-//     uint16_t maxOn = map(_segments[_segment_index].intensity, 0, 255, 1, SEGLEN); // make sure at least one LED is on
-//     if (_segment_runtimes[_segment_index].aux0 >= maxOn)
+//     uint16_t maxOn = map(_segments[segment_index].intensity(), 0, 255, 1, segment_length); // make sure at least one LED is on
+//     if (_segment_runtimes[segment_index].aux0 >= maxOn)
 //     {
-//       _segment_runtimes[_segment_index].aux0 = 0;
-//       _segment_runtimes[_segment_index].aux1 = random16(); //new seed for our PRNG
+//       _segment_runtimes[segment_index].aux0 = 0;
+//       _segment_runtimes[segment_index].aux1 = random16(); //new seed for our PRNG
 //     }
-//     _segment_runtimes[_segment_index].aux0++;
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].aux0++;
+//     _segment_runtimes[segment_index].step = it;
 //   }
   
-//   uint16_t PRNG16 = _segment_runtimes[_segment_index].aux1;
+//   uint16_t PRNG16 = _segment_runtimes[segment_index].aux1;
 
-//   for (uint16_t i = 0; i < _segment_runtimes[_segment_index].aux0; i++)
+//   for (uint16_t i = 0; i < _segment_runtimes[segment_index].aux0; i++)
 //   {
 //     PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
-//     uint32_t p = (uint32_t)SEGLEN * (uint32_t)PRNG16;
+//     uint32_t p = (uint32_t)segment_length * (uint32_t)PRNG16;
 //     uint16_t j = p >> 16;
-//     pCONT_lAni->mEffects->setPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+//     SetPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
 //   }
 
 //   return FRAMETIME;
@@ -6870,31 +7173,31 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::dissolve(uint32_t color) {
 //   bool wa = (SEGCOLOR(1) != 0 && _brightness < 255); //workaround, can't compare getPixel to color if not full brightness
   
-//   for (uint16_t j = 0; j <= SEGLEN / 15; j++)
+//   for (uint16_t j = 0; j <= segment_length / 15; j++)
 //   {
-//     if (random8() <= _segments[_segment_index].intensity) {
+//     if (random8() <= _segments[segment_index].intensity()) {
 //       for (uint8_t times = 0; times < 10; times++) //attempt to spawn a new pixel 5 times
 //       {
-//         uint16_t i = random16(SEGLEN);
-//         if (_segment_runtimes[_segment_index].aux0) { //dissolve to primary/palette
+//         uint16_t i = random16(segment_length);
+//         if (_segment_runtimes[segment_index].aux0) { //dissolve to primary/palette
 //           if (getPixelColor(i) == SEGCOLOR(1) || wa) {
 //             if (color == SEGCOLOR(0))
 //             {
-//               pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//             } else { pCONT_lAni->mEffects->setPixelColor(i, color); }     
+//               SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//             } else { SetPixelColor(i, color); }     
 //             break; //only spawn 1 new pixel per frame per 50 LEDs
 //           }
 //         } else { //dissolve to secondary
-//           if (getPixelColor(i) != SEGCOLOR(1)) { pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(1)); break; }
+//           if (getPixelColor(i) != SEGCOLOR(1)) { SetPixelColor(i, SEGCOLOR(1)); break; }
 //         }
 //       }
 //     }
 //   }
 
-//   if (_segment_runtimes[_segment_index].call > (255 - _segments[_segment_index].speed) + 15) 
+//   if (_segment_runtimes[segment_index].call > (255 - _segments[segment_index].speed()) + 15) 
 //   {
-//     _segment_runtimes[_segment_index].aux0 = !_segment_runtimes[_segment_index].aux0;
-//     _segment_runtimes[_segment_index].call = 0;
+//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
+//     _segment_runtimes[segment_index].call = 0;
 //   }
   
 //   return FRAMETIME;
@@ -6924,49 +7227,49 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_android(void) {
   
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
 //   }
 
-//   if (_segment_runtimes[_segment_index].aux1 > ((float)_segments[_segment_index].intensity/255.0)*(float)SEGLEN)
+//   if (_segment_runtimes[segment_index].aux1 > ((float)_segments[segment_index].intensity()/255.0)*(float)segment_length)
 //   {
-//     _segment_runtimes[_segment_index].aux0 = 1;
+//     _segment_runtimes[segment_index].aux0 = 1;
 //   } else
 //   {
-//     if (_segment_runtimes[_segment_index].aux1 < 2) _segment_runtimes[_segment_index].aux0 = 0;
+//     if (_segment_runtimes[segment_index].aux1 < 2) _segment_runtimes[segment_index].aux0 = 0;
 //   }
 
-//   uint16_t a = _segment_runtimes[_segment_index].step;
+//   uint16_t a = _segment_runtimes[segment_index].step;
   
-//   if (_segment_runtimes[_segment_index].aux0 == 0)
+//   if (_segment_runtimes[segment_index].aux0 == 0)
 //   {
-//     if (_segment_runtimes[_segment_index].call %3 == 1) {a++;}
-//     else {_segment_runtimes[_segment_index].aux1++;}
+//     if (_segment_runtimes[segment_index].call %3 == 1) {a++;}
+//     else {_segment_runtimes[segment_index].aux1++;}
 //   } else
 //   {
 //     a++;
-//     if (_segment_runtimes[_segment_index].call %3 != 1) _segment_runtimes[_segment_index].aux1--;
+//     if (_segment_runtimes[segment_index].call %3 != 1) _segment_runtimes[segment_index].aux1--;
 //   }
   
-//   if (a >= SEGLEN) a = 0;
+//   if (a >= segment_length) a = 0;
 
-//   if (a + _segment_runtimes[_segment_index].aux1 < SEGLEN)
+//   if (a + _segment_runtimes[segment_index].aux1 < segment_length)
 //   {
-//     for(int i = a; i < a+_segment_runtimes[_segment_index].aux1; i++) {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//     for(int i = a; i < a+_segment_runtimes[segment_index].aux1; i++) {
+//       SetPixelColor(i, SEGCOLOR(0));
 //     }
 //   } else
 //   {
-//     for(int i = a; i < SEGLEN; i++) {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//     for(int i = a; i < segment_length; i++) {
+//       SetPixelColor(i, SEGCOLOR(0));
 //     }
-//     for(int i = 0; i < _segment_runtimes[_segment_index].aux1 - (SEGLEN -a); i++) {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//     for(int i = 0; i < _segment_runtimes[segment_index].aux1 - (segment_length -a); i++) {
+//       SetPixelColor(i, SEGCOLOR(0));
 //     }
 //   }
-//   _segment_runtimes[_segment_index].step = a;
+//   _segment_runtimes[segment_index].step = a;
 
-//   return 3 + ((8 * (uint32_t)(255 - _segments[_segment_index].speed)) / SEGLEN);
+//   return 3 + ((8 * (uint32_t)(255 - _segments[segment_index].speed())) / segment_length);
 // }
 
 
@@ -6975,7 +7278,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_colorful(void) {
 //   uint32_t cols[]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC,0x00FF0000,0x00EEBB00,0x0000EE00};
-//   if (_segments[_segment_index].intensity < 127) //pastel (easter) colors
+//   if (_segments[segment_index].intensity() < 127) //pastel (easter) colors
 //   {
 //     cols[0] = 0x00FF8040;
 //     cols[1] = 0x00E5D241;
@@ -6984,34 +7287,34 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     for (uint8_t i = 4; i < 7; i++) cols[i] = cols[i-4];
 //   }
   
-//   uint32_t cycleTime = 50 + (15 * (uint32_t)(255 - _segments[_segment_index].speed));
+//   uint32_t cycleTime = 50 + (15 * (uint32_t)(255 - _segments[segment_index].speed()));
 //   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[_segment_index].step)
+//   if (it != _segment_runtimes[segment_index].step)
 //   {
-//     if (_segments[_segment_index].speed > 0) _segment_runtimes[_segment_index].aux0++;
-//     if (_segment_runtimes[_segment_index].aux0 > 3) _segment_runtimes[_segment_index].aux0 = 0;
-//     _segment_runtimes[_segment_index].step = it;
+//     if (_segments[segment_index].speed() > 0) _segment_runtimes[segment_index].aux0++;
+//     if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
+//     _segment_runtimes[segment_index].step = it;
 //   }
   
 //   uint16_t i = 0;
-//   for (i; i < SEGLEN -3; i+=4)
+//   for (i; i < segment_length -3; i+=4)
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(i, cols[_segment_runtimes[_segment_index].aux0]);
-//     pCONT_lAni->mEffects->setPixelColor(i+1, cols[_segment_runtimes[_segment_index].aux0+1]);
-//     pCONT_lAni->mEffects->setPixelColor(i+2, cols[_segment_runtimes[_segment_index].aux0+2]);
-//     pCONT_lAni->mEffects->setPixelColor(i+3, cols[_segment_runtimes[_segment_index].aux0+3]);
+//     SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
+//     SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
+//     SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
+//     SetPixelColor(i+3, cols[_segment_runtimes[segment_index].aux0+3]);
 //   }
-//   if(i < SEGLEN)
+//   if(i < segment_length)
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(i, cols[_segment_runtimes[_segment_index].aux0]);
+//     SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
     
-//     if(i+1 < SEGLEN)
+//     if(i+1 < segment_length)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(i+1, cols[_segment_runtimes[_segment_index].aux0+1]);
+//       SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
       
-//       if(i+2 < SEGLEN)
+//       if(i+2 < segment_length)
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(i+2, cols[_segment_runtimes[_segment_index].aux0+2]);
+//         SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
 //       }
 //     }
 //   }
@@ -7024,26 +7327,26 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Emulates a traffic light.
 //  */
 // uint16_t mAnimatorLight::mode_traffic_light(void) {
-//   for(uint16_t i=0; i < SEGLEN; i++)
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+//   for(uint16_t i=0; i < segment_length; i++)
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
 //   uint32_t mdelay = 500;
-//   for (int i = 0; i < SEGLEN-2 ; i+=3)
+//   for (int i = 0; i < segment_length-2 ; i+=3)
 //   {
-//     switch (_segment_runtimes[_segment_index].aux0)
+//     switch (_segment_runtimes[segment_index].aux0)
 //     {
-//       case 0: pCONT_lAni->mEffects->setPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - _segments[_segment_index].speed));break;
-//       case 1: pCONT_lAni->mEffects->setPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - _segments[_segment_index].speed)); pCONT_lAni->mEffects->setPixelColor(i+1, 0x00EECC00); break;
-//       case 2: pCONT_lAni->mEffects->setPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - _segments[_segment_index].speed));break;
-//       case 3: pCONT_lAni->mEffects->setPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - _segments[_segment_index].speed));break;
+//       case 0: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
+//       case 1: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed())); SetPixelColor(i+1, 0x00EECC00); break;
+//       case 2: SetPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
+//       case 3: SetPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed()));break;
 //     }
 //   }
 
-//   if (now - _segment_runtimes[_segment_index].step > mdelay)
+//   if (now - _segment_runtimes[segment_index].step > mdelay)
 //   {
-//     _segment_runtimes[_segment_index].aux0++;
-//     if (_segment_runtimes[_segment_index].aux0 == 1 && _segments[_segment_index].intensity > 140) _segment_runtimes[_segment_index].aux0 = 2; //skip Red + Amber, to get US-style sequence
-//     if (_segment_runtimes[_segment_index].aux0 > 3) _segment_runtimes[_segment_index].aux0 = 0;
-//     _segment_runtimes[_segment_index].step = now;
+//     _segment_runtimes[segment_index].aux0++;
+//     if (_segment_runtimes[segment_index].aux0 == 1 && _segments[segment_index].intensity() > 140) _segment_runtimes[segment_index].aux0 = 2; //skip Red + Amber, to get US-style sequence
+//     if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
+//     _segment_runtimes[segment_index].step = now;
 //   }
   
 //   return FRAMETIME;
@@ -7055,29 +7358,29 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Alternating pixels running function.
 //  */
 // uint16_t mAnimatorLight::running(uint32_t color1, uint32_t color2) {
-//   uint8_t pxw = 1 + (_segments[_segment_index].intensity >> 5);
-//   uint32_t cycleTime = 35 + (255 - _segments[_segment_index].speed);
+//   uint8_t pxw = 1 + (_segments[segment_index].intensity() >> 5);
+//   uint32_t cycleTime = 35 + (255 - _segments[segment_index].speed());
 //   uint32_t it = now / cycleTime;
-//   if (_segments[_segment_index].speed == 0) it = 0;
+//   if (_segments[segment_index].speed() == 0) it = 0;
 
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
-//     if((i + _segment_runtimes[_segment_index].aux0) % (pxw*2) < pxw) {
+//   for(uint16_t i = 0; i < segment_length; i++) {
+//     if((i + _segment_runtimes[segment_index].aux0) % (pxw*2) < pxw) {
 //       if (color1 == SEGCOLOR(0))
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(SEGLEN -i -1, pCONT_lAni->mEffects->color_from_palette(SEGLEN -i -1, true, PALETTE_SOLID_WRAP, 0));
+//         SetPixelColor(segment_length -i -1, pCONT_lAni->mEffects->color_from_palette(segment_length -i -1, true, PALETTE_SOLID_WRAP, 0));
 //       } else
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(SEGLEN -i -1, color1);
+//         SetPixelColor(segment_length -i -1, color1);
 //       }
 //     } else {
-//       pCONT_lAni->mEffects->setPixelColor(SEGLEN -i -1, color2);
+//       SetPixelColor(segment_length -i -1, color2);
 //     }
 //   }
 
-//   if (it != _segment_runtimes[_segment_index].step )
+//   if (it != _segment_runtimes[segment_index].step )
 //   {
-//     _segment_runtimes[_segment_index].aux0 = (_segment_runtimes[_segment_index].aux0 +1) % (pxw*2);
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % (pxw*2);
+//     _segment_runtimes[segment_index].step = it;
 //   }
 //   return FRAMETIME;
 // }
@@ -7118,26 +7421,26 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Random colored pixels running.
 //  */
 // uint16_t mAnimatorLight::mode_running_random(void) {
-//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[_segment_index].speed));
+//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
 //   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[_segment_index].aux1 == it) return FRAMETIME;
+//   if (_segment_runtimes[segment_index].aux1 == it) return FRAMETIME;
 
-//   for(uint16_t i=SEGLEN-1; i > 0; i--) {
-//     pCONT_lAni->mEffects->setPixelColor( i, getPixelColor( i - 1));
+//   for(uint16_t i=segment_length-1; i > 0; i--) {
+//     SetPixelColor( i, getPixelColor( i - 1));
 //   }
 
-//   if(_segment_runtimes[_segment_index].step == 0) {
-//     _segment_runtimes[_segment_index].aux0 = get_random_wheel_index(_segment_runtimes[_segment_index].aux0);
-//     pCONT_lAni->mEffects->setPixelColor(0, color_wheel(_segment_runtimes[_segment_index].aux0));
+//   if(_segment_runtimes[segment_index].step == 0) {
+//     _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+//     SetPixelColor(0, color_wheel(_segment_runtimes[segment_index].aux0));
 //   }
 
-//   _segment_runtimes[_segment_index].step++;
-//   if (_segment_runtimes[_segment_index].step > ((255-_segments[_segment_index].intensity) >> 4))
+//   _segment_runtimes[segment_index].step++;
+//   if (_segment_runtimes[segment_index].step > ((255-_segments[segment_index].intensity()) >> 4))
 //   {
-//     _segment_runtimes[_segment_index].step = 0;
+//     _segment_runtimes[segment_index].step = 0;
 //   }
 
-//   _segment_runtimes[_segment_index].aux1 = it;
+//   _segment_runtimes[segment_index].aux1 = it;
 //   return FRAMETIME;
 // }
 
@@ -7146,23 +7449,23 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Firing comets from one end. "Lighthouse"
 //  */
 // uint16_t mAnimatorLight::mode_comet(void) {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >>2) +1);
-//   uint16_t index = counter * SEGLEN >> 16;
-//   if (_segment_runtimes[_segment_index].call == 0) _segment_runtimes[_segment_index].aux0 = index;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >>2) +1);
+//   uint16_t index = counter * segment_length >> 16;
+//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = index;
 
-//   fade_out(_segments[_segment_index].intensity);
+//   fade_out(_segments[segment_index].intensity());
 
-//   pCONT_lAni->mEffects->setPixelColor( index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
-//   if (index > _segment_runtimes[_segment_index].aux0) {
-//     for (uint16_t i = _segment_runtimes[_segment_index].aux0; i < index ; i++) {
-//        pCONT_lAni->mEffects->setPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//   SetPixelColor( index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+//   if (index > _segment_runtimes[segment_index].aux0) {
+//     for (uint16_t i = _segment_runtimes[segment_index].aux0; i < index ; i++) {
+//        SetPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //     }
-//   } else if (index < _segment_runtimes[_segment_index].aux0 && index < 10) {
+//   } else if (index < _segment_runtimes[segment_index].aux0 && index < 10) {
 //     for (uint16_t i = 0; i < index ; i++) {
-//        pCONT_lAni->mEffects->setPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//        SetPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 //     }      
 //   }
-//   _segment_runtimes[_segment_index].aux0 = index++;
+//   _segment_runtimes[segment_index].aux0 = index++;
 
 //   return FRAMETIME;
 // }
@@ -7173,16 +7476,16 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * Gradient run base function
 //  */
 // uint16_t mAnimatorLight::gradient_base(bool loading) {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) + 1);
-//   uint16_t pp = counter * SEGLEN >> 16;
-//   if (_segment_runtimes[_segment_index].call == 0) pp = 0;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
+//   uint16_t pp = counter * segment_length >> 16;
+//   if (_segment_runtimes[segment_index].call == 0) pp = 0;
 //   float val; //0.0 = sec 1.0 = pri
-//   float brd = loading ? _segments[_segment_index].intensity : _segments[_segment_index].intensity/2;
+//   float brd = loading ? _segments[segment_index].intensity() : _segments[segment_index].intensity()/2;
 //   if (brd <1.0) brd = 1.0;
-//   int p1 = pp-SEGLEN;
-//   int p2 = pp+SEGLEN;
+//   int p1 = pp-segment_length;
+//   int p2 = pp+segment_length;
 
-//   for(uint16_t i = 0; i < SEGLEN; i++)
+//   for(uint16_t i = 0; i < segment_length; i++)
 //   {
 //     if (loading)
 //     {
@@ -7191,7 +7494,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       val = MIN(abs(pp-i),MIN(abs(p1-i),abs(p2-i)));
 //     }
 //     val = (brd > val) ? val/brd * 255 : 255;
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(0), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), val));
+//     SetPixelColor(i, color_blend(SEGCOLOR(0), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), val));
 //   }
 
 //   return FRAMETIME;
@@ -7217,39 +7520,39 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // //American Police Light with all LEDs Red and Blue 
 // uint16_t mAnimatorLight::police_base(uint32_t color1, uint32_t color2, bool all)
 // {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) +1);
-//   uint16_t idexR = (counter * SEGLEN) >> 16;
-//   if (idexR >= SEGLEN) idexR = 0;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +1);
+//   uint16_t idexR = (counter * segment_length) >> 16;
+//   if (idexR >= segment_length) idexR = 0;
 
-//   uint16_t topindex = SEGLEN >> 1;
+//   uint16_t topindex = segment_length >> 1;
 //   uint16_t idexB = (idexR > topindex) ? idexR - topindex : idexR + topindex;
-//   if (_segment_runtimes[_segment_index].call == 0) _segment_runtimes[_segment_index].aux0 = idexR;
-//   if (idexB >= SEGLEN) idexB = 0; //otherwise overflow on odd number of LEDs
+//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = idexR;
+//   if (idexB >= segment_length) idexB = 0; //otherwise overflow on odd number of LEDs
 
 //   if (all) { //different algo, ensuring immediate fill
 //     if (idexB > idexR) {
 //       fill(color2);
-//       for (uint16_t i = idexR; i < idexB; i++) pCONT_lAni->mEffects->setPixelColor(i, color1);
+//       for (uint16_t i = idexR; i < idexB; i++) SetPixelColor(i, color1);
 //     } else {
 //       fill(color1);
-//       for (uint16_t i = idexB; i < idexR; i++) pCONT_lAni->mEffects->setPixelColor(i, color2);
+//       for (uint16_t i = idexB; i < idexR; i++) SetPixelColor(i, color2);
 //     } 
 //   } else { //regular dot-only mode
-//     uint8_t size = 1 + _segments[_segment_index].intensity >> 3;
-//     if (size > SEGLEN/2) size = 1+ SEGLEN/2;
+//     uint8_t size = 1 + _segments[segment_index].intensity() >> 3;
+//     if (size > segment_length/2) size = 1+ segment_length/2;
 //     for (uint8_t i=0; i <= size; i++) {
-//       pCONT_lAni->mEffects->setPixelColor(idexR+i, color1);
-//       pCONT_lAni->mEffects->setPixelColor(idexB+i, color2);
+//       SetPixelColor(idexR+i, color1);
+//       SetPixelColor(idexB+i, color2);
 //     }
-//     if (_segment_runtimes[_segment_index].aux0 != idexR) {
-//       uint8_t gap = (_segment_runtimes[_segment_index].aux0 < idexR)? idexR - _segment_runtimes[_segment_index].aux0:SEGLEN - _segment_runtimes[_segment_index].aux0 + idexR;
+//     if (_segment_runtimes[segment_index].aux0 != idexR) {
+//       uint8_t gap = (_segment_runtimes[segment_index].aux0 < idexR)? idexR - _segment_runtimes[segment_index].aux0:segment_length - _segment_runtimes[segment_index].aux0 + idexR;
 //       for (uint8_t i = 0; i <= gap ; i++) {
-//         if ((idexR - i) < 0) idexR = SEGLEN-1 + i;
-//         if ((idexB - i) < 0) idexB = SEGLEN-1 + i;
-//         pCONT_lAni->mEffects->setPixelColor(idexR-i, color1);
-//         pCONT_lAni->mEffects->setPixelColor(idexB-i, color2);
+//         if ((idexR - i) < 0) idexR = segment_length-1 + i;
+//         if ((idexB - i) < 0) idexB = segment_length-1 + i;
+//         SetPixelColor(idexR-i, color1);
+//         SetPixelColor(idexB-i, color2);
 //       }
-//       _segment_runtimes[_segment_index].aux0 = idexR;
+//       _segment_runtimes[segment_index].aux0 = idexR;
 //     }
 //   }
   
@@ -7294,37 +7597,37 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  * ICU mode
 //  */
 // uint16_t mAnimatorLight::mode_icu(void) {
-//   uint16_t dest = _segment_runtimes[_segment_index].step & 0xFFFF;
-//   uint8_t space = (_segments[_segment_index].intensity >> 3) +2;
+//   uint16_t dest = _segment_runtimes[segment_index].step & 0xFFFF;
+//   uint8_t space = (_segments[segment_index].intensity() >> 3) +2;
 
 //   fill(SEGCOLOR(1));
 
-//   byte pindex = map(dest, 0, SEGLEN-SEGLEN/space, 0, 255);
+//   byte pindex = map(dest, 0, segment_length-segment_length/space, 0, 255);
 //   uint32_t col = pCONT_lAni->mEffects->color_from_palette(pindex, false, false, 0);
 
-//   pCONT_lAni->mEffects->setPixelColor(dest, col);
-//   pCONT_lAni->mEffects->setPixelColor(dest + SEGLEN/space, col);
+//   SetPixelColor(dest, col);
+//   SetPixelColor(dest + segment_length/space, col);
 
-//   if(_segment_runtimes[_segment_index].aux0 == dest) { // pause between eye movements
+//   if(_segment_runtimes[segment_index].aux0 == dest) { // pause between eye movements
 //     if(random8(6) == 0) { // blink once in a while
-//       pCONT_lAni->mEffects->setPixelColor(dest, SEGCOLOR(1));
-//       pCONT_lAni->mEffects->setPixelColor(dest + SEGLEN/space, SEGCOLOR(1));
+//       SetPixelColor(dest, SEGCOLOR(1));
+//       SetPixelColor(dest + segment_length/space, SEGCOLOR(1));
 //       return 200;
 //     }
-//     _segment_runtimes[_segment_index].aux0 = random16(SEGLEN-SEGLEN/space);
+//     _segment_runtimes[segment_index].aux0 = random16(segment_length-segment_length/space);
 //     return 1000 + random16(2000);
 //   }
 
-//   if(_segment_runtimes[_segment_index].aux0 > _segment_runtimes[_segment_index].step) {
-//     _segment_runtimes[_segment_index].step++;
+//   if(_segment_runtimes[segment_index].aux0 > _segment_runtimes[segment_index].step) {
+//     _segment_runtimes[segment_index].step++;
 //     dest++;
-//   } else if (_segment_runtimes[_segment_index].aux0 < _segment_runtimes[_segment_index].step) {
-//     _segment_runtimes[_segment_index].step--;
+//   } else if (_segment_runtimes[segment_index].aux0 < _segment_runtimes[segment_index].step) {
+//     _segment_runtimes[segment_index].step--;
 //     dest--;
 //   }
 
-//   pCONT_lAni->mEffects->setPixelColor(dest, col);
-//   pCONT_lAni->mEffects->setPixelColor(dest + SEGLEN/space, col);
+//   SetPixelColor(dest, col);
+//   SetPixelColor(dest + segment_length/space, col);
 
 //   return SPEED_FORMULA_L;
 // }
@@ -7335,34 +7638,34 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_tricolor_wipe(void)
 // {
-//   uint32_t cycleTime = 1000 + (255 - _segments[_segment_index].speed)*200;
+//   uint32_t cycleTime = 1000 + (255 - _segments[segment_index].speed())*200;
 //   uint32_t perc = now % cycleTime;
 //   uint16_t prog = (perc * 65535) / cycleTime;
-//   uint16_t ledIndex = (prog * SEGLEN * 3) >> 16;
+//   uint16_t ledIndex = (prog * segment_length * 3) >> 16;
 //   uint16_t ledOffset = ledIndex;
 
-//   for (uint16_t i = 0; i < SEGLEN; i++)
+//   for (uint16_t i = 0; i < segment_length; i++)
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
 //   }
   
-//   if(ledIndex < SEGLEN) { //wipe from 0 to 1
-//     for (uint16_t i = 0; i < SEGLEN; i++)
+//   if(ledIndex < segment_length) { //wipe from 0 to 1
+//     for (uint16_t i = 0; i < segment_length; i++)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(i, (i > ledOffset)? SEGCOLOR(0) : SEGCOLOR(1));
+//       SetPixelColor(i, (i > ledOffset)? SEGCOLOR(0) : SEGCOLOR(1));
 //     }
-//   } else if (ledIndex < SEGLEN*2) { //wipe from 1 to 2
-//     ledOffset = ledIndex - SEGLEN;
-//     for (uint16_t i = ledOffset +1; i < SEGLEN; i++)
+//   } else if (ledIndex < segment_length*2) { //wipe from 1 to 2
+//     ledOffset = ledIndex - segment_length;
+//     for (uint16_t i = ledOffset +1; i < segment_length; i++)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(1));
+//       SetPixelColor(i, SEGCOLOR(1));
 //     }
 //   } else //wipe from 2 to 0
 //   {
-//     ledOffset = ledIndex - SEGLEN*2;
+//     ledOffset = ledIndex - segment_length*2;
 //     for (uint16_t i = 0; i <= ledOffset; i++)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//       SetPixelColor(i, SEGCOLOR(0));
 //     }
 //   }
 
@@ -7377,7 +7680,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_tricolor_fade(void)
 // {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 3) +1);
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 3) +1);
 //   uint32_t prog = (counter * 768) >> 16;
 
 //   uint32_t color1 = 0, color2 = 0;
@@ -7399,7 +7702,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 //   byte stp = prog; // % 256
 //   uint32_t color = 0;
-//   for(uint16_t i = 0; i < SEGLEN; i++) {
+//   for(uint16_t i = 0; i < segment_length; i++) {
 //     if (stage == 2) {
 //       color = color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
 //     } else if (stage == 1) {
@@ -7407,7 +7710,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     } else {
 //       color = color_blend(color1, color2, stp);
 //     }
-//     pCONT_lAni->mEffects->setPixelColor(i, color);
+//     SetPixelColor(i, color);
 //   }
 
 //   return FRAMETIME;
@@ -7420,34 +7723,34 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //  */
 // uint16_t mAnimatorLight::mode_multi_comet(void)
 // {
-//   uint32_t cycleTime = 10 + (uint32_t)(255 - _segments[_segment_index].speed);
+//   uint32_t cycleTime = 10 + (uint32_t)(255 - _segments[segment_index].speed());
 //   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[_segment_index].step == it) return FRAMETIME;
-//   if (!_segment_runtimes[_segment_index].allocateData(sizeof(uint16_t) * 8)) return mode_static(); //allocation failed
+//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
+//   if (!_segment_runtimes[segment_index].allocateData(sizeof(uint16_t) * 8)) return mode_static(); //allocation failed
   
-//   fade_out(_segments[_segment_index].intensity);
+//   fade_out(_segments[segment_index].intensity());
   
-//   uint16_t* comets = reinterpret_cast<uint16_t*>(_segment_runtimes[_segment_index].data);
+//   uint16_t* comets = reinterpret_cast<uint16_t*>(_segment_runtimes[segment_index].data);
 
 //   for(uint8_t i=0; i < 8; i++) {
-//     if(comets[i] < SEGLEN) {
+//     if(comets[i] < segment_length) {
 //       uint16_t index = comets[i];
 //       if (SEGCOLOR(2) != 0)
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(index, i % 2 ? pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
+//         SetPixelColor(index, i % 2 ? pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
 //       } else
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+//         SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
 //       }
 //       comets[i]++;
 //     } else {
-//       if(!random(SEGLEN)) {
+//       if(!random(segment_length)) {
 //         comets[i] = 0;
 //       }
 //     }
 //   }
 
-//   _segment_runtimes[_segment_index].step = it;
+//   _segment_runtimes[segment_index].step = it;
 //   return FRAMETIME;
 // }
 
@@ -7457,7 +7760,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   int16_t pos;
 //   int8_t  size;
 //   int8_t  dir;
-//   int8_t  speed;
+//   int8_t  speed();
 // } oscillator;
 
 // /*
@@ -7468,89 +7771,89 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   uint8_t numOscillators = 3;
 //   uint16_t dataSize = sizeof(oscillator) * numOscillators;
 
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
   
-//   Oscillator* oscillators = reinterpret_cast<Oscillator*>(_segment_runtimes[_segment_index].data);
+//   Oscillator* oscillators = reinterpret_cast<Oscillator*>(_segment_runtimes[segment_index].data);
 
-//   if (_segment_runtimes[_segment_index].call == 0)
+//   if (_segment_runtimes[segment_index].call == 0)
 //   {
-//     oscillators[0] = {SEGLEN/4,   SEGLEN/8,  1, 1};
-//     oscillators[1] = {SEGLEN/4*3, SEGLEN/8,  1, 2};
-//     oscillators[2] = {SEGLEN/4*2, SEGLEN/8, -1, 1};
+//     oscillators[0] = {segment_length/4,   segment_length/8,  1, 1};
+//     oscillators[1] = {segment_length/4*3, segment_length/8,  1, 2};
+//     oscillators[2] = {segment_length/4*2, segment_length/8, -1, 1};
 //   }
 
-//   uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - _segments[_segment_index].speed));
+//   uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - _segments[segment_index].speed()));
 //   uint32_t it = now / cycleTime;
 
 //   for(uint8_t i = 0; i < numOscillators; i++) {
 //     // if the counter has increased, move the oscillator by the random step
-//     if (it != _segment_runtimes[_segment_index].step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed;
-//     oscillators[i].size = SEGLEN/(3+_segments[_segment_index].intensity/8);
+//     if (it != _segment_runtimes[segment_index].step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed();
+//     oscillators[i].size = segment_length/(3+_segments[segment_index].intensity()/8);
 //     if((oscillators[i].dir == -1) && (oscillators[i].pos <= 0)) {
 //       oscillators[i].pos = 0;
 //       oscillators[i].dir = 1;
 //       // make bigger steps for faster speeds
-//       oscillators[i].speed = _segments[_segment_index].speed > 100 ? random8(2, 4):random8(1, 3);
+//       oscillators[i].speed() = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
 //     }
-//     if((oscillators[i].dir == 1) && (oscillators[i].pos >= (SEGLEN - 1))) {
-//       oscillators[i].pos = SEGLEN - 1;
+//     if((oscillators[i].dir == 1) && (oscillators[i].pos >= (segment_length - 1))) {
+//       oscillators[i].pos = segment_length - 1;
 //       oscillators[i].dir = -1;
-//       oscillators[i].speed = _segments[_segment_index].speed > 100 ? random8(2, 4):random8(1, 3);
+//       oscillators[i].speed() = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
 //     }
 //   }
 
-//   for(uint16_t i=0; i < SEGLEN; i++) {
+//   for(uint16_t i=0; i < segment_length; i++) {
 //     uint32_t color = BLACK;
 //     for(uint8_t j=0; j < numOscillators; j++) {
 //       if(i >= oscillators[j].pos - oscillators[j].size && i <= oscillators[j].pos + oscillators[j].size) {
 //         color = (color == BLACK) ? SEGCOLOR(j) : color_blend(color, SEGCOLOR(j), 128);
 //       }
 //     }
-//     pCONT_lAni->mEffects->setPixelColor(i, color);
+//     SetPixelColor(i, color);
 //   }
  
-//   _segment_runtimes[_segment_index].step = it;
+//   _segment_runtimes[segment_index].step = it;
 //   return FRAMETIME;
 // }
 
 
 // uint16_t mAnimatorLight::mode_lightning(void)
 // {
-//   uint16_t ledstart = random16(SEGLEN);               // Determine starting location of flash
-//   uint16_t ledlen = 1 + random16(SEGLEN -ledstart);    // Determine length of flash (not to go beyond NUM_LEDS-1)
+//   uint16_t ledstart = random16(segment_length);               // Determine starting location of flash
+//   uint16_t ledlen = 1 + random16(segment_length -ledstart);    // Determine length of flash (not to go beyond NUM_LEDS-1)
 //   uint8_t bri = 255/random8(1, 3);
 
-//   if (_segment_runtimes[_segment_index].step == 0)
+//   if (_segment_runtimes[segment_index].step == 0)
 //   {
-//     _segment_runtimes[_segment_index].aux0 = random8(3, 3 + _segments[_segment_index].intensity/20); //number of flashes
+//     _segment_runtimes[segment_index].aux0 = random8(3, 3 + _segments[segment_index].intensity()/20); //number of flashes
 //     bri = 52;
-//     _segment_runtimes[_segment_index].aux1 = 1;
+//     _segment_runtimes[segment_index].aux1 = 1;
 //   }
 
 //   fill(SEGCOLOR(1));
 
-//   if (_segment_runtimes[_segment_index].aux1) {
+//   if (_segment_runtimes[segment_index].aux1) {
 //     for (int i = ledstart; i < ledstart + ledlen; i++)
 //     {
-//       if (_segments[_segment_index].palette == 0)
+//       if (_segments[segment_index].palette == 0)
 //       {
-//         pCONT_lAni->mEffects->setPixelColor(i,bri,bri,bri,bri);
+//         SetPixelColor(i,bri,bri,bri,bri);
 //       } else {
-//         pCONT_lAni->mEffects->setPixelColor(i,color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
+//         SetPixelColor(i,color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
 //       }
 //     }
-//     _segment_runtimes[_segment_index].aux1 = 0;
-//     _segment_runtimes[_segment_index].step++;
+//     _segment_runtimes[segment_index].aux1 = 0;
+//     _segment_runtimes[segment_index].step++;
 //     return random8(4, 10);                                    // each flash only lasts 4-10 milliseconds
 //   }
 
-//   _segment_runtimes[_segment_index].aux1 = 1;
-//   if (_segment_runtimes[_segment_index].step == 1) return (200);                       // longer delay until next flash after the leader
+//   _segment_runtimes[segment_index].aux1 = 1;
+//   if (_segment_runtimes[segment_index].step == 1) return (200);                       // longer delay until next flash after the leader
 
-//   if (_segment_runtimes[_segment_index].step <= _segment_runtimes[_segment_index].aux0) return (50 + random8(100));  // shorter delay between strokes
+//   if (_segment_runtimes[segment_index].step <= _segment_runtimes[segment_index].aux0) return (50 + random8(100));  // shorter delay between strokes
 
-//   _segment_runtimes[_segment_index].step = 0;
-//   return (random8(255 - _segments[_segment_index].speed) * 100);                            // delay between strikes
+//   _segment_runtimes[segment_index].step = 0;
+//   return (random8(255 - _segments[segment_index].speed()) * 100);                            // delay between strikes
 // }
 
 
@@ -7559,9 +7862,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // // by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
 // uint16_t mAnimatorLight::mode_pride_2015(void)
 // {
-//   uint16_t duration = 10 + _segments[_segment_index].speed;
-//   uint16_t sPseudotime = _segment_runtimes[_segment_index].step;
-//   uint16_t sHue16 = _segment_runtimes[_segment_index].aux0;
+//   uint16_t duration = 10 + _segments[segment_index].speed();
+//   uint16_t sPseudotime = _segment_runtimes[segment_index].step;
+//   uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
 
 //   uint8_t sat8 = beatsin88( 87, 220, 250);
 //   uint8_t brightdepth = beatsin88( 341, 96, 224);
@@ -7576,7 +7879,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   uint16_t brightnesstheta16 = sPseudotime;
 //   CRGB fastled_col;
 
-//   for (uint16_t i = 0 ; i < SEGLEN; i++) {
+//   for (uint16_t i = 0 ; i < segment_length; i++) {
 //     hue16 += hueinc16;
 //     uint8_t hue8 = hue16 >> 8;
 
@@ -7591,24 +7894,24 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     fastled_col = col_to_crgb(getPixelColor(i));
 
 //     nblend(fastled_col, newcolor, 64);
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
-//   _segment_runtimes[_segment_index].step = sPseudotime;
-//   _segment_runtimes[_segment_index].aux0 = sHue16;
+//   _segment_runtimes[segment_index].step = sPseudotime;
+//   _segment_runtimes[segment_index].aux0 = sHue16;
 //   return FRAMETIME;
 // }
 
 
 // //eight colored dots, weaving in and out of sync with each other
 // uint16_t mAnimatorLight::mode_juggle(void){
-//   fade_out(_segments[_segment_index].intensity);
+//   fade_out(_segments[segment_index].intensity());
 //   CRGB fastled_col;
 //   byte dothue = 0;
 //   for ( byte i = 0; i < 8; i++) {
-//     uint16_t index = 0 + beatsin88((128 + _segments[_segment_index].speed)*(i + 7), 0, SEGLEN -1);
+//     uint16_t index = 0 + beatsin88((128 + _segments[segment_index].speed())*(i + 7), 0, segment_length -1);
 //     fastled_col = col_to_crgb(getPixelColor(index));
-//     fastled_col |= (_segments[_segment_index].palette==0)?CHSV(dothue, 220, 255):ColorFromPalette(currentPalette, dothue, 255);
-//     pCONT_lAni->mEffects->setPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     fastled_col |= (_segments[segment_index].palette==0)?CHSV(dothue, 220, 255):ColorFromPalette(currentPalette, dothue, 255);
+//     SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
 //     dothue += 32;
 //   }
 //   return FRAMETIME;
@@ -7618,20 +7921,20 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::mode_palette()
 // {
 //   uint16_t counter = 0;
-//   if (_segments[_segment_index].speed != 0) 
+//   if (_segments[segment_index].speed() != 0) 
 //   {
-//     counter = (now * ((_segments[_segment_index].speed >> 3) +1)) & 0xFFFF;
+//     counter = (now * ((_segments[segment_index].speed() >> 3) +1)) & 0xFFFF;
 //     counter = counter >> 8;
 //   }
   
-//   bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && _segments[_segment_index].speed == 0));
-//   for (uint16_t i = 0; i < SEGLEN; i++)
+//   bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && _segments[segment_index].speed() == 0));
+//   for (uint16_t i = 0; i < segment_length; i++)
 //   {
-//     uint8_t colorIndex = (i * 255 / SEGLEN) - counter;
+//     uint8_t colorIndex = (i * 255 / segment_length) - counter;
     
 //     if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
     
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
 //   }
 //   return FRAMETIME;
 // }
@@ -7664,41 +7967,41 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // //
 // // There are two main parameters you can play with to control the look and
 // // feel of your fire: COOLING (used in step 1 above) (Speed = COOLING), and SPARKING (used
-// // in step 3 above) (Effect Intensity = Sparking).
+// // in step 3 above) (Effect intensity() = Sparking).
 
 
 // uint16_t mAnimatorLight::mode_fire_2012()
 // {
 //   uint32_t it = now >> 5; //div 32
 
-//   if (!_segment_runtimes[_segment_index].allocateData(SEGLEN)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
   
-//   byte* heat = _segment_runtimes[_segment_index].data;
+//   byte* heat = _segment_runtimes[segment_index].data;
 
-//   if (it != _segment_runtimes[_segment_index].step)
+//   if (it != _segment_runtimes[segment_index].step)
 //   {
 //     // Step 1.  Cool down every cell a little
-//     for (uint16_t i = 0; i < SEGLEN; i++) {
-//       _segment_runtimes[_segment_index].data[i] = qsub8(heat[i],  random8(0, (((20 + _segments[_segment_index].speed /3) * 10) / SEGLEN) + 2));
+//     for (uint16_t i = 0; i < segment_length; i++) {
+//       _segment_runtimes[segment_index].data[i] = qsub8(heat[i],  random8(0, (((20 + _segments[segment_index].speed() /3) * 10) / segment_length) + 2));
 //     }
   
 //     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-//     for (uint16_t k= SEGLEN -1; k > 1; k--) {
+//     for (uint16_t k= segment_length -1; k > 1; k--) {
 //       heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
 //     }
     
 //     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-//     if (random8() <= _segments[_segment_index].intensity) {
+//     if (random8() <= _segments[segment_index].intensity()) {
 //       uint8_t y = random8(7);
-//       if (y < SEGLEN) heat[y] = qadd8(heat[y], random8(160,255));
+//       if (y < segment_length) heat[y] = qadd8(heat[y], random8(160,255));
 //     }
-//     _segment_runtimes[_segment_index].step = it;
+//     _segment_runtimes[segment_index].step = it;
 //   }
 
 //   // Step 4.  Map from heat cells to LED colors
-//   for (uint16_t j = 0; j < SEGLEN; j++) {
+//   for (uint16_t j = 0; j < segment_length; j++) {
 //     CRGB color = ColorFromPalette(currentPalette, MIN(heat[j],240), 255, LINEARBLEND);
-//     pCONT_lAni->mEffects->setPixelColor(j, color.red, color.green, color.blue);
+//     SetPixelColor(j, color.red, color.green, color.blue);
 //   }
 //   return FRAMETIME;
 // }
@@ -7709,9 +8012,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // // widely-varying set of parameters, using a color palette.
 // uint16_t mAnimatorLight::mode_colorwaves()
 // {
-//   uint16_t duration = 10 + _segments[_segment_index].speed;
-//   uint16_t sPseudotime = _segment_runtimes[_segment_index].step;
-//   uint16_t sHue16 = _segment_runtimes[_segment_index].aux0;
+//   uint16_t duration = 10 + _segments[segment_index].speed();
+//   uint16_t sPseudotime = _segment_runtimes[segment_index].step;
+//   uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
 
 //   uint8_t brightdepth = beatsin88(341, 96, 224);
 //   uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
@@ -7719,14 +8022,14 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 //   uint16_t hue16 = sHue16;//gHue * 256;
 //   // uint16_t hueinc16 = beatsin88(113, 300, 1500);
-//   uint16_t hueinc16 = beatsin88(113, 60, 300)*_segments[_segment_index].intensity*10/255;  // Use the Intensity Slider for the hues
+//   uint16_t hueinc16 = beatsin88(113, 60, 300)*_segments[segment_index].intensity()*10/255;  // Use the intensity() Slider for the hues
 
 //   sPseudotime += duration * msmultiplier;
 //   sHue16 += duration * beatsin88(400, 5, 9);
 //   uint16_t brightnesstheta16 = sPseudotime;
 //   CRGB fastled_col;
 
-//   for ( uint16_t i = 0 ; i < SEGLEN; i++) {
+//   for ( uint16_t i = 0 ; i < segment_length; i++) {
 //     hue16 += hueinc16;
 //     uint8_t hue8 = hue16 >> 8;
 //     uint16_t h16_128 = hue16 >> 7;
@@ -7747,10 +8050,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     fastled_col = col_to_crgb(getPixelColor(i));
 
 //     nblend(fastled_col, newcolor, 128);
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
-//   _segment_runtimes[_segment_index].step = sPseudotime;
-//   _segment_runtimes[_segment_index].aux0 = sHue16;
+//   _segment_runtimes[segment_index].step = sPseudotime;
+//   _segment_runtimes[segment_index].aux0 = sHue16;
 //   return FRAMETIME;
 // }
 
@@ -7760,10 +8063,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   CRGB fastled_col;
 //   uint32_t stp = (now / 20) & 0xFF;
-//   uint8_t beat = beatsin8(_segments[_segment_index].speed, 64, 255);
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   uint8_t beat = beatsin8(_segments[segment_index].speed(), 64, 255);
+//   for (uint16_t i = 0; i < segment_length; i++) {
 //     fastled_col = ColorFromPalette(currentPalette, stp + (i * 2), beat - stp + (i * 10));
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 //   return FRAMETIME;
 // }
@@ -7774,17 +8077,17 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // //based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
 // uint16_t mAnimatorLight::mode_colortwinkle()
 // {
-//   uint16_t dataSize = (SEGLEN+7) >> 3; //1 bit per LED
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   uint16_t dataSize = (segment_length+7) >> 3; //1 bit per LED
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
   
 //   CRGB fastled_col, prev;
-//   fract8 fadeUpAmount = 8 + (_segments[_segment_index].speed/4), fadeDownAmount = 5 + (_segments[_segment_index].speed/7);
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   fract8 fadeUpAmount = 8 + (_segments[segment_index].speed()/4), fadeDownAmount = 5 + (_segments[segment_index].speed()/7);
+//   for (uint16_t i = 0; i < segment_length; i++) {
 //     fastled_col = col_to_crgb(getPixelColor(i));
 //     prev = fastled_col;
 //     uint16_t index = i >> 3;
 //     uint8_t  bitNum = i & 0x07;
-//     bool fadeUp = bitRead(_segment_runtimes[_segment_index].data[index], bitNum);
+//     bool fadeUp = bitRead(_segment_runtimes[segment_index].data[index], bitNum);
     
 //     if (fadeUp) {
 //       CRGB incrementalColor = fastled_col;
@@ -7792,33 +8095,33 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       fastled_col += incrementalColor;
 
 //       if (fastled_col.red == 255 || fastled_col.green == 255 || fastled_col.blue == 255) {
-//         bitWrite(_segment_runtimes[_segment_index].data[index], bitNum, false);
+//         bitWrite(_segment_runtimes[segment_index].data[index], bitNum, false);
 //       }
-//       pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//       SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 
 //       if (col_to_crgb(getPixelColor(i)) == prev) //fix "stuck" pixels
 //       {
 //         fastled_col += fastled_col;
-//         pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//         SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //       }
 //     } else {
 //       fastled_col.nscale8( 255 - fadeDownAmount);
-//       pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//       SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //     }
 //   }
 
-//   for (uint16_t j = 0; j <= SEGLEN / 50; j++)
+//   for (uint16_t j = 0; j <= segment_length / 50; j++)
 //   {
-//     if (random8() <= _segments[_segment_index].intensity) {
+//     if (random8() <= _segments[segment_index].intensity()) {
 //       for (uint8_t times = 0; times < 5; times++) //attempt to spawn a new pixel 5 times
 //       {
-//         int i = random16(SEGLEN);
+//         int i = random16(segment_length);
 //         if(getPixelColor(i) == 0) {
 //           fastled_col = ColorFromPalette(currentPalette, random8(), 64, NOBLEND);
 //           uint16_t index = i >> 3;
 //           uint8_t  bitNum = i & 0x07;
-//           bitWrite(_segment_runtimes[_segment_index].data[index], bitNum, true);
-//           pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//           bitWrite(_segment_runtimes[segment_index].data[index], bitNum, true);
+//           SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //           break; //only spawn 1 new pixel per frame per 50 LEDs
 //         }
 //       }
@@ -7830,18 +8133,18 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 // //Calm effect, like a lake at night
 // uint16_t mAnimatorLight::mode_lake() {
-//   uint8_t sp = _segments[_segment_index].speed/10;
+//   uint8_t sp = _segments[segment_index].speed()/10;
 //   int wave1 = beatsin8(sp +2, -64,64);
 //   int wave2 = beatsin8(sp +1, -64,64);
 //   uint8_t wave3 = beatsin8(sp +2,   0,80);
 //   CRGB fastled_col;
 
-//   for (uint16_t i = 0; i < SEGLEN; i++)
+//   for (uint16_t i = 0; i < segment_length; i++)
 //   {
 //     int index = cos8((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;           
 //     uint8_t lum = (index > wave3) ? index - wave3 : 0;
 //     fastled_col = ColorFromPalette(currentPalette, map(index,0,255,0,240), lum, LINEARBLEND);
-//     pCONT_lAni->mEffects->setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 //   }
 //   return FRAMETIME;
 // }
@@ -7851,33 +8154,33 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // // send a meteor from begining to to the end of the strip with a trail that randomly decays.
 // // adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
 // uint16_t mAnimatorLight::mode_meteor() {
-//   if (!_segment_runtimes[_segment_index].allocateData(SEGLEN)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
 
-//   byte* trail = _segment_runtimes[_segment_index].data;
+//   byte* trail = _segment_runtimes[segment_index].data;
   
-//   byte meteorSize= 1+ SEGLEN / 10;
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) +8);
-//   uint16_t in = counter * SEGLEN >> 16;
+//   byte meteorSize= 1+ segment_length / 10;
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
+//   uint16_t in = counter * segment_length >> 16;
 
 //   // fade all leds to colors[1] in LEDs one step
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     if (random8() <= 255 - _segments[_segment_index].intensity)
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     if (random8() <= 255 - _segments[segment_index].intensity())
 //     {
 //       byte meteorTrailDecay = 128 + random8(127);
 //       trail[i] = scale8(trail[i], meteorTrailDecay);
-//       pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
+//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
 //     }
 //   }
 
 //   // draw meteor
 //   for(int j = 0; j < meteorSize; j++) {
 //     uint16_t index = in + j;
-//     if(index >= SEGLEN) {
-//       index = (in + j - SEGLEN);
+//     if(index >= segment_length) {
+//       index = (in + j - segment_length);
 //     }
 
 //     trail[index] = 240;
-//     pCONT_lAni->mEffects->setPixelColor(index, pCONT_lAni->mEffects->color_from_palette(trail[index], false, true, 255));
+//     SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(trail[index], false, true, 255));
 //   }
 
 //   return FRAMETIME;
@@ -7888,36 +8191,36 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // // send a meteor from begining to to the end of the strip with a trail that randomly decays.
 // // adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
 // uint16_t mAnimatorLight::mode_meteor_smooth() {
-//   if (!_segment_runtimes[_segment_index].allocateData(SEGLEN)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
 
-//   byte* trail = _segment_runtimes[_segment_index].data;
+//   byte* trail = _segment_runtimes[segment_index].data;
   
-//   byte meteorSize= 1+ SEGLEN / 10;
-//   uint16_t in = map((_segment_runtimes[_segment_index].step >> 6 & 0xFF), 0, 255, 0, SEGLEN -1);
+//   byte meteorSize= 1+ segment_length / 10;
+//   uint16_t in = map((_segment_runtimes[segment_index].step >> 6 & 0xFF), 0, 255, 0, segment_length -1);
 
 //   // fade all leds to colors[1] in LEDs one step
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     if (trail[i] != 0 && random8() <= 255 - _segments[_segment_index].intensity)
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     if (trail[i] != 0 && random8() <= 255 - _segments[segment_index].intensity())
 //     {
 //       int change = 3 - random8(12); //change each time between -8 and +3
 //       trail[i] += change;
 //       if (trail[i] > 245) trail[i] = 0;
 //       if (trail[i] > 240) trail[i] = 240;
-//       pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
+//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
 //     }
 //   }
   
 //   // draw meteor
 //   for(int j = 0; j < meteorSize; j++) {  
 //     uint16_t index = in + j;   
-//     if(in + j >= SEGLEN) {
-//       index = (in + j - SEGLEN);
+//     if(in + j >= segment_length) {
+//       index = (in + j - segment_length);
 //     }
-//     pCONT_lAni->mEffects->setPixelColor(index, color_blend(getPixelColor(index), pCONT_lAni->mEffects->color_from_palette(240, false, true, 255), 48));
+//     SetPixelColor(index, color_blend(getPixelColor(index), pCONT_lAni->mEffects->color_from_palette(240, false, true, 255), 48));
 //     trail[index] = 240;
 //   }
 
-//   _segment_runtimes[_segment_index].step += _segments[_segment_index].speed +1;
+//   _segment_runtimes[segment_index].step += _segments[segment_index].speed() +1;
 //   return FRAMETIME;
 // }
 
@@ -7925,37 +8228,37 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // //Railway Crossing / Christmas Fairy lights
 // uint16_t mAnimatorLight::mode_railway()
 // {
-//   uint16_t dur = 40 + (255 - _segments[_segment_index].speed) * 10;
-//   uint16_t rampdur = (dur * _segments[_segment_index].intensity) >> 8;
-//   if (_segment_runtimes[_segment_index].step > dur)
+//   uint16_t dur = 40 + (255 - _segments[segment_index].speed()) * 10;
+//   uint16_t rampdur = (dur * _segments[segment_index].intensity()) >> 8;
+//   if (_segment_runtimes[segment_index].step > dur)
 //   {
 //     //reverse direction
-//     _segment_runtimes[_segment_index].step = 0;
-//     _segment_runtimes[_segment_index].aux0 = !_segment_runtimes[_segment_index].aux0;
+//     _segment_runtimes[segment_index].step = 0;
+//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
 //   }
 //   uint8_t pos = 255;
 //   if (rampdur != 0)
 //   {
-//     uint16_t p0 = (_segment_runtimes[_segment_index].step * 255) / rampdur;
+//     uint16_t p0 = (_segment_runtimes[segment_index].step * 255) / rampdur;
 //     if (p0 < 255) pos = p0;
 //   }
-//   if (_segment_runtimes[_segment_index].aux0) pos = 255 - pos;
-//   for (uint16_t i = 0; i < SEGLEN; i += 2)
+//   if (_segment_runtimes[segment_index].aux0) pos = 255 - pos;
+//   for (uint16_t i = 0; i < segment_length; i += 2)
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(255 - pos, false, false, 255));
-//     if (i < SEGLEN -1)
+//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(255 - pos, false, false, 255));
+//     if (i < segment_length -1)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(i + 1, pCONT_lAni->mEffects->color_from_palette(pos, false, false, 255));
+//       SetPixelColor(i + 1, pCONT_lAni->mEffects->color_from_palette(pos, false, false, 255));
 //     }
 //   }
-//   _segment_runtimes[_segment_index].step += FRAMETIME;
+//   _segment_runtimes[segment_index].step += FRAMETIME;
 //   return FRAMETIME;
 // }
 
 
 // //Water ripple
-// //propagation velocity from speed
-// //drop rate from intensity
+// //propagation velocity from speed()
+// //drop rate from intensity()
 
 // //4 bytes
 // typedef struct Ripple {
@@ -7966,29 +8269,29 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 // uint16_t mAnimatorLight::ripple_base(bool rainbow)
 // {
-//   uint16_t maxRipples = 1 + (SEGLEN >> 2);
+//   uint16_t maxRipples = 1 + (segment_length >> 2);
 //   if (maxRipples > 100) maxRipples = 100;
 //   uint16_t dataSize = sizeof(ripple) * maxRipples;
 
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
  
-//   Ripple* ripples = reinterpret_cast<Ripple*>(_segment_runtimes[_segment_index].data);
+//   Ripple* ripples = reinterpret_cast<Ripple*>(_segment_runtimes[segment_index].data);
 
 //   // ranbow background or chosen background, all very dim.
 //   if (rainbow) {
-//     if (_segment_runtimes[_segment_index].call ==0) {
-//       _segment_runtimes[_segment_index].aux0 = random8();
-//       _segment_runtimes[_segment_index].aux1 = random8();
+//     if (_segment_runtimes[segment_index].call ==0) {
+//       _segment_runtimes[segment_index].aux0 = random8();
+//       _segment_runtimes[segment_index].aux1 = random8();
 //     }
-//     if (_segment_runtimes[_segment_index].aux0 == _segment_runtimes[_segment_index].aux1) {
-//       _segment_runtimes[_segment_index].aux1 = random8();
+//     if (_segment_runtimes[segment_index].aux0 == _segment_runtimes[segment_index].aux1) {
+//       _segment_runtimes[segment_index].aux1 = random8();
 //     }
-//     else if (_segment_runtimes[_segment_index].aux1 > _segment_runtimes[_segment_index].aux0) {
-//       _segment_runtimes[_segment_index].aux0++;
+//     else if (_segment_runtimes[segment_index].aux1 > _segment_runtimes[segment_index].aux0) {
+//       _segment_runtimes[segment_index].aux0++;
 //     } else {
-//       _segment_runtimes[_segment_index].aux0--;
+//       _segment_runtimes[segment_index].aux0--;
 //     }
-//     fill(color_blend(color_wheel(_segment_runtimes[_segment_index].aux0),BLACK,235));
+//     fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux0),BLACK,235));
 //   } else {
 //     fill(SEGCOLOR(1));
 //   }
@@ -7999,10 +8302,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     uint16_t ripplestate = ripples[i].state;
 //     if (ripplestate)
 //     {
-//       uint8_t rippledecay = (_segments[_segment_index].speed >> 4) +1; //faster decay if faster propagation
+//       uint8_t rippledecay = (_segments[segment_index].speed() >> 4) +1; //faster decay if faster propagation
 //       uint16_t rippleorigin = ripples[i].pos;
 //       uint32_t col = pCONT_lAni->mEffects->color_from_palette(ripples[i].color, false, false, 255);
-//       uint16_t propagation = ((ripplestate/rippledecay -1) * _segments[_segment_index].speed);
+//       uint16_t propagation = ((ripplestate/rippledecay -1) * _segments[segment_index].speed());
 //       int16_t propI = propagation >> 8;
 //       uint8_t propF = propagation & 0xFF;
 //       int16_t left = rippleorigin - propI -1;
@@ -8011,24 +8314,24 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       for (int16_t v = left; v < left +4; v++)
 //       {
 //         uint8_t mag = scale8(cubicwave8((propF>>2)+(v-left)*64), amp);
-//         if (v < SEGLEN && v >= 0)
+//         if (v < segment_length && v >= 0)
 //         {
-//           pCONT_lAni->mEffects->setPixelColor(v, color_blend(getPixelColor(v), col, mag));
+//           SetPixelColor(v, color_blend(getPixelColor(v), col, mag));
 //         }
 //         int16_t w = left + propI*2 + 3 -(v-left);
-//         if (w < SEGLEN && w >= 0)
+//         if (w < segment_length && w >= 0)
 //         {
-//           pCONT_lAni->mEffects->setPixelColor(w, color_blend(getPixelColor(w), col, mag));
+//           SetPixelColor(w, color_blend(getPixelColor(w), col, mag));
 //         }
 //       }  
 //       ripplestate += rippledecay;
 //       ripples[i].state = (ripplestate > 254) ? 0 : ripplestate;
 //     } else //randomly create new wave
 //     {
-//       if (random16(IBN + 10000) <= _segments[_segment_index].intensity)
+//       if (random16(IBN + 10000) <= _segments[segment_index].intensity())
 //       {
 //         ripples[i].state = 1;
-//         ripples[i].pos = random16(SEGLEN);
+//         ripples[i].pos = random16(segment_length);
 //         ripples[i].color = random8(); //color
 //       }
 //     }
@@ -8058,8 +8361,8 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 // CRGB mAnimatorLight::twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
 // {
-//   // Overall twinkle speed (changed)
-//   uint16_t ticks = ms / _segment_runtimes[_segment_index].aux0;
+//   // Overall twinkle speed() (changed)
+//   uint16_t ticks = ms / _segment_runtimes[segment_index].aux0;
 //   uint8_t fastcycle8 = ticks;
 //   uint16_t slowcycle16 = (ticks >> 8) + salt;
 //   slowcycle16 += sin8(slowcycle16);
@@ -8069,7 +8372,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   // Overall twinkle density.
 //   // 0 (NONE lit) to 8 (ALL lit at once).
 //   // Default is 5.
-//   uint8_t twinkleDensity = (_segments[_segment_index].intensity >> 5) +1;
+//   uint8_t twinkleDensity = (_segments[segment_index].intensity() >> 5) +1;
 
 //   uint8_t bright = 0;
 //   if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
@@ -8124,9 +8427,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   // numbers that it generates is (paradoxically) stable.
 //   uint16_t PRNG16 = 11337;
 
-//   // Calculate speed
-//   if (_segments[_segment_index].speed > 100) _segment_runtimes[_segment_index].aux0 = 3 + ((255 - _segments[_segment_index].speed) >> 3);
-//   else _segment_runtimes[_segment_index].aux0 = 22 + ((100 - _segments[_segment_index].speed) >> 1);
+//   // Calculate speed()
+//   if (_segments[segment_index].speed() > 100) _segment_runtimes[segment_index].aux0 = 3 + ((255 - _segments[segment_index].speed()) >> 3);
+//   else _segment_runtimes[segment_index].aux0 = 22 + ((100 - _segments[segment_index].speed()) >> 1);
 
 //   // Set up the background color, "bg".
 //   CRGB bg;
@@ -8142,12 +8445,12 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 
 //   uint8_t backgroundBrightness = bg.getAverageLight();
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   for (uint16_t i = 0; i < segment_length; i++) {
   
 //     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
 //     uint16_t myclockoffset16= PRNG16; // use that number as clock offset
 //     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
-//     // use that number as clock speed adjustment factor (in 8ths, from 8/8ths to 23/8ths)
+//     // use that number as clock speed() adjustment factor (in 8ths, from 8/8ths to 23/8ths)
 //     uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
 //     uint32_t myclock30 = (uint32_t)((now * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
 //     uint8_t  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
@@ -8162,15 +8465,15 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     if (deltabright >= 32 || (!bg)) {
 //       // If the new pixel is significantly brighter than the background color,
 //       // use the new color.
-//       pCONT_lAni->mEffects->setPixelColor(i, c.red, c.green, c.blue);
+//       SetPixelColor(i, c.red, c.green, c.blue);
 //     } else if (deltabright > 0) {
 //       // If the new pixel is just slightly brighter than the background color,
 //       // mix a blend of the new color and the background color
-//       pCONT_lAni->mEffects->setPixelColor(i, color_blend(crgb_to_col(bg), crgb_to_col(c), deltabright * 8));
+//       SetPixelColor(i, color_blend(crgb_to_col(bg), crgb_to_col(c), deltabright * 8));
 //     } else {
 //       // if the new pixel is not at all brighter than the background color,
 //       // just use the background color.
-//       pCONT_lAni->mEffects->setPixelColor(i, bg.r, bg.g, bg.b);
+//       SetPixelColor(i, bg.r, bg.g, bg.b);
 //     }
 //   }
 //   return FRAMETIME;
@@ -8194,52 +8497,52 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // uint16_t mAnimatorLight::mode_halloween_eyes()
 // {  
 //   uint16_t eyeLength = (2*HALLOWEEN_EYE_WIDTH) + HALLOWEEN_EYE_SPACE;
-//   if (eyeLength > SEGLEN) return mode_static(); //bail if segment too short
+//   if (eyeLength > segment_length) return mode_static(); //bail if segment too short
 
 //   fill(SEGCOLOR(1)); //fill background
 
-//   uint8_t state = _segment_runtimes[_segment_index].aux1 >> 8;
-//   uint16_t stateTime = _segment_runtimes[_segment_index].call;
+//   uint8_t state = _segment_runtimes[segment_index].aux1 >> 8;
+//   uint16_t stateTime = _segment_runtimes[segment_index].call;
 //   if (stateTime == 0) stateTime = 2000;
 
 //   if (state == 0) { //spawn eyes
-//     _segment_runtimes[_segment_index].aux0 = random16(0, SEGLEN - eyeLength); //start pos
-//     _segment_runtimes[_segment_index].aux1 = random8(); //color
+//     _segment_runtimes[segment_index].aux0 = random16(0, segment_length - eyeLength); //start pos
+//     _segment_runtimes[segment_index].aux1 = random8(); //color
 //     state = 1;
 //   }
   
 //   if (state < 2) { //fade eyes
-//     uint16_t startPos    = _segment_runtimes[_segment_index].aux0;
+//     uint16_t startPos    = _segment_runtimes[segment_index].aux0;
 //     uint16_t start2ndEye = startPos + HALLOWEEN_EYE_WIDTH + HALLOWEEN_EYE_SPACE;
     
-//     uint32_t fadestage = (now - _segment_runtimes[_segment_index].step)*255 / stateTime;
+//     uint32_t fadestage = (now - _segment_runtimes[segment_index].step)*255 / stateTime;
 //     if (fadestage > 255) fadestage = 255;
-//     uint32_t c = color_blend(color_from_palette(_segment_runtimes[_segment_index].aux1 & 0xFF, false, false, 0), SEGCOLOR(1), fadestage);
+//     uint32_t c = color_blend(color_from_palette(_segment_runtimes[segment_index].aux1 & 0xFF, false, false, 0), SEGCOLOR(1), fadestage);
     
 //     for (uint16_t i = 0; i < HALLOWEEN_EYE_WIDTH; i++)
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(startPos    + i, c);
-//       pCONT_lAni->mEffects->setPixelColor(start2ndEye + i, c);
+//       SetPixelColor(startPos    + i, c);
+//       SetPixelColor(start2ndEye + i, c);
 //     }
 //   }
 
-//   if (now - _segment_runtimes[_segment_index].step > stateTime)
+//   if (now - _segment_runtimes[segment_index].step > stateTime)
 //   {
 //     state++;
 //     if (state > 2) state = 0;
     
 //     if (state < 2)
 //     {
-//       stateTime = 100 + (255 - _segments[_segment_index].intensity)*10; //eye fade time
+//       stateTime = 100 + (255 - _segments[segment_index].intensity())*10; //eye fade time
 //     } else {
-//       uint16_t eyeOffTimeBase = (255 - _segments[_segment_index].speed)*10;
+//       uint16_t eyeOffTimeBase = (255 - _segments[segment_index].speed())*10;
 //       stateTime = eyeOffTimeBase + random16(eyeOffTimeBase);
 //     }
-//     _segment_runtimes[_segment_index].step = now;
-//     _segment_runtimes[_segment_index].call = stateTime;
+//     _segment_runtimes[segment_index].step = now;
+//     _segment_runtimes[segment_index].call = stateTime;
 //   }
 
-//   _segment_runtimes[_segment_index].aux1 = (_segment_runtimes[_segment_index].aux1 & 0xFF) + (state << 8); //save state
+//   _segment_runtimes[segment_index].aux1 = (_segment_runtimes[segment_index].aux1 & 0xFF) + (state << 8); //save state
   
 //   return FRAMETIME;
 // }
@@ -8251,10 +8554,10 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   fill(SEGCOLOR(1));
   
-//   uint16_t maxZones = SEGLEN >> 2;
-//   uint16_t zones = 1 + ((_segments[_segment_index].intensity * maxZones) >> 8);
-//   uint16_t zoneLen = SEGLEN / zones;
-//   uint16_t offset = (SEGLEN - zones * zoneLen) >> 1;
+//   uint16_t maxZones = segment_length >> 2;
+//   uint16_t zones = 1 + ((_segments[segment_index].intensity() * maxZones) >> 8);
+//   uint16_t zoneLen = segment_length / zones;
+//   uint16_t offset = (segment_length - zones * zoneLen) >> 1;
 
 //   for (uint16_t z = 0; z < zones; z++)
 //   {
@@ -8265,7 +8568,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       if (wave > threshold) {
 //         uint16_t index = 0 + pos + i;
 //         uint8_t s = (wave - threshold)*255 / (0xFFFF - threshold);
-//         pCONT_lAni->mEffects->setPixelColor(index, color_blend(color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255-s));
+//         SetPixelColor(index, color_blend(color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255-s));
 //       }
 //     }
 //   }
@@ -8274,17 +8577,17 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // }
 
 
-// //Intensity slider sets number of "lights", speed sets LEDs per light
+// //intensity() slider sets number of "lights", speed() sets LEDs per light
 // uint16_t mAnimatorLight::mode_spots()
 // {
-//   return spots_base((255 - _segments[_segment_index].speed) << 8);
+//   return spots_base((255 - _segments[segment_index].speed()) << 8);
 // }
 
 
-// //Intensity slider sets number of "lights", LEDs per light fade in and out
+// //intensity() slider sets number of "lights", LEDs per light fade in and out
 // uint16_t mAnimatorLight::mode_spots_fade()
 // {
-//   uint16_t counter = now * ((_segments[_segment_index].speed >> 2) +8);
+//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
 //   uint16_t t = triwave16(counter);
 //   uint16_t tr = (t >> 1) + (t >> 2);
 //   return spots_base(tr);
@@ -8306,20 +8609,20 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   //allocate segment data
 //   uint16_t maxNumBalls = 16; 
 //   uint16_t dataSize = sizeof(ball) * maxNumBalls;
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
   
-//   Ball* balls = reinterpret_cast<Ball*>(_segment_runtimes[_segment_index].data);
+//   Ball* balls = reinterpret_cast<Ball*>(_segment_runtimes[segment_index].data);
   
-//   // number of balls based on intensity setting to max of 7 (cycles colors)
+//   // number of balls based on intensity() setting to max of 7 (cycles colors)
 //   // non-chosen color is a random color
-//   uint8_t numBalls = int(((_segments[_segment_index].intensity * (maxNumBalls - 0.8f)) / 255) + 1);
+//   uint8_t numBalls = int(((_segments[segment_index].intensity() * (maxNumBalls - 0.8f)) / 255) + 1);
   
 //   float gravity                           = -9.81; // standard value of gravity
 //   float impactVelocityStart               = sqrt( -2 * gravity);
 
 //   unsigned long time = millis();
 
-//   if (_segment_runtimes[_segment_index].call == 0) {
+//   if (_segment_runtimes[segment_index].call == 0) {
 //     for (uint8_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
 //   }
   
@@ -8327,7 +8630,7 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   fill(hasCol2 ? BLACK : SEGCOLOR(1));
   
 //   for (uint8_t i = 0; i < numBalls; i++) {
-//     float timeSinceLastBounce = (time - balls[i].lastBounceTime)/((255-_segments[_segment_index].speed)*8/256 +1);
+//     float timeSinceLastBounce = (time - balls[i].lastBounceTime)/((255-_segments[segment_index].speed())*8/256 +1);
 //     balls[i].height = 0.5 * gravity * pow(timeSinceLastBounce/1000 , 2.0) + balls[i].impactVelocity * timeSinceLastBounce/1000;
 
 //     if (balls[i].height < 0) { //start bounce
@@ -8343,14 +8646,14 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //     }
     
 //     uint32_t color = SEGCOLOR(0);
-//     if (_segments[_segment_index].palette) {
+//     if (_segments[segment_index].palette) {
 //       color = color_wheel(i*(256/MAX(numBalls, 8)));
 //     } else if (hasCol2) {
 //       color = SEGCOLOR(i % NUM_COLORS);
 //     }
 
-//     uint16_t pos = round(balls[i].height * (SEGLEN - 1));
-//     pCONT_lAni->mEffects->setPixelColor(pos, color);
+//     uint16_t pos = round(balls[i].height * (segment_length - 1));
+//     SetPixelColor(pos, color);
 //   }
 
 //   return FRAMETIME;
@@ -8361,33 +8664,33 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // * Sinelon stolen from FASTLED examples
 // */
 // uint16_t mAnimatorLight::sinelon_base(bool dual, bool rainbow=false) {
-//   fade_out(_segments[_segment_index].intensity);
-//   uint16_t pos = beatsin16(_segments[_segment_index].speed/10,0,SEGLEN-1);
-//   if (_segment_runtimes[_segment_index].call == 0) _segment_runtimes[_segment_index].aux0 = pos;
+//   fade_out(_segments[segment_index].intensity());
+//   uint16_t pos = beatsin16(_segments[segment_index].speed()/10,0,segment_length-1);
+//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = pos;
 //   uint32_t color1 = pCONT_lAni->mEffects->color_from_palette(pos, true, false, 0);
 //   uint32_t color2 = SEGCOLOR(2);
 //   if (rainbow) {
 //     color1 = color_wheel((pos & 0x07) * 32);
 //   }
-//   pCONT_lAni->mEffects->setPixelColor(pos, color1);
+//   SetPixelColor(pos, color1);
 //   if (dual) {
 //     if (!color2) color2 = pCONT_lAni->mEffects->color_from_palette(pos, true, false, 0);
 //     if (rainbow) color2 = color1; //rainbow
-//     pCONT_lAni->mEffects->setPixelColor(SEGLEN-1-pos, color2);
+//     SetPixelColor(segment_length-1-pos, color2);
 //   }
-//   if (_segment_runtimes[_segment_index].aux0 != pos) { 
-//     if (_segment_runtimes[_segment_index].aux0 < pos) {
-//       for (uint16_t i = _segment_runtimes[_segment_index].aux0; i < pos ; i++) {
-//         pCONT_lAni->mEffects->setPixelColor(i, color1);
-//         if (dual) pCONT_lAni->mEffects->setPixelColor(SEGLEN-1-i, color2);
+//   if (_segment_runtimes[segment_index].aux0 != pos) { 
+//     if (_segment_runtimes[segment_index].aux0 < pos) {
+//       for (uint16_t i = _segment_runtimes[segment_index].aux0; i < pos ; i++) {
+//         SetPixelColor(i, color1);
+//         if (dual) SetPixelColor(segment_length-1-i, color2);
 //       }
 //     } else {
-//       for (uint16_t i = _segment_runtimes[_segment_index].aux0; i > pos ; i--) {
-//         pCONT_lAni->mEffects->setPixelColor(i, color1);
-//         if (dual) pCONT_lAni->mEffects->setPixelColor(SEGLEN-1-i, color2);
+//       for (uint16_t i = _segment_runtimes[segment_index].aux0; i > pos ; i--) {
+//         SetPixelColor(i, color1);
+//         if (dual) SetPixelColor(segment_length-1-i, color2);
 //       }
 //     }
-//     _segment_runtimes[_segment_index].aux0 = pos;
+//     _segment_runtimes[segment_index].aux0 = pos;
 //   }
 
 //   return FRAMETIME;
@@ -8411,9 +8714,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 // {
 //   mode_palette();
 
-//   if (_segments[_segment_index].intensity > random8())
+//   if (_segments[segment_index].intensity() > random8())
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(random16(SEGLEN), ULTRAWHITE);
+//     SetPixelColor(random16(segment_length), ULTRAWHITE);
 //   }
   
 //   return FRAMETIME;
@@ -8429,17 +8732,17 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //   //allocate segment data
 //   uint16_t maxNumPopcorn = 24; 
 //   uint16_t dataSize = sizeof(spark) * maxNumPopcorn;
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
   
-//   Spark* popcorn = reinterpret_cast<Spark*>(_segment_runtimes[_segment_index].data);
+//   Spark* popcorn = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
 
-//   float gravity = -0.0001 - (_segments[_segment_index].speed/200000.0); // m/s/s
-//   gravity *= SEGLEN;
+//   float gravity = -0.0001 - (_segments[segment_index].speed()/200000.0); // m/s/s
+//   gravity *= segment_length;
 
 //   bool hasCol2 = SEGCOLOR(2);
 //   fill(hasCol2 ? BLACK : SEGCOLOR(1));
 
-//   uint8_t numPopcorn = _segments[_segment_index].intensity*maxNumPopcorn/255;
+//   uint8_t numPopcorn = _segments[segment_index].intensity()*maxNumPopcorn/255;
 //   if (numPopcorn == 0) numPopcorn = 1;
 
 //   for(uint8_t i = 0; i < numPopcorn; i++) {
@@ -8449,19 +8752,19 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 //       popcorn[i].pos += popcorn[i].vel;
 //       popcorn[i].vel += gravity;
 //       uint32_t col = color_wheel(popcorn[i].colIndex);
-//       if (!_segments[_segment_index].palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
+//       if (!_segments[segment_index].palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
       
 //       uint16_t ledIndex = popcorn[i].pos;
-//       if (ledIndex < SEGLEN) pCONT_lAni->mEffects->setPixelColor(ledIndex, col);
+//       if (ledIndex < segment_length) SetPixelColor(ledIndex, col);
 //     } else { // if kernel is inactive, randomly pop it
 //       if (random8() < 2) { // POP!!!
 //         popcorn[i].pos = 0.01f;
         
 //         uint16_t peakHeight = 128 + random8(128); //0-255
-//         peakHeight = (peakHeight * (SEGLEN -1)) >> 8;
+//         peakHeight = (peakHeight * (segment_length -1)) >> 8;
 //         popcorn[i].vel = sqrt(-2.0 * gravity * peakHeight);
         
-//         if (_segments[_segment_index].palette)
+//         if (_segments[segment_index].palette)
 //         {
 //           popcorn[i].colIndex = random8();
 //         } else {
@@ -8534,7 +8837,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
     } 
   }
 
-  //max. flicker range controlled by intensity
+  //max. flicker range controlled by intensity()
   uint8_t valrange = _segments[segment_index].intensity();
   uint8_t rndval = valrange >> 1;
 
@@ -8544,7 +8847,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
   // AddLog(LOG_LEVEL_TEST, PSTR("rndval=%d"),rndval);
   #endif
 
-  //step (how much to move closer to target per frame) coarsely set by speed
+  //step (how much to move closer to target per frame) coarsely set by speed()
   uint8_t speedFactor = 4;
   if (_segments[segment_index].speed() > 252) { //epilepsy
     speedFactor = 1;
@@ -8734,7 +9037,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
     } 
   }
 
-  //max. flicker range controlled by intensity
+  //max. flicker range controlled by intensity()
   uint8_t valrange = _segments[segment_index].intensity();
   uint8_t rndval = valrange >> 1;
 
@@ -8746,7 +9049,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
   // AddLog(LOG_LEVEL_TEST, PSTR("rndval=%d"),rndval);
   #endif
 
-  //step (how much to move closer to target per frame) coarsely set by speed
+  //step (how much to move closer to target per frame) coarsely set by speed()
   uint8_t speedFactor = 4;
   if (_segments[segment_index].speed() > 252) { //epilepsy
     speedFactor = 1;
@@ -8974,32 +9277,32 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //   //allocate segment data
 //   uint16_t numDrops = 4; 
 //   uint16_t dataSize = sizeof(spark) * numDrops;
-//   if (!_segment_runtimes[_segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
 
 //   fill(SEGCOLOR(1));
   
-//   Spark* drops = reinterpret_cast<Spark*>(_segment_runtimes[_segment_index].data);
+//   Spark* drops = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
 
-//   numDrops = 1 + (_segments[_segment_index].intensity >> 6);
+//   numDrops = 1 + (_segments[segment_index].intensity() >> 6);
 
-//   float gravity = -0.001 - (_segments[_segment_index].speed/50000.0);
-//   gravity *= SEGLEN;
+//   float gravity = -0.001 - (_segments[segment_index].speed()/50000.0);
+//   gravity *= segment_length;
 //   int sourcedrop = 12;
 
 //   for (int j=0;j<numDrops;j++) {
 //     if (drops[j].colIndex == 0) { //init
-//       drops[j].pos = SEGLEN-1;    // start at end
-//       drops[j].vel = 0;           // speed
+//       drops[j].pos = segment_length-1;    // start at end
+//       drops[j].vel = 0;           // speed()
 //       drops[j].col = sourcedrop;  // brightness
 //       drops[j].colIndex = 1;      // drop state (0 init, 1 forming, 2 falling, 5 bouncing) 
 //     }
     
-//     pCONT_lAni->mEffects->setPixelColor(SEGLEN-1,color_blend(BLACK,SEGCOLOR(0), sourcedrop));// water source
+//     SetPixelColor(segment_length-1,color_blend(BLACK,SEGCOLOR(0), sourcedrop));// water source
 //     if (drops[j].colIndex==1) {
 //       if (drops[j].col>255) drops[j].col=255;
-//       pCONT_lAni->mEffects->setPixelColor(int(drops[j].pos),color_blend(BLACK,SEGCOLOR(0),drops[j].col));
+//       SetPixelColor(int(drops[j].pos),color_blend(BLACK,SEGCOLOR(0),drops[j].col));
       
-//       drops[j].col += map(_segments[_segment_index].speed, 0, 255, 1, 6); // swelling
+//       drops[j].col += map(_segments[segment_index].speed(), 0, 255, 1, 6); // swelling
       
 //       if (random8() < drops[j].col/10) {               // random drop
 //         drops[j].colIndex=2;               //fall
@@ -9013,11 +9316,11 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //         drops[j].vel += gravity;
 
 //         for (int i=1;i<7-drops[j].colIndex;i++) { // some minor math so we don't expand bouncing droplets
-//           pCONT_lAni->mEffects->setPixelColor(int(drops[j].pos)+i,color_blend(BLACK,SEGCOLOR(0),drops[j].col/i)); //spread pixel with fade while falling
+//           SetPixelColor(int(drops[j].pos)+i,color_blend(BLACK,SEGCOLOR(0),drops[j].col/i)); //spread pixel with fade while falling
 //         }
         
 //         if (drops[j].colIndex > 2) {       // during bounce, some water is on the floor
-//           pCONT_lAni->mEffects->setPixelColor(0,color_blend(SEGCOLOR(0),BLACK,drops[j].col));
+//           SetPixelColor(0,color_blend(SEGCOLOR(0),BLACK,drops[j].col));
 //         }
 //       } else {                             // we hit bottom
 //         if (drops[j].colIndex > 2) {       // already hit once, so back to forming
@@ -9048,12 +9351,12 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //   uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
 //   uint8_t thatPhase = beatsin8(7,-64,64);
 
-//   for (int i = 0; i < SEGLEN; i++) {   // For each of the LED's in the strand, set color &  brightness based on a wave as follows:
-//     uint8_t colorIndex = cubicwave8((i*(1+ 3*(_segments[_segment_index].speed >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
-//                              + cos8((i*(1+ 2*(_segments[_segment_index].speed >> 5)))+(thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
-//     uint8_t thisBright = qsub8(colorIndex, beatsin8(6,0, (255 - _segments[_segment_index].intensity)|0x01 ));
+//   for (int i = 0; i < segment_length; i++) {   // For each of the LED's in the strand, set color &  brightness based on a wave as follows:
+//     uint8_t colorIndex = cubicwave8((i*(1+ 3*(_segments[segment_index].speed() >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
+//                              + cos8((i*(1+ 2*(_segments[segment_index].speed() >> 5)))+(thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
+//     uint8_t thisBright = qsub8(colorIndex, beatsin8(6,0, (255 - _segments[segment_index].intensity())|0x01 ));
 //     CRGB color = ColorFromPalette(currentPalette, colorIndex, thisBright, LINEARBLEND);
-//     pCONT_lAni->mEffects->setPixelColor(i, color.red, color.green, color.blue);
+//     SetPixelColor(i, color.red, color.green, color.blue);
 //   }
 
 //   return FRAMETIME;
@@ -9066,39 +9369,39 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //  */
 // uint16_t mAnimatorLight::mode_percent(void) {
 
-// 	uint8_t percent = MAX(0, MIN(200, _segments[_segment_index].intensity));
-// 	uint16_t active_leds = (percent < 100) ? SEGLEN * percent / 100.0
-//                                          : SEGLEN * (200 - percent) / 100.0;
+// 	uint8_t percent = MAX(0, MIN(200, _segments[segment_index].intensity()));
+// 	uint16_t active_leds = (percent < 100) ? segment_length * percent / 100.0
+//                                          : segment_length * (200 - percent) / 100.0;
   
-//   uint8_t size = (1 + ((_segments[_segment_index].speed * SEGLEN) >> 11));
-//   if (_segments[_segment_index].speed == 255) size = 255;
+//   uint8_t size = (1 + ((_segments[segment_index].speed() * segment_length) >> 11));
+//   if (_segments[segment_index].speed() == 255) size = 255;
     
 //   if (percent < 100) {
-//     for (uint16_t i = 0; i < SEGLEN; i++) {
-// 	  	if (i < _segment_runtimes[_segment_index].step) {
-//         pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//     for (uint16_t i = 0; i < segment_length; i++) {
+// 	  	if (i < _segment_runtimes[segment_index].step) {
+//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 // 	  	}
 // 	  	else {
-//         pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(1));
+//         SetPixelColor(i, SEGCOLOR(1));
 // 	  	}
 // 	  }
 //   } else {
-//     for (uint16_t i = 0; i < SEGLEN; i++) {
-// 	  	if (i < (SEGLEN - _segment_runtimes[_segment_index].step)) {
-//         pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(1));
+//     for (uint16_t i = 0; i < segment_length; i++) {
+// 	  	if (i < (segment_length - _segment_runtimes[segment_index].step)) {
+//         SetPixelColor(i, SEGCOLOR(1));
 // 	  	}
 // 	  	else {
-//         pCONT_lAni->mEffects->setPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
 // 	  	}
 // 	  }
 //   }
 
-//   if(active_leds > _segment_runtimes[_segment_index].step) {  // smooth transition to the target value
-//     _segment_runtimes[_segment_index].step += size;
-//     if (_segment_runtimes[_segment_index].step > active_leds) _segment_runtimes[_segment_index].step = active_leds;
-//   } else if (active_leds < _segment_runtimes[_segment_index].step) {
-//     if (_segment_runtimes[_segment_index].step > size) _segment_runtimes[_segment_index].step -= size; else _segment_runtimes[_segment_index].step = 0;
-//     if (_segment_runtimes[_segment_index].step < active_leds) _segment_runtimes[_segment_index].step = active_leds;
+//   if(active_leds > _segment_runtimes[segment_index].step) {  // smooth transition to the target value
+//     _segment_runtimes[segment_index].step += size;
+//     if (_segment_runtimes[segment_index].step > active_leds) _segment_runtimes[segment_index].step = active_leds;
+//   } else if (active_leds < _segment_runtimes[segment_index].step) {
+//     if (_segment_runtimes[segment_index].step > size) _segment_runtimes[segment_index].step -= size; else _segment_runtimes[segment_index].step = 0;
+//     if (_segment_runtimes[segment_index].step < active_leds) _segment_runtimes[segment_index].step = active_leds;
 //   }
 
 //  	return FRAMETIME;
@@ -9108,27 +9411,27 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // / Modulates the brightness similar to a heartbeat
 // */
 // uint16_t mAnimatorLight::mode_heartbeat(void) {
-//   uint8_t bpm = 40 + (_segments[_segment_index].speed >> 4);
+//   uint8_t bpm = 40 + (_segments[segment_index].speed() >> 4);
 //   uint32_t msPerBeat = (60000 / bpm);
 //   uint32_t secondBeat = (msPerBeat / 3);
 
-//   uint32_t bri_lower = _segment_runtimes[_segment_index].aux1;
-//   bri_lower = bri_lower * 2042 / (2048 + _segments[_segment_index].intensity);
-//   _segment_runtimes[_segment_index].aux1 = bri_lower;
+//   uint32_t bri_lower = _segment_runtimes[segment_index].aux1;
+//   bri_lower = bri_lower * 2042 / (2048 + _segments[segment_index].intensity());
+//   _segment_runtimes[segment_index].aux1 = bri_lower;
 
-//   unsigned long beatTimer = millis() - _segment_runtimes[_segment_index].step;
-//   if((beatTimer > secondBeat) && !_segment_runtimes[_segment_index].aux0) { // time for the second beat?
-//     _segment_runtimes[_segment_index].aux1 = UINT16_MAX; //full bri
-//     _segment_runtimes[_segment_index].aux0 = 1;
+//   unsigned long beatTimer = millis() - _segment_runtimes[segment_index].step;
+//   if((beatTimer > secondBeat) && !_segment_runtimes[segment_index].aux0) { // time for the second beat?
+//     _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
+//     _segment_runtimes[segment_index].aux0 = 1;
 //   }
 //   if(beatTimer > msPerBeat) { // time to reset the beat timer?
-//     _segment_runtimes[_segment_index].aux1 = UINT16_MAX; //full bri
-//     _segment_runtimes[_segment_index].aux0 = 0;
-//     _segment_runtimes[_segment_index].step = millis();
+//     _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
+//     _segment_runtimes[segment_index].aux0 = 0;
+//     _segment_runtimes[segment_index].step = millis();
 //   }
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (_segment_runtimes[_segment_index].aux1 >> 8)));
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (_segment_runtimes[segment_index].aux1 >> 8)));
 //   }
 
 //   return FRAMETIME;
@@ -9150,8 +9453,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // // waves line up with each other more.  Finally, another pass is taken
 // // over the led array to 'deepen' (dim) the blues and greens.
 // //
-// // The speed and scale and motion each layer varies slowly within independent 
-// // hand-chosen ranges, which is why the code has a lot of low-speed 'beatsin8' functions
+// // The speed() and scale and motion each layer varies slowly within independent 
+// // hand-chosen ranges, which is why the code has a lot of low-speed() 'beatsin8' functions
 // // with a lot of oddly specific numeric ranges.
 // //
 // // These three custom blue-green color palettes were inspired by the colors found in
@@ -9171,17 +9474,17 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //     { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33, 
 //       0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
-//   if (_segments[_segment_index].palette) {
+//   if (_segments[segment_index].palette) {
 //     pacifica_palette_1 = currentPalette;
 //     pacifica_palette_2 = currentPalette;
 //     pacifica_palette_3 = currentPalette;
 //   }
 
 //   // Increment the four "color index start" counters, one for each wave layer.
-//   // Each is incremented at a different speed, and the speeds vary over time.
-//   uint16_t sCIStart1 = _segment_runtimes[_segment_index].aux0, sCIStart2 = _segment_runtimes[_segment_index].aux1, sCIStart3 = _segment_runtimes[_segment_index].step, sCIStart4 = _segment_runtimes[_segment_index].step >> 16;
+//   // Each is incremented at a different speed(), and the speeds vary over time.
+//   uint16_t sCIStart1 = _segment_runtimes[segment_index].aux0, sCIStart2 = _segment_runtimes[segment_index].aux1, sCIStart3 = _segment_runtimes[segment_index].step, sCIStart4 = _segment_runtimes[segment_index].step >> 16;
 //   //static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
-//   uint32_t deltams = 26 + (_segments[_segment_index].speed >> 3);
+//   uint32_t deltams = 26 + (_segments[segment_index].speed() >> 3);
   
 //   uint16_t speedfactor1 = beatsin16(3, 179, 269);
 //   uint16_t speedfactor2 = beatsin16(4, 179, 269);
@@ -9192,8 +9495,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //   sCIStart2 -= (deltams21 * beatsin88(777,8,11));
 //   sCIStart3 -= (deltams1 * beatsin88(501,5,7));
 //   sCIStart4 -= (deltams2 * beatsin88(257,4,6));
-//   _segment_runtimes[_segment_index].aux0 = sCIStart1; _segment_runtimes[_segment_index].aux1 = sCIStart2;
-//   _segment_runtimes[_segment_index].step = sCIStart4; _segment_runtimes[_segment_index].step = (_segment_runtimes[_segment_index].step << 16) + sCIStart3;
+//   _segment_runtimes[segment_index].aux0 = sCIStart1; _segment_runtimes[segment_index].aux1 = sCIStart2;
+//   _segment_runtimes[segment_index].step = sCIStart4; _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step << 16) + sCIStart3;
 
 //   // Clear out the LED array to a dim background blue-green
 //   //fill(132618);
@@ -9201,7 +9504,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //   uint8_t basethreshold = beatsin8( 9, 55, 65);
 //   uint8_t wave = beat8( 7 );
   
-//   for( uint16_t i = 0; i < SEGLEN; i++) {
+//   for( uint16_t i = 0; i < segment_length; i++) {
 //     CRGB c = CRGB(2, 6, 10);
 //     // Render each of four layers, with different scales and speeds, that vary over time
 //     c += pacifica_one_layer(i, pacifica_palette_1, sCIStart1, beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130), 0-beat16(301));
@@ -9224,7 +9527,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //     c.green = scale8(c.green, 200); 
 //     c |= CRGB( 2, 5, 7);
 
-//     pCONT_lAni->mEffects->setPixelColor(i, c.red, c.green, c.blue);
+//     SetPixelColor(i, c.red, c.green, c.blue);
 //   }
 
 //   return FRAMETIME;
@@ -9237,7 +9540,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //   uint16_t waveangle = ioff;
 //   uint16_t wavescale_half = (wavescale >> 1) + 20;
   
-//   waveangle += ((120 + _segments[_segment_index].intensity) * i); //original 250 * i
+//   waveangle += ((120 + _segments[segment_index].intensity()) * i); //original 250 * i
 //   uint16_t s16 = sin16(waveangle) + 32768;
 //   uint16_t cs = scale16(s16, wavescale_half) + wavescale_half;
 //   ci += (cs * i);
@@ -9251,9 +9554,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // {
 //   fill(SEGCOLOR(0));
 
-//   if (_segments[_segment_index].intensity > random8())
+//   if (_segments[segment_index].intensity() > random8())
 //   {
-//     pCONT_lAni->mEffects->setPixelColor(random16(SEGLEN), ULTRAWHITE);
+//     SetPixelColor(random16(segment_length), ULTRAWHITE);
 //   }
 //   return FRAMETIME;
 // }
@@ -9263,69 +9566,69 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //  * Mode simulates a gradual sunrise
 //  */
 // uint16_t mAnimatorLight::mode_sunrise() {
-//   //speed 0 - static sun
-//   //speed 1 - 60: sunrise time in minutes
-//   //speed 60 - 120 : sunset time in minutes - 60;
-//   //speed above: "breathing" rise and set
-//   if (_segment_runtimes[_segment_index].call == 0 || _segments[_segment_index].speed != _segment_runtimes[_segment_index].aux0) {
-// 	  _segment_runtimes[_segment_index].step = millis(); //save starting time, millis() because now can change from sync
-//     _segment_runtimes[_segment_index].aux0 = _segments[_segment_index].speed;
+//   //speed() 0 - static sun
+//   //speed() 1 - 60: sunrise time in minutes
+//   //speed() 60 - 120 : sunset time in minutes - 60;
+//   //speed() above: "breathing" rise and set
+//   if (_segment_runtimes[segment_index].call == 0 || _segments[segment_index].speed() != _segment_runtimes[segment_index].aux0) {
+// 	  _segment_runtimes[segment_index].step = millis(); //save starting time, millis() because now can change from sync
+//     _segment_runtimes[segment_index].aux0 = _segments[segment_index].speed();
 //   }
   
 //   fill(0);
 //   uint16_t stage = 0xFFFF;
   
-//   uint32_t s10SinceStart = (millis() - _segment_runtimes[_segment_index].step) /100; //tenths of seconds
+//   uint32_t s10SinceStart = (millis() - _segment_runtimes[segment_index].step) /100; //tenths of seconds
   
-//   if (_segments[_segment_index].speed > 120) { //quick sunrise and sunset
-// 	  uint16_t counter = (now >> 1) * (((_segments[_segment_index].speed -120) >> 1) +1);
+//   if (_segments[segment_index].speed() > 120) { //quick sunrise and sunset
+// 	  uint16_t counter = (now >> 1) * (((_segments[segment_index].speed() -120) >> 1) +1);
 // 	  stage = triwave16(counter);
-//   } else if (_segments[_segment_index].speed) { //sunrise
-// 	  uint8_t durMins = _segments[_segment_index].speed;
+//   } else if (_segments[segment_index].speed()) { //sunrise
+// 	  uint8_t durMins = _segments[segment_index].speed();
 // 	  if (durMins > 60) durMins -= 60;
 // 	  uint32_t s10Target = durMins * 600;
 // 	  if (s10SinceStart > s10Target) s10SinceStart = s10Target;
 // 	  stage = map(s10SinceStart, 0, s10Target, 0, 0xFFFF);
-// 	  if (_segments[_segment_index].speed > 60) stage = 0xFFFF - stage; //sunset
+// 	  if (_segments[segment_index].speed() > 60) stage = 0xFFFF - stage; //sunset
 //   }
   
-//   for (uint16_t i = 0; i <= SEGLEN/2; i++)
+//   for (uint16_t i = 0; i <= segment_length/2; i++)
 //   {
 //     //default palette is Fire
 //     uint32_t c = pCONT_lAni->mEffects->color_from_palette(0, false, true, 255); //background
 
-//     uint16_t wave = triwave16((i * stage) / SEGLEN);
+//     uint16_t wave = triwave16((i * stage) / segment_length);
 
-//     wave = (wave >> 8) + ((wave * _segments[_segment_index].intensity) >> 15);
+//     wave = (wave >> 8) + ((wave * _segments[segment_index].intensity()) >> 15);
 
 //     if (wave > 240) { //clipped, full white sun
 //       c = pCONT_lAni->mEffects->color_from_palette( 240, false, true, 255);
 //     } else { //transition
 //       c = pCONT_lAni->mEffects->color_from_palette(wave, false, true, 255);
 //     }
-//     pCONT_lAni->mEffects->setPixelColor(i, c);
-//     pCONT_lAni->mEffects->setPixelColor(SEGLEN - i - 1, c);
+//     SetPixelColor(i, c);
+//     SetPixelColor(segment_length - i - 1, c);
 //   }
 
 //   return FRAMETIME;
 // }
 
 
-// // Sine waves that have controllable phase change speed, frequency and cutoff. By Andrew Tuline.
-// // _segments[_segment_index].speed ->Speed, _segments[_segment_index].intensity -> Frequency (_segments[_segment_index].fft1 -> Color change, _segments[_segment_index].fft2 -> PWM cutoff)
+// // Sine waves that have controllable phase change speed(), frequency and cutoff. By Andrew Tuline.
+// // _segments[segment_index].speed() ->Speed, _segments[segment_index].intensity() -> Frequency (_segments[segment_index].fft1 -> Color change, _segments[segment_index].fft2 -> PWM cutoff)
 // //
 // uint16_t mAnimatorLight::mode_sinewave(void) {             // Adjustable sinewave. By Andrew Tuline
 //   //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
 
-//   uint16_t colorIndex = now /32;//(256 - _segments[_segment_index].fft1);  // Amount of colour change.
+//   uint16_t colorIndex = now /32;//(256 - _segments[segment_index].fft1);  // Amount of colour change.
 
-//   _segment_runtimes[_segment_index].step += _segments[_segment_index].speed/16;                   // Speed of animation.
-//   uint16_t freq = _segments[_segment_index].intensity/4;//_segments[_segment_index].fft2/8;                       // Frequency of the signal.
+//   _segment_runtimes[segment_index].step += _segments[segment_index].speed()/16;                   // Speed of animation.
+//   uint16_t freq = _segments[segment_index].intensity()/4;//_segments[segment_index].fft2/8;                       // Frequency of the signal.
 
-//   for (int i=0; i<SEGLEN; i++) {                   // For each of the LED's in the strand, set a brightness based on a wave as follows:
-//     int pixBri = cubicwave8((i*freq)+_segment_runtimes[_segment_index].step);//qsuba(cubicwave8((i*freq)+_segment_runtimes[_segment_index].step), (255-_segments[_segment_index].intensity)); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
+//   for (int i=0; i<segment_length; i++) {                   // For each of the LED's in the strand, set a brightness based on a wave as follows:
+//     int pixBri = cubicwave8((i*freq)+_segment_runtimes[segment_index].step);//qsuba(cubicwave8((i*freq)+_segment_runtimes[segment_index].step), (255-_segments[segment_index].intensity())); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
 //     //setPixCol(i, i*colorIndex/255, pixBri);
-//     pCONT_lAni->mEffects->setPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
+//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
 //   }
 
 //   return FRAMETIME;
@@ -9338,18 +9641,18 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // uint16_t mAnimatorLight::mode_flow(void)
 // {
 //   uint16_t counter = 0;
-//   if (_segments[_segment_index].speed != 0) 
+//   if (_segments[segment_index].speed() != 0) 
 //   {
-//     counter = now * ((_segments[_segment_index].speed >> 2) +1);
+//     counter = now * ((_segments[segment_index].speed() >> 2) +1);
 //     counter = counter >> 8;
 //   }
   
-//   uint16_t maxZones = SEGLEN / 6; //only looks good if each zone has at least 6 LEDs
-//   uint16_t zones = (_segments[_segment_index].intensity * maxZones) >> 8;
+//   uint16_t maxZones = segment_length / 6; //only looks good if each zone has at least 6 LEDs
+//   uint16_t zones = (_segments[segment_index].intensity() * maxZones) >> 8;
 //   if (zones & 0x01) zones++; //zones must be even
 //   if (zones < 2) zones = 2;
-//   uint16_t zoneLen = SEGLEN / zones;
-//   uint16_t offset = (SEGLEN - zones * zoneLen) >> 1;
+//   uint16_t zoneLen = segment_length / zones;
+//   uint16_t offset = (segment_length - zones * zoneLen) >> 1;
 
 //   fill(color_from_palette(-counter, false, true, 255));
 
@@ -9361,7 +9664,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //       uint8_t colorIndex = (i * 255 / zoneLen) - counter;
 //       uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
 //       if (IS_REVERSE) led = (zoneLen -1) -led;
-//       pCONT_lAni->mEffects->setPixelColor(pos + led, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
+//       SetPixelColor(pos + led, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
 //     }
 //   }
 
@@ -9376,17 +9679,17 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // uint16_t mAnimatorLight::mode_chunchun(void)
 // {
 //   fill(SEGCOLOR(1));
-//   uint16_t counter = now*(6 + (_segments[_segment_index].speed >> 4));
-//   uint16_t numBirds = SEGLEN >> 2;
-//   uint16_t span = _segments[_segment_index].intensity << 8;
+//   uint16_t counter = now*(6 + (_segments[segment_index].speed() >> 4));
+//   uint16_t numBirds = segment_length >> 2;
+//   uint16_t span = _segments[segment_index].intensity() << 8;
 
 //   for (uint16_t i = 0; i < numBirds; i++)
 //   {
 //     counter -= span/numBirds;
 //     int megumin = sin16(counter) + 0x8000;
-//     uint32_t bird = (megumin * SEGLEN) >> 16;
+//     uint32_t bird = (megumin * segment_length) >> 16;
 //     uint32_t c = pCONT_lAni->mEffects->color_from_palette((i * 255)/ numBirds, false, true, 0);
-//     pCONT_lAni->mEffects->setPixelColor(bird, c);
+//     SetPixelColor(bird, c);
 //   }
 //   return FRAMETIME;
 // }
@@ -9401,15 +9704,6 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //  ****************************************************************************************************************************/
 
 
-// /*
-//  * Fills segment with color
-//  */
-// void mAnimatorLight::fill(uint32_t c) {
-//   for(uint16_t i = 0; i < _virtualSegmentLength; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, c);
-//   }
-// }
-
 
 // /*
 //  * No blinking. Just plain old static light.
@@ -9417,19 +9711,19 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 // uint16_t mAnimatorLight::mode_static(void)
 // {
 //   fill(SEGCOLOR2(0));
-//   return (_segments[_segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+//   return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
 // }
 
-// //Speed slider sets amount of LEDs lit, intensity sets unlit
+// //Speed slider sets amount of LEDs lit, intensity() sets unlit
 // uint16_t mAnimatorLight::mode_static_pattern()
 // {
-//   uint16_t lit = 1 + _segments[_segment_index].speed;
-//   uint16_t unlit = 1 + _segments[_segment_index].intensity;
+//   uint16_t lit = 1 + _segments[segment_index].speed();
+//   uint16_t unlit = 1 + _segments[segment_index].intensity();
 //   bool drawingLit = true;
 //   uint16_t cnt = 0;
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
-//     pCONT_lAni->mEffects->setPixelColor(i, 
+//   for (uint16_t i = 0; i < segment_length; i++) {
+//     SetPixelColor(i, 
 //       (drawingLit) ? 
 //       pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : 
 //       SEGCOLOR2(1)
@@ -9447,17 +9741,17 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 
 // uint16_t mAnimatorLight::mode_tri_static_pattern()
 // {
-//   uint8_t segSize = (_segments[_segment_index].intensity >> 5) +1;
+//   uint8_t segSize = (_segments[segment_index].intensity() >> 5) +1;
 //   uint8_t currSeg = 0;
 //   uint16_t currSegCount = 0;
 
-//   for (uint16_t i = 0; i < SEGLEN; i++) {
+//   for (uint16_t i = 0; i < segment_length; i++) {
 //     if ( currSeg % 3 == 0 ) {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(0));
+//       SetPixelColor(i, SEGCOLOR(0));
 //     } else if( currSeg % 3 == 1) {
-//       pCONT_lAni->mEffects->setPixelColor(i, SEGCOLOR(1));
+//       SetPixelColor(i, SEGCOLOR(1));
 //     } else {
-//       pCONT_lAni->mEffects->setPixelColor(i, (SEGCOLOR(2) > 0 ? SEGCOLOR(2) : WHITE));
+//       SetPixelColor(i, (SEGCOLOR(2) > 0 ? SEGCOLOR(2) : WHITE));
 //     }
 //     currSegCount += 1;
 //     if (currSegCount >= segSize) {
@@ -9488,51 +9782,51 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //    * */
 //   handle_palette();
   
-//   uint32_t cycleTime = 750 + (255 - _segments[_segment_index].speed)*150;
+//   uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
 //   uint32_t perc = now % cycleTime;
 //   uint16_t prog = (perc * 65535) / cycleTime;
 //   bool back = (prog > 32767);
 //   if (back) {
 //     prog -= 32767;
-//     if (_segment_runtimes[_segment_index].step == 0) _segment_runtimes[_segment_index].step = 1;
+//     if (_segment_runtimes[segment_index].step == 0) _segment_runtimes[segment_index].step = 1;
 //   } else {
-//     if (_segment_runtimes[_segment_index].step == 2) _segment_runtimes[_segment_index].step = 3; //trigger color change
+//     if (_segment_runtimes[segment_index].step == 2) _segment_runtimes[segment_index].step = 3; //trigger color change
 //   }
 
 //   if (useRandomColors) {
-//     if (_segment_runtimes[_segment_index].call == 0) {
-//       _segment_runtimes[_segment_index].aux0 = random8();
-//       _segment_runtimes[_segment_index].step = 3;
+//     if (_segment_runtimes[segment_index].call == 0) {
+//       _segment_runtimes[segment_index].aux0 = random8();
+//       _segment_runtimes[segment_index].step = 3;
 //     }
-//     if (_segment_runtimes[_segment_index].step == 1) { //if flag set, change to new random color
-//       _segment_runtimes[_segment_index].aux1 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[_segment_index].aux0);
-//       _segment_runtimes[_segment_index].step = 2;
+//     if (_segment_runtimes[segment_index].step == 1) { //if flag set, change to new random color
+//       _segment_runtimes[segment_index].aux1 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+//       _segment_runtimes[segment_index].step = 2;
 //     }
-//     if (_segment_runtimes[_segment_index].step == 3) {
-//       _segment_runtimes[_segment_index].aux0 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[_segment_index].aux1);
-//       _segment_runtimes[_segment_index].step = 0;
+//     if (_segment_runtimes[segment_index].step == 3) {
+//       _segment_runtimes[segment_index].aux0 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux1);
+//       _segment_runtimes[segment_index].step = 0;
 //     }
 //   }
 
-//   uint16_t ledIndex = (prog * SEGLEN) >> 15;
+//   uint16_t ledIndex = (prog * segment_length) >> 15;
 //   uint16_t rem = 0;
-//   rem = (prog * SEGLEN) * 2; //mod 0xFFFF
-//   rem /= (_segments[_segment_index].intensity +1);
+//   rem = (prog * segment_length) * 2; //mod 0xFFFF
+//   rem /= (_segments[segment_index].intensity() +1);
 //   if (rem > 255) rem = 255;
 
-//   uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[_segment_index].aux1) : SEGCOLOR(1);
-//   for (uint16_t i = 0; i < SEGLEN; i++)
+//   uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux1) : SEGCOLOR(1);
+//   for (uint16_t i = 0; i < segment_length; i++)
 //   {
-//     uint16_t index = (rev && back)? SEGLEN -1 -i : i;
-//     uint32_t col0 = useRandomColors? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[_segment_index].aux0) : pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
+//     uint16_t index = (rev && back)? segment_length -1 -i : i;
+//     uint32_t col0 = useRandomColors? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux0) : pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
     
 //     if (i < ledIndex) 
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(index, back? col1 : col0);
+//       SetPixelColor(index, back? col1 : col0);
 //     } else
 //     {
-//       pCONT_lAni->mEffects->setPixelColor(index, back? col0 : col1);
-//       if (i == ledIndex) pCONT_lAni->mEffects->setPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
+//       SetPixelColor(index, back? col0 : col1);
+//       if (i == ledIndex) SetPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
 //     }
 //   } 
 //   return FRAMETIME;

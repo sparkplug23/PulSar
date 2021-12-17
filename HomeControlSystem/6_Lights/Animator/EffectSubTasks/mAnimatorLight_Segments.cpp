@@ -14,6 +14,17 @@ void mAnimatorLight::Init_Segments()
 
   Init_Segments_RgbcctControllers();
 
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  // Serial.println("To get past failed flashing");
+  
+
 
   // _segments[0].palette.id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_03_ID;
   // _segments[1].palette.id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_01_ID;
@@ -272,6 +283,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
             _segments[segment_iters._segment_index].tSaved_AnimateRunTime = millis();
           }
           
+        _virtualSegmentLength = _segments[segment_iters._segment_index].virtualLength();
+          
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=segI%d %d %s"),segment_iters._segment_index, flashersettings_segments.function,GetFlasherFunctionNamebyID(flashersettings_segments.function, buffer));
 
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=segI%d %d %d"),segment_iters._segment_index, _segments[segment_iters._segment_index].effect_id);
@@ -323,8 +336,11 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID:
             SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
           break;     
-          
-
+          case EFFECTS_FUNCTION_WLED_FIREWORKS_ID:
+            SubTask_Segment_Flasher_Animate_Function__Fireworks();
+          break;
+          case EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID:
+            SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
           #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
           //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
@@ -391,7 +407,10 @@ void mAnimatorLight::SubTask_Segments_Animation()
         } //end SWITCH
 
         // Configure animator to show output
-        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_iters._segment_index);                
+        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_iters._segment_index);       
+
+        _segment_runtimes[segment_iters._segment_index].call++; // Used as progress counter for animations eg rainbow across all hues
+                 
 
       }//end if update reached
 
@@ -557,6 +576,9 @@ mAnimatorLight& mAnimatorLight::setAnimFunctionCallback_Segments_Indexed(uint8_t
 {
   // AddLog(LOG_LEVEL_INFO, PSTR("setAnimFunctionCallback_Segments_Indexed segment_index=%d"));
   this->_segment_runtimes[segment_index].anim_function_callback = anim_function_callback;
+  
+  _segment_runtimes[segment_index].animation_has_anim_callback = true;
+
   return *this;
 }
 
@@ -608,7 +630,7 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
   //   }
   // }
 
-  if(_segment_runtimes[segment_index].anim_function_callback)
+  if(_segment_runtimes[segment_index].animation_has_anim_callback == true)
   {
     _segment_runtimes[segment_index].animator->StartAnimation(0, time_tmp, _segment_runtimes[segment_index].anim_function_callback);
   }
@@ -1347,6 +1369,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   _segments[segment_index].effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   _segment_runtimes[0].aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
   _segments[0].flags.animator_first_run= true; // first run, so do extra things
+
   
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset

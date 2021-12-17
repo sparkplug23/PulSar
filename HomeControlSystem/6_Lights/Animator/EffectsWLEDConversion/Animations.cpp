@@ -99,22 +99,24 @@ void WS2812FX::blur(uint8_t blur_amount)
   CRGB carryover = HTMLColorCode::Black;
   for(uint16_t i = 0; i < _virtualSegmentLength; i++)
   {
-    CRGB cur = col_to_crgb(getPixelColor(i));
-    CRGB part = cur;
-    part.nscale8(seep);
-    cur.nscale8(keep);
-    cur += carryover;
+    CRGB cur = col_to_crgb(getPixelColor(i));  //current colour
+    CRGB part = cur;                          // part of colour (sides?)
+    part.nscale8(seep);  // reduce its brightness by half (>>1 is the same as /2), so each pixel will be half the previous?
+    cur.nscale8(keep);   // keep gets scaled by (255-blur_amount)
+    cur += carryover; // adding black to it, should do nothing?
     if(i > 0) {
-      uint32_t c = getPixelColor(i-1);
+      uint32_t c = getPixelColor(i-1);  // get previous indexed pixel (except when first)
       uint8_t r = (c >> 16 & 0xFF);
       uint8_t g = (c >> 8  & 0xFF);
       uint8_t b = (c       & 0xFF);
+      // Add the half_brightness new colour to the existing colour on output
       setPixelColor(i-1, qadd8(r, part.red), qadd8(g, part.green), qadd8(b, part.blue));
     }
-    setPixelColor(i,cur.red, cur.green, cur.blue);
-    carryover = part;
+    setPixelColor(i,cur.red, cur.green, cur.blue); // add back the colour in this index
+    carryover = part; // this is how blur works, be adding the colour from previous to next (but at half brightness)
   }
 }
+
 
 
 /*
@@ -124,20 +126,33 @@ void WS2812FX::fade_out(uint8_t rate) {
   rate = (255-rate) >> 1;
   float mappedRate = float(rate) +1.1;
 
+  /**
+   * fade=0
+   * rate = (255-0) >> 1    ->    127 
+   * mappedRate = 127 + 1.1   -> 128.1
+   * 
+   */
+
+  // SPF("test","%f",123.45);
+
   uint32_t color = SEGCOLOR(1); // target color
   int w2 = (color >> 24) & 0xff;
   int r2 = (color >> 16) & 0xff;
   int g2 = (color >>  8) & 0xff;
   int b2 =  color        & 0xff;
+  
+  // SPF("colo2r","%d",color);
 
   for(uint16_t i = 0; i < _virtualSegmentLength; i++) {
     color = getPixelColor(i);
+    
+  // SPF("color1","%d",color);
     int w1 = (color >> 24) & 0xff;
     int r1 = (color >> 16) & 0xff;
     int g1 = (color >>  8) & 0xff;
     int b1 =  color        & 0xff;
 
-    int wdelta = (w2 - w1) / mappedRate;
+    int wdelta = (w2 - w1) / mappedRate;  //linearblend
     int rdelta = (r2 - r1) / mappedRate;
     int gdelta = (g2 - g1) / mappedRate;
     int bdelta = (b2 - b1) / mappedRate;

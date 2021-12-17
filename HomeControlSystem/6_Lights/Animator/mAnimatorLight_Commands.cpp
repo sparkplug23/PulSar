@@ -24,6 +24,10 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
       AddLog(LOG_LEVEL_TEST, PSTR("Seg: \"%s\""),buffer);
       segments_found++;
+
+      // If segment commands updated, some effects may need reset
+      _segment_runtimes[segment_i].call = 0; 
+
     }
   }
 

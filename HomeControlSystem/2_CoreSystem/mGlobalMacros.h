@@ -21,6 +21,9 @@
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf
 
+  #define SPF(param_name,string_type,parameter)  Serial.printf("\"" param_name "\"=" string_type "\n\r", parameter)
+  
+
 #define DEBUGGING_PROCEED_ONLY_AFTER_MILLIS_SHOWS_STABLE(X) \
               if(millis()<60000){ return X; } 
 

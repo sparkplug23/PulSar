@@ -145,7 +145,7 @@
 
   #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
   //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
-  //#define USE_DEVFEATURE_METHOD_WLED_BUILD
+  // #define USE_DEVFEATURE_METHOD_WLED_BUILD
  
  
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
@@ -178,7 +178,8 @@
     #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION  // to test existing effects in wled
     #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+    #define LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
     // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     #define D_EFFECT_INSIDE_TEMPLATE "WLED"
     #define DEBUG_WLED_EFFECT_FUNCTIONS
@@ -227,6 +228,25 @@
     "\"BrightnessRGB\":100"
   "}";
   #endif
+
+  #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 21\"," 
+    "\"Effects\":{"
+      "\"Function\":30"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
 
   #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
