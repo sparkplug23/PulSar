@@ -10444,29 +10444,13 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Drip()
    @brief: Plasma
    @note : Converted from WLED Effects
            Draws growing/shrinking spans of concentric faded light
+           adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino
    @note   Rate: FRAME_RATE
 
    @param rev             Reversed
    @param useRandomColors 
 *******************************************************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Name
- * @note : Converted from WLED Effects
- * 
-
-/*
-/ Plasma Effect
-/ adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino
-*
-void mAnimatorLight::mode_plasma(void) {
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Plasma()
 {
 
@@ -10480,7 +10464,6 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Plasma()
     CRGB color = ColorFromPalette(currentPalette, colorIndex, thisBright, LINEARBLEND);
     SetPixelColor(i, color.red, color.green, color.blue);
   }
-
 
 } 
 

@@ -323,6 +323,64 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
             SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
           break;        
+          //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
+          //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+          //  break;
+          //  case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
+          //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+          //  break;
+          //  case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
+          //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+          //  break;
+          //  case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
+          //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+          //  break;
+          //  case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
+          //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+          //  break;
+          //  case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
+          //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+          //  break;
+          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
+          //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+          //  break;
+          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
+          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+          //  break;
+          // EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID
+          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
+          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+          //  break;
+          //  case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+          //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+          //  break;
+          //  case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+          //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01:
+          //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+          //  break;
+          //  case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+          //  break;
           #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
           case EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID:
             SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
@@ -333,8 +391,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           // case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
           //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
           // break;
-          #endif // ENABLE_DEVFEATURE_RGB_CLOCK
-          
+          #endif // ENABLE_DEVFEATURE_RGB_CLOCK          
           #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
           /**
            * Static
@@ -700,65 +757,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
             SubTask_Segment_Flasher_Animate_Function__Drip();
           break;
           #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-
-          //  case EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-          //  break;
-          //  case EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID:
-          //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-          //  break;
-          //  case EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID:
-          //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-          //  break;
-          //  case EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-          //  break;
-          //  case EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-          //  break;
-          //  case EFFECTS_FUNCTION_FADE_GRADIENT_ID:
-          //    SubTask_Flasher_Animate_Function_Fade_Gradient();
-          //  break;
-          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
-          //  break;
-          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-          //  break;
-          // EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID
-          //  case EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-          //  break;
-          //  case EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-          //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-          //  break;
-          //  case EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-          //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-          //  break;
-          //  case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-          //  break;
           case EFFECTS_FUNCTION_TESTER_ID:
             SubTask_Flasher_Animate_Function_Tester();
           break; 
